@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI沙盒课程 - 扣哒宇宙教研岛</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 导航栏 */
+        .navbar { 
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000; 
+            display: flex; align-items: center; padding: 0 40px; height: 64px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); 
+            border-bottom: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo { height: 28px; }
+        .nav-divider { width: 1px; height: 18px; background: #cbd5e1; }
+        .nav-text { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
+
+        /* 通用容器 */
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+        /* 页头 */
+        .page-header { padding: 120px 0 40px; text-align: center; }
+        .header-title-wrapper { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+        .header-icon-inline { height: 2.4rem; width: auto; object-fit: contain; }
+        .page-header h1 { font-size: 2.4rem; font-weight: 800; color: #1e293b; margin: 0; }
+        .course-desc { font-size: 1.05rem; color: var(--text-secondary); max-width: 760px; margin: 0 auto; line-height: 1.8; }
+
+        /* 课时导航锚点 */
+        .lesson-nav { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+        .lesson-nav a { 
+            padding: 10px 20px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; text-decoration: none; 
+            background: #fff; border: 1px solid var(--border); color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lesson-nav a:hover, .lesson-nav a.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(59,130,246,0.2); }
+
+        /* 课程卡片 */
+        .lesson-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 40px; overflow: hidden; box-shadow: var(--shadow); }
+        .lesson-card-header { padding: 24px 32px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+        .lesson-title { font-size: 1.4rem; font-weight: 800; color: #1e293b; }
+        .lesson-goal { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+        .lesson-card-body { padding: 32px; }
+
+        /* 统一的行布局：左文右按 */
+        .action-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 20px; background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px;
+        }
+        .action-info { flex: 1; padding-right: 20px; }
+        .action-label { font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; display: block; font-size: 1.05rem; }
+        .action-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* 按钮样式 */
+        .btn { 
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; 
+            font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: all 0.2s; white-space: nowrap; cursor: pointer;
+        }
+        .btn-ppt { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+        .btn-ppt:hover { background: #ffedd5; transform: translateY(-1px); }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.2); }
+        .btn-outline { background: #fff; color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* 关卡预览列表 */
+        .level-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; padding-left: 12px; border-left: 3px solid #e2e8f0; }
+        .level-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 14px 20px; background: #fff; border: 1px solid var(--border); border-radius: 8px;
+        }
+        .level-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .level-badge { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+        .badge-create { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+        .level-name { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+        .level-tool { font-size: 0.8rem; color: var(--text-muted); background: #f1f5f9; padding: 2px 8px; border-radius: 4px;}
+
+        /* 页脚 */
+        .footer { padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border); background: #fff; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 16px; }
+            .action-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .btn { width: 100%; justify-content: center; }
+            .level-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .page-header h1 { font-size: 1.8rem; }
+            .header-icon-inline { height: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.html" class="nav-brand">
+        <img src="images/ai-logo.png" alt="扣哒宇宙" class="nav-logo">
+        <div class="nav-divider"></div>
+        <span class="nav-text">AI 课程</span>
+    </a>
+</nav>
+
+<div class="page-header">
+    <div class="container">
+        <div class="header-title-wrapper">
+            <img src="images/planet-ai-sandbox.png" alt="课程地图" class="header-icon-inline">
+            <h1>AI 沙盒课程</h1>
+        </div>
+        <p class="course-desc">
+            本课程旨在提供一个开放式的自由创作环境。在这里，学生可以自由体验并比较多种最新的前沿 AI 模型（涵盖文本生成、图像生成等不同领域），在无限制的“沙盒”中尽情释放想象力，进行创意实践。
+        </p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="lesson-nav">
+        <a href="#lesson1" class="active">第1课</a>
+        <a href="#lesson2">第2课</a>
+        <a href="#lesson3">第3课</a>
+        <a href="#lesson4">第4课</a>
+        <a href="#lesson5">第5课</a>
+        <a href="#lesson6">第6课</a>
+        <a href="#lesson7">第7课</a>
+        <a href="#lesson8">第8课</a>
+        <a href="#lesson9">第9课</a>
+        <a href="#lesson10">第10课</a>
+    </div>
+
+    <div id="lesson1" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第1课：用千问图片创造</div>
+                <p class="lesson-goal">目标：体验最新图像生成模型，探索文本到图像的创意转换。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">1. 用千问图片创造</span>
+                        <span class="level-tool">工具: qwen-image-plus</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson2" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第2课：用DeepSeek创造</div>
+                <p class="lesson-goal">目标：体验 DeepSeek 强大的语言推理与文本生成能力。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">2. 用DeepSeek创造</span>
+                        <span class="level-tool">工具: deepseek-chat</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson3" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第3课：用即梦AI创造</div>
+                <p class="lesson-goal">目标：体验 Seedream 系列模型，探索多模态 AI 的创作可能。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">3. 用即梦AI创造</span>
+                        <span class="level-tool">工具: Seedream 系列</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson4" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第4课：用千问创造</div>
+                <p class="lesson-goal">目标：体验通义千问模型的高效文本理解与复杂任务生成能力。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">4. 用千问创造</span>
+                        <span class="level-tool">工具: qwen-plus</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson5" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第5课：用豆包创造</div>
+                <p class="lesson-goal">目标：体验豆包（Doubao）模型的语言特色与趣味互动创作。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">5. 用豆包创造</span>
+                        <span class="level-tool">工具: doubao-seed-2.0</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson6" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第6课：用万相文生图创造</div>
+                <p class="lesson-goal">目标：通过万相模型探索高级图像生成的潜力，实现精准画面控制。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">6. 用万相文生图创造</span>
+                        <span class="level-tool">工具: wan2.6-t2i</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson7" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第7课：用元宝创造</div>
+                <p class="lesson-goal">目标：体验元宝大模型的多场景应用能力与思维发散属性。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">7. 用元宝创造</span>
+                        <span class="level-tool">工具: hunyuan-turbo</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson8" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第8课：用 Kimi 创造</div>
+                <p class="lesson-goal">目标：通过 Kimi 体验长文本分析与大容量信息提取能力。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">8. 用 Kimi 创造</span>
+                        <span class="level-tool">工具: kimi-k2.5</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson9" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第9课：用minimax创造</div>
+                <p class="lesson-goal">目标：体验 MiniMax 模型在特定语义环境中的角色扮演与创作特点。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">9. 用minimax创造</span>
+                        <span class="level-tool">工具: MiniMax-M2.5</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lesson10" class="lesson-card">
+        <div class="lesson-card-header">
+            <div>
+                <div class="lesson-title">第10课：用可灵创造</div>
+                <p class="lesson-goal">目标：体验可灵模型（Kling）探索更前沿的 AI 动态视觉与内容生成能力。</p>
+            </div>
+        </div>
+        <div class="lesson-card-body">
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第一步：课前准备</span>
+                    <span class="action-text">熟悉本课指定的 AI 创作工具，准备好引导学生进行发散性思考的案例素材。</span>
+                </div>
+                <a href="javascript:void(0);" onclick="alert('正在开发中')" class="btn btn-ppt">📥 下载本课 PPT</a>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第二步：课堂演示</span>
+                    <span class="action-text">点击右侧按钮进入演示地图。引导学生进入对应关卡，展示工具的基础功能。</span>
+                </div>
+                <a href="https://koudashijie.com/ai/play/ai-sandbox" target="_blank" class="btn btn-primary">🚀 开始课堂演示</a>
+            </div>
+
+            <div class="level-list">
+                <div class="level-item">
+                    <div class="level-meta">
+                        <span class="level-badge badge-create">创造</span>
+                        <span class="level-name">10. 用可灵创造</span>
+                        <span class="level-tool">工具: kling 系列</span>
+                    </div>
+                    <a href="#" target="_blank" class="btn-outline btn" style="padding: 6px 14px; font-size: 0.85rem;">预览关卡</a>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <div class="action-info">
+                    <span class="action-label">第三步：学情追踪</span>
+                    <span class="action-text">登录教师后台 → 选择班级 → 选择"AI沙盒"课程，查看全班学生的创意作品和进度。</span>
+                </div>
+                <a href="https://koudashijie.com/teachers/classes" target="_blank" class="btn btn-outline">前往教师后台 →</a>
+            </div>
+
+            <div class="action-row" style="margin-bottom: 0;">
+                <div class="action-info">
+                    <span class="action-label">第四步：课后总结与作品展示</span>
+                    <span class="action-text">回到 PPT，为学生梳理总结本节课核心知识点。展示 1~2 份学生优秀作品或创新解法（可在教师后台选择优秀学生项目直接投屏展示）。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p>© 2026 扣哒世界 · 扣哒宇宙 AI 课程中心</p>
+    </div>
+</footer>
+
+<script>
+    // 监听滚动，更新导航激活状态
+    window.addEventListener('scroll', () => {
+        const sections = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10'];
+        const scrollPos = window.scrollY + 150;
+
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.offsetTop <= scrollPos && (el.offsetTop + el.offsetHeight) > scrollPos) {
+                document.querySelectorAll('.lesson-nav a').forEach(a => {
+                    a.classList.remove('active');
+                    if (a.getAttribute('href') === '#' + id) a.classList.add('active');
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
