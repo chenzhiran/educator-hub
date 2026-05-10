@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二单元：程序、编程、注释、字符串与调试 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary: #FF6B35;
+            --primary-light: #FF8F5E;
+            --primary-lighter: #FFF0E8;
+            --primary-dark: #E55A2B;
+            --dark: #1a1a2e;
+            --dark-code: #1e1e2e;
+            --dark-code-border: #313244;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #fafafa;
+            --bg-card: #ffffff;
+            --border: #e8e8e8;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c6370;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #abb2bf;
+            --code-punctuation: #abb2bf;
+            --code-object: #e5c07b;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #1a1a2e;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: #2a2a4e;
+        }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(255, 107, 53, 0.1);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #2a2a4e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #aaa;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover {
+            color: #fff;
+        }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper {
+            margin-left: var(--sidebar-width);
+        }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 {
+            color: var(--primary-dark);
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .section-header .en-title {
+            color: var(--text-light);
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p {
+            margin: 12px 0;
+            text-align: justify;
+        }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1565c0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #f0f0f0;
+            color: #d63384;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .code-block .dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .tip-box .tip-label {
+            font-weight: 700;
+            color: #f57f17;
+            margin-right: 6px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .info-box .info-label {
+            font-weight: 700;
+            color: #1565c0;
+            margin-right: 6px;
+        }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .remember-box .remember-label {
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-right: 6px;
+        }
+
+        .figure {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+
+        .figure .caption {
+            font-size: 0.85em;
+            color: var(--text-lighter);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .styled-table thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        .styled-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .styled-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background: var(--bg-alt);
+        }
+
+        .styled-table tbody tr:hover {
+            background: var(--primary-lighter);
+        }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .summary-card h3 {
+            color: var(--primary-dark);
+            border: none;
+            margin-top: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav {
+                transform: translateX(-100%);
+            }
+            .sidebar-nav.active {
+                transform: translateX(0);
+            }
+            .nav-toggle {
+                display: block;
+            }
+            .page-wrapper {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<!-- ===== 左侧导航栏 ===== -->
+<nav class="sidebar-nav">
+    <div class="nav-title">暗影地牢-第二单元</div>
+
+    <a href="#section-2-1" class="nav-section">2.1 深入理解程序</a>
+    <a href="#sec-2-1-1" class="nav-sub">2.1.1 程序的结构</a>
+    <a href="#sec-2-1-2" class="nav-sub">2.1.2 程序的执行</a>
+    <a href="#sec-2-1-3" class="nav-sub">2.1.3 程序的输入与输出</a>
+
+    <a href="#section-2-2" class="nav-section">2.2 字符串</a>
+    <a href="#sec-2-2-1" class="nav-sub">2.2.1 字符串的定义</a>
+    <a href="#sec-2-2-2" class="nav-sub">2.2.2 字符串的语法</a>
+    <a href="#sec-2-2-3" class="nav-sub">2.2.3 大小写敏感性</a>
+    <a href="#sec-2-2-4" class="nav-sub">2.2.4 字符串作为参数</a>
+    <a href="#sec-2-2-5" class="nav-sub">2.2.5 字符串与标识符的区别</a>
+    <a href="#sec-2-2-6" class="nav-sub">2.2.6 字符串基本操作</a>
+
+    <a href="#section-2-3" class="nav-section">2.3 注释</a>
+    <a href="#sec-2-3-1" class="nav-sub">2.3.1 注释的概念</a>
+    <a href="#sec-2-3-2" class="nav-sub">2.3.2 注释语法</a>
+    <a href="#sec-2-3-3" class="nav-sub">2.3.3 注释最佳实践</a>
+    <a href="#sec-2-3-4" class="nav-sub">2.3.4 注释作为学习工具</a>
+
+    <a href="#section-2-4" class="nav-section">2.4 hero.attack() 方法</a>
+    <a href="#sec-2-4-1" class="nav-sub">2.4.1 attack 方法的使用</a>
+    <a href="#sec-2-4-2" class="nav-sub">2.4.2 attack 方法的策略</a>
+
+    <a href="#section-2-5" class="nav-section">2.5 hero.say() 方法</a>
+    <a href="#sec-2-5-1" class="nav-sub">2.5.1 say 方法的使用</a>
+
+    <a href="#section-2-6" class="nav-section">2.6 错误与调试</a>
+    <a href="#sec-2-6-1" class="nav-sub">2.6.1 Bug 的概念</a>
+    <a href="#sec-2-6-2" class="nav-sub">2.6.2 错误类型</a>
+    <a href="#sec-2-6-3" class="nav-sub">2.6.3 调试的概念</a>
+    <a href="#sec-2-6-4" class="nav-sub">2.6.4 调试技巧</a>
+    <a href="#sec-2-6-5" class="nav-sub">2.6.5 常见初学者错误</a>
+
+    <a href="#section-2-7" class="nav-section">2.7 顺序结构正式定义</a>
+    <a href="#sec-2-7-1" class="nav-sub">2.7.1 三种基本控制结构</a>
+    <a href="#sec-2-7-2" class="nav-sub">2.7.2 顺序结构的应用</a>
+
+    <a href="#section-2-8" class="nav-section">2.8 函数/方法总结</a>
+    <a href="#sec-2-8-1" class="nav-sub">2.8.1 新增方法列表</a>
+    <a href="#sec-2-8-2" class="nav-sub">2.8.2 内置函数预告</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<!-- ===== 页面主体 ===== -->
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第二单元：程序、编程、注释、字符串与调试</h1>
+    <div class="subtitle">Unit 2: Programs, Programming, Comments, Strings & Debugging</div>
+    <div class="badge">对应关卡 Level 7–9 | 暗影地牢 Kithgard Dungeon</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 2.1 ==================== -->
+<div class="section-header" id="section-2-1">
+    <h2>2.1 深入理解程序</h2>
+    <div class="en-title">Understanding Programs in Depth</div>
+</div>
+
+<h3 id="sec-2-1-1">2.1.1 程序的结构（Structure of a Program）</h3>
+
+<h4>2.1.1.1 程序由语句组成
+    <span class="en">A program consists of statements</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-1-1-1_program_statements.png" alt="程序由语句组成">
+    <div class="caption">图1：程序就像乐高积木——由一块块"语句"搭建而成</div>
+</div>
+
+<p>在第一单元中，你已经体验过写程序的感觉了。现在让我们更深入地理解它的结构。</p>
+
+<p>一个程序就像一栋建筑，而<span class="keyword">语句（Statement）</span>就是建筑中的一块块砖。每一行 <code>hero.moveRight()</code> 或 <code>hero.attack("Brak")</code> 都是一条语句。所有语句组合在一起，就构成了一个完整的程序。</p>
+
+<p>来看第 7 关"真名实姓"的完整程序——它由 6 条语句组成：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>       <span class="cmt"># 语句1</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># 语句2</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># 语句3</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>       <span class="cmt"># 语句4</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Treg"</span><span class="punc">)</span>    <span class="cmt"># 语句5</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Treg"</span><span class="punc">)</span>    <span class="cmt"># 语句6</span></pre>
+</div>
+
+<p>6 条指令，按顺序执行，塔林就能消灭两个食人魔并收集宝石。简洁而有力！</p>
+
+<h4>2.1.1.2 语句（Statement）的定义：一条完整的指令
+    <span class="en">A complete instruction</span>
+</h4>
+
+<p><span class="keyword">语句</span>是程序中的最小执行单元——一条完整的指令，告诉计算机做一件事。在 Python 中，通常一行就是一条语句。</p>
+
+<p>在 扣哒世界 的第 7–9 关中，你会遇到这些类型的语句：</p>
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>● 移动语句：<code>hero.moveRight()</code>——让英雄移动</li>
+    <li>● 攻击语句：<code>hero.attack("Brak")</code>——让英雄攻击</li>
+    <li>● 说话语句：<code>hero.say("Hello")</code>——让英雄说话</li>
+</ul>
+
+<p>每条语句都是一个完整的动作——它能独立执行，产生明确的效果。</p>
+
+<h4>2.1.1.3 表达式（Expression）的定义：产生值的代码片段
+    <span class="en">Code that produces a value</span>
+</h4>
+
+<p><span class="keyword">表达式（Expression）</span>是一段能"算出结果"的代码。比如：</p>
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>● <code>3 + 2</code> 是表达式，它的值是 <code>5</code></li>
+    <li>● <code>"Brak"</code> 是表达式，它的值是字符串 Brak</li>
+    <li>● <code>hero.moveRight()</code> 则是语句（它执行一个动作，而不是"算出一个值"）</li>
+</ul>
+
+<p>简单说：表达式关注的是"得到什么值"，语句关注的是"做什么动作"。</p>
+
+<h4>2.1.1.4 语句与表达式的区别
+    <span class="en">Difference between statement and expression</span>
+</h4>
+
+<table class="styled-table">
+    <thead><tr><th>概念</th><th>核心作用</th><th>例子</th></tr></thead>
+    <tbody>
+        <tr><td><strong>语句 Statement</strong></td><td>执行一个动作</td><td><code>hero.attack("Brak")</code></td></tr>
+        <tr><td><strong>表达式 Expression</strong></td><td>产生一个值</td><td><code>3 + 2</code>、<code>"Hello"</code></td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">小提示：</span>在前 9 关中，你写的基本都是语句。表达式经常"藏在"语句里面——比如 <code>hero.attack("Brak")</code> 中的 <code>"Brak"</code> 就是一个表达式（它产生了一个字符串值），整行代码则是一条语句。
+</div>
+
+<!-- ===== 2.1.2 ===== -->
+<h3 id="sec-2-1-2">2.1.2 程序的执行（Program Execution）</h3>
+
+<h4>2.1.2.1 解释器（Interpreter）的概念
+    <span class="en">Concept of interpreter</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-1-2-1_interpreter.png" alt="解释器概念">
+    <div class="caption">图2：解释器就像一个实时翻译——你说一句，它翻译一句给计算机</div>
+</div>
+
+<p>你写的 Python 代码，计算机并不能直接"读懂"。它需要一个<span class="keyword">解释器（Interpreter）</span>来当翻译。</p>
+
+<p>想象你在和一个只懂机器语言的外星人对话。解释器就是那个站在你们中间的翻译：你说一句 Python，它立刻翻译成机器语言告诉外星人。</p>
+
+<h4>2.1.2.2 逐行解释执行
+    <span class="en">Line-by-line interpretation</span>
+</h4>
+
+<p>Python 解释器的工作方式是：<span class="keyword">读一行 → 翻译一行 → 执行一行 → 读下一行……</span></p>
+
+<p>在 扣哒世界 中，你能清楚地观察到这个过程——代码左侧会有一个高亮标记，显示当前执行到了哪一行。塔林执行完 <code>hero.moveRight()</code> 之后，解释器才会去读 <code>hero.attack("Brak")</code>。</p>
+
+<h4>2.1.2.3 编译 vs. 解释
+    <span class="en">Compilation vs. Interpretation，简要对比</span>
+</h4>
+
+<p>编程语言有两种翻译策略：</p>
+
+<table class="styled-table">
+    <thead><tr><th>方式</th><th>类比</th><th>特点</th><th>代表语言</th></tr></thead>
+    <tbody>
+        <tr><td><strong>编译 Compile</strong></td><td>先把整本书翻译好，再交给读者</td><td>执行速度快，但修改后需重新编译</td><td>C, C++, Java</td></tr>
+        <tr><td><strong>解释 Interpret</strong></td><td>同声传译，说一句翻一句</td><td>开发灵活，写完就能运行</td><td>Python, JavaScript</td></tr>
+    </tbody>
+</table>
+
+<h4>2.1.2.4 Python 是解释型语言
+    <span class="en">Python is an interpreted language</span>
+</h4>
+
+<p>Python 是<span class="keyword">解释型语言</span>——写完代码点击"运行"就能立即看到效果，不需要等待编译过程。这就是为什么 扣哒世界 中你修改一行代码后，立刻就能重新运行看到不同的结果。</p>
+
+<h4>2.1.2.5 运行时（Runtime）的概念
+    <span class="en">Concept of runtime</span>
+</h4>
+
+<p><span class="keyword">运行时（Runtime）</span>就是"程序正在运行的那段时间"。在 扣哒世界 中，从你点击"运行"按钮到英雄完成任务（或失败），这整个过程就是运行时。运行时出现的错误叫"运行时错误"（后面会学到）。</p>
+
+<!-- ===== 2.1.3 ===== -->
+<h3 id="sec-2-1-3">2.1.3 程序的输入与输出（Program Input and Output）</h3>
+
+<h4>2.1.3.1 输入（Input）：程序接收的数据
+    <span class="en">Data that a program receives</span>
+</h4>
+
+<p><span class="keyword">输入（Input）</span>是程序从外部接收的信息。在 扣哒世界 中，输入包括：地图布局（墙壁、尖刺、敌人的位置）、敌人的名字（如 "Brak"、"Treg"）、关卡目标（收集宝石、消灭食人魔）。</p>
+
+<p>你在写代码之前观察地图，获取这些"输入信息"，然后用代码做出相应的决策。</p>
+
+<h4>2.1.3.2 输出（Output）：程序产生的结果
+    <span class="en">Results that a program produces</span>
+</h4>
+
+<p><span class="keyword">输出（Output）</span>是程序执行后产生的效果。在 扣哒世界 中，输出就是英雄的行为：安雅移动了、塔林攻击了食人魔、敌人被消灭了——这些都是你的程序的"输出"。</p>
+
+<h4>2.1.3.3 hero.say() 作为一种输出方式
+    <span class="en">hero.say() as output</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-1-3-3_hero_say_output.png" alt="hero.say()输出">
+    <div class="caption">图3：hero.say() 让英雄说出文字——这是一种可视化的输出方式</div>
+</div>
+
+<p><code>hero.say("message")</code> 是一种特殊的输出方式——它让英雄在游戏画面中说出一段文字（就像漫画对话气泡）。这既是一种信息展示，有时候也能触发游戏事件（比如对着门卫说出密码来开门）。</p>
+
+<h4>2.1.3.4 print() 函数简介
+    <span class="en">Introduction to print() function</span>
+</h4>
+
+<p>在传统 Python 编程中，最常用的输出方式是 <code>print()</code> 函数——它把信息显示在控制台（终端）上：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="fn">print</span><span class="punc">(</span><span class="str">"Hello, World!"</span><span class="punc">)</span>   <span class="cmt"># 在屏幕上显示文字</span>
+<span class="fn">print</span><span class="punc">(</span><span class="num">3</span> + <span class="num">2</span><span class="punc">)</span>              <span class="cmt"># 显示计算结果：5</span></pre>
+</div>
+
+<p>在 扣哒世界 中你主要用 <code>hero.say()</code>，但 <code>print()</code> 在以后的纯 Python 编程中会变得非常重要。</p>
+
+<!-- ==================== 2.2 ==================== -->
+<div class="section-header" id="section-2-2">
+    <h2>2.2 字符串</h2>
+    <div class="en-title">Strings</div>
+</div>
+
+<h3 id="sec-2-2-1">2.2.1 字符串的定义（Definition of Strings）</h3>
+
+<h4>2.2.1.1 字符串是字符的序列
+    <span class="en">A sequence of characters</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-2-1-1_string_definition.png" alt="字符串定义">
+    <div class="caption">图4：字符串就像糖葫芦——一个一个字符串在竹签上</div>
+</div>
+
+<p><span class="keyword">字符串（String）</span>就是一串字符排在一起组成的数据。想象一串糖葫芦——每颗山楂就是一个字符，整串就是一个字符串。</p>
+
+<p>比如 <code>"Brak"</code> 这个字符串由 4 个字符组成：<code>B</code>、<code>r</code>、<code>a</code>、<code>k</code>。</p>
+
+<p>在第 7 关"真名实姓"中，你第一次正式使用字符串作为参数——<code>"Brak"</code> 和 <code>"Treg"</code> 就是告诉英雄"攻击谁"的字符串。</p>
+
+<h4>2.2.1.2 字符串是一种数据类型
+    <span class="en">String as a data type</span>
+</h4>
+
+<p>在第一单元中你学了数字类型（整数和浮点数），现在来认识一个新的数据类型：<span class="keyword-en">str</span>（字符串类型）。</p>
+
+<p>三种你已经了解的数据类型：</p>
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>● <code>int</code>（整数）：<code>3</code>、<code>-1</code>、<code>0</code></li>
+    <li>● <code>float</code>（浮点数）：<code>2.5</code>、<code>-0.5</code></li>
+    <li>● <code>str</code>（字符串）：<code>"Brak"</code>、<code>"Hello"</code>、<code>"攻击！"</code> ← 新朋友！</li>
+</ul>
+
+<h4>2.2.1.3 字符串用引号包围
+    <span class="en">Strings are enclosed in quotes</span>
+</h4>
+
+<p>字符串的标志就是那对<span class="keyword">引号</span>。没有引号的 <code>Brak</code> 是一个变量名，加了引号的 <code>"Brak"</code> 才是字符串。这个区别非常重要（2.2.5 节会详细讲）！</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="str">"Brak"</span>      <span class="cmt"># ✓ 这是字符串（有引号）</span>
+<span class="str">"Treg"</span>      <span class="cmt"># ✓ 这也是字符串</span>
+<span class="str">"Hello!"</span>    <span class="cmt"># ✓ 包含字母和标点的字符串</span>
+Brak        <span class="cmt"># ✗ 这不是字符串！这是一个变量名</span></pre>
+</div>
+
+<h4>2.2.1.4 字符串的内容可以是任何字符
+    <span class="en">Content can be any character</span>
+</h4>
+
+<p>字符串里可以放任何字符：英文字母（<code>"Hello"</code>）、中文（<code>"你好"</code>）、数字字符（<code>"123"</code>）、标点符号（<code>"!@#"</code>）、空格（<code>"hi there"</code>）、甚至完全为空（<code>""</code>）。</p>
+
+<p>注意：<code>"3"</code> 是字符串（文本），<code>3</code> 是整数（数字）——它们不是同一种东西！</p>
+
+<!-- ===== 2.2.2 ===== -->
+<h3 id="sec-2-2-2">2.2.2 字符串的语法（String Syntax）</h3>
+
+<h4>2.2.2.1 双引号 "Hello"
+    <span class="en">Double quotes</span>
+</h4>
+
+<p>Python 中最常用的字符串写法是<span class="keyword">双引号</span>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># 双引号包围的字符串</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Hello!"</span><span class="punc">)</span>    <span class="cmt"># 双引号包围的字符串</span></pre>
+</div>
+
+<p>在 扣哒世界 中，你看到的字符串基本都用双引号。</p>
+
+<h4>2.2.2.2 单引号 'Hello'
+    <span class="en">Single quotes</span>
+</h4>
+
+<p><span class="keyword">单引号</span>也能创建字符串，效果完全相同：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">'Brak'</span><span class="punc">)</span>    <span class="cmt"># 单引号也可以！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">'Hello!'</span><span class="punc">)</span>    <span class="cmt"># 效果和双引号一样</span></pre>
+</div>
+
+<h4>2.2.2.3 双引号与单引号的等价性
+    <span class="en">Equivalence of single and double quotes</span>
+</h4>
+
+<p><code>"Brak"</code> 和 <code>'Brak'</code> 是<strong>完全一样</strong>的。选哪种都行，只要保持一致就好。扣哒世界 中默认使用双引号，建议你也用双引号。</p>
+
+<h4>2.2.2.4 引号的配对规则
+    <span class="en">Matching quote rules</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-2-2-4_quote_matching.png" alt="引号配对规则">
+    <div class="caption">图5：引号必须配对——开头用什么引号，结尾就用什么引号</div>
+</div>
+
+<p>引号必须<span class="keyword">成对出现</span>，而且类型要一致：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="str">"Brak"</span>     <span class="cmt"># ✓ 双引号开头，双引号结尾</span>
+<span class="str">'Brak'</span>     <span class="cmt"># ✓ 单引号开头，单引号结尾</span>
+<span class="err">"Brak'</span>     <span class="cmt"># ✗ 错误！双引号开头，单引号结尾——不匹配！</span>
+<span class="err">'Brak"</span>     <span class="cmt"># ✗ 错误！单引号开头，双引号结尾——不匹配！</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">配对口诀：</span>双引号开，双引号收；单引号开，单引号收。绝不能"混搭"！
+</div>
+
+<h4>2.2.2.5 空字符串 ""
+    <span class="en">Empty string</span>
+</h4>
+
+<p>两个引号之间什么都不写，就是<span class="keyword">空字符串</span>：<code>""</code> 或 <code>''</code>。它是一个合法的字符串，只不过里面没有任何字符（长度为 0）。虽然在前 9 关中不会用到，但知道它的存在就好。</p>
+
+<!-- ===== 2.2.3 ===== -->
+<h3 id="sec-2-2-3">2.2.3 字符串的大小写敏感性（Case Sensitivity of Strings）</h3>
+
+<h4>2.2.3.1 "Brak" 与 "brak" 是不同的字符串
+    <span class="en">"Brak" ≠ "brak"</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-2-3-1_case_sensitivity.png" alt="大小写敏感">
+    <div class="caption">图6：在计算机看来，"Brak" 和 "brak" 是两个完全不同的名字</div>
+</div>
+
+<p>这是第 7 关中最容易翻车的地方！<span class="keyword">大小写不同 = 不同的字符串</span>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># ✓ 正确！找到了食人魔 Brak</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="err">"brak"</span><span class="punc">)</span>    <span class="cmt"># ✗ 找不到叫 "brak" 的敌人！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="err">"BRAK"</span><span class="punc">)</span>    <span class="cmt"># ✗ 也找不到 "BRAK"！</span></pre>
+</div>
+
+<p>食人魔的名字是 <code>"Brak"</code>（首字母大写），你写 <code>"brak"</code> 或 <code>"BRAK"</code> 计算机都不认识。就像在通讯录里搜"张三"能找到人，搜"张三三"就找不到了。</p>
+
+<h4>2.2.3.2 大小写敏感在编程中的普遍性
+    <span class="en">Case sensitivity is common in programming</span>
+</h4>
+
+<p>不只是字符串，Python 中<strong>几乎所有东西都区分大小写</strong>：<code>hero</code> ≠ <code>Hero</code>、<code>moveRight</code> ≠ <code>moveright</code>、<code>True</code> ≠ <code>true</code>。养成注意大小写的习惯，能帮你避免大量的错误。</p>
+
+<h4>2.2.3.3 正确拼写的重要性
+    <span class="en">Importance of correct spelling</span>
+</h4>
+
+<p>在第 7a 关中，敌人叫 <code>"Krug"</code> 和 <code>"Grump"</code>。如果你写成 <code>"krug"</code>、<code>"Krugh"</code> 或 <code>"Grumpy"</code>——哪怕只差一个字母——攻击指令也不会生效。计算机要求<span class="keyword">精确匹配（Exact Match）</span>。</p>
+
+<h4>2.2.3.4 字符串比较是精确匹配
+    <span class="en">String comparison is exact match</span>
+</h4>
+
+<p>计算机比较两个字符串时，会逐个字符检查。每个字符的位置、大小写、拼写都必须<strong>完全一致</strong>才算相同。没有"差不多"这个概念——要么完全匹配，要么完全不匹配。</p>
+
+<div class="tip-box">
+    <span class="tip-label">通关秘诀：</span>观察游戏画面中敌人头顶的名字，<strong>一个字母一个字母地</strong>抄到代码里。首字母通常大写！
+</div>
+
+<!-- ===== 2.2.4 ===== -->
+<h3 id="sec-2-2-4">2.2.4 字符串作为参数（Strings as Arguments）</h3>
+
+<h4>2.2.4.1 将字符串传递给方法：hero.attack("Brak")
+    <span class="en">Passing strings to methods</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-2-4-1_string_argument.png" alt="字符串作为参数">
+    <div class="caption">图7：字符串参数告诉方法"对谁做"——attack 谁？say 什么？</div>
+</div>
+
+<p>在第一单元中，你给方法传递的参数是数字（步数）。现在在第 7 关中，你开始给方法传递<span class="keyword">字符串参数</span>——用来指定目标的名字：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>     <span class="cmt"># "Brak" 是字符串参数——指定攻击目标</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Treg"</span><span class="punc">)</span>     <span class="cmt"># "Treg" 是另一个字符串参数</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>       <span class="cmt"># 2 是数字参数——指定步数</span></pre>
+</div>
+
+<p>数字参数回答"多少"的问题，字符串参数回答"谁"或"什么"的问题。</p>
+
+<h4>2.2.4.2 字符串参数必须加引号
+    <span class="en">String arguments must be quoted</span>
+</h4>
+
+<p>传递字符串参数时，<strong>引号不能少</strong>！引号是字符串的"身份证"——没了它，Python 就不知道这是一段文字。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># ✓ 正确：有引号，"Brak" 是字符串</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>Brak<span class="punc">)</span>      <span class="cmt"># ✗ 错误：没引号，Python 以为 Brak 是变量名！</span></pre>
+</div>
+
+<h4>2.2.4.3 不加引号会被视为变量名
+    <span class="en">Without quotes, it's treated as a variable name</span>
+</h4>
+
+<p>如果你写 <code>hero.attack(Brak)</code>（没有引号），Python 会认为 <code>Brak</code> 是一个变量的名字，然后去查找叫做 <code>Brak</code> 的变量——结果找不到，就会报错：<code>NameError: name 'Brak' is not defined</code>（名字错误：Brak 未定义）。</p>
+
+<p>这就是为什么引号如此重要——它告诉 Python："这是一段文字，不是变量名！"</p>
+
+<h4>2.2.4.4 字符串参数的用途：指定目标名称
+    <span class="en">Use: specifying target names</span>
+</h4>
+
+<p>在第 7–9 关中，字符串参数的主要用途是指定攻击目标的名称。来看第 8 关"危险脚步"中四个不同的敌人名字：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Sog"</span><span class="punc">)</span>     <span class="cmt"># 攻击食人魔 Sog</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Gos"</span><span class="punc">)</span>     <span class="cmt"># 攻击食人魔 Gos</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Kro"</span><span class="punc">)</span>     <span class="cmt"># 攻击食人魔 Kro</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ergo"</span><span class="punc">)</span>    <span class="cmt"># 攻击食人魔 Ergo</span></pre>
+</div>
+
+<p>不同的字符串 → 不同的目标 → 不同的效果。字符串让你的代码能精确地指定"对谁做什么"。</p>
+
+<!-- ===== 2.2.5 ===== -->
+<h3 id="sec-2-2-5">2.2.5 字符串与标识符的区别（Difference Between Strings and Identifiers）</h3>
+
+<h4>2.2.5.1 带引号 = 字符串
+    <span class="en">With quotes = string literal</span>
+</h4>
+
+<p><span class="keyword">字符串</span>就是代码中直接写出来的字符串值——用引号括起来的那些文字。它们是"字面意思"的数据，不需要进一步查找。</p>
+
+<h4>2.2.5.2 不带引号 = 变量 或 标识符
+    <span class="en">Without quotes = variable/identifier</span>
+</h4>
+
+<p>不带引号的名字会被 Python 当作<span class="keyword">标识符（Identifier）</span>——也就是变量名、对象名或方法名。Python 会尝试去找这个名字对应的"东西"。</p>
+
+<h4>2.2.5.3 这一区别是初学者常见错误来源
+    <span class="en">Common source of beginner errors</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-2-5-3_string_vs_identifier.png" alt="字符串vs标识符">
+    <div class="caption">图8：一个引号的差别，就是"字符串"和"变量名"的天壤之别</div>
+</div>
+
+<p>这可能是编程初学者最常犯的错误之一！让我们用一个表格彻底搞清楚：</p>
+
+<table class="styled-table">
+    <thead><tr><th>代码</th><th>Python 的理解</th><th>结果</th></tr></thead>
+    <tbody>
+        <tr><td><code>"Brak"</code></td><td>一个字符串值，内容是 Brak</td><td>✓ 正常工作</td></tr>
+        <tr><td><code>Brak</code></td><td>一个叫做 Brak 的变量</td><td>✗ NameError（变量未定义）</td></tr>
+        <tr><td><code>"hero"</code></td><td>一个字符串值，内容是 hero</td><td>只是文字，不是英雄对象！</td></tr>
+        <tr><td><code>hero</code></td><td>英雄对象</td><td>✓ 指向游戏中的英雄</td></tr>
+    </tbody>
+</table>
+
+<h4>2.2.5.4 示例对比："enemy1" vs. enemy1
+    <span class="en">Example comparison</span>
+</h4>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># "enemy1" 是字符串——就是文字 "enemy1"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"enemy1"</span><span class="punc">)</span>   <span class="cmt"># 攻击名字叫 enemy1 的敌人</span>
+
+<span class="cmt"># enemy1 是变量名——Python 会去找这个变量的值</span>
+<span class="cmt"># 如果 enemy1 变量存储了 "Brak"，那就攻击 Brak</span>
+<span class="cmt"># 如果 enemy1 变量不存在，就报错！</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">终极口诀：</span>有引号 = 文字本身；没引号 = 去找对应的东西。
+</div>
+
+<!-- ===== 2.2.6 ===== -->
+<h3 id="sec-2-2-6">2.2.6 字符串的基本操作（Basic String Operations，初步了解）</h3>
+
+<h4>2.2.6.1 字符串长度
+    <span class="en">String length，概念预告</span>
+</h4>
+
+<p>每个字符串都有<span class="keyword">长度</span>——就是它包含的字符数。<code>"Brak"</code> 的长度是 4，<code>"Treg"</code> 的长度也是 4，<code>"Ergo"</code> 的长度也是 4。在未来你会学到用 <code>len()</code> 函数来获取长度。</p>
+
+<h4>2.2.6.2 字符串拼接
+    <span class="en">String concatenation，概念预告</span>
+</h4>
+
+<p><span class="keyword">拼接（Concatenation）</span>就是把两个字符串连在一起。在 Python 中用 <code>+</code> 号：<code>"Hello" + " World"</code> = <code>"Hello World"</code>。前 9 关中不需要用到，先知道就好。</p>
+
+<h4>2.2.6.3 字符串在 Python 中是不可变的
+    <span class="en">Strings are immutable in Python</span>
+</h4>
+
+<p>字符串一旦创建就<span class="keyword">不可修改</span>——你不能改变 <code>"Brak"</code> 中的某个字母。如果需要不同的字符串，只能创建一个新的。这个概念现在了解即可，后面用到时会更深入学习。</p>
+
+<!-- ==================== 2.3 ==================== -->
+<div class="section-header" id="section-2-3">
+    <h2>2.3 注释</h2>
+    <div class="en-title">Comments</div>
+</div>
+
+<h3 id="sec-2-3-1">2.3.1 注释的概念（The Concept of Comments）</h3>
+
+<h4>2.3.1.1 注释的定义：给人看的解释，不被执行
+    <span class="en">Explanations for humans, not executed</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-3-1-1_comment_definition.png" alt="注释的定义">
+    <div class="caption">图9：注释就像便利贴——贴在代码旁边给人看，计算机完全无视它</div>
+</div>
+
+<p><span class="keyword">注释（Comment）</span>是代码中给人类程序员看的文字说明。计算机在执行程序时会<strong>完全跳过</strong>注释——就像它们根本不存在一样。</p>
+
+<p>在第 7 关的代码中，你会看到这样的注释：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 抵御 "Brak" 和 "Treg"！</span>
+<span class="cmt"># 小食人魔攻击两次才会被击败。</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span></pre>
+</div>
+
+<p>前两行以 <code>#</code> 开头的灰色文字就是注释。它们告诉你这段代码要做什么，但塔林完全不会理会它们——他只执行真正的代码。</p>
+
+<h4>2.3.1.2 注释的目的：解释代码意图
+    <span class="en">Purpose: explain code intent</span>
+</h4>
+
+<p>注释的核心目的是回答一个问题："<strong>这段代码为什么这样写？</strong>"它帮助未来的你（或其他读代码的人）快速理解代码的思路。</p>
+
+<h4>2.3.1.3 注释不影响程序运行
+    <span class="en">Comments don't affect program execution</span>
+</h4>
+
+<p>你可以写100行注释，程序的行为也不会有任何变化。你也可以删除所有注释，程序照样正常运行。注释纯粹是给人看的"笔记"。</p>
+
+<h4>2.3.1.4 注释是程序员之间的沟通工具
+    <span class="en">Comments as communication between programmers</span>
+</h4>
+
+<p>在团队合作中，注释就像队友之间的留言条。在 扣哒世界 中，关卡的默认代码里经常有注释给你提示——这就是游戏设计师在通过注释和你"沟通"。</p>
+
+<!-- ===== 2.3.2 ===== -->
+<h3 id="sec-2-3-2">2.3.2 Python 注释语法（Python Comment Syntax）</h3>
+
+<h4>2.3.2.1 单行注释：# 符号
+    <span class="en">Single-line comment: # symbol</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-3-2-1_hash_comment.png" alt="井号注释">
+    <div class="caption">图10：# 号是 Python 注释的标志——它后面的内容全被忽略</div>
+</div>
+
+<p>在 Python 中，<span class="keyword"><code>#</code> 号</span>（井号 / hash）标记注释的开始。从 <code>#</code> 开始到这一行结束的所有内容都会被忽略。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 这整行都是注释</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>    <span class="cmt"># 这里开始也是注释</span></pre>
+</div>
+
+<h4>2.3.2.2 # 后的内容全部被忽略
+    <span class="en">Everything after # is ignored</span>
+</h4>
+
+<p>从 <code>#</code> 号开始，这一行后面的所有文字都不会被执行。哪怕你写了一行代码在 <code>#</code> 后面，它也不会运行：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># hero.moveRight()    ← 这行不会执行！因为被注释掉了</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>      <span class="cmt"># ← 这行才会执行</span></pre>
+</div>
+
+<h4>2.3.2.3 注释可以在行首
+    <span class="en">Comment at the beginning of a line</span>
+</h4>
+
+<p><code>#</code> 写在行的最开头，整行都是注释：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 击败第一对食人魔。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Sog"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Sog"</span><span class="punc">)</span></pre>
+</div>
+
+<h4>2.3.2.4 注释可以在代码行末尾
+    <span class="en">Inline comment at end of code line</span>
+</h4>
+
+<p><code>#</code> 也可以写在一行代码的后面，用来解释这行代码：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>   <span class="cmt"># 第一次攻击 Brak</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>   <span class="cmt"># 第二次——这下它倒了！</span></pre>
+</div>
+
+<h4>2.3.2.5 多行注释的写法
+    <span class="en">Multi-line comments：多个 # 或三引号</span>
+</h4>
+
+<p>Python 没有专门的"多行注释"语法，但有两种常用方法：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 方法1：每行都加 # 号</span>
+<span class="cmt"># 这是第一行注释</span>
+<span class="cmt"># 这是第二行注释</span>
+<span class="cmt"># 这是第三行注释</span>
+
+<span class="cmt"># 方法2：三引号（技术上是多行字符串，不是真正的注释）</span>
+<span class="str">"""
+这里可以写很多行
+不会被执行
+但通常用于文档说明
+"""</span></pre>
+</div>
+
+<p>在 扣哒世界 中，我们通常只用 <code>#</code> 号。</p>
+
+<!-- ===== 2.3.3 ===== -->
+<h3 id="sec-2-3-3">2.3.3 注释的最佳实践（Best Practices for Comments）</h3>
+
+<h4>2.3.3.1 解释"为什么"而非"是什么"
+    <span class="en">Explain "why" not "what"</span>
+</h4>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 不好的注释：说了等于没说</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>   <span class="cmt"># 向右移动  ← 这不是废话吗？</span>
+
+<span class="cmt"># 好的注释：解释了为什么</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>   <span class="cmt"># 走到 Brak 的攻击范围内</span></pre>
+</div>
+
+<h4>2.3.3.2 保持注释与代码同步更新
+    <span class="en">Keep comments updated with code</span>
+</h4>
+
+<p>如果你修改了代码但忘了改注释，旧注释就会变成"误导性谎言"。每次改代码时，顺手检查一下旁边的注释是否还正确。</p>
+
+<h4>2.3.3.3 不要注释显而易见的代码
+    <span class="en">Don't comment the obvious</span>
+</h4>
+
+<p>像 <code>hero.moveRight() # 向右移动</code> 这种注释没有价值——代码本身已经够清楚了。只在代码不容易理解的地方添加注释。</p>
+
+<h4>2.3.3.4 使用注释规划代码结构
+    <span class="en">Use comments to plan code structure</span>
+</h4>
+
+<p>在第 8 关"危险脚步"中，代码用注释分成了逻辑组：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>
+<span class="cmt"># 击败第一对食人魔。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Sog"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Sog"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Gos"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Gos"</span><span class="punc">)</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>
+<span class="cmt"># 击败第二对食人魔。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Kro"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Kro"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ergo"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ergo"</span><span class="punc">)</span></pre>
+</div>
+
+<p>注释把代码分成了"打第一组"和"打第二组"两个阶段，逻辑清晰明了！</p>
+
+<h4>2.3.3.5 先写注释再写代码的习惯
+    <span class="en">Habit: write comments before code</span>
+</h4>
+
+<p>面对复杂关卡时，可以先用注释写出"计划"，再填入实际代码：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 步骤1：走到第一个敌人面前</span>
+<span class="cmt"># 步骤2：消灭 Ursa（攻击两次）</span>
+<span class="cmt"># 步骤3：移动到第二个敌人</span>
+<span class="cmt"># 步骤4：消灭 Rexxar（攻击两次）</span>
+<span class="cmt"># 步骤5：到达出口</span></pre>
+</div>
+
+<p>有了这个"骨架"，再一步步填入代码就轻松多了！</p>
+
+<!-- ===== 2.3.4 ===== -->
+<h3 id="sec-2-3-4">2.3.4 注释作为学习工具（Comments as a Learning Tool）</h3>
+
+<h4>2.3.4.1 阅读注释获取线索和指导
+    <span class="en">Reading comments for clues and guidance</span>
+</h4>
+
+<p>在 扣哒世界 中，关卡的默认代码里经常有注释提示。比如第 9 关"睡眠时刻"的开头：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 这是一个组合挑战关卡。</span>
+<span class="cmt"># 打败食人魔，收集宝石，并逃到红色X处</span>
+<span class="cmt"># 使用字符串和移动参数！</span></pre>
+</div>
+
+<p>这些注释告诉你关卡目标和需要用到的技能——一定要认真阅读！</p>
+
+<h4>2.3.4.2 注释中包含密码或指令
+    <span class="en">Comments containing passwords or instructions</span>
+</h4>
+
+<p>有些关卡的注释里藏着通关必需的信息——比如密码、敌人名字的正确拼写、或特定的操作提示。养成阅读注释的习惯，可能会在关键时刻帮你一把。</p>
+
+<h4>2.3.4.3 通过注释理解代码意图
+    <span class="en">Understanding code intent through comments</span>
+</h4>
+
+<p>当你看别人写的代码时，注释能帮你快速理解"这段代码想做什么"。即使你暂时看不懂具体语法，注释也能让你把握代码的整体思路。</p>
+
+<!-- ==================== 2.4 ==================== -->
+<div class="section-header" id="section-2-4">
+    <h2>2.4 hero.attack() 方法</h2>
+    <div class="en-title">The hero.attack() Method</div>
+</div>
+
+<h3 id="sec-2-4-1">2.4.1 attack 方法的使用（Using the attack Method）</h3>
+
+<h4>2.4.1.1 语法：hero.attack("目标名称")
+    <span class="en">Syntax: hero.attack("targetName")</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-4-1-1_attack_syntax.png" alt="attack方法语法">
+    <div class="caption">图11：hero.attack("Brak") —— 对象.方法("字符串参数")</div>
+</div>
+
+<p><code>hero.attack()</code> 是第 7 关引入的新方法。它让英雄攻击一个指定的敌人：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>
+<span class="cmt"># ^      ^       ^</span>
+<span class="cmt"># 对象  方法   字符串参数（目标名称）</span></pre>
+</div>
+
+<p>和 <code>moveRight(3)</code> 的结构一样：对象.方法(参数)。只不过这次参数是字符串而不是数字。</p>
+
+<h4>2.4.1.2 参数为字符串类型的目标名称
+    <span class="en">Argument is a string target name</span>
+</h4>
+
+<p><code>attack</code> 方法的参数必须是一个字符串，代表你要攻击的敌人的名字。这个名字必须和游戏中敌人头顶显示的名字<strong>完全一致</strong>（包括大小写）。</p>
+
+<h4>2.4.1.3 多次攻击同一目标
+    <span class="en">Attacking the same target multiple times</span>
+</h4>
+
+
+<p>在地牢的关卡中，由于我们使用的剑是系统赠送的普通剑，攻击力太低，每个食人魔矮人都需要被攻击<span class="keyword">两次</span>才能被消灭。所以你必须连续写两行相同的攻击指令：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>   <span class="cmt"># 第一下！Brak 还没倒</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>   <span class="cmt"># 第二下！Brak 被消灭了！</span></pre>
+</div>
+
+<p>只写一次 <code>attack</code> 是不够的——食人魔会剩一点血，然后反击你！</p>
+
+<h4>2.4.1.4 不同目标可能需要不同攻击次数
+    <span class="en">Different targets may need different attacks</span>
+</h4>
+
+<p>在当前关卡中所有矮人都需要两次攻击。但在未来的关卡中，更强大的敌人可能需要更多次攻击，或者更好的武器能让你一击必杀。如果你装备了更强的剑（比如第 7a 关提到的），有可能一次攻击就能解决！</p>
+
+<!-- ===== 2.4.2 ===== -->
+<h3 id="sec-2-4-2">2.4.2 attack 方法的策略（Strategy for attack Method）</h3>
+
+<h4>2.4.2.1 确定攻击顺序
+    <span class="en">Determining attack order</span>
+</h4>
+
+<p>面对多个敌人时，攻击顺序很重要！在第 7b 关"高举之剑"中，三个敌人 Rig、Gurt、Ack 从不同方向靠近。按照他们<strong>到达的先后顺序</strong>攻击，可以减少挨打次数：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 按到达顺序攻击，减少受伤</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Rig"</span><span class="punc">)</span>     <span class="cmt"># 先打最近的</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Rig"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Gurt"</span><span class="punc">)</span>    <span class="cmt"># 再打第二个</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Gurt"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ack"</span><span class="punc">)</span>     <span class="cmt"># 最后打第三个</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ack"</span><span class="punc">)</span></pre>
+</div>
+
+<h4>2.4.2.2 移动到攻击范围内
+    <span class="en">Moving within attack range</span>
+</h4>
+
+<p>英雄不能隔空攻击——必须先走到敌人旁边！在第 7 关中，塔林需要先 <code>moveRight()</code> 走到 Brak 面前，才能 <code>attack("Brak")</code>。</p>
+
+<h4>2.4.2.3 先移动后攻击的模式
+    <span class="en">Pattern: move then attack</span>
+</h4>
+
+<p>这是第 7–9 关最常用的<span class="keyword">代码模式</span>：<strong>移动 → 攻击 → 攻击 → 移动 → 攻击 → 攻击……</strong></p>
+
+<p>第 9 关"睡眠时刻"是这个模式的综合运用：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>        <span class="cmt"># 移动到 Ursa 面前</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ursa"</span><span class="punc">)</span>     <span class="cmt"># 攻击！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ursa"</span><span class="punc">)</span>     <span class="cmt"># 再攻击！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveDown</span><span class="punc">()</span>          <span class="cmt"># 移动到下一个区域</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveLeft</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>         <span class="cmt"># 继续移动</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveUp</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>           <span class="cmt"># 到 Rexxar 面前</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Rexxar"</span><span class="punc">)</span>   <span class="cmt"># 攻击！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Rexxar"</span><span class="punc">)</span>   <span class="cmt"># 再攻击！</span></pre>
+</div>
+
+<h4>2.4.2.4 优先级判断
+    <span class="en">Priority judgment：先打哪个敌人</span>
+</h4>
+
+<p>当路线上有多个敌人时，通常的策略是：先打<strong>挡路的</strong>敌人（不打掉就过不去），然后打<strong>近的</strong>敌人（减少来回走的路程）。</p>
+
+<!-- ==================== 2.5 ==================== -->
+<div class="section-header" id="section-2-5">
+    <h2>2.5 hero.say() 方法</h2>
+    <div class="en-title">The hero.say() Method</div>
+</div>
+
+<h3 id="sec-2-5-1">2.5.1 say 方法的使用（Using the say Method）</h3>
+
+<h4>2.5.1.1 语法：hero.say("内容")
+    <span class="en">Syntax: hero.say("content")</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-5-1-1_say_syntax.png" alt="say方法语法">
+    <div class="caption">图13：hero.say() 让英雄在游戏中说出对话气泡</div>
+</div>
+
+<p><code>hero.say()</code> 让英雄在游戏画面中"说话"——就像漫画里的对话气泡：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Hello!"</span><span class="punc">)</span>          <span class="cmt"># 安雅说："Hello!"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"开门芝麻！"</span><span class="punc">)</span>      <span class="cmt"># 塔林说出密码</span></pre>
+</div>
+
+<h4>2.5.1.2 参数为字符串
+    <span class="en">Argument is a string</span>
+</h4>
+
+<p>和 <code>attack</code> 一样，<code>say</code> 的参数也是字符串。不同的是，<code>attack</code> 的字符串是敌人名字，<code>say</code> 的字符串是英雄要说出的话——可以是任何内容。</p>
+
+<h4>2.5.1.3 say 方法作为输出/交互方式
+    <span class="en">say as output/interaction</span>
+</h4>
+
+<p><code>say</code> 是游戏中英雄与世界互动的方式之一。它不仅能显示文字，还能用来调试——当你不确定代码执行到了哪里时，加一句 <code>hero.say("到这里了")</code> 就能验证。</p>
+
+<h4>2.5.1.4 say 方法触发游戏事件
+    <span class="en">say triggering game events，如开门、招募</span>
+</h4>
+
+<p>在某些关卡中，<code>hero.say()</code> 不只是"说话"——它可以触发特殊事件。比如对着门卫说出正确的密码，门就会打开；或者对着友军说"跟我来"，他们就会跟随你。这让 <code>say</code> 方法不仅仅是输出工具，更是一种<strong>与游戏世界互动</strong>的手段。</p>
+
+<!-- ==================== 2.6 ==================== -->
+<div class="section-header" id="section-2-6">
+    <h2>2.6 错误与调试</h2>
+    <div class="en-title">Bugs and Debugging</div>
+</div>
+
+<h3 id="sec-2-6-1">2.6.1 Bug 的概念（The Concept of Bugs）</h3>
+
+<h4>2.6.1.1 Bug 的定义：程序中的错误
+    <span class="en">An error in a program</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-6-1-1_bug_definition.png" alt="Bug的定义">
+    <div class="caption">图14：Bug 就是让程序出问题的"小虫子"</div>
+</div>
+
+<p><span class="keyword">Bug</span> 就是程序中的错误——任何导致程序不能正常工作的问题都叫 Bug。在 扣哒世界 中，Bug 可能导致安雅走错路、攻击失败、或者代码根本无法运行。</p>
+
+<h4>2.6.1.2 Bug 一词的历史由来
+    <span class="en">Historical origin of the term "bug"</span>
+</h4>
+
+<p>1947 年，计算机科学家 Grace Hopper 的团队在调试一台大型计算机时，发现了一只飞蛾卡在了继电器中导致故障。他们把这只蛾子粘在日志本上并写道："First actual case of bug being found."（找到了第一个真正的 bug。）从此，"Bug"就成了程序错误的代名词。</p>
+
+<div class="info-box">
+    <span class="info-label">有趣的事实：</span>Debug（调试）的字面意思就是"去除虫子"——把程序里的"小虫子"找出来消灭掉！
+</div>
+
+<h4>2.6.1.3 Bug 的类型概述
+    <span class="en">Overview of bug types</span>
+</h4>
+
+<p>Bug 主要分为三大类：<span class="keyword">语法错误</span>（代码写法不对）、<span class="keyword">运行时错误</span>（运行中崩溃）、<span class="keyword">逻辑错误</span>（不崩溃但结果不对）。下面一一介绍。</p>
+
+<!-- ===== 2.6.2 ===== -->
+<h3 id="sec-2-6-2">2.6.2 错误类型（Types of Errors）</h3>
+
+<h4>2.6.2.1 语法错误（Syntax errors）：代码不符合语言规则
+    <span class="en">Code that violates language rules</span>
+</h4>
+
+
+<p><span class="keyword">语法错误</span>是最常见的错误类型——代码不符合 Python 的语法规则，程序<strong>根本无法启动</strong>。就像你写了一句话但标点全乱了，别人读不懂。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="err">"Brak</span><span class="punc">)</span>     <span class="cmt"># ✗ 语法错误：缺少结尾引号</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span>     <span class="cmt"># ✗ 语法错误：缺少右括号</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="err">atack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># ✗ 拼写错误：atack → attack</span></pre>
+</div>
+
+<h4>2.6.2.2 运行时错误（Runtime errors）：执行时崩溃
+    <span class="en">Crashes during execution</span>
+</h4>
+
+<p><span class="keyword">运行时错误</span>是代码语法没问题，但执行到某一行时出了问题。比如攻击一个不存在的目标：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ghost"</span><span class="punc">)</span>   <span class="cmt"># 运行时错误：没有叫 Ghost 的敌人！</span></pre>
+</div>
+
+<h4>2.6.2.3 逻辑错误（Logic errors）：结果不符合预期
+    <span class="en">Results don't match expectations</span>
+</h4>
+
+<p><span class="keyword">逻辑错误</span>是最棘手的——代码能运行，但结果不是你想要的。比如只攻击了 Brak 一次就走开了：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>    <span class="cmt"># 只打了一次——Brak 还活着！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>       <span class="cmt"># 就走了……然后被 Brak 追上打死了</span></pre>
+</div>
+
+<p>代码没有报错，但塔林挂了——这就是逻辑错误。</p>
+
+<h4>2.6.2.4 拼写错误
+    <span class="en">Spelling/typo errors</span>
+</h4>
+
+<p>把 <code>attack</code> 写成 <code>atack</code>、把 <code>"Brak"</code> 写成 <code>"Brek"</code>——少一个字母或拼错都会导致 Bug。</p>
+
+<h4>2.6.2.5 大小写错误
+    <span class="en">Case errors</span>
+</h4>
+
+<p>把 <code>"Brak"</code> 写成 <code>"brak"</code>——只是大小写不同就找不到目标了。</p>
+
+<h4>2.6.2.6 缺少引号错误
+    <span class="en">Missing quotes errors</span>
+</h4>
+
+<p>写了 <code>hero.attack(Brak)</code> 忘了加引号——Python 以为 Brak 是变量名，找不到就报错。</p>
+
+<!-- ===== 2.6.3 ===== -->
+<h3 id="sec-2-6-3">2.6.3 调试的概念（The Concept of Debugging）</h3>
+
+<h4>2.6.3.1 调试的定义：找到并修复错误的过程
+    <span class="en">Finding and fixing errors</span>
+</h4>
+
+<p><span class="keyword">调试（Debugging）</span>就是发现、定位并修复 Bug 的过程。它是编程中最重要的技能之一——没有人能写出完全没有 Bug 的代码（至少第一遍不行）！</p>
+
+<h4>2.6.3.2 调试是编程的核心技能之一
+    <span class="en">Debugging is a core programming skill</span>
+</h4>
+
+<p>专业程序员花在调试上的时间可能比写新代码还多！学会高效地调试，就是学会做一个优秀的"代码侦探"。</p>
+
+<h4>2.6.3.3 调试的基本步骤
+    <span class="en">Discover → Locate → Analyze → Fix → Verify</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-6-3-3_debug_steps.png" alt="调试步骤">
+    <div class="caption">图16：调试五步法——发现、定位、分析、修复、验证</div>
+</div>
+
+<p>调试就像当侦探破案：</p>
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>1️⃣ <strong>发现</strong>：意识到有问题（安雅没走到宝石那里！）</li>
+    <li>2️⃣ <strong>定位</strong>：找到问题在哪一行（是第 3 行走错方向了？）</li>
+    <li>3️⃣ <strong>分析</strong>：理解为什么错（哦！我写成了 moveLeft 而不是 moveRight）</li>
+    <li>4️⃣ <strong>修复</strong>：改正代码（把 moveLeft 改成 moveRight）</li>
+    <li>5️⃣ <strong>验证</strong>：重新运行，确认问题解决了</li>
+</ul>
+
+<!-- ===== 2.6.4 ===== -->
+<h3 id="sec-2-6-4">2.6.4 调试技巧（Debugging Techniques）</h3>
+
+<h4>2.6.4.1 仔细阅读错误信息
+    <span class="en">Read error messages carefully</span>
+</h4>
+
+<p>当 Python 报错时，它会告诉你：错误类型（SyntaxError? NameError?）和错误位置（第几行）。别怕看英文——错误信息是你的"破案线索"！</p>
+
+<h4>2.6.4.2 检查拼写和大小写
+    <span class="en">Check spelling and case</span>
+</h4>
+
+<p>90% 的初学者错误是拼写和大小写问题。检查清单：<code>hero</code>（全小写？）、方法名（camelCase？）、敌人名字（首字母大写？每个字母都对？）</p>
+
+<h4>2.6.4.3 检查引号是否配对
+    <span class="en">Check for matching quotes</span>
+</h4>
+
+<p>每个字符串的开头引号和结尾引号是否匹配？有没有忘记其中一个？</p>
+
+<h4>2.6.4.4 检查括号是否配对
+    <span class="en">Check for matching parentheses</span>
+</h4>
+
+<p>每个 <code>(</code> 都必须有对应的 <code>)</code>。试试数一下：左括号和右括号的数量应该相等。</p>
+
+<h4>2.6.4.5 逐行检查代码
+    <span class="en">Check code line by line</span>
+</h4>
+
+<p>用手指或笔指着代码，一行一行地读——在脑中"模拟"英雄的行为。这个方法简单但非常有效。</p>
+
+<h4>2.6.4.6 使用回放/运行观察结果
+    <span class="en">Use playback/run to observe results</span>
+</h4>
+
+<p>在 扣哒世界 中，拖动回放进度条可以逐步观察英雄的行为，看看他在哪一步开始出错的。</p>
+
+<h4>2.6.4.7 删除或注释掉可疑代码
+    <span class="en">Comment out suspicious code</span>
+</h4>
+
+<p>不确定哪一行有问题？在可疑的代码前面加 <code>#</code> 把它"临时禁用"，看看去掉它后程序是否正常。这是一种排除法。</p>
+
+<h4>2.6.4.8 与预期结果对比
+    <span class="en">Compare with expected results</span>
+</h4>
+
+<p>问自己："我期望英雄做什么？"和"英雄实际做了什么？"找到差异，就找到了 Bug。</p>
+
+<h4>2.6.4.9 小黄鸭调试法
+    <span class="en">Rubber duck debugging</span>
+</h4>
+
+<p>把你的代码逐行"解释"给一只小黄鸭（或任何物品）听。在解释的过程中，你往往会突然发现"等等，这行不对！"——这就是<span class="keyword">小黄鸭调试法</span>。听起来很傻，但真的很有效！</p>
+
+<!-- ===== 2.6.5 ===== -->
+<h3 id="sec-2-6-5">2.6.5 常见初学者错误（Common Beginner Mistakes）</h3>
+
+<h4>2.6.5.1 忘记调用方法的括号
+    <span class="en">Forgetting parentheses when calling methods</span>
+</h4>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>   <span class="cmt"># ✓ 正确</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span> <span class="str">"Brak"</span>    <span class="cmt"># ✗ 错误：忘了括号！</span></pre>
+</div>
+
+<h4>2.6.5.2 字符串忘记加引号
+    <span class="en">Forgetting quotes around strings</span>
+</h4>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brak"</span><span class="punc">)</span>   <span class="cmt"># ✓ 正确</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>Brak<span class="punc">)</span>      <span class="cmt"># ✗ 错误：Brak 没引号！</span></pre>
+</div>
+
+<h4>2.6.5.3 变量名拼写不一致
+    <span class="en">Inconsistent variable name spelling</span>
+</h4>
+
+<p>把 <code>hero</code> 写成 <code>horo</code>、把 <code>attack</code> 写成 <code>atack</code>——差一个字母就出错。</p>
+
+<h4>2.6.5.4 缩进错误
+    <span class="en">Indentation errors</span>
+</h4>
+
+<p>在前 9 关中所有代码都是顶格写的（不需要缩进）。如果你不小心在某行前面加了空格，Python 可能会报 <code>IndentationError</code>。</p>
+
+<h4>2.6.5.5 语句顺序错误
+    <span class="en">Wrong statement order</span>
+</h4>
+
+<p>先攻击后移动（但还没走到攻击范围）、忘记攻击第二次就走开了——这些都是逻辑上的顺序错误。</p>
+
+<div class="remember-box">
+    <span class="remember-label">调试心态：</span>犯错是正常的！每个程序员都在不断地写 Bug、修 Bug。重要的是学会高效地找到和修复它们。不要灰心，多试几次一定能过关！
+</div>
+
+<!-- ==================== 2.7 ==================== -->
+<div class="section-header" id="section-2-7">
+    <h2>2.7 顺序结构的正式定义</h2>
+    <div class="en-title">Formal Definition of Sequential Structure</div>
+</div>
+
+<h3 id="sec-2-7-1">2.7.1 三种基本控制结构（Three Basic Control Structures）</h3>
+
+<h4>2.7.1.1 顺序结构（Sequence）：按顺序执行
+    <span class="en">Execute in order</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-7-1-1_three_structures.png" alt="三种控制结构">
+    <div class="caption">图17：所有程序都由顺序、选择、循环三种结构组合而成</div>
+</div>
+
+<p><span class="keyword-green">顺序结构</span>就是代码从上到下、一行一行执行——这是第 1–9 关中你一直在使用的方式。没有跳转、没有重复、没有分支。</p>
+
+<h4>2.7.1.2 选择/分支结构（Selection/branching）：预告
+    <span class="en">Preview of selection structure</span>
+</h4>
+
+<p><span class="keyword">选择结构</span>能让程序根据条件做不同的事情。在未来关卡中你会学到 <code>if</code>/<code>else</code>："如果有敌人就攻击，否则继续走"。</p>
+
+<h4>2.7.1.3 循环/迭代结构（Iteration/looping）：预告
+    <span class="en">Preview of iteration structure</span>
+</h4>
+
+<p><span class="keyword">循环结构</span>能让程序重复执行某段代码。下一单元就会学到 <code>while True:</code>——让英雄不断巡逻、持续攻击，不用手动写几百行重复代码！</p>
+
+<h4>2.7.1.4 AP CSP：所有算法由这三种结构构建
+    <span class="en">All algorithms built from these three</span>
+</h4>
+
+<p>AP 计算机科学原理课程明确指出：世界上所有的计算机程序——从简单的游戏到复杂的 AI——都是由这三种结构<strong>组合嵌套</strong>而成的。掌握了它们，你就掌握了编程的核心骨架。</p>
+
+<h4>2.7.1.5 AQA A Level：三种组合原则
+    <span class="en">Three combining principles</span>
+</h4>
+
+<p>英国 A Level 计算机科学课程也把这三种结构作为编程基础的核心教学内容。无论哪个国家的 CS 教育体系，这三种结构都是必修的核心知识。</p>
+
+<!-- ===== 2.7.2 ===== -->
+<h3 id="sec-2-7-2">2.7.2 顺序结构的应用（Applications of Sequential Structure）</h3>
+
+<h4>2.7.2.1 步骤明确的任务
+    <span class="en">Tasks with clear steps</span>
+</h4>
+
+<p>顺序结构最适合处理<strong>步骤固定、不需要判断</strong>的任务。第 7–9 关的每一关都是这种类型：你已经知道所有敌人的位置和名字，只需要按照正确顺序写出指令。</p>
+
+<h4>2.7.2.2 食谱类比
+    <span class="en">Recipe analogy</span>
+</h4>
+
+<p>做菜就是典型的顺序结构：先洗菜 → 切菜 → 热油 → 下锅 → 翻炒 → 调味 → 出锅。每步都必须按顺序来，跳过任何一步都可能"翻车"。</p>
+
+<h4>2.7.2.3 导航指令类比
+    <span class="en">Navigation directions analogy</span>
+</h4>
+
+<p>GPS 给你的路线指示也是顺序结构："直行200米 → 右转 → 直行500米 → 到达目的地"。扣哒世界 中的代码就像英雄的 GPS！</p>
+
+<h4>2.7.2.4 顺序结构的局限性
+    <span class="en">Limitations of pure sequential structure</span>
+</h4>
+
+<p>纯顺序结构有一个大问题：如果敌人数量不固定怎么办？如果你不确定该走哪条路怎么办？这些情况需要循环和条件判断来解决——这就是下一单元的内容！</p>
+
+<!-- ==================== 2.8 ==================== -->
+<div class="section-header" id="section-2-8">
+    <h2>2.8 本单元相关函数/方法总结</h2>
+    <div class="en-title">Functions/Methods Summary for This Unit</div>
+</div>
+
+<h3 id="sec-2-8-1">2.8.1 新增方法列表（New Methods Introduced）</h3>
+
+<h4>2.8.1.1 hero.attack(target) —— 攻击指定目标
+    <span class="en">Attack a specified target</span>
+</h4>
+
+<table class="styled-table">
+    <thead><tr><th>项目</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><strong>方法名</strong></td><td><code>attack</code></td></tr>
+        <tr><td><strong>所属对象</strong></td><td><code>hero</code></td></tr>
+        <tr><td><strong>参数</strong></td><td>字符串类型，敌人的名称（如 <code>"Brak"</code>）</td></tr>
+        <tr><td><strong>效果</strong></td><td>英雄对指定目标发起一次攻击</td></tr>
+        <tr><td><strong>注意事项</strong></td><td>需在攻击范围内；矮人需攻击2次</td></tr>
+    </tbody>
+</table>
+
+<h4>2.8.1.2 hero.say(message) —— 说出信息
+    <span class="en">Say a message</span>
+</h4>
+
+<table class="styled-table">
+    <thead><tr><th>项目</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><strong>方法名</strong></td><td><code>say</code></td></tr>
+        <tr><td><strong>所属对象</strong></td><td><code>hero</code></td></tr>
+        <tr><td><strong>参数</strong></td><td>字符串类型，要说的内容（如 <code>"Hello"</code>）</td></tr>
+        <tr><td><strong>效果</strong></td><td>英雄在游戏中显示对话气泡；可能触发事件</td></tr>
+        <tr><td><strong>注意事项</strong></td><td>内容为字符串，需要引号包围</td></tr>
+    </tbody>
+</table>
+
+<!-- ===== 2.8.2 ===== -->
+<h3 id="sec-2-8-2">2.8.2 Python 内置函数预告（以后会学到，现在先了解）</h3>
+
+<h4>2.8.2.1 print() —— 输出到控制台
+    <span class="en">Output to console</span>
+</h4>
+
+<p><code>print()</code> 在传统 Python 开发中是最常用的输出方式。它把信息显示在终端/控制台中。虽然 扣哒世界 中主要用 <code>hero.say()</code>，但 <code>print()</code> 在后续课程中会频繁出现。</p>
+
+<h4>2.8.2.2 type() —— 查看数据类型
+    <span class="en">Check data type</span>
+</h4>
+
+<p><code>type("Brak")</code> 返回 <code>&lt;class 'str'&gt;</code>，告诉你 "Brak" 是字符串类型。这是个很好的"身份鉴定"工具。</p>
+
+<h4>2.8.2.3 len() —— 获取长度
+    <span class="en">Get length</span>
+</h4>
+
+<p><code>len("Brak")</code> 返回 <code>4</code>——表示这个字符串有 4 个字符。在后续关卡中处理数组和列表时，<code>len()</code> 会非常有用。</p>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <div class="figure">
+        <img src="images/2-summary_card.png" alt="单元总结">
+        <div class="caption">图18：第二单元核心概念全景图</div>
+    </div>
+
+    <p>恭喜你完成了第二单元！来看第 9 关"睡眠时刻"的完整解法，回顾所有核心概念：</p>
+
+    <div class="code-block">
+        <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 这是一个组合挑战关卡。</span>
+<span class="cmt"># 打败食人魔，收集宝石，并逃到红色X处</span>
+<span class="cmt"># 使用字符串和移动参数！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>          <span class="cmt"># 移动参数（整数）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ursa"</span><span class="punc">)</span>       <span class="cmt"># 字符串参数（目标名称）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Ursa"</span><span class="punc">)</span>       <span class="cmt"># 攻击两次消灭矮人</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveDown</span><span class="punc">()</span>            <span class="cmt"># 顺序执行——一步步向前</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveLeft</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>           <span class="cmt"># 路径规划</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveUp</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>             <span class="cmt"># 绕过障碍</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Rexxar"</span><span class="punc">)</span>     <span class="cmt"># 注意大小写！R 大写</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Rexxar"</span><span class="punc">)</span>     <span class="cmt"># 攻击两次</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">()</span>          <span class="cmt"># 继续前进</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brack"</span><span class="punc">)</span>      <span class="cmt"># 第三个敌人</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span><span class="str">"Brack"</span><span class="punc">)</span>      <span class="cmt"># 消灭！</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveRight</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>         <span class="cmt"># 到达红色X——通关！🎉</span></pre>
+    </div>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键知识</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>程序结构</td><td>程序由语句组成，逐行执行</td><td>第7–9关</td></tr>
+            <tr><td>字符串</td><td>用引号包围的文字数据：<code>"Brak"</code></td><td>第7关</td></tr>
+            <tr><td>大小写敏感</td><td><code>"Brak"</code> ≠ <code>"brak"</code></td><td>第7关</td></tr>
+            <tr><td>字符串作为参数</td><td><code>hero.attack("目标名")</code></td><td>第7关</td></tr>
+            <tr><td>字符串 vs 标识符</td><td>有引号=文字，无引号=变量名</td><td>第7关</td></tr>
+            <tr><td>注释</td><td><code># 给人看的说明</code></td><td>第7–9关</td></tr>
+            <tr><td>hero.attack()</td><td>攻击指定名称的敌人</td><td>第7关</td></tr>
+            <tr><td>hero.say()</td><td>说出指定内容</td><td>概念引入</td></tr>
+            <tr><td>Bug 与调试</td><td>发现→定位→分析→修复→验证</td><td>全部关卡</td></tr>
+            <tr><td>顺序结构</td><td>三种控制结构之一（最基本）</td><td>全部关卡</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        安雅已经学会了用名字精准打击敌人，塔林也掌握了阅读注释获取情报的技能。<br>
+        下一站：<strong>第三单元</strong>——循环结构 <code>while True:</code>，让英雄拥有无限战斗力！⚔️
+    </p>
+</div>
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #aaa; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>CodeCombat 编程知识 · 计算机科学入门（暗影地牢）：第二单元</p>
+    <p style="margin-top:8px; color:#666;">扣哒世界（CodeCombat ）教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
