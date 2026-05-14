@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>扣哒宇宙 | 开发者作品集</title>
+    <style>
+        :root {
+            --bg-body: #0a0a0a;
+            --text-white: #ffffff;
+            --text-gray: #b8b8b8;
+            --gold: #FFD700;
+        }
+
+        body { 
+            margin: 0; background-color: var(--bg-body); color: var(--text-white); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 顶部菜单 */
+        .nav-bar { 
+            position: absolute; top: 0; width: 100%; padding: 30px 50px; 
+            z-index: 100; pointer-events: none;
+        }
+        .nav-bar h1 { 
+            margin: 0; font-size: 26px; letter-spacing: 2px; 
+            text-transform: uppercase; color: var(--gold); 
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
+        }
+
+        /* 全屏轮播图 */
+        .hero-container { position: relative; width: 100%; height: 75vh; overflow: hidden; }
+        .hero-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; }
+        .hero-slide.active { opacity: 1; }
+        .hero-slide img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* 轮播图文案：精简版 */
+        .hero-caption {
+            position: absolute; bottom: 80px; left: 80px;
+            max-width: 600px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+        }
+        .hero-caption h2 { 
+            font-size: 42px; margin: 0 0 10px 0; 
+            color: #FFFFFF !important;
+        }
+        .hero-caption p { font-size: 16px; color: var(--text-gray); margin: 0; }
+
+        /* 轮播切换按钮 */
+        .arrow { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            padding: 20px; cursor: pointer; font-size: 30px; 
+            background: rgba(255,255,255,0.1); border-radius: 5px; 
+            transition: 0.3s; z-index: 50; 
+        }
+        .arrow:hover { background: rgba(255,255,255,0.3); }
+        .arrow.left { left: 20px; }
+        .arrow.right { right: 20px; }
+
+        /* 项目列表 */
+        .grid-container { 
+            max-width: 1200px; margin: 50px auto; 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding: 0 20px;
+        }
+        .game-card { 
+            background: #1a1a1a; border-radius: 6px; overflow: hidden; 
+            transition: 0.4s; cursor: pointer; text-decoration: none; color: inherit;
+        }
+        .game-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); background: #252525; }
+        .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .content { padding: 20px; }
+        .content h3 { margin: 0 0 10px 0; font-size: 20px; color: var(--text-white); }
+        .content p { font-size: 14px; color: var(--text-gray); line-height: 1.5; }
+        .dev-badge { font-size: 12px; font-weight: bold; color: #fff; background: #333; padding: 3px 8px; border-radius: 3px; }
+
+        /* 页脚 */
+        .footer { text-align: center; padding: 60px 20px; color: #555; font-size: 14px; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar"><h1>扣哒宇宙学生作品</h1></div>
+
+    <div class="hero-container" id="hero-wrapper">
+        </div>
+    <div class="arrow left" onclick="plusSlides(-1)">❮</div>
+    <div class="arrow right" onclick="plusSlides(1)">❯</div>
+
+    <div class="grid-container" id="grid"></div>
+
+    <div class="footer">
+        扣哒宇宙 —— 扣哒世界面向青少年的生成式人工智能教学平台
+    </div>
+
+    <script>
+        const projects = [
+            { id: '3dgongyuan', name: '3D 城市冒险', dev: '李同学', shortDesc: '沉浸式都市跑酷，挑战极限高度。', desc: '在这个高自由度的开放世界中，体验极具张力的城市跑酷。玩家将穿梭于错综复杂的摩天大楼与街巷，通过精确的跳跃与攀爬，挑战极限速度与高度。这不仅是视觉的冒险，更是对物理交互的极致考验，带你领略未来城市的每一个角落。', file: '3dgongyuan.html', img: '3dgongyuan/3dgongyuan.png' },
+            { id: '3dkongbubieshu', name: '3D 恐怖别墅', dev: '郝同学', shortDesc: '幽闭空间内的悬疑解谜冒险。', desc: '踏入这座被遗忘的深宅大院，在这场极具沉浸感的心理惊悚冒险中，每一道暗影都隐藏着秘密。通过精细的场景渲染与动态光影，玩家需在幽闭的空间内寻找线索，解开重重谜题，在恐惧与解谜的边缘挑战你的逻辑思考能力。', file: '3dkongbubieshu.html', img: '3dkongbubieshu/3dkongbubieshu.png' },
+            { id: '3dxiangsufeng', name: '3D 像素方块', dev: '陈同学', shortDesc: '无限像素沙盒，构建无限奇迹。', desc: '进入一个由无限方块组成的数字沙盒，这里不仅是简单的构建，更是想象力的画布。无论是宏伟的建筑还是复杂的地下迷宫，你都可以自由摆放与创造。结合生存挑战与资源采集，在像素构建的 3D 世界中，打造属于你的独一无二的奇迹空间。', file: '3dxiangsufeng.html', img: '3dxiangsufeng/3dxiangsufeng.png' },
+            { id: 'chengyugushi', name: '成语奇缘', dev: '郭同学', shortDesc: '益智闯关，沉浸式成语学习。', desc: '这不仅仅是一个益智游戏，更是通往传统文化智慧殿堂的钥匙。精心设计的成语填字谜题，涵盖 1-6 年级核心词汇。通过趣味十足的交互界面，让抽象的成语变得具象可感，在快乐闯关的同时，不仅提升了文学素养，更极大地锻炼了记忆力与反应速度。', file: 'chengyugushi.html', img: 'chengyugushi/chengyugushi.png' },
+            { id: 'liuxingtiangong', name: '流形天工', dev: '包同学', shortDesc: '3D 几何互动，探索空间数学。', desc: '告别枯燥的平面几何，进入三维空间下的数学实验场。通过直观的旋转、缩放与拆解，全方位剖析 1-6 年级数学课中的几何图形构成。这款工具不仅能帮助你构建牢固的空间想象力，更能让你在互动中发现数学的结构之美。', file: 'liuxingtiangong.html', img: 'liuxingtiangong/liuxingtiangong.png' },
+            { id: 'guodongpaidui', name: '果冻派对', dev: '刘同学', shortDesc: '快节奏双人竞技，欢乐乱斗。', desc: '准备好迎接一场软萌又激烈的竞技了吗？控制形态各异的果冻小人，在多变的高难度平台中展开弹射与碰撞。这款双人竞技游戏完美结合了物理反馈与平台跳跃机制，考验反应速度与默契配合。快节奏的对局，让你与朋友在欢声笑语中分出胜负。', file: 'guodongpaidui.html', img: 'guodongpaidui/guodongpaidui.png' }
+        ];
+
+        let slideIndex = 0;
+        const heroWrapper = document.getElementById('hero-wrapper');
+        const grid = document.getElementById('grid');
+
+        projects.forEach((p, i) => {
+            // 轮播图修改为 div，不再跳转
+            heroWrapper.innerHTML += `
+                <div class="hero-slide ${i===0?'active':''}">
+                    <img src="${p.img}">
+                    <div class="hero-caption">
+                        <h2>${p.name}</h2>
+                        <p>${p.shortDesc}</p>
+                    </div>
+                </div>
+            `;
+            // 下方游戏卡片跳转，且使用长描述
+            grid.innerHTML += `
+                <a href="${p.id}/${p.file}" class="game-card">
+                    <img src="${p.img}">
+                    <div class="content">
+                        <span class="dev-badge">${p.dev}</span>
+                        <h3>${p.name}</h3>
+                        <p>${p.desc}</p>
+                    </div>
+                </a>
+            `;
+        });
+
+        function plusSlides(n) {
+            const slides = document.getElementsByClassName("hero-slide");
+            slides[slideIndex].classList.remove('active');
+            slideIndex = (slideIndex + n + slides.length) % slides.length;
+            slides[slideIndex].classList.add('active');
+        }
+
+        setInterval(() => plusSlides(1), 5000);
+    </script>
+</body>
+</html>
