@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>果冻恶魔大跳跳小人 - 全屏版</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        /* 文字指引叠加在游戏之上 */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            pointer-events: none; /* 让鼠标点击穿透到canvas */
+            display: flex;
+            justify-content: space-between;
+            font-family: "Microsoft YaHei", sans-serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        .instruction-box {
+            background: rgba(22, 33, 62, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e94560;
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .p1-color { color: #4eccaf; font-weight: bold; }
+        .p2-color { color: #e94560; font-weight: bold; }
+        kbd {
+            background: #333;
+            border: 1px solid #555;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <div class="instruction-box">
+            <span class="p1-color">🔵 玩家 1 (WASD):</span><br>
+            移动: <kbd>A</kbd> <kbd>D</kbd> | 跳跃: <kbd>W</kbd> (二段跳)
+        </div>
+        <div class="instruction-box" style="text-align: right; border-left: 0; border-right: 4px solid #e94560;">
+            <span class="p2-color">🔴 玩家 2 (方向键):</span><br>
+            移动: <kbd>←</kbd> <kbd>→</kbd> | 跳跃: <kbd>↑</kbd> (二段跳)<br>
+            <span style="font-size: 12px; opacity: 0.8;">按 <kbd>R</kbd> 重置关卡</span>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 动态设置全屏尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 游戏常量
+        const PLAYER_SIZE = 80;
+        const GRAVITY = 0.8;
+        const JUMP_STRENGTH = -14;
+        const MOVE_SPEED = 6;
+
+        // 资源加载
+        const images = {};
+        const imageFiles = {
+            p1L: 'al1.png', p1R: 'ar1.png',
+            p2L: 'al2.png', p2R: 'ar2.png',
+            bg: 'bg.png'
+        };
+
+        let bgPattern = null;
+        let imagesLoadedCount = 0;
+        for (let key in imageFiles) {
+            images[key] = new Image();
+            images[key].src = imageFiles[key];
+            images[key].onload = () => {
+                imagesLoadedCount++;
+                if (key === 'bg') {
+                    bgPattern = ctx.createPattern(images['bg'], 'repeat');
+                }
+            };
+        }
+
+        const keys = {};
+        window.onkeydown = (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === 'r' || e.key === 'R') resetGame();
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+        };
+        window.onkeyup = (e) => keys[e.key.toLowerCase()] = false;
+
+        class Player {
+            constructor(x, y, controls, color, imgs) {
+                this.startX = x;
+                this.startY = y;
+                this.x = x;
+                this.y = y;
+                this.w = PLAYER_SIZE;
+                this.h = PLAYER_SIZE;
+                this.vx = 0;
+                this.vy = 0;
+                this.jumps = 0;
+                this.maxJumps = 2;
+                this.controls = controls;
+                this.color = color;
+                this.imgs = imgs;
+                this.dir = 'R';
+                this.alive = true;
+                this.upPressed = false;
+            }
+
+            reset(x, y) {
+                this.x = x || this.startX;
+                this.y = y || this.startY;
+                this.vx = 0;
+                this.vy = 0;
+                this.alive = true;
+                this.jumps = 0;
+            }
+
+            update(platforms, traps, exits) {
+                if (!this.alive) return;
+
+                // 水平移动
+                this.vx = 0;
+                if (keys[this.controls.left]) { this.vx = -MOVE_SPEED; this.dir = 'L'; }
+                if (keys[this.controls.right]) { this.vx = MOVE_SPEED; this.dir = 'R'; }
+
+                // 跳跃
+                if (keys[this.controls.up] && !this.upPressed) {
+                    if (this.jumps < this.maxJumps) {
+                        this.vy = JUMP_STRENGTH;
+                        this.jumps++;
+                    }
+                    this.upPressed = true;
+                }
+                if (!keys[this.controls.up]) this.upPressed = false;
+
+                this.vy += GRAVITY;
+                this.x += this.vx;
+
+                // X轴碰撞
+                for (let p of platforms) {
+                    if (this.isColliding(p)) {
+                        if (this.vx > 0) this.x = p.x - this.w;
+                        if (this.vx < 0) this.x = p.x + p.w;
+                    }
+                }
+
+                this.y += this.vy;
+
+                // Y轴碰撞
+                for (let p of platforms) {
+                    if (this.isColliding(p)) {
+                        if (this.vy > 0) {
+                            this.y = p.y - this.h;
+                            this.vy = 0;
+                            this.jumps = 0;
+                        } else if (this.vy < 0) {
+                            this.y = p.y + p.h;
+                            this.vy = 0;
+                        }
+                    }
+                }
+
+                // 边界
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.w > canvas.width) this.x = canvas.width - this.w;
+                if (this.y < 0) { this.y = 0; this.vy = 0; }
+                if (this.y > canvas.height) this.alive = false; // 掉落死亡
+
+                for (let t of traps) {
+                    if (this.isColliding(t)) this.alive = false;
+                }
+
+                for (let e of exits) {
+                    if (this.isColliding(e)) return "WIN";
+                }
+            }
+
+            isColliding(obj) {
+                return this.x < obj.x + obj.w && this.x + this.w > obj.x &&
+                       this.y < obj.y + obj.h && this.y + this.h > obj.y;
+            }
+
+            draw() {
+                if (!this.alive) return;
+                const img = this.dir === 'L' ? images[this.imgs.L] : images[this.imgs.R];
+                if (img && img.complete && img.naturalWidth !== 0) {
+                    ctx.drawImage(img, this.x, this.y, this.w, this.h);
+                } else {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x, this.y, this.w, this.h);
+                }
+            }
+        }
+
+        let currentLevel = 1;
+        const maxLevel = 3;
+        let platforms = [], traps = [], exits = [];
+        let p1, p2;
+        let gameState = "PLAY";
+
+        function initLevel(lv) {
+            platforms = []; traps = []; exits = [];
+            const W = canvas.width;
+            const H = canvas.height;
+
+            // 地面：拉伸到全屏宽
+            platforms.push({x: 0, y: H - 40, w: W, h: 40});
+
+            // 关卡设计 (基于比例或中心定位)
+            const centerX = W / 2;
+            
+            if (lv === 1) {
+                platforms.push({x: centerX - 300, y: H - 150, w: 200, h: 20});
+                platforms.push({x: centerX + 100, y: H - 250, w: 200, h: 20});
+                platforms.push({x: centerX - 150, y: H - 350, w: 200, h: 20});
+                traps.push({x: centerX, y: H - 80, w: 40, h: 40});
+                exits.push({x: W - 100, y: H - 400, w: 40, h: 40});
+            } else if (lv === 2) {
+                for(let i=0; i<5; i++) {
+                    platforms.push({x: 100 + i*150, y: H - 150 - i*50, w: 100, h: 20});
+                    traps.push({x: 200 + i*150, y: H - 80, w: 40, h: 40});
+                }
+                exits.push({x: W - 100, y: 150, w: 40, h: 40});
+            } else if (lv === 3) {
+                platforms.push({x: 50, y: H-100, w: 100, h: 20});
+                for(let i=0; i<6; i++) {
+                    platforms.push({x: 150 + i*100, y: H - 150 - i*60, w: 80, h: 20});
+                    traps.push({x: centerX, y: H - 200 - i*40, w: 40, h: 40});
+                }
+                exits.push({x: W - 100, y: 100, w: 40, h: 40});
+            }
+
+            if (!p1) {
+                p1 = new Player(50, H - 100, {up:'w', left:'a', right:'d'}, '#4eccaf', {L:'p1L', R:'p1R'});
+                p2 = new Player(120, H - 100, {up:'arrowup', left:'arrowleft', right:'arrowright'}, '#e94560', {L:'p2L', R:'p2R'});
+            } else {
+                p1.reset(50, H - 100);
+                p2.reset(120, H - 100);
+            }
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            gameState = "PLAY";
+            initLevel(currentLevel);
+        }
+
+        function update() {
+            if (gameState !== "PLAY") return;
+
+            const r1 = p1.update(platforms, traps, exits);
+            const r2 = p2.update(platforms, traps, exits);
+
+            if (!p1.alive || !p2.alive) gameState = "OVER";
+            if (r1 === "WIN" || r2 === "WIN") {
+                if (currentLevel < maxLevel) {
+                    currentLevel++;
+                    initLevel(currentLevel);
+                } else {
+                    gameState = "FINISH";
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 绘制背景 (底层)
+            if (bgPattern) {
+                ctx.fillStyle = bgPattern;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = "#0f3460";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 2. 绘制关卡物件
+            ctx.fillStyle = "#2ecc71"; // 平台
+            platforms.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+            ctx.fillStyle = "#e74c3c"; // 陷阱
+            traps.forEach(t => ctx.fillRect(t.x, t.y, t.w, t.h));
+            ctx.fillStyle = "#f1c40f"; // 出口
+            exits.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
+
+            // 3. 绘制玩家 (在上层)
+            p1.draw();
+            p2.draw();
+
+            // 4. 状态文本 (无遮罩)
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24px Arial";
+            ctx.textAlign = "center";
+            if (gameState === "OVER") {
+                ctx.fillStyle = "#ff4d4d";
+                ctx.fillText("游戏结束! 按 R 重新开始", canvas.width / 2, canvas.height / 2);
+            } else if (gameState === "FINISH") {
+                ctx.fillStyle = "#f1c40f";
+                ctx.fillText("恭喜通关！你们太棒了！", canvas.width / 2, canvas.height / 2);
+            }
+            
+            // 顶部中间显示关卡数
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(`关卡: ${currentLevel} / ${maxLevel}`, canvas.width / 2, 35);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // 初始关卡
+        initLevel(currentLevel);
+        loop();
+    </script>
+</body>
+</html>
