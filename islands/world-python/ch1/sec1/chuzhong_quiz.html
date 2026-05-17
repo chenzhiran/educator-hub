@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编程小英雄挑战赛 - 终极试炼</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 --- */
+        :root {
+            --primary-color: #6C5CE7; 
+            --secondary-color: #A29BFE;
+            --bg-color: #DFE6E9;     
+            --card-bg: #FFFFFF;
+            --text-color: #2D3436;   
+            --en-text-color: #636e72; /* 英文专属柔和色 */
+            --correct-color: #00b894;
+            --wrong-color: #d63031;  
+            --accent-yellow: #fdcb6e;
+            
+            /* 代码高亮颜色 */
+            --code-bg: #2d2d2d;
+            --code-text: #ccc;
+            --code-kw: #cc99cd; 
+            --code-fn: #6196cc; 
+            --code-num: #f08d49; 
+            --code-str: #7ec699; 
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#b2bec3 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 (扩大区域以完整展示一题) --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #e1b12c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* 英文文本专用样式 */
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 题目中程序(代码)的专属样式：背景色、幼圆字体、加粗 --- */
+        .question-title code, .en-text code {
+            background-color: #f1f2f6; /* 浅灰色背景 */
+            font-family: 'YouYuan', '幼圆', monospace; /* 幼圆字体 */
+            font-weight: bold; /* 加粗显示 */
+            color: var(--primary-color); /* 主题色高亮 */
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 (改为垂直排列以适应中英双语) --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 单列布局，防止拥挤 */
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #ecf0f1;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #bdc3c7;
+            display: flex;
+            flex-direction: column; /* 允许中英文垂直排列 */
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        /* 选项中的代码区域：支持多行换行 */
+        .option-code {
+            font-family: 'Fira Code', monospace;
+            background: #f8f9fa;
+            color: #2d3436;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #dfe6e9;
+            white-space: pre-wrap; /* 关键修改：支持多行程序正确换行 */
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); /* 选中后英文颜色变白 */
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(255,255,255,0.2);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #aab0b3;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        /* --- 答题状态 --- */
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #00965e;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #c0392b;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #f1f2f6;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); }
+        .feedback-section.wrong { border-color: var(--wrong-color); }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: #2d3436;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* --- 下一题按钮 --- */
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #5649c0;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #e1b12c;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: #636e72; font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画定义 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 20</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+                </div>
+
+            <div class="options-grid" id="options-container">
+                </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+            </div>
+    </div>
+
+    <script>
+        // --- 题目数据 (完整20题，中英文严格分行) ---
+        const quizData = [
+            {
+                qZh: "1. 下面哪一项最准确地描述了计算机程序？",
+                qEn: "Which of the following most accurately describes a computer program?",
+                options: [
+                    { zh: "A. 一份按顺序排列的指令集合", en: "An ordered collection of instructions" },
+                    { zh: "B. 计算机的硬件组成部分", en: "A hardware component of the computer" },
+                    { zh: "C. 只能在游戏引擎中运行的脚本", en: "A script that only runs in game engines" },
+                    { zh: "D. 由0和1直接组成的机器语言", en: "Machine language composed directly of 0s and 1s" }
+                ],
+                correct: 0, 
+                descZh: "解析：程序是一组有序的指令集合，按照书写顺序逐行执行。它是写给计算机的“行动清单”，不限于游戏引擎，源代码也不是直接由0和1组成，而是经过解释器翻译。",
+                descEn: "Explanation: A program is an ordered set of instructions executed line by line. It's a 'to-do list' for the computer, not limited to game engines, and source code is translated rather than directly written in 0s and 1s."
+            },
+            {
+                qZh: "2. 在扣哒世界中，英雄对象的名字是什么？",
+                qEn: "In CodeCombat, what is the name of the hero object?",
+                options: [
+                    { zh: "A. Tharin", en: "" },
+                    { zh: "B. Anya", en: "" },
+                    { zh: "C. hero", en: "" },
+                    { zh: "D. player", en: "" }
+                ],
+                correct: 2,
+                descZh: "解析：无论你选择安雅还是塔林，在代码中英雄的名称都是 `hero`，这是扣哒世界预先设定好的对象标识符，不能随意更改。",
+                descEn: "Explanation: Whether you choose Anya or Tharin, the hero is identified as `hero` in the code. It is a pre-set object identifier that cannot be changed."
+            },
+            {
+                qZh: "3. 下面哪一项是“方法”的正确描述？",
+                qEn: "Which of the following correctly describes a \"method\"?",
+                options: [
+                    { zh: "A. 对象的属性，比如生命值", en: "An attribute of an object, such as health points" },
+                    { zh: "B. 对象能够执行的动作", en: "An action that an object can perform" },
+                    { zh: "C. 存储数据的一段内存", en: "A segment of memory that stores data" },
+                    { zh: "D. 只能在编辑器中使用的快捷操作", en: "A shortcut operation only available in the editor" }
+                ],
+                correct: 1,
+                descZh: "解析：方法是附属于对象的可执行动作，例如 `hero.moveRight()` 中的 `moveRight()` 就是英雄的一个方法。属性描述对象“是什么样的”，方法描述对象“会做什么”。",
+                descEn: "Explanation: A method is an executable action attached to an object. Properties describe what an object 'is like', while methods describe what an object 'can do'."
+            },
+            {
+                qZh: "4. 点表示法 <code>hero.moveDown()</code> 中的点号 <code>.</code> 表示什么？",
+                qEn: "In the dot notation <code>hero.moveDown()</code>, what does the dot <code>.</code> signify?",
+                options: [
+                    { zh: "A. 对象和方法是独立的", en: "The object and method are independent" },
+                    { zh: "B. 英雄的当前位置", en: "The hero’s current position" },
+                    { zh: "C. 访问对象的成员（方法或属性）", en: "Access a member (method or attribute) of the object" },
+                    { zh: "D. 代码的结束标志", en: "The end of a line of code" }
+                ],
+                correct: 2,
+                descZh: "解析：点号 `.` 的意思是“的”，表示后面的方法属于前面的对象。`hero.moveDown()` 可理解为“英雄的向下移动动作”。",
+                descEn: "Explanation: The dot `.` means 'belongs to', indicating the subsequent method belongs to the preceding object. It signifies accessing the object's members."
+            },
+            {
+                qZh: "5. <code>hero.moveRight(3)</code> 中的数字 <code>3</code> 是什么？",
+                qEn: "In <code>hero.moveRight(3)</code>, what is the number <code>3</code>?",
+                options: [
+                    { zh: "A. 方法名", en: "Method name" },
+                    { zh: "B. 属性", en: "Attribute" },
+                    { zh: "C. 参数", en: "Argument" },
+                    { zh: "D. 返回值", en: "Return value" }
+                ],
+                correct: 2,
+                descZh: "解析：圆括号内的 `3` 是传递给方法的参数，表示让英雄向右移动的步数。参数用于提供附加信息，改变方法的行为。",
+                descEn: "Explanation: The `3` inside the parentheses is the argument passed to the method, indicating how many steps to move. Arguments provide additional information."
+            },
+            {
+                qZh: "6. 使用参数 <code>hero.moveUp(3)</code> 相比于连续写三次 <code>hero.moveUp()</code> 的主要优点是什么？",
+                qEn: "What is the main advantage of using <code>hero.moveUp(3)</code> instead of writing <code>hero.moveUp()</code> three times?",
+                options: [
+                    { zh: "A. 英雄移动得更快", en: "The hero moves faster" },
+                    { zh: "B. 代码更简洁，减少语句数量", en: "The code is more concise and reduces the number of statements" },
+                    { zh: "C. 可以改变英雄的颜色", en: "It can change the hero’s color" },
+                    { zh: "D. 允许英雄穿墙", en: "It allows the hero to walk through walls" }
+                ],
+                correct: 1,
+                descZh: "解析：参数可以让一行代码完成多次移动，从而减少总语句数，使代码更简洁易读，效果与多次调用完全相同。",
+                descEn: "Explanation: Parameters allow a single line to perform multiple movements, reducing the total number of statements and making code more concise."
+            },
+            {
+                qZh: "7. 以下哪种数据类型最适合表示移动步数？",
+                qEn: "Which data type is most suitable for representing the number of steps to move?",
+                options: [
+                    { zh: "A. 字符串", en: "String" },
+                    { zh: "B. 布尔值", en: "Boolean" },
+                    { zh: "C. 整数", en: "Integer (int)" },
+                    { zh: "D. 列表", en: "List" }
+                ],
+                correct: 2,
+                descZh: "解析：移动步数是没有小数点的整数，例如 `1, 2, 3`，因此应该使用整数类型。字符串 `\"3\"` 是文字而非数字，不能直接作为步数使用。",
+                descEn: "Explanation: Movement steps are whole numbers without decimals, so integers should be used. Strings like `\"3\"` are text and cannot be used directly as steps."
+            },
+            {
+                qZh: "8. 如果想让英雄向下移动 2 步，以下哪行代码是正确的？",
+                qEn: "If you want the hero to move down by 2 steps, which line of code is correct?",
+                options: [
+                    { zh: "A.", en: "", code: "hero.moveDown(\"2\")" },
+                    { zh: "B.", en: "", code: "hero.moveDown(2)" },
+                    { zh: "C.", en: "", code: "hero.moveDown" },
+                    { zh: "D.", en: "", code: "hero.moveDown.2" }
+                ],
+                correct: 1,
+                descZh: "解析：参数必须放在圆括号内，并且步数参数应为整数 `2`，不能加引号。方括号或点号的写法都是错误的。",
+                descEn: "Explanation: Parameters must be placed inside parentheses, and the step argument should be an integer `2` without quotes."
+            },
+            {
+                qZh: "9. 执行 <code>hero.moveLeft(-1)</code> 后，英雄实际会怎样移动？",
+                qEn: "After executing <code>hero.moveLeft(-1)</code>, what will the hero actually do?",
+                options: [
+                    { zh: "A. 向左移动1步", en: "Move left by 1 step" },
+                    { zh: "B. 向右移动1步", en: "Move right by 1 step" },
+                    { zh: "C. 原地不动", en: "Stay in place" },
+                    { zh: "D. 向上移动1步", en: "Move up by 1 step" }
+                ],
+                correct: 1,
+                descZh: "解析：负数参数表示反方向移动。`moveLeft(-1)` 相当于“向左的反方向走1步”，也就是向右移动1步。",
+                descEn: "Explanation: A negative parameter means moving in the opposite direction. `moveLeft(-1)` equates to moving right by 1 step."
+            },
+            {
+                qZh: "10. 在扣哒世界的二维坐标系中，<code>hero.moveRight()</code> 会对英雄的坐标产生什么影响？",
+                qEn: "In CodeCombat’s 2D coordinate system, what effect does <code>hero.moveRight()</code> have on the hero’s coordinates?",
+                options: [
+                    { zh: "A. y 坐标增加", en: "The y-coordinate increases" },
+                    { zh: "B. y 坐标减少", en: "The y-coordinate decreases" },
+                    { zh: "C. x 坐标增加", en: "The x-coordinate increases" },
+                    { zh: "D. x 坐标减少", en: "The x-coordinate decreases" }
+                ],
+                correct: 2,
+                descZh: "解析：x 轴为水平方向，向右移动时 x 坐标增加。`moveUp()` 增加 y 坐标，`moveDown()` 减少 y 坐标。",
+                descEn: "Explanation: The x-axis is horizontal; moving right increases the x-coordinate. `moveUp()` increases y, and `moveDown()` decreases y."
+            },
+            {
+                qZh: "11. 顺序执行结构最重要的特点是什么？",
+                qEn: "What is the most important characteristic of sequential execution?",
+                options: [
+                    { zh: "A. 代码随机选择一行开始执行", en: "The code randomly selects a line to start executing" },
+                    { zh: "B. 代码从下往上执行", en: "The code executes from bottom to top" },
+                    { zh: "C. 代码按书写顺序从上到下逐行执行，且每行执行一次", en: "The code executes line by line from top to bottom, each line once" },
+                    { zh: "D. 代码会跳过所有错误行", en: "The code skips all lines with errors" }
+                ],
+                correct: 2,
+                descZh: "解析：顺序结构是最基本的控制结构，代码按照书写顺序从上到下逐行执行，前一行完成后才会执行下一行，每行只执行一次。",
+                descEn: "Explanation: Sequential execution means code runs strictly from top to bottom in the order it is written, line by line."
+            },
+            {
+                qZh: "12. 在“幽影守卫”关卡中，将整个通关过程拆解为“先走到雕像旁，再躲到雕像后面，然后从食人魔身后通过”，这种思维方式叫做什么？",
+                qEn: "In the \"Shadow Guard\" level, breaking the whole process into \"walk to the statue, hide behind it, then pass behind the ogre\" is an example of which thinking method?",
+                options: [
+                    { zh: "A. 代码优化", en: "Code optimization" },
+                    { zh: "B. 问题分解", en: "Problem decomposition" },
+                    { zh: "C. 数据类型转换", en: "Data type conversion" },
+                    { zh: "D. 坐标计算", en: "Coordinate calculation" }
+                ],
+                correct: 1,
+                descZh: "解析：将一个复杂的大问题（通过关卡）分解成多个小步骤（每一步移动），就是问题分解，它是计算思维的核心之一。",
+                descEn: "Explanation: Breaking down a complex problem into smaller, manageable steps is called problem decomposition."
+            },
+            {
+                qZh: "13. 以下哪一项是正确的方法调用？",
+                qEn: "Which of the following is a correct method call?",
+                options: [
+                    { zh: "A.", en: "", code: "Hero.moveRight()" },
+                    { zh: "B.", en: "", code: "hero.MoveRight()" },
+                    { zh: "C.", en: "", code: "hero.moveright()" },
+                    { zh: "D.", en: "", code: "hero.moveRight()" }
+                ],
+                correct: 3,
+                descZh: "解析：Python 区分大小写，`hero` 必须全小写，`moveRight` 采用驼峰命名法，即第一个单词小写，后面每个单词首字母大写。",
+                descEn: "Explanation: Python is case-sensitive. `hero` must be lowercase, and methods like `moveRight` use camelCase."
+            },
+            {
+                qZh: "14. 在 Python 中，数字 <code>3</code> 和带引号的 <code>\"3\"</code> 有什么区别？",
+                qEn: "In Python, what is the difference between the number <code>3</code> and the quoted <code>\"3\"</code>?",
+                options: [
+                    { zh: "A. 没有区别", en: "There is no difference" },
+                    { zh: "B. 3 是整数，\"3\" 是字符串", en: "3 is an integer, \"3\" is a string" },
+                    { zh: "C. 3 是字符串，\"3\" 是整数", en: "3 is a string, \"3\" is an integer" },
+                    { zh: "D. 两者都是浮点数", en: "Both are floats" }
+                ],
+                correct: 1,
+                descZh: "解析：不加引号的数字是整数类型，可以参与运算或作为步数参数；加引号的是字符串类型，代表文字字符，不能直接用于移动步数。",
+                descEn: "Explanation: Unquoted numbers are integer data types, while quoted numbers are string data types representing text."
+            },
+            {
+                qZh: "15. 在扣哒世界的代码编辑器中，点击“运行”按钮后会发生什么？",
+                qEn: "In the CodeCombat code editor, what happens after clicking the \"Run\" button?",
+                options: [
+                    { zh: "A. 代码被保存但不会执行", en: "The code is saved but not executed" },
+                    { zh: "B. 英雄按照代码中的指令一步步行动", en: "The hero performs the actions according to the code instructions step by step" },
+                    { zh: "C. 编辑器会自动修正所有错误", en: "The editor automatically fixes all errors" },
+                    { zh: "D. 游戏会重新开始", en: "The game restarts" }
+                ],
+                correct: 1,
+                descZh: "解析：点击运行按钮后，程序开始执行，英雄会按照你的代码顺序执行移动等动作，这就是程序运行的可视化输出。",
+                descEn: "Explanation: Once executed, the program runs and the hero visually performs the step-by-step actions you coded."
+            },
+            {
+                qZh: "16. 以下关于 <code>hero.moveRight</code>（没有括号）的说法，哪一个是正确的？",
+                qEn: "Which statement about <code>hero.moveRight</code> (without parentheses) is correct?",
+                options: [
+                    { zh: "A. 它会立即让英雄向右移动", en: "It will make the hero move right immediately" },
+                    { zh: "B. 它表示英雄的移动速度", en: "It represents the hero’s movement speed" },
+                    { zh: "C. 它只是引用了方法本身，但不会执行移动动作", en: "It only refers to the method itself but does not execute the movement" },
+                    { zh: "D. 它等价于 hero.moveRight(1)", en: "It is equivalent to hero.moveRight(1)" }
+                ],
+                correct: 2,
+                descZh: "解析：方法名后面如果没有圆括号 `()`，就不会被调用和执行。`hero.moveRight` 只是指向这个方法对象，而不是让它运行。",
+                descEn: "Explanation: Without parentheses, you are merely referencing the method object, not invoking/executing it."
+            },
+            {
+                qZh: "17. 给移动方法传入浮点数参数（如 <code>hero.moveRight(1.5)</code>）会发生什么？",
+                qEn: "What happens when you pass a float argument to a movement method, such as <code>hero.moveRight(1.5)</code>?",
+                options: [
+                    { zh: "A. 程序会报错", en: "The program will throw an error" },
+                    { zh: "B. 英雄会向右移动1.5个单位", en: "The hero will move right by 1.5 units" },
+                    { zh: "C. 英雄会直接瞬移到终点", en: "The hero will teleport to the destination" },
+                    { zh: "D. 浮点数会被自动转换为整数", en: "The float will be automatically converted to an integer" }
+                ],
+                correct: 1,
+                descZh: "解析：移动方法可以接受浮点数参数，英雄可以移动非整数距离，实现更精确的定位。",
+                descEn: "Explanation: Movement methods accept float arguments, allowing the hero to travel non-integer distances for precise positioning."
+            },
+            {
+                qZh: "18. 以下哪种命名符合扣哒世界中移动方法的驼峰命名法（camelCase）？",
+                qEn: "Which of the following names follows the camelCase convention used by movement methods in CodeCombat?",
+                options: [
+                    { zh: "A.", en: "", code: "move_right" },
+                    { zh: "B.", en: "", code: "moveright" },
+                    { zh: "C.", en: "", code: "MoveRight" },
+                    { zh: "D.", en: "", code: "moveRight" }
+                ],
+                correct: 3,
+                descZh: "解析：驼峰命名法要求第一个单词全小写，后续每个单词首字母大写。`moveRight` 中“move”小写，“Right”首字母大写，符合规范。",
+                descEn: "Explanation: camelCase convention requires the first word to be lowercase and subsequent words to be capitalized."
+            },
+            {
+                qZh: "19. 如果要把“向下走2步，再向右走3步”用最少的语句完成，最优的写法是什么？",
+                qEn: "To complete \"move down 2 steps, then move right 3 steps\" with the fewest statements, what is the optimal code?",
+                options: [
+                    { zh: "A.", en: "", code: "hero.moveDown(2)\nhero.moveRight(3)" },
+                    { zh: "B.", en: "", code: "hero.moveDown()\nhero.moveDown()\nhero.moveRight()\nhero.moveRight()\nhero.moveRight()" },
+                    { zh: "C.", en: "", code: "hero.moveDown(2)\nhero.moveRight()\nhero.moveRight()\nhero.moveRight()" },
+                    { zh: "D.", en: "", code: "hero.moveDown()\nhero.moveDown()\nhero.moveRight(3)" }
+                ],
+                correct: 0,
+                descZh: "解析：使用参数可以减少语句数量，`moveDown(2)` 和 `moveRight(3)` 仅用两行就完成了任务，其他选项的语句数都多于两行。",
+                descEn: "Explanation: Using parameters minimizes statements. `moveDown(2)` and `moveRight(3)` accomplish the task in just two lines of code."
+            },
+            {
+                qZh: "20. 在规划一条从起点到宝石的路线时，如果地图中有尖刺陷阱，以下哪种做法最合理？",
+                qEn: "When planning a route from the starting point to the gem, if there are spike traps on the map, which approach is most reasonable?",
+                options: [
+                    { zh: "A. 直接穿过尖刺，因为英雄不会受伤", en: "Walk directly through the spikes because the hero won’t get hurt" },
+                    { zh: "B. 规划一条绕过尖刺的安全路径", en: "Plan a safe path that goes around the spikes" },
+                    { zh: "C. 只使用 moveUp() 和 moveDown() 来避免尖刺", en: "Only use moveUp() and moveDown() to avoid spikes" },
+                    { zh: "D. 删除尖刺的代码", en: "Delete the code that creates the spikes" }
+                ],
+                correct: 1,
+                descZh: "解析：路径规划中的避障策略要求识别危险格子（尖刺、敌人视线等），并规划一条绕过它们的安全路线，同时保持方向感和语句的高效性。",
+                descEn: "Explanation: Path planning requires identifying hazards like traps and plotting a safe, efficient route around them."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        // --- 代码纯净渲染，不再进行容易出错的高亮替换 ---
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr); 
+        }
+
+        // --- 初始化题目 ---
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            // 渲染题目 (中英文分行)
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            // 渲染选项
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                // 处理带代码的选项
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // --- 检查答案 ---
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            // 组装中英双语解析
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                // 动态提取选项字母 (A/B/C/D)
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        // --- 将解析和文字中用到的代码统一换成幼圆加粗样式 ---
+        function highlightDescCode(text) {
+            // 对 backtick (`) 包裹的内容应用同样的样式
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#f1f2f6; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#6C5CE7; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的编程小英雄！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Programming Hero!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你掌握了所有的知识点，简直是天才！<br><span class="en-text">Amazing! You've mastered all the concepts, you're a genius!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！继续加油，下次争取拿满分哦！<br><span class="en-text">Good job! Keep it up and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
