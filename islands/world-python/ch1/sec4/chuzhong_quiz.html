@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编程小英雄挑战赛 - 变量与数据篇</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 --- */
+        :root {
+            --primary-color: #0984e3; 
+            --secondary-color: #74b9ff;
+            --bg-color: #DFE6E9;     
+            --card-bg: #FFFFFF;
+            --text-color: #2d3436;   
+            --en-text-color: #636e72; 
+            --correct-color: #00b894;
+            --wrong-color: #d63031;  
+            --accent-yellow: #fdcb6e;
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#b2bec3 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #e1b12c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 题目中程序(代码)的专属样式：背景色、幼圆字体、加粗 --- */
+        .question-title code, .en-text code {
+            background-color: #f1f2f6; 
+            font-family: 'YouYuan', '幼圆', monospace; 
+            font-weight: bold; 
+            color: var(--primary-color); 
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #ecf0f1;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #bdc3c7;
+            display: flex;
+            flex-direction: column; 
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        /* 选项中的代码区域：支持多行换行 */
+        .option-code {
+            font-family: 'Fira Code', 'YouYuan', '幼圆', monospace;
+            background: #f8f9fa;
+            color: #0984e3;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #dfe6e9;
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); 
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(255,255,255,0.2);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #aab0b3;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        /* --- 答题状态 --- */
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #00965e;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #c0392b;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #f1f2f6;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); }
+        .feedback-section.wrong { border-color: var(--wrong-color); }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: #2d3436;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* --- 下一题按钮 --- */
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #0652dd;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #e1b12c;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: #636e72; font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画定义 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 20</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+            </div>
+
+            <div class="options-grid" id="options-container">
+            </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+        </div>
+    </div>
+
+    <script>
+        // --- 题目数据 ---
+        const quizData = [
+            {
+                qZh: "1. 在 Python 中，变量最准确的定义是什么？",
+                qEn: "What is the most accurate definition of a variable in Python?",
+                options: [
+                    { zh: "A. 一个永远不能改变的值", en: "A value that can never be changed" },
+                    { zh: "B. 一个存储数据的命名容器", en: "A named container that stores data" },
+                    { zh: "C. 只能存储数字的数据类型", en: "A data type that can only store numbers" },
+                    { zh: "D. 一种用于循环的特殊语法结构", en: "A special syntax structure used for loops" }
+                ],
+                correct: 1, 
+                descZh: "解析：变量是程序中存储数据的命名容器，它的值可以在程序运行过程中被读取和修改。变量不是只能存数字，也不仅仅用于循环。",
+                descEn: "Explanation: A variable is a named container that stores data in a program. Its value can be read and modified during program execution. It is not limited to numbers or loops."
+            },
+            {
+                qZh: "2. 在 Python 的赋值语句 `enemy = \"Kratt\"` 中，等号 `=` 的作用是什么？",
+                qEn: "In the Python assignment statement `enemy = \"Kratt\"`, what is the role of the equal sign `=`?",
+                options: [
+                    { zh: "A. 判断左右两边是否相等", en: "To check if the left and right sides are equal" },
+                    { zh: "B. 把右边的值存入左边的变量中", en: "To store the value on the right into the variable on the left" },
+                    { zh: "C. 交换左右两边的值", en: "To swap the values on the left and right" },
+                    { zh: "D. 没有任何作用，只是装饰", en: "It has no purpose and is just decorative" }
+                ],
+                correct: 1,
+                descZh: "解析：在 Python 中，`=` 是赋值运算符，它的作用是把右边表达式的值计算出来，然后存到左边的变量中。判断是否相等应使用 `==`。",
+                descEn: "Explanation: In Python, `=` is the assignment operator. It evaluates the expression on the right and stores the result into the variable on the left. Equality check uses `==`."
+            },
+            {
+                qZh: "3. 以下哪个变量名是合法的？",
+                qEn: "Which of the following variable names is valid?",
+                options: [
+                    { zh: "A.", en: "", code: "2nd_enemy" },
+                    { zh: "B.", en: "", code: "my-enemy" },
+                    { zh: "C.", en: "", code: "enemy_1" },
+                    { zh: "D.", en: "", code: "while" }
+                ],
+                correct: 2,
+                descZh: "解析：变量名不能以数字开头（A 错），不能包含减号（B 错），不能使用 Python 保留字如 `while`（D 错）。`enemy_1` 由字母、数字和下划线组成且不以数字开头，是合法的。",
+                descEn: "Explanation: Variable names cannot start with a number (A), cannot contain hyphens (B), and cannot be reserved keywords like `while` (D). `enemy_1` is valid."
+            },
+            {
+                qZh: "4. 如果执行 `x = 5` 后再执行 `x = 10`，变量 `x` 最终的值是多少？",
+                qEn: "After executing `x = 5` and then `x = 10`, what is the final value of the variable `x`?",
+                options: [
+                    { zh: "A.", en: "", code: "5" },
+                    { zh: "B.", en: "", code: "10" },
+                    { zh: "C.", en: "", code: "15" },
+                    { zh: "D. 程序会报错", en: "The program will error" }
+                ],
+                correct: 1,
+                descZh: "解析：变量可以被重新赋值。第二次赋值 `x = 10` 会用新值覆盖旧值 `5`，所以最终 `x` 的值为 `10`。",
+                descEn: "Explanation: Variables can be reassigned. The second assignment `x = 10` overwrites the old value `5`, making the final value `10`."
+            },
+            {
+                qZh: "5. 在 Python 中，`x = x + 1` 这行代码的含义是什么？",
+                qEn: "In Python, what does the line `x = x + 1` mean?",
+                options: [
+                    { zh: "A. 检查 x 是否等于 x+1", en: "Check if x is equal to x+1" },
+                    { zh: "B. 取 x 当前的值，加 1，然后存回 x", en: "Take the current value of x, add 1, then store it back in x" },
+                    { zh: "C. 这行代码没有任何意义", en: "This line of code has no meaning" },
+                    { zh: "D. 创建一个新的变量名为 x+1", en: "Create a new variable named x+1" }
+                ],
+                correct: 1,
+                descZh: "解析：先计算右边 `x + 1` 的值（使用 x 的当前值），然后将结果赋给左边的 `x`，实现自增。这在数学中矛盾，但在编程中很常见。",
+                descEn: "Explanation: It calculates `x + 1` using the current value of x, and assigns the result back to `x`, incrementing it. Common in programming despite mathematical contradiction."
+            },
+            {
+                qZh: "6. 以下哪种命名风格是 Python 社区推荐的变量命名方式？",
+                qEn: "Which naming style does the Python community recommend for variables?",
+                options: [
+                    { zh: "A. 驼峰命名法 / camelCase（如 `nearestEnemy`）", en: "camelCase (e.g., `nearestEnemy`)" },
+                    { zh: "B. 帕斯卡命名法 / PascalCase（如 `NearestEnemy`）", en: "PascalCase (e.g., `NearestEnemy`)" },
+                    { zh: "C. 蛇形命名法 / snake_case（如 `nearest_enemy`）", en: "snake_case (e.g., `nearest_enemy`)" },
+                    { zh: "D. 全大写加连字符 / UPPERCASE-WITH-HYPHENS", en: "UPPERCASE-WITH-HYPHENS" }
+                ],
+                correct: 2,
+                descZh: "解析：Python 社区惯例是蛇形命名法，用小写字母加下划线分隔单词，如 `nearest_enemy`。全大写用于常量，驼峰命名法多用于 Java 等语言。",
+                descEn: "Explanation: The Python convention is snake_case (lowercase words separated by underscores). ALL_CAPS is for constants, and camelCase is more common in Java."
+            },
+            {
+                qZh: "7. `hero.findNearestEnemy()` 方法如果没有找到任何敌人，会返回什么？",
+                qEn: "What does `hero.findNearestEnemy()` return if no enemies are found?",
+                options: [
+                    { zh: "A.", en: "", code: "0" },
+                    { zh: "B.", en: "", code: "\"None\"" },
+                    { zh: "C.", en: "", code: "None" },
+                    { zh: "D.", en: "", code: "False" }
+                ],
+                correct: 2,
+                descZh: "解析：`findNearestEnemy()` 在视野内没有敌人时返回特殊值 `None`，表示“什么都没有”。因此在使用返回值前，通常要用 `if enemy:` 来检查是否为 `None`。",
+                descEn: "Explanation: `findNearestEnemy()` returns the special value `None` when there are no enemies. You typically check `if enemy:` before using the result."
+            },
+            {
+                qZh: "8. 为什么要把 `enemy = hero.findNearestEnemy()` 放在循环内部而不是循环前面？",
+                qEn: "Why should `enemy = hero.findNearestEnemy()` be placed inside the loop rather than before it?",
+                options: [
+                    { zh: "A. 放在循环前面会报语法错误", en: "Placing it before the loop causes a syntax error" },
+                    { zh: "B. 只有放在循环内部，变量才会被创建", en: "The variable can only be created inside the loop" },
+                    { zh: "C. 为了让每一轮循环都能重新侦察，更新最近敌人的信息", en: "To re-scan and update the nearest enemy information every loop iteration" },
+                    { zh: "D. 循环外面的代码不能被循环内的代码使用", en: "Code outside the loop cannot be used by code inside the loop" }
+                ],
+                correct: 2,
+                descZh: "解析：敌人可能在移动，上一个敌人被消灭后会出现新敌人。如果侦察只执行一次（循环外），变量就不会更新，英雄会对着空无一人的位置空挥剑。",
+                descEn: "Explanation: Enemies move and new ones appear. If you only scan once outside the loop, the variable won't update, and the hero will swing at empty space."
+            },
+            {
+                qZh: "9. 在 Python 中，常量通常如何命名？",
+                qEn: "How are constants typically named in Python?",
+                options: [
+                    { zh: "A. 用小写字母", en: "Using lowercase letters" },
+                    { zh: "B. 用驼峰命名法", en: "Using camelCase" },
+                    { zh: "C. 用全大写字母加下划线", en: "Using ALL_CAPS with underscores" },
+                    { zh: "D. 用数字开头", en: "Starting with a number" }
+                ],
+                correct: 2,
+                descZh: "解析：Python 约定用全大写字母加下划线命名常量，如 `MAX_HEALTH`。这提醒程序员这个值不应该被修改，虽然没有语法上的强制。",
+                descEn: "Explanation: Python conventions dictate naming constants with ALL_CAPS_AND_UNDERSCORES to signal programmers that the value shouldn't be changed."
+            },
+            {
+                qZh: "10. `hero.buildXY(\"fence\", 40, 52)` 中，第一个参数 `\"fence\"` 的作用是什么？",
+                qEn: "In `hero.buildXY(\"fence\", 40, 52)`, what is the purpose of the first argument `\"fence\"`?",
+                options: [
+                    { zh: "A. 指定建造的 X 坐标", en: "Specifying the X coordinate to build" },
+                    { zh: "B. 指定建造的 Y 坐标", en: "Specifying the Y coordinate to build" },
+                    { zh: "C. 指定建造物品的类型", en: "Specifying the type of item to build" },
+                    { zh: "D. 指定建造花费的金币数量", en: "Specifying the amount of gold to spend" }
+                ],
+                correct: 2,
+                descZh: "解析：`buildXY` 方法的第一个参数是字符串，表示要建造的物品类型，如 `\"fence\"`（栅栏）或 `\"fire-trap\"`（火焰陷阱）。第二、三个参数才是 X 和 Y 坐标。",
+                descEn: "Explanation: The first argument is a string indicating the item type (e.g., `\"fence\"`). The 2nd and 3rd arguments are the X and Y coordinates."
+            },
+            {
+                qZh: "11. 以下哪种数据类型可以用来表示“英雄是否存活”的状态？",
+                qEn: "Which data type is most suitable for representing whether the hero is alive?",
+                options: [
+                    { zh: "A. 整数", en: "Integer" },
+                    { zh: "B. 字符串", en: "String" },
+                    { zh: "C. 布尔值", en: "Boolean" },
+                    { zh: "D. 浮点数", en: "Float" }
+                ],
+                correct: 2,
+                descZh: "解析：布尔类型只有 `True` 和 `False` 两个值，最适合表示“是/否”、“存活/死亡”这类二元状态。",
+                descEn: "Explanation: Booleans only have two values (`True`/`False`), making them perfect for binary states like \"yes/no\" or \"alive/dead\"."
+            },
+            {
+                qZh: "12. Python 是动态类型语言，这意味着什么？",
+                qEn: "Python is dynamically typed. What does this mean?",
+                options: [
+                    { zh: "A. 变量必须先声明类型才能使用", en: "Variables must be declared with a type before use" },
+                    { zh: "B. 同一个变量可以在不同时刻存储不同类型的值", en: "The same variable can store values of different types at different times" },
+                    { zh: "C. 所有变量都必须是同一类型", en: "All variables must be of the same type" },
+                    { zh: "D. 变量的值一旦设定就不能改变", en: "Once a variable's value is set, it cannot be changed" }
+                ],
+                correct: 1,
+                descZh: "解析：动态类型意味着变量不需要事先声明类型，而且同一个变量在不同时间可以指向不同类型的值。比如 `x = 5` 之后可以 `x = \"hello\"`。",
+                descEn: "Explanation: Dynamically typed means you don't declare variable types, and a variable can point to an integer one moment and a string the next."
+            },
+            {
+                qZh: "13. 在使用 `hero.attack(enemy)` 之前，通常应该先做什么？",
+                qEn: "What should usually be done before using `hero.attack(enemy)`?",
+                options: [
+                    { zh: "A. 用 `hero.say(enemy)` 打印 enemy", en: "Use `hero.say(enemy)` to print enemy" },
+                    { zh: "B. 检查 `enemy` 是否为 `None`", en: "Check if `enemy` is `None`" },
+                    { zh: "C. 给 `enemy` 加 1", en: "Add 1 to `enemy`" },
+                    { zh: "D. 将 `enemy` 转换成字符串", en: "Convert `enemy` to a string" }
+                ],
+                correct: 1,
+                descZh: "解析：如果 `findNearestEnemy()` 没有找到敌人，返回 `None`，对 `None` 调用 `attack()` 会报错。因此应先检查 `if enemy:`，确认有敌人后再攻击。",
+                descEn: "Explanation: If no enemy is found, `findNearestEnemy()` returns `None`. Attacking `None` causes an error, so you must verify the enemy exists first."
+            },
+            {
+                qZh: "14. 计数器变量 `count` 初始化为 0，每消灭一个敌人执行 `count = count + 1`，最终 `count` 中存储的是什么？",
+                qEn: "A counter variable `count` is initialized to 0, and `count = count + 1` is executed each time an enemy is defeated. What does `count` ultimately store?",
+                options: [
+                    { zh: "A. 当前敌人的血量", en: "The health of the current enemy" },
+                    { zh: "B. 英雄的坐标", en: "The hero's coordinates" },
+                    { zh: "C. 被消灭的敌人总数", en: "The total number of defeated enemies" },
+                    { zh: "D. 循环执行的次数", en: "The number of times the loop has executed" }
+                ],
+                correct: 2,
+                descZh: "解析：计数器变量用于追踪某事件发生的次数。每次消灭敌人加 1，最终 `count` 记录的是被消灭敌人的总数。",
+                descEn: "Explanation: Counters track how many times an event occurs. Incrementing by 1 per defeated enemy means it ultimately holds the total kill count."
+            },
+            {
+                qZh: "15. 以下哪个不是 Python 的合法数据类型？",
+                qEn: "Which of the following is NOT a valid Python data type?",
+                options: [
+                    { zh: "A.", en: "", code: "int" },
+                    { zh: "B.", en: "", code: "str" },
+                    { zh: "C.", en: "", code: "bool" },
+                    { zh: "D.", en: "", code: "char" }
+                ],
+                correct: 3,
+                descZh: "解析：Python 中没有单独的 `char`（字符）类型，单个字符也是字符串类型 `str`。`int`、`str`、`bool` 都是 Python 的内置数据类型。",
+                descEn: "Explanation: Python does not have a separate `char` type; a single character is just a string (`str`). `int`, `str`, and `bool` are built-in types."
+            },
+            {
+                qZh: "16. `hero.buildXY` 方法需要消耗什么资源才能成功建造？",
+                qEn: "What resource does the `hero.buildXY` method require to successfully build?",
+                options: [
+                    { zh: "A. 生命值", en: "Health" },
+                    { zh: "B. 经验值", en: "Experience" },
+                    { zh: "C. 金币", en: "Gold" },
+                    { zh: "D. 魔法值", en: "Mana" }
+                ],
+                correct: 2,
+                descZh: "解析：在 CodeCombat 中，`buildXY` 建造物品需要消耗金币。如果金币不足，建造会失败。可以用 `hero.gold` 查看当前金币数量。",
+                descEn: "Explanation: Building items in CodeCombat costs gold. If you don't have enough gold, the build command will fail."
+            },
+            {
+                qZh: "17. 下列代码中，`enemy = hero.findNearestEnemy()` 的返回值是什么类型（当有敌人时）？",
+                qEn: "In the following code, what type is the return value of `enemy = hero.findNearestEnemy()` (when an enemy exists)?",
+                options: [
+                    { zh: "A. 字符串", en: "String" },
+                    { zh: "B. 整数", en: "Integer" },
+                    { zh: "C. 对象", en: "Object" },
+                    { zh: "D. 布尔值", en: "Boolean" }
+                ],
+                correct: 2,
+                descZh: "解析：`findNearestEnemy()` 返回的是一个敌人对象，该对象包含敌人的位置、名字、血量等属性。它不是简单的数字或字符串。",
+                descEn: "Explanation: It returns an enemy object, which bundles various properties like position, name, and health. It's not a primitive type like an int or string."
+            },
+            {
+                qZh: "18. 累加器模式与普通计数器的关键区别是什么？",
+                qEn: "What is the key difference between an accumulator pattern and a regular counter?",
+                options: [
+                    { zh: "A. 累加器只能使用乘法", en: "Accumulators can only use multiplication" },
+                    { zh: "B. 计数器只能在循环外使用", en: "Counters can only be used outside loops" },
+                    { zh: "C. 累加器每次增加的数值可以不同，计数器通常每次加固定值", en: "Accumulators can add varying amounts each time, while counters usually add a fixed amount" },
+                    { zh: "D. 两者完全一样，没有区别", en: "There is no difference between them" }
+                ],
+                correct: 2,
+                descZh: "解析：计数器通常每次加 1（固定），而累加器每次可以加上不同的值，比如收集金币时每枚金币价值不同，累加总额就是累加器模式。",
+                descEn: "Explanation: Counters typically increment by a fixed amount (like 1), while accumulators can add varying values (e.g., adding coin values of 1, 2, or 3)."
+            },
+            {
+                qZh: "19. 关于变量的重新赋值，以下描述正确的是？",
+                qEn: "Which statement about variable reassignment is correct?",
+                options: [
+                    { zh: "A. 变量一旦赋值就不能再改变", en: "Once a variable is assigned, it cannot be changed" },
+                    { zh: "B. 重新赋值会保留旧值并同时存储新值", en: "Reassignment keeps the old value and stores the new value simultaneously" },
+                    { zh: "C. 重新赋值会用新值替换旧值，旧值被丢弃", en: "Reassignment replaces the old value with the new value, and the old value is discarded" },
+                    { zh: "D. 重新赋值会导致程序崩溃", en: "Reassignment causes the program to crash" }
+                ],
+                correct: 2,
+                descZh: "解析：重新赋值时，变量指向新值，旧值如果没有其他变量指向它，就会被 Python 的垃圾回收机制清理。变量只存储一个当前值。",
+                descEn: "Explanation: When reassigned, a variable points to the new value. The old value is discarded (garbage collected) if nothing else references it."
+            },
+            {
+                qZh: "20. 在大型程序中，为什么要用常量代替直接写在代码中的数字（魔数）？",
+                qEn: "Why should constants be used instead of hard-coded numbers (magic numbers) in large programs?",
+                options: [
+                    { zh: "A. 常量执行速度更快", en: "Constants execute faster" },
+                    { zh: "B. 常量不占用内存", en: "Constants don't use memory" },
+                    { zh: "C. 提高可读性，且需要修改时只需改一处", en: "To improve readability and require only one change when updating" },
+                    { zh: "D. 只有常量可以作为方法的参数", en: "Only constants can be used as method arguments" }
+                ],
+                correct: 2,
+                descZh: "解析：使用有意义的常量名（如 `MAX_HEALTH = 200`）比到处写数字 `200` 更易读，且当需要调整值时只需修改常量定义处，所有引用自动更新。",
+                descEn: "Explanation: Named constants (like `MAX_HEALTH = 200`) are much easier to read than scattered raw numbers, and updating the value only requires one change."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        // --- 纯净模式，直接转义HTML，不再用正则做容易出错的高亮 ---
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr);
+        }
+
+        // --- 初始化题目 ---
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            // 渲染题目 (中英文分行)
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            // 渲染选项
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                // 处理带代码的选项
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // --- 检查答案 ---
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            // 组装中英双语解析
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        // --- 将文本中的反引号部分替换为带有背景色的幼圆加粗代码样式 ---
+        function highlightDescCode(text) {
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#f1f2f6; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#0984e3; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的编程小英雄！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Programming Hero!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你掌握了所有的知识点，简直是天才！<br><span class="en-text">Amazing! You've mastered all the concepts, you're a genius!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！继续加油，下次争取拿满分哦！<br><span class="en-text">Good job! Keep it up and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
