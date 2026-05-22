@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.6 递归与分治策略 - C++ 魔法课堂</title>
+    <style>
+        /* ================= 核心配色 (森林绿与魔法金主题) ================= */
+        :root {
+            --primary: #2E7D32;      
+            --primary-dark: #1B5E20;
+            --secondary: #F57F17;    
+            --accent: #43A047;       
+            --bg-color: #F1F8E9;     
+            --text-main: #33691E;
+            --code-bg: #263238;      
+        }
+
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#DCEDC8 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 15px 30px rgba(46, 125, 50, 0.15);
+            border: 4px solid #A5D6A7;
+        }
+
+        /* ================= 标题样式 ================= */
+        h1 {
+            text-align: center;
+            color: var(--primary-dark);
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #F1F8E9;
+        }
+
+        h2 {
+            background: linear-gradient(90deg, var(--primary), #81C784);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            font-size: 1.6em;
+        }
+
+        h3 {
+            color: var(--secondary);
+            border-bottom: 3px dashed var(--secondary);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* ================= 强调样式 ================= */
+        .highlight {
+            color: #FFF;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        
+        .text-orange { color: #E65100; font-weight: bold; }
+        .text-green { color: #2E7D32; font-weight: bold; }
+        .text-blue { color: #1565C0; font-weight: bold; }
+
+        /* 行内重要代码高亮强调 */
+        .code-hl {
+            background-color: #DCEDC8;
+            color: #1B5E20;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: "Consolas", "Courier New", monospace;
+            border: 1px solid #A5D6A7;
+            box-shadow: 1px 1px 0 #81C784;
+        }
+
+        .note-box {
+            background-color: #E8F5E9;
+            border-left: 8px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .danger-box {
+            background-color: #FFF3E0;
+            border: 2px solid #FFB74D;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step-box {
+            background-color: #FAFAFA;
+            border: 2px dashed #81C784;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #2E7D32;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .compare-table th { background: var(--primary); color: white; padding: 12px; }
+        .compare-table td { border: 1px solid #C8E6C9; padding: 12px; color: var(--text-main); }
+
+        /* ================= 图解区域 ================= */
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #C8E6C9;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        /* ================= 并排代码块 ================= */
+        .code-comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .code-card {
+            flex: 1;
+            border: 3px solid #81C784;
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--code-bg);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .code-header {
+            background: #1B5E20;
+            color: #C8E6C9;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #81C784;
+        }
+
+        .code-body {
+            padding: 20px;
+            color: #AEEA00; 
+            font-family: "Consolas", "Courier New", monospace;
+            white-space: pre;
+            font-size: 14.5px;
+            line-height: 1.6;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        .kw { color: #FF8A65; font-weight: bold; } 
+        .com { color: #78909C; font-style: italic; } 
+        .str { color: #AED581; } 
+        .num { color: #FFD54F; } 
+        .func { color: #4FC3F7; } 
+        .type { color: #BA68C8; } 
+
+        @media (max-width: 768px) {
+            .code-comparison {
+                flex-direction: column;
+            }
+        }
+
+        .simple-footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #A5D6A7;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>6.6 递归与分治策略</h1>
+
+    <div class="note-box">
+        <p>⚔️ <strong>折筷子的哲学与蚂蚁吃大象：</strong></p>
+        <p>一把粗糙的筷子很难折断，但如果把它分成一根一根的，哪怕是小孩子也能轻易折断。一只大象很大，但如果分成一小块一小块，蚂蚁群也能把它搬空。在编程世界中，面对庞大而复杂的数据，最聪明的办法就是 <strong>“分而治之” (Divide and Conquer)</strong>。</p>
+        <p>分治策略是算法设计中最伟大的思想之一，而<span class="highlight">递归</span>，正是实现分治策略最完美的武器！</p>
+    </div>
+
+    <h2>一、分治思想的三步神功</h2>
+
+    <p>任何一个标准的分治算法，在它的体内都流淌着“三步走”的血液：</p>
+
+    <div class="step-box" style="border-color: #F57F17; background-color: #FFFDE7;">
+        <ol>
+            <li><strong>分解 (Divide)：</strong> 挥舞大刀，将原问题拦腰斩断，划分为几个规模较小、但结构与原问题完全相同的子问题。</li>
+            <li><strong>解决 (Conquer)：</strong> 若子问题规模足够小（比如小到了只剩 1 个数字），就直接出手解决它；若还不够小，就继续召唤“递归”，让它自己解决自己。</li>
+            <li><strong>合并 (Combine)：</strong> 将所有已经解决的子问题的答案，像拼图一样拼凑起来，形成原问题的最终答案！</li>
+        </ol>
+    </div>
+
+    <div class="illustration">
+        <svg width="700" height="280" viewBox="0 0 700 280">
+            <text x="350" y="25" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="18">图解：分治法 (Divide & Conquer) 的流水线</text>
+
+            <rect x="250" y="50" width="200" height="40" rx="8" fill="#FFCDD2" stroke="#E53935" stroke-width="2"/>
+            <text x="350" y="75" text-anchor="middle" font-weight="bold" fill="#C62828">庞大复杂的原问题</text>
+
+            <path d="M 300 90 L 150 140" stroke="#F57F17" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrow-orange)"/>
+            <path d="M 400 90 L 550 140" stroke="#F57F17" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrow-orange)"/>
+            <text x="210" y="115" fill="#E65100" font-weight="bold">分解大刀</text>
+            <text x="490" y="115" text-anchor="end" fill="#E65100" font-weight="bold">分解大刀</text>
+
+            <rect x="50" y="140" width="200" height="40" rx="8" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="150" y="165" text-anchor="middle" fill="#F57F17">好欺负的小问题 1</text>
+            
+            <rect x="450" y="140" width="200" height="40" rx="8" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="550" y="165" text-anchor="middle" fill="#F57F17">好欺负的小问题 2</text>
+
+            <path d="M 150 180 L 150 210" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <path d="M 550 180 L 550 210" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <text x="160" y="200" fill="#2E7D32" font-size="12">解决 (Conquer)</text>
+            <text x="560" y="200" fill="#2E7D32" font-size="12">解决 (Conquer)</text>
+
+            <rect x="70" y="210" width="160" height="30" rx="5" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="150" y="230" text-anchor="middle" fill="#1B5E20" font-size="14">小碎片 1 的答案</text>
+            
+            <rect x="470" y="210" width="160" height="30" rx="5" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="550" y="230" text-anchor="middle" fill="#1B5E20" font-size="14">小碎片 2 的答案</text>
+
+            <path d="M 230 225 Q 350 260 350 260" fill="none" stroke="#2196F3" stroke-width="3" marker-end="url(#arrow-blue)"/>
+            <path d="M 470 225 Q 350 260 350 260" fill="none" stroke="#2196F3" stroke-width="3" marker-end="url(#arrow-blue)"/>
+            <text x="350" y="275" text-anchor="middle" fill="#0D47A1" font-weight="bold">使用魔法胶水：合并为最终答案！</text>
+
+            <defs>
+                <marker id="arrow-orange" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#F57F17" /></marker>
+                <marker id="arrow-green" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4CAF50" /></marker>
+                <marker id="arrow-blue" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#2196F3" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <h2>二、超酷视觉案例：谢尔宾斯基地毯 (Sierpinski Carpet)</h2>
+    <p>分治法不仅能做枯燥的数学计算，它还是数字艺术的魔法棒！让我们用分治法画一张无穷无尽的“谢尔宾斯基地毯”。</p>
+    
+    <p><strong>它的规则极度简单，却能画出极其复杂的图形：</strong><br>
+    将一个正方形切成 3 行 3 列共 9 个小正方形。然后<strong>把最中间的那个小正方形挖空（变成白色）</strong>。接下来，对剩下的 8 个小正方形，重复这个“切 9 块、挖中间”的动作！</p>
+
+    <div class="illustration" style="background-color: #E0F2F1; border-color: #4DB6AC;">
+        <svg width="800" height="250" viewBox="0 0 800 250">
+            <text x="400" y="25" text-anchor="middle" font-weight="bold" fill="#00695C" font-size="18">图解：分治魔法阵——谢尔宾斯基地毯的进化</text>
+
+            <rect x="50" y="50" width="160" height="160" fill="#00796B" stroke="#004D40" stroke-width="2"/>
+            <text x="130" y="235" text-anchor="middle" font-weight="bold" fill="#00695C">第 0 层：完整地毯</text>
+
+            <path d="M 230 130 L 260 130" stroke="#00897B" stroke-width="4" marker-end="url(#arrow-teal)"/>
+
+            <g transform="translate(280, 50)">
+                <rect x="0" y="0" width="160" height="160" fill="#00796B" stroke="#004D40" stroke-width="2"/>
+                <rect x="53.3" y="53.3" width="53.3" height="53.3" fill="#E0F2F1"/>
+                
+                <line x1="53.3" y1="0" x2="53.3" y2="160" stroke="#B2DFDB" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="106.6" y1="0" x2="106.6" y2="160" stroke="#B2DFDB" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="0" y1="53.3" x2="160" y2="53.3" stroke="#B2DFDB" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="0" y1="106.6" x2="160" y2="106.6" stroke="#B2DFDB" stroke-width="1" stroke-dasharray="3,3"/>
+            </g>
+            <text x="360" y="235" text-anchor="middle" font-weight="bold" fill="#00695C">第 1 层：切9块，挖空中间</text>
+
+            <path d="M 460 130 L 490 130" stroke="#00897B" stroke-width="4" marker-end="url(#arrow-teal)"/>
+
+            <g transform="translate(510, 50)">
+                <rect x="0" y="0" width="160" height="160" fill="#00796B" stroke="#004D40" stroke-width="2"/>
+                <rect x="53.3" y="53.3" width="53.3" height="53.3" fill="#E0F2F1"/>
+                
+                <rect x="17.7" y="17.7" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="71" y="17.7" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="124.3" y="17.7" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="17.7" y="71" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="124.3" y="71" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="17.7" y="124.3" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="71" y="124.3" width="17.7" height="17.7" fill="#E0F2F1"/>
+                <rect x="124.3" y="124.3" width="17.7" height="17.7" fill="#E0F2F1"/>
+            </g>
+            <text x="590" y="235" text-anchor="middle" font-weight="bold" fill="#00695C">第 2 层：对剩下8块继续分治！</text>
+
+            <defs>
+                <marker id="arrow-teal" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#00897B" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 画地毯 (矩阵操作)</div>
+            <div class="code-body"><span class="com">// 递归函数：在 grid 中画出一块左上角为 (r, c)，边长为 size 的地毯</span>
+<span class="type">void</span> <span class="func">drawCarpet</span>(<span class="type">int</span> r, <span class="type">int</span> c, <span class="type">int</span> size, <span class="type">vector&lt;string&gt;</span>& grid) {
+    <span class="kw">if</span> (size == <span class="num">1</span>) {
+        <span class="com">// 1. 基准情形：只有1格大小时，画一个实心方块</span>
+        grid[r][c] = <span class="str">'#'</span>;
+        <span class="kw">return</span>;
+    }
+    
+    <span class="com">// 2. 分解：将边长分成 3 份</span>
+    <span class="type">int</span> sub = size / <span class="num">3</span>;
+    
+    <span class="com">// 遍历 3 行 3 列</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+        <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++) {
+            <span class="com">// 如果是正中间的那一块，我们跳过它（不画，留白）</span>
+            <span class="kw">if</span> (i == <span class="num">1</span> && j == <span class="num">1</span>) <span class="kw">continue</span>;
+            
+            <span class="com">// 3. 解决：对其余 8 块区域，递归调用自己去画更小的地毯！</span>
+            <span class="code-hl"><span class="func">drawCarpet</span>(r + i * sub, c + j * sub, sub, grid);</span>
+        }
+    }
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 画地毯 (字符串魔法)</div>
+            <div class="code-body"><span class="com"># Python 可以利用列表拼接，非常优雅地合并结果</span>
+<span class="kw">def</span> <span class="func">carpet</span>(n):
+    <span class="com"># 1. 基准情形：边长为 1，直接返回实心块</span>
+    <span class="kw">if</span> n == <span class="num">1</span>:
+        <span class="kw">return</span> [<span class="str">"#"</span>]
+    
+    <span class="com"># 2. 分解与解决：先要小弟帮我画出边长为 n/3 的小地毯</span>
+    <span class="code-hl">sub_carpet = <span class="func">carpet</span>(n // <span class="num">3</span>)</span>
+    
+    <span class="com"># 3. 合并：把这 8 个小地毯拼成一个大地毯！</span>
+    res = []
+    <span class="com"># 顶部 3 块连在一起</span>
+    <span class="kw">for</span> row <span class="kw">in</span> sub_carpet: res.append(row * <span class="num">3</span>)
+    <span class="com"># 中间 2 块，夹着一大片空白</span>
+    <span class="kw">for</span> row <span class="kw">in</span> sub_carpet: res.append(row + <span class="str">" "</span> * (n // <span class="num">3</span>) + row)
+    <span class="com"># 底部 3 块连在一起</span>
+    <span class="kw">for</span> row <span class="kw">in</span> sub_carpet: res.append(row * <span class="num">3</span>)
+    
+    <span class="kw">return</span> res</div>
+        </div>
+    </div>
+
+    <div class="step-box" style="border-color: #00897B; background-color: #E0F2F1;">
+        <strong>🪄 代码魔法原理解析：</strong>
+        <p>1. <strong>分解 (Divide)：</strong> 不管当前的地毯有多大，我们都把它的边长除以 3 (<code>size / 3</code> 或 <code>n // 3</code>)，这样就把一块大地毯分成了 9 块小地毯的区域。</p>
+        <p>2. <strong>解决 (Conquer) 与挖空：</strong> 我们遍历这 3 行 3 列共 9 个区域。当走到正中间那块（即 <code>i == 1</code> 且 <code>j == 1</code>）时，直接跳过什么都不画，这就实现了“挖空中间”的效果。对于其余的 8 块，我们调用函数自己，继续在这个更小的区域里画地毯。</p>
+        <p>3. <strong>合并 (Combine)：</strong> 在 Python 代码中，我们利用列表推导式，把小地毯的字符串拼接起来。顶部拼接 3 块，中间拼接 2 块并塞入一段空格，底部再拼接 3 块，最终就返回了一张充满神秘感的大地毯！</p>
+    </div>
+
+    <h2>三、典型战役：快速排序 (Quick Sort) 的粗暴分治</h2>
+    <p>除了画画，在处理数据时，<strong>快速排序</strong> 将分治策略体现得淋漓尽致。它的套路是：<strong>随便挑一个基准数，比它小的全一脚踢到左边，比它大的全一脚踢到右边。</strong>这样一分，基准数的位置就彻底固定了！左右两边再各自独立使用快排。</p>
+
+    <div class="illustration" style="background-color: #FFF3E0; border-color: #FFB74D;">
+        <svg width="700" height="250" viewBox="0 0 700 250">
+            <text x="350" y="20" text-anchor="middle" font-weight="bold" fill="#E65100" font-size="16">图解：快速排序的核心——粗暴踢开与分区 (Partition)</text>
+
+            <rect x="200" y="60" width="300" height="30" fill="#FFF" stroke="#424242" stroke-width="2"/>
+            <text x="350" y="80" text-anchor="middle" font-family="monospace" font-weight="bold" fill="#424242"></text>
+            
+            <path d="M 470 50 L 470 60" stroke="#D32F2F" stroke-width="3" marker-end="url(#arrow-red-qs)"/>
+            <text x="470" y="40" text-anchor="middle" fill="#C62828" font-size="12">选 40 作为基准 (Pivot)</text>
+
+            <text x="120" y="130" fill="#E65100" font-weight="bold">粗暴分解</text>
+            <path d="M 350 95 L 350 130" stroke="#F57F17" stroke-width="3" stroke-dasharray="4,4" marker-end="url(#arrow-orange-qs)"/>
+
+            <rect x="150" y="140" width="120" height="30" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="210" y="160" text-anchor="middle" font-family="monospace" fill="#1B5E20"></text>
+            <text x="210" y="185" text-anchor="middle" fill="#2E7D32" font-size="12">全比 40 小的踢左边</text>
+
+            <rect x="330" y="140" width="40" height="30" fill="#FFCDD2" stroke="#E53935" stroke-width="3"/>
+            <text x="350" y="160" text-anchor="middle" font-family="monospace" font-weight="bold" fill="#B71C1C">40</text>
+            <text x="350" y="185" text-anchor="middle" fill="#D32F2F" font-size="12">位置锁死归位!</text>
+
+            <rect x="430" y="140" width="120" height="30" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="490" y="160" text-anchor="middle" font-family="monospace" fill="#F57F17"></text>
+            <text x="490" y="185" text-anchor="middle" fill="#F57F17" font-size="12">全比 40 大的踢右边</text>
+
+            <path d="M 210 195 L 210 215" stroke="#4CAF50" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow-green-qs)"/>
+            <path d="M 490 195 L 490 215" stroke="#FBC02D" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow-yellow-qs)"/>
+            <text x="350" y="235" text-anchor="middle" fill="#757575" font-size="12">左右两段各玩各的，继续调用快速排序...</text>
+
+            <defs>
+                <marker id="arrow-red-qs" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#D32F2F" /></marker>
+                <marker id="arrow-orange-qs" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#F57F17" /></marker>
+                <marker id="arrow-green-qs" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4CAF50" /></marker>
+                <marker id="arrow-yellow-qs" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#FBC02D" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 快速排序 (指针原地操作)</div>
+            <div class="code-body"><span class="com">// 辅助函数：负责选取基准，并将数组分区</span>
+<span class="type">int</span> <span class="func">partition</span>(<span class="type">vector&lt;int&gt;</span>& arr, <span class="type">int</span> low, <span class="type">int</span> high) {
+    <span class="com">// (此处省略双指针交换分区的具体代码)</span>
+    <span class="com">// 返回基准数最终所处的正确位置下标</span>
+}
+
+<span class="type">void</span> <span class="func">quickSort</span>(<span class="type">vector&lt;int&gt;</span>& arr, <span class="type">int</span> low, <span class="type">int</span> high) {
+    <span class="kw">if</span> (low &lt; high) {
+        <span class="com">// 1. 分解 (Divide)：找基准并分区，pi 是基准的新位置</span>
+        <span class="code-hl"><span class="type">int</span> pi = <span class="func">partition</span>(arr, low, high);</span>
+        
+        <span class="com">// 2. 解决 (Conquer)：基准已在正确位置，递归排序左右两边</span>
+        <span class="func">quickSort</span>(arr, low, pi - <span class="num">1</span>);
+        <span class="func">quickSort</span>(arr, pi + <span class="num">1</span>, high);
+        
+        <span class="com">// 3. 合并 (Combine)：不需要！原数组已经有序了。</span>
+    }
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 快速排序 (列表推导极简版)</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">quick_sort</span>(arr):
+    <span class="com"># 基准情形：长度小于等于1的数组直接返回</span>
+    <span class="kw">if</span> <span class="func">len</span>(arr) &lt;= <span class="num">1</span>:
+        <span class="kw">return</span> arr
+        
+    <span class="com"># 1. 分解：随便挑中间的元素作为基准 (Pivot)</span>
+    pivot = arr[<span class="func">len</span>(arr) // <span class="num">2</span>]
+    
+    <span class="com"># 把数组分成三派：小于、等于、大于基准</span>
+    <span class="code-hl">left = [x <span class="kw">for</span> x <span class="kw">in</span> arr <span class="kw">if</span> x &lt; pivot]</span>
+    <span class="code-hl">middle = [x <span class="kw">for</span> x <span class="kw">in</span> arr <span class="kw">if</span> x == pivot]</span>
+    <span class="code-hl">right = [x <span class="kw">for</span> x <span class="kw">in</span> arr <span class="kw">if</span> x &gt; pivot]</span>
+    
+    <span class="com"># 2 & 3. 递归解决左右两派，并直接加法合并返回！</span>
+    <span class="kw">return</span> <span class="func">quick_sort</span>(left) + middle + <span class="func">quick_sort</span>(right)</div>
+        </div>
+    </div>
+
+    <div class="step-box" style="border-color: #F57F17; background-color: #FFFDE7;">
+        <strong>🪄 快速排序原理解析：</strong>
+        <p>1. <strong>选基准与分区 (Partition)：</strong> 在 Python 的极简代码中，我们直接取数组中间的数字作为基准 (<code>pivot</code>)。然后用列表推导式，像滤网一样把比它小的数字过滤出来当左派 (<code>left</code>)，相等的当中间派 (<code>middle</code>)，比它大的当右派 (<code>right</code>)。</p>
+        <p>2. <strong>递归与合并：</strong> 左派和右派的数据现在虽然分开了，但各自内部还是乱序的，怎么办？直接把它们各自丢给 <code>quick_sort()</code> 重新来一遍！等它们各自排好序返回后，我们只需要用 <code>+</code> 号把左、中、右拼起来，整个数组就瞬间有序了！</p>
+        <p>3. <strong>C++ 中的原地操作：</strong> 真实的 C++ 快速排序为了节省宝贵的内存，不会像 Python 那样创建全新的数组，而是使用两个聪明的指针在原数组上不断交换元素，这被称为“原地分区 (In-place Partition)”，执行速度如闪电一般！</p>
+    </div>
+
+    <h2>四、复杂度分析：分治算法有多快？</h2>
+    <p>评估一个递归分治算法快不快，我们不需要去看复杂头晕的数学公式，把它想象成一个<strong>老板给打工人分配任务</strong>的拔河比赛就行了！</p>
+
+    <div class="danger-box" style="border-color: #81C784; background-color: #E8F5E9;">
+        <p><strong>老板（当前函数）</strong>接到一个规模为 <strong>N</strong> 的超大项目。他自己不想干，于是把项目劈成两半，交给两个<strong>打工人（子递归）</strong>去做。等打工人做完后，老板花时间把两半的结果合并起来。</p>
+        <p>以<strong>归并排序</strong>为例，我们来算算整个公司完成项目要多久：</p>
+        <ul style="color: #1B5E20; line-height: 1.8;">
+            <li><strong>树的层数（深度）：</strong> 项目规模每次对半切，N 变成 N/2、N/4... 直到切成 1 为止。切的次数也就是这棵递归树的层数，在数学上这就是 <strong>O(log N)</strong> 层。</li>
+            <li><strong>每一层的工作量：</strong> 虽然任务被切得越来越碎，但如果你把每一层所有打工人的手头工作加起来，总零件数依然是 N。老板在每一层合并这些零件，需要花费 <strong>O(N)</strong> 的时间。</li>
+            <li><strong>总时间复杂度：</strong> 每层合并花费 N 的时间，一共有 log N 层。两者相乘，就得出了归并排序的终极速度：<span class="highlight" style="background-color: #4CAF50; font-family: monospace; font-size: 1.2em;">O(N log N)</span>！这是基于比较的排序算法中最快的境界！</li>
+        </ul>
+    </div>
+
+    <div class="illustration" style="background-color: #FAFAFA;">
+        <svg width="600" height="240" viewBox="0 0 600 240">
+            <text x="300" y="20" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="16">图解：谁是效率的拖油瓶？</text>
+
+            <rect x="50" y="40" width="220" height="150" rx="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="160" y="70" text-anchor="middle" font-weight="bold" fill="#1B5E20">场景 A：整合太费劲</text>
+            <text x="160" y="100" text-anchor="middle" fill="#2E7D32" font-size="13">打工人只分到了极少的任务</text>
+            <text x="160" y="120" text-anchor="middle" fill="#2E7D32" font-size="13">但老板合并成千上万个零件累到吐血</text>
+            <text x="160" y="160" text-anchor="middle" font-weight="bold" fill="#E65100">最终复杂度由【老板合并代码】决定</text>
+
+            <rect x="330" y="40" width="220" height="150" rx="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+            <text x="440" y="70" text-anchor="middle" font-weight="bold" fill="#E65100">场景 B：疯狂生猴子</text>
+            <text x="440" y="100" text-anchor="middle" fill="#E65100" font-size="13">老板啥事不干 (合并极快)</text>
+            <text x="440" y="120" text-anchor="middle" fill="#E65100" font-size="13">但他招了无穷无尽的打工人疯狂繁殖</text>
+            <text x="440" y="160" text-anchor="middle" font-weight="bold" fill="#D32F2F">最终复杂度由【子树分裂数量】决定</text>
+
+            <text x="300" y="220" text-anchor="middle" fill="#424242" font-weight="bold" font-size="14">分治算法的终极速度，其实就是这“两股力量”拔河的结果！</text>
+        </svg>
+    </div>
+
+    <h2>五、终极辨析：分治与递归是一回事吗？</h2>
+    
+    <p>许多初学者会把这两个词混为一谈。其实，它们的关系就像 <strong>“图纸上的战术”</strong> 与 <strong>“战场上的兵器”</strong>：</p>
+
+    <table class="compare-table">
+        <tr>
+            <th>概念</th>
+            <th>本质定位</th>
+            <th>举个通俗的例子</th>
+        </tr>
+        <tr>
+            <td><strong>分治法 (Divide & Conquer)</strong></td>
+            <td>一种宏观的<strong>算法设计策略（思想）</strong>。它告诉你遇到大问题时“应该怎么做”（切碎了解决）。</td>
+            <td>军事大将说：“把敌军分割成三块，逐个击破！”这就是分治思想。</td>
+        </tr>
+        <tr>
+            <td><strong>递归 (Recursion)</strong></td>
+            <td>一种具体的<strong>代码实现工具（技巧）</strong>。函数自己调用自己，用来写出简洁优雅的代码。</td>
+            <td>士兵拔出佩剑开始砍人。递归是用来执行“逐个击破”战术的完美武器。</td>
+        </tr>
+    </table>
+
+    <div class="note-box" style="border-left-color: #2196F3; background-color: #E3F2FD;">
+        <p><strong>💡 总结：</strong> 分治法几乎总是用递归来写代码（因为分解出的子问题和原问题结构一样，最适合自我调用）。但递归不仅能用来写分治，还能用来写搜索（如迷宫寻路）、记忆化搜索等！</p>
+    </div>
+
+    <div class="simple-footer">
+        扣哒世界教研团队
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.4 递归转递推 - C++ 魔法课堂</title>
+    <style>
+        /* ================= 核心配色 (森林绿与魔法金主题) ================= */
+        :root {
+            --primary: #2E7D32;      
+            --primary-dark: #1B5E20;
+            --secondary: #F57F17;    
+            --accent: #43A047;       
+            --bg-color: #F1F8E9;     
+            --text-main: #33691E;
+            --code-bg: #263238;      
+        }
+
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#DCEDC8 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 15px 30px rgba(46, 125, 50, 0.15);
+            border: 4px solid #A5D6A7;
+        }
+
+        /* ================= 标题样式 ================= */
+        h1 {
+            text-align: center;
+            color: var(--primary-dark);
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #F1F8E9;
+        }
+
+        h2 {
+            background: linear-gradient(90deg, var(--primary), #81C784);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            font-size: 1.6em;
+        }
+
+        h3 {
+            color: var(--secondary);
+            border-bottom: 3px dashed var(--secondary);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* ================= 强调样式 ================= */
+        .highlight {
+            color: #FFF;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        
+        .text-orange { color: #E65100; font-weight: bold; }
+        .text-green { color: #2E7D32; font-weight: bold; }
+
+        /* 行内重要代码高亮强调 */
+        .code-hl {
+            background-color: #DCEDC8;
+            color: #1B5E20;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: "Consolas", "Courier New", monospace;
+            border: 1px solid #A5D6A7;
+            box-shadow: 1px 1px 0 #81C784;
+        }
+
+        .note-box {
+            background-color: #E8F5E9;
+            border-left: 8px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .step-box {
+            background-color: #FAFAFA;
+            border: 2px dashed #81C784;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #2E7D32;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .compare-table th { background: var(--primary); color: white; padding: 12px; }
+        .compare-table td { border: 1px solid #C8E6C9; padding: 12px; color: var(--text-main); }
+
+        /* ================= 图解区域 ================= */
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #C8E6C9;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        /* ================= 并排代码块 ================= */
+        .code-comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .code-card {
+            flex: 1;
+            border: 3px solid #81C784;
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--code-bg);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .code-header {
+            background: #1B5E20;
+            color: #C8E6C9;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #81C784;
+        }
+
+        .code-body {
+            padding: 20px;
+            color: #AEEA00; 
+            font-family: "Consolas", "Courier New", monospace;
+            white-space: pre;
+            font-size: 14.5px;
+            line-height: 1.6;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        .kw { color: #FF8A65; font-weight: bold; } 
+        .com { color: #78909C; font-style: italic; } 
+        .str { color: #AED581; } 
+        .num { color: #FFD54F; } 
+        .func { color: #4FC3F7; } 
+        .type { color: #BA68C8; } 
+
+        @media (max-width: 768px) {
+            .code-comparison {
+                flex-direction: column;
+            }
+        }
+
+        .simple-footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #A5D6A7;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>6.4 递归转递推</h1>
+
+    <div class="note-box">
+        <p>🔄 <strong>盖楼的两种思维：从屋顶倒推 vs 从地基打起</strong></p>
+        <p>前面我们学习的“递归”，就像是一个想要直接触碰屋顶的人，他发现够不着，于是问下一层楼怎么盖，下一层再问下下一层……直到问到地基（基准情形），然后再一层层把结果返回来。这叫 <span class="highlight">自顶向下</span>。</p>
+        <p>但现实中，聪明的工匠盖楼，一定是先打好地基（已知条件），然后一层一层稳扎稳打地往上盖，直到盖到屋顶。这种思维，就是我们今天要施展的高阶魔法：<strong>递推（自底向上）</strong>！</p>
+    </div>
+
+    <h2>一、递推与递归的关系</h2>
+
+    <p>递归和递推，其实是解决同一个问题的“双胞胎”。它们的数学公式往往是一模一样的，唯一的区别在于<strong>计算的方向与存储方式</strong>。</p>
+    <p>递归利用了操作系统的“函数调用栈”来隐式地保存过程，而递推则是我们显式地创建一个“数组”来记录中间答案。因此，递推完美地避开了爆栈的风险，并且省去了反复调用函数带来的时间损耗，可以说是将速度拉满的终极形态！</p>
+
+    <div class="illustration">
+        <svg width="700" height="260" viewBox="0 0 700 260">
+            <text x="175" y="30" text-anchor="middle" font-weight="bold" fill="#F57F17" font-size="18">递归：自顶向下 (倒推)</text>
+            
+            <rect x="100" y="50" width="150" height="35" rx="8" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="175" y="73" text-anchor="middle" fill="#E65100">未知的大问题 f(n)</text>
+            
+            <path d="M 175 85 L 175 115" stroke="#F57F17" stroke-width="3" stroke-dasharray="4,4" marker-end="url(#arrow-orange)"/>
+
+            <rect x="100" y="115" width="150" height="35" rx="8" fill="#FFF59D" stroke="#FBC02D" stroke-width="2"/>
+            <text x="175" y="138" text-anchor="middle" fill="#E65100">小问题 f(n-1)</text>
+
+            <path d="M 175 150 L 175 180" stroke="#F57F17" stroke-width="3" stroke-dasharray="4,4" marker-end="url(#arrow-orange)"/>
+
+            <rect x="100" y="180" width="150" height="35" rx="8" fill="#FFCC80" stroke="#EF6C00" stroke-width="3"/>
+            <text x="175" y="203" text-anchor="middle" font-weight="bold" fill="#E65100">地基 (基准情形)</text>
+
+            <text x="525" y="30" text-anchor="middle" font-weight="bold" fill="#2E7D32" font-size="18">递推：自底向上 (顺推)</text>
+            
+            <rect x="450" y="180" width="150" height="35" rx="8" fill="#A5D6A7" stroke="#4CAF50" stroke-width="3"/>
+            <text x="525" y="203" text-anchor="middle" font-weight="bold" fill="#1B5E20">地基 (初始值)</text>
+            
+            <path d="M 525 180 L 525 150" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrow-green)"/>
+
+            <rect x="450" y="115" width="150" height="35" rx="8" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="525" y="138" text-anchor="middle" fill="#1B5E20">递推公式算出 f(2)</text>
+
+            <path d="M 525 115 L 525 85" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrow-green)"/>
+
+            <rect x="450" y="50" width="150" height="35" rx="8" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="525" y="73" text-anchor="middle" fill="#1B5E20">最终目标 f(n)</text>
+
+            <path d="M 350 20 L 350 240" stroke="#BCAAA4" stroke-width="2" stroke-dasharray="6,6"/>
+
+            <defs>
+                <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#F57F17" /></marker>
+                <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#4CAF50" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <h2>二、从递归推导递推公式：三步走心法</h2>
+    <p>要把一个已经写好的递归程序，改写成运行速度极快、永不爆栈的递推循环，只需牢记以下“转换三步曲”：</p>
+
+    <div class="step-box" style="border-color: #2E7D32; background-color: #E8F5E9;">
+        <ol>
+            <li><strong>找准“小账本”（状态定义）：</strong> 定义一个数组（比如 <span class="code-hl">dp[i]</span>），用来明确记录每一步的答案。这是递推中最难也最核心的一步，必须想清楚 <span class="code-hl">dp[i]</span> 到底代表什么含义。比如在斐波那契中，它就代表第 i 个斐波那契数。</li>
+            <li><strong>垫好“地基”（边界条件）：</strong> 递归里的“基准情形（if n == 1 return 1）”，直接变成数组的初始赋值（比如 <span class="code-hl">dp = 1</span>）。因为递推是从底层开始的，如果没有地基，公式就成了无源之水。</li>
+            <li><strong>写好“发动机”（递推方程与循环）：</strong> 这是魔法自动运转的时刻。递归里的自我调用 <span class="code-hl">f(n) = f(n-1) + ...</span>，在递推中直接变成对已知数组元素的查表相加 <span class="code-hl">dp[i] = dp[i-1] + ...</span>。用一个 for 循环，让 <code>i</code> 从已知地基一路跑向目标 <code>n</code> 即可。</li>
+        </ol>
+    </div>
+
+    <h2>三、实战示例 1：斐波那契数列</h2>
+    <p>我们在第一节中提过，斐波那契数列如果是纯递归，会因为疯狂地重复计算导致电脑卡死。现在我们把它转为<strong>递推（自底向上循环计算）</strong>，不仅不会卡，而且在一瞬间就能给出答案！</p>
+    
+    <div class="illustration" style="background-color: #FAFAFA;">
+        <svg width="700" height="200" viewBox="0 0 700 200">
+            <text x="350" y="25" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="16">图解：斐波那契的“自底向上”数组填空游戏</text>
+
+            <rect x="50" y="70" width="80" height="50" fill="#FFCC80" stroke="#EF6C00" stroke-width="2"/>
+            <text x="90" y="100" text-anchor="middle" font-weight="bold" font-size="18">1</text>
+            <text x="90" y="145" text-anchor="middle" fill="#E65100">dp</text>
+
+            <rect x="130" y="70" width="80" height="50" fill="#FFCC80" stroke="#EF6C00" stroke-width="2"/>
+            <text x="170" y="100" text-anchor="middle" font-weight="bold" font-size="18">1</text>
+            <text x="170" y="145" text-anchor="middle" fill="#E65100">dp</text>
+
+            <rect x="210" y="70" width="80" height="50" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="250" y="100" text-anchor="middle" font-weight="bold" font-size="18">2</text>
+            <text x="250" y="145" text-anchor="middle" fill="#2E7D32">dp</text>
+
+            <rect x="290" y="70" width="80" height="50" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="330" y="100" text-anchor="middle" font-weight="bold" font-size="18">3</text>
+            <text x="330" y="145" text-anchor="middle" fill="#2E7D32">dp</text>
+
+            <rect x="370" y="70" width="80" height="50" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="410" y="100" text-anchor="middle" font-weight="bold" font-size="18">5</text>
+            <text x="410" y="145" text-anchor="middle" fill="#2E7D32">dp</text>
+
+            <rect x="450" y="70" width="80" height="50" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="490" y="100" text-anchor="middle" font-weight="bold" font-size="18">8</text>
+            <text x="490" y="145" text-anchor="middle" fill="#2E7D32">dp</text>
+            
+            <text x="560" y="100" fill="#1B5E20" font-size="20">...</text>
+
+            <path d="M 90 60 Q 170 30 250 60" fill="none" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <path d="M 170 60 Q 210 40 250 60" fill="none" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <text x="170" y="25" text-anchor="middle" fill="#2E7D32" font-size="12">1 + 1 = 2</text>
+
+            <path d="M 250 160 Q 330 190 410 160" fill="none" stroke="#2E7D32" stroke-width="3" marker-end="url(#arrow-darkgreen)"/>
+            <path d="M 330 160 Q 370 180 410 160" fill="none" stroke="#2E7D32" stroke-width="3" marker-end="url(#arrow-darkgreen)"/>
+            <text x="330" y="195" text-anchor="middle" fill="#1B5E20" font-size="12">dp + dp = dp</text>
+
+            <defs>
+                <marker id="arrow-darkgreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2E7D32" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 斐波那契 (递推)</div>
+            <div class="code-body"><span class="type">long long</span> <span class="func">fib_iterative</span>(<span class="type">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="num">2</span>) <span class="kw">return</span> <span class="num">1</span>;
+    
+    <span class="com">// 1. 准备小账本 (数组)</span>
+    <span class="type">long long</span> dp[n + <span class="num">1</span>]; 
+    
+    <span class="com">// 2. 垫好地基 (边界条件)</span>
+    dp[<span class="num">1</span>] = <span class="num">1</span>;
+    dp[<span class="num">2</span>] = <span class="num">1</span>;
+    
+    <span class="com">// 3. 发动机：自底向上循环推导</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">3</span>; i &lt;= n; i++) {
+        <span class="com">// 查表相加，完全没有函数调用的开销</span>
+        dp[i] = dp[i - <span class="num">1</span>] + dp[i - <span class="num">2</span>];
+    }
+    
+    <span class="kw">return</span> dp[n]; <span class="com">// 直接返回目标结果</span>
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 斐波那契 (递推)</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">fib_iterative</span>(n):
+    <span class="kw">if</span> n &lt;= <span class="num">2</span>:
+        <span class="kw">return</span> <span class="num">1</span>
+        
+    <span class="com"># 1. 准备小账本 (列表)</span>
+    dp = [<span class="num">0</span>] * (n + <span class="num">1</span>)
+    
+    <span class="com"># 2. 垫好地基 (边界条件)</span>
+    dp[<span class="num">1</span>] = <span class="num">1</span>
+    dp[<span class="num">2</span>] = <span class="num">1</span>
+    
+    <span class="com"># 3. 发动机：自底向上循环推导</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="func">range</span>(<span class="num">3</span>, n + <span class="num">1</span>):
+        <span class="com"># 查表相加，完全没有函数调用的开销</span>
+        dp[i] = dp[i - <span class="num">1</span>] + dp[i - <span class="num">2</span>]
+        
+    <span class="kw">return</span> dp[n] <span class="com"># 直接返回目标结果</span></div>
+        </div>
+    </div>
+
+
+    <h2>四、实战示例 2：爬楼梯问题</h2>
+    <p><strong>问题描述：</strong> 假设你正在爬一个 N 阶的楼梯。每次你可以选择跨 1 个台阶或者 2 个台阶。请问，爬到第 N 阶楼梯，一共有多少种不同的走法？</p>
+    <p><strong>思考逻辑：</strong> 我们把“物理上的台阶”抽象为“数学上的状态”。想想最后一步你是怎么到达目标第 N 阶的？<br>
+    由于每次只能跨 1 步或 2 步，所以你到达第 N 阶之前的那一瞬间，要么站在第 <code>N-1</code> 阶，要么站在第 <code>N-2</code> 阶。<br>
+    所以：<span class="code-hl">到达第N阶的走法 = 到达第N-1阶的走法 + 到达第N-2阶的走法</span>。这说明爬楼梯本质上也是一个斐波那契的变形体！</p>
+
+    <div class="illustration">
+        <svg width="700" height="260" viewBox="0 0 700 260">
+            <text x="350" y="30" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="18">图解：爬楼梯的递推转移</text>
+            
+            <path d="M 100 220 L 200 220 L 200 180 L 300 180 L 300 140 L 400 140 L 400 100 L 500 100 L 500 60 L 600 60" fill="none" stroke="#795548" stroke-width="4"/>
+            
+            <text x="150" y="240" text-anchor="middle" fill="#4E342E" font-weight="bold">第 i-2 阶</text>
+            <text x="250" y="200" text-anchor="middle" fill="#4E342E" font-weight="bold">第 i-1 阶</text>
+            <text x="350" y="160" text-anchor="middle" fill="#F57F17" font-weight="bold">目标第 i 阶</text>
+            
+            <path d="M 250 170 Q 280 130 350 130" fill="none" stroke="#4CAF50" stroke-width="4" stroke-dasharray="5,5" marker-end="url(#arrow-green)"/>
+            <text x="290" y="125" fill="#2E7D32" font-size="12">跨 1 步</text>
+
+            <path d="M 150 210 Q 250 110 350 130" fill="none" stroke="#29B6F6" stroke-width="4" stroke-dasharray="5,5" marker-end="url(#arrow-blue)"/>
+            <text x="220" y="145" fill="#0288D1" font-size="12">跨 2 步</text>
+
+            <rect x="430" y="140" width="230" height="60" rx="10" fill="#FFF3E0" stroke="#FFB74D" stroke-width="2"/>
+            <text x="545" y="165" text-anchor="middle" fill="#E65100" font-weight="bold">状态转移方程：</text>
+            <text x="545" y="185" text-anchor="middle" fill="#1B5E20" font-size="15" font-family="monospace" font-weight="bold">dp[i] = dp[i-1] + dp[i-2]</text>
+
+            <defs>
+                <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#29B6F6" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 爬楼梯 (递推)</div>
+            <div class="code-body"><span class="type">int</span> <span class="func">climbStairs</span>(<span class="type">int</span> n) {
+    <span class="kw">if</span> (n == <span class="num">1</span>) <span class="kw">return</span> <span class="num">1</span>;
+    
+    <span class="com">// 1. 准备小账本</span>
+    <span class="type">int</span> dp[n + <span class="num">1</span>];
+    
+    <span class="com">// 2. 地基：1阶有1种走法，2阶有2种走法(1+1 或 2)</span>
+    dp[<span class="num">1</span>] = <span class="num">1</span>;
+    dp[<span class="num">2</span>] = <span class="num">2</span>;
+    
+    <span class="com">// 3. 自底向上推导每一阶的走法</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">3</span>; i &lt;= n; i++) {
+        dp[i] = dp[i - <span class="num">1</span>] + dp[i - <span class="num">2</span>];
+    }
+    
+    <span class="kw">return</span> dp[n];
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 爬楼梯 (递推)</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">climbStairs</span>(n):
+    <span class="kw">if</span> n == <span class="num">1</span>:
+        <span class="kw">return</span> <span class="num">1</span>
+        
+    <span class="com"># 1. 准备小账本</span>
+    dp = [<span class="num">0</span>] * (n + <span class="num">1</span>)
+    
+    <span class="com"># 2. 地基：1阶有1种，2阶有2种(1+1 或 2)</span>
+    dp[<span class="num">1</span>] = <span class="num">1</span>
+    dp[<span class="num">2</span>] = <span class="num">2</span>
+    
+    <span class="com"># 3. 自底向上推导每一阶的走法</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="func">range</span>(<span class="num">3</span>, n + <span class="num">1</span>):
+        dp[i] = dp[i - <span class="num">1</span>] + dp[i - <span class="num">2</span>]
+        
+    <span class="kw">return</span> dp[n]</div>
+        </div>
+    </div>
+
+    <h2>五、递归转递推的终极对决与应用场景</h2>
+
+    <table class="compare-table">
+        <tr>
+            <th>对比维度</th>
+            <th>递归 (自顶向下)</th>
+            <th>递推 (自底向上)</th>
+        </tr>
+        <tr>
+            <td><strong>执行速度</strong></td>
+            <td>较慢（频繁的函数压栈、弹栈开销）</td>
+            <td><strong>极快</strong>（普通的循环遍历，毫无额外开销）</td>
+        </tr>
+        <tr>
+            <td><strong>内存消耗</strong></td>
+            <td>高（需要极深的函数调用栈，容易爆栈）</td>
+            <td><strong>极低</strong>（只需要一个数组，甚至能优化为几个变量）</td>
+        </tr>
+        <tr>
+            <td><strong>代码易读性</strong></td>
+            <td><strong>优雅直观</strong>（公式原样翻译，数学美感极佳）</td>
+            <td>稍显平淡（需要理清推导顺序和状态定义）</td>
+        </tr>
+        <tr>
+            <td><strong>适用场景</strong></td>
+            <td>问题具有明显树状分支、回溯搜索、不知深度时</td>
+            <td><strong>绝大多数数列求值、动态规划问题</strong></td>
+        </tr>
+    </table>
+
+    <div class="note-box" style="border-left-color: #F57F17; background-color: #FFFDE7;">
+        <p><strong>💡 魔法终极进化：空间复杂度优化到 O(1)</strong></p>
+        <p>如果你仔细观察斐波那契数列和爬楼梯的递推公式：<span class="code-hl">dp[i] = dp[i-1] + dp[i-2]</span>。你会发现，虽然我们开了一个很长的数组记录历史记录，但实际上，每次计算新楼层时，我们<strong>只需要知道紧挨着的前面两个楼层的数据</strong>，更早的楼层数据已经被彻底抛弃，再也用不上了！</p>
+        <p>因此，我们可以连数组都不开，只用三个简单的变量 <span class="code-hl">a</span>（代表 i-2 的值）、<span class="code-hl">b</span>（代表 i-1 的值）、<span class="code-hl">c</span>（代表刚算出来的 i 的值）不断滚动向前即可。</p>
+        <p>具体来说，就是在每次循环中，用 <span class="code-hl">c = a + b</span> 算出新台阶，然后立刻让位置整体前移：<span class="code-hl">a = b</span>，<span class="code-hl">b = c</span>。旧的数据被无情覆盖，内存占用从 O(N) 瞬间变成 O(1)。这被称为<strong>“滚动数组”优化</strong>，是递推算法在面试与竞赛中的进阶杀手锏！</p>
+    </div>
+
+    <div class="simple-footer">
+        扣哒世界教研团队
+    </div>
+
+</div>
+
+</body>
+</html>

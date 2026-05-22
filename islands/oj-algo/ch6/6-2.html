@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.2 递归执行过程与栈帧 - C++ 魔法课堂</title>
+    <style>
+        /* ================= 核心配色 (森林绿与魔法金主题) ================= */
+        :root {
+            --primary: #2E7D32;      /* 深绿色：代表递归的深度与森林 */
+            --primary-dark: #1B5E20;
+            --secondary: #F57F17;    /* 魔法金：代表核心基准点 */
+            --accent: #43A047;       /* 亮绿色：代表生机与分支 */
+            --bg-color: #F1F8E9;     /* 浅葱绿底色 */
+            --text-main: #33691E;
+            --code-bg: #263238;      /* 深色代码块背景 */
+        }
+
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#DCEDC8 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 15px 30px rgba(46, 125, 50, 0.15);
+            border: 4px solid #A5D6A7;
+        }
+
+        /* ================= 标题样式 ================= */
+        h1 {
+            text-align: center;
+            color: var(--primary-dark);
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #F1F8E9;
+        }
+
+        h2 {
+            background: linear-gradient(90deg, var(--primary), #81C784);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            font-size: 1.6em;
+        }
+
+        h3 {
+            color: var(--secondary);
+            border-bottom: 3px dashed var(--secondary);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* ================= 强调样式 ================= */
+        .highlight {
+            color: #FFF;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        
+        .text-orange { color: #E65100; font-weight: bold; }
+        .text-green { color: #2E7D32; font-weight: bold; }
+        .text-gold { color: #F57F17; font-weight: bold; }
+        .text-red { color: #C62828; font-weight: bold; }
+
+        .note-box {
+            background-color: #E8F5E9;
+            border-left: 8px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .danger-box {
+            background-color: #FFF3E0;
+            border: 2px solid #FFB74D;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .error-box {
+            background-color: #FFEBEE;
+            border: 2px solid #E53935;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #B71C1C;
+        }
+
+        .step-box {
+            background-color: #FAFAFA;
+            border: 2px dashed #81C784;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #2E7D32;
+        }
+
+        /* ================= 图解区域 ================= */
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #C8E6C9;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        /* ================= 并排代码块 ================= */
+        .code-comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .code-card {
+            flex: 1;
+            border: 3px solid #81C784;
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--code-bg);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .code-header {
+            background: #1B5E20;
+            color: #C8E6C9;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #81C784;
+        }
+
+        .code-body {
+            padding: 20px;
+            color: #AEEA00; 
+            font-family: "Consolas", "Courier New", monospace;
+            white-space: pre;
+            font-size: 14.5px;
+            line-height: 1.6;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        /* 代码高亮 (暗黑系绿/金色调) */
+        .kw { color: #FF8A65; font-weight: bold; } /* 关键字 */
+        .com { color: #78909C; font-style: italic; } /* 注释 */
+        .str { color: #AED581; } /* 字符串 */
+        .num { color: #FFD54F; } /* 数字 */
+        .func { color: #4FC3F7; } /* 函数名 */
+        .type { color: #BA68C8; } /* 类型 */
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .code-comparison {
+                flex-direction: column;
+            }
+        }
+
+        /* 极简页脚 */
+        .simple-footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #A5D6A7;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>6.2 递归执行过程与栈帧</h1>
+
+    <div class="note-box">
+        <p>🥞 <strong>煎饼果子与魔法电梯：</strong></p>
+        <p>你知道电脑是怎么记住“自己调用自己”走到哪一步的吗？想象你在食堂拿盘子，新洗好的盘子总是摞在最上面，而你拿盘子时也只能从最上面拿。这叫 <span class="highlight">后进先出 (LIFO)</span>。</p>
+        <p>在编程魔法中，这个装盘子的容器叫做 <strong>“函数调用栈 (Call Stack)”</strong>，而每一个盘子，就是一个 <strong>“栈帧 (Stack Frame)”</strong>！</p>
+    </div>
+
+    <h2>一、函数调用栈与栈帧结构</h2>
+
+    <p>当一个函数开始执行时，电脑会在内存的“栈”区为它分配一个专属的“工作隔间”，这就是<strong>栈帧</strong>。它就像一张便签纸，记录着当前函数的所有私密信息。如果这个函数又调用了别的函数（或者它自己），电脑就会在上面再叠一张新的便签纸。</p>
+
+    <div class="step-box">
+        <h3>🔍 栈帧里到底装了什么？</h3>
+        <ul>
+            <li><strong>局部变量：</strong> 函数内部自己定义的变量（比如 <code>int a = 5;</code>），别的函数看不见。</li>
+            <li><strong>参数：</strong> 从外面传进来的数据（比如 <code>sum(3)</code> 里的 <code>3</code>）。</li>
+            <li><strong>返回地址：</strong> 这个最重要！它记录了“等我执行完，我该把结果交给谁？我该回到代码的哪一行继续执行？”</li>
+        </ul>
+    </div>
+
+    <div class="illustration">
+        <svg width="650" height="320" viewBox="0 0 650 320">
+            <path d="M 200 40 L 200 280 L 450 280 L 450 40" fill="none" stroke="#2E7D32" stroke-width="6" stroke-linecap="round"/>
+            <text x="325" y="310" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="18">函数调用栈 (Call Stack)</text>
+
+            <rect x="220" y="210" width="210" height="60" rx="5" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="325" y="235" text-anchor="middle" font-weight="bold" fill="#1B5E20">main() 的栈帧</text>
+            <text x="325" y="255" text-anchor="middle" fill="#33691E" font-size="12">局部变量: 无 | 返回地址: 操作系统</text>
+
+            <rect x="220" y="140" width="210" height="60" rx="5" fill="#A5D6A7" stroke="#4CAF50" stroke-width="2"/>
+            <text x="325" y="165" text-anchor="middle" font-weight="bold" fill="#1B5E20">sum(3) 的栈帧</text>
+            <text x="325" y="185" text-anchor="middle" fill="#33691E" font-size="12">参数 n=3 | 返回地址: main() 第10行</text>
+
+            <rect x="220" y="70" width="210" height="60" rx="5" fill="#81C784" stroke="#4CAF50" stroke-width="2"/>
+            <text x="325" y="95" text-anchor="middle" font-weight="bold" fill="#1B5E20">sum(2) 的栈帧</text>
+            <text x="325" y="115" text-anchor="middle" fill="#33691E" font-size="12">参数 n=2 | 返回地址: sum() 第5行</text>
+
+            <path d="M 150 50 Q 180 100 200 100" fill="none" stroke="#F57F17" stroke-width="4" marker-end="url(#arrow-push)"/>
+            <text x="120" y="40" font-weight="bold" fill="#E65100">压栈 (Push)</text>
+            <text x="120" y="60" fill="#E65100" font-size="12">调用函数时分配</text>
+
+            <path d="M 450 100 Q 470 100 500 50" fill="none" stroke="#43A047" stroke-width="4" marker-end="url(#arrow-pop)"/>
+            <text x="530" y="40" font-weight="bold" fill="#2E7D32">弹栈 (Pop)</text>
+            <text x="530" y="60" fill="#2E7D32" font-size="12">执行完毕后销毁</text>
+
+            <defs>
+                <marker id="arrow-push" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#F57F17" />
+                </marker>
+                <marker id="arrow-pop" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#43A047" />
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+    <h2>二、压栈与弹栈的魔法秀</h2>
+    <p>让我们用一个简单的例子：计算 1 到 n 的和（例如 <code>sum(3) = 3 + 2 + 1 = 6</code>），来亲眼看看递归是如何一层层压入，又一层层弹出的。</p>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 累加求和</div>
+            <div class="code-body"><span class="type">int</span> <span class="func">sum</span>(<span class="type">int</span> n) {
+    <span class="com">// 基准情形：当 n 为 1 时返回 1</span>
+    <span class="kw">if</span> (n == <span class="num">1</span>) {
+        <span class="kw">return</span> <span class="num">1</span>;
+    }
+    <span class="com">// 递归情形：自己加上更小规模的和</span>
+    <span class="kw">return</span> n + <span class="func">sum</span>(n - <span class="num">1</span>);
+}
+
+<span class="type">int</span> <span class="func">main</span>() {
+    <span class="type">int</span> result = <span class="func">sum</span>(<span class="num">3</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 累加求和</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">sum_n</span>(n):
+    <span class="com"># 基准情形：当 n 为 1 时返回 1</span>
+    <span class="kw">if</span> n == <span class="num">1</span>:
+        <span class="kw">return</span> <span class="num">1</span>
+        
+    <span class="com"># 递归情形：自己加上更小规模的和</span>
+    <span class="kw">return</span> n + <span class="func">sum_n</span>(n - <span class="num">1</span>)
+
+
+<span class="com"># 主程序调用</span>
+result = <span class="func">sum_n</span>(<span class="num">3</span>)
+</div>
+        </div>
+    </div>
+
+    <div class="illustration">
+        <svg width="800" height="300" viewBox="0 0 800 300">
+            <text x="400" y="25" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="18">图解：sum(3) 的生命周期 (递去与归来)</text>
+
+            <text x="150" y="60" text-anchor="middle" font-weight="bold" fill="#F57F17">第一阶段：深入 (压栈等待)</text>
+            
+            <rect x="80" y="80" width="140" height="40" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="150" y="105" text-anchor="middle" fill="#1B5E20">sum(3) 算 3 + sum(2)</text>
+            <path d="M 150 120 L 150 140" stroke="#F57F17" stroke-width="3" marker-end="url(#arrow-push)"/>
+
+            <rect x="80" y="140" width="140" height="40" rx="5" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="150" y="165" text-anchor="middle" fill="#1B5E20">sum(2) 算 2 + sum(1)</text>
+            <path d="M 150 180 L 150 200" stroke="#F57F17" stroke-width="3" marker-end="url(#arrow-push)"/>
+
+            <rect x="80" y="200" width="140" height="40" rx="5" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="150" y="225" text-anchor="middle" fill="#E65100" font-weight="bold">sum(1) 触底！直接返回 1</text>
+
+            <path d="M 250 220 Q 400 280 550 220" fill="none" stroke="#9E9E9E" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrow-gray)"/>
+            <text x="400" y="265" text-anchor="middle" fill="#757575">触碰基准情形，开始反弹回溯</text>
+
+            <text x="650" y="60" text-anchor="middle" font-weight="bold" fill="#43A047">第二阶段：返回 (弹栈计算)</text>
+
+            <rect x="580" y="200" width="140" height="40" rx="5" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="650" y="225" text-anchor="middle" fill="#757575">sum(1) 销毁</text>
+            <path d="M 650 200 L 650 180" stroke="#43A047" stroke-width="3" marker-end="url(#arrow-pop)"/>
+            <text x="680" y="195" fill="#2E7D32" font-size="14" font-weight="bold">向上返回 1</text>
+
+            <rect x="580" y="140" width="140" height="40" rx="5" fill="#C8E6C9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="650" y="165" text-anchor="middle" fill="#1B5E20">得到 1, 算 2 + 1 = 3</text>
+            <path d="M 650 140 L 650 120" stroke="#43A047" stroke-width="3" marker-end="url(#arrow-pop)"/>
+            <text x="680" y="135" fill="#2E7D32" font-size="14" font-weight="bold">向上返回 3</text>
+
+            <rect x="580" y="80" width="140" height="40" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="650" y="105" text-anchor="middle" fill="#1B5E20">得到 3, 算 3 + 3 = 6</text>
+            
+            <text x="650" y="40" text-anchor="middle" fill="#E65100" font-weight="bold" font-size="16">最终结果: 6</text>
+
+            <defs>
+                <marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#9E9E9E" />
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+
+    <h2>三、危险边缘：递归深度与栈溢出</h2>
+    <p>电脑的内存是有限的，分配给“函数调用栈”的空间就更小了（通常只有几兆字节，MB）。如果你忘记写“基准情形”，或者问题规模太大（比如调用 <code>sum(100000)</code>），就会导致盘子越摞越高，最后把天花板顶破！这就叫 <span class="highlight text-red" style="background:#FFEBEE;">栈溢出 (Stack Overflow)</span>，程序会当场崩溃闪退。</p>
+
+    <div class="error-box">
+        <h3>🚨 致命错误演示：忘记基准情形</h3>
+        <p>下面的代码就像一个刹车失灵的汽车，会疯狂地压栈，直到系统强制将它杀死。</p>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card" style="border-color: #E53935;">
+            <div class="code-header" style="background: #C62828; color: #FFEBEE; border-bottom-color: #E53935;">C++ 崩溃代码</div>
+            <div class="code-body" style="color: #FFCDD2;"><span class="type">void</span> <span class="func">endless_loop</span>() {
+    <span class="com">// 致命错误：没有写 if(基准条件) return;</span>
+    <span class="com">// 函数直接调用自己，无休无止！</span>
+    <span class="func">endless_loop</span>(); 
+}
+
+<span class="type">int</span> <span class="func">main</span>() {
+    <span class="func">endless_loop</span>(); <span class="com">// 砰！程序崩溃</span>
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+        </div>
+
+        <div class="code-card" style="border-color: #E53935;">
+            <div class="code-header" style="background: #C62828; color: #FFEBEE; border-bottom-color: #E53935;">Python 崩溃代码</div>
+            <div class="code-body" style="color: #FFCDD2;"><span class="kw">def</span> <span class="func">endless_loop</span>():
+    <span class="com"># 致命错误：没有写 if 基准条件: return</span>
+    <span class="com"># 函数直接调用自己，无休无止！</span>
+    <span class="func">endless_loop</span>()
+
+<span class="com"># 主程序调用</span>
+<span class="func">endless_loop</span>() <span class="com"># Python 会抛出 RecursionError</span>
+</div>
+        </div>
+    </div>
+
+    <div class="illustration" style="border-color: #EF9A9A; background-color: #FFEBEE;">
+        <svg width="400" height="280" viewBox="0 0 400 280">
+            <path d="M 100 150 L 100 260 L 300 260 L 300 150" fill="none" stroke="#C62828" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 100 150 L 80 120 M 300 150 L 320 120" fill="none" stroke="#C62828" stroke-width="4" stroke-dasharray="8,8"/>
+            
+            <rect x="120" y="210" width="160" height="30" fill="#EF9A9A" stroke="#C62828" stroke-width="2"/>
+            <rect x="120" y="170" width="160" height="30" fill="#EF5350" stroke="#C62828" stroke-width="2"/>
+            <rect x="120" y="130" width="160" height="30" fill="#E53935" stroke="#C62828" stroke-width="2"/>
+            <rect x="120" y="90" width="160" height="30" fill="#D32F2F" stroke="#B71C1C" stroke-width="2"/>
+            <rect x="120" y="50" width="160" height="30" fill="#C62828" stroke="#B71C1C" stroke-width="2"/>
+            <rect x="120" y="10" width="160" height="30" fill="#B71C1C" stroke="#880E4F" stroke-width="2"/>
+
+            <text x="200" y="140" text-anchor="middle" font-weight="bold" fill="#FFF" font-size="28" transform="rotate(-15 200 140)">💥 STACK OVERFLOW!</text>
+            <text x="200" y="280" text-anchor="middle" fill="#C62828" font-weight="bold">内存耗尽，程序崩溃退出！</text>
+        </svg>
+    </div>
+
+
+    <h2>四、火眼金睛：通过打印观察执行过程</h2>
+    <p>觉得脑内模拟压栈弹栈太抽象了？我们可以通过一个小技巧让程序自己“说”出它的执行过程。利用一个表示<strong>深度</strong>的参数，打印不同数量的空格，就能画出一棵漂亮的“递归树”！</p>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 打印执行缩进</div>
+            <div class="code-body"><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;string&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">void</span> <span class="func">countdown</span>(<span class="type">int</span> n, <span class="type">string</span> indent) {
+    cout &lt;&lt; indent &lt;&lt; <span class="str">"进入 countdown("</span> &lt;&lt; n &lt;&lt; <span class="str">")"</span> &lt;&lt; endl;
+    
+    <span class="kw">if</span> (n == <span class="num">0</span>) {
+        cout &lt;&lt; indent &lt;&lt; <span class="str">"  触底！准备返回"</span> &lt;&lt; endl;
+        <span class="kw">return</span>;
+    }
+    
+    <span class="com">// 递归调用，缩进增加 4 个空格</span>
+    <span class="func">countdown</span>(n - <span class="num">1</span>, indent + <span class="str">"    "</span>);
+    
+    cout &lt;&lt; indent &lt;&lt; <span class="str">"退出 countdown("</span> &lt;&lt; n &lt;&lt; <span class="str">")"</span> &lt;&lt; endl;
+}
+
+<span class="type">int</span> <span class="func">main</span>() {
+    <span class="func">countdown</span>(<span class="num">2</span>, <span class="str">""</span>);
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 打印执行缩进</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">countdown</span>(n, depth=<span class="num">0</span>):
+    <span class="com"># 深度乘空格，生成缩进字符串</span>
+    indent = <span class="str">"    "</span> * depth 
+    <span class="func">print</span>(<span class="str">f"{indent}进入 countdown({n})"</span>)
+    
+    <span class="kw">if</span> n == <span class="num">0</span>:
+        <span class="func">print</span>(<span class="str">f"{indent}  触底！准备返回"</span>)
+        <span class="kw">return</span>
+        
+    <span class="com"># 递归调用，深度加 1</span>
+    <span class="func">countdown</span>(n - <span class="num">1</span>, depth + <span class="num">1</span>)
+    
+    <span class="func">print</span>(<span class="str">f"{indent}退出 countdown({n})"</span>)
+
+<span class="com"># 主程序调用</span>
+<span class="func">countdown</span>(<span class="num">2</span>)
+</div>
+        </div>
+    </div>
+
+    <div class="illustration" style="background-color: #1E1E1E; border-color: #424242;">
+        <svg width="600" height="260" viewBox="0 0 600 260">
+            <text x="300" y="25" text-anchor="middle" font-weight="bold" fill="#81C784" font-size="16">▶ 控制台运行输出结果：清晰的凹凸结构</text>
+            
+            <text x="50" y="60" fill="#E0E0E0" font-family="monospace" font-size="16">进入 countdown(2)</text>
+            <path d="M 50 65 L 50 230" fill="none" stroke="#F57F17" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="50" y="250" fill="#E0E0E0" font-family="monospace" font-size="16">退出 countdown(2)</text>
+
+            <text x="100" y="90" fill="#E0E0E0" font-family="monospace" font-size="16">进入 countdown(1)</text>
+            <path d="M 100 95 L 100 200" fill="none" stroke="#4CAF50" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="100" y="220" fill="#E0E0E0" font-family="monospace" font-size="16">退出 countdown(1)</text>
+
+            <text x="150" y="120" fill="#E0E0E0" font-family="monospace" font-size="16">进入 countdown(0)</text>
+            <path d="M 150 125 L 150 160" fill="none" stroke="#29B6F6" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="150" y="150" fill="#FFB74D" font-family="monospace" font-size="16">  触底！准备返回</text>
+            <text x="150" y="180" fill="#E0E0E0" font-family="monospace" font-size="16">退出 countdown(0)</text>
+
+            <text x="400" y="120" fill="#81C784" font-size="14">这种 V 字型的凹凸结构</text>
+            <text x="400" y="145" fill="#81C784" font-size="14">完美展现了递归</text>
+            <text x="400" y="170" fill="#F57F17" font-weight="bold" font-size="16">“先深入压栈，后返回弹栈”</text>
+            <text x="400" y="195" fill="#81C784" font-size="14">的完整生命周期！</text>
+        </svg>
+    </div>
+
+    <div class="simple-footer">
+        扣哒世界教研团队
+    </div>
+
+</div>
+
+</body>
+</html>
