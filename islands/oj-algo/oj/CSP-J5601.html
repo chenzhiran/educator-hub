@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：四柱汉诺塔</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 复古地图主题 */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fdf8e4; /* 羊皮纸浅黄色背景 */
+            color: #4e342e; /* 深咖啡色文字 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #d35400;
+            background-color: #e67e22;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #27ae60;
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 5px solid #d35400; /* 复古橙棕色边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #c0392b;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #f5b041;
+            margin-bottom: 20px;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #2980b9;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #1f618d, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #1f618d, 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #d35400;
+            border-bottom: 3px dashed #f5b041;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h3 {
+            color: #e67e22;
+            margin-top: 25px;
+        }
+
+        /* 可爱的内容卡片 */
+        .card {
+            background-color: #fdfbf7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #d35400;
+        }
+
+        .card.problem { border-color: #3498db; background-color: #ebf5fb; }
+        .card.logic { border-color: #9b59b6; background-color: #f5eef8; }
+        .card.knowledge { border-color: #1abc9c; background-color: #e8f8f5; }
+        .card.code-box { border-color: #2c3e50; background-color: #f2f3f4; }
+        .card.summary { border-color: #e74c3c; background-color: #fdedec; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #f1c40f; font-style: italic; }
+        .keyword { color: #e74c3c; font-weight: bold; }
+        .type { color: #3498db; }
+        .string { color: #2ecc71; }
+        .number { color: #e67e22; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #fad7a1;
+            color: #d35400;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划公式 */
+        .formula {
+            background-color: #fff3e0;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #d35400;
+            border: 2px dashed #e67e22;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+
+        /* 强调高亮文字 */
+        .highlight {
+            background-color: #ffcc80;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #a6acaf;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏛️ 四柱汉诺塔 ⏳</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #d35400;">
+        👋 嗨，时光神殿的守护者！我是你的算法向导！<br>
+        古老的僧侣们日夜搬运着纯金的圆盘。原本神殿里只有三根石柱，但现在神明额外赐予了一根全新的石柱，这让搬运的速度大大加快！快用魔法算算，在四根柱子的加持下，最少需要多少步吧！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/42" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>在四座塔（A、B、C、D）的情况下，我们需要将 A 座上的 n 个圆盘移动到 D 座上。</p>
+        <p><strong>神圣的搬运法则：</strong></p>
+        <ul>
+            <li>每次只能移动一个圆盘。</li>
+            <li>移动过程中必须始终保持<strong>小盘在上，大盘在下</strong>。</li>
+        </ul>
+        <p><strong>计算任务：</strong> 请问至少要移动多少步才能完成任务？</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #5dade2;">
+                <strong>📥 魔法输入阵：</strong><br>
+                <span style="color: #7f8c8d; font-size: 0.9em;">(圆盘的数量)</span><br>
+                <span class="code-inline" style="background-color: #ebf5fb; color: #2980b9;">5</span>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #af7ac5;">
+                <strong>📤 奇迹输出阵：</strong><br>
+                <span style="color: #7f8c8d; font-size: 0.9em;">(需要的最少步数)</span><br>
+                <span class="code-inline" style="background-color: #f4ecf7; color: #8e44ad;">13</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：四柱的奥秘)</h2>
+        
+        <p>普通的汉诺塔只有三根柱子，而四根柱子给我们带来了新的可能！我们需要将问题拆解开来：</p>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #9b59b6; margin: 20px 0; text-align: center;">
+            <div style="color: #7f8c8d; font-size: 1.1em; margin-bottom: 15px; font-weight: bold;">
+                🏗️ 四柱汉诺塔的完美三步曲 🏗️
+            </div>
+            
+            <div style="text-align: left; margin-top: 15px; background-color: #fdfefe; padding: 20px; border-radius: 12px; border: 2px dashed #d2b4de;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 18px; border-bottom: 1px solid #f4ecf7; padding-bottom: 12px;">
+                        <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">步骤 1</span> 
+                        <span style="color: #4a235a;">先把 A 柱顶端的 <strong>j</strong> 个较小的盘子，在 4 根柱子的帮助下，移到某根空柱（比如 B 柱）上。<br><span style="margin-left: 75px; color: #8e44ad;">消耗步数：<span class="code-inline">h4[j]</span></span></span>
+                    </li>
+                    <li style="margin-bottom: 18px; border-bottom: 1px solid #f4ecf7; padding-bottom: 12px;">
+                        <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">步骤 2</span> 
+                        <span style="color: #4a235a;">现在 B 柱被那 j 个盘子占用了！A 柱还剩 <strong>n-j</strong> 个大盘子。我们只能用剩下的 3 根柱子（A、C、D）把这 n-j 个大盘子移到目标柱 D 柱上。<br><span style="margin-left: 75px; color: #8e44ad;">消耗步数：退化为三柱汉诺塔 <span class="code-inline">h3[n-j]</span></span></span>
+                    </li>
+                    <li>
+                        <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">步骤 3</span> 
+                        <span style="color: #4a235a;">最后，再把 B 柱上的 <strong>j</strong> 个小盘子，在 4 根柱子的帮助下，移到 D 柱上。<br><span style="margin-left: 75px; color: #8e44ad;">消耗步数：<span class="code-inline">h4[j]</span></span></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>✨ 状态转移与极限求极小值</h3>
+        <p>我们不知道把多少个盘子（也就是 j 等于多少）先移走才是最划算的，所以我们可以遍历所有的 j（从 1 到 n-1），找出总步数最小的那种切分方案！</p>
+        
+        <div style="text-align: center; color: #c0392b; font-size: 1.1em; font-weight: bold; margin: 25px 0 10px 0;">
+            💡 经典三柱汉诺塔公式：
+        </div>
+        <div class="formula">
+            $$h_3(n) = 2 \times h_3(n-1) + 1$$
+        </div>
+
+        <div style="text-align: center; color: #c0392b; font-size: 1.1em; font-weight: bold; margin: 25px 0 10px 0;">
+            💡 四柱汉诺塔动态规划公式：
+        </div>
+        <div class="formula">
+            $$h_4(n) = \min_{1 \le j < n} \{ 2 \times h_4(j) + h_3(n-j) \}$$
+        </div>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>记忆化搜索 (Memoization)：</strong> 递归虽然好理解，但是如果不用数组把算过的答案存起来，它会傻乎乎地重复计算，导致“超时”！代码里的 <span class="code-inline">h3</span> 和 <span class="code-inline">h4</span> 数组就是我们的“记忆笔记本”。</li>
+                <li>🛡️ <strong>初始化 -1：</strong> 使用 <span class="code-inline">memset(h3, -1, sizeof h3)</span> 把笔记本初始化为 -1，代表“还没算过”。当看到值不是 -1 时，直接把答案拿出来用即可，速度起飞！</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;bits/stdc++.h&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="keyword">const int</span> N = <span class="number">20000</span>;
+<span class="type">int</span> h3[N], h4[N]; <span class="comment">// 魔法笔记本，用于记录计算结果</span>
+
+<span class="comment">// 🎨 计算 3 根柱子时移动 i 个盘子的最少步数</span>
+<span class="type">int</span> calc_h3(<span class="type">int</span> i) {
+    <span class="keyword">if</span> (i == <span class="number">1</span>) <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">// 🏁 基本情况</span>
+    <span class="keyword">if</span> (h3[i] != -<span class="number">1</span>) <span class="keyword">return</span> h3[i]; <span class="comment">// 📖 如果算过了，直接翻笔记本</span>
+    
+    <span class="comment">// 经典汉诺塔递推公式：移走上方 i-1 个，移底盘，再移回上方 i-1 个</span>
+    <span class="keyword">return</span> h3[i] = <span class="number">2</span> * calc_h3(i - <span class="number">1</span>) + <span class="number">1</span>;
+}
+
+<span class="comment">// 🎨 计算 4 根柱子时移动 i 个盘子的最少步数</span>
+<span class="type">int</span> calc_h4(<span class="type">int</span> i) {
+    <span class="keyword">if</span> (i == <span class="number">1</span>) <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">// 🏁 基本情况</span>
+    <span class="keyword">if</span> (h4[i] != -<span class="number">1</span>) <span class="keyword">return</span> h4[i]; <span class="comment">// 📖 查阅笔记本</span>
+
+    <span class="type">int</span> result = INT_MAX; <span class="comment">// 初始设为无穷大，为了寻找最小值</span>
+    <span class="comment">// 🔍 遍历所有的分割方案，寻找最完美的切分点 j</span>
+    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt; i; ++j) {
+        result = min(result, <span class="number">2</span> * calc_h4(j) + calc_h3(i - j));
+    }
+    
+    <span class="keyword">return</span> h4[i] = result; <span class="comment">// 把算出的最优解写进笔记本</span>
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n;
+    <span class="type">cin</span> &gt;&gt; n;
+
+    <span class="comment">// 🧹 初始化数组为 -1，清除笔记本</span>
+    memset(h3, -<span class="number">1</span>, <span class="keyword">sizeof</span> h3);
+    memset(h4, -<span class="number">1</span>, <span class="keyword">sizeof</span> h4);
+
+    <span class="type">cout</span> &lt;&lt; calc_h4(n) &lt;&lt; endl;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>字典作记忆本：</strong> Python 中我们可以直接使用字典（Dictionary）或者内置的 <span class="code-inline">@lru_cache</span> 装饰器来实现记忆化。这里我们用字典来模拟 C++ 中的数组记录过程。</li>
+                <li>⚠️ <strong>递归深度限制：</strong> 汉诺塔的步数和层数增加很快，为了防止神殿法力崩溃（RecursionError），我们需要在代码开头用 <span class="code-inline">sys.setrecursionlimit()</span> 解除递归深度封印。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">import</span> sys
+<span class="comment"># 🛡️ 提升魔法上限，防止递归层数过深导致报错</span>
+sys.setrecursionlimit(<span class="number">20000</span>)
+
+<span class="comment"># 📖 魔法笔记本，用于记录算过的结果，拒绝重复劳动</span>
+memo_h3 = {}
+memo_h4 = {}
+
+<span class="comment"># 🎨 计算 3 根柱子的情况</span>
+<span class="keyword">def</span> <span class="type">calc_h3</span>(i):
+    <span class="keyword">if</span> i == <span class="number">1</span>:
+        <span class="keyword">return</span> <span class="number">1</span>
+    <span class="keyword">if</span> i <span class="keyword">in</span> memo_h3:
+        <span class="keyword">return</span> memo_h3[i]
+        
+    memo_h3[i] = <span class="number">2</span> * calc_h3(i - <span class="number">1</span>) + <span class="number">1</span>
+    <span class="keyword">return</span> memo_h3[i]
+
+<span class="comment"># 🎨 计算 4 根柱子的情况</span>
+<span class="keyword">def</span> <span class="type">calc_h4</span>(i):
+    <span class="keyword">if</span> i == <span class="number">1</span>:
+        <span class="keyword">return</span> <span class="number">1</span>
+    <span class="keyword">if</span> i <span class="keyword">in</span> memo_h4:
+        <span class="keyword">return</span> memo_h4[i]
+
+    min_steps = <span class="type">float</span>(<span class="string">'inf'</span>) <span class="comment"># 设为无穷大</span>
+    <span class="comment"># 🔍 遍历 1 到 i-1 所有的分割方案 j，寻找最小值</span>
+    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, i):
+        min_steps = <span class="type">min</span>(min_steps, <span class="number">2</span> * calc_h4(j) + calc_h3(i - j))
+
+    memo_h4[i] = min_steps
+    <span class="keyword">return</span> memo_h4[i]
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    n = <span class="type">int</span>(<span class="type">input</span>())
+    <span class="type">print</span>(calc_h4(n))
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+    </div>
+
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🌟 降维打击的核心思想：</strong> 遇到四柱汉诺塔不会做？我们就把它<strong>拆分</strong>成我们会做的三柱汉诺塔！通过让出一部分柱子，把复杂问题转化为已知问题。</li>
+            <li><strong>🌟 寻找最优解 (DP思想的萌芽)：</strong> 我们并不知道切分点在哪，既然不知道，那就让程序用一个 <span class="code-inline">for</span> 循环试遍所有的可能性，然后用 <span class="code-inline">min()</span> 函数选出步数最少的那一个。</li>
+            <li><strong>🌟 记忆化搜索：</strong> 这种“画个树叉”一直递归下去的方法，往往有很多分支计算的内容是完全一模一样的。使用数组或字典记录下算过的结果，是把时间复杂度从指数级降下来的关键法宝！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    // 简单的魔法切换法术 (JS 控制 Python 和 C++ 内容的显示)
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>
