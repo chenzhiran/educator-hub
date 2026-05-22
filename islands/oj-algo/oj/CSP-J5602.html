@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：骑士赛马</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 复古地图主题 */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fdf8e4; /* 羊皮纸浅黄色背景 */
+            color: #4e342e; /* 深咖啡色文字 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #d35400;
+            background-color: #e67e22;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #27ae60;
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 5px solid #d35400; /* 复古橙棕色边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #c0392b;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #f5b041;
+            margin-bottom: 20px;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #2980b9;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #1f618d, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #1f618d, 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #d35400;
+            border-bottom: 3px dashed #f5b041;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h3 {
+            color: #e67e22;
+            margin-top: 25px;
+        }
+
+        /* 可爱的内容卡片 */
+        .card {
+            background-color: #fdfbf7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #d35400;
+        }
+
+        .card.problem { border-color: #3498db; background-color: #ebf5fb; }
+        .card.logic { border-color: #9b59b6; background-color: #f5eef8; }
+        .card.knowledge { border-color: #1abc9c; background-color: #e8f8f5; }
+        .card.code-box { border-color: #2c3e50; background-color: #f2f3f4; }
+        .card.summary { border-color: #e74c3c; background-color: #fdedec; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #f1c40f; font-style: italic; }
+        .keyword { color: #e74c3c; font-weight: bold; }
+        .type { color: #3498db; }
+        .string { color: #2ecc71; }
+        .number { color: #e67e22; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #fad7a1;
+            color: #d35400;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划公式 */
+        .formula {
+            background-color: #fff3e0;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #d35400;
+            border: 2px dashed #e67e22;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+
+        /* 强调高亮文字 */
+        .highlight {
+            background-color: #ffcc80;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #a6acaf;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🐎 骑士赛马 ⚔️</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #d35400;">
+        👋 欢迎来到奇幻大陆的皇家竞技场！我是你的算法游吟诗人！<br>
+        骑士们为了荣耀在赛场上飞奔！他们可以分出先后，也可以冲线时并列第一！现在国王想让你算算，如果有 n 组骑士参赛，最终的名次榜单到底能有多少种不可思议的组合？
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/43" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>每一组骑士都会争夺名次。这些对决中允许出现<strong>并列</strong>的情况！</p>
+        <p>例如 2 组骑士 A 和 B，可能会出现：并列第一；A 第一 B 第二；B 第一 A 第二，一共 <strong>3</strong> 种组合。</p>
+        <p><strong>计算任务：</strong> 请问 n 组骑手最终的名次可能有多少种组合？因为这个数字可能很大，请对 <strong>10056</strong> 取模（即求余数）。</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #5dade2;">
+                <strong>📥 魔法输入阵：</strong><br>
+                <span style="color: #7f8c8d; font-size: 0.9em;">(第一行是测试次数 T，接下来是每次比赛的组数 n)</span><br>
+                <pre style="background-color: #ebf5fb; color: #2980b9; padding: 10px; margin: 5px 0;">3
+1
+2
+3</pre>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #af7ac5;">
+                <strong>📤 奇迹输出阵：</strong><br>
+                <span style="color: #7f8c8d; font-size: 0.9em;">(输出格式需要是 Case i: 答案)</span><br>
+                <pre style="background-color: #f4ecf7; color: #8e44ad; padding: 10px; margin: 5px 0;">Case 1: 1
+Case 2: 3
+Case 3: 13</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：名次争夺战)</h2>
+        
+        <p>要算出总组合数，我们可以将问题具体化：如果 n 个人比赛，最终占据了 j 个名次（比如 3 个人只占据了 2 个名次，说明有两个人并列），情况是怎样的？</p>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #9b59b6; margin: 20px 0; text-align: center;">
+            <div style="color: #7f8c8d; font-size: 1.1em; margin-bottom: 15px; font-weight: bold;">
+                🛡️ 动态规划：让第 i 个骑士入场 🛡️
+            </div>
+            
+            <div style="text-align: left; margin-top: 15px; background-color: #fdfefe; padding: 20px; border-radius: 12px; border: 2px dashed #d2b4de;">
+                <p>假设我们用 <strong>$f(i, j)$</strong> 表示 $i$ 个骑士比赛，最终产生了 $j$ 个名次的方案数。</p>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 18px; border-bottom: 1px solid #f4ecf7; padding-bottom: 12px;">
+                        <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">选择 1</span> 
+                        <span style="color: #4a235a;"><strong>选择并列：</strong> 第 i 个骑士入场时，他可以和前面的骑士并列！前面的 i-1 人已经占了 j 个名次，所以他有 j 个位置可以选择加入。<br><span style="margin-left: 80px; color: #8e44ad;">👉 带来的方案数：$j \times f(i-1, j)$</span></span>
+                    </li>
+                    <li style="margin-bottom: 5px;">
+                        <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">选择 2</span> 
+                        <span style="color: #4a235a;"><strong>独占名次：</strong> 第 i 个骑士不愿并列，他自己霸占一个新名次！这意味着前面的人其实只占了 j-1 个名次，而他可以在最终这 j 个名次中挑选任意一个名次插入（比如抢第一，或者落到最后）。<br><span style="margin-left: 80px; color: #8e44ad;">👉 带来的方案数：$j \times f(i-1, j-1)$</span></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #c0392b; font-size: 1.1em; font-weight: bold; margin: 25px 0 10px 0;">
+            💡 状态转移公式（加起来并提取公因数 j）：
+        </div>
+        <div class="formula">
+            $$f(i, j) = (f(i-1, j) + f(i-1, j-1)) \times j \pmod{10056}$$
+        </div>
+        <p style="text-align: center;">最终 n 个骑士的总方案数就是：<strong>把他们分出 1 个名次一直到分出 n 个名次的方案数全部加起来！</strong></p>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>一次预处理，终生受益 (Precomputation)：</strong> 题目中有 T 次查询，如果我们每次都重新算一遍，魔法阵就会过载（Time Limit Exceeded）。所以我们先用两个大循环把所有答案算好存在 <span class="code-inline">ans</span> 数组里，后面查询时直接 <span class="code-inline">O(1)</span> 输出！</li>
+                <li>🛡️ <strong>步步取模：</strong> 不要等最后才对 10056 取模！在乘法和加法的每一步都要取模，防止数字过大导致 C++ 的 <span class="code-inline">int</span> 类型溢出。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="keyword">const int</span> N = <span class="number">1005</span>;
+<span class="keyword">const int</span> MOD = <span class="number">10056</span>;
+<span class="type">int</span> f[N][N], ans[N] = {<span class="number">0</span>, <span class="number">1</span>}; <span class="comment">// 魔法阵：f 是状态，ans 记录总和，ans 初始化为 1</span>
+
+<span class="type">int</span> main() {
+    <span class="comment">// 🎨 预处理：每个人与自己并列，只有 1 个名次，方案数为 1</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; N; i++) f[i][<span class="number">1</span>] = <span class="number">1</span>; 
+    
+    <span class="comment">// ✨ 核心递推：计算所有的名次组合可能</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i &lt; N; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= i; j++) {
+            <span class="comment">// 并列现有名次 + 独占新名次 (注意处处取模)</span>
+            f[i][j] = (f[i-<span class="number">1</span>][j] * j + f[i-<span class="number">1</span>][j-<span class="number">1</span>] * j) % MOD; 
+            
+            <span class="comment">// 累加当前人数下，不同名次个数的方案数</span>
+            ans[i] = (ans[i] + f[i][j]) % MOD; 
+        }
+    }
+    
+    <span class="type">int</span> T;
+    <span class="type">cin</span> &gt;&gt; T; <span class="comment">// 接收询问次数</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= T; i++) {
+        <span class="type">int</span> n;
+        <span class="type">cin</span> &gt;&gt; n;
+        <span class="comment">// 📤 施放法术，按格式输出答案</span>
+        <span class="type">cout</span> &lt;&lt; <span class="string">"Case "</span> &lt;&lt; i &lt;&lt; <span class="string">": "</span> &lt;&lt; ans[n] &lt;&lt; endl;
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>二维列表生成：</strong> 在 Python 中创建一个 <span class="code-inline">N x N</span> 的二维数组，最标准安全的魔法是 <span class="code-inline">[ * N for _ in range(N)]</span>。千万不要用 <span class="code-inline">[ * N] * N</span>，这会导致所有行都关联在一起，改一个全乱套！</li>
+                <li>🚀 <strong>快速读取大法：</strong> 使用 <span class="code-inline">sys.stdin.read().split()</span> 能够一次性把所有输入的数据吞下，然后我们挨个取出来用，这在算法比赛中比不停地写 <span class="code-inline">input()</span> 要快得多！</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    MOD = <span class="number">10056</span>
+    N = <span class="number">1005</span>
+    
+    <span class="comment"># 📖 准备魔法笔记本：f[i][j] 表示 i 个人排成 j 个名次的方案数</span>
+    f = [[<span class="number">0</span>] * N <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="type">range</span>(N)]
+    ans = [<span class="number">0</span>] * N
+    ans[<span class="number">1</span>] = <span class="number">1</span>
+    
+    <span class="comment"># 🏁 每个人与自己并列，只有 1 个名次，方案数为 1</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, N):
+        f[i][<span class="number">1</span>] = <span class="number">1</span>
+        
+    <span class="comment"># ✨ 核心递推：计算所有的名次组合可能</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">2</span>, N):
+        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, i + <span class="number">1</span>):
+            <span class="comment"># (并列现有名次 + 独占新名次) * 选取位置，步步取模</span>
+            f[i][j] = (f[i-<span class="number">1</span>][j] * j + f[i-<span class="number">1</span>][j-<span class="number">1</span>] * j) % MOD
+            
+            <span class="comment"># 累加结果</span>
+            ans[i] = (ans[i] + f[i][j]) % MOD
+            
+    <span class="comment"># 📥 一次性读取所有魔法输入</span>
+    input_data = sys.stdin.read().split()
+    <span class="keyword">if not</span> input_data:
+        <span class="keyword">return</span>
+    
+    T = <span class="type">int</span>(input_data[<span class="number">0</span>]) <span class="comment"># 第一个数是询问次数</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, T + <span class="number">1</span>):
+        n = <span class="type">int</span>(input_data[i])
+        <span class="comment"># 🏆 格式化输出答案</span>
+        <span class="type">print</span>(<span class="string">f"Case {i}: {ans[n]}"</span>)
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+    </div>
+
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🌟 组合数学的转化：</strong> 这道题在数学上相当于求「有序集合划分数」（Fubini numbers/Ordered Bell numbers）。我们通过动态规划，巧妙地将排名的逻辑转化为了向已有排名的缝隙里“插空”和“合并”的操作。</li>
+            <li><strong>🌟 取模运算的分配律：</strong> 在编程中，<span class="code-inline">(a + b) % M</span> 等价于 <span class="code-inline">((a % M) + (b % M)) % M</span>。同理，乘法也适用！所以我们在递推每一步都勇敢地放手去 <span class="code-inline">% MOD</span> 吧，它能保证答案正确且绝不溢出！</li>
+            <li><strong>🌟 时空复杂度的权衡：</strong> 虽然查询次数可能很多，但总人数最多才 1000 人。预先花 $O(N^2)$ 的时间算好所有的榜单存起来，之后每次查询只需 $O(1)$ 的时间，这叫做“以空间换时间”，是算法大师们的必修课哦！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    // 简单的魔法切换法术 (JS 控制 Python 和 C++ 内容的显示)
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>
