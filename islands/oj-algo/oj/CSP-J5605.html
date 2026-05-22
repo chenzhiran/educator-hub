@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：奖励关卡</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 电子游戏/街机主题 (加深文字颜色，保证绝对清晰) */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #e0f7fa; /* 极浅的青色背景，游戏风 */
+            color: #111111; /* 极深的黑色，保证绝对清晰 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #006064;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            color: #111111; /* 按钮文字极深 */
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0d47a1; /* 极深蓝色 */
+            background-color: #1976d2; /* 深蓝色 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+        .lang-btn.active.py-btn {
+            border-color: #1b5e20; /* 极深绿色 */
+            background-color: #388e3c; /* 深绿色 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 96, 100, 0.2);
+            border: 5px solid #006064; /* 深青色边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #b71c1c; /* 深红色 */
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #ef6c00; /* 深橙色 */
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #e65100, 0 8px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff3e0;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #e65100, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #004d40; /* 极深蓝绿色 */
+            border-bottom: 3px dashed #00838f;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #c2185b; /* 极深粉红色 */
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        /* 可爱的内容卡片 - 调整文字颜色为深色 */
+        .card {
+            background-color: #fafbfc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #00838f;
+            color: #111111; /* 卡片内文字全部加深 */
+        }
+
+        .card.problem { border-color: #1565c0; background-color: #e3f2fd; }
+        .card.logic { border-color: #f57c00; background-color: #fff8e1; }
+        .card.knowledge { border-color: #2e7d32; background-color: #e8f5e9; }
+        .card.code-box { border-color: #263238; background-color: #eceff1; }
+        .card.summary { border-color: #c62828; background-color: #ffebee; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #1e2b3c;
+            color: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #aed581; font-style: italic; }
+        .keyword { color: #ff80ab; font-weight: bold; }
+        .type { color: #81d4fa; }
+        .string { color: #fff59d; }
+        .number { color: #ffb74d; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #b2ebf2;
+            color: #006064; /* 深青色 */
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划公式 */
+        .formula {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #b71c1c; /* 极深的红色 */
+            border: 2px dashed #006064; /* 深青色边框 */
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #37474f; /* 加深的蓝灰色 */
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🕹️ 奖励关卡：电玩城的大冒险 💎</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #004d40; font-weight: bold;">
+        👋 嗨，头号玩家！欢迎进入隐藏的奖励关卡！<br>
+        天空中正在随机掉落各种珍贵的宝物！但是有些宝物有“前置要求”，必须先收集到其他特定的宝物才能吃下它。如果采用了绝对完美的最优策略，你在这次狂欢中平均能拿下多少分呢？快来用“期望动态规划（期望DP）”破解游戏的核心代码吧！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/46" target="_blank" class="action-btn">
+            🚀 点击这里，开启街机传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>系统一共会抛出 k 次宝物。每次你可以选择吃或者不吃。</p>
+        <p><strong>游戏规则：</strong></p>
+        <ul>
+            <li>宝物共有 n 种，每次抛出任意一种宝物的概率是均等的（都是 1/n）。</li>
+            <li>吃下第 i 种宝物会获得 Pi 的分数（分数可能是负数哦！）。</li>
+            <li><strong>前置要求：</strong> 想吃第 i 种宝物，必须先把集合 Si 里的所有宝物都吃过至少一次。如果不满足条件，这件宝物就只能眼睁睁看它掉在地上消失。</li>
+        </ul>
+        <p><strong>计算任务：</strong> 假设你是一个超级人工智能，永远做出最明智的决定，求你在这 k 个回合中，能得到的<strong>平均分数（数学期望值）</strong>是多少？</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #1565c0;">
+                <strong style="color: #0d47a1;">📥 魔法输入阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(k次掉落，n种宝物。接着是每种宝物的分数和前置条件，以0结尾)</span><br>
+                <pre style="background-color: #e3f2fd; color: #111111; padding: 10px; margin: 5px 0;">1 2
+1 0
+2 0</pre>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #c62828;">
+                <strong style="color: #b71c1c;">📤 奇迹输出阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(保留六位小数的平均得分)</span><br>
+                <pre style="background-color: #ffebee; color: #111111; padding: 10px; margin: 5px 0;">1.500000</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：状态压缩与逆向推导)</h2>
+        
+        <p style="font-weight: bold;">这里有两个超级魔法需要掌握：第一是“状态压缩”，第二是“逆向期望DP”。</p>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #f57c00; margin: 20px 0; text-align: center;">
+            <div style="color: #e65100; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                🎒 魔法 1：状态压缩 (用一个数字代表整个背包) 🎒
+            </div>
+            <p style="text-align: left; font-weight: bold; color: #111;">因为宝物最多只有 15 种，我们可以用一串 0 和 1 组成的二进制数来表示“我们吃过了哪些宝物”。</p>
+            
+            <div style="display: flex; align-items: center; justify-content: center; margin: 20px 0; background-color: #fff8e1; padding: 15px; border-radius: 10px; border: 2px dashed #ffb300;">
+                <div style="text-align: center; margin-right: 20px;">
+                    <div style="font-weight: bold; color: #e65100; margin-bottom: 10px;">十进制数字: 5</div>
+                    <div style="font-weight: bold; color: #1565c0; margin-bottom: 10px;">二进制表示: ...0 0 1 0 1</div>
+                </div>
+                
+                <div style="font-size: 30px; font-weight: bold; color: #f57c00; margin-right: 20px;">🟰</div>
+                
+                <div style="display: flex; gap: 5px;">
+                    <div style="text-align: center;">
+                        <div style="width: 40px; height: 40px; background-color: #ef9a9a; border: 2px solid #c62828; border-radius: 5px; line-height: 40px; font-weight: bold; color: #b71c1c;">0</div>
+                        <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">宝物4</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 40px; height: 40px; background-color: #a5d6a7; border: 2px solid #2e7d32; border-radius: 5px; line-height: 40px; font-weight: bold; color: #1b5e20;">1</div>
+                        <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">宝物3</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 40px; height: 40px; background-color: #ef9a9a; border: 2px solid #c62828; border-radius: 5px; line-height: 40px; font-weight: bold; color: #b71c1c;">0</div>
+                        <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">宝物2</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 40px; height: 40px; background-color: #a5d6a7; border: 2px solid #2e7d32; border-radius: 5px; line-height: 40px; font-weight: bold; color: #1b5e20;">1</div>
+                        <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">宝物1</div>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align: left; font-weight: bold; color: #111;">如图，数字 5 的二进制是 0101，这意味着我们已经吃过了第 1 种和第 3 种宝物。我们把这个集合状态记为 j。</p>
+        </div>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #f57c00; margin: 20px 0; text-align: center;">
+            <div style="color: #e65100; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                ⏳ 魔法 2：逆向期望树 (从最后一轮倒推) ⏳
+            </div>
+            
+            <p style="text-align: left; font-weight: bold; color: #111;">假设 f(i, j) 表示：在第 i 轮开始时，我们背包里的状态是 j，从这轮一直玩到游戏结束，我们能拿到的最大平均分。</p>
+            <p style="text-align: left; font-weight: bold; color: #c2185b;">现在是第 i 轮，天上随机掉下来了第 l 种宝物 (概率为 1/n)：</p>
+            
+            <div style="text-align: center; margin: 20px 0; background-color: #fff8e1; padding: 15px; border-radius: 10px; border: 2px dashed #ffb300;">
+                <div style="display: inline-block; background-color: #00838f; color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; margin-bottom: 15px;">
+                    掉落了宝物 l
+                </div>
+                
+                <div style="display: flex; justify-content: space-around; position: relative;">
+                    <div style="width: 45%; border: 2px solid #2e7d32; border-radius: 10px; padding: 10px; background-color: #e8f5e9;">
+                        <div style="font-weight: bold; color: #1b5e20; border-bottom: 2px dashed #a5d6a7; padding-bottom: 5px; margin-bottom: 10px;">
+                            ✔️ 前置条件满足！
+                        </div>
+                        <div style="font-size: 0.9em; font-weight: bold; color: #111;">
+                            我们可以做选择：<br>
+                            1. <span style="color: #c62828;">吃掉它：</span> 得到宝物分，且状态变为 (j加上l)<br>
+                            👉 分数 = P_l + f(i+1, j 加上 l)<br>
+                            2. <span style="color: #1565c0;">不吃它：</span> 啥也没得，状态不变<br>
+                            👉 分数 = f(i+1, j)<br><br>
+                            <span style="background-color: #ffb74d; padding: 2px 5px; border-radius: 5px;">最优策略：取这俩的 MAX 值！</span>
+                        </div>
+                    </div>
+                    
+                    <div style="width: 45%; border: 2px solid #c62828; border-radius: 10px; padding: 10px; background-color: #ffebee;">
+                        <div style="font-weight: bold; color: #b71c1c; border-bottom: 2px dashed #ef9a9a; padding-bottom: 5px; margin-bottom: 10px;">
+                            ❌ 前置条件不足...
+                        </div>
+                        <div style="font-size: 0.9em; font-weight: bold; color: #111;">
+                            我们根本吃不了它。<br>
+                            宝物消失，状态不变，直接进入下一轮。<br><br>
+                            👉 分数 = f(i+1, j)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #004d40; font-size: 1.2em; font-weight: bold; margin: 25px 0 10px 0;">
+            💡 终极期望转移公式：
+        </div>
+        <p style="text-align: center; font-weight: bold; color: #111;">因为抛出这 n 种宝物是等概率的，所以把所有 n 种宝物的最优结果加起来，再除以 n，就是这一轮的期望得分！</p>
+        <div class="formula">
+            f(i, j) = 累加求和 [ 面对每种宝物 l 的最佳得分 ] / n
+        </div>
+        <p style="text-align: center; font-weight: bold; color: #111;">我们从最后一轮 (第 k 轮) 往第一轮倒推计算，最后的答案就是最初始始始的期望：<span class="code-inline">f(1, 0)</span>。</p>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>位运算的魔法：</strong> C++ 中，<span class="code-inline">j | (1 << (l - 1))</span> 的意思是把第 l 种宝物加入背包（把对应位置变成 1）。判断背包 j 是否满足宝物 l 的前置要求，原代码用了一个极具极客风格的位运算：<span class="code-inline">!((~j) & need[l])</span>，它等价于 <span class="code-inline">(j & need[l]) == need[l]</span>，意思是 need 中要求是 1 的位置，j 中也全都是 1。</li>
+                <li>🛡️ <strong>逆向 DP 循环：</strong> 注意看外层循环 <span class="code-inline">for(i = k ; i ; i--)</span>，它是从第 k 轮倒着算回来的。在期望 DP 中，因为未来的结果决定现在的期望，倒推是标准的正确姿势。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;cstdio&gt;
+
+<span class="comment">// sc 存分数，need 存前置要求（用二进制数压缩）</span>
+<span class="type">int</span> sc[<span class="number">20</span>], need[<span class="number">20</span>];
+<span class="comment">// f[轮数][背包状态] = 从当前一直玩到结束的最大期望得分</span>
+<span class="type">double</span> f[<span class="number">102</span>][<span class="number">32770</span>]; 
+
+<span class="type">double</span> max(<span class="type">double</span> a, <span class="type">double</span> b) {
+    <span class="keyword">return</span> a &gt; b ? a : b;
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> k, n, i, j, l, x;
+    <span class="type">scanf</span>(<span class="string">"%d%d"</span>, &k, &n);
+    
+    <span class="comment">// 📥 读取每种宝物的数据</span>
+    <span class="keyword">for</span>(i = <span class="number">1</span>; i &lt;= n; i++) {
+        <span class="type">scanf</span>(<span class="string">"%d"</span>, &sc[i]);
+        <span class="comment">// 持续读取前置要求，直到遇到 0</span>
+        <span class="keyword">while</span>(<span class="type">scanf</span>(<span class="string">"%d"</span>, &x) && x != <span class="number">0</span>) {
+            need[i] |= <span class="number">1</span> &lt;&lt; (x - <span class="number">1</span>); <span class="comment">// 把前置要求的位设为 1</span>
+        }
+    }
+    
+    <span class="comment">// 🌟 核心逆向期望 DP：从最后一轮 k 倒推回第 1 轮</span>
+    <span class="keyword">for</span>(i = k; i &gt; <span class="number">0</span>; i--) {
+        <span class="comment">// 遍历所有可能的背包状态 (0 到 2^n - 1)</span>
+        <span class="keyword">for</span>(j = <span class="number">0</span>; j &lt; (<span class="number">1</span> &lt;&lt; n); j++) {
+            <span class="comment">// 面对随机掉落的 n 种宝物，计算每种情况</span>
+            <span class="keyword">for</span>(l = <span class="number">1</span>; l &lt;= n; l++) {
+                <span class="comment">// 如果背包 j 满足宝物 l 的前置要求</span>
+                <span class="keyword">if</span>(!((~j) & need[l])) {
+                    <span class="comment">// 最优策略：在 (不吃) 和 (吃掉得分 + 新状态) 之间取最大值</span>
+                    f[i][j] += max(f[i + <span class="number">1</span>][j], f[i + <span class="number">1</span>][j | (<span class="number">1</span> &lt;&lt; (l - <span class="number">1</span>))] + sc[l]);
+                } <span class="keyword">else</span> {
+                    <span class="comment">// 不满足条件，只能不吃</span>
+                    f[i][j] += f[i + <span class="number">1</span>][j];
+                }
+            }
+            <span class="comment">// 求平均值，得到在这轮的期望得分</span>
+            f[i][j] /= n;
+        }
+    }
+    
+    <span class="comment">// 📤 输出第 1 轮开始，背包为空 (状态0) 的期望得分，保留六位小数</span>
+    <span class="type">printf</span>(<span class="string">"%.6lf\n"</span>, f[<span class="number">1</span>][<span class="number">0</span>]);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>快速读取大法：</strong> 对于输入数据非常多的题目，使用 <span class="code-inline">sys.stdin.read().split()</span> 将全部输入一次性读入成列表，再用游标 <span class="code-inline">idx</span> 去遍历，是 Python 中避免输入超时的最佳魔法阵。</li>
+                <li>🚀 <strong>状态与转移：</strong> Python 中的位运算与 C++ 完全一致。我们使用列表生成式 <span class="code-inline">[[0.0] * (1 << n) for _ in range(k + 2)]</span> 建立一个二维的 DP 表格，确保每一格都能存储浮点数。</li>
+            </ul>
+        </div>

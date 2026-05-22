@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：错排问题</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 淘气精灵主题 (加深文字颜色，保证绝对清晰) */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #f3e5f5; /* 极浅的紫色背景 */
+            color: #111111; /* 极深的黑色，保证绝对清晰 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            color: #333333; /* 按钮文字加深 */
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #4a148c; /* 极深紫色 */
+            background-color: #7b1fa2; /* 深紫色 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+        .lang-btn.active.py-btn {
+            border-color: #004d40; /* 极深绿色 */
+            background-color: #00796b; /* 深绿色 */
+            color: white;
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(123, 31, 162, 0.15);
+            border: 5px solid #4a148c; /* 深紫色边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #311b92; /* 深靛蓝色 */
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #c2185b; /* 深粉红色 */
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #880e4f, 0 8px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fce4ec;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #880e4f, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #4a148c; /* 极深紫色 */
+            border-bottom: 3px dashed #ce93d8;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #b71c1c; /* 极深红色 */
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        /* 可爱的内容卡片 - 调整文字颜色为深色 */
+        .card {
+            background-color: #fafbfc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #7b1fa2;
+            color: #1a1a1a; /* 卡片内文字全部加深 */
+        }
+
+        .card.problem { border-color: #1976d2; background-color: #e3f2fd; }
+        .card.logic { border-color: #8e24aa; background-color: #f3e5f5; }
+        .card.knowledge { border-color: #388e3c; background-color: #e8f5e9; }
+        .card.code-box { border-color: #2c3e50; background-color: #f2f3f4; }
+        .card.summary { border-color: #d32f2f; background-color: #ffebee; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #1e2b3c;
+            color: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #aed581; font-style: italic; }
+        .keyword { color: #ff80ab; font-weight: bold; }
+        .type { color: #81d4fa; }
+        .string { color: #fff59d; }
+        .number { color: #ffb74d; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #e1bee7;
+            color: #4a148c; /* 深紫色 */
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划公式 */
+        .formula {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #b71c1c; /* 极深的红色 */
+            border: 2px dashed #4a148c; /* 深紫边框 */
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+
+        /* 强调高亮文字 */
+        .highlight {
+            background-color: #ffcc80;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #455a64; /* 加深的蓝灰色 */
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🎭 错排问题：淘气精灵的恶作剧 🧩</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #4a148c; font-weight: bold;">
+        👋 嗨，见习魔法使！我是你的递归向导！<br>
+        淘气的小精灵们趁你不注意，把 n 个魔法药水瓶全都打乱了位置。更糟糕的是，它们还下了一个诅咒：<strong>每一个药水瓶都绝对不能放在它原本的位置上！</strong> 快用递归法术算一算，这些调皮的精灵到底能摆出多少种不同的混乱阵型？
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/45" target="_blank" class="action-btn">
+            🚀 点击这里，开启递归传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>给定一个整数 n，求 n 个元素的<strong>错排个数</strong>。</p>
+        <p><strong>错排的定义：</strong></p>
+        <ul>
+            <li>把 1 到 n 这 n 个数字重新排列。</li>
+            <li>规定第 i 个数字绝对不能放在第 i 个位置上（即每个人都走错房间）。</li>
+        </ul>
+        <p><strong>计算任务：</strong> 请问一共有多少种合法的错排方式？</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #1976d2;">
+                <strong style="color: #0d47a1;">📥 魔法输入阵：</strong><br>
+                <span style="color: #1a1a1a; font-size: 0.9em; font-weight: bold;">(一个整数 n，代表药水瓶的数量)</span><br>
+                <pre style="background-color: #e3f2fd; color: #1a1a1a; padding: 10px; margin: 5px 0;">4</pre>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #c2185b;">
+                <strong style="color: #880e4f;">📤 奇迹输出阵：</strong><br>
+                <span style="color: #1a1a1a; font-size: 0.9em; font-weight: bold;">(一个整数，代表合法的错排数量)</span><br>
+                <pre style="background-color: #fce4ec; color: #1a1a1a; padding: 10px; margin: 5px 0;">9</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：递归降维打击)</h2>
+        
+        <p>这道题是练习<strong>递归思想</strong>的绝佳素材！假设我们用 f(n) 表示 n 个元素的错排数量。现在，我们要把第 n 号药水瓶放进别的盒子里，看看会发生什么连锁反应：</p>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #8e24aa; margin: 20px 0; text-align: center;">
+            <div style="color: #4a148c; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                🧪 第 n 号瓶的命运抉择 🧪
+            </div>
+            
+            <p style="text-align: left; font-weight: bold; color: #111;">首先，n 号瓶绝对不能放在 n 号盒子里。所以，它可以随便挑一个前面的盒子 k。一共有 (n-1) 个盒子可以挑。</p>
+            <p style="text-align: left; font-weight: bold; color: #b71c1c;">一旦 n 号瓶霸占了 k 号盒子，那原本属于 k 号盒子的 k 号瓶该怎么办呢？它有两种选择：</p>
+            
+            <div style="text-align: left; margin-top: 15px; background-color: #fdfefe; padding: 20px; border-radius: 12px; border: 2px dashed #ba68c8;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 25px; border-bottom: 2px solid #e1bee7; padding-bottom: 15px;">
+                        <span style="display: inline-block; background-color: #6a1b9a; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 1em;">情况 1：和平互换</span> 
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-around; margin: 20px 0; background-color: #f3e5f5; padding: 15px; border-radius: 10px; border: 2px dashed #8e24aa;">
+                            <div style="text-align: center;">
+                                <div style="width: 50px; height: 50px; line-height: 50px; background-color: #c2185b; color: white; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 0 auto 10px;">n号瓶</div>
+                                ⬇️跑去⬇️<br>
+                                <div style="width: 60px; height: 40px; border: 3px solid #1976d2; border-radius: 5px; line-height: 40px; font-weight: bold; color: #1976d2; margin: 10px auto 0;">k号盒</div>
+                            </div>
+                            
+                            <div style="font-size: 30px; font-weight: bold; color: #4a148c;">🤝</div>
+                            
+                            <div style="text-align: center;">
+                                <div style="width: 50px; height: 50px; line-height: 50px; background-color: #1976d2; color: white; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 0 auto 10px;">k号瓶</div>
+                                ⬇️跑去⬇️<br>
+                                <div style="width: 60px; height: 40px; border: 3px solid #c2185b; border-radius: 5px; line-height: 40px; font-weight: bold; color: #c2185b; margin: 10px auto 0;">n号盒</div>
+                            </div>
+                        </div>
+
+                        <span style="color: #111; font-weight: bold; display: block; margin-top: 10px;">
+                            k 号瓶说：“既然你抢了我的盒子，那我就去你的 n 号盒子吧！”<br>
+                            这样一来，n 号瓶和 k 号瓶<strong>完美互换</strong>，它们俩的问题彻底解决了！剩下的 (n-2) 个瓶子继续它们自己的错排游戏。
+                            <br><span style="color: #b71c1c; margin-top: 5px; display: inline-block;">👉 这转化为规模更小的子问题：f(n-2)</span>
+                        </span>
+                    </li>
+                    <li style="margin-bottom: 5px;">
+                        <span style="display: inline-block; background-color: #6a1b9a; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 1em;">情况 2：不妥协的流浪</span> 
+
+                        <div style="display: flex; align-items: center; justify-content: space-around; margin: 20px 0; background-color: #f3e5f5; padding: 15px; border-radius: 10px; border: 2px dashed #8e24aa;">
+                            <div style="text-align: center;">
+                                <div style="width: 50px; height: 50px; line-height: 50px; background-color: #c2185b; color: white; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 0 auto 10px;">n号瓶</div>
+                                ⬇️跑去⬇️<br>
+                                <div style="width: 60px; height: 40px; border: 3px solid #1976d2; border-radius: 5px; line-height: 40px; font-weight: bold; color: #1976d2; margin: 10px auto 0;">k号盒</div>
+                            </div>
+                            
+                            <div style="font-size: 24px; font-weight: bold; color: #d32f2f;">❌ 不去 n 号盒！</div>
+                            
+                            <div style="text-align: center;">
+                                <div style="width: 50px; height: 50px; line-height: 50px; background-color: #1976d2; color: white; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 0 auto 10px;">k号瓶</div>
+                                ⬇️跑去⬇️<br>
+                                <div style="width: 70px; height: 40px; border: 3px solid #388e3c; border-radius: 5px; line-height: 40px; font-weight: bold; color: #388e3c; margin: 10px auto 0;">其他盒子</div>
+                            </div>
+                        </div>
+
+                        <span style="color: #111; font-weight: bold; display: block; margin-top: 10px;">
+                            k 号瓶说：“我才不去你的 n 号盒子呢！”<br>
+                            此时 n 号盒子还是空的，并且 k 号瓶拒绝进入它。这简直就像是 k 号瓶继承了 n 号瓶的遗志——它有了一个不能去的“禁区”。除了已经安置好的 n 号瓶，场上还剩下 (n-1) 个瓶子和 (n-1) 个盒子，且每个瓶子都刚好有一个不能去的盒子。这在逻辑上完全等价于 (n-1) 个元素的错排！
+                            <br><span style="color: #b71c1c; margin-top: 5px; display: inline-block;">👉 这转化为另一个规模的子问题：f(n-1)</span>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #4a148c; font-size: 1.2em; font-weight: bold; margin: 25px 0 10px 0;">
+            💡 终极递归推导公式：
+        </div>
+        <div class="formula">
+            f(n) = (n - 1) × ( f(n-1) + f(n-2) )
+        </div>
+        <p style="text-align: center; font-weight: bold; color: #111;">基础终止条件：f(1) = 0（1个人肯定走不错），f(2) = 1（2个人只能互相交换）。</p>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>带记忆的递归 (Memoization)：</strong> 纯粹的递归会因为反复计算相同的分支而变得非常慢（指数级时间）。我们开辟一个 <span class="code-inline">memo</span> 数组，把算过的 f(n) 存起来，下次再问到它，直接查表返回，瞬间将时间复杂度降为 O(n)！</li>
+                <li>🛡️ <strong>类型的选择：</strong> 即便 n 只到 20，错排的数量增长也是极其可怕的！仔细看代码，必须要使用 <span class="code-inline">long long</span> 才能装下这巨大的天文数字哦。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (记忆化递归版)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="comment">// 📖 魔法记忆笔记本：专门记录已经算过的错排数</span>
+<span class="type">long long</span> memo[<span class="number">25</span>] = {<span class="number">0</span>};
+
+<span class="comment">// 🌟 核心递归函数 f(n)</span>
+<span class="type">long long</span> f(<span class="type">int</span> n) {
+    <span class="comment">// 🏁 递归终止条件</span>
+    <span class="keyword">if</span> (n == <span class="number">1</span>) <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">// 1 个瓶子没法错排</span>
+    <span class="keyword">if</span> (n == <span class="number">2</span>) <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">// 2 个瓶子只有 1 种换法</span>
+    
+    <span class="comment">// 🛡️ 如果笔记本里已经记过这个 n 的答案，直接拿出来用！(记忆化)</span>
+    <span class="keyword">if</span> (memo[n] != <span class="number">0</span>) {
+        <span class="keyword">return</span> memo[n];
+    }
+    
+    <span class="comment">// 🧙‍♂️ 施放法术：(n-1) 个选择 × (和平互换 f(n-2) + 不妥协 f(n-1))</span>
+    memo[n] = (n - <span class="number">1</span>) * (f(n - <span class="number">1</span>) + f(n - <span class="number">2</span>));
+    
+    <span class="keyword">return</span> memo[n];
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n;
+    <span class="type">cin</span> &gt;&gt; n;
+    
+    <span class="comment">// 📤 呼叫函数并输出最终答案</span>
+    <span class="type">cout</span> &lt;&lt; f(n) &lt;&lt; endl;
+    
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>字典缓存大法：</strong> 在 Python 中，实现记忆化递归最舒服的方式就是创建一个全局字典 <span class="code-inline">memo = {}</span>。通过 <span class="code-inline">if n in memo:</span> 就能轻松避免重复计算。</li>
+                <li>🚀 <strong>从递归到递推：</strong> 既然 f(n) 只和 f(n-1) 以及 f(n-2) 有关，很多老练的魔法师会选择只用三个变量 a, b, c 来滚动计算（这叫做递推或者动态规划），这样连字典都不用建，速度更快哦！不过为了练习递归思维，我们这里的代码依然呈现原汁原味的递归风味。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (记忆化递归版)</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="comment"># 📖 魔法记忆笔记本：用字典来记录算过的答案</span>
+memo = {}
+
+<span class="comment"># 🌟 核心递归函数</span>
+<span class="keyword">def</span> <span class="type">f</span>(n):
+    <span class="comment"># 🏁 递归终止条件</span>
+    <span class="keyword">if</span> n == <span class="number">1</span>:
+        <span class="keyword">return</span> <span class="number">0</span>
+    <span class="keyword">if</span> n == <span class="number">2</span>:
+        <span class="keyword">return</span> <span class="number">1</span>
+        
+    <span class="comment"># 🛡️ 记忆化查表：算过了就直接返回，绝不加班</span>
+    <span class="keyword">if</span> n <span class="keyword">in</span> memo:
+        <span class="keyword">return</span> memo[n]
+        
+    <span class="comment"># 🧙‍♂️ 施放法术：(n-1) 个选择 × (和平互换 f(n-2) + 不妥协 f(n-1))</span>
+    memo[n] = (n - <span class="number">1</span>) * (f(n - <span class="number">1</span>) + f(n - <span class="number">2</span>))
+    
+    <span class="keyword">return</span> memo[n]
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    <span class="comment"># 📥 读取想要计算的瓶子数量</span>
+    input_data = sys.stdin.read().split()
+    <span class="keyword">if not</span> input_data:
+        <span class="keyword">return</span>
+    n = <span class="type">int</span>(input_data[<span class="number">0</span>])
+    
+    <span class="comment"># 🏆 施放法术，打印出最终的错排总数</span>
+    <span class="type">print</span>(f(n))
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+    </div>
+
+    <div class="card summary">
+        <h2>💡 技巧和重点详细总结 (一定要看)</h2>
+        <ul>
+            <li><strong>🌟 递归分解的艺术：</strong> “错排”可以说是高中数学和算法中最经典的排列组合问题。初看时觉得情况太乱根本数不清，但是只要我们盯住<strong>最后一个元素</strong>，并对它占领的位置的原主人（k号）做分类讨论（去还是不去n号），就能瞬间把庞大的乱麻切分成两个已知的子问题！这是算法中最顶级的<strong>降维打击</strong>思维！</li>
+            <li><strong>🌟 记忆化（Memoization）不可或缺：</strong> 在写类似于斐波那契数列、错排公式这种 f(n) 依赖于前几项的递归时，必须加数组/字典进行缓存。否则当你计算 f(20) 时，它会展开成上百万个树枝，计算到天荒地老！加了记忆化之后，它就只算 20 次，速度堪比光速。</li>
+            <li><strong>🌟 动态规划的基石：</strong> 掌握了带记忆的递归之后，你其实半只脚已经踏入了“动态规划（DP）”的大门。像题目原描述里给出的那段 C++ 代码，就是省略了函数调用，直接用一个 for 循环从 3 算到 n，那是递归算法修炼到极致后的最终形态（自底向上递推），但是它们的内在数学灵魂是完全一模一样的！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    // 简单的魔法阵语言切换系统 (JS 控制 Python 和 C++ 内容的显示)
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>

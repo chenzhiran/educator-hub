@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：冰后棋阵</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 寒冰王座主题 (超级深色文字，保证高对比度与绝对清晰) */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #e0f2f1; /* 极浅的冰晶蓝绿色背景 */
+            color: #111111; /* 极深黑色文字，确保极佳的可读性 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #ffffff;
+            border: 3px solid #006064;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            color: #111111;
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0d47a1; /* 极深蓝色 */
+            background-color: #0288d1; /* 冰晶蓝 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+        .lang-btn.active.py-btn {
+            border-color: #004d40; /* 极深绿 */
+            background-color: #00796b; /* 翡翠绿 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 96, 100, 0.2);
+            border: 5px solid #00838f; /* 寒冰霜蓝边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #006064; /* 深冰蓝 */
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+            text-shadow: 2px 2px 0px #b2ebf2;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #0288d1;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #01579b, 0 8px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #e1f5fe;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #006064; /* 极深蓝绿色 */
+            border-bottom: 3px dashed #00bcbc;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #b71c1c; /* 极深红色 */
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        /* 可爱的内容卡片 - 调整文字颜色为极其清晰的深色 */
+        .card {
+            background-color: #fafbfc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #00838f;
+            color: #111111; 
+        }
+
+        .card.problem { border-color: #0288d1; background-color: #e3f2fd; }
+        .card.logic { border-color: #00b0ff; background-color: #e0f7fa; }
+        .card.knowledge { border-color: #7e57c2; background-color: #f3e5f5; }
+        .card.code-box { border-color: #263238; background-color: #eceff1; }
+        .card.summary { border-color: #c62828; background-color: #ffebee; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #1e2b3c;
+            color: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #8bc34a; font-style: italic; }
+        .keyword { color: #ff4081; font-weight: bold; }
+        .type { color: #29b6f6; }
+        .string { color: #ffeb3b; }
+        .number { color: #ff9800; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #b2ebf2;
+            color: #004d40; /* 深绿字 */
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划/递推公式卡片 */
+        .formula {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #004d40; 
+            border: 2px dashed #00838f;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 纯CSS棋盘样式 */
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(7, 45px);
+            grid-template-rows: repeat(7, 45px);
+            gap: 1px;
+            background-color: #006064;
+            padding: 5px;
+            border-radius: 5px;
+            width: fit-content;
+            margin: 20px auto;
+        }
+        .cell {
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .cell.header {
+            background-color: #b2ebf2;
+            color: #004d40;
+        }
+        .queen {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid #0288d1;
+            background-color: #e0f2f1;
+            box-shadow: 0 0 8px #00b0ff;
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #37474f; 
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>❄️ 冰后棋阵：寒冰王座的无冲突布阵 👑</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #006064; font-weight: bold;">
+        👋 嗨，天才布阵师！欢迎来到冰雪的战略中心！<br>
+        巫师在王座前展开了一块巨大的魔法棋盘。你需要在这张棋盘上，放置 n 枚威力巨大的“冰后”棋子。每一行、每一列、甚至每一条倾斜的冰雪对角线上，都绝对不能有两只冰后互相厮杀！让我们使出强大的“回溯搜索法术”，找出完美的御敌阵型吧！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/49" target="_blank" class="action-btn">
+            🚀 点击这里，开启冰雪传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>在 n 乘 n 的魔法棋盘上放下 n 枚“冰后”（每行恰好一枚）。</p>
+        <p><strong>冰后的绝不冲突法则：</strong></p>
+        <ul>
+            <li><b>每一列</b>也必须恰好只有一枚冰后。</li>
+            <li><b>任意一条对角线</b>（包含两条主对角线及其所有平行倾斜线）上，<b>至多</b>只能存在一枚冰后。</li>
+        </ul>
+        <p>我们可以用一个数字序列来记录阵法：第 i 个数字表示第 i 行皇后所在的列号。例如，在 6 乘 6 的棋盘中，一种完美阵型可以描述为：2 4 6 1 3 5。</p>
+        <p><strong>计算任务：</strong> 给定棋盘尺寸 n，请按照<b>字典序</b>输出前三个合法阵型。最后一行输出该棋盘尺寸下，所有合法解的总数量。</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #0288d1;">
+                <strong style="color: #01579b;">📥 魔法输入阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(一个正整数 n，范围在 6 到 13 之间)</span><br>
+                <pre style="background-color: #e3f2fd; color: #111111; padding: 10px; margin: 5px 0;">6</pre>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #00b0ff;">
+                <strong style="color: #006064;">📤 奇迹输出阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(前三行按字典序输出解，最后一行输出总方案数)</span><br>
+                <pre style="background-color: #e0f7fa; color: #111111; padding: 10px; margin: 5px 0;">2 4 6 1 3 5
+3 6 2 5 1 4
+4 1 5 2 6 3
+4</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：对角线常量的秘密)</h2>
+        
+        <p style="font-weight: bold;">经典的 N 皇后问题！我们采用<b>回溯搜索（DFS）</b>：按行依次放下冰后。只要解决了“怎么用最快速度判断对角线冲突”，就能无伤通关！</p>
+
+        <div class="visual-panel" style="background: #ffffff; padding: 25px; border-radius: 15px; border: 2px dashed #00838f; margin: 20px 0; text-align: center;">
+            <div style="color: #006064; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                🧭 网页棋盘图解：以样例一的第一个解 [2 4 6 1 3 5] 为例 🧭
+            </div>
+
+            <div class="chessboard">
+                <div class="cell header">R\C</div>
+                <div class="cell header">1</div>
+                <div class="cell header">2</div>
+                <div class="cell header">3</div>
+                <div class="cell header">4</div>
+                <div class="cell header">5</div>
+                <div class="cell header">6</div>
+
+                <div class="cell header">1</div>
+                <div class="cell"></div>
+                <div class="cell"><div class="queen"></div></div> <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+
+                <div class="cell header">2</div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"><div class="queen"></div></div> <div class="cell"></div>
+                <div class="cell"></div>
+
+                <div class="cell header">3</div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"><div class="queen"></div></div> <div class="cell header">4</div>
+                <div class="cell"><div class="queen"></div></div> <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+
+                <div class="cell header">5</div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"><div class="queen"></div></div> <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+
+                <div class="cell header">6</div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"><div class="queen"></div></div> <div class="cell"></div>
+            </div>
+
+            <div style="text-align: left; margin-top: 15px; background-color: #fffdf5; padding: 20px; border-radius: 12px; border: 2px dashed #ffb74d;">
+                <p style="font-weight: bold; color: #111111;">🔍 冰雪极速冲突判定术：</p>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 15px; border-bottom: 1px solid #ffe082; padding-bottom: 10px;">
+                        <span style="display: inline-block; background-color: #0288d1; color: white; padding: 3px 10px; border-radius: 15px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">1. 直线列冲突</span> 
+                        <span style="color: #111111; font-weight: bold;">用一个简单的布尔数组 <span class="code-inline">col[c]</span> 来标记，如果第 c 列被放了冰后，就设为 true。</span>
+                    </li>
+                    <li style="margin-bottom: 15px; border-bottom: 1px solid #ffe082; padding-bottom: 10px;">
+                        <span style="display: inline-block; background-color: #0288d1; color: white; padding: 3px 10px; border-radius: 15px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">2. 主对角线（左上到右下）</span> 
+                        <span style="color: #111111; font-weight: bold;">观察规律可以惊奇地发现：在同一条主对角线上，所有格子的<b>“行号减列号 (row - c)”</b>结果竟然是一个完全一样的常数！由于相减可能出现负数，我们统一加上棋盘大小 n 作为偏移，即使用 <span class="code-inline">row - c + n</span> 作为数组下标来唯一标识一条主对角线。</span>
+                    </li>
+                    <li>
+                        <span style="display: inline-block; background-color: #0288d1; color: white; padding: 3px 10px; border-radius: 15px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">3. 副对角线（右上到左下）</span> 
+                        <span style="color: #111111; font-weight: bold;">同理，在同一条副对角线上，所有格子的<b>“行号加列号 (row + c)”</b>结果也是一个一模一样的常量！直接用 <span class="code-inline">row + c</span> 作为下标即可完美判定冲突！</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #006064; font-size: 1.2em; font-weight: bold; margin: 25px 0 10px 0;">
+            💡 阵法无冲突判定公式：
+        </div>
+        <div class="formula">
+            如果 !col[c] 且 !d1[row - c + n] 且 !d2[row + c] 成立，则当前位置安全，可放置冰后！
+        </div>
+        <p style="text-align: center; font-weight: bold;">要保持天然的<b>字典序</b>，我们在遍历列号 c 时，必须从 1 到 n <b>从小到大</b>进行尝试。</p>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>回溯搜索的基本结构：</strong> 尝试放置第 <span class="code-inline">row</span> 行的冰后 ➡️ 成功找到一个安全列 c ➡️ 标记占用，将 c 加入结果 ➡️ 递归进入下一行 <span class="code-inline">dfs(row + 1)</span> ➡️ <b>关键一步：恢复现场 (Backtracking)</b>，把标记清除，弹出 c，继续尝试下一个位置！</li>
+                <li>🛡️ <strong>结果的拦截：</strong> 当 <span class="code-inline">row == n</span> 时说明成功发现了一个完整阵型，总计数加 1。因为只需要前三个解，所以当 <span class="code-inline">firstThree.size() < 3</span> 时，才把当前方案塞进记录本。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (清晰直观回溯版)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;vector&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="type">int</span> n;
+vector&lt;<span class="type">int</span>&gt; cur;                  <span class="comment">// 收集当前正在推演的解</span>
+vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; firstThree;   <span class="comment">// 仅储存前 3 个满分法阵</span>
+<span class="type">int</span> total = <span class="number">0</span>;                    <span class="comment">// 全局累加器，统计总方案数</span>
+
+<span class="comment">// 🔮 三个真假布尔阵：列占用、主对角线占用、副对角线占用</span>
+<span class="type">bool</span> col[<span class="number">15</span>], d1[<span class="number">30</span>], d2[<span class="number">30</span>]; 
+
+<span class="comment">// 🎨 核心深度优先搜索回溯函数</span>
+<span class="type">void</span> dfs(<span class="type">int</span> row) {
+    <span class="comment">// 🏁 终止条件：当 row 从 0 一直顺利走到 n-1 后，row 变成 n 说明全部行都放好了！</span>
+    <span class="keyword">if</span> (row == n) {
+        total++; <span class="comment">// 发现了一条全新的秘径</span>
+        <span class="keyword">if</span> (firstThree.size() &lt; <span class="number">3</span>) {
+            firstThree.push_back(cur); <span class="comment">// 只有前 3 个解能入选展示集</span>
+        }
+        <span class="keyword">return</span>;
+    }
+    
+    <span class="comment">// 🔍 按照列号从小到大升序遍历，这保证了最先搜出来的方案天然符合字典序</span>
+    <span class="keyword">for</span> (<span class="type">int</span> c = <span class="number">1</span>; c &lt;= n; ++c) {
+        <span class="comment">// 🛡️ 判定当前的直线、主对角线、副对角线是否通畅无冲突</span>
+        <span class="keyword">if</span> (!col[c] && !d1[row - c + n] && !d2[row + c]) {
+            
+            <span class="comment">// 🎯 施法占领当前阵位</span>
+            col[c] = d1[row - c + n] = d2[row + c] = <span class="keyword">true</span>;
+            cur.push_back(c);
+            
+            <span class="comment">// 🚀 带着目前的成果，递归推演下一行</span>
+            dfs(row + <span class="number">1</span>);
+            
+            <span class="comment">// 🧹 恢复现场（回溯）：拔出这枚冰后，抹除所有占用痕迹，继续考察下一列</span>
+            cur.pop_back();
+            col[c] = d1[row - c + n] = d2[row + c] = <span class="keyword">false</span>;
+        }
+    }
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n_input;
+    <span class="keyword">if</span> (cin &gt;&gt; n_input) {
+        n = n_input;
+        dfs(<span class="number">0</span>); <span class="comment">// 从第 0 行开始摆放冰后</span>
+        
+        <span class="comment">// 📤 打印输出前 3 个符合规则的优秀阵法序列</span>
+        <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>& sol : firstThree) {
+            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i) {
+                <span class="keyword">if</span> (i &gt; <span class="number">0</span>) cout &lt;&lt; <span class="string">" "</span>;
+                cout &lt;&lt; sol[i];
+            }
+            cout &lt;&lt; endl;
+        }
+        <span class="comment">// 📤 最后一行为最终结算的总和方案数</span>
+        cout &lt;&lt; total &lt;&lt; endl;
+    }
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>列表的切片复制与备份：</strong> 当我们在 Python 中成功发现一个解并想要存入 <span class="code-inline">first_three</span> 时，必须要写成 <span class="code-inline">cur[:]</span>。 这种带有冒号的写法国防级地复制了一份当前的独立数据副本。如果是直接写 <span class="code-inline">cur</span>，由于它是引用传递，后续回溯会把里面的元素全部清空，导致你最后得到的都是空的列表！</li>
+                <li>🚀 <strong>闭包与 nonlocal 关键字：</strong> 在内嵌函数 <span class="code-inline">dfs()</span> 里，如果我们想对外面定义的计数器 <span class="code-inline">total</span> 进行修改和累加，必须在开头写一行 <span class="code-inline">nonlocal total</span>，明确告诉 Python 这不是一个局部的全新变量，而是外面那个核心总计数器。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (清晰直观回溯版)</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="keyword">def</span> <span class="type">solve_n_queens</span>(n):
+    <span class="comment"># 📖 准备冲突记录本，乘 2 是为了给对角线相加相减预留足够的空间</span>
+    col = [<span class="keyword">False</span>] * (n + <span class="number">1</span>)
+    d1 = [<span class="keyword">False</span>] * (<span class="number">2</span> * n + <span class="number">1</span>)  <span class="comment"># 主对角线：row - col + n</span>
+    d2 = [<span class="keyword">False</span>] * (<span class="number">2</span> * n + <span class="number">1</span>)  <span class="comment"># 副对角线：row + col</span>
+    
+    cur = []
+    first_three = []
+    total = <span class="number">0</span>
+
+    <span class="keyword">def</span> <span class="type">dfs</span>(row):
+        <span class="keyword">nonlocal</span> total <span class="comment"># 声明使用闭包外部的全局累计变量</span>
+        
+        <span class="comment"># 🏁 终止条件：所有行都已经成功安排就绪！</span>
+        <span class="keyword">if</span> row == n:
+            total += <span class="number">1</span>
+            <span class="keyword">if</span> len(first_three) &lt; <span class="number">3</span>:
+                first_three.append(cur[:]) <span class="comment"># ⚠️ 必须用切片 [:] 制作数据副本备份！</span>
+            <span class="keyword">return</span>
+            
+        <span class="comment"># 🔍 按列号 1 到 n 的升序依次尝试放置冰后</span>
+        <span class="keyword">for</span> c <span class="keyword">in</span> range(<span class="number">1</span>, n + <span class="number">1</span>):
+            <span class="comment"># 🛡️ 判定这三个方位的阵法是否有冲突</span>
+            <span class="keyword">if not</span> col[c] <span class="keyword">and not</span> d1[row - c + n] <span class="keyword">and not</span> d2[row + c]:
+                
+                <span class="comment">// 🎯 实施占领，并记录当前列号</span>
+                col[c] = d1[row - c + n] = d2[row + c] = <span class="keyword">True</span>
+                cur.append(c)
+                
+                <span class="comment">// 🚀 递归向下摆放下一行</span>
+                dfs(row + <span class="number">1</span>)
+                
+                <span class="comment">// 🧹 清除现场（回溯）：恢复所有的自由通行状态</span>
+                cur.pop()
+                col[c] = d1[row - c + n] = d2[row + c] = <span class="keyword">False</span>
+
+    dfs(<span class="number">0</span>) <span class="comment"># 从第 0 行正式开始深度搜索之旅</span>
+    <span class="keyword">return</span> first_three, total
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    <span class="comment"># 📥 读取输入的棋盘大小限制</span>
+    lines = sys.stdin.read().split()
+    <span class="keyword">if not</span> lines:
+        <span class="keyword">return</span>
+    n = int(lines[<span class="number">0</span>])
+    
+    first_three, total = solve_n_queens(n)
+    
+    <span class="comment"># 🏆 格式化打印出前三个合法解</span>
+    <span class="keyword">for</span> sol <span class="keyword">in</span> first_three:
+        print(<span class="string">' '</span>.join(map(str, sol)))
+        
+    <span class="comment"># 🏆 最后一行为全部方案的总结</span>
+    print(total)
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+    </div>
+
+    <div class="card summary">
+        <h2>💡 技巧和重点详细总结 (回溯阵法核心秘籍)</h2>
+        <ul>
+            <li><strong>🌟 回溯（Backtracking）的至高心法：</strong> 回溯算法最生动的比喻就是“走迷宫”。当你来到一处岔路口（一列），你先试探着往里走（<span class="code-inline">dfs</span> 深入下一行）。如果走到头发现是死胡同或者已经拿到了正确的路线，你必须沿着原路**倒退回来**。在倒退回岔路口的过程中，你必须把你沿途做的所有标记、放下的路标全部原封不动地**擦除抹净**（恢复占用状态为 false），这样你才能清清白白地去尝试另一条全新的岔路！</li>
+            <li><strong>🌟 对角线常量化技巧：</strong> 这是做所有网格棋盘类冲突题目最精妙的降维打击武器。行号和列号的数学加减组合，能够把纷繁复杂的倾斜对角线完美投影到一条一维的直线索引数组里。不需要用多重循环去沿着斜线数格子供判断，用 $O(1)$ 的时间查一下布尔数组就能立刻知道是否有冲突，这是算法大师的核心提速法宝！</li>
+            <li><strong>🌟 字典序控制：</strong> 很多初学者会在搜出一堆答案后，再写一个排序算法去给答案进行字典序排列，这是非常低效的。只要我们在每一层写 <span class="code-inline">for</span> 循环时，控制列号由小到大递增（<span class="code-inline">1, 2, 3 ... n</span>），那么递归树在生长的过程中，左边的树枝一定比右边的树枝先成熟。这样最先被捕获的三个答案自然而然就是字典序最小的前三个，完全免去了后期的排序开销！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    // 简单的语言切换系统
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>

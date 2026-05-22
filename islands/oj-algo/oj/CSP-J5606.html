@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：半数秘径</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 雪山祭坛主题 (加深文字颜色，保证高对比度与绝对清晰) */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #eef7fa; /* 冰雪浅蓝背景 */
+            color: #111111; /* 极深黑色文字，保证清晰度 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #006064;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            color: #111111;
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0d47a1; /* 极深蓝色 */
+            background-color: #1976d2; /* 深蓝色 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+        .lang-btn.active.py-btn {
+            border-color: #1b5e20; /* 极深绿色 */
+            background-color: #388e3c; /* 深绿色 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(25, 118, 210, 0.15);
+            border: 5px solid #1976d2; /* 深蓝色边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #0d47a1; /* 皇家深蓝 */
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #ef6c00; /* 深橙色 */
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #e65100, 0 8px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff3e0;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #e65100, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #0d47a1; /* 极深蓝色 */
+            border-bottom: 3px dashed #90caf9;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #c62828; /* 极深红色 */
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        /* 可爱的内容卡片 - 调整文字颜色为深色 */
+        .card {
+            background-color: #fafbfc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #1976d2;
+            color: #111111; /* 卡片内文字全部加深 */
+        }
+
+        .card.problem { border-color: #1565c0; background-color: #e3f2fd; }
+        .card.logic { border-color: #f57c00; background-color: #fff8e1; }
+        .card.knowledge { border-color: #2e7d32; background-color: #e8f5e9; }
+        .card.code-box { border-color: #263238; background-color: #eceff1; }
+        .card.summary { border-color: #c62828; background-color: #ffebee; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #1e2b3c;
+            color: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #aed581; font-style: italic; }
+        .keyword { color: #ff80ab; font-weight: bold; }
+        .type { color: #81d4fa; }
+        .string { color: #fff59d; }
+        .number { color: #ffb74d; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #bbdefb;
+            color: #0d47a1; /* 深蓝色 */
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划公式 */
+        .formula {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #b71c1c; /* 极深的红色 */
+            border: 2px dashed #1976d2; /* 深蓝色边框 */
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #37474f; /* 加深的蓝灰色 */
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏔️ 半数秘径：雪山祭坛的能量序列 🔮</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #0d47a1; font-weight: bold;">
+        👋 嗨，勇敢的魔导师！欢迎来到远古的雪山祭坛！<br>
+        在这里，我们需要吟唱一串神秘的“能量序列”。 序列会由一个正整数 n 开启，每次我们可以在末尾添加一个新数字，但是这个新数字绝对不能超过“上一个数字的一半”！ 这样分岔交错的小路，一共有多少条不同的“秘径”可以成功通往山脚呢？ 让我们用递归与动态规划的智慧来解开它！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/47" target="_blank" class="action-btn">
+            🚀 点击这里，开启雪山传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>给定一个正整数 n，我们需要构造一个满足下列规则的正整数序列：</p>
+        <p><strong>能量序列的构筑法则：</strong></p>
+        <ul>
+            <li>序列的第一个数字必须是 n。</li>
+            <li>在序列的队尾可以随时接一个新的正整数，但是这个新数字<strong>不能超过当前最后一个数字的一半</strong>。</li>
+            <li>一直遵守这个规则，直到再也无法或不想继续往后接新数字为止，这样得到的每一条序列都是一条合法的“秘径”。</li>
+        </ul>
+        <p><strong>判定不同的方式：</strong> 只要两条序列的长度不同，或者任何一个位置上的数字不同，就视为两条不同的秘径。 请问从 n 出发，总共能构造出多少条不同的合法序列？</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #1565c0;">
+                <strong style="color: #0d47a1;">📥 魔法输入阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(一个正整数 n，1 ≤ n ≤ 1000)</span><br>
+                <pre style="background-color: #e3f2fd; color: #111111; padding: 10px; margin: 5px 0;">6</pre>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #ff8f00;">
+                <strong style="color: #e65100;">📤 奇迹输出阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(一个整数，代表可行的秘径总数)</span><br>
+                <pre style="background-color: #fff8e1; color: #111111; padding: 10px; margin: 5px 0;">6</pre>
+            </div>
+        </div>
+        <p><strong>样例解释说明：</strong> 当 n=6 时，合法的 6 条秘径序列分别为：<br>
+        1. （直接结束）<br>
+        2. （1 不超过 6 的一半）<br>
+        3. （2 不超过 6 的一半）<br>
+        4. （1 不超过 2 的一半）<br>
+        5. （3 不超过 6 的一半）<br>
+        6. （1 不超过 3 的一半）</p>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：树状分岔与两种解法)</h2>
+        
+        <p style="font-weight: bold;">要解决这个问题，我们可以从递归的基本逻辑出发，然后通过高阶的线性优化法术来实现全屏秒杀！</p>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #1976d2; margin: 20px 0; text-align: center;">
+            <div style="color: #0d47a1; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                🌲 解法 1：记忆化递归（自顶向下的分岔树） 🌲
+            </div>
+            <p style="text-align: left; font-weight: bold; color: #111;">假设我们要计算从数字 x 出发能构成的合法序列条数 f(x)。 根据规则，它可以分为以下两部分：</p>
+            <p style="text-align: left; font-weight: bold; color: #c62828;">1. 只包含它本身一根独苗的序列（贡献为 1 条）。<br>2. 在它的后面接上一个新的数字 i，而这个 i 只能从 1 挑选到 x/2（向下取整）。 接上 i 之后，就相当于变成了“从 i 出发的秘径”！</p>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 20px 0; background-color: #e3f2fd; padding: 20px; border-radius: 10px; border: 2px dashed #1565c0;">
+                <div style="width: 50px; height: 50px; line-height: 50px; background-color: #0d47a1; color: white; border-radius: 5px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">6</div>
+                <div style="font-size: 20px; color: #0d47a1; margin: 5px 0;">⬇️ 分岔（后面只能接 ≤ 3 的正整数）</div>
+                <div style="display: flex; justify-content: space-around; width: 100%; gap: 10px;">
+                    <div style="text-align: center; border: 2px solid #2e7d32; padding: 10px; border-radius: 5px; background-color: white;">
+                        <span style="font-weight: bold; color: #2e7d32;">自身独立项</span><br>
+                        <div style="margin-top: 5px; font-weight: bold; color: #111;"></div>
+                        <div style="font-size: 12px; color: #37474f; font-weight: bold; margin-top: 5px;">数量：1</div>
+                    </div>
+                    <div style="text-align: center; border: 2px solid #ef6c00; padding: 10px; border-radius: 5px; background-color: white;">
+                        <span style="font-weight: bold; color: #ef6c00;">接上 1 后续</span><br>
+                        <div style="margin-top: 5px; font-weight: bold; color: #111;">[6, 1...]</div>
+                        <div style="font-size: 12px; color: #37474f; font-weight: bold; margin-top: 5px;">数量：f(1)</div>
+                    </div>
+                    <div style="text-align: center; border: 2px solid #ef6c00; padding: 10px; border-radius: 5px; background-color: white;">
+                        <span style="font-weight: bold; color: #ef6c00;">接上 2 后续</span><br>
+                        <div style="margin-top: 5px; font-weight: bold; color: #111;">[6, 2...]</div>
+                        <div style="font-size: 12px; color: #37474f; font-weight: bold; margin-top: 5px;">数量：f(2)</div>
+                    </div>
+                    <div style="text-align: center; border: 2px solid #ef6c00; padding: 10px; border-radius: 5px; background-color: white;">
+                        <span style="font-weight: bold; color: #ef6c00;">接上 3 后续</span><br>
+                        <div style="margin-top: 5px; font-weight: bold; color: #111;">[6, 3...]</div>
+                        <div style="font-size: 12px; color: #37474f; font-weight: bold; margin-top: 5px;">数量：f(3)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #0d47a1; font-size: 1.1em; font-weight: bold; margin: 15px 0 10px 0;">
+                💡 递归转移公式：
+            </div>
+            <div class="formula">
+                f(x) = 1 + f(1) + f(2) + ... + f(x / 2)
+            </div>
+            <p style="text-align: left; font-weight: bold; color: #111;">为了防止递归反复计算相同的数超时，我们可以建立一个记忆本数组，这就是带记忆化的递归，时间复杂度是 O(n^2)。</p>
+        </div>
+
+        <div class="visual-panel" style="background: #fff; padding: 25px; border-radius: 15px; border: 2px dashed #2e7d32; margin: 20px 0; text-align: center;">
+            <div style="color: #2e7d32; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                ⚡ 解法 2：线性递推优化（神级 O(n) 降维打击） ⚡
+            </div>
+            <p style="text-align: left; font-weight: bold; color: #111;">让我们静下心来，观察两个相邻的数字，比如 5 和 6：</p>
+            <p style="text-align: left; font-weight: bold; color: #2e7d32;">
+                根据公式：<br>
+                f(5) = 1 + f(1) + f(2) （5 的一半向下取整是 2）<br>
+                f(6) = 1 + f(1) + f(2) + f(3) （6 的一半向下取整是 3）
+            </p>
+            <p style="text-align: left; font-weight: bold; color: #111;">看到了吗！f(6) 和 f(5) 相比，前面的项一模一样，唯独最后<strong>多出了一项 f(3)</strong>！ 这里的 3 恰好就是 6 / 2。</p>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0; background-color: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px dashed #2e7d32;">
+                <div style="border: 2px solid #1565c0; padding: 10px; border-radius: 5px; background-color: white; font-weight: bold;">
+                    x 是奇数（如 5）<br>
+                    <span style="color: #c62828;">一半的限制不变</span><br>
+                    ➡️ f(x) = f(x - 1)
+                </div>
+                <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">✨</div>
+                <div style="border: 2px solid #2e7d32; padding: 10px; border-radius: 5px; background-color: white; font-weight: bold;">
+                    x 是偶数（如 6）<br>
+                    <span style="color: #2e7d32;">刚好解锁了接上 x/2 这一支</span><br>
+                    ➡️ f(x) = f(x - 1) + f(x / 2)
+                </div>
+            </div>
+
+            <p style="text-align: left; font-weight: bold; color: #111;">通过这个惊天的大发现，我们可以彻底扔掉内层的 for 循环求和，直接用 O(1) 的时间从前一项推出后一项！ 整个问题的总时间复杂度被降级成了极其恐怖的 <strong>O(n)</strong>！</p>
+        </div>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>记忆化搜索的机制：</strong> 在第一个程序（递归版）中，我们开辟了全局的 <span class="code-inline">memo</span> 动态数组并初始化为 -1。 每次进入函数先进行检查，如果算过则瞬间返回，这体现了自顶向下的分治记忆思想。</li>
+                <li>🛡️ <strong>线性递推与 long long：</strong> 虽然这道题的 n 只有 1000，但在做类似计数或阶乘相关的递归题目时，结果可能呈爆炸式增长。 题目提示我们为了安全起见，一定要使用 64 位整型 <span class="code-inline">long long</span> 来存储答案。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 1 (记忆化递归版：契合递归练习)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;vector&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="comment">// 📖 魔法记忆本：专门阻止递归陷入重复计算的深渊</span>
+vector&lt;<span class="type">long long</span>&gt; memo;
+
+<span class="comment">// 🎨 递归计算从正整数 x 出发能构成的秘径序列条数</span>
+<span class="type">long long</span> f(<span class="type">int</span> x) {
+    <span class="keyword">if</span> (x == <span class="number">1</span>) <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">// 🏁 边界条件：1 的后面什么都接不了，只有 自身这1条</span>
+    
+    <span class="comment">// 🛡️ 记忆化查表：如果之前曾经施法计算过，直接翻书拿答案</span>
+    <span class="keyword">if</span> (memo[x] != -<span class="number">1</span>) <span class="keyword">return</span> memo[x];
+    
+    <span class="type">long long</span> res = <span class="number">1</span>; <span class="comment">// ✨ 首先包含只由自己组成的单数序列</span>
+    
+    <span class="comment">// 🔍 遍历所有合法的后继数字 i (不能超过当前数字的一半)</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= x / <span class="number">2</span>; ++i) {
+        res += f(i); <span class="comment">// 累加每一个分岔子树带来的序列数</span>
+    }
+    
+    memo[x] = res; <span class="comment">// ✍️ 将最优解记入小本本</span>
+    <span class="keyword">return</span> res;
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n;
+    <span class="type">cin</span> &gt;&gt; n;
+    
+    <span class="comment">// 🧹 将记忆本容量扩展为 n+1，全部涂成 -1 代表尚未算过</span>
+    memo.assign(n + <span class="number">1</span>, -<span class="number">1</span>);
+    
+    <span class="type">cout</span> &lt;&lt; f(n) &lt;&lt; endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 2 (极致优化 O(n) 线性递推版)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;vector&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n;
+    <span class="type">cin</span> &gt;&gt; n;
+    
+    vector&lt;<span class="type">long long</span>&gt; f(n + <span class="number">1</span>);
+    f[<span class="number">1</span>] = <span class="number">1</span>; <span class="comment">// 🎨 初始阵型基石</span>
+    
+    <span class="comment">// ⚡ 一层 for 循环，利用奇偶数规律直接推出全表</span>
+    <span class="keyword">for</span> (<span class="type">int</span> x = <span class="number">2</span>; x &lt;= n; ++x) {
+        <span class="comment">// 如果是偶数，多解锁了接上 x/2 的能力；如果是奇数，方案数跟前一项完全相同</span>
+        f[x] = (x % <span class="number">2</span> == <span class="number">0</span>) ? f[x - <span class="number">1</span>] + f[x / <span class="number">2</span>] : f[x - <span class="number">1</span>];
+    }
+    
+    <span class="type">cout</span> &lt;&lt; f[n] &lt;&lt; <span class="string">'\n'</span>;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>内置黑魔法 @lru_cache：</strong> 在 Python 递归版代码中，我们直接引入了工具箱里的 <span class="code-inline">from functools import lru_cache</span>。这是一个极其强大的内置缓存装饰器，只要在自定义函数上方随手写一行 <span class="code-inline">@lru_cache(maxsize=None)</span>，Python 就会在幕后默默帮我们把所有的函数输入与对应的返回值存进字典里，实现全自动的记忆化搜索，代码极其高雅简洁！</li>
+                <li>🚀 <strong>整除切分符 //：</strong> 请记住，Python 的单斜杠 <span class="code-inline">/</span> 算出的是浮点数（小数），如果想要取得满足规则的、向下取整的“一半”整数，必须使用双斜杠整除符号 <span class="code-inline">//</span>。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 1 (记忆化递归版)</h2>
+<pre>
+<span class="keyword">from</span> functools <span class="keyword">import</span> lru_cache
+<span class="keyword">import</span> sys
+
+<span class="comment"># 🧙‍♂️ 施加全自动查表魔法，免去我们手动写字典的烦恼</span>
+<span class="keyword">@lru_cache</span>(maxsize=<span class="keyword">None</span>)
+<span class="keyword">def</span> <span class="type">f</span>(x):
+    <span class="keyword">if</span> x == <span class="number">1</span>:
+        <span class="keyword">return</span> <span class="number">1</span>  <span class="comment">// 🏁 1 后面无法追加任何数字，只有 一种可能</span>
+        
+    total = <span class="number">1</span>  <span class="comment"># ✨ 首先包括只含有一个数 x 自身的单元素序列</span>
+    
+    <span class="comment"># 🔍 寻找所有不超过上一个数字一半的后继整数 i</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, x // <span class="number">2</span> + <span class="number">1</span>):
+        total += f(i)  <span class="comment"># 递归呼叫子问题并累加</span>
+        
+    <span class="keyword">return</span> total
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    <span class="comment"># 📥 接入雪山祭坛的原始能量</span>
+    n = <span class="type">int</span>(sys.stdin.read().strip())
+    <span class="type">print</span>(f(n))
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 2 (极致优化 O(n) 线性递推版)</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    n = <span class="type">int</span>(sys.stdin.read().strip())
+    
+    <span class="comment"># 📖 准备一维递推账本</span>
+    f = [<span class="number">0</span>] * (n + <span class="number">1</span>)
+    f[<span class="number">1</span>] = <span class="number">1</span>
+    
+    <span class="comment"># ⚡ 自底向上单层循环，光速递推</span>
+    <span class="keyword">for</span> x <span class="keyword">in</span> <span class="type">range</span>(<span class="number">2</span>, n + <span class="number">1</span>):
+        <span class="keyword">if</span> x % <span class="number">2</span> == <span class="number">0</span>:
+            f[x] = f[x - <span class="number">1</span>] + f[x // <span class="number">2</span>] <span class="comment"># 偶数时解锁新分岔</span>
+        <span class="keyword">else</span>:
+            f[x] = f[x - <span class="number">1</span>]             <span class="comment"># 奇数时与前一项相同</span>
+            
+    <span class="type">print</span>(f[n])
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+    </div>
+
+    <div class="card summary">
+        <h2>💡 技巧和重点详细总结 (一定要看)</h2>
+        <ul>
+            <li><strong>🌟 递归到递推的底层相通：</strong> 很多初学者觉得“递归”和“用 for 循环动态规划递推”是两个互不相干的法术。实际上，带记忆化的递归（自顶向下）和循环递推（自底向上）在数学的本质结构上是完全同一对孪生兄弟！ 掌握了用小笔记本记录答案的递归，你就已经领悟了动态规划的真谛。</li>
+            <li><strong>🌟 发现隐藏的局部规律：</strong> 面对一个复杂的求和递推式，千万不要急着直接写双重循环开跑。试着在纸上把前几项（如 f(5)、f(6)）展开并进行**差分对比**，你会经常发现相邻两项之间庞大的求和公式可以被神奇地合并简化。 像本题中利用奇偶性把 O(n^2) 降维打击成 O(n)，就是算法优化中极具美感的操作！</li>
+            <li><strong>🌟 边界条件的牢固性：</strong> 写任何递归和递推代码，基础的边界条件（Base Case）是让魔法停下来的最重要锚点。 比如这道题，<span class="code-inline">f(1) = 1</span> 是全场迭代的根基，失去了这个 1，所有的累加结果都将变成 0，做题时千万要先把边界牢牢锁死！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    // 简单的语言切换法术
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>

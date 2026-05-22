@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：星语解码</title>
+    <style>
+        /* 全局可爱魔法风格设置 - 炽热沙海与璀璨星空主题 (超深文字颜色，保证绝对清晰) */
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fdf6e2; /* 温暖的沙海浅黄背景 */
+            color: #111111; /* 极深的黑色，保障最佳可读性 */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #ffffff;
+            border: 3px solid #e65100;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            color: #111111;
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0d47a1; /* 极深蓝色 */
+            background-color: #1a237e; /* 璀璨星空深蓝 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+        .lang-btn.active.py-btn {
+            border-color: #1b5e20; /* 极深绿色 */
+            background-color: #2e7d32; /* 丛林深绿 */
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.4);
+        }
+
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(230, 81, 0, 0.15);
+            border: 5px solid #e65100; /* 炽热沙海深橙色边框 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #b71c1c; /* 深火红色 */
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+            text-shadow: 1px 1px 0px #ffcc80;
+        }
+        
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #0288d1; /* 天空蓝 */
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #01579b, 0 8px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #e1f5fe;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #0d47a1; /* 极深宇宙蓝 */
+            border-bottom: 3px dashed #ffb74d;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #e65100; /* 极深烈阳橙 */
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        /* 可爱的内容卡片 - 调整文字颜色为极其清晰的深色 */
+        .card {
+            background-color: #fafbfc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #e65100;
+            color: #111111; 
+        }
+
+        .card.problem { border-color: #1565c0; background-color: #e3f2fd; }
+        .card.logic { border-color: #ff8f00; background-color: #fff8e1; }
+        .card.knowledge { border-color: #2e7d32; background-color: #e8f5e9; }
+        .card.code-box { border-color: #263238; background-color: #eceff1; }
+        .card.summary { border-color: #c62828; background-color: #ffebee; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #1e2b3c;
+            color: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        /* 代码中的高亮颜色 */
+        .comment { color: #aed581; font-style: italic; }
+        .keyword { color: #ff80ab; font-weight: bold; }
+        .type { color: #81d4fa; }
+        .string { color: #fff59d; }
+        .number { color: #ffb74d; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #ffe082;
+            color: #b71c1c; /* 深红字 */
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        /* 动态规划/递推公式卡片 */
+        .formula {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #0d47a1; /* 极深蓝色 */
+            border: 2px dashed #e65100;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #37474f; 
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>📜 星语解码：解开方括号套娃咒 🌌</h1>
+    
+    <div style="text-align: center; font-size: 1.2em; color: #e65100; font-weight: bold;">
+        👋 嗨，远古文明的破译专家！我是你的算法向导！<br>
+        在一片炽热的沙海上，你发现了一卷记录着外星文明密码的“星语卷”。这些神秘的密语被一种“方括号咒”层层压缩包裹着。要把整条密语完整解压出来，我们需要使用威力无穷的“递归下降解析法”，像拆开俄罗斯套娃一样，由内而外逐步还原它！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/48" target="_blank" class="action-btn">
+            🚀 点击这里，开启星际传送门（前往做题）！
+        </a>
+    </div>
+
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>输入一行被压缩的外星密码字符串，请你输出完全解压还原后的原始文本字符串。</p>
+        <p><strong>神奇的方括号咒（压缩规则）：</strong></p>
+        <ul>
+            <li>形如 <strong>[D子串]</strong> 表示把方括号里面的子串连续重复出现 D 次（1 ≤ D ≤ 99）。</li>
+            <li><strong>嵌套套娃法则：</strong> 方括号内部的子串还可以继续包含更多的方括号压缩咒语，最多可以支持 10 层嵌套。</li>
+            <li>输入数据只包含大写字母、数字、左方括号 '[' 和右方括号 ']'。 解压完成后的最终字符串总长度不超过 20000。</li>
+        </ul>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #1565c0;">
+                <strong style="color: #0d47a1;">📥 魔法输入阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(含有方括号咒的密码线索)</span><br>
+                <pre style="background-color: #e3f2fd; color: #111111; padding: 10px; margin: 5px 0;">AC[3FUN]</pre>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 10px; border: 2px solid #ff8f00;">
+                <strong style="color: #e65100;">📤 奇迹输出阵：</strong><br>
+                <span style="color: #111111; font-size: 0.9em; font-weight: bold;">(完全解压展开后的真实含义)</span><br>
+                <pre style="background-color: #fff8e1; color: #111111; padding: 10px; margin: 5px 0;">ACFUNFUNFUN</pre>
+            </div>
+        </div>
+        <p style="font-weight: bold; margin-top: 15px;">更多神秘线索提示：</p>
+        <ul>
+            <li>线索二：<strong>[2ABC]XYZ[3Q]</strong> 展开结果为：ABCABCXYZQQQ</li>
+            <li>线索三：<strong>X[2A[3B]C]Y</strong> 展开时先处理内层 [3B] 变成 BBB，得到 [2ABBBC]，再把整段重复 2 次，最后得到：XABBBCABBBCY</li>
+        </ul>
+    </div>
+
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：递归解压的套娃艺术)</h2>
+        
+        <p style="font-weight: bold;">面对这种“大盒子套小盒子”的嵌套结构，最天然完美的破解武器就是<b>递归（Recursion）</b>！我们将使用“从左到右单指针扫描”的递归下降解析策略。</p>
+
+        <div class="visual-panel" style="background: #ffffff; padding: 25px; border-radius: 15px; border: 2px dashed #ff8f00; margin: 20px 0; text-align: center;">
+            <div style="color: #e65100; font-size: 1.2em; margin-bottom: 15px; font-weight: bold;">
+                🪆 纯前端网页图解：以密码 X[2A[3B]C]Y 为例的递归展开过程 🪆
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; background-color: #fffdf5; padding: 20px; border-radius: 12px; border: 1px solid #ffe082;">
+                
+                <div style="border: 2px solid #0d47a1; background-color: #e3f2fd; padding: 12px; border-radius: 8px; width: 90%; text-align: left;">
+                    <strong style="color: #0d47a1;">第一层解析（当前指针位置：最左端）</strong><br>
+                    <span style="font-weight: bold;">遇到普通字母：</span> 遇到 <span class="code-inline">X</span>，直接装进最终结果。<br>
+                    <span style="font-weight: bold; color: #b71c1c;">遇到左括号 [：</span> 暂停当前层的组装！读取重复次数 <span class="code-inline">2</span>。指针右移，向下<b>递归调用第二层</b>去解出括号里的秘密。
+                    
+                    <div style="border: 2px solid #e65100; background-color: #fff3e0; padding: 12px; border-radius: 8px; margin-top: 15px; width: 93%; margin-left: auto; margin-right: auto;">
+                        <strong style="color: #e65100;">第二层解析（进入第一个括号内部）</strong><br>
+                        <span style="font-weight: bold;">遇到普通字母：</span> 读到 <span class="code-inline">A</span>，直接记下来。<br>
+                        <span style="font-weight: bold; color: #b71c1c;">又遇到左括号 [：</span> 再次暂停！读取重复次数 <span class="code-inline">3</span>。指针继续右移，<b>继续递归调用第三层</b>！
+                        
+                        <div style="border: 2px solid #2e7d32; background-color: #e8f5e9; padding: 12px; border-radius: 8px; margin-top: 15px; width: 90%; margin-left: auto; margin-right: auto;">
+                            <strong style="color: #2e7d32;">第三层解析（最深处的套娃）</strong><br>
+                            <span style="font-weight: bold;">遇到普通字母：</span> 读到 <span class="code-inline">B</span>，记下来。<br>
+                            <span style="font-weight: bold; color: #1565c0;">遇到右括号 ]：</span> 这一层的秘密到头了！第三层宣告结束，向第二层返回解压结果：<span class="code-inline">"B"</span>。
+                        </div>
+                        
+                        <div style="margin-top: 12px; border-top: 1px dashed #ffb74d; padding-top: 8px; font-size: 0.95em;">
+                            <strong style="color: #e65100;">第二层恢复执行：</strong><br>
+                            接收到第三层传回的 <span class="code-inline">"B"</span>，根据刚才记录的次数 3，将其自我复制变成 <span class="code-inline">"BBB"</span> 并拼接上先前的 A，目前组合成 <span class="code-inline">"ABBB"</span>。<br>
+                            指针继续右移，读到普通字母 <span class="code-inline">C</span>，拼上去变成 <span class="code-inline">"ABBBC"</span>。<br>
+                            <span style="font-weight: bold; color: #1565c0;">遇到右括号 ]：</span> 第二层功德圆满！结束并向第一层返回：<span class="code-inline">"ABBBC"</span>。
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 12px; border-top: 1px dashed #90caf9; padding-top: 8px; font-size: 0.95em;">
+                        <strong style="color: #0d47a1;">第一层恢复执行：</strong><br>
+                        接收到第二层传回的 <span class="code-inline">"ABBBC"</span>，根据外面记录的次数 2，将其复制两遍变成 <span class="code-inline">"ABBBCABBBC"</span>。与开头的 X 拼接得到 <span class="code-inline">"XABBBCABBBC"</span>。<br>
+                        指针最后读完末尾的普通字母 <span class="code-inline">Y</span>。整个字符串成功解析完毕！
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <h3>✨ 递归三大核心逻辑解析</h3>
+        <p>只要我们在代码里设计一个扫描指针变量 <span class="code-inline">i</span>，让它在字符串中一路向右走，遇到的情况可以完美总结为三种状态：</p>
+        <ul style="line-height: 2;">
+            <li>🔸 <b>普通大写字母：</b> 不需要任何特殊处理，直接把它装进我们当前层用来收集结果的容器里，指针 <span class="code-inline">i</span> 前进 1 步。</li>
+            <li>🔸 <b>遇到左括号 '['：</b> 指针前进 1 步跳过左括号。接着写一个循环把紧随其后的数字完整地读出来，存为重复次数 <span class="code-inline">D</span>。接着，直接<b>呼叫函数自己（进行递归）</b>。递归函数会帮我们把括号深处的东西全部解析好并作为一个整体字符串返回。我们拿到这个返回的子字符串后，把它自我复制叠加 <span class="code-inline">D</span> 次，追加到当前的容器中即可！</li>
+            <li>🔸 <b>遇到右括号 ']' 或字符串结束：</b> 这代表当前这一层括号的任务圆满完成了！直接退出循环，把当前容器里收集好的字符串返回给呼叫它的上一层。</li>
+        </ul>
+        <div class="formula">
+            核心思想：把解压 [D子串] 转化为 “重复 D 次调取 decode() 对子串的解压结果”
+        </div>
+    </div>
+
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>⚙️ <strong>传引用控制指针 (&)：</strong> 在 C++ 中，为了让所有的递归层级能够共享、并实时修改同一个扫描位置，我们需要将下标变量定义为引用传递：<span class="code-inline">int& i</span>。这样无论在哪一层嵌套里让指针前进了，其他层都能同步感知到最新的扫描进度，绝对不会出现重复读取或漏读的情况。</li>
+                <li>🛡️ <strong>高效字符串拼接：</strong> 在处理高频率的字符串相加时，C++ 的 <span class="code-inline">+=</span> 运算符非常高效。由于题目给出了最终解压长度不超过 20000 的限制，直接使用标准的 <span class="code-inline">std::string</span> 收集结果即可轻松通关，无须担心内存过载。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (指针引用递归版)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;string&gt;
+<span class="keyword">#include</span> &lt;cctype&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="comment">// 🎨 递归解析函数，i 为全局共享的当前解析位置（通过引用传递控制进度）</span>
+<span class="type">string</span> decode(<span class="keyword">const</span> <span class="type">string</span>& s, <span class="type">int</span>& i) {
+    <span class="type">string</span> res = <span class="string">""</span>; <span class="comment">// 当前层收集解压片段的容器</span>
+    
+    <span class="comment">// 当还没读到字符串末尾，且没有撞到当前层的右括号时，持续进行解析</span>
+    <span class="keyword">while</span> (i &lt; s.size() && s[i] != <span class="string">']'</span>) {
+        <span class="keyword">if</span> (s[i] == <span class="string">'['</span>) {
+            i++; <span class="comment">// 👀 成功触发左括号咒，指针前进一步跳过 '['</span>
+            
+            <span class="type">int</span> d = <span class="number">0</span>;
+            <span class="comment">// 🔢 用经典的逐位累加法，读取出紧跟在括号后面的重复次数 D</span>
+            <span class="keyword">while</span> (isdigit(s[i])) {
+                d = d * <span class="number">10</span> + (s[i] - <span class="string">'0'</span>);
+                i++;
+            }
+            
+            <span class="comment">// 🧙‍♂️ 施展递归套娃分裂术！让下一层函数帮我们把括号里的子串完全解开</span>
+            <span class="type">string</span> inner = decode(s, i);
+            
+            i++; <span class="comment">// 👀 递归回来时指针正好停在 ']' 上，前进一步跳过它</span>
+            
+            <span class="comment">// 🔄 按照外仙人指定的次数 d，把解开的子串自我复制叠加到当前结果中</span>
+            <span class="keyword">for</span> (<span class="type">int</span> k = <span class="number">0</span>; k &lt; d; ++k) {
+                res += inner;
+            }
+        } <span class="keyword">else</span> {
+            <span class="comment">// 🔤 遇到的只是普通的魔法字符，直接抓进当前层的容器中，指针前进一步</span>
+            res += s[i];
+            i++;
+        }
+    }
+    <span class="keyword">return</span> res; <span class="comment">// 返回当前层完全解压拼接好的结果</span>
+}
+
+<span class="type">int</span> main() {
+    <span class="type">string</span> s;
+    <span class="comment">// 读取整行外星密码线索</span>
+    <span class="keyword">if</span> (getline(cin, s)) {
+        <span class="type">int</span> i = <span class="number">0</span>; <span class="comment">// 从最左端第 0 号位置开启全局解密扫描指针</span>
+        <span class="type">cout</span> &lt;&lt; decode(s, i) &lt;&lt; endl;
+    }
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>✨ <strong>多重返回值机制：</strong> 由于 Python 的基本变量（如整数）在函数传递时是值传递，无法像 C++ 那样直接修改全局下标，所以我们让递归函数每次同时返回两个宝贝：<span class="code-inline">return ''.join(res), i</span>。这样上一层就能轻松拿到解压好的字符串以及最新的指针位置。</li>
+                <li>🚀 <strong>列表拼接性能优化：</strong> 在 Python 中，如果高频执行字符串相加（<span class="code-inline">s = s + char</span>），由于字符串是不可变对象，底层会不断开辟新内存，速度很慢。老练的 Python 程序员会使用列表 <span class="code-inline">res.append()</span> 收集碎片，最后用 <span class="code-inline">''.join(res)</span> 一次性成型，运行速度直接拉满！</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (多重返回值递归版)</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="comment"># 🎨 递归解析函数：接收原始密码 s 和当前解析起点 i</span>
+<span class="keyword">def</span> <span class="type">decode</span>(s, i):
+    <span class="comment">"""每个递归层级均返回一个元组：(当前层解压后的字符串, 最新推动后的索引位置)"""</span>
+    res = [] <span class="comment"># 采用列表收集字符碎片，性能更无敌</span>
+    n = len(s)
+    
+    <span class="comment"># 当指针没有出界且没有碰到属于当前层结束的右括号时，持续向右推进</span>
+    <span class="keyword">while</span> i &lt; n <span class="keyword">and</span> s[i] != <span class="string">']'</span>:
+        <span class="keyword">if</span> s[i] == <span class="string">'['</span>:
+            i += <span class="number">1</span> <span class="comment"># 👀 触发左括号，前进一步跳过 '['</span>
+            
+            d = <span class="number">0</span>
+            <span class="comment"># 🔢 连续读取数字字符，拼装出需要重复的倍数 D</span>
+            <span class="keyword">while</span> s[i].isdigit():
+                d = d * <span class="number">10</span> + int(s[i])
+                i += <span class="number">1</span>
+                
+            <span class="comment"># 🧙‍♂️ 递归调用：把剩下的重任交给下一层套娃，并同步接收对方返回的新指针</span>
+            inner, i = decode(s, i)
+            
+            i += <span class="number">1</span>  <span class="comment"># 👀 下一层结束时指针停留在 ']'，前进一步跳过它</span>
+            
+            <span class="comment"># 🔄 利用 Python 优雅的乘法特性，直接将子串重复 d 次并装进列表</span>
+            res.append(inner * d)
+        <span class="keyword">else</span>:
+            <span class="comment"># 🔤 只是普通的字母，直接追加进当前层的列表，指针前进一步</span>
+            res.append(s[i])
+            i += <span class="number">1</span>
+            
+    <span class="comment"># 🏆 把列表里的碎片拼成一个完整的字符串，并连同指针一起奉还给上一层</span>
+    <span class="keyword">return</span> <span class="string">''</span>.join(res), i
+
+<span class="keyword">def</span> <span class="type">main</span>():
+    <span class="comment"># 📥 读取外星密码，剔除两端多余的空格</span>
+    s = sys.stdin.read().strip()
+    <span class="keyword">if not</span> s:
+        <span class="keyword">return</span>
+        
+    <span class="comment"># 从 0 号索引位置正式开启大破译之旅</span>
+    ans, _ = decode(s, <span class="number">0</span>)
+    
+    <span class="comment"># 🏆 打印输出完全恢复完毕的星语原文</span>
+    <span class="type">print</span>(ans)
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
+    </div>
+
+    <div class="card summary">
+        <h2>💡 技巧和重点详细总结 (破译者的经验笔记)</h2>
+        <ul>
+            <li><strong>🌟 递归下降解析的威力：</strong> 这种“用一个指针配合递归函数来解析字符串”的技术，叫做<b>递归下降解析法（Recursive Descent Parsing）</b>。它是计算机编译原理的核心基础！大到解析整个 C++ 语言源程序，小到我们这道解压密码题，只要遇到含有嵌套括号的结构（比如算术表达式、JSON格式、HTML标签），递归下降都是降维打击般的标准解法。</li>
+            <li><strong>🌟 为什么不需要手动找匹配的右括号？：</strong> 初学者做这道题时，最容易走入一个误区：“我看到左括号后，是不是应该先写个循环去往后数，找到对应的右括号在哪里？” <b>千万不要这样做！</b> 递归的精髓就在于，每一层函数都只管遇到右括号就闭嘴退出。在上面的代码中，内层的 <span class="code-inline">decode</span> 遇到内层的右括号就会主动刹车，把它完美地处理并返回，外层的循环根本不需要操心内层的结束边界，这就是“各司其职”的递归之美。</li>
+            <li><strong>🌟 时间复杂度的绝佳表现：</strong> 因为整个算法中，全局指针 <span class="code-inline">i</span> 仅仅是从 0 毫无回头路地一路走到了最右端，每个字符只被读取和扫描了刚好一次。唯一的额外花销仅仅是把解压出来的字符拼接到最终结果中。所以整个算法的时间复杂度是 <b>O(最终解压后字符串的长度)</b>。由于题目规定最终长度不超过 20000，程序可以在几毫秒内瞬间完成，效率极其无敌！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    // 简单的语言切换法术
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>
