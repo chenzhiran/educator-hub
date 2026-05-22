@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.9 递归的局限与调试技巧 - C++ 魔法课堂</title>
+    <style>
+        /* ================= 核心配色 (森林绿与魔法金主题) ================= */
+        :root {
+            --primary: #2E7D32;      
+            --primary-dark: #1B5E20;
+            --secondary: #F57F17;    
+            --accent: #43A047;       
+            --bg-color: #F1F8E9;     
+            --text-main: #33691E;
+            --code-bg: #263238;      
+        }
+
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#DCEDC8 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 15px 30px rgba(46, 125, 50, 0.15);
+            border: 4px solid #A5D6A7;
+        }
+
+        /* ================= 标题样式 ================= */
+        h1 {
+            text-align: center;
+            color: var(--primary-dark);
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #F1F8E9;
+        }
+
+        h2 {
+            background: linear-gradient(90deg, var(--primary), #81C784);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            font-size: 1.6em;
+        }
+
+        h3 {
+            color: var(--secondary);
+            border-bottom: 3px dashed var(--secondary);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* ================= 强调样式 ================= */
+        .highlight {
+            color: #FFF;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        
+        .text-orange { color: #E65100; font-weight: bold; }
+        .text-green { color: #2E7D32; font-weight: bold; }
+        .text-blue { color: #1565C0; font-weight: bold; }
+        .text-red { color: #C62828; font-weight: bold; }
+
+        /* 行内重要代码高亮强调 */
+        .code-hl {
+            background-color: #DCEDC8;
+            color: #1B5E20;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: "Consolas", "Courier New", monospace;
+            border: 1px solid #A5D6A7;
+            box-shadow: 1px 1px 0 #81C784;
+        }
+
+        .note-box {
+            background-color: #E8F5E9;
+            border-left: 8px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .danger-box {
+            background-color: #FFF3E0;
+            border: 2px solid #FFB74D;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step-box {
+            background-color: #FAFAFA;
+            border: 2px dashed #81C784;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #2E7D32;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .compare-table th { background: var(--primary); color: white; padding: 12px; }
+        .compare-table td { border: 1px solid #C8E6C9; padding: 12px; color: var(--text-main); }
+
+        /* ================= 图解区域 ================= */
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #C8E6C9;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        /* ================= 并排代码块 ================= */
+        .code-comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .code-card {
+            flex: 1;
+            border: 3px solid #81C784;
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--code-bg);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .code-header {
+            background: #1B5E20;
+            color: #C8E6C9;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #81C784;
+        }
+
+        .code-body {
+            padding: 20px;
+            color: #AEEA00; 
+            font-family: "Consolas", "Courier New", monospace;
+            white-space: pre;
+            font-size: 14.5px;
+            line-height: 1.6;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        .kw { color: #FF8A65; font-weight: bold; } 
+        .com { color: #78909C; font-style: italic; } 
+        .str { color: #AED581; } 
+        .num { color: #FFD54F; } 
+        .func { color: #4FC3F7; } 
+        .type { color: #BA68C8; } 
+
+        @media (max-width: 768px) {
+            .code-comparison {
+                flex-direction: column;
+            }
+        }
+
+        .simple-footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #A5D6A7;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>6.9 递归的局限与调试技巧</h1>
+
+    <div class="note-box">
+        <p>🛠️ <strong>掌控禁忌魔法的工具箱：</strong></p>
+        <p>递归就像是魔法世界里最绚丽也最危险的法术。它能让你用寥寥几行代码解决极度复杂的问题，但一旦失控，它就会吞噬掉你电脑所有的内存，导致程序崩溃闪退。</p>
+        <p>作为一个成熟的魔法师，不仅要会释放魔法，还要知道魔法的<strong>极限在哪里</strong>，并且学会<strong>如何在它失控时进行调试和修复</strong>！</p>
+    </div>
+
+    <h2>一、悬崖边缘：递归过深与栈溢出</h2>
+
+    <p>每次我们调用一个函数，操作系统就会在内存的“函数调用栈”里分配一个小房间（栈帧）。普通人的栈空间是非常有限的（比如在很多系统上默认只有区区几兆 MB 大小）。如果你让递归往下潜入了一万层、十万层……</p>
+
+    <div class="danger-box" style="border-color: #E53935; background-color: #FFEBEE;">
+        <p><strong>🚨 栈溢出 (Stack Overflow)：</strong> 当所有的小房间都被占满，递归还在疯狂往下挖的时候，电脑就会无情地强行终止你的程序！</p>
+        <p><strong>解决方案有三招：</strong></p>
+        <ul style="color: #C62828;">
+            <li><strong>第一招（治标）：</strong> 手动修改编译器的设置，扩大默认的栈内存空间。但这只是拖延崩溃的时间而已。</li>
+            <li><strong>第二招（治本）：</strong> 将普通递归改写为 <span class="highlight" style="background-color: #4CAF50;">尾递归</span>，让编译器去复用同一个小房间。</li>
+            <li><strong>第三招（终极）：</strong> 彻底抛弃递归，使用 <span class="highlight" style="background-color: #0288D1;">迭代（循环）+ 自建数据结构（如栈/队列）</span> 来模拟递归的过程！堆内存（Heap）可比系统栈内存大得多！</li>
+        </ul>
+    </div>
+
+    <div class="illustration" style="background-color: #FFF3E0; border-color: #FFB74D;">
+        <svg width="600" height="300" viewBox="0 0 600 300">
+            <text x="300" y="25" text-anchor="middle" font-weight="bold" fill="#E65100" font-size="18">图解：无底洞般的深层递归导致爆炸</text>
+            
+            <path d="M 250 90 L 250 240 L 350 240 L 350 90" fill="none" stroke="#E65100" stroke-width="4"/>
+            <text x="300" y="265" text-anchor="middle" fill="#E65100" font-weight="bold">系统调用栈 (容量极其有限)</text>
+
+            <rect x="255" y="210" width="90" height="25" fill="#FFCCBC" stroke="#D84315"/>
+            <text x="300" y="227" text-anchor="middle" fill="#BF360C" font-size="12">f(10000)</text>
+            
+            <rect x="255" y="180" width="90" height="25" fill="#FFAB91" stroke="#D84315"/>
+            <text x="300" y="197" text-anchor="middle" fill="#BF360C" font-size="12">f(9999)</text>
+            
+            <rect x="255" y="150" width="90" height="25" fill="#EF9A9A" stroke="#D84315"/>
+            <text x="300" y="167" text-anchor="middle" fill="#BF360C" font-size="12">f(9998)</text>
+
+            <rect x="255" y="120" width="90" height="25" fill="#E53935" stroke="#B71C1C"/>
+            <text x="300" y="137" text-anchor="middle" fill="#FFF" font-size="12">......</text>
+
+            <rect x="255" y="90" width="90" height="25" fill="#D32F2F" stroke="#B71C1C"/>
+            <text x="300" y="107" text-anchor="middle" fill="#FFF" font-size="12">f(8000)</text>
+
+            <path d="M 255 60 L 345 60" stroke="#D32F2F" stroke-width="4" stroke-dasharray="4,4"/>
+            <path d="M 300 85 L 300 45" stroke="#C62828" stroke-width="4" marker-end="url(#arrow-red-explode)"/>
+            
+            <text x="460" y="90" text-anchor="middle" fill="#D32F2F" font-weight="bold" font-size="16">💥 砰！天花板被顶破！</text>
+            <text x="460" y="115" text-anchor="middle" fill="#C62828" font-size="12">Stack Overflow Error!</text>
+
+            <defs>
+                <marker id="arrow-red-explode" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#C62828" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <h2>二、可读性与性能的权衡之战</h2>
+    <p>在真实的项目开发中，我们到底是无脑用循环，还是优雅地用递归呢？这就涉及到了经典的 <strong>“人与机器的权衡”</strong>：</p>
+
+    <div class="illustration" style="background-color: #FAFAFA;">
+        <svg width="700" height="220" viewBox="0 0 700 220">
+            <text x="350" y="25" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="18">图解：人脑与电脑的权衡博弈</text>
+
+            <rect x="50" y="60" width="280" height="130" rx="10" fill="#E3F2FD" stroke="#2196F3" stroke-width="2"/>
+            <text x="190" y="85" text-anchor="middle" font-weight="bold" fill="#0D47A1" font-size="16">🔄 循环迭代 (Iterative)</text>
+            
+            <text x="80" y="125" font-size="20">💻</text>
+            <text x="110" y="120" fill="#1565C0" font-weight="bold">电脑极其开心</text>
+            <text x="110" y="138" fill="#1565C0" font-size="12">跑得飞快，不耗额外内存</text>
+
+            <text x="80" y="170" font-size="20">🧠</text>
+            <text x="110" y="165" fill="#C62828" font-weight="bold">人脑隐隐作痛</text>
+            <text x="110" y="183" fill="#C62828" font-size="12">代码冗长，遇到复杂树形容易晕</text>
+
+            <rect x="370" y="60" width="280" height="130" rx="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="510" y="85" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="16">🪆 递归算法 (Recursive)</text>
+
+            <text x="400" y="125" font-size="20">💻</text>
+            <text x="430" y="120" fill="#E65100" font-weight="bold">电脑满头大汗</text>
+            <text x="430" y="138" fill="#E65100" font-size="12">疯狂开关房间（压栈弹栈），耗内存</text>
+
+            <text x="400" y="170" font-size="20">🧠</text>
+            <text x="430" y="165" fill="#2E7D32" font-weight="bold">人脑极其舒适</text>
+            <text x="430" y="183" fill="#2E7D32" font-size="12">逻辑如公式般优美，寥寥几行搞定</text>
+
+            <text x="350" y="130" text-anchor="middle" font-size="24" fill="#9E9E9E">VS</text>
+        </svg>
+    </div>
+
+    <table class="compare-table">
+        <tr>
+            <th>评判维度</th>
+            <th>循环迭代 (Iterative)</th>
+            <th>递归法 (Recursive)</th>
+        </tr>
+        <tr>
+            <td><strong>机器感受 (性能)</strong></td>
+            <td><strong>极其开心。</strong>跑得飞快，不需要创建多余的空间。</td>
+            <td>有点头疼。需要反复开关房间（入栈出栈），且耗内存。</td>
+        </tr>
+        <tr>
+            <td><strong>人类感受 (可读性)</strong></td>
+            <td>当问题复杂时（如树的遍历），人类会看得眼花缭乱，代码又臭又长。</td>
+            <td><strong>极其舒适！</strong>代码只有短短几行，逻辑清晰，如同数学公式般优美。</td>
+        </tr>
+        <tr>
+            <td><strong>最佳使用建议</strong></td>
+            <td>简单的线性问题（求和、阶乘）、性能要求极高的底层开发。</td>
+            <td><strong>处理天然的树形结构、分治算法、回溯搜索。</strong>（在现代电脑强大的性能下，牺牲一点点性能换取代码的可读性是完全值得的！）</td>
+        </tr>
+    </table>
+
+    <h2>三、黑夜寻路：递归的断点与打印调试法</h2>
+    <p>递归最让人抓狂的就是：代码只有三行，但是它在后台自己调用了自己几百次！出了 Bug 根本不知道是哪一层算错了。这里教大家两招“照明魔法”。</p>
+
+    <h3>1. 打印缩进法：留下清晰的脚印</h3>
+    <p>我们在每次进入函数时，根据当前层数打印不同数量的空格。这样运行出来的结果会呈现出清晰的 V 字形或树状层次！</p>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 打印缩进调试法</div>
+            <div class="code-body"><span class="type">void</span> <span class="func">dfs</span>(<span class="type">int</span> n, <span class="type">int</span> depth) {
+    <span class="com">// 根据深度生成一排空格</span>
+    <span class="type">string</span> indent(depth * <span class="num">4</span>, <span class="str">' '</span>);
+    
+    <span class="com">// 进去时打印</span>
+    cout &lt;&lt; indent &lt;&lt; <span class="str">"⬇️ 进入节点: "</span> &lt;&lt; n &lt;&lt; endl;
+    
+    <span class="kw">if</span> (n == <span class="num">0</span>) {
+        cout &lt;&lt; indent &lt;&lt; <span class="str">"★ 触底反弹!"</span> &lt;&lt; endl;
+        <span class="kw">return</span>;
+    }
+    
+    <span class="com">// 递归调用，深度 + 1</span>
+    <span class="func">dfs</span>(n - <span class="num">1</span>, depth + <span class="num">1</span>);
+    
+    <span class="com">// 出来时打印</span>
+    cout &lt;&lt; indent &lt;&lt; <span class="str">"⬆️ 退出节点: "</span> &lt;&lt; n &lt;&lt; endl;
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 打印缩进调试法</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">dfs</span>(n, depth=<span class="num">0</span>):
+    <span class="com"># 根据深度生成空格前缀</span>
+    indent = <span class="str">"    "</span> * depth
+    
+    <span class="com"># 进去时打印</span>
+    <span class="func">print</span>(<span class="str">f"{indent}⬇️ 进入节点: {n}"</span>)
+    
+    <span class="kw">if</span> n == <span class="num">0</span>:
+        <span class="func">print</span>(<span class="str">f"{indent}★ 触底反弹!"</span>)
+        <span class="kw">return</span>
+        
+    <span class="com"># 递归调用，深度 + 1</span>
+    <span class="func">dfs</span>(n - <span class="num">1</span>, depth + <span class="num">1</span>)
+    
+    <span class="com"># 出来时打印</span>
+    <span class="func">print</span>(<span class="str">f"{indent}⬆️ 退出节点: {n}"</span>)
+</div>
+        </div>
+    </div>
+
+    <div class="illustration" style="background-color: #263238; border-color: #37474F;">
+        <svg width="600" height="240" viewBox="0 0 600 240">
+            <text x="300" y="25" text-anchor="middle" font-weight="bold" fill="#81C784" font-size="16">图解：控制台的 V 字形缩进输出</text>
+            
+            <text x="50" y="60" fill="#E0E0E0" font-family="monospace" font-size="14">⬇️ 进入节点: 2</text>
+            <path d="M 50 65 L 50 210" fill="none" stroke="#F57F17" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="50" y="230" fill="#E0E0E0" font-family="monospace" font-size="14">⬆️ 退出节点: 2</text>
+
+            <text x="90" y="90" fill="#E0E0E0" font-family="monospace" font-size="14">⬇️ 进入节点: 1</text>
+            <path d="M 90 95 L 90 180" fill="none" stroke="#4CAF50" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="90" y="200" fill="#E0E0E0" font-family="monospace" font-size="14">⬆️ 退出节点: 1</text>
+
+            <text x="130" y="120" fill="#E0E0E0" font-family="monospace" font-size="14">⬇️ 进入节点: 0</text>
+            <path d="M 130 125 L 130 145" fill="none" stroke="#29B6F6" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="130" y="140" fill="#FFB74D" font-family="monospace" font-size="14">★ 触底反弹!</text>
+            <text x="130" y="160" fill="#E0E0E0" font-family="monospace" font-size="14">⬆️ 退出节点: 0</text>
+
+            <text x="400" y="110" fill="#81C784" font-size="14">通过缩进，我们一眼就能看出</text>
+            <text x="400" y="130" fill="#F57F17" font-weight="bold" font-size="14">这是在第几层发生的 Bug！</text>
+        </svg>
+    </div>
+
+    <h3>2. 条件断点法：精准狙击Bug</h3>
+    <p>有时候问题出在第 500 层递归里，难道我们要按 500 次“下一步”吗？在现代编辑器 (如 Visual Studio, VS Code, PyCharm) 中，你可以右键点击代码行号旁的红点，设置 <strong>“条件断点” (Conditional Breakpoint)</strong>。写上 <span class="code-hl">n == 500</span>，程序就会自动飞奔到那一层停下来，等你检查！</p>
+
+    <div class="illustration" style="background-color: #282C34; border-color: #ABB2BF;">
+        <svg width="600" height="180" viewBox="0 0 600 180">
+            <text x="300" y="25" text-anchor="middle" font-weight="bold" fill="#61AFEF" font-size="16">图解：IDE 编辑器中的条件断点设置</text>
+            
+            <rect x="50" y="40" width="500" height="120" rx="5" fill="#1E2227" stroke="#3E4451" stroke-width="2"/>
+            
+            <rect x="50" y="40" width="40" height="120" rx="5" fill="#282C34"/>
+            <text x="70" y="65" text-anchor="middle" fill="#5C6370" font-family="monospace">12</text>
+            <text x="70" y="95" text-anchor="middle" fill="#5C6370" font-family="monospace">13</text>
+            <text x="70" y="125" text-anchor="middle" fill="#5C6370" font-family="monospace">14</text>
+            
+            <text x="100" y="65" fill="#C678DD" font-family="monospace" font-weight="bold">if <tspan fill="#ABB2BF" font-weight="normal">(n == </tspan><tspan fill="#D19A66" font-weight="normal">0</tspan><tspan fill="#ABB2BF" font-weight="normal">):</tspan></text>
+            <text x="120" y="95" fill="#C678DD" font-family="monospace" font-weight="bold">return <tspan fill="#D19A66" font-weight="normal">1</tspan></text>
+            
+            <circle cx="70" cy="60" r="8" fill="#E06C75"/>
+            <circle cx="70" cy="60" r="4" fill="#FFF"/> <rect x="130" y="70" width="220" height="40" rx="5" fill="#FFF3E0" stroke="#FFB74D" stroke-width="2"/>
+            <text x="140" y="95" fill="#E65100" font-family="monospace" font-weight="bold" font-size="14">Condition: <tspan fill="#D32F2F">n == 500</tspan></text>
+            
+            <path d="M 130 90 L 85 65" stroke="#FFB74D" stroke-width="2" marker-end="url(#arrow-orange-bp)"/>
+
+            <text x="460" y="90" text-anchor="middle" fill="#98C379" font-size="12">程序会忽略前 499 次，</text>
+            <text x="460" y="110" text-anchor="middle" fill="#98C379" font-size="12">直接在第 500 层停下！</text>
+
+            <defs>
+                <marker id="arrow-orange-bp" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#FFB74D" /></marker>
+            </defs>
+        </svg>
+    </div>
+
+    <h2>四、递归在实际工程中的杀手锏应用</h2>
+    <p>虽然我们在课堂上用递归算阶乘、算斐波那契，但这只是为了好懂。在真正的大型软件工程中，递归是用来解决那些<strong>“不用递归根本写不出来”</strong>的超级难题的！</p>
+
+    <div class="step-box" style="border-color: #2E7D32; background-color: #E8F5E9;">
+        <strong>🌲 场景 1：一切树形与图的遍历 (Tree & Graph Traversal)</strong>
+        <p>你电脑里的<strong>文件夹和子文件</strong>、前端网页的 <strong>HTML DOM 节点树</strong>、组织架构图、社交网络的好友关系……它们天然就是树形结构！要写一个“计算文件夹总大小”的功能，只要用递归对里面的所有子文件夹调用自己，几行代码就能搞定！</p>
+    </div>
+
+    <div class="illustration">
+        <svg width="700" height="240" viewBox="0 0 700 240">
+            <text x="350" y="20" text-anchor="middle" font-weight="bold" fill="#1B5E20" font-size="16">图解：文件系统的递归扫描</text>
+            
+            <rect x="300" y="40" width="100" height="30" rx="5" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="350" y="60" text-anchor="middle" fill="#F57F17" font-weight="bold">📂 我的电脑</text>
+
+            <path d="M 350 70 L 200 110" stroke="#4CAF50" stroke-width="2"/>
+            <path d="M 350 70 L 500 110" stroke="#4CAF50" stroke-width="2"/>
+
+            <rect x="150" y="110" width="100" height="30" rx="5" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="200" y="130" text-anchor="middle" fill="#F57F17" font-weight="bold">📂 C盘</text>
+
+            <rect x="450" y="110" width="100" height="30" rx="5" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2"/>
+            <text x="500" y="130" text-anchor="middle" fill="#F57F17" font-weight="bold">📂 D盘</text>
+
+            <path d="M 200 140 L 150 180" stroke="#4CAF50" stroke-width="2"/>
+            <path d="M 200 140 L 250 180" stroke="#4CAF50" stroke-width="2"/>
+            <path d="M 500 140 L 500 180" stroke="#4CAF50" stroke-width="2"/>
+
+            <rect x="110" y="180" width="80" height="30" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="150" y="200" text-anchor="middle" fill="#2E7D32" font-size="12">📄 系统.dll</text>
+
+            <rect x="210" y="180" width="80" height="30" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="250" y="200" text-anchor="middle" fill="#2E7D32" font-size="12">📂 用户</text>
+
+            <rect x="460" y="180" width="80" height="30" rx="5" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+            <text x="500" y="200" text-anchor="middle" fill="#2E7D32" font-size="12">📄 游戏.exe</text>
+
+            <text x="350" y="235" text-anchor="middle" fill="#757575" font-size="12">代码逻辑：如果是文件就返回大小；如果是文件夹就把里面的东西全递归一遍！</text>
+        </svg>
+    </div>
+
+    <div class="step-box" style="border-color: #F57F17; background-color: #FFFDE7;">
+        <strong>♟️ 场景 2：回溯算法与迷宫搜索 (Backtracking)</strong>
+        <p>八皇后问题、数独求解、走迷宫、路线规划等。当你走错了一条死路，你需要“退回上一个路口”重新选一条路。这种高级的“试错并回头”的动作，利用递归的“弹栈”特性来实现是再完美不过的了！</p>
+    </div>
+
+    <div class="simple-footer">
+        扣哒世界教研团队
+    </div>
+
+</div>
+
+</body>
+</html>
