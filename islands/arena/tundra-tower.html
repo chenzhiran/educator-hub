@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>竞技场：苔原塔 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary: #FF6B35;
+            --primary-light: #FF8F5E;
+            --primary-lighter: #FFF0E8;
+            --primary-dark: #E55A2B;
+            --dark: #1a1a2e;
+            --dark-code: #1e1e2e;
+            --dark-code-border: #313244;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #fafafa;
+            --bg-card: #ffffff;
+            --border: #e8e8e8;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c6370;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #abb2bf;
+            --code-punctuation: #abb2bf;
+            --code-object: #e5c07b;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #1a1a2e;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #2a2a4e; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(255, 107, 53, 0.1);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #2a2a4e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #aaa;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 {
+            color: var(--primary-dark);
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .section-header .en-title {
+            color: var(--text-light);
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p {
+            margin: 12px 0;
+            text-align: justify;
+        }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1565c0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #f0f0f0;
+            color: #d63384;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .code-block .dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .tip-box .tip-label {
+            font-weight: 700;
+            color: #f57f17;
+            margin-right: 6px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .info-box .info-label {
+            font-weight: 700;
+            color: #1565c0;
+            margin-right: 6px;
+        }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .remember-box .remember-label {
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-right: 6px;
+        }
+
+        .warn-box {
+            background: #fdecea;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .warn-box .warn-label {
+            font-weight: 700;
+            color: #c62828;
+            margin-right: 6px;
+        }
+
+        .figure { margin: 24px 0; text-align: center; }
+
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+
+        .figure .caption {
+            font-size: 0.85em;
+            color: var(--text-lighter);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .styled-table thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        .styled-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .styled-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        .tower-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 22px 26px;
+            margin: 20px 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .tower-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .tower-card .tower-name {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .tower-card .tower-tag {
+            display: inline-block;
+            font-size: 0.78em;
+            color: var(--text-lighter);
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        /* ===== 塔/技能图片 ===== */
+        .unit-img {
+            display: block;
+            margin: 0 auto 14px;
+            max-width: 140px;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-alt);
+            padding: 6px;
+        }
+
+        /* ===== 怪物图鉴网格 ===== */
+        .monster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .monster-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .monster-item:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        }
+
+        .monster-item img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin-bottom: 6px;
+        }
+
+        .monster-item .m-name {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 0.82em;
+            display: block;
+        }
+
+        .monster-item .m-en {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.72em;
+            color: var(--text-lighter);
+            display: block;
+        }
+
+        .monster-item .m-tag {
+            font-size: 0.72em;
+            color: var(--text-light);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .summary-card h3 {
+            color: var(--primary-dark);
+            border: none;
+            margin-top: 0;
+        }
+
+        ul.clean, ol.clean {
+            margin: 10px 0 10px 24px;
+            list-style: none;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<!-- ===== 左侧导航栏 ===== -->
+<nav class="sidebar-nav">
+    <div class="nav-title">竞技场 · 苔原塔</div>
+
+    <a href="#section-1" class="nav-section">1. 竞技场总览</a>
+    <a href="#sec-1-1" class="nav-sub">1.1 玩法目标</a>
+    <a href="#sec-1-2" class="nav-sub">1.2 赛前准备</a>
+    <a href="#sec-1-3" class="nav-sub">1.3 胜负条件</a>
+
+    <a href="#section-2" class="nav-section">2. 法力系统</a>
+    <a href="#sec-2-1" class="nav-sub">2.1 法力的作用</a>
+    <a href="#sec-2-2" class="nav-sub">2.2 法力的获取</a>
+
+    <a href="#section-3" class="nav-section">3. 领土与建造</a>
+    <a href="#sec-3-1" class="nav-sub">3.1 建造规则</a>
+    <a href="#sec-3-2" class="nav-sub">3.2 建造方式</a>
+    <a href="#sec-3-3" class="nav-sub">3.3 升级与替换</a>
+    <a href="#sec-3-4" class="nav-sub">3.4 坐标镜像</a>
+
+    <a href="#section-4" class="nav-section">4. 四种防御塔</a>
+    <a href="#sec-4-1" class="nav-sub">4.1 伤害公式</a>
+    <a href="#sec-4-2" class="nav-sub">4.2 弓箭手塔</a>
+    <a href="#sec-4-3" class="nav-sub">4.3 法师塔</a>
+    <a href="#sec-4-4" class="nav-sub">4.4 加农炮塔</a>
+    <a href="#sec-4-5" class="nav-sub">4.5 冰霜塔</a>
+
+    <a href="#section-5" class="nav-section">5. 特殊技能</a>
+    <a href="#sec-5-1" class="nav-sub">5.1 四种特殊技能</a>
+    <a href="#sec-5-2" class="nav-sub">5.2 技能参数</a>
+    <a href="#sec-5-3" class="nav-sub">5.3 经典连招</a>
+
+    <a href="#section-6" class="nav-section">6. 古代守卫</a>
+    <a href="#sec-6-1" class="nav-sub">6.1 守卫特性</a>
+    <a href="#sec-6-2" class="nav-sub">6.2 守卫控制</a>
+    <a href="#sec-6-3" class="nav-sub">6.3 守卫能力</a>
+    <a href="#sec-6-4" class="nav-sub">6.4 守卫 API</a>
+
+    <a href="#section-7" class="nav-section">7. 怪物图鉴</a>
+    <a href="#sec-7-1" class="nav-sub">7.1 怪物波次</a>
+    <a href="#sec-7-2" class="nav-sub">7.2 怪物 API</a>
+    <a href="#sec-7-3" class="nav-sub">7.3 怪物类型</a>
+
+    <a href="#section-8" class="nav-section">8. 实战策略</a>
+    <a href="#section-9" class="nav-section">9. 调试技巧</a>
+
+    <a href="#section-summary" class="nav-section">📋 核心速查表</a>
+</nav>
+
+<!-- ===== 页面主体 ===== -->
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>竞技场：苔原塔 ❄️🏰</h1>
+    <div class="subtitle">Tundra Tower Arena —— 守护基地，比对手活得更久！</div>
+    <div class="badge">CodeCombat 多人竞技场 | 塔防 + 特殊技能 + 古代守卫</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 1 ==================== -->
+<div class="section-header" id="section-1">
+    <h2>1. 竞技场总览</h2>
+    <div class="en-title">Overview of the Tundra Tower Arena</div>
+</div>
+
+<h3 id="sec-1-1">1.1 玩法目标（The Goal）</h3>
+
+<p>欢迎来到冰天雪地的<span class="keyword">苔原塔</span>竞技场！这不是普通的闯关，而是一场<strong>双人对抗的塔防大战</strong>。你和你的对手各自镇守一座基地，面对源源不断从<span class="keyword">裂隙（The Rift）</span>涌出的怪物大军（Horde）。</p>
+
+<p>你的任务只有一句话：<strong>比你的对手存活更久。</strong>怪物会同时进攻你和对手的基地，谁的基地先被攻破，谁就输了。你需要综合运用三大武器系统来撑到最后一刻：</p>
+
+<ul class="clean">
+    <li>🏰 <strong>建造防御塔</strong>：用 <code>hero.build</code> 在领土上修建弓箭手、法师、加农炮、冰霜四种塔。</li>
+    <li>🌀 <strong>特殊技能</strong>：用 <code>hero.special</code> 制造引力井、推力、爆发或传送，操控怪物的走位。</li>
+    <li>⚔️ <strong>古代守卫</strong>：直接指挥两名苔原守护者，吸引、攻击和牵制敌人。</li>
+</ul>
+
+<h3 id="sec-1-2">1.2 赛前准备（Prepare）</h3>
+
+<p>苔原塔是一个<span class="keyword">挑战级别（Challenge Level）</span>的竞技场——它在玩法上比基础关卡复杂得多。如果你还没玩过前一个竞技场，强烈建议先去玩一下<strong>冰封竞速（Iron and Ice Arena）</strong>来热身，熟悉建塔和资源管理的基本套路。</p>
+
+<div class="tip-box">
+    <span class="tip-label">热身建议：</span>苔原塔在「冰封竞速」的玩法基础上做了进化——把怪物限制为精英怪物，并赠送给你两名可操控的雪人守卫（yeti champions）。先打通冰封竞速，会让你上手苔原塔事半功倍。
+</div>
+
+<h3 id="sec-1-3">1.3 胜负条件（Win &amp; Lose）</h3>
+
+<div class="figure">
+    <img src="src/tt-1-3_heart_base.png" alt="基地之心">
+    <div class="caption">图1：基地之心（Heart）——它被摧毁，你就出局了！</div>
+</div>
+
+<p>场地中央有一颗属于你的<span class="keyword">心脏（Heart）</span>，也就是你的<strong>基地</strong>。</p>
+
+<div class="warn-box">
+    <span class="warn-label">核心规则：</span>如果你的心脏（基地）被怪物摧毁，<strong>你立刻就输了</strong>。所以一切防御手段，最终都是为了守住这颗心脏。
+</div>
+
+<p>由于双方面对的是同样的怪物波次，比的就是谁的防御体系更稳、谁能让基地撑得更久。这是一场<strong>耐久度的较量</strong>。</p>
+
+<!-- ==================== 2 ==================== -->
+<div class="section-header" id="section-2">
+    <h2>2. 法力系统</h2>
+    <div class="en-title">Mana —— Your Main Resource</div>
+</div>
+
+<h3 id="sec-2-1">2.1 法力的作用（What Mana Does）</h3>
+
+<p><span class="keyword">法力（Mana）</span>是你在苔原塔里最重要、也是唯一的"货币"资源。它就像塔防游戏里的金币——你需要花费法力来<strong>建造</strong>新塔，或者<strong>升级</strong>已有的塔。没有法力，你就什么也建不了。</p>
+
+<p>你可以随时用 <code>hero.mana</code> 查看当前的法力值：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 查看当前法力值</span>
+myMana <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span>mana</pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">关键数字：</span>法力的<strong>上限是 <code>100</code></strong>。法力满了之后再积攒也不会超过 100，溢出的部分会直接作废。所以不要让法力"溢出"浪费掉——接近上限时务必立即花出去！
+</div>
+
+<h3 id="sec-2-2">2.2 法力的获取（How to Gain Mana）</h3>
+
+<p>法力有两个来源，理解它们能帮你规划经济节奏：</p>
+
+<table class="styled-table">
+    <thead><tr><th>来源</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><strong>每秒自动恢复</strong></td><td>每一秒你都会自动获得一定量的法力（稳定的基本收入）。</td></tr>
+        <tr><td><strong>击败怪物奖励</strong></td><td>每消灭一个怪物，都会额外奖励法力——怪物越强，奖励越多，杀得越多越有钱！</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">经济小提示：</span>稳定收入 + 击杀奖励形成了一个正循环：早期建好塔多杀怪 → 获得更多法力 → 建更多更高级的塔。开局把第一笔法力花在对的位置上，至关重要！
+</div>
+
+<!-- ==================== 3 ==================== -->
+<div class="section-header" id="section-3">
+    <h2>3. 领土与建造</h2>
+    <div class="en-title">Territory and Building</div>
+</div>
+
+<h3 id="sec-3-1">3.1 建造规则（Where You Can Build）</h3>
+
+<div class="figure">
+    <img src="src/tt-3-1_territory.png" alt="领土与建造点">
+    <div class="caption">图2：场地上有预定义点（A–I）和你方颜色的格子可供建造</div>
+</div>
+
+<p>你不能在地图上随便乱建。建造受到以下规则限制：</p>
+
+<ul class="clean">
+    <li>📍 场地上有几个<strong>预定义的建造点</strong>，用字母命名，从 <code>"A"</code> 到 <code>"I"</code>。</li>
+    <li>🟧 你也可以使用<strong>自由坐标</strong>（任意的 <code>x</code> 和 <code>y</code>），塔会建在那个格子的<strong>正中心</strong>。</li>
+    <li>🎨 你只能在<strong>本队颜色、且未被占用</strong>的格子上建塔。比如你是红队，就只能建在红色格子上。</li>
+</ul>
+
+<p>建造之前，可以用 <code>hero.canBuildAt(x, y)</code> 判断某个位置是否可以建造，避免浪费法力。</p>
+
+<h3 id="sec-3-2">3.2 建造方式（Two Ways to Build）</h3>
+
+<p>建塔的核心命令是 <code>hero.build</code>，它有两种用法：用<strong>预定义点的名字</strong>，或者用<strong>坐标</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 先判断该位置是否可以建造</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">canBuildAt</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+
+<span class="cmt"># 方式一：用预定义点的名字（"A" 到 "I"）建造</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">build</span><span class="punc">(</span><span class="str">'archer'</span><span class="punc">,</span> <span class="str">'A'</span><span class="punc">)</span>
+
+<span class="cmt"># 方式二：用坐标 (x, y) 建造，塔出现在格子中心</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">build</span><span class="punc">(</span><span class="str">'mage'</span><span class="punc">,</span> <span class="num">15</span><span class="punc">,</span> <span class="num">40</span><span class="punc">)</span></pre>
+</div>
+
+<p>第一个参数永远是<strong>塔的类型字符串</strong>（如 <code>'archer'</code>、<code>'mage'</code>），后面跟着位置信息。</p>
+
+<h3 id="sec-3-3">3.3 升级与替换（Upgrade &amp; Replace）</h3>
+
+<p>当你在<strong>已经有自己塔</strong>的格子上再次执行 <code>build</code> 时，会发生有趣的事情：</p>
+
+<table class="styled-table">
+    <thead><tr><th>情况</th><th>结果</th></tr></thead>
+    <tbody>
+        <tr><td>新建类型与原塔<strong>相同</strong></td><td>现有的塔被<strong>升级</strong>（等级 +1，威力更强）。</td></tr>
+        <tr><td>新建类型与原塔<strong>不同</strong></td><td>旧塔被<strong>替换</strong>成新塔，并且新塔会<strong>保留之前的等级</strong>出现（法力不浪费）。</td></tr>
+    </tbody>
+</table>
+
+<div class="remember-box">
+    <span class="remember-label">建造口诀：</span>同种再建 = 升级；异种再建 = 换塔且保留等级。两种操作都消耗法力，要算好账！
+</div>
+
+<h3 id="sec-3-4">3.4 坐标镜像（Coordinate Mirroring）</h3>
+
+<div class="warn-box">
+    <span class="warn-label">非常重要：</span>当你通过<strong>评级阶梯（rating ladder）</strong>以<strong>蓝队</strong>身份对战时，<code>x</code> 坐标会被自动<strong>镜像</strong>。这意味着你<strong>不需要为蓝队单独写代码</strong>——你用<strong>红队视角</strong>写的逻辑，系统会帮你自动翻转到蓝队那一侧。
+</div>
+
+<p>这是个非常贴心的设计：你只管按一种视角思考和编程，比赛时无论你被分到哪一队，代码都能正常工作。</p>
+
+<!-- ==================== 4 ==================== -->
+<div class="section-header" id="section-4">
+    <h2>4. 四种防御塔</h2>
+    <div class="en-title">Towers —— Your Main Defense</div>
+</div>
+
+<p>塔是你保卫基地的主力。你可以点击界面上的<strong>提示按钮</strong>查阅塔的参数，也可以用代码动态获取：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 获取所有可用塔类型的列表</span>
+<span class="obj">hero</span><span class="punc">.</span>availableTowerTypes
+
+<span class="cmt"># 获取某一种塔的详细参数</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">getTowerParameters</span><span class="punc">(</span><span class="str">'archer'</span><span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-4-1">4.1 通用规则与伤害公式（Cost &amp; Damage Formula）</h3>
+
+<p>每座塔的<strong>建造（或升级）成本都是 <code>25</code> 法力</strong>。塔的攻击伤害会随等级提升，遵循这个公式：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 等级越高，伤害越高（向上取整）</span>
+伤害 = ROUND(BASE_DAMAGE * (1 + LOG(1.55, LEVEL)))</pre>
+</div>
+
+<p>简单理解：<code>BASE_DAMAGE</code> 是这座塔的基础伤害，等级 <code>LEVEL</code> 越高，伤害增长越多。所以把一座塔升到高级，往往比铺一堆 1 级塔更划算。</p>
+
+<h3 id="sec-4-2">4.2 弓箭手塔（Archer）</h3>
+
+<div class="tower-card">
+    <img src="src/archer.png" alt="弓箭手塔" class="unit-img">
+    <div class="tower-name">🏹 弓箭手塔 archer</div>
+    <div class="tower-tag">射速最快、基石火力的塔（The fast weak tower）</div>
+    <table class="styled-table">
+        <thead><tr><th>参数</th><th>数值</th></tr></thead>
+        <tbody>
+            <tr><td>类型 type</td><td><code>"archer"</code></td></tr>
+            <tr><td>攻击冷却 cooldown</td><td>0.5（出手最快）</td></tr>
+            <tr><td>攻击伤害 damage</td><td>12</td></tr>
+            <tr><td>攻击范围 range</td><td>22</td></tr>
+            <tr><td>能否对空</td><td>可对空</td></tr>
+            <tr><td>升级加成</td><td>每升一级，攻击范围 +<code>1</code></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<p>弓箭手塔出手频率高、性价比不错，是早期清理大量弱小地面怪（如 munchkin）的好帮手，也是你防线的基石火力。</p>
+
+<h3 id="sec-4-3">4.3 法师塔（Mage）</h3>
+
+<div class="tower-card">
+    <img src="src/mage.png" alt="法师塔" class="unit-img">
+    <div class="tower-name">🔮 法师塔 mage</div>
+    <div class="tower-tag">带穿透攻击的防空塔（Anti-aircraft with piercing attack）</div>
+    <table class="styled-table">
+        <thead><tr><th>参数</th><th>数值</th></tr></thead>
+        <tbody>
+            <tr><td>类型 type</td><td><code>"mage"</code></td></tr>
+            <tr><td>攻击冷却 cooldown</td><td>1</td></tr>
+            <tr><td>攻击伤害 damage</td><td>7</td></tr>
+            <tr><td>攻击范围 range</td><td>30（射程最远！）</td></tr>
+            <tr><td>能否对空</td><td>可对空（防空主力）</td></tr>
+            <tr><td>升级加成</td><td>每升一级，攻击范围 +<code>1</code></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">关键特性：</span>法师塔是<strong>天空克星</strong>，对<strong>飞行怪物造成 4 倍伤害</strong>！面对 orb、bird、rider 这类空中单位，法师塔是你的核心防空武器。它还有<strong>穿透攻击</strong>，能命中一条线上的多个敌人，射程也最远（30）。
+</div>
+
+<h3 id="sec-4-4">4.4 加农炮塔（Cannon）</h3>
+
+<div class="tower-card">
+    <img src="src/cannon.png" alt="加农炮塔" class="unit-img">
+    <div class="tower-name">💣 加农炮塔 cannon</div>
+    <div class="tower-tag">慢速但带 AOE 范围伤害的塔（Slow tower with AOE damage）</div>
+    <table class="styled-table">
+        <thead><tr><th>参数</th><th>数值</th></tr></thead>
+        <tbody>
+            <tr><td>类型 type</td><td><code>"cannon"</code></td></tr>
+            <tr><td>攻击冷却 cooldown</td><td>1.5（较慢）</td></tr>
+            <tr><td>攻击伤害 damage</td><td>15（单发最高）</td></tr>
+            <tr><td>攻击范围 range</td><td>20</td></tr>
+            <tr><td>爆炸半径 blast radius</td><td>10</td></tr>
+            <tr><td>能否对空</td><td><strong>不能对空</strong></td></tr>
+            <tr><td>升级加成</td><td>每升一级，爆炸范围 +<code>0.5</code></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">注意：</span>加农炮<strong>无法攻击飞行怪物</strong>——飞行怪会直接无视炮击！它的强项是用范围爆炸一次性炸掉<strong>扎堆的地面怪</strong>。配合特殊技能把怪物聚成一团再开炮，效果拔群。
+</div>
+
+<h3 id="sec-4-5">4.5 冰霜塔（Frost）</h3>
+
+<div class="tower-card">
+    <img src="src/frost.png" alt="冰霜塔" class="unit-img">
+    <div class="tower-name">❄️ 冰霜塔 frost</div>
+    <div class="tower-tag">对周围怪物造成伤害并减速的辅助核心塔（Damage &amp; slow down）</div>
+    <table class="styled-table">
+        <thead><tr><th>参数</th><th>数值</th></tr></thead>
+        <tbody>
+            <tr><td>类型 type</td><td><code>"frost"</code></td></tr>
+            <tr><td>攻击冷却 cooldown</td><td>2（最慢）</td></tr>
+            <tr><td>攻击伤害 damage</td><td>5(最低)</td></tr>
+            <tr><td>攻击范围 range</td><td>12（最短）</td></tr>
+            <tr><td>爆炸半径 blast radius</td><td>10</td></tr>
+            <tr><td>减速持续时间 slow duration</td><td>2 秒</td></tr>
+            <tr><td>减速系数 slow factor</td><td>0.5（速度减半）</td></tr>
+            <tr><td>能否对空</td><td>可对空</td></tr>
+            <tr><td>升级加成</td><td>每升一级，减速系数 −<code>0.0125</code>（减速更强）</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<p>冰霜塔的价值不在伤害，而在<strong>控制</strong>。它能把周围的怪物大幅减速（系数越低，怪物越慢），为你的其他塔争取更多输出时间。把冰霜塔布在怪物必经的咽喉要道，能极大延缓敌人推进，是辅助核心。</p>
+
+<div class="info-box">
+    <span class="info-label">塔的搭配思路：</span>弓箭手清杂兵、法师专打飞行、加农炮炸成堆的地面怪、冰霜塔减速控场——四种塔各司其职，组合起来才是稳固的防线。切记：<strong>防线里必须有对空塔（弓箭或法师）</strong>，否则飞行怪会长驱直入！
+</div>
+
+<!-- ==================== 5 ==================== -->
+<div class="section-header" id="section-5">
+    <h2>5. 特殊技能</h2>
+    <div class="en-title">Special Abilities —— Bend the Battlefield</div>
+</div>
+
+<h3 id="sec-5-1">5.1 四种特殊技能（Four Special Abilities）</h3>
+
+<p>除了建塔，你还能用 <code>hero.special('技能名', x, y)</code> 在指定坐标释放<span class="keyword">特殊技能（Special Abilities）</span>，制造引力效果，直接操控怪物和空间。共有四种：</p>
+
+<table class="styled-table">
+    <thead><tr><th>图标</th><th>技能名</th><th>效果</th></tr></thead>
+    <tbody>
+        <tr><td><img src="src/pull.png" alt="拉力" style="width:48px;height:48px;object-fit:contain;"></td><td><code>"pull"</code> 拉力</td><td>制造一个<strong>引力井</strong>，把怪物<strong>向内吸聚</strong>（聚怪）。<strong>与加农炮绝配</strong>。</td></tr>
+        <tr><td><img src="src/push.png" alt="推力" style="width:48px;height:48px;object-fit:contain;"></td><td><code>"push"</code> 推力</td><td>制造引力效果，把怪物<strong>持续向外推开</strong>（驱散/阻挡）。</td></tr>
+        <tr><td><img src="src/burst.png" alt="爆发" style="width:48px;height:48px;object-fit:contain;"></td><td><code>"burst"</code> 爆发</td><td>短促而强力的"推"——瞬间把怪物炸飞得很远，是<strong>保命神技</strong>。</td></tr>
+        <tr><td><img src="src/teleport.png" alt="传送" style="width:48px;height:48px;object-fit:contain;"></td><td><code>"teleport"</code> 传送</td><td>把怪物<strong>传送到对手基地的方向</strong>——把麻烦丢给对面！</td></tr>
+    </tbody>
+</table>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 在坐标 (40, 40) 制造一个引力井，把怪物聚成一团</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">special</span><span class="punc">(</span><span class="str">'pull'</span><span class="punc">,</span> <span class="num">40</span><span class="punc">,</span> <span class="num">40</span><span class="punc">)</span>
+
+<span class="cmt"># 在某处爆发，把逼近基地的怪物炸飞</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">special</span><span class="punc">(</span><span class="str">'burst'</span><span class="punc">,</span> <span class="num">30</span><span class="punc">,</span> <span class="num">25</span><span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-5-2">5.2 技能参数与冷却（Parameters &amp; Cooldown）</h3>
+
+<div class="remember-box">
+    <span class="remember-label">好消息：</span><code>special</code> 技能<strong>完全不消耗法力</strong>，是独立冷却的"免费王牌"！但每种技能都有<strong>冷却时间</strong>，不能无限连发。释放时通用施法时间均为 0.4 秒（英雄会被短暂锁定）。
+</div>
+
+<p>这里有两个容易混淆的冷却概念，务必分清：</p>
+
+<ul class="clean">
+    <li>⏱️ <strong>cooldown（施法时间）</strong>：施放该技能时，英雄被"锁住"无法做别的事的时长。</li>
+    <li>🔁 <strong>specificCooldown（专属冷却）</strong>：同一种技能两次释放之间必须间隔的时间。</li>
+</ul>
+
+<table class="styled-table">
+    <thead><tr><th>技能</th><th>力量 force</th><th>范围 range</th><th>持续 duration</th><th>cooldown</th><th>specificCooldown</th><th>其他</th></tr></thead>
+    <tbody>
+        <tr><td><code>"push"</code></td><td>-3000</td><td>20</td><td>3</td><td>0.4</td><td>5</td><td>—</td></tr>
+        <tr><td><code>"pull"</code></td><td>3000</td><td>20</td><td>3</td><td>0.4</td><td>5</td><td>—</td></tr>
+        <tr><td><code>"burst"</code></td><td>-100000</td><td>20</td><td>0.2</td><td>0.4</td><td>3</td><td>力量极强、极短，冷却最快</td></tr>
+        <tr><td><code>"teleport"</code></td><td>—</td><td>12</td><td>—</td><td>0.4</td><td>4</td><td>传送距离 60，眩晕 0.3 秒</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-5-3">5.3 经典连招推荐（Combos）</h3>
+
+<table class="styled-table">
+    <thead><tr><th>连招</th><th>操作</th></tr></thead>
+    <tbody>
+        <tr><td>🕸️ 天罗地网</td><td>用 <code>"pull"</code> 把怪物吸聚成团，再用加农炮范围轰炸，一锅端。</td></tr>
+        <tr><td>🌊 潮汐连环</td><td>用 <code>"pull"</code> 吸聚后立刻接 <code>"push"</code>，让怪物在你的火力网中来回挨打。</td></tr>
+        <tr><td>🔮 乾坤挪移</td><td>针对高血量精英怪，用 <code>"teleport"</code> 直接把它送回起点，让它重走一遍。</td></tr>
+        <tr><td>🛡️ 保命爆发</td><td>怪物逼近基地时，用 <code>"burst"</code> 瞬间把它们炸飞，争取喘息时间。</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">实战技巧：</span>四种技能各自独立冷却、又不耗法力，要勤用、轮转着用。社区高手还有更花的招数——把怪物 <code>"burst"</code> / <code>"push"</code> 推进你方一侧的能量屏障里造成额外伤害，甚至在对手那一侧用 <code>"pull"</code>，把怪物引向对方的水晶基地！
+</div>
+
+<!-- ==================== 6 ==================== -->
+<div class="section-header" id="section-6">
+    <h2>6. 古代守卫</h2>
+    <div class="en-title">Guards —— Ancient Guardians of the Tundra</div>
+</div>
+
+<p>苔原的<span class="keyword">古代守护者</span>前来助阵——你可以直接操控<strong>两名守卫</strong>。它们能移动、攻击、使用特殊能力，还能侦察怪物的信息。它们是你区别于纯塔防的"机动部队"。</p>
+
+<h3 id="sec-6-1">6.1 守卫特性（Guard Traits）</h3>
+
+<div class="figure">
+    <img src="src/tt-6-1_guards.png" alt="古代守卫">
+    <div class="caption">图3：两名雪人守卫可被你的代码直接操控，死亡后会重生</div>
+</div>
+
+<table class="styled-table">
+    <thead><tr><th>特性</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td>免疫技能</td><td>守卫<strong>无视所有特殊技能</strong>——你的 pull/push 不会影响自己人。</td></tr>
+        <tr><td>生命恢复</td><td>每秒恢复 <code>15</code> 点生命值，很耐打。</td></tr>
+        <tr><td>死亡重生</td><td>若阵亡，<code>10</code> 秒后在原地重生。</td></tr>
+        <tr><td>对基地伤害低</td><td>守卫对敌方基地只造成 <code>0.25</code> 倍伤害（它们是防守者，不是攻城者）。</td></tr>
+        <tr><td>抗远程</td><td>守卫受到<strong>远程怪物</strong>的伤害只有 <code>0.5</code> 倍。</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-6-2">6.2 守卫控制（Controlling Guards）</h3>
+
+<p>控制守卫的方式和建塔不同——你要写一个<strong>事件处理函数</strong>，它会在<strong>每次守卫生成时</strong>被自动调用。这个函数接收一个参数 <code>data</code>，里面装着：</p>
+
+<ul class="clean">
+    <li>🛡️ <code>.guard</code>：可供你指挥的<strong>守卫对象</strong>本身。</li>
+    <li>📌 <code>.place</code>：生成位置的字符串——<code>"S"</code>（上方）或 <code>"T"</code>（下方）。</li>
+</ul>
+
+<p>用 <code>hero.on('spawn-guard', 函数)</code> 把你的处理函数注册上去：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">guardAct</span><span class="punc">(</span>data<span class="punc">):</span>
+    guard <span class="punc">=</span> data<span class="punc">.</span>guard
+    place <span class="punc">=</span> data<span class="punc">.</span>place
+    <span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+        monster <span class="punc">=</span> guard<span class="punc">.</span><span class="fn">findNearestMonster</span><span class="punc">()</span>
+        <span class="kw">if</span> monster<span class="punc">:</span>
+            guard<span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>monster<span class="punc">)</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">'spawn-guard'</span><span class="punc">,</span> guardAct<span class="punc">)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">！！！极其重要！！！</span>不要在事件处理函数里使用会"阻塞"的<strong>英雄方法</strong>，比如 <code>hero.special</code> 和 <code>hero.build</code>。它们会卡住你的主线程，导致不可预测的混乱结果。事件函数里只用守卫自己的方法（如 <code>guard.attack</code>、<code>guard.special</code>）。
+</div>
+
+<h3 id="sec-6-3">6.3 守卫能力（Guard Abilities）</h3>
+
+<p>每当守卫攻击一个怪物，那个怪物就会把<strong>仇恨（注意力）转向守卫</strong>。利用这个机制，守卫有四种能力来"牵着怪物的鼻子走"：</p>
+
+<table class="styled-table">
+    <thead><tr><th>能力</th><th>效果</th><th>cooldown</th><th>specificCooldown</th></tr></thead>
+    <tbody>
+        <tr><td><code>"roar"</code> 咆哮</td><td>让 20 米半径内所有怪物都来攻击守卫（强制聚怪/拉仇恨）</td><td>0.5 秒</td><td>5 秒</td></tr>
+        <tr><td><code>"hide"</code> 隐匿</td><td>重置所有以该守卫为目标的怪物仇恨（脱战逃跑）</td><td>0.3 秒</td><td>3 秒</td></tr>
+        <tr><td><code>"haste"</code> 加速</td><td>守卫速度提升 2 倍，持续 3 秒</td><td>0.1 秒</td><td>10 秒</td></tr>
+        <tr><td><code>"home"</code> 归位</td><td>把守卫瞬间传送回它的出生点</td><td>0.3 秒</td><td>7 秒</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">战术组合：</span><code>roar</code> 把怪物全吸引过来 → 你的加农炮/冰霜塔集中招呼这一团；血量危险时用 <code>hide</code> 甩脱仇恨、再用 <code>haste</code> 加速跑路或 <code>home</code> 直接回家保命。守卫就是你的"活体诱饵 + 机动尖兵"。
+</div>
+
+<h3 id="sec-6-4">6.4 守卫 API（Methods &amp; Properties）</h3>
+
+<h4>方法 Methods</h4>
+
+<table class="styled-table">
+    <thead><tr><th>方法</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>moveTo(x, y)</code></td><td>移动到点 {x, y}，<strong>阻塞</strong>守卫代码直到抵达</td></tr>
+        <tr><td><code>moveTowards(x, y)</code></td><td>朝点 {x, y} 移动，<strong>非阻塞</strong>，只占用 1 帧</td></tr>
+        <tr><td><code>attack(target)</code></td><td>攻击指定目标</td></tr>
+        <tr><td><code>special(abilityName)</code></td><td>使用上面介绍的守卫特殊能力</td></tr>
+        <tr><td><code>isReady(abilityName)</code></td><td>返回布尔值，检查某能力当前是否可用</td></tr>
+        <tr><td><code>distanceTo(target)</code></td><td>返回到目标的距离</td></tr>
+        <tr><td><code>findMonsters()</code></td><td>返回当前存活怪物的列表</td></tr>
+        <tr><td><code>findNearest(targets)</code></td><td>返回 <code>targets</code> 列表中最近的对象</td></tr>
+        <tr><td><code>findNearestMonster()</code></td><td>等价于 <code>guard.findNearest(guard.findMonsters())</code></td></tr>
+    </tbody>
+</table>
+
+<h4>属性 Properties</h4>
+
+<table class="styled-table">
+    <thead><tr><th>属性</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>id</code></td><td>守卫的唯一名称</td></tr>
+        <tr><td><code>type</code></td><td>类型，守卫为 <code>"guard"</code></td></tr>
+        <tr><td><code>health</code> / <code>maxHealth</code></td><td>当前生命值 / 最大生命值</td></tr>
+        <tr><td><code>color</code></td><td>所属队伍，<code>"red"</code> 或 <code>"blue"</code></td></tr>
+        <tr><td><code>maxSpeed</code></td><td>守卫的移动速度</td></tr>
+        <tr><td><code>x</code> / <code>y</code></td><td>横 / 纵坐标（蓝方 x 自动镜像）</td></tr>
+        <tr><td><code>position</code></td><td>包含 {x, y} 的向量对象</td></tr>
+        <tr><td><code>attackRange</code></td><td>攻击范围</td></tr>
+        <tr><td><code>attackCooldown</code></td><td>一次攻击占用的时间（代码阻塞）</td></tr>
+        <tr><td><code>attackDamage</code></td><td>每次攻击的伤害</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 7 ==================== -->
+<div class="section-header" id="section-7">
+    <h2>7. 怪物图鉴</h2>
+    <div class="en-title">Monsters —— Know Your Enemy</div>
+</div>
+
+<h3 id="sec-7-1">7.1 怪物波次（Monster Waves）</h3>
+
+<p>怪物以<span class="keyword">波次（Wave）</span>的形式出现，有节奏可循：</p>
+
+<ul class="clean">
+    <li>⏳ 每一波持续 <strong>12 秒</strong>。</li>
+    <li>👹 每 <strong>3 秒</strong> 出现 <strong>4 个</strong>怪物。</li>
+    <li>🔀 不同波次之间的区别，仅在于<strong>怪物类型的组合与出现顺序</strong>。</li>
+</ul>
+
+<p>你可以提前查询波次信息，针对性地布防：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 查询第 n 波的怪物信息</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">getWave</span><span class="punc">(</span>n<span class="punc">)</span>
+
+<span class="cmt"># 查询全部波次信息</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">getWaves</span><span class="punc">()</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">剧情彩蛋：</span>随着战斗推进，<strong>裂隙会派遣更强、更厚实的新怪物部队</strong>。前期的轻松绝不会持续到最后——你的防线要能扛得住后期的精英怪潮。
+</div>
+
+<h3 id="sec-7-2">7.2 怪物 API（Monster Properties）</h3>
+
+<table class="styled-table">
+    <thead><tr><th>属性</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>id</code></td><td>怪物的唯一 ID</td></tr>
+        <tr><td><code>x</code> / <code>y</code></td><td>横 / 纵坐标（蓝方 x 镜像）</td></tr>
+        <tr><td><code>health</code> / <code>maxHealth</code></td><td>当前 / 最大生命值</td></tr>
+        <tr><td><code>maxSpeed</code></td><td>怪物的移动速度</td></tr>
+        <tr><td><code>type</code></td><td>怪物的类型字符串</td></tr>
+    </tbody>
+</table>
+
+<p>想知道某种怪物的详细参数，用：<code>hero.getMonsterParameters(monsterType)</code>。</p>
+
+<h3 id="sec-7-3">7.3 怪物类型（Monster Types）</h3>
+
+<p>苔原塔里有 11 种怪物，按<strong>等级（tier）</strong>从弱到强排列。注意几个关键属性：<strong>飞行（flying）</strong>怪物会无视加农炮，只有法师塔克它；<strong>远程（ranged）</strong>怪物不用贴近就能攻击你的基地，必须优先处理！</p>
+
+<div class="monster-grid">
+    <div class="monster-item">
+        <img src="src/munchkin.png" alt="munchkin">
+        <span class="m-name">小喽啰</span><span class="m-en">munchkin</span>
+        <span class="m-tag">tier 0 · 地面近战</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/ogre.png" alt="ogre">
+        <span class="m-name">食人魔</span><span class="m-en">ogre</span>
+        <span class="m-tag">tier 1 · 厚实慢速</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/thrower.png" alt="thrower">
+        <span class="m-name">投掷者</span><span class="m-en">thrower</span>
+        <span class="m-tag">tier 1 · 地面远程</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/orb.png" alt="orb">
+        <span class="m-name">浮游球</span><span class="m-en">orb</span>
+        <span class="m-tag">tier 1 · 飞行近战</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/troll.png" alt="troll">
+        <span class="m-name">巨魔</span><span class="m-en">troll</span>
+        <span class="m-tag">tier 2 · 厚实慢速</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/shaman.png" alt="shaman">
+        <span class="m-name">萨满</span><span class="m-en">shaman</span>
+        <span class="m-tag">tier 2 · 地面远程</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/bird.png" alt="bird">
+        <span class="m-name">飞鸟</span><span class="m-en">bird</span>
+        <span class="m-tag">tier 2 · 飞行近战</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/brawler.png" alt="brawler">
+        <span class="m-name">斗士</span><span class="m-en">brawler</span>
+        <span class="m-tag">tier 3 · 厚实慢速</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/warlock.png" alt="warlock">
+        <span class="m-name">术士</span><span class="m-en">warlock</span>
+        <span class="m-tag">tier 3 · 地面远程</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/rider.png" alt="rider">
+        <span class="m-name">骑手</span><span class="m-en">rider</span>
+        <span class="m-tag">tier 3 · 飞行远程</span>
+    </div>
+    <div class="monster-item">
+        <img src="src/elemental.png" alt="elemental">
+        <span class="m-name">元素</span><span class="m-en">elemental</span>
+        <span class="m-tag">tier X · 极厚地面</span>
+    </div>
+</div>
+
+<table class="styled-table">
+    <thead><tr><th>类型</th><th>等级</th><th>特征</th></tr></thead>
+    <tbody>
+        <tr><td><code>"munchkin"</code> 小喽啰</td><td>tier 0</td><td>弱小，地面，近战</td></tr>
+        <tr><td><code>"ogre"</code> 食人魔</td><td>tier 1</td><td>厚实，缓慢，地面，近战</td></tr>
+        <tr><td><code>"thrower"</code> 投掷者</td><td>tier 1</td><td>弱，地面，<strong>远程</strong></td></tr>
+        <tr><td><code>"orb"</code> 浮游球</td><td>tier 1</td><td><strong>飞行</strong>，近战</td></tr>
+        <tr><td><code>"troll"</code> 巨魔</td><td>tier 2</td><td>厚实，缓慢，地面，近战</td></tr>
+        <tr><td><code>"shaman"</code> 萨满</td><td>tier 2</td><td>弱，地面，<strong>远程</strong></td></tr>
+        <tr><td><code>"bird"</code> 飞鸟</td><td>tier 2</td><td><strong>飞行</strong>，近战</td></tr>
+        <tr><td><code>"brawler"</code> 斗士</td><td>tier 3</td><td>厚实，缓慢，地面，近战</td></tr>
+        <tr><td><code>"warlock"</code> 术士</td><td>tier 3</td><td>弱，地面，<strong>远程</strong></td></tr>
+        <tr><td><code>"rider"</code> 骑手</td><td>tier 3</td><td><strong>飞行</strong>，<strong>远程</strong>（最棘手！）</td></tr>
+        <tr><td><code>"elemental"</code> 元素</td><td>tier X</td><td>极厚实，地面，近战（最强地面单位）</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">克制要点：</span>看到飞行怪（orb / bird / rider）→ 法师塔伺候（4 倍伤害）；看到一堆缓慢的厚血近战怪（ogre / troll / brawler / elemental）→ 用 pull 聚成团 + 加农炮 AOE + 冰霜塔减速；看到远程怪（thrower / shaman / warlock / rider）→ 优先用守卫或 teleport 处理，别让它们隔空磨血。
+</div>
+
+<!-- ==================== 8 ==================== -->
+<div class="section-header" id="section-8">
+    <h2>8. 实战策略</h2>
+    <div class="en-title">Putting It All Together</div>
+</div>
+
+<p>把所有系统串起来，一套稳健的苔原塔思路大致是这样的：</p>
+
+<ol class="clean" style="list-style: decimal;">
+    <li><strong>开局经济</strong>：法力有限（上限 100，每塔 25），开局优先在怪物必经的咽喉位置建 1–2 座弓箭手塔快速起步、靠击杀滚雪球。</li>
+    <li><strong>分工补全</strong>：随着法力积累，补上法师塔（防空 + 远射）和加农炮（清地面团），形成多类型混合防线。<strong>务必保证有对空塔</strong>。</li>
+    <li><strong>升级优先</strong>：由于伤害随等级呈对数增长，关键位置把塔升级往往比铺新塔更划算——同点重复 <code>build</code> 即可升级。</li>
+    <li><strong>技能控场</strong>：<code>special</code> 不耗法力，要勤用、轮转着用。<code>pull</code> 聚怪喂炮、<code>burst</code> 推开逼近基地的怪、<code>teleport</code> 把麻烦丢回去。</li>
+    <li><strong>守卫机动</strong>：用 <code>spawn-guard</code> 事件让两名守卫自动找最近的怪攻击；危险时 <code>roar</code> 拉仇恨集火、<code>hide</code> + <code>haste</code> + <code>home</code> 保命。切记事件函数里别调用 <code>build</code> / <code>special</code>。</li>
+    <li><strong>预判波次</strong>：用 <code>getWaves()</code> 提前看清后续怪潮，针对飞行/远程/厚血怪提前调整塔的配置。</li>
+    <li><strong>管理法力</strong>：接近上限就花掉，绝不浪费每一点法力。</li>
+</ol>
+
+<div class="remember-box">
+    <span class="remember-label">终极目标提醒：</span>你不必"全歼"怪物，只需让你的<strong>心脏比对手的撑得更久</strong>。每一座塔、每一次技能、每一个守卫动作，都是为了这一个目的服务。
+</div>
+
+<!-- ==================== 9 ==================== -->
+<div class="section-header" id="section-9">
+    <h2>9. 调试技巧</h2>
+    <div class="en-title">Debug —— Find Bugs Faster</div>
+</div>
+
+<p>学会调试，效率翻倍！在比赛中，你可以把关键信息打印出来观察。查看输出的方法：在浏览器中<strong>右键点击页面 → 检查 → Console（控制台）</strong>标签页。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="fn">print</span><span class="punc">(</span><span class="str">"当前法力值:"</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>mana<span class="punc">)</span>
+<span class="fn">print</span><span class="punc">(</span><span class="str">"当前波次:"</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">getWaveNumber</span><span class="punc">())</span>
+
+<span class="cmt"># 检查技能是否冷却完毕</span>
+<span class="fn">print</span><span class="punc">(</span><span class="str">"拉力技能是否就绪:"</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isReady</span><span class="punc">(</span><span class="str">"pull"</span><span class="punc">))</span>
+
+<span class="cmt"># 打印已建造的防御塔信息</span>
+myTowers <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findMyTowers</span><span class="punc">()</span>
+<span class="kw">for</span> t <span class="kw">in</span> myTowers<span class="punc">:</span>
+    <span class="fn">print</span><span class="punc">(</span><span class="str">"塔类型:"</span><span class="punc">,</span> t<span class="punc">.</span>type<span class="punc">,</span> <span class="str">"等级:"</span><span class="punc">,</span> t<span class="punc">.</span>level<span class="punc">,</span> <span class="str">"位置:"</span><span class="punc">,</span> t<span class="punc">.</span>x<span class="punc">,</span> t<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+<p>你也可以查看对手水晶（基地）的血量，判断战况：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 查看敌方水晶血量</span>
+enemy <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">getEnemyHero</span><span class="punc">()</span>
+<span class="fn">print</span><span class="punc">(</span><span class="str">"敌方水晶血量:"</span><span class="punc">,</span> enemy<span class="punc">.</span>health<span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>核心速查表 ✨</h3>
+
+    <div class="figure">
+        <img src="src/tt-summary.png" alt="苔原塔核心速查">
+        <div class="caption">图4：苔原塔三大系统全景图——塔 · 技能 · 守卫</div>
+    </div>
+
+    <table class="styled-table">
+        <thead><tr><th>系统</th><th>关键命令 / 概念</th><th>要点</th></tr></thead>
+        <tbody>
+            <tr><td>目标</td><td>守住心脏（基地）</td><td>比对手活得更久即获胜</td></tr>
+            <tr><td>法力</td><td>上限 100，每塔 25，<code>hero.mana</code></td><td>每秒流入 + 击杀奖励，溢出作废</td></tr>
+            <tr><td>建造</td><td><code>hero.build('类型', 'A')</code> 或坐标</td><td>同点重建=升级；蓝方 x 自动镜像</td></tr>
+            <tr><td>弓箭手</td><td><code>"archer"</code></td><td>快、便宜，清杂兵，可对空</td></tr>
+            <tr><td>法师</td><td><code>"mage"</code></td><td>防空（飞行 4 倍）、穿透、远射 30</td></tr>
+            <tr><td>加农炮</td><td><code>"cannon"</code></td><td>AOE 炸地面团；不能对空</td></tr>
+            <tr><td>冰霜</td><td><code>"frost"</code></td><td>减速控场，辅助核心</td></tr>
+            <tr><td>特殊技能</td><td><code>hero.special('pull'/'push'/'burst'/'teleport', x, y)</code></td><td>不耗法力，独立冷却</td></tr>
+            <tr><td>守卫</td><td><code>hero.on('spawn-guard', fn)</code></td><td>免疫技能、自愈、重生；能力 roar/hide/haste/home</td></tr>
+            <tr><td>怪物</td><td><code>hero.getWaves()</code> / <code>getMonsterParameters()</code></td><td>12 秒一波，飞行/远程要警惕</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        塔阵成墙，技能乱敌，守卫破阵 ⚔️❄️<br>
+        现在，去苔原塔的赛场上，让你的心脏跳动得比对手更久吧！🏰
+    </p>
+</div>
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #aaa; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>CodeCombat 编程知识 · 多人竞技场：苔原塔（Tundra Tower）</p>
+    <p style="margin-top:8px; color:#666;">扣哒世界（CodeCombat）教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
