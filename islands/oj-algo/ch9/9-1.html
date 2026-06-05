@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.1 数值计算中的二分（解方程） - C++ 魔法课堂</title>
+    <style>
+        /* ================= 核心配色 (科技青与进阶琥珀主题) ================= */
+        :root {
+            --primary: #00695C;      /* 深青色：代表高效运转的算法引擎 */
+            --primary-dark: #004D40;
+            --secondary: #FF8F00;    /* 进阶琥珀：代表二分逼近的火花 */
+            --accent: #26A69A;       /* 亮青色：代表连续的实数域 */
+            --bg-color: #E0F2F1;     /* 浅青底色 */
+            --text-main: #004D40;
+            --code-bg: #263238;      /* 深色代码块背景 */
+        }
+
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#B2DFDB 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 15px 30px rgba(0, 77, 64, 0.15);
+            border: 4px solid #80CBC4;
+        }
+
+        /* ================= 标题样式 ================= */
+        h1 {
+            text-align: center;
+            color: var(--primary-dark);
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #E0F2F1;
+        }
+
+        h2 {
+            background: linear-gradient(90deg, var(--primary), #26A69A);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            font-size: 1.6em;
+        }
+
+        h3 {
+            color: var(--secondary);
+            border-bottom: 3px dashed var(--secondary);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* ================= 强调样式 ================= */
+        .highlight {
+            color: #FFF;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        
+        .text-cyan { color: #00695C; font-weight: bold; }
+        .text-amber { color: #FF8F00; font-weight: bold; }
+        .text-red { color: #D32F2F; font-weight: bold; }
+
+        .note-box {
+            background-color: #E0F2F1;
+            border-left: 8px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .danger-box {
+            background-color: #FFF8E1;
+            border: 2px solid #FFCA28;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step-box {
+            background-color: #FAFAFA;
+            border: 2px dashed #80CBC4;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #004D40;
+        }
+
+        /* ================= 图解区域 ================= */
+        .illustration {
+            text-align: center;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #B2DFDB;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .svg-caption {
+            color: #00695C;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        /* ================= 并排代码块 ================= */
+        .code-comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .code-card {
+            flex: 1;
+            border: 3px solid #80CBC4;
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--code-bg);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .code-header {
+            background: #004D40;
+            color: #E0F2F1;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #26A69A;
+        }
+
+        .code-body {
+            padding: 20px;
+            color: #E0F2F1; 
+            font-family: "Consolas", "Courier New", monospace;
+            white-space: pre;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        /* 代码高亮 */
+        .kw { color: #FF8A65; font-weight: bold; } 
+        .com { color: #78909C; font-style: italic; } 
+        .str { color: #81D4FA; } 
+        .num { color: #FFCA28; } 
+        .func { color: #A5D6A7; } 
+        .type { color: #CE93D8; } 
+
+        .btn-back {
+            display: inline-block;
+            background-color: #FFCA28;
+            color: #E65100;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 0px #FF8F00;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .code-comparison { flex-direction: column; }
+        }
+
+        .simple-footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #26A69A;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <a href="index.html" class="btn-back">⬅ 返回第九章目录</a>
+
+    <h1>9.1 数值计算中的二分（解方程）</h1>
+
+    <div class="note-box">
+        <p>📈 <strong>从离散的台阶，踏入平滑的星轨：</strong></p>
+        <p>在前面的章节中，我们的二分查找就像在走台阶——不管怎么跳，脚下落的必然是一个整数（数组的下标）。但当我们面对现实世界中的物理问题，或者需要求解一个复杂的数学方程时，答案往往包含无数个小数点。</p>
+        <p>这时候，普通的“加一、减一”操作就会让我们直接跨过正确答案。欢迎来到<span class="highlight">实数二分</span>的微观世界！</p>
+    </div>
+
+    <div class="step-box">
+        <p><strong>实数二分的两大黄金法则 (9.1.1 & 9.1.2)：</strong></p>
+        <ol>
+            <li><strong>绝不加减一：</strong> 当发现中点 Mid 太小或者太大时，我们直接让 <code>left = mid</code> 或者 <code>right = mid</code>。因为哪怕是微小的 0.00001，也可能藏着真正的答案！</li>
+            <li><strong>固定循环 100 次：</strong> 既然 Left 和 Right 永远不可能绝对相等，我们别管什么误差值了，直接写一个执行 100 次的 <code>for</code> 循环！每次区间缩减一半，100 次后区间会缩小到原来的 2 的 100 次方分之一！这精度足以秒杀任何变态算法题，并且<strong>绝不死循环！</strong></li>
+        </ol>
+    </div>
+
+    <h2>一、应用一：求算术平方根 (9.1.3)</h2>
+
+    <p>假设我们不用自带的数学库，要求你自己计算数字 <code>10</code> 的算术平方根，要求精确到小数点后 5 位。我们可以直接猜答案！如果猜的数的平方大于 10，说明猜大了；反之则猜小了。</p>
+
+    <div class="illustration">
+        <div class="svg-caption">图解 1：寻找 10 的平方根追踪过程</div>
+        <svg width="700" height="150" viewBox="0 0 700 150">
+            <line x1="50" y1="80" x2="650" y2="80" stroke="#B2DFDB" stroke-width="6"/>
+            
+            <circle cx="50" cy="80" r="6" fill="#00695C"/> <text x="50" y="60" text-anchor="middle" fill="#004D40" font-weight="bold">L=0</text>
+            <circle cx="650" cy="80" r="6" fill="#00695C"/> <text x="650" y="60" text-anchor="middle" fill="#004D40" font-weight="bold">R=10</text>
+
+            <circle cx="350" cy="80" r="8" fill="#FFCA28" stroke="#FF8F00" stroke-width="2"/> 
+            <text x="350" y="55" text-anchor="middle" fill="#FF8F00" font-weight="bold">mid=5</text>
+            <text x="350" y="115" text-anchor="middle" fill="#D32F2F" font-size="12">5 的平方是 25，比 10 大！</text>
+            <text x="350" y="135" text-anchor="middle" fill="#D32F2F" font-size="12">猜大了！下一步令 R = mid (绝不减一)</text>
+
+            <path d="M 640 100 Q 500 150 360 100" fill="none" stroke="#D32F2F" stroke-width="3" stroke-dasharray="4,4"/>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 计算平方根 (固定 100 次)</div>
+            <div class="code-body"><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;iomanip&gt;</span> <span class="com">// 用于控制输出精度</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">double</span> <span class="func">findSqrt</span>(<span class="type">double</span> n) {
+    <span class="com">// 处理边界：若 n < 1，右边界需设为 1，否则区间错误</span>
+    <span class="type">double</span> left = <span class="num">0.0</span>;
+    <span class="type">double</span> right = max(<span class="num">1.0</span>, n); 
+    
+    <span class="com">// 固定循环 100 次，避免任何浮点数精度死循环</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i &lt; <span class="num">100</span>; i++) {
+        <span class="type">double</span> mid = left + (right - left) / <span class="num">2.0</span>;
+        
+        <span class="kw">if</span> (mid * mid &lt;= n) {
+            left = mid;  <span class="com">// 猜小了，提高下限 (不要加一！)</span>
+        } <span class="kw">else</span> {
+            right = mid; <span class="com">// 猜大了，降低上限 (不要减一！)</span>
+        }
+    }
+    <span class="kw">return</span> left; <span class="com">// 最后 left 和 right 几乎完全重合</span>
+}
+
+<span class="type">int</span> <span class="func">main</span>() {
+    <span class="com">// fixed 和 setprecision 保证输出固定 5 位小数</span>
+    cout &lt;&lt; fixed &lt;&lt; <span class="func">setprecision</span>(<span class="num">5</span>) &lt;&lt; <span class="func">findSqrt</span>(<span class="num">10.0</span>) &lt;&lt; endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 计算平方根 (固定 100 次)</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">find_sqrt</span>(n):
+    left = <span class="num">0.0</span>
+    right = <span class="func">max</span>(<span class="num">1.0</span>, n)
+    
+    <span class="com"># 固定循环 100 次，非常稳健</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="func">range</span>(<span class="num">100</span>):
+        mid = left + (right - left) / <span class="num">2.0</span> <span class="com"># 真正的实数除法 /</span>
+        
+        <span class="kw">if</span> mid * mid &lt;= n:
+            left = mid  <span class="com"># 猜小了，提高下限 (不加一！)</span>
+        <span class="kw">else</span>:
+            right = mid <span class="com"># 猜大了，降低上限 (不减一！)</span>
+            
+    <span class="kw">return</span> left
+
+<span class="com"># 测试：格式化输出保留 5 位小数</span>
+<span class="func">print</span>(<span class="str">f"{find_sqrt(10.0):.5f}"</span>)
+</div>
+        </div>
+    </div>
+
+
+    <h2>二、应用二：求方程 f(x) = 0 的近似解 (9.1.3)</h2>
+
+    <p>假设我们有一个复杂且单调递增的方程：<code>f(x) = x的3次方 + x - 15</code>。我们想要找到一个 <code>x</code>，使得 <code>f(x) = 0</code>。</p>
+    <p>因为方程是单调上升的，如果 <code>f(mid) &gt; 0</code>，说明当前猜的 x 太大了；如果 <code>f(mid) &lt; 0</code>，说明猜小了。原理跟求平方根一模一样！</p>
+
+    <div class="illustration">
+        <div class="svg-caption">图解 2：方程寻根的探测追踪过程</div>
+        <svg width="700" height="220" viewBox="0 0 700 220">
+            <rect x="50" y="20" width="600" height="180" rx="10" fill="#E0F2F1" stroke="#80CBC4" stroke-width="2"/>
+            
+            <text x="70" y="50" fill="#004D40" font-weight="bold">初始范围设定：L = 0, R = 10 (确保真正的解在这两者之间)</text>
+
+            <rect x="70" y="70" width="560" height="30" fill="#FFF8E1" stroke="#FFCA28"/>
+            <text x="90" y="90" fill="#FF8F00" font-size="14" font-weight="bold">第一轮:</text>
+            <text x="160" y="90" fill="#FF8F00" font-size="14">Mid = 5。 f(5) = 125 + 5 - 15 = 115。因为 115 > 0，猜大了！</text>
+            <text x="560" y="90" fill="#D32F2F" font-size="14" font-weight="bold">更新 R = 5</text>
+
+            <rect x="70" y="110" width="560" height="30" fill="#B2DFDB" stroke="#00897B"/>
+            <text x="90" y="130" fill="#00695C" font-size="14" font-weight="bold">第二轮:</text>
+            <text x="160" y="130" fill="#00695C" font-size="14">Mid = 2.5。 f(2.5) = 15.625 + 2.5 - 15 ≈ 3.125 > 0，还是大！</text>
+            <text x="560" y="130" fill="#D32F2F" font-size="14" font-weight="bold">更新 R = 2.5</text>
+
+            <rect x="70" y="150" width="560" height="30" fill="#E0F2F1" stroke="#26A69A"/>
+            <text x="90" y="170" fill="#004D40" font-size="14" font-weight="bold">第三轮:</text>
+            <text x="160" y="170" fill="#004D40" font-size="14">Mid = 1.25。 f(1.25) ≈ -11.8 < 0。结果为负，猜小了！</text>
+            <text x="560" y="170" fill="#2E7D32" font-size="14" font-weight="bold">更新 L = 1.25</text>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 二分解方程</div>
+            <div class="code-body"><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;iomanip&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="com">// 1. 定义目标方程 f(x) = x^3 + x - 15</span>
+<span class="type">double</span> <span class="func">f</span>(<span class="type">double</span> x) {
+    <span class="kw">return</span> x * x * x + x - <span class="num">15.0</span>;
+}
+
+<span class="type">double</span> <span class="func">solveEquation</span>() {
+    <span class="type">double</span> left = <span class="num">0.0</span>, right = <span class="num">10.0</span>; 
+    
+    <span class="com">// 2. 固定循环 100 次</span>
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i &lt; <span class="num">100</span>; i++) {
+        <span class="type">double</span> mid = left + (right - left) / <span class="num">2.0</span>;
+        
+        <span class="kw">if</span> (<span class="func">f</span>(mid) &gt;= <span class="num">0</span>) {
+            right = mid; <span class="com">// 结果大于 0，说明 x 猜大了</span>
+        } <span class="kw">else</span> {
+            left = mid;  <span class="com">// 结果小于 0，说明 x 猜小了</span>
+        }
+    }
+    <span class="kw">return</span> left; 
+}
+
+<span class="type">int</span> <span class="func">main</span>() {
+    cout &lt;&lt; <span class="str">"方程的近似根是: "</span> &lt;&lt; fixed &lt;&lt; <span class="func">setprecision</span>(<span class="num">5</span>) &lt;&lt; <span class="func">solveEquation</span>() &lt;&lt; endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 二分解方程</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">f</span>(x):
+    <span class="kw">return</span> x * x * x + x - <span class="num">15.0</span>
+
+<span class="kw">def</span> <span class="func">solve_equation</span>():
+    left = <span class="num">0.0</span>
+    right = <span class="num">10.0</span>
+    
+    <span class="com"># 固定循环 100 次，简单又安全</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="func">range</span>(<span class="num">100</span>):
+        mid = left + (right - left) / <span class="num">2.0</span>
+        
+        <span class="kw">if</span> <span class="func">f</span>(mid) &gt;= <span class="num">0</span>:
+            right = mid  <span class="com"># 猜大了，缩小上限</span>
+        <span class="kw">else</span>:
+            left = mid   <span class="com"># 猜小了，提高下限</span>
+            
+    <span class="kw">return</span> left
+
+<span class="func">print</span>(<span class="str">f"方程的近似根是: {solve_equation():.5f}"</span>)
+</div>
+        </div>
+    </div>
+
+
+    <h2>三、应用三：牛顿迭代法求根 (9.1.4 扩展)</h2>
+
+    <p>高阶数学中还有一个寻找方程根的极致神器：<strong>牛顿迭代法 (Newton's Method)</strong>。如果说二分法是个稳扎稳打的老实人，那牛顿法就是一个“顺着切线滑行的狂徒”。</p>
+
+    <div class="note-box" style="border-left-color: #FF8F00; background-color: #FFF8E1;">
+        <p>🚀 <strong>牛顿法的数学核心：</strong><br>
+        它不再盲目取中点，而是计算当前点 <code>x</code> 在曲线上的“斜率（导数）”。在当前点画一条切线，这条切线与 X 轴的交点，就是我们下一次探测的位置！</p>
+        <p>其著名的迭代公式为：<br>
+        <span class="text-amber">下一个 x = 当前 x 减去 ( 函数值 / 导数值 )</span></p>
+        <p>对于方程 <code>f(x) = x的3次方 + x - 15</code>，它的导数（求导法则）是 <code>f'(x) = 3 乘以 x的平方 + 1</code>。</p>
+    </div>
+
+    <div class="illustration">
+        <div class="svg-caption">图解 3：牛顿迭代法利用切线进行降维打击</div>
+        <svg width="700" height="260" viewBox="0 0 700 260">
+            <line x1="50" y1="200" x2="650" y2="200" stroke="#80CBC4" stroke-width="4"/>
+            <text x="660" y="205" fill="#00695C" font-weight="bold">X 轴</text>
+
+            <path d="M 100 250 Q 300 230 550 40" fill="none" stroke="#26A69A" stroke-width="4"/>
+            <text x="560" y="50" fill="#004D40" font-weight="bold">f(x)</text>
+
+            <circle cx="280" cy="200" r="6" fill="#FF8F00"/>
+            <text x="250" y="225" fill="#FF8F00" font-weight="bold">Root 目标</text>
+
+            <circle cx="500" cy="200" r="6" fill="#004D40"/>
+            <text x="500" y="225" text-anchor="middle" fill="#004D40" font-weight="bold">猜测起点 x0</text>
+            <line x1="500" y1="200" x2="500" y2="65" stroke="#004D40" stroke-width="2" stroke-dasharray="4,4"/>
+            <circle cx="500" cy="65" r="6" fill="#004D40"/>
+            <text x="520" y="80" fill="#004D40">f(x0)</text>
+
+            <path d="M 550 30 L 330 200" fill="none" stroke="#FFCA28" stroke-width="3"/>
+            <text x="440" y="130" fill="#FF8F00" font-weight="bold" transform="rotate(-36 440 130)">顺着切线直达 X 轴!</text>
+
+            <circle cx="330" cy="200" r="6" fill="#D32F2F"/>
+            <text x="330" y="225" text-anchor="middle" fill="#D32F2F" font-weight="bold">下一次探测 x1</text>
+            
+            <path d="M 500 240 Q 415 260 330 240" fill="none" stroke="#D32F2F" stroke-width="2" marker-end="url(#arrow-red)"/>
+            <text x="415" y="255" text-anchor="middle" fill="#D32F2F" font-size="12">跨度极大！只要几次迭代就能收敛！</text>
+
+            <defs>
+                <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#D32F2F" />
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="code-comparison">
+        <div class="code-card">
+            <div class="code-header">C++ 牛顿迭代法</div>
+            <div class="code-body"><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;iomanip&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;cmath&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="com">// 原方程 f(x)</span>
+<span class="type">double</span> <span class="func">f</span>(<span class="type">double</span> x) {
+    <span class="kw">return</span> x * x * x + x - <span class="num">15.0</span>;
+}
+
+<span class="com">// 导数方程 f'(x)</span>
+<span class="type">double</span> <span class="func">derivative_f</span>(<span class="type">double</span> x) {
+    <span class="kw">return</span> <span class="num">3.0</span> * x * x + <span class="num">1.0</span>;
+}
+
+<span class="type">double</span> <span class="func">newtonMethod</span>() {
+    <span class="type">double</span> x = <span class="num">10.0</span>; <span class="com">// 随便猜一个起点</span>
+    
+    <span class="com">// 只要 f(x) 还不等于 0 (设定一个极小的误差控制)</span>
+    <span class="kw">while</span> (<span class="func">abs</span>(<span class="func">f</span>(x)) &gt; <span class="num">1e-7</span>) {
+        <span class="com">// 核心公式：新 x = 老 x - ( f(x) / f'(x) )</span>
+        x = x - (<span class="func">f</span>(x) / <span class="func">derivative_f</span>(x));
+    }
+    
+    <span class="kw">return</span> x; 
+}
+
+<span class="type">int</span> <span class="func">main</span>() {
+    cout &lt;&lt; <span class="str">"牛顿法极速求得近似根: "</span> &lt;&lt; fixed &lt;&lt; <span class="func">setprecision</span>(<span class="num">5</span>) &lt;&lt; <span class="func">newtonMethod</span>() &lt;&lt; endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+        </div>
+
+        <div class="code-card">
+            <div class="code-header">Python 牛顿迭代法</div>
+            <div class="code-body"><span class="kw">def</span> <span class="func">f</span>(x):
+    <span class="kw">return</span> x * x * x + x - <span class="num">15.0</span>
+
+<span class="kw">def</span> <span class="func">derivative_f</span>(x):
+    <span class="kw">return</span> <span class="num">3.0</span> * x * x + <span class="num">1.0</span>
+
+<span class="kw">def</span> <span class="func">newton_method</span>():
+    x = <span class="num">10.0</span> <span class="com"># 随便猜一个起点</span>
+    
+    <span class="com"># abs(f(x)) 趋近于 0，说明找到了根</span>
+    <span class="kw">while</span> <span class="func">abs</span>(<span class="func">f</span>(x)) &gt; <span class="num">1e-7</span>:
+        <span class="com"># 核心公式：新 x = 老 x - ( f(x) / f'(x) )</span>
+        x = x - (<span class="func">f</span>(x) / <span class="func">derivative_f</span>(x))
+            
+    <span class="kw">return</span> x
+
+<span class="com"># 测试牛顿法</span>
+<span class="func">print</span>(<span class="str">f"牛顿法极速求得近似根: {newton_method():.5f}"</span>)
+</div>
+        </div>
+    </div>
+
+    <div class="step-box">
+        <h3>🎉 二分法 VS 牛顿法总结</h3>
+        <p>虽然牛顿法非常快，但在算法竞赛和工程运用中，如果遇到了未知的、扭曲的函数，牛顿法有可能会因为切线水平（导数为0）导致程序崩溃，或者在这个坑里反复横跳死循环。</p>
+        <p>因此，对于单调函数的求根，<span class="highlight">实数二分（固定循环 100 次）</span>永远是你最可靠、最值得信赖的战友！</p>
+    </div>
+
+    <div class="simple-footer">
+        扣哒世界教研团队
+    </div>
+
+</div>
+
+</body>
+</html>
