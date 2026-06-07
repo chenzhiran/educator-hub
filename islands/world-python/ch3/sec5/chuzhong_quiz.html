@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>边际森林知识挑战 - 嵌套选择结构</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 (边际森林主题绿) --- */
+        :root {
+            --primary-color: #2E9E5B; 
+            --secondary-color: #4FBF7C;
+            --bg-color: #f7faf8;     
+            --card-bg: #FFFFFF;
+            --text-color: #14241a;   
+            --en-text-color: #6b8a76; 
+            --correct-color: #28c840;
+            --wrong-color: #ff5f57;  
+            --accent-yellow: #febc2e;
+            
+            /* 代码高亮颜色 */
+            --code-bg: #1e2a22;
+            --code-text: #b6c2ba;
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d5e5d9 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(46,158,91,0.15);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #d99e22;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #e3ece6;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 专属代码样式 --- */
+        .question-title code, .en-text code {
+            background-color: #e8f7ee; 
+            font-family: 'YouYuan', '幼圆', monospace;
+            font-weight: bold; 
+            color: var(--primary-color); 
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #e3ece6;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #c4d4c9;
+            display: flex;
+            flex-direction: column; 
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        .option-code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #314538;
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); 
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(0,0,0,0.25);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #95b8a0;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #1f9c31;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #c24640;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #e8f7ee;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); background: #eafaf1;}
+        .feedback-section.wrong { border-color: var(--wrong-color); background: #fceaea; }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #1F7A44;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #d99e22;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: var(--en-text-color); font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 20</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+            </div>
+
+            <div class="options-grid" id="options-container">
+            </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+        </div>
+    </div>
+
+    <script>
+        // --- 题目数据 (结合 Unit 5: 嵌套选择结构) ---
+        const quizData = [
+            {
+                qZh: "1. 什么是嵌套选择结构（Nested Selection）？",
+                qEn: "What is a Nested Selection structure?",
+                options: [
+                    { zh: "A. 同时执行两个以上的 if 语句", en: "Executing two or more if statements simultaneously" },
+                    { zh: "B. 把一个完整的 if 结构，放进另一个 if 结构的代码块里面", en: "Placing a complete if structure inside the code block of another if structure" },
+                    { zh: "C. 用 while 循环代替 if 语句", en: "Replacing an if statement with a while loop" },
+                    { zh: "D. 在同一行写完所有的 if 和 else", en: "Writing all if and else statements on the same line" }
+                ],
+                correct: 1, 
+                descZh: "解析：在编程里，嵌套 if 指的是把一个完整的 if 结构，放进另一个 if 结构的代码块里面。这样，程序就能做出先判断，再判断的多层选择。",
+                descEn: "Explanation: In programming, a nested if means putting a complete if structure inside the code block of another if structure. This allows the program to make multi-layered decisions."
+            },
+            {
+                qZh: "2. 在现实生活中，以下哪一项最符合嵌套判断的逻辑？",
+                qEn: "In real life, which of the following best matches the logic of a nested decision?",
+                options: [
+                    { zh: "A. 看到红灯停下，看到绿灯走", en: "Stop at a red light, go at a green light" },
+                    { zh: "B. 每天早上必须吃早餐，否则会饿", en: "Must eat breakfast every morning, otherwise get hungry" },
+                    { zh: "C. 先决定出门，决定出门后，再看如果下雨就带伞", en: "First decide to go out; after deciding to go out, check if it's raining to bring an umbrella" },
+                    { zh: "D. 抛硬币决定今天穿红衣服还是蓝衣服", en: "Flip a coin to decide whether to wear red or blue today" }
+                ],
+                correct: 2,
+                descZh: "解析：看天气这个判断，是嵌在要不要出门这个判断里面的——只有先决定出门，才轮到考虑带什么，这就是生活中的嵌套。",
+                descEn: "Explanation: Checking the weather is nested inside the decision to go out—only after deciding to go out do you consider bringing an umbrella. This is nesting in daily life."
+            },
+            {
+                qZh: "3. “以静制动”关卡给嵌套结构做了一个绝妙的比喻，是什么？",
+                qEn: "What brilliant analogy did the 'Patience' level use for nested structures?",
+                options: [
+                    { zh: "A. 像一条没有尽头的河流", en: "Like an endless river" },
+                    { zh: "B. 像爬楼梯", en: "Like climbing stairs" },
+                    { zh: "C. 将每个 if/else 考虑成一个容器，其中又可以容纳另一个 if/else", en: "Think of each if/else as a container that can hold another if/else" },
+                    { zh: "D. 像一本有目录的书", en: "Like a book with a table of contents" }
+                ],
+                correct: 2,
+                descZh: "解析：“以静制动”关卡给了一个绝妙的比喻：将每个 if/else 考虑成一个容器，其中又可以容纳另一个 if/else 结构！也就是“盒子套盒子”的概念。",
+                descEn: "Explanation: The 'Patience' level uses the analogy: Think of each if/else as a container, which can hold another if/else structure! It's the concept of boxes within boxes."
+            },
+            {
+                qZh: "4. Python 程序是如何看出一个 if 语句是“嵌套”在另一个 if 里面的？",
+                qEn: "How does a Python program know that an if statement is 'nested' inside another if?",
+                options: [
+                    { zh: "A. 通过代码的颜色", en: "Through the color of the code" },
+                    { zh: "B. 通过括号 {}", en: "Through curly brackets {}" },
+                    { zh: "C. 通过在代码前加上 nest 关键字", en: "By adding the 'nest' keyword before the code" },
+                    { zh: "D. 通过向右的缩进层级", en: "Through the level of rightward indentation" }
+                ],
+                correct: 3,
+                descZh: "解析：嵌套的层级，完全靠缩进来表达。嵌套内层的 if 结构需要更多缩进，说明它在外层结构的里面。",
+                descEn: "Explanation: The nesting level is expressed entirely through indentation. The inner nested if structure needs more indentation, indicating it is inside the outer structure."
+            },
+            {
+                qZh: "5. 在一个标准的两层嵌套结构中，如果某个动作需要“外层和内层条件都满足”才执行，它需要缩进几次？",
+                qEn: "In a standard two-layer nested structure, if an action requires 'both outer and inner conditions to be met' to execute, how many times must it be indented?",
+                options: [
+                    { zh: "A. 0 次（顶格）", en: "0 times (flush left)" },
+                    { zh: "B. 1 次（通常 4 个空格）", en: "1 time (usually 4 spaces)" },
+                    { zh: "C. 2 次（通常 8 个空格）", en: "2 times (usually 8 spaces)" },
+                    { zh: "D. 3 次（通常 12 个空格）", en: "3 times (usually 12 spaces)" }
+                ],
+                correct: 2,
+                descZh: "解析：外层 if 顶格（0格），内层 if 缩进一次（4格），内层要执行的代码（两个条件都满足时）需要再向右缩进一次，总计两次（8格）。",
+                descEn: "Explanation: The outer if is flush left (0 spaces), the inner if is indented once (4 spaces), and the inner action requires another indentation, making it two times (8 spaces)."
+            },
+            {
+                qZh: "6. 如果嵌套判断太复杂，推荐使用的“注释占位法”指的是什么？",
+                qEn: "If a nested decision is too complex, what is the recommended 'Comment-First Method'?",
+                options: [
+                    { zh: "A. 把复杂的代码全部注释掉不执行", en: "Comment out all complex code so it doesn't run" },
+                    { zh: "B. 如果你的 if 语句很复杂，先用注释写下想法，然后再修改成代码", en: "If your if statement is complex, first write your thoughts as comments, then modify them into code" },
+                    { zh: "C. 请别人帮忙写注释", en: "Ask someone else to write the comments" },
+                    { zh: "D. 代码报错时只看注释", en: "Only look at the comments when the code errors" }
+                ],
+                correct: 1,
+                descZh: "解析：“以静制动”关卡传授了一个非常实用的技巧：如果你的 if 语句很复杂，你可以一步步来，先用注释写下想法，然后再修改成代码。",
+                descEn: "Explanation: The 'Patience' level teaches a practical trick: If your if statement is complex, you can take it step by step, write your thoughts in comments first, and then change them into code."
+            },
+            {
+                qZh: "7. 在游戏中，可以通过 `pos` 属性获取物体的坐标位置。`pos` 本身包含哪两个属性？",
+                qEn: "In the game, you can get an object's coordinates through the `pos` property. What two attributes does `pos` itself contain?",
+                options: [
+                    { zh: "A. x 和 y", en: "x and y" },
+                    { zh: "B. top 和 bottom", en: "top and bottom" },
+                    { zh: "C. left 和 right", en: "left and right" },
+                    { zh: "D. distance 和 time", en: "distance and time" }
+                ],
+                correct: 0,
+                descZh: "解析：每个 pos 本身也是个对象，它又包含了 x 和 y 属性。用 `物体.pos.x` 就能拿到它的横坐标，`物体.pos.y` 拿到纵坐标。",
+                descEn: "Explanation: Every pos itself is an object containing x and y properties. Using `object.pos.x` gets its horizontal coordinate, and `object.pos.y` gets the vertical."
+            },
+            {
+                qZh: "8. 在内层条件判断中，想要检查横坐标是不是恰好为 34，应该使用哪种符号？",
+                qEn: "In an inner condition check, which symbol should be used to test if the horizontal coordinate is exactly 34?",
+                options: [
+                    { zh: "A. =", en: "=" },
+                    { zh: "B. ===", en: "===" },
+                    { zh: "C. ==", en: "==" },
+                    { zh: "D. ->", en: "->" }
+                ],
+                correct: 2,
+                descZh: "解析：在内层条件里，我们经常要问这个值是不是等于某个数。这时用双等号 `==`。它会返回 True 或 False，正好可以当作 if 的条件。",
+                descEn: "Explanation: In inner conditions, we often ask if a value equals a number. We use the double equals sign `==`. It returns True or False, acting as an if condition."
+            },
+            {
+                qZh: "9. 如果你在 `if` 判断条件中不小心把 `==`（双等号）写成了 `=`（单等号），会发生什么？",
+                qEn: "If you accidentally write `=` (single equal) instead of `==` (double equal) in an `if` condition, what happens?",
+                options: [
+                    { zh: "A. 没有任何影响，两者通用", en: "No effect, they are interchangeable" },
+                    { zh: "B. 会导致代码出错，因为单等号是用于“赋值”，双等号才是用于“比较”", en: "It causes an error because a single equal is for 'assignment', while double equal is for 'comparison'" },
+                    { zh: "C. 会让英雄移动得更快", en: "It makes the hero move faster" },
+                    { zh: "D. 代码会被自动修正", en: "The code is automatically corrected" }
+                ],
+                correct: 1,
+                descZh: "解析：千万别搞混：`=`（单等号）是赋值，把右边装进左边的盒子；`==`（双等号）是比较，问两边是否相等。在 if 条件里要用的是 `==`，写成 `=` 会出错！",
+                descEn: "Explanation: Don't mix them up: `=` is assignment, putting the right into the left box; `==` is comparison, asking if both sides are equal. Using `=` in an if condition causes an error."
+            },
+            {
+                qZh: "10. 英雄的新技能 `distanceTo(目标)` 能够返回什么？",
+                qEn: "What does the hero's new skill `distanceTo(target)` return?",
+                options: [
+                    { zh: "A. 敌人下一次的攻击方向", en: "The enemy's next attack direction" },
+                    { zh: "B. 英雄到某个目标之间的距离（单位：米）", en: "The distance between the hero and a target (in meters)" },
+                    { zh: "C. 敌人的当前血量", en: "The enemy's current health" },
+                    { zh: "D. 地图的总面积", en: "The total area of the map" }
+                ],
+                correct: 1,
+                descZh: "解析：`hero.distanceTo(目标)` 会返回英雄到某个目标之间的距离（单位：米）。存进变量后就能在内层 if 里比较远近。",
+                descEn: "Explanation: `hero.distanceTo(target)` returns the distance between the hero and a target in meters. Storing it in a variable allows comparing distances in an inner if."
+            },
+            {
+                qZh: "11. 为什么在“Agrippa守卫战”中，有敌人出现时不能立刻放大招，而必须嵌套一个 `if distance < 5` 的判断？",
+                qEn: "Why can't you use your ultimate immediately when an enemy appears in 'Agrippa Defense', but must instead nest an `if distance < 5` check?",
+                options: [
+                    { zh: "A. 因为游戏不允许立刻攻击", en: "Because the game doesn't allow immediate attacks" },
+                    { zh: "B. 因为大招需要蓄力 5 秒", en: "Because the ultimate needs 5 seconds to charge" },
+                    { zh: "C. 因为“敌人存在”和“敌人够近能打到”是两回事，太早放大招只能打到前面几个，剩下的会围上来", en: "Because 'enemy exists' and 'enemy is close enough to hit' are different; using it too early only hits the front ones, letting the rest surround you" },
+                    { zh: "D. 为了节省代码行数", en: "To save lines of code" }
+                ],
+                correct: 2,
+                descZh: "解析：这一关的精妙之处在于不能一看到敌人就 cleave。如果太早放大招，只能打到最前面几个，剩下的会围上来。策略是用 distanceTo 等敌人靠近再出手。",
+                descEn: "Explanation: The brilliance of this level is you can't cleave immediately. Using it early only hits the front ones, letting the rest swarm. The strategy is waiting until they are close."
+            },
+            {
+                qZh: "12. 在检查顺劈斩（cleave）是否能用时，`hero.isReady(\"cleave\")` 会返回什么？",
+                qEn: "When checking if cleave is usable, what does `hero.isReady(\"cleave\")` return?",
+                options: [
+                    { zh: "A. 返回一个具体的冷却时间数字", en: "Returns a specific cooldown time number" },
+                    { zh: "B. 返回 True 或 False", en: "Returns True or False" },
+                    { zh: "C. 返回当前敌人的坐标", en: "Returns the current enemy's coordinates" },
+                    { zh: "D. 返回英雄的剑的名字", en: "Returns the name of the hero's sword" }
+                ],
+                correct: 1,
+                descZh: "解析：`hero.isReady(\"cleave\")` 会返回 True 或 False，告诉你这个技能现在能不能用。这又是一个天然适合放进内层 if 的条件。",
+                descEn: "Explanation: `hero.isReady(\"cleave\")` returns True or False, telling you if the skill can be used now. It's a natural fit for an inner if condition."
+            },
+            {
+                qZh: "13. 在“跃火林中”关卡，外层判断有没有恶魔石，如果外层的 `if evilstone:` 成立，接下来的内层判断检查的是什么？",
+                qEn: "In the 'Leap of Faith' level, the outer layer checks if there is an evilstone. If `if evilstone:` is true, what does the inner layer check next?",
+                options: [
+                    { zh: "A. 恶魔石的颜色", en: "The color of the evilstone" },
+                    { zh: "B. 恶魔石距离英雄多远", en: "How far the evilstone is from the hero" },
+                    { zh: "C. 恶魔石的横坐标（pos.x）是不是等于 34，判断它在哪边", en: "If the evilstone's horizontal coordinate (pos.x) equals 34, determining which side it is on" },
+                    { zh: "D. 恶魔石是否可以被吃掉", en: "If the evilstone can be eaten" }
+                ],
+                correct: 2,
+                descZh: "解析：这是一个两层判断：外层问有没有恶魔石，内层问它在哪一边。内层代码 `if pos.x == 34:` 用来判断恶魔石在左还是右。",
+                descEn: "Explanation: It's a two-layer decision: the outer asks if there's a stone, the inner asks which side it's on. The inner code `if pos.x == 34:` determines left or right."
+            },
+            {
+                qZh: "14. 在最复杂的“Agrippa守卫战”中，英雄使用大招之前，需要依次问哪三个层层递进的问题（三层嵌套）？",
+                qEn: "In the complex 'Agrippa Defense', what three progressive questions (three-layer nesting) must the hero ask before using the ultimate?",
+                options: [
+                    { zh: "A. 有敌人吗 → 敌人名字叫什么 → 敌人血量多吗", en: "Is there an enemy → What's its name → Does it have high HP" },
+                    { zh: "B. 有敌人吗 → 近不近（distance） → 技能好没好（isReady）", en: "Is there an enemy → Is it close (distance) → Is skill ready (isReady)" },
+                    { pos: "C. 宝箱在哪 → 钥匙在哪 → 门在哪", en: "Where's the chest → Where's the key → Where's the door" },
+                    { zh: "D. 技能好没好 → 敌人速度快吗 → 有没有队友", en: "Is skill ready → Is enemy fast → Are there allies" }
+                ],
+                correct: 1,
+                descZh: "解析：三个问题层层递进——“有没有”→“近不近”→“技能好没好”。只有一路全部满足才会放大招，任何一层不满足就走备选方案。",
+                descEn: "Explanation: Three progressive questions: 'Is there an enemy' → 'Is it close' → 'Is skill ready'. Only if all are met is the ultimate used; otherwise, fallback plans run."
+            },
+            {
+                qZh: "15. 在“危险的树”概念关卡中，内层 `if distance < 15` 没有写对应的 `else` 分支。这说明什么？",
+                qEn: "In the 'Dangerous Trees' concept level, the inner `if distance < 15` has no corresponding `else` branch. What does this show?",
+                options: [
+                    { zh: "A. 这是代码写错了，一定会报错", en: "This is a code error and will definitely crash" },
+                    { zh: "B. 说明嵌套的每一层都可以是单分支（不必须有 else），“够远就什么都不做”本身也是合理的设计", en: "It shows each nested layer can be a single branch (else isn't mandatory); 'doing nothing when far' is a valid design" },
+                    { zh: "C. Python 会自动脑补出一个 else", en: "Python automatically imagines an else" },
+                    { zh: "D. 会导致食人魔无法被击败", en: "It causes ogres to become invincible" }
+                ],
+                correct: 1,
+                descZh: "解析：内层不一定非要配 else。“够远就什么都不做”本身就是合理的设计——这说明嵌套里的每一层，都可以是单分支或双分支，按需选用。",
+                descEn: "Explanation: Inner layers don't strictly need an else. 'Doing nothing when far' is a valid design, showing each nested layer can be single or dual branch as needed."
+            },
+            {
+                qZh: "16. 在“最后的守护者”中，如果外层的 `if enemy:` 成立，且内层的 `if distance < 10:` 比较发现敌人超过了10米（比如是15米），此时英雄会执行什么动作？",
+                qEn: "In 'The Last Guardian', if the outer `if enemy:` is true, but the inner `if distance < 10:` finds the enemy is over 10 meters away (e.g., 15m), what action does the hero take?",
+                options: [
+                    { zh: "A. 追出去砍敌人", en: "Chase out to slash the enemy" },
+                    { zh: "B. 跑回防守点", en: "Run back to the defense point" },
+                    { zh: "C. 执行与 distance < 10 配对的 else：用 say 报出距离召唤大炮", en: "Executes the else paired with distance < 10: uses say to call out distance for the artillery" },
+                    { zh: "D. 使用治疗药水", en: "Uses a healing potion" }
+                ],
+                correct: 2,
+                descZh: "解析：如果食人魔很远，只要用 say 说出到它的距离，你的大炮就会自动开火。代码中 `distance < 10` 的 else 分支就是 `hero.say(distance)`。",
+                descEn: "Explanation: If the ogre is far, using say to call out its distance makes your artillery fire automatically. The else branch for `distance < 10` runs `hero.say(distance)`."
+            },
+            {
+                qZh: "17. 写嵌套判断时，如果不小心少缩进了一次（比如 4个空格写成了顶格），通常会导致什么严重后果？",
+                qEn: "When writing nested decisions, if you accidentally indent one less time (e.g., flush left instead of 4 spaces), what serious consequence usually follows?",
+                options: [
+                    { zh: "A. 导致这段代码“跳出”了内层，归属关系彻底改变，逻辑全乱", en: "It causes the code to 'jump out' of the inner layer, completely changing its belonging and ruining the logic" },
+                    { zh: "B. 程序会自动帮你补齐空格", en: "The program automatically adds the missing spaces" },
+                    { zh: "C. 变量的值会被清空", en: "Variable values will be cleared" },
+                    { zh: "D. 没关系，只要括号对齐就行", en: "It doesn't matter as long as brackets align" }
+                ],
+                correct: 0,
+                descZh: "解析：嵌套结构里最致命的坑就是缩进。同一段代码，缩进多一层就“钻进”了内层 if，少一层就“跳出”到了外层，含义天差地别。",
+                descEn: "Explanation: The most fatal trap in nested structures is indentation. Indenting more puts it inside the inner if, while less indentation 'jumps out' to the outer layer, changing meaning drastically."
+            },
+            {
+                qZh: "18. 在多层嵌套中，如何判断一个 `else` 到底配对的是哪一个 `if`？",
+                qEn: "In multi-layer nesting, how do you determine which `if` a specific `else` is paired with?",
+                options: [
+                    { zh: "A. 总是配对代码最上面的那个 if", en: "It always pairs with the topmost if in the code" },
+                    { zh: "B. 总是配对最近的那个 if", en: "It always pairs with the closest if" },
+                    { zh: "C. else 属于和它缩进对齐的那个 if", en: "The else belongs to the if that it is perfectly aligned with (indentation-wise)" },
+                    { zh: "D. 抛开缩进不谈，看心情配对", en: "Ignoring indentation, it pairs randomly" }
+                ],
+                correct: 2,
+                descZh: "解析：有了多层 if，就有多个可能的 else。else 属于和它缩进对齐的那个 if。跟谁对齐就属于谁。",
+                descEn: "Explanation: With multiple ifs, there are multiple possible elses. An else belongs to the if it is aligned with through indentation. It belongs to whoever it aligns with."
+            },
+            {
+                qZh: "19. 在“跃火林中”关卡，处理没有恶魔石的情况是让英雄回到中心。这个回到中心的 `else` 分支应该与哪个 `if` 对齐？",
+                qEn: "In 'Leap of Faith', handling no evilstone means returning to center. Which `if` should this return-to-center `else` align with?",
+                options: [
+                    { zh: "A. 与内层的 `if pos.x == 34:` 对齐", en: "Align with the inner `if pos.x == 34:`" },
+                    { zh: "B. 与外层的 `if evilstone:` 对齐", en: "Align with the outer `if evilstone:`" },
+                    { zh: "C. 顶格写在 `while True:` 外部", en: "Flush left outside the `while True:`" },
+                    { zh: "D. 随便对齐哪里都可以", en: "Align anywhere works" }
+                ],
+                correct: 1,
+                descZh: "解析：处理没有恶魔石的情况属于外层判断（有没有恶魔石）。“去中间”的 else 要和外层 if 对齐（属于外层）。",
+                descEn: "Explanation: Handling the absence of a stone belongs to the outer decision (is there a stone). The 'go to center' else must align with the outer if."
+            },
+            {
+                qZh: "20. 综合提问：为什么要学习“嵌套选择结构”？",
+                qEn: "Comprehensive question: Why learn 'Nested Selection Structures'?",
+                options: [
+                    { zh: "A. 为了让代码行数看起来更多", en: "To make the code look longer" },
+                    { zh: "B. 满足系统打分的字数要求", en: "To meet word count requirements for system grading" },
+                    { zh: "C. 真实的挑战很复杂，嵌套结构赋予程序“层层推进、多维判断”的能力，能处理诸如“既要...还要...”的战术要求", en: "Real challenges are complex; nesting gives programs the ability to 'progress logically, making multi-dimensional decisions' to handle 'if this AND that' tactical requirements" },
+                    { zh: "D. 只有嵌套结构能用变量", en: "Only nested structures can use variables" }
+                ],
+                correct: 2,
+                descZh: "解析：一个判断的答案，往往会引出下一个需要判断的问题。嵌套表达复杂战术的本领，让英雄做出层层递进的复杂决策。",
+                descEn: "Explanation: The answer to one decision often leads to the next question. Nesting expresses complex tactics, allowing the hero to make layered, sophisticated decisions."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr); 
+        }
+
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        function highlightDescCode(text) {
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#e8f7ee; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#1F7A44; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的决策大师！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Decision Master!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你已经完全掌握了嵌套选择结构，面对多层复杂的战局也能写出最精密的战术代码！<br><span class="en-text">Amazing! You've mastered nested selection structures and can write precise tactical code for complex situations!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！多留意一下缩进的细节，下次一定拿满分！<br><span class="en-text">Good job! Pay closer attention to indentation details, and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>

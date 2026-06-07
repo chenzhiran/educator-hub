@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五单元：嵌套选择结构 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1565c0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fdecea;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        /* ===== 嵌套层级示意（盒子套盒子） ===== */
+        .nest-box {
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+            background: rgba(46, 158, 91, 0.04);
+        }
+        .nest-box .nest-label {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.78em;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .nest-box .nest-inner {
+            border: 2px dashed var(--primary-light);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 10px 0;
+            background: rgba(79, 191, 124, 0.07);
+        }
+        .nest-box .nest-inner .nest-label {
+            background: var(--primary-light);
+        }
+        .nest-box .nest-inner .nest-inner {
+            border-color: #d19a66;
+            background: rgba(209, 154, 102, 0.08);
+        }
+        .nest-box .nest-inner .nest-inner .nest-label {
+            background: #d19a66;
+        }
+        .nest-box .nest-content { color: var(--text-light); font-size: 0.92em; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">边际森林-第五单元</div>
+
+    <a href="#section-5-1" class="nav-section">5.1 从单层到嵌套</a>
+    <a href="#sec-5-1-1" class="nav-sub">5.1.1 复习 if 与 if/else</a>
+    <a href="#sec-5-1-2" class="nav-sub">5.1.2 单层判断的局限</a>
+    <a href="#sec-5-1-3" class="nav-sub">5.1.3 生活中的多层判断</a>
+
+    <a href="#section-5-2" class="nav-section">5.2 什么是嵌套</a>
+    <a href="#sec-5-2-1" class="nav-sub">5.2.1 嵌套的定义</a>
+    <a href="#sec-5-2-2" class="nav-sub">5.2.2 盒子套盒子</a>
+    <a href="#sec-5-2-3" class="nav-sub">5.2.3 缩进与层级</a>
+
+    <a href="#section-5-3" class="nav-section">5.3 嵌套语法详解</a>
+    <a href="#sec-5-3-1" class="nav-sub">5.3.1 基本格式</a>
+    <a href="#sec-5-3-2" class="nav-sub">5.3.2 流程图解读</a>
+    <a href="#sec-5-3-3" class="nav-sub">5.3.3 注释占位法</a>
+
+    <a href="#section-5-4" class="nav-section">5.4 新工具箱</a>
+    <a href="#sec-5-4-1" class="nav-sub">5.4.1 pos 位置属性</a>
+    <a href="#sec-5-4-2" class="nav-sub">5.4.2 == 等于运算符</a>
+    <a href="#sec-5-4-3" class="nav-sub">5.4.3 distanceTo 距离</a>
+    <a href="#sec-5-4-4" class="nav-sub">5.4.4 isReady 技能就绪</a>
+
+    <a href="#section-5-5" class="nav-section">5.5 实战关卡精讲</a>
+    <a href="#sec-5-5-1" class="nav-sub">5.5.1 跃火林中</a>
+    <a href="#sec-5-5-2" class="nav-sub">5.5.2 以静制动</a>
+    <a href="#sec-5-5-3" class="nav-sub">5.5.3 Agrippa守卫战</a>
+    <a href="#sec-5-5-4" class="nav-sub">5.5.4 危险的树</a>
+    <a href="#sec-5-5-5" class="nav-sub">5.5.5 最后的守护者</a>
+
+    <a href="#section-5-6" class="nav-section">5.6 嵌套的常见错误</a>
+    <a href="#sec-5-6-1" class="nav-sub">5.6.1 缩进陷阱</a>
+    <a href="#sec-5-6-2" class="nav-sub">5.6.2 else 配对</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第五单元：嵌套选择结构</h1>
+    <div class="subtitle">Unit 5: Nested Selection Structures</div>
+    <div class="badge">计算机科学 2 · 边际森林 Border Forest · 跃火林中 → 最后的守护者</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 5.1 ==================== -->
+<div class="section-header" id="section-5-1">
+    <h2>5.1 从单层到嵌套</h2>
+    <div class="en-title">From Single Layer to Nesting</div>
+</div>
+
+<h3 id="sec-5-1-1">5.1.1 复习：if 与 if/else（Review: if and if/else）</h3>
+
+<h4>5.1.1.1 你已经会的判断本领
+    <span class="en">The decisions you can already make</span>
+</h4>
+
+<p>到目前为止，你已经掌握了两种判断武器。第一种是<span class="keyword">单分支 if</span>——"如果条件成立，就做某件事，否则跳过"。第二种是<span class="keyword">双分支 if/else</span>——"如果条件成立做这个，否则（条件不成立）做那个"。它们都只在<strong>一个层面</strong>上做决定。</p>
+
+<table class="styled-table">
+    <thead><tr><th>结构</th><th>逻辑</th><th>分支数</th><th>掌握进度</th></tr></thead>
+    <tbody>
+        <tr><td>单分支 if</td><td>成立则做，否则跳过</td><td>1 条路</td><td>✅ 已学</td></tr>
+        <tr><td>双分支 if/else</td><td>成立做 A，否则做 B</td><td>2 条路</td><td>✅ 已学</td></tr>
+        <tr><td>嵌套 if</td><td>判断里再套判断</td><td>多层多路</td><td>⭐ 本单元</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-5-1-2">5.1.2 单层判断的局限（The Limits of One Layer）</h3>
+
+<h4>5.1.2.1 当一个问题不够用时
+    <span class="en">When one question isn't enough</span>
+</h4>
+
+<p>真实的森林越来越凶险，光问"一个问题"已经不够了。比如在"跃火林中"关卡里，你不仅要问"有没有恶魔石？"，还得接着问"它在<strong>哪一边</strong>？"——这是<strong>两层</strong>的问题。又比如打怪时，你不仅要问"有没有敌人？"，还要再问"它离我<strong>有多远</strong>？"才能决定是攻击还是格挡。</p>
+
+<p>一个判断的答案，往往会引出<strong>下一个</strong>需要判断的问题。要表达这种"问题里还套着问题"的逻辑，就需要本单元的主角：<span class="keyword">嵌套选择结构（Nested Selection）</span>。</p>
+
+<h3 id="sec-5-1-3">5.1.3 生活中的多层判断（Layered Decisions in Daily Life）</h3>
+
+<h4>5.1.3.1 你也在做"套娃式"决定
+    <span class="en">You make nested decisions too</span>
+</h4>
+
+<p>嵌套判断在生活里随处可见，只是你没注意。比如出门前：</p>
+
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>● <strong>如果</strong>要出门，<strong>那么</strong>再看天气：
+        <ul style="margin: 6px 0 6px 24px; list-style: none;">
+            <li>○ <strong>如果</strong>下雨，<strong>就</strong>带伞；</li>
+            <li>○ <strong>否则</strong>，戴帽子防晒。</li>
+        </ul>
+    </li>
+    <li>● <strong>否则</strong>（不出门），就待在家里。</li>
+</ul>
+
+<p>看到了吗？"看天气"这个判断，是<strong>嵌在</strong>"要不要出门"这个判断<strong>里面</strong>的——只有先决定出门，才轮到考虑带什么。这就是嵌套的精髓。</p>
+
+<!-- ==================== 5.2 ==================== -->
+<div class="section-header" id="section-5-2">
+    <h2>5.2 什么是嵌套</h2>
+    <div class="en-title">What is Nesting</div>
+</div>
+
+<h3 id="sec-5-2-1">5.2.1 嵌套的定义（Definition of Nesting）</h3>
+
+<h4>5.2.1.1 判断里面再放判断
+    <span class="en">A decision inside a decision</span>
+</h4>
+
+<div class="figure">
+    <img src="images/5-2-1-1_nested_intro.png" alt="嵌套 if 示意：判断里面还有判断">
+    <div class="caption">图1：嵌套就是在一个 if 的代码块里，再写一个完整的 if</div>
+</div>
+
+<p><span class="keyword">嵌套（Nest）</span>这个词，本意是"鸟巢"——一层包一层。在编程里，<span class="keyword">嵌套 if（Nested if）</span>指的是<strong>把一个完整的 if 结构，放进另一个 if 结构的代码块里面</strong>。这样，程序就能做出"先判断，再判断"的多层、更复杂的选择。</p>
+
+<p>正如关卡里说的：<strong>"你可以在一个 if 语句内嵌套（nest）另一个 if 语句，从而做出更复杂的选择。"</strong></p>
+
+<h3 id="sec-5-2-2">5.2.2 盒子套盒子（Boxes Within Boxes）</h3>
+
+<h4>5.2.2.1 把每个 if/else 想成一个容器
+    <span class="en">Think of each if/else as a container</span>
+</h4>
+
+<p>"以静制动"关卡给了一个绝妙的比喻：<strong>"将每个 if/else 考虑成一个容器，其中又可以容纳另一个 if/else 结构！"</strong> 外层的 if 是一个大盒子，里面又可以塞一个小盒子，小盒子里还能再塞更小的盒子。下面用"盒子套盒子"的方式，直观感受三层嵌套（来自"最后的守护者"关卡）：</p>
+
+<div class="nest-box">
+    <span class="nest-label">外层 if enemy　（有没有敌人？）</span>
+    <div class="nest-content">先算出距离 distance……</div>
+    <div class="nest-inner">
+        <span class="nest-label">中层 if distance &lt; 10　（近不近？）</span>
+        <div class="nest-inner">
+            <span class="nest-label">内层 if isReady("cleave")　（技能好了没？）</span>
+            <div class="nest-content">好了 → 用 cleave；否则 → 普通 attack</div>
+        </div>
+        <div class="nest-content">（外层的 else：太远 → say 距离让大炮开火）</div>
+    </div>
+</div>
+
+<h3 id="sec-5-2-3">5.2.3 缩进与层级（Indentation and Levels）</h3>
+
+<h4>5.2.3.1 缩进越深，嵌套越里
+    <span class="en">Deeper indentation, deeper nesting</span>
+</h4>
+
+<p>嵌套的层级，完全靠<strong>缩进</strong>来表达。关卡里特别强调：<strong>"嵌套内层的 if 结构需要更多缩进，说明它在外层结构的里面。"</strong> 每深入一层，就向右多缩进一次（通常 4 个空格）。看代码时，只要数一数前面有几格缩进，就知道它属于第几层。</p>
+
+<div class="warn-box">
+    <span class="warn-label">致命要点：</span>嵌套结构里，<strong>缩进就是逻辑</strong>。缩进多一格少一格，代码的归属和含义就完全变了。"缩进一定要小心。"
+</div>
+
+<!-- ==================== 5.3 ==================== -->
+<div class="section-header" id="section-5-3">
+    <h2>5.3 嵌套语法详解</h2>
+    <div class="en-title">Nested Syntax in Detail</div>
+</div>
+
+<h3 id="sec-5-3-1">5.3.1 基本格式（Basic Format）</h3>
+
+<h4>5.3.1.1 两层嵌套的标准写法
+    <span class="en">The standard form of two-layer nesting</span>
+</h4>
+
+<p>最常见的嵌套，是在外层 if/else 的某个分支里，再写一个内层 if/else。它的骨架长这样：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> 外层条件<span class="punc">:</span>                 <span class="cmt"># 第一层判断</span>
+    <span class="kw">if</span> 内层条件<span class="punc">:</span>             <span class="cmt"># 第二层判断（缩进一次）</span>
+        做事 A                <span class="cmt"># 两个条件都成立（缩进两次）</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        做事 B                <span class="cmt"># 外层成立、内层不成立</span>
+<span class="kw">else</span><span class="punc">:</span>
+    做事 C                    <span class="cmt"># 外层就不成立</span></pre>
+</div>
+
+<p>注意观察缩进的"台阶":外层 if/else 顶格,内层 if/else 缩进一次,内层要执行的代码缩进两次。这种层层递进的台阶感,正是嵌套结构的标志。</p>
+
+<table class="styled-table">
+    <thead><tr><th>缩进层级</th><th>归属</th><th>什么时候执行</th></tr></thead>
+    <tbody>
+        <tr><td>0 格（顶格）</td><td>外层 if / else</td><td>循环每圈都会检查</td></tr>
+        <tr><td>4 格</td><td>内层 if / else</td><td>仅当外层条件成立时检查</td></tr>
+        <tr><td>8 格</td><td>内层的动作</td><td>外层、内层条件都满足时</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-5-3-2">5.3.2 流程图解读（Reading the Flowchart）</h3>
+
+<h4>5.3.2.1 嵌套就是"岔路里还有岔路"
+    <span class="en">Nesting is a fork within a fork</span>
+</h4>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 480 420" width="480" role="img" aria-label="嵌套选择结构流程图">
+        <!-- 开始 -->
+        <rect x="190" y="14" width="100" height="32" rx="16" fill="#2E9E5B"/>
+        <text x="240" y="35" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif">开始</text>
+        <line x1="240" y1="46" x2="240" y2="68" stroke="#555" stroke-width="2"/>
+        <polygon points="240,68 235,58 245,58" fill="#555"/>
+        <!-- 外层判断 -->
+        <polygon points="240,72 330,112 240,152 150,112" fill="#fff" stroke="#2E9E5B" stroke-width="2.5"/>
+        <text x="240" y="110" text-anchor="middle" fill="#1F7A44" font-size="12" font-family="sans-serif">外层条件?</text>
+        <text x="240" y="127" text-anchor="middle" fill="#888" font-size="10" font-family="monospace">if enemy</text>
+        <!-- 外层否 -->
+        <line x1="150" y1="112" x2="70" y2="112" stroke="#c62828" stroke-width="2"/>
+        <text x="92" y="104" fill="#c62828" font-size="11" font-family="sans-serif">否</text>
+        <rect x="20" y="150" width="100" height="38" rx="6" fill="#fdecea" stroke="#c62828"/>
+        <text x="70" y="174" text-anchor="middle" fill="#c62828" font-size="11" font-family="sans-serif">外层 else</text>
+        <line x1="70" y1="112" x2="70" y2="150" stroke="#c62828" stroke-width="2"/>
+        <polygon points="70,150 65,140 75,140" fill="#c62828"/>
+        <!-- 外层是 -->
+        <line x1="240" y1="152" x2="240" y2="180" stroke="#555" stroke-width="2"/>
+        <polygon points="240,180 235,170 245,170" fill="#555"/>
+        <text x="252" y="170" fill="#2E9E5B" font-size="11" font-family="sans-serif">是</text>
+        <!-- 内层判断 -->
+        <polygon points="240,184 330,224 240,264 150,224" fill="#fff" stroke="#4FBF7C" stroke-width="2.5"/>
+        <text x="240" y="222" text-anchor="middle" fill="#1F7A44" font-size="12" font-family="sans-serif">内层条件?</text>
+        <text x="240" y="239" text-anchor="middle" fill="#888" font-size="10" font-family="monospace">if distance&lt;5</text>
+        <!-- 内层是 -->
+        <line x1="240" y1="264" x2="240" y2="292" stroke="#555" stroke-width="2"/>
+        <polygon points="240,292 235,282 245,282" fill="#555"/>
+        <text x="252" y="282" fill="#2E9E5B" font-size="11" font-family="sans-serif">是</text>
+        <rect x="170" y="294" width="140" height="38" rx="6" fill="#E8F7EE" stroke="#2E9E5B"/>
+        <text x="240" y="318" text-anchor="middle" fill="#1F7A44" font-size="12" font-family="sans-serif">attack 攻击</text>
+        <!-- 内层否 -->
+        <line x1="330" y1="224" x2="410" y2="224" stroke="#d19a66" stroke-width="2"/>
+        <text x="350" y="216" fill="#c8862f" font-size="11" font-family="sans-serif">否</text>
+        <rect x="360" y="294" width="110" height="38" rx="6" fill="#fff8e1" stroke="#d19a66"/>
+        <text x="415" y="318" text-anchor="middle" fill="#c8862f" font-size="12" font-family="sans-serif">shield 格挡</text>
+        <line x1="410" y1="224" x2="410" y2="294" stroke="#d19a66" stroke-width="2"/>
+        <polygon points="410,294 405,284 415,284" fill="#d19a66"/>
+        <!-- 汇合到结束 -->
+        <line x1="240" y1="332" x2="240" y2="370" stroke="#555" stroke-width="2"/>
+        <line x1="70" y1="188" x2="70" y2="386" stroke="#555" stroke-width="2"/>
+        <line x1="415" y1="332" x2="415" y2="386" stroke="#555" stroke-width="2"/>
+        <line x1="70" y1="386" x2="415" y2="386" stroke="#555" stroke-width="2"/>
+        <rect x="190" y="370" width="100" height="32" rx="16" fill="#1F7A44"/>
+        <text x="240" y="391" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">下一圈循环</text>
+    </svg>
+    <div class="caption">图2：嵌套流程图——外层先分一次岔路，"是"的那条路里又分出第二个岔路</div>
+</div>
+
+<h3 id="sec-5-3-3">5.3.3 注释占位法（The Comment-First Method）</h3>
+
+<h4>5.3.3.1 先想清楚，再写代码
+    <span class="en">Think first, code later</span>
+</h4>
+
+<p>嵌套 if 一旦层数多了就容易乱。"以静制动"关卡传授了一个非常实用的技巧——<strong>"如果你的 if 语句很复杂，你可以一步步来，先用注释写下想法，然后再修改成代码。"</strong> 也就是先用人类语言（注释）把逻辑搭好骨架，再把每条注释逐一翻译成代码。</p>
+
+<p><strong>第一步：</strong>先用注释列出全部想法，给内层结构"占位"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="cmt"># 如果有敌人出现，那么就……</span>
+        <span class="cmt"># 如果敌人很近，那么就攻击</span>
+        <span class="cmt"># 否则，那么就举盾防御</span>
+    <span class="cmt"># 否则（没有敌人）……</span>
+        <span class="cmt"># 那么，回到中心 X 位置</span></pre>
+</div>
+
+<p><strong>第二步：</strong>把外层注释先变成真正的 if/else 代码。<strong>第三步：</strong>再把内层注释翻译成代码，<strong>并确保缩进正确</strong>。逐层落实，复杂逻辑就被驯服了。</p>
+
+<div class="tip-box">
+    <span class="tip-label">编辑器小技巧：</span>你可以选中一块代码，按 <code>Tab</code> 整体增加缩进，按 <code>Shift + Tab</code> 整体减少缩进。处理多层嵌套时这招特别省事。
+</div>
+
+<!-- ==================== 5.4 ==================== -->
+<div class="section-header" id="section-5-4">
+    <h2>5.4 嵌套必备的新工具箱</h2>
+    <div class="en-title">New Tools for Nesting</div>
+</div>
+
+<p>嵌套判断之所以强大，是因为每一层都可以问<strong>不同种类</strong>的问题。本单元给你的工具箱添了几件新装备，让内层条件能问出"在哪边""有多远""技能好了没"这些更精细的问题。</p>
+
+<h3 id="sec-5-4-1">5.4.1 pos 位置属性（The pos Property）</h3>
+
+<h4>5.4.1.1 每个单位都知道自己在哪
+    <span class="en">Every unit knows where it is</span>
+</h4>
+
+<p>关卡告诉我们：<strong>"游戏中每个物品（或者单位）都有一个 pos 属性，代表了其坐标位置。而每个 pos 本身也是个对象，它又包含了 x 和 y 属性。"</strong> 也就是说，找到一个物体后，用 <code>物体.pos.x</code> 就能拿到它的横坐标，<code>物体.pos.y</code> 拿到纵坐标。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>evilstone = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+pos = evilstone<span class="punc">.</span>pos        <span class="cmt"># 取出这块恶魔石的位置对象</span>
+<span class="cmt"># pos.x 是它的横坐标，pos.y 是它的纵坐标</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 pos 就像物体的"身份证地址"</div>
+    <p>把 <code>pos</code> 想成一张写着地址的卡片，上面有两行：第一行 <code>x</code>（横向第几格），第二行 <code>y</code>（纵向第几格）。有了它，你就能精确判断一个物体到底站在地图的哪个位置——这正是"跃火林中"判断"恶魔石在左边还是右边"的关键。</p>
+</div>
+
+<h3 id="sec-5-4-2">5.4.2 == 等于运算符（The == Operator）</h3>
+
+<h4>5.4.2.1 判断"是不是相等"
+    <span class="en">Checking whether two values are equal</span>
+</h4>
+
+<p>在内层条件里，我们经常要问"这个值是不是等于某个数？"。这时用<span class="keyword">双等号 <code>==</code></span>。关卡注释里特意提醒：<strong>"== 的意思是 is equal to（等于）。"</strong> 它会返回 <code>True</code> 或 <code>False</code>，正好可以当作 if 的条件。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> pos<span class="punc">.</span>x == <span class="num">34</span><span class="punc">:</span>      <span class="cmt"># 横坐标是不是正好等于 34？</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">46</span><span class="punc">,</span> <span class="num">22</span><span class="punc">)</span>   <span class="cmt"># 恶魔石在左，就跑到右边</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">千万别搞混：</span><code>=</code>（单等号）是<strong>赋值</strong>，把右边装进左边的盒子；<code>==</code>（双等号）是<strong>比较</strong>，问"两边是否相等"。在 if 条件里要用的是 <code>==</code>，写成 <code>=</code> 会出错！</p>
+</div>
+
+<h3 id="sec-5-4-3">5.4.3 distanceTo 距离（The distanceTo Method）</h3>
+
+<h4>5.4.3.1 量一量"有多远"
+    <span class="en">Measuring how far away</span>
+</h4>
+
+<p><code>hero.distanceTo(目标)</code> 会返回英雄到某个目标之间的<strong>距离</strong>（单位：米）。把它存进一个变量，就能在内层 if 里用大于、小于运算符来比较远近，从而决定不同的战术。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>distance = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>  <span class="cmt"># 算出到敌人的距离</span>
+<span class="kw">if</span> distance &lt; <span class="num">5</span><span class="punc">:</span>            <span class="cmt"># 近到 5 米以内？</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>        <span class="cmt"># 近了才动手</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">shield</span><span class="punc">()</span>            <span class="cmt"># 还远，先举盾</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么要看距离？</span>因为"敌人存在"和"敌人能打到"是两回事。先用外层判断"有没有敌人"，再用内层判断"够不够近"，这正是嵌套最自然的应用场景。
+</div>
+
+<h3 id="sec-5-4-4">5.4.4 isReady 技能就绪（The isReady Method）</h3>
+
+<h4>5.4.4.1 大招好了没？
+    <span class="en">Is the special skill ready?</span>
+</h4>
+
+<p>像 <code>cleave</code>（顺劈斩）这样的强力技能有<strong>冷却时间（Cooldown）</strong>，用完得等一会儿才能再用。<code>hero.isReady("cleave")</code> 会返回 <code>True</code> 或 <code>False</code>，告诉你这个技能<strong>现在能不能用</strong>。这又是一个天然适合放进内层 if 的条件。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isReady</span><span class="punc">(</span><span class="str">"cleave"</span><span class="punc">)</span><span class="punc">:</span>  <span class="cmt"># 顺劈斩冷却好了吗？</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">cleave</span><span class="punc">(</span>enemy<span class="punc">)</span>         <span class="cmt"># 好了，放大招</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>         <span class="cmt"># 没好，普通攻击别闲着</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">实战提醒：</span>"如果你的 cleave 没准备好，别呆呆站在那里！冷却时间内记得用普通的 attack() 继续攻击。" 这就是 <code>isReady</code> 配 <code>else</code> 的意义所在。
+</div>
+
+<!-- ==================== 5.5 ==================== -->
+<div class="section-header" id="section-5-5">
+    <h2>5.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节我们聚焦每一关的<strong>难点、思路和嵌套结构的设计</strong>。看懂"为什么这样嵌套"，你就能举一反三，自己写出完整解法。</p>
+
+<h3 id="sec-5-5-1">5.5.1 跃火林中（Leap of Faith）</h3>
+
+<h4>5.5.1.1 思路：用嵌套躲避双火球
+    <span class="en">Strategy: dodge two fireballs with nesting</span>
+</h4>
+
+<div class="figure">
+    <img src="images/5-5-1-1_leap_of_faith.png" alt="跃火林中关卡">
+    <div class="caption">图3：跃火林中——根据恶魔石（宝石）出现的位置，躲到安全的另一侧</div>
+</div>
+
+<p>这一关有点像之前的"焰中舞动"，但这次要<strong>同时躲两个火球</strong>，而且<strong>火球随机出现</strong>，不能简单地左右循环走。安全策略是看恶魔石的位置:<strong>恶魔石在哪一侧,就远离它跑到另一侧;如果根本没有恶魔石,就回到中间。</strong></p>
+
+<p>这正好是一个<strong>两层判断</strong>：外层问"<strong>有没有</strong>恶魔石"，内层问"它在<strong>哪一边</strong>"。关键逻辑片段如下：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>evilstone = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+<span class="kw">if</span> evilstone<span class="punc">:</span>                  <span class="cmt"># 外层：有恶魔石吗？</span>
+    pos = evilstone<span class="punc">.</span>pos
+    <span class="kw">if</span> pos<span class="punc">.</span>x == <span class="num">34</span><span class="punc">:</span>            <span class="cmt"># 内层：它在左边（x=34）吗？</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">46</span><span class="punc">,</span> <span class="num">22</span><span class="punc">)</span>     <span class="cmt"># 在左 → 跑到右边</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">34</span><span class="punc">,</span> <span class="num">22</span><span class="punc">)</span>     <span class="cmt"># 在右 → 跑到左边</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">22</span><span class="punc">)</span>         <span class="cmt"># 没有 → 待在中间</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">理清归属：</span>"向左走和向右走的条件分支在内层 if 的范围内，而在中间的条件分支则属于外层 if 的范围。" 注意看缩进——"去中间"那行和内层 if 对齐，所以它属于外层的 else。
+</div>
+
+<h3 id="sec-5-5-2">5.5.2 以静制动（Patience）</h3>
+
+<h4>5.5.2.1 思路：近了就打，远了举盾
+    <span class="en">Strategy: attack when close, shield when far</span>
+</h4>
+
+<div class="figure">
+    <img src="images/5-5-2-1_patience.png" alt="以静制动关卡">
+    <div class="caption">图4：以静制动——只在敌人靠近时攻击，平时举盾并守在中央</div>
+</div>
+
+<p>这一关要求你<strong>守在中间区域</strong>不被猎头者发现。难点是三种情况要分清楚:有敌人且近、有敌人但远、没敌人。这构成一个经典的<strong>嵌套 if/else</strong>：外层判断"有没有敌人",外层成立后内层再判断"距离够不够近"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">:</span>                       <span class="cmt"># 外层：有敌人吗？</span>
+    distance = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    <span class="kw">if</span> distance &lt; <span class="num">5</span><span class="punc">:</span>            <span class="cmt"># 内层：近到 5 米以内？</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>        <span class="cmt"># 近 → 攻击</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">shield</span><span class="punc">()</span>            <span class="cmt"># 远 → 举盾</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">34</span><span class="punc">)</span>         <span class="cmt"># 没敌人 → 回到中心</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">配套用注释占位法：</span>这一关正是 5.3.3 节"先注释、后代码"技巧的最佳练习对象——先写四条注释占好位，再逐条翻译，缩进自然就理顺了。
+</div>
+
+<h3 id="sec-5-5-3">5.5.3 Agrippa守卫战（Agrippa Defense）</h3>
+
+<h4>5.5.3.1 思路：三层嵌套，把大招用在刀刃上
+    <span class="en">Strategy: three layers, save the special move</span>
+</h4>
+
+<div class="figure">
+    <img src="images/5-5-3-1_agrippa.png" alt="Agrippa守卫战关卡">
+    <div class="caption">图5：Agrippa守卫战——等敌人聚拢、且 cleave 就绪时，才放大招</div>
+</div>
+
+<p>这一关的精妙之处在于<strong>不能一看到敌人就 cleave</strong>。如果太早放大招，只能打到最前面几个，剩下的会围上来。策略是用 <code>distanceTo</code> 等敌人靠近（约 5 米）再出手，而且要先确认大招冷却好了。这就需要<strong>三层嵌套</strong>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">:</span>                           <span class="cmt"># 第一层：有敌人吗？</span>
+    distance = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    <span class="kw">if</span> distance &lt; <span class="num">5</span><span class="punc">:</span>                <span class="cmt"># 第二层：靠得够近了吗？</span>
+        <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isReady</span><span class="punc">(</span><span class="str">"cleave"</span><span class="punc">)</span><span class="punc">:</span>  <span class="cmt"># 第三层：大招好了吗？</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">cleave</span><span class="punc">(</span>enemy<span class="punc">)</span>         <span class="cmt"># 都满足 → 顺劈斩！</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>         <span class="cmt"># 大招没好 → 普通攻击</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">嵌套的威力：</span>三个问题层层递进——"有没有"→"近不近"→"技能好没好"。只有<strong>一路全部满足</strong>才会放大招，任何一层不满足就走对应的备选方案。这就是嵌套表达复杂战术的本领。
+</div>
+
+<h3 id="sec-5-5-4">5.5.4 危险的树（概念挑战 · Dangerous Trees）</h3>
+
+<h4>5.5.4.1 思路：看见且够近才出手
+    <span class="en">Strategy: act only if seen and close enough</span>
+</h4>
+
+<p>这是一个<strong>概念挑战</strong>。借助森林迷彩，食人魔只有靠近时才看得见你。逻辑很清晰：如果看到敌人，就检查距离;若不到 15 米就攻击;如果根本没看到敌人,就回到中心点。它是一个"外层 if/else + 内层单分支 if"的组合——注意内层这次<strong>只有 if、没有 else</strong>（够远就什么都不做，继续观察）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">:</span>                       <span class="cmt"># 外层：看到敌人了吗？</span>
+    distance = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    <span class="kw">if</span> distance &lt; <span class="num">15</span><span class="punc">:</span>           <span class="cmt"># 内层：单分支，没有 else</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>        <span class="cmt"># 够近才打，太远就略过</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">34</span><span class="punc">)</span>         <span class="cmt"># 没看到敌人 → 回中心</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">灵活之处：</span>内层不一定非要配 else。"够远就什么都不做"本身就是合理的设计——这说明嵌套里的每一层，都可以是单分支或双分支，按需选用。
+</div>
+
+<h3 id="sec-5-5-5">5.5.5 最后的守护者（组合挑战 · The Last Guardian）</h3>
+
+<h4>5.5.5.1 思路：综合运用全部判断技巧
+    <span class="en">Strategy: combine every decision skill</span>
+</h4>
+
+<div class="figure">
+    <img src="images/5-5-5-1_last_guardian.png" alt="最后的守护者关卡">
+    <div class="caption">图6：最后的守护者——综合 if/else、嵌套 if、大小比较，全力守护</div>
+</div>
+
+<p>这是本单元的<strong>组合挑战</strong>，要求你把学过的本领<strong>同时用上</strong>：if/else 语句、嵌套 if、以及大于/小于比较。一个巧妙的设定是：如果食人魔很远，只要用 <code>say</code> 说出到它的距离，你的大炮就会自动开火。于是战术变成——近的自己用 cleave/attack 解决，远的交给大炮。这就形成了一个<strong>三层嵌套 + 外层 else</strong> 的完整结构：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">:</span>                           <span class="cmt"># 第一层：有敌人吗？</span>
+    distance = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    <span class="kw">if</span> distance &lt; <span class="num">10</span><span class="punc">:</span>               <span class="cmt"># 第二层：近（&lt;10 米）吗？</span>
+        <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isReady</span><span class="punc">(</span><span class="str">"cleave"</span><span class="punc">)</span><span class="punc">:</span>  <span class="cmt"># 第三层：大招好了吗？</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">cleave</span><span class="punc">(</span>enemy<span class="punc">)</span>         <span class="cmt"># 近 + 大招好 → 顺劈斩</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>         <span class="cmt"># 近 + 大招没好 → 普攻</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>distance<span class="punc">)</span>           <span class="cmt"># 远 → 报距离，召唤大炮</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">融会贯通：</span>这道题把三层嵌套、if/else、距离比较全部串了起来。能独立写出它，说明你已经真正掌握了嵌套选择结构的精髓。
+</div>
+
+<!-- ==================== 5.6 ==================== -->
+<div class="section-header" id="section-5-6">
+    <h2>5.6 嵌套的常见错误</h2>
+    <div class="en-title">Common Mistakes in Nesting</div>
+</div>
+
+<h3 id="sec-5-6-1">5.6.1 缩进陷阱（Indentation Pitfalls）</h3>
+
+<h4>5.6.1.1 缩进错一格，逻辑全乱
+    <span class="en">One wrong indent ruins everything</span>
+</h4>
+
+<div class="figure">
+    <img src="images/5-6-1-1_indent_trap.png" alt="缩进错误导致逻辑改变示意">
+    <div class="caption">图7：内层代码缩进不对，归属就变了，程序行为完全不同</div>
+</div>
+
+<p>嵌套结构里最致命的坑就是缩进。同一段代码，缩进多一层就"钻进"了内层 if，少一层就"跳出"到了外层，含义天差地别。务必做到：<strong>同一层级的代码左对齐，每深入一层就统一多缩进 4 个空格，绝不能空格和 Tab 混用。</strong></p>
+
+<h3 id="sec-5-6-2">5.6.2 else 配对问题（Matching else）</h3>
+
+<h4>5.6.2.1 这个 else 到底属于哪个 if？
+    <span class="en">Which if does this else belong to?</span>
+</h4>
+
+<p>有了多层 if，就有多个可能的 else。<strong>else 属于和它缩进对齐的那个 if。</strong> 写"跃火林中"时，"去中间"的 else 要和外层 if 对齐（属于外层）；写"以静制动"时，"举盾"的 else 要和内层 if 对齐（属于内层）。下表帮你对号入座：</p>
+
+<table class="styled-table">
+    <thead><tr><th>else 缩进位置</th><th>它配对的 if</th><th>例子</th></tr></thead>
+    <tbody>
+        <tr><td>与外层 if 对齐</td><td>外层 if</td><td>跃火林中"去中间"</td></tr>
+        <tr><td>与内层 if 对齐</td><td>内层 if</td><td>以静制动"举盾"</td></tr>
+    </tbody>
+</table>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>内层 if 忘记多缩进——它没"钻进"外层，逻辑就错了。</li>
+        <li>else 缩进错位——本该配内层的 else 却跑去配了外层。</li>
+        <li>把 <code>==</code> 写成 <code>=</code>——条件判断里要用双等号。</li>
+        <li>忘记先存 <code>distance</code> 变量——直接比较前要先 <code>distanceTo</code>。</li>
+        <li>空格与 Tab 混用——Python 会直接报缩进错误。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成边际森林第五单元！你的英雄现在不仅会"看情况"，还会"看了情况之后再看情况"——能做出层层递进的复杂决策了。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>嵌套 if</td><td>判断里面再放判断</td><td>全部</td></tr>
+            <tr><td>盒子比喻</td><td>每个 if/else 是个容器</td><td>以静制动</td></tr>
+            <tr><td>缩进定层级</td><td>越深表示嵌得越里</td><td>全部</td></tr>
+            <tr><td>注释占位法</td><td>先写想法，再翻译成码</td><td>以静制动</td></tr>
+            <tr><td>pos 属性</td><td><code>物体.pos.x / .y</code></td><td>跃火林中</td></tr>
+            <tr><td>== 等于</td><td>比较是否相等</td><td>跃火林中</td></tr>
+            <tr><td>distanceTo</td><td>测量到目标的距离</td><td>以静制动、危险的树</td></tr>
+            <tr><td>isReady</td><td>技能冷却好了没</td><td>Agrippa守卫战</td></tr>
+            <tr><td>三层嵌套</td><td>有→近→技能好</td><td>Agrippa、最后的守护者</td></tr>
+            <tr><td>else 配对</td><td>跟谁对齐就属于谁</td><td>全部</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会层层思考、步步为营的英雄，才是真正深谋远虑的英雄。<br>
+        继续守护边际森林吧，勇敢的程序员！🌲🛡️🔥
+    </p>
+</div>
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #9db0a4; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 2（边际森林）：第五单元</p>
+    <p style="margin-top:8px; color:#5e7567;">扣哒世界（CodeCombat）教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
