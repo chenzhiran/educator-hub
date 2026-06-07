@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二单元：if 语句与打敌人三件套 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1565c0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fdecea;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">边际森林-第二单元</div>
+
+    <a href="#section-2-1" class="nav-section">2.1 从顺序到选择</a>
+    <a href="#sec-2-1-1" class="nav-sub">2.1.1 程序的三种结构</a>
+    <a href="#sec-2-1-2" class="nav-sub">2.1.2 什么是选择结构</a>
+    <a href="#sec-2-1-3" class="nav-sub">2.1.3 生活中的选择</a>
+
+    <a href="#section-2-2" class="nav-section">2.2 单分支选择结构</a>
+    <a href="#sec-2-2-1" class="nav-sub">2.2.1 单分支的定义</a>
+    <a href="#sec-2-2-2" class="nav-sub">2.2.2 执行流程图</a>
+    <a href="#sec-2-2-3" class="nav-sub">2.2.3 "做或不做"</a>
+
+    <a href="#section-2-3" class="nav-section">2.3 if 语句详解</a>
+    <a href="#sec-2-3-1" class="nav-sub">2.3.1 if 语句语法</a>
+    <a href="#sec-2-3-2" class="nav-sub">2.3.2 冒号与缩进</a>
+    <a href="#sec-2-3-3" class="nav-sub">2.3.3 条件与布尔值</a>
+    <a href="#sec-2-3-4" class="nav-sub">2.3.4 if 与 while 的区别</a>
+
+    <a href="#section-2-4" class="nav-section">2.4 条件判断</a>
+    <a href="#sec-2-4-1" class="nav-sub">2.4.1 真与假</a>
+    <a href="#sec-2-4-2" class="nav-sub">2.4.2 检查存在性</a>
+    <a href="#sec-2-4-3" class="nav-sub">2.4.3 None 与空值</a>
+
+    <a href="#section-2-5" class="nav-section">2.5 打敌人三件套</a>
+    <a href="#sec-2-5-1" class="nav-sub">2.5.1 三件套总览</a>
+    <a href="#sec-2-5-2" class="nav-sub">2.5.2 findNearestEnemy</a>
+    <a href="#sec-2-5-3" class="nav-sub">2.5.3 if enemy 判断</a>
+    <a href="#sec-2-5-4" class="nav-sub">2.5.4 attack 攻击</a>
+    <a href="#sec-2-5-5" class="nav-sub">2.5.5 为什么必须检查</a>
+
+    <a href="#section-2-6" class="nav-section">2.6 实战关卡精讲</a>
+    <a href="#sec-2-6-1" class="nav-sub">2.6.1 林地小屋</a>
+    <a href="#sec-2-6-2" class="nav-sub">2.6.2 巡逻兵克星</a>
+    <a href="#sec-2-6-3" class="nav-sub">2.6.3 村庄守护者</a>
+    <a href="#sec-2-6-4" class="nav-sub">2.6.4 荆棘农场</a>
+    <a href="#sec-2-6-5" class="nav-sub">2.6.5 组合挑战·中点</a>
+
+    <a href="#section-2-7" class="nav-section">2.7 if + 循环的威力</a>
+    <a href="#sec-2-7-1" class="nav-sub">2.7.1 循环里的 if</a>
+    <a href="#sec-2-7-2" class="nav-sub">2.7.2 常见错误</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第二单元：if 语句与打敌人三件套</h1>
+    <div class="subtitle">Unit 2: The if Statement &amp; the Combat Trio</div>
+    <div class="badge">计算机科学 2 · 边际森林 Border Forest · 林地小屋 → 中点</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 2.1 ==================== -->
+<div class="section-header" id="section-2-1">
+    <h2>2.1 从顺序到选择</h2>
+    <div class="en-title">From Sequence to Selection</div>
+</div>
+
+<h3 id="sec-2-1-1">2.1.1 程序的三种结构（Three Control Structures）</h3>
+
+<h4>2.1.1.1 复习：所有程序的"骨架"
+    <span class="en">Review: the skeleton of all programs</span>
+</h4>
+
+<p>还记得吗？任何复杂的程序，无论多么庞大，都是由三种<span class="keyword">控制结构（Control Structure）</span>搭建起来的。在上一单元（边际森林第一章）里，你已经熟练掌握了其中两种——<span class="keyword-green">顺序</span>和初步的<span class="keyword-green">循环</span>。这一单元，你将解锁第三种、也是最能体现"智能"的一种：<span class="keyword">选择（Selection）</span>。</p>
+
+<table class="styled-table">
+    <thead><tr><th>结构</th><th>含义</th><th>代表语句</th><th>掌握进度</th></tr></thead>
+    <tbody>
+        <tr><td>顺序 Sequence</td><td>代码从上到下逐行执行</td><td>—</td><td>✅ 已学</td></tr>
+        <tr><td>循环 Iteration</td><td>重复执行某段代码</td><td><code>while True:</code></td><td>✅ 已学</td></tr>
+        <tr><td>选择 Selection</td><td>根据条件决定是否执行</td><td><code>if</code></td><td>⭐ 本单元</td></tr>
+    </tbody>
+</table>
+
+<h4>2.1.1.2 为什么需要"选择"
+    <span class="en">Why we need selection</span>
+</h4>
+
+<p>顺序结构有一个"硬伤"：它太死板了。不管发生什么，它都会一行行照做。但真实的森林充满了<strong>不确定性</strong>——前方那间林地小屋里到底有没有食人魔？那个 X 标记处这次会不会刷出敌人？顺序结构无法应对这种"看情况而定"的局面。</p>
+
+<p>这时就需要程序具备<strong>"判断"和"决策"</strong>的能力：先看一看情况，再决定做不做某件事。这正是选择结构的使命。</p>
+
+<h3 id="sec-2-1-2">2.1.2 什么是选择结构（What is a Selection Structure）</h3>
+
+<h4>2.1.2.1 让程序学会"看情况"
+    <span class="en">Letting programs react to conditions</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-1-2-1_selection_intro.png" alt="选择结构示意：根据条件走不同的路">
+    <div class="caption">图1：选择结构让程序像走到岔路口一样，根据条件决定走哪条路</div>
+</div>
+
+<p><span class="keyword">选择结构（Selection Structure）</span>，也叫<span class="keyword">分支结构（Branching）</span>，它允许程序<strong>先检验一个条件，再根据条件成立与否，决定执行哪一段代码</strong>。就像走到一个岔路口，先看看路标，再决定往哪边走。</p>
+
+<h3 id="sec-2-1-3">2.1.3 生活中的选择（Selection in Daily Life）</h3>
+
+<h4>2.1.3.1 你每天都在做"if 判断"
+    <span class="en">You make "if" decisions every day</span>
+</h4>
+
+<p>其实你的生活里到处都是"if 判断"。比如：</p>
+
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>● <strong>如果</strong>外面下雨，<strong>那么</strong>带把伞。</li>
+    <li>● <strong>如果</strong>红灯亮了，<strong>那么</strong>停下来等。</li>
+    <li>● <strong>如果</strong>肚子饿了，<strong>那么</strong>去吃饭。</li>
+</ul>
+
+<p>注意这些句子里都有一个共同的模式："<strong>如果……那么……</strong>"。而且，<strong>如果条件不成立，对应的动作就不做</strong>——不下雨就不用带伞。把这个日常逻辑翻译成 Python，就是本单元的主角：<code>if</code> 语句。</p>
+
+<!-- ==================== 2.2 ==================== -->
+<div class="section-header" id="section-2-2">
+    <h2>2.2 单分支选择结构</h2>
+    <div class="en-title">Single-Branch Selection Structure</div>
+</div>
+
+<h3 id="sec-2-2-1">2.2.1 单分支的定义（Definition of Single-Branch）</h3>
+
+<h4>2.2.1.1 只有一条"岔路"
+    <span class="en">Only one branch</span>
+</h4>
+
+<p><span class="keyword">单分支选择结构</span>是最简单的一种选择结构。"单分支"的意思是：它<strong>只有一个分叉口</strong>——条件成立时，执行一段代码；条件不成立时，<strong>什么都不做</strong>，直接跳过，继续往下走。</p>
+
+<p>用一句话概括它的逻辑就是：<span class="keyword">"如果条件成立，就做某件事；否则跳过。"</span> 它没有"否则该做什么"的分支（那是后面才学的双分支 if/else），所以叫"单分支"。</p>
+
+<h3 id="sec-2-2-2">2.2.2 执行流程图（Flowchart）</h3>
+
+<h4>2.2.2.1 一图看懂单分支
+    <span class="en">Understanding single-branch in one diagram</span>
+</h4>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 420 360" width="420" role="img" aria-label="单分支选择结构流程图">
+        <!-- 开始 -->
+        <rect x="160" y="20" width="100" height="34" rx="17" fill="#2E9E5B"/>
+        <text x="210" y="42" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif">开始</text>
+        <line x1="210" y1="54" x2="210" y2="84" stroke="#555" stroke-width="2"/>
+        <polygon points="210,84 205,74 215,74" fill="#555"/>
+        <!-- 判断菱形 -->
+        <polygon points="210,90 300,140 210,190 120,140" fill="#fff" stroke="#2E9E5B" stroke-width="2"/>
+        <text x="210" y="138" text-anchor="middle" fill="#1F7A44" font-size="13" font-family="sans-serif">条件成立?</text>
+        <text x="210" y="156" text-anchor="middle" fill="#888" font-size="11" font-family="monospace">if 条件</text>
+        <!-- 是 -->
+        <line x1="210" y1="190" x2="210" y2="220" stroke="#555" stroke-width="2"/>
+        <polygon points="210,220 205,210 215,210" fill="#555"/>
+        <text x="222" y="208" fill="#2E9E5B" font-size="12" font-family="sans-serif">是(True)</text>
+        <rect x="140" y="222" width="140" height="40" rx="6" fill="#E8F7EE" stroke="#2E9E5B"/>
+        <text x="210" y="247" text-anchor="middle" fill="#1F7A44" font-size="13" font-family="sans-serif">执行代码块</text>
+        <line x1="210" y1="262" x2="210" y2="292" stroke="#555" stroke-width="2"/>
+        <!-- 否 (绕过) -->
+        <line x1="300" y1="140" x2="370" y2="140" stroke="#c62828" stroke-width="2"/>
+        <text x="312" y="132" fill="#c62828" font-size="12" font-family="sans-serif">否(False)</text>
+        <line x1="370" y1="140" x2="370" y2="307" stroke="#c62828" stroke-width="2"/>
+        <line x1="370" y1="307" x2="213" y2="307" stroke="#c62828" stroke-width="2"/>
+        <polygon points="213,307 223,302 223,312" fill="#c62828"/>
+        <!-- 结束 -->
+        <rect x="160" y="292" width="100" height="34" rx="17" fill="#1F7A44"/>
+        <text x="210" y="314" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif">继续往下</text>
+        <polygon points="210,292 205,282 215,282" fill="#555"/>
+    </svg>
+    <div class="caption">图2：单分支流程图——条件为真则执行代码块，为假则直接跳过</div>
+</div>
+
+<h3 id="sec-2-2-3">2.2.3 "做或不做"（Do or Skip）</h3>
+
+<h4>2.2.3.1 关键在于"可以什么都不做"
+    <span class="en">The key: it can do nothing</span>
+</h4>
+
+<p>单分支结构最精髓的地方，就在于它允许程序<strong>"什么都不做"</strong>。在此之前，你写的每一行代码都一定会执行。但有了 <code>if</code>，代码块里的内容变成了"有条件的"——它<strong>可能执行，也可能被跳过</strong>。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 渔夫钓鱼的故事</div>
+    <p>"鹰眼"关卡里有个绝妙的比喻：渔夫放线钓鱼后，总会先<strong>判断有没有鱼上钩</strong>，确认有鱼才提竿收线。设想一下，如果什么都没钓到就把空线拉上来装进桶里，那不是很滑稽吗？英雄打怪也一样——<strong>得先确认有敌人，才挥剑攻击</strong>，否则就是"对着空气挥剑"。</p>
+</div>
+
+<!-- ==================== 2.3 ==================== -->
+<div class="section-header" id="section-2-3">
+    <h2>2.3 if 语句详解</h2>
+    <div class="en-title">The if Statement in Detail</div>
+</div>
+
+<h3 id="sec-2-3-1">2.3.1 if 语句语法（Syntax of if）</h3>
+
+<h4>2.3.1.1 基本格式
+    <span class="en">Basic format</span>
+</h4>
+
+<p>在扣哒世界里，新的<strong>编程宝典 II（Programmaticon II）</strong>赋予了你使用 <code>if</code> 语句的能力。它的基本语法是：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> 条件<span class="punc">:</span>
+    <span class="cmt"># 当条件成立时，执行这里缩进的代码</span>
+    要做的事情</pre>
+</div>
+
+<p>它由四个部分组成：关键字 <code>if</code>、一个<strong>条件</strong>、一个<strong>冒号</strong> <code>:</code>，以及下面<strong>缩进</strong>的代码块。</p>
+
+<table class="styled-table">
+    <thead><tr><th>组成部分</th><th>作用</th><th>示例</th></tr></thead>
+    <tbody>
+        <tr><td><code>if</code></td><td>关键字，表示"如果"</td><td><code>if</code></td></tr>
+        <tr><td>条件</td><td>要检验的内容</td><td><code>enemy</code></td></tr>
+        <tr><td><code>:</code></td><td>冒号，表示代码块开始</td><td><code>:</code></td></tr>
+        <tr><td>缩进代码</td><td>条件成立才执行</td><td><code>hero.attack(enemy)</code></td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-2-3-2">2.3.2 冒号与缩进（Colon and Indentation）</h3>
+
+<h4>2.3.2.1 别忘了冒号
+    <span class="en">Don't forget the colon</span>
+</h4>
+
+<p><code>if</code> 后面、条件之后，必须紧跟一个<strong>冒号</strong> <code>:</code>。冒号是 Python 在说："注意，下面要开始一个代码块了。"漏写冒号是初学者最常见的语法错误之一。</p>
+
+<h4>2.3.2.2 缩进决定"谁属于 if"
+    <span class="en">Indentation defines what belongs to the if</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-3-2-2_indentation.png" alt="缩进决定代码归属示意">
+    <div class="caption">图3：缩进的代码才"属于"if，决定了哪些代码受条件控制</div>
+</div>
+
+<p>冒号下面的代码必须<strong>向右缩进</strong>（通常是 4 个空格）。这些缩进的代码才"属于"这个 <code>if</code>，只有在条件成立时才会执行。一旦缩进结束、代码回到顶格，就表示 <code>if</code> 管辖的范围结束了。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>   <span class="cmt"># 缩进：属于 if，有敌人才打</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>   <span class="cmt"># 缩进：同样受条件控制</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">49</span><span class="punc">,</span> <span class="num">51</span><span class="punc">)</span>  <span class="cmt"># 顶格：不属于 if，无论如何都会执行</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">常见错误：</span>缩进必须统一。同一个代码块里，要么全用 4 个空格，要么全用 Tab，不能混用，否则 Python 会报错。
+</div>
+
+<h3 id="sec-2-3-3">2.3.3 条件与布尔值（Conditions and Booleans）</h3>
+
+<h4>2.3.3.1 条件的本质是"真"或"假"
+    <span class="en">A condition is ultimately true or false</span>
+</h4>
+
+<p><code>if</code> 后面的条件，最终都会被 Python 判断为两个值之一：<span class="keyword-en">True</span>（真）或 <span class="keyword-en">False</span>（假）。这两个值叫做<span class="keyword">布尔值（Boolean）</span>。条件为 <code>True</code> 时，执行代码块；为 <code>False</code> 时，跳过代码块。</p>
+
+<h3 id="sec-2-3-4">2.3.4 if 与 while 的区别（if vs. while）</h3>
+
+<h4>2.3.4.1 长得像，但行为不同
+    <span class="en">They look alike, but behave differently</span>
+</h4>
+
+<p>你会发现 <code>if</code> 和 <code>while</code> 长得很像——都是"关键字 + 条件 + 冒号 + 缩进代码"。但它们有一个关键区别：</p>
+
+<table class="styled-table">
+    <thead><tr><th>对比项</th><th>if 语句</th><th>while 循环</th></tr></thead>
+    <tbody>
+        <tr><td>检验次数</td><td>检验一次</td><td>反复检验</td></tr>
+        <tr><td>执行次数</td><td>条件成立则执行<strong>一次</strong></td><td>条件成立则<strong>反复</strong>执行</td></tr>
+        <tr><td>形象比喻</td><td>"如果……就做一次"</td><td>"只要……就一直做"</td></tr>
+    </tbody>
+</table>
+
+<p>简单说：<code>if</code> 是"看一眼，做不做就这一次"；<code>while</code> 是"一直盯着，只要条件还成立就不停地做"。</p>
+
+<!-- ==================== 2.4 ==================== -->
+<div class="section-header" id="section-2-4">
+    <h2>2.4 条件判断</h2>
+    <div class="en-title">Conditions and Truthiness</div>
+</div>
+
+<h3 id="sec-2-4-1">2.4.1 真与假（True and False）</h3>
+
+<h4>2.4.1.1 布尔值：编程世界的"是/否"
+    <span class="en">Booleans: the yes/no of programming</span>
+</h4>
+
+<p>布尔值是以数学家<strong>乔治·布尔（George Boole）</strong>命名的，它只有两个取值：<code>True</code> 和 <code>False</code>。它们是计算机做一切判断的基础——可以把它们想象成电灯的"开"和"关"两种状态。</p>
+
+<div class="tip-box">
+    <span class="tip-label">小提示：</span>在 Python 中，<code>True</code> 和 <code>False</code> 的首字母必须大写，而且它们是关键字，不能用作变量名。
+</div>
+
+<h3 id="sec-2-4-2">2.4.2 检查存在性（Checking for Existence）</h3>
+
+<h4>2.4.2.1 if 后面直接跟一个变量
+    <span class="en">Putting a variable right after if</span>
+</h4>
+
+<p>本单元里，你最常用的 <code>if</code> 用法是<strong>检查某个东西是否存在</strong>。只需要在 <code>if</code> 后面直接写上那个变量名即可。例如：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>     <span class="cmt"># 如果 enemy 确实指向一个敌人……</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<p>当 <code>enemy</code> 里真的有一个敌人时，<code>if enemy:</code> 就为真，攻击会执行；当附近没有敌人时，<code>enemy</code> 是一个"空值"，<code>if enemy:</code> 为假，攻击就被跳过。</p>
+
+<h3 id="sec-2-4-3">2.4.3 None 与空值（None and Empty Values）</h3>
+
+<h4>2.4.3.1 "什么都没找到"是什么
+    <span class="en">What "nothing found" looks like</span>
+</h4>
+
+<p>当 <code>findNearestEnemy()</code> 附近没有任何敌人时，它返回的不是一个敌人，而是一个特殊的"空值"——在 Python 里通常是 <span class="keyword-en">None</span>。<code>None</code> 在 <code>if</code> 判断中相当于 <code>False</code>。这就是为什么"没有敌人"时 <code>if enemy:</code> 会自动跳过的原因。</p>
+
+<div class="info-box">
+    <span class="info-label">理解要点：</span>"有敌人" → <code>enemy</code> 为真 → 执行攻击；"没敌人" → <code>enemy</code> 是 <code>None</code>（假）→ 跳过攻击。你不必手动写 <code>== True</code>，直接 <code>if enemy:</code> 就够了。
+</div>
+
+<!-- ==================== 2.5 ==================== -->
+<div class="section-header" id="section-2-5">
+    <h2>2.5 打敌人三件套</h2>
+    <div class="en-title">The Combat Trio: Find, Check, Attack</div>
+</div>
+
+<h3 id="sec-2-5-1">2.5.1 三件套总览（Overview of the Trio）</h3>
+
+<h4>2.5.1.1 安全打怪的黄金三步
+    <span class="en">The golden three steps of safe combat</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-5-1-1_combat_trio.png" alt="打敌人三件套：找敌人、判断、攻击">
+    <div class="caption">图4：打敌人三件套——① 找敌人 ② 判断是否存在 ③ 攻击</div>
+</div>
+
+<p>本单元的核心实战技能，可以总结为一套固定的"<span class="keyword">打敌人三件套</span>"。无论哪一关，遇到"可能有敌人也可能没有"的情况，都用这三步搞定：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 第①步：找到最近的敌人，存进变量</span>
+enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="cmt"># 第②步：用 if 判断敌人是否存在</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="cmt"># 第③步：如果存在，就攻击它</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<table class="styled-table">
+    <thead><tr><th>步骤</th><th>代码</th><th>作用</th></tr></thead>
+    <tbody>
+        <tr><td>① 找</td><td><code>enemy = hero.findNearestEnemy()</code></td><td>寻找最近的敌人</td></tr>
+        <tr><td>② 判</td><td><code>if enemy:</code></td><td>检查到底有没有找到</td></tr>
+        <tr><td>③ 打</td><td><code>hero.attack(enemy)</code></td><td>攻击这个敌人</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-2-5-2">2.5.2 第一件：findNearestEnemy（Finding the Enemy）</h3>
+
+<h4>2.5.2.1 找到最近的敌人并"记住"它
+    <span class="en">Find the nearest enemy and remember it</span>
+</h4>
+
+<p><code>hero.findNearestEnemy()</code> 会让英雄环顾四周，找出<strong>距离最近的那个敌人</strong>。但找到之后，我们得把它"记下来"，否则下一步就没法引用了。记下来的方法是用一个<span class="keyword">变量（Variable）</span>把它存起来：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="cmt"># 把找到的敌人，存进名叫 enemy 的变量里</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 变量就像一个贴了标签的盒子</div>
+    <p>等号 <code>=</code> 的意思是"赋值"——把右边的结果装进左边的盒子。这里 <code>enemy</code> 就是盒子的标签，<code>findNearestEnemy()</code> 的结果（一个敌人，或者 <code>None</code>）被装了进去。之后我们就能用 <code>enemy</code> 这个名字反复引用它。变量名可以自己起，比如村庄守护者关卡里就用了 <code>leftEnemy</code> 和 <code>rightEnemy</code> 来分别记住左右两边的敌人。</p>
+</div>
+
+<h3 id="sec-2-5-3">2.5.3 第二件：if enemy 判断（Checking with if）</h3>
+
+<h4>2.5.3.1 这一步最关键，绝不能省
+    <span class="en">The most critical step — never skip it</span>
+</h4>
+
+<p>三件套里，<strong>第二步的 <code>if</code> 判断是最关键、也最容易被新手忽略的一步</strong>。它的作用是：在挥剑之前，先确认 <code>enemy</code> 里真的有一个敌人。有，才打；没有（<code>None</code>），就跳过。</p>
+
+<p>正是因为有了这一步，"像这样使用 if 语句的话，就不会出现没有敌人还去攻击的错误了！"</p>
+
+<h3 id="sec-2-5-4">2.5.4 第三件：attack 攻击（Attacking）</h3>
+
+<h4>2.5.4.1 把敌人当参数传进去
+    <span class="en">Pass the enemy as an argument</span>
+</h4>
+
+<p>确认有敌人后，用 <code>hero.attack(enemy)</code> 发动攻击。注意括号里要填上<strong>攻击谁</strong>——也就是把第①步存起来的 <code>enemy</code> 变量作为<span class="keyword">参数</span>传进去。</p>
+
+<p>有些关卡（如林地小屋、边地伏击战）里，敌人比较强壮，一次攻击打不死，所以会连续写两行 <code>hero.attack(enemy)</code> 来确保击败它：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>   <span class="cmt"># 砍第一下</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>   <span class="cmt"># 再砍一下，确保击败</span></pre>
+</div>
+
+<h3 id="sec-2-5-5">2.5.5 为什么必须检查（Why the Check Matters）</h3>
+
+<h4>2.5.5.1 敌人是随机出现的
+    <span class="en">Enemies appear randomly</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-5-5-1_random_enemy.png" alt="敌人随机出现，可能有也可能没有">
+    <div class="caption">图5：每次点击提交，X 标记处可能有敌人，也可能空无一人</div>
+</div>
+
+<p>在像"边地伏击战""清除"这样的关卡里，<strong>敌人是每次点击提交按钮时随机生成的</strong>——你根本无法预测哪个 X 标记处会刷出食人魔。如果不用 <code>if</code> 检查就盲目攻击，当某处恰好没有敌人时，英雄就会"对着空气挥剑"，浪费时间甚至导致出错。</p>
+
+<div class="warn-box">
+    <span class="warn-label">血的教训：</span>"没有敌人时不要攻击！别把英雄弄糊涂了。" 这就是为什么三件套里的 <code>if</code> 判断是不可省略的安全锁。
+</div>
+
+<!-- ==================== 2.6 ==================== -->
+<div class="section-header" id="section-2-6">
+    <h2>2.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节我们换一种方式——不再贴出完整代码，而是聚焦每一关的<strong>难点、思路和策略</strong>。看懂了"为什么这样设计"，你自然就能自己写出完整的解法。</p>
+
+<h3 id="sec-2-6-1">2.6.1 林地小屋（Woodland Cottage）</h3>
+
+<h4>2.6.1.1 思路：把三件套当成"一个动作单元"
+    <span class="en">Strategy: treat the trio as one action unit</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-6-1-1_woodland_cottage.png" alt="林地小屋关卡">
+    <div class="caption">图6：林地小屋——移动到每个小屋附近，用三件套检查并清剿</div>
+</div>
+
+<p>这是你第一次使用 <code>if</code> 的关卡。地图上有<strong>几间固定的小屋</strong>，每间里可能藏着食人魔，也可能空着。难点不在语法，而在于<strong>意识到"每个地点都要独立检查一次"</strong>。</p>
+
+<p>核心策略是把"<span class="keyword">移动 → 找 → 判 → 打</span>"看成一个完整的"动作单元"，每到一间小屋就完整地走一遍这个单元。这一关地点是固定的、数量有限，所以用<strong>顺序结构</strong>把这个动作单元重复书写即可，不需要循环。</p>
+
+<p>最容易被忽略的一点是：<strong>每换一个地点，都必须重新调用一次 <code>findNearestEnemy()</code></strong>。来看这个片段的关键逻辑：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">19</span><span class="punc">,</span> <span class="num">33</span><span class="punc">)</span>          <span class="cmt"># 先到第一间小屋</span>
+enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>  <span class="cmt"># 在这里重新"看一眼"</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="cmt"># ……清剿……</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么要重新找？</span>因为换了地方，"最近的敌人"也变了。如果不更新 <code>enemy</code>，英雄会一直盯着上一个地点的旧信息，导致判断出错。
+</div>
+
+<h3 id="sec-2-6-2">2.6.2 巡逻兵克星（Patrol Buster）系列</h3>
+
+<h4>2.6.2.1 思路：从"顺序重复"升级到"循环复用"
+    <span class="en">Strategy: from repetition to looping</span>
+</h4>
+
+<p>"巡逻兵克星""野餐毁灭者""鹰眼""If 的盛宴"这几关，敌人会<strong>源源不断地出现</strong>。如果还像林地小屋那样把三件套抄很多遍，既写不完也应付不了无限刷新的敌人。</p>
+
+<p>这里的思维跃迁是：<strong>用 <code>while True</code> 把三件套"包"起来，让它自动反复执行</strong>。这样只写一遍代码，就能不知疲倦地"找敌人 → 判断 → 攻击"，直到清场。结构上的关键是<strong>两层缩进</strong>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>                       <span class="cmt"># 第一层：循环</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>                    <span class="cmt"># 第二层：判断（缩进一次）</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>       <span class="cmt"># 第三层：动作（再缩进一次）</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察：</span>循环每转一圈，都会<strong>重新</strong> find 一次，所以即使敌人是后面才刷出来的，下一圈也能被发现并击败。这就是"循环 + 判断"组合的强大之处。
+</div>
+
+<h3 id="sec-2-6-3">2.6.3 村庄守护者（Village Guard）</h3>
+
+<h4>2.6.3.1 思路：两个入口要用两个不同的变量
+    <span class="en">Strategy: two entrances need two variables</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-6-3-1_village_guard.png" alt="村庄守护者关卡">
+    <div class="caption">图7：村庄守护者——在左右两个入口之间来回巡逻，分别检查敌人</div>
+</div>
+
+<p>这一关的挑战在于<strong>同时守护左右两个入口</strong>。策略是让英雄在循环里<strong>来回巡逻</strong>：先走到左入口检查清剿，再走到右入口检查清剿，如此往复。</p>
+
+<p>这里有一个值得品味的设计：解法用了<strong>两个不同名字</strong>的变量 <code>leftEnemy</code> 和 <code>rightEnemy</code>。其实只用一个 <code>enemy</code> 也能过关，但用有意义的名字能让代码<strong>自我解释</strong>——一看就知道这是哪边的敌人。这是一个好的编程习惯。</p>
+
+<div class="warn-box">
+    <span class="warn-label">最易出错的地方：</span>移动到右入口后，<strong>必须重新</strong> <code>findNearestEnemy()</code> 来定义 <code>rightEnemy</code>。如果偷懒沿用左边的判断结果，英雄就会对右边来袭的敌人视而不见。"在能看到敌人从右侧过来时，确保你定义了 rightEnemy 变量。"
+</div>
+
+<h3 id="sec-2-6-4">2.6.4 荆棘农场（Thornbush Farm）</h3>
+
+<h4>2.6.4.1 思路：if 不只用来攻击，还能用来"分辨敌我"
+    <span class="en">Strategy: if can tell friend from foe</span>
+</h4>
+
+<div class="figure">
+    <img src="images/2-6-4-1_thornbush_farm.png" alt="荆棘农场关卡">
+    <div class="caption">图8：荆棘农场——只在看到食人魔时建火焰陷阱，避免误伤农民</div>
+</div>
+
+<p>这一关最妙：它把"三件套"的第三步从<strong>攻击</strong>换成了<strong>建造火焰陷阱</strong>，并且引入了一个全新的两难——场上既有食人魔，又有想进村的<strong>农民</strong>。如果不分青红皂白地到处建陷阱，农民就会被误伤！</p>
+
+<p>所以 <code>if</code> 在这里的意义发生了升华：它从"省得对空挥剑"变成了<strong>"分辨敌我、避免误伤"的安全开关</strong>——只有 <code>findNearestEnemy()</code> 真的发现了食人魔，才在对应位置建陷阱。结构上，三个方向（上/左/下）各是一个独立的"巡逻单元"：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">43</span><span class="punc">,</span> <span class="num">50</span><span class="punc">)</span>        <span class="cmt"># 走到"上"入口</span>
+top = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="kw">if</span> top<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> <span class="num">43</span><span class="punc">,</span> <span class="num">50</span><span class="punc">)</span>
+<span class="cmt"># left、bottom 两个方向，照此模式各写一组即可</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">举一反三：</span>看懂了 top 这一组，left 和 bottom 只需<strong>改坐标、换变量名</strong>就能照葫芦画瓢。把整套放进 <code>while True</code>，英雄就会在三个入口间永不停歇地巡逻布防。
+</div>
+
+<h3 id="sec-2-6-5">2.6.5 组合挑战·中点（Midpoint）</h3>
+
+<h4>2.6.5.1 思路：坐标与 if 的融会贯通
+    <span class="en">Strategy: combining coordinates and if</span>
+</h4>
+
+<p>"中点"是一道<strong>组合挑战</strong>，它要求你同时驾驭第一单元的 <span class="keyword">XY 坐标</span>和本单元的 <span class="keyword">if 语句</span>。英雄上下巡逻，在每个 X 标记处停下，看到食人魔才建陷阱——整体框架和荆棘农场一脉相承。</p>
+
+<p>真正考验细心的，是一个容易被忽略的细节：<strong>"英雄站立的巡逻点"和"陷阱建造点"坐标并不相同</strong>。英雄站在通道上的 <code>(32, …)</code>，却把陷阱建在敌人必经的 <code>(35, …)</code>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">32</span><span class="punc">,</span> <span class="num">52</span><span class="punc">)</span>                <span class="cmt"># 英雄站在 x=32 的通道</span>
+topEnemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="kw">if</span> topEnemy<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> <span class="num">35</span><span class="punc">,</span> <span class="num">52</span><span class="punc">)</span>  <span class="cmt"># 陷阱建在 x=35 的敌人通道</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">策略提示：</span>规划时不妨问自己两个问题——"<strong>英雄站哪儿能看到这个方向的敌人？</strong>" 和 "<strong>陷阱建在哪儿才挡得住它？</strong>" 想清楚这两点，坐标就不会填错了。
+</div>
+
+<!-- ==================== 2.7 ==================== -->
+<div class="section-header" id="section-2-7">
+    <h2>2.7 if + 循环的威力</h2>
+    <div class="en-title">The Power of if Inside Loops</div>
+</div>
+
+<h3 id="sec-2-7-1">2.7.1 循环里的 if（if Inside while）</h3>
+
+<h4>2.7.1.1 两种黄金组合模式
+    <span class="en">Two golden patterns</span>
+</h4>
+
+<p>纵观本单元的所有关卡，<code>if</code> 和循环主要有两种组合方式，掌握它们就能应对绝大多数场景：</p>
+
+<table class="styled-table">
+    <thead><tr><th>模式</th><th>结构</th><th>适用场景</th><th>代表关卡</th></tr></thead>
+    <tbody>
+        <tr><td>模式 A</td><td>顺序排列多组三件套</td><td>地点固定、数量有限</td><td>林地小屋、清除</td></tr>
+        <tr><td>模式 B</td><td>while 循环里套三件套</td><td>需要持续巡逻防守</td><td>巡逻兵克星、村庄守护者、荆棘农场</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-2-7-2">2.7.2 常见错误（Common Mistakes）</h3>
+
+<h4>2.7.2.1 新手最容易踩的坑
+    <span class="en">Pitfalls for beginners</span>
+</h4>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘写冒号 <code>:</code>——<code>if enemy</code> 后面少了冒号。</li>
+        <li>缩进错误——攻击代码没有缩进，或缩进不一致。</li>
+        <li>忘记重新 find——换地方后没重新调用 <code>findNearestEnemy()</code>，攻击的还是旧敌人。</li>
+        <li>跳过 if 直接 attack——没敌人时"对空挥剑"。</li>
+        <li>变量名写错——定义时叫 <code>rightEnemy</code>，使用时却写成 <code>enemy</code>。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成边际森林第二单元！你已经让程序拥有了"判断"和"决策"的能力，从只会埋头执行，进化到了能"看情况而定"。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>选择结构</td><td>程序的第三种基本结构</td><td>全部</td></tr>
+            <tr><td>单分支</td><td>条件成立才执行，否则跳过</td><td>全部</td></tr>
+            <tr><td>if 语句</td><td><code>if 条件:</code> + 缩进代码</td><td>林地小屋</td></tr>
+            <tr><td>冒号与缩进</td><td>别忘冒号，缩进定归属</td><td>全部</td></tr>
+            <tr><td>条件判断</td><td>True / False / None</td><td>If 的盛宴</td></tr>
+            <tr><td>① findNearestEnemy</td><td>找到并存入变量</td><td>全部</td></tr>
+            <tr><td>② if enemy</td><td>检查敌人是否存在</td><td>全部</td></tr>
+            <tr><td>③ attack</td><td>把敌人当参数攻击</td><td>巡逻兵克星</td></tr>
+            <tr><td>多变量</td><td>leftEnemy / rightEnemy</td><td>村庄守护者</td></tr>
+            <tr><td>if + buildXY</td><td>看到敌人才建陷阱</td><td>荆棘农场、中点</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会判断、会决策的英雄，才是真正聪明的英雄。<br>
+        继续守护边际森林吧，勇敢的程序员！🌲🛡️
+    </p>
+</div>
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #9db0a4; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 2（边际森林）：第二单元</p>
+    <p style="margin-top:8px; color:#5e7567;">扣哒世界（CodeCombat）教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
