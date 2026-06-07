@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>边际森林知识挑战 - 多分支选择结构</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 (边际森林主题绿) --- */
+        :root {
+            --primary-color: #2E9E5B; 
+            --secondary-color: #4FBF7C;
+            --bg-color: #f7faf8;     
+            --card-bg: #FFFFFF;
+            --text-color: #14241a;   
+            --en-text-color: #6b8a76; 
+            --correct-color: #28c840;
+            --wrong-color: #ff5f57;  
+            --accent-yellow: #febc2e;
+            
+            /* 代码高亮颜色 */
+            --code-bg: #1e2a22;
+            --code-text: #b6c2ba;
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d5e5d9 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(46,158,91,0.15);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #d99e22;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #e3ece6;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 专属代码样式 --- */
+        .question-title code, .en-text code {
+            background-color: #e8f7ee; 
+            font-family: 'YouYuan', '幼圆', monospace;
+            font-weight: bold; 
+            color: var(--primary-color); 
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #e3ece6;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #c4d4c9;
+            display: flex;
+            flex-direction: column; 
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        .option-code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #314538;
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); 
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(0,0,0,0.25);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #95b8a0;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #1f9c31;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #c24640;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #e8f7ee;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); background: #eafaf1;}
+        .feedback-section.wrong { border-color: var(--wrong-color); background: #fceaea; }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #1F7A44;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #d99e22;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: var(--en-text-color); font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 20</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+            </div>
+
+            <div class="options-grid" id="options-container">
+            </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+        </div>
+    </div>
+
+    <script>
+        // --- 题目数据 (完整20题，结合 Unit 4: if-elif-else) ---
+        const quizData = [
+            {
+                qZh: "1. 当战场上面对三种甚至更多互相排斥的可能动作时（如：放技能 OR 普攻 OR 打宝箱），我们最需要哪种结构？",
+                qEn: "When facing three or more mutually exclusive actions on the battlefield (e.g., cast skill OR attack OR hit chest), which structure do we need most?",
+                options: [
+                    { zh: "A. 顺序结构", en: "Sequential structure" },
+                    { zh: "B. 单分支 if", en: "Single branch if" },
+                    { zh: "C. 双分支 if-else", en: "Dual branch if-else" },
+                    { zh: "D. 多分支 if-elif-else", en: "Multi-branch if-elif-else" }
+                ],
+                correct: 3, 
+                descZh: "解析：双分支只能处理两种情况的对立，当面对三种甚至更多互相排斥的情况时，就需要引入多分支选择结构。",
+                descEn: "Explanation: A dual branch handles only two opposing cases. When dealing with three or more mutually exclusive situations, we must introduce the multi-branch selection structure."
+            },
+            {
+                qZh: "2. 在 Python 中，把多个条件像链条一样串起来的关键词 `elif` 是什么短语的缩写？",
+                qEn: "In Python, the keyword `elif` that chains multiple conditions together is an abbreviation of what phrase?",
+                options: [
+                    { zh: "A. end if", en: "end if" },
+                    { zh: "B. else if", en: "else if" },
+                    { zh: "C. every if", en: "every if" },
+                    { zh: "D. even if", en: "even if" }
+                ],
+                correct: 1,
+                descZh: "解析：Python 使用 `elif`（是 else if 的缩写，读作“else if”）把多个条件像链条一样串起来。",
+                descEn: "Explanation: Python uses `elif` (an abbreviation for else if, pronounced 'else if') to chain multiple conditions together like a sequence."
+            },
+            {
+                qZh: "3. 在一个完整的多分支结构中，开启整个分支链条的 `if` 关键字必须出现几次？",
+                qEn: "In a complete multi-branch structure, how many times must the `if` keyword that starts the entire chain appear?",
+                options: [
+                    { zh: "A. 可以有 0 个", en: "It can be 0 times" },
+                    { zh: "B. 有且只有 1 个", en: "Exactly 1 time" },
+                    { zh: "C. 至少 2 个", en: "At least 2 times" },
+                    { zh: "D. 没有数量限制", en: "No limit" }
+                ],
+                correct: 1,
+                descZh: "解析：`if` 是开头第一个条件，必须由它开启分支，在一个多分支结构中有且只有 1 个。",
+                descEn: "Explanation: `if` is the very first condition and must initiate the branch chain. It must appear exactly 1 time in a multi-branch structure."
+            },
+            {
+                qZh: "4. 对于中间负责检查额外条件的 `elif`，它的数量要求是什么？",
+                qEn: "What is the quantity requirement for `elif`, which handles additional conditions in the middle?",
+                options: [
+                    { zh: "A. 只能有 1 个", en: "Exactly 1" },
+                    { zh: "B. 必须和 if 的数量一样多", en: "Must be equal to the number of if statements" },
+                    { zh: "C. 可以有 0 个、1 个或多个", en: "It can be 0, 1, or multiple" },
+                    { zh: "D. 至少要有 2 个", en: "At least 2" }
+                ],
+                correct: 2,
+                descZh: "解析：`elif` 作为中间的“否则如果”，负责检查额外的条件，它可以有 0 个、1 个或多个。",
+                descEn: "Explanation: As the 'else if' in the middle responsible for checking extra conditions, `elif` can appear 0, 1, or multiple times."
+            },
+            {
+                qZh: "5. 关于 `else` 关键字在多分支结构中的作用和要求，哪一项是正确的？",
+                qEn: "Which statement is correct regarding the role and requirement of the `else` keyword in a multi-branch structure?",
+                options: [
+                    { zh: "A. 它是用来开启分支的", en: "It is used to start the branch chain" },
+                    { zh: "B. 它可以带有自己的条件", en: "It can have its own condition attached" },
+                    { zh: "C. 作为最后的兜底分支，它最多只能有 1 个，且可以省略", en: "As the final fallback branch, there can be at most 1, and it can be omitted" },
+                    { zh: "D. 必须要有 else 程序才能运行", en: "The program requires an else to run" }
+                ],
+                correct: 2,
+                descZh: "解析：`else` 是最后的兜底分支，前面全失败时执行它。它的数量要求是最多 1 个，且可省略。",
+                descEn: "Explanation: `else` is the final fallback branch executed when everything above fails. There can be at most 1, and it is optional."
+            },
+            {
+                qZh: "6. 书写 `if-elif-else` 结构时，这三个关键字的缩进规则是什么？",
+                qEn: "When writing an `if-elif-else` structure, what is the indentation rule for these three keywords?",
+                options: [
+                    { zh: "A. elif 必须比 if 多缩进一次", en: "elif must be indented one more time than if" },
+                    { zh: "B. else 需要缩进到最右侧", en: "else needs to be indented to the far right" },
+                    { zh: "C. 它们必须对齐在同一列（同级缩进）", en: "They must be aligned in the same column (same indentation level)" },
+                    { zh: "D. 它们必须写在同一行代码里", en: "They must be written on the same line of code" }
+                ],
+                correct: 2,
+                descZh: "解析：致命要点：`if`、`elif`、`else` 这三个关键词必须对齐在同一列（同级缩进）。",
+                descEn: "Explanation: Critical point: the `if`, `elif`, and `else` keywords must be perfectly aligned in the same column at the same indentation level."
+            },
+            {
+                qZh: "7. Python 在执行多分支结构时遵循“命中即停原则”。这是什么意思？",
+                qEn: "Python follows the 'Hit and Stop' principle when executing a multi-branch structure. What does this mean?",
+                options: [
+                    { zh: "A. 遇到错误时程序会停止", en: "The program stops when it encounters an error" },
+                    { zh: "B. 自上而下逐条检查条件，一旦某条成立并执行，就会跳过后续所有的 elif 和 else", en: "Checks conditions top-down; once one is met and executed, it skips all subsequent elif and else blocks" },
+                    { zh: "C. 必须命中目标英雄才会停下脚步", en: "The hero only stops moving when hitting a target" },
+                    { zh: "D. 执行完所有的分支后才停止", en: "Stops only after executing all branches" }
+                ],
+                correct: 1,
+                descZh: "解析：Python 是自上而下逐条检查条件的，一旦命中，立刻停止。执行成立的动作后，会跳过后续所有的 elif 和 else，整个多分支结构结束。",
+                descEn: "Explanation: Python evaluates conditions top-to-bottom. Once a condition is met and its action executed, it skips the rest of the elif/else blocks and finishes the structure."
+            },
+            {
+                qZh: "8. 根据“命中即停原则”，如果把它比喻成下楼梯，那么：",
+                qEn: "According to the 'Hit and Stop' principle, if we compare it to walking down a staircase:",
+                options: [
+                    { zh: "A. 你可以同时站在多个台阶上", en: "You can stand on multiple steps simultaneously" },
+                    { zh: "B. 多分支结构如同阶梯，自上而下，剩下的会被全部跳过", en: "The multi-branch structure is like a staircase, top to bottom; the remaining steps are all skipped once you step off" },
+                    { zh: "C. 只能从下往上走", en: "You can only walk from bottom to top" },
+                    { zh: "D. 每个台阶都会踩一次", en: "You step on every single stair" }
+                ],
+                correct: 1,
+                descZh: "解析：多分支结构如同阶梯，自上而下“命中即停”，一旦条件满足走了某条分支，剩下的分支会被全部跳过。",
+                descEn: "Explanation: A multi-branch structure acts like a staircase. It evaluates top-down, and once a branch is taken, all remaining branches are skipped entirely."
+            },
+            {
+                qZh: "9. 在使用小于号 `<` 或大于号 `>` 等比较运算符时，必须牢记的法则是什么？",
+                qEn: "When using comparison operators like less than `<` or greater than `>`, what rule must you always remember?",
+                options: [
+                    { zh: "A. 只能用来比较两个“数字”", en: "They can only be used to compare two 'numbers'" },
+                    { zh: "B. 只能用来比较两个“对象”", en: "They can only be used to compare two 'objects'" },
+                    { zh: "C. 只能用来比较布尔值", en: "They can only be used to compare booleans" },
+                    { zh: "D. 可以比较任何类型的数据", en: "They can compare any type of data" }
+                ],
+                correct: 0,
+                descZh: "解析：牢记法则：`<` 和 `>` 只能用来比较两个“数字”！绝对不能拿一个物体（比如敌人对象）直接和数字比大小。",
+                descEn: "Explanation: Rule to remember: `<` and `>` can ONLY compare two 'numbers'! You cannot directly compare an object (like an enemy) with a number."
+            },
+            {
+                qZh: "10. 为什么直接写 `if hero.findNearestEnemy() < 5:` 会导致代码报错？",
+                qEn: "Why does writing `if hero.findNearestEnemy() < 5:` directly cause the code to throw an error?",
+                options: [
+                    { zh: "A. 因为数字 5 太小了", en: "Because the number 5 is too small" },
+                    { zh: "B. 因为函数名拼写错误", en: "Because the function name is misspelled" },
+                    { zh: "C. 因为 `findNearestEnemy()` 返回的是一个“敌人对象”，它不是一个数字，无法比较", en: "Because `findNearestEnemy()` returns an 'enemy object', which is not a number and cannot be compared" },
+                    { zh: "D. 因为缺少了 else 语句", en: "Because the else statement is missing" }
+                ],
+                correct: 2,
+                descZh: "解析：`findNearestEnemy` 返回的是一个“对象”（比如某个食人魔），不能用 `<` 比较。这就好比问“这只食人魔 小于 5 吗？”，毫无逻辑。",
+                descEn: "Explanation: `findNearestEnemy` returns an 'object'. You cannot compare it using `<`. It's like asking 'Is this ogre less than 5?' which makes no logical sense."
+            },
+            {
+                qZh: "11. 解决上述“比较陷阱”的钥匙是什么技能？",
+                qEn: "What skill is the key to solving the 'comparison pitfall' mentioned above?",
+                options: [
+                    { zh: "A. `hero.moveXY()`", en: "" },
+                    { zh: "B. `hero.isReady()`", en: "" },
+                    { zh: "C. `hero.cleave()`", en: "" },
+                    { zh: "D. `hero.distanceTo()`", en: "" }
+                ],
+                correct: 3,
+                descZh: "解析：`hero.distanceTo(目标)` 是解决“比较陷阱”的钥匙。它会计算直线距离，并返回一个准确的数字（米），有了数字就可以比较了。",
+                descEn: "Explanation: `hero.distanceTo(target)` solves the pitfall by calculating the straight-line distance and returning a specific number (in meters), which can then be compared."
+            },
+            {
+                qZh: "12. `hero.isReady(\"cleave\")` 方法本身会返回什么类型的值，使得它可以直接作为 `if` 的条件？",
+                qEn: "What type of value does `hero.isReady(\"cleave\")` return, allowing it to be used directly as an `if` condition?",
+                options: [
+                    { zh: "A. 一个数字 (Number)", en: "A Number" },
+                    { zh: "B. 一个字符串 (String)", en: "A String" },
+                    { zh: "C. 一个对象 (Object)", en: "An Object" },
+                    { zh: "D. 一个布尔值 (True / False)", en: "A Boolean value (True / False)" }
+                ],
+                correct: 3,
+                descZh: "解析：`isReady` 专门用于检查技能状态，它本身就会回答“是”（True）或“否”（False），即可直接作为 if 条件。",
+                descEn: "Explanation: `isReady` checks the skill's cooldown status and returns a Boolean 'Yes' (True) or 'No' (False), making it perfectly suited as an if condition directly."
+            },
+            {
+                qZh: "13. 战术启示：因为多分支存在“命中即停”的特性，我们在排列条件时必须怎么做？",
+                qEn: "Tactical takeaway: Because multi-branch structures have the 'hit and stop' characteristic, how must we arrange our conditions?",
+                options: [
+                    { zh: "A. 把代码写在一行", en: "Write the code on a single line" },
+                    { zh: "B. 把最优先、最重要的动作放在最上面", en: "Place the highest priority and most important actions at the very top" },
+                    { zh: "C. 随机排列", en: "Arrange them randomly" },
+                    { zh: "D. 总是把距离判断放在第一位", en: "Always put distance checks first" }
+                ],
+                correct: 1,
+                descZh: "解析：战术启示：因为“命中即停”，你必须把最优先、最重要的动作放在最上面（比如威力巨大的劈斩），把默认的保底动作放在 `else` 里。",
+                descEn: "Explanation: Tactical insight: Because of 'hit and stop', you must place your top-priority actions (like powerful cleaves) at the very top, and fallbacks in the `else`."
+            },
+            {
+                qZh: "14. 在“发狂的矮人”关卡中，顶层 `if`、中间 `elif` 和兜底 `else` 分别分配了什么任务组合？",
+                qEn: "In the 'Furious Dwarves' level, what task combination is assigned to the top `if`, the middle `elif`, and the fallback `else`?",
+                options: [
+                    { zh: "A. 普攻、开宝箱、劈斩", en: "Attack, hit chest, cleave" },
+                    { zh: "B. 跑路、防御、攻击", en: "Run, defend, attack" },
+                    { zh: "C. 劈斩、近战普攻、开宝箱", en: "Cleave, melee attack, hit chest" },
+                    { zh: "D. 开宝箱、劈斩、近战普攻", en: "Hit chest, cleave, melee attack" }
+                ],
+                correct: 2,
+                descZh: "解析：第一优先（顶层 if）：劈斩；第二优先（中间 elif）：近战普攻；第三优先（兜底 else）：开箱（攻击宝箱）。",
+                descEn: "Explanation: First priority (top if): Cleave. Second priority (middle elif): Melee attack. Third priority (fallback else): Hit the chest."
+            },
+            {
+                qZh: "15. 如果你把 `elif distance < 5:` 写在了 `if hero.isReady(\"cleave\"):` 之前，当敌人贴脸并且大招已就绪时，英雄会怎么做？",
+                qEn: "If you place `elif distance < 5:` BEFORE `if hero.isReady(\"cleave\"):`, what will the hero do when an enemy is right next to them and the ultimate is ready?",
+                options: [
+                    { zh: "A. 同时释放普攻和劈斩", en: "Cast both basic attack and cleave simultaneously" },
+                    { zh: "B. 优先普攻，即使劈斩好了也不会放", en: "Prioritize basic attack, never releasing the cleave even if it's ready" },
+                    { zh: "C. 游戏会崩溃", en: "The game will crash" },
+                    { zh: "D. 跑向宝箱", en: "Run towards the chest" }
+                ],
+                correct: 1,
+                descZh: "解析：因为“命中即停”，一旦前面的距离条件（< 5）成立，英雄就会执行普攻并立刻结束分支，底下的劈斩条件连看都不会看一眼。",
+                descEn: "Explanation: Due to 'hit and stop', if the distance condition (< 5) is met first, the hero basic attacks and ends the branch, completely ignoring the cleave below."
+            },
+            {
+                qZh: "16. “释放树精”关卡和“发狂的矮人”在多分支结构上的核心逻辑完全相同，只做了一点微小的改动，是什么改动？",
+                qEn: "The 'Release the Dryad' level shares the exact same core logic as 'Furious Dwarves' with only one minor change. What is it?",
+                options: [
+                    { zh: "A. 删除了劈斩代码", en: "Deleted the cleave code" },
+                    { zh: "B. 把所有 `if` 换成了 `while`", en: "Changed all `if` to `while`" },
+                    { zh: "C. 把 else 分支里打宝箱（\"Chest\"）换成了打大门（\"Door\"）", en: "Changed hitting the chest ('Chest') to hitting the gate ('Door') in the else branch" },
+                    { zh: "D. 改变了缩进方向", en: "Changed the indentation direction" }
+                ],
+                correct: 2,
+                descZh: "解析：宝箱和门本质上都是“静态目标”。只需要把 `else` 分支里的 `\"Chest\"` 换成 `\"Door\"`，这套“三段式”战术模板就成功迁移了。",
+                descEn: "Explanation: Both chests and doors are static targets. You simply swap `\"Chest\"` with `\"Door\"` in the `else` branch to reuse the entire tactical pattern."
+            },
+            {
+                qZh: "17. 根据多分支的“优先级阶梯法”，我们应该把“剩下的默认选项（兜底）”装进哪个关键字里？",
+                qEn: "According to the 'Priority Ladder' method for multi-branch structures, which keyword should house the 'remaining default option (fallback)'?",
+                options: [
+                    { zh: "A. `if`", en: "" },
+                    { zh: "B. `elif`", en: "" },
+                    { zh: "C. `else`", en: "" },
+                    { zh: "D. `while`", en: "" }
+                ],
+                correct: 2,
+                descZh: "解析：优先级阶梯法第四步：“兜底：把‘剩下的默认选项’装进最后的 `else` 里”。",
+                descEn: "Explanation: Step 4 of the Priority Ladder: 'Fallback: put the remaining default options into the final `else`'."
+            },
+            {
+                qZh: "18. 如果你的多分支代码不断报错 `IndentationError`（缩进错误），最可能的原因是什么？",
+                qEn: "If your multi-branch code keeps throwing an `IndentationError`, what is the most likely reason?",
+                options: [
+                    { zh: "A. `if`、`elif`、`else` 没有左侧对齐，或者内部的动作忘记了缩进", en: "`if`, `elif`, `else` are not left-aligned, or the inner actions forgot to indent" },
+                    { zh: "B. 距离参数超过了限制", en: "The distance parameter exceeded the limit" },
+                    { zh: "C. 变量名太长", en: "Variable names are too long" },
+                    { zh: "D. 没有使用大括号 {}", en: "Curly braces {} were not used" }
+                ],
+                correct: 0,
+                descZh: "解析：常见错误自查表中指出，报错 IndentationError 的原因是 `if`、`elif`、`else` 这三个词没有左侧对齐，或者内部的动作忘记了缩进。",
+                descEn: "Explanation: The troubleshooting checklist states that IndentationErrors occur when `if`, `elif`, and `else` aren't left-aligned, or their inner actions aren't indented."
+            },
+            {
+                qZh: "19. 如果你发现代码中写在 `else` 兜底分支里的动作（比如开宝箱）永远不会被执行，这说明了什么？",
+                qEn: "If you notice that the fallback action in your `else` branch (like opening a chest) is NEVER executed, what does this indicate?",
+                options: [
+                    { zh: "A. 宝箱被施加了无敌魔法", en: "The chest has invincible magic cast on it" },
+                    { zh: "B. Python 忘记了运行 else", en: "Python forgot to run the else" },
+                    { zh: "C. 前面的条件（if 或 elif）太容易满足了，导致程序根本走不到 else 这个阶梯", en: "Earlier conditions (if or elif) are too easily met, so the program never reaches the else step" },
+                    { zh: "D. else 只能在游戏最后 10 秒运行", en: "else only runs in the last 10 seconds of the game" }
+                ],
+                correct: 2,
+                descZh: "解析：常见错误自查表提到：兜底动作永远不执行，是因为前面的条件太容易满足了，导致程序每次都“命中即停”，根本走不到 else 这个阶梯。",
+                descEn: "Explanation: The checklist notes that if the fallback action never runs, the earlier conditions are met too frequently, causing the program to 'hit and stop' before reaching the else."
+            },
+            {
+                qZh: "20. 综合复习：如果代码运行到多分支结构时，前面的 `if` 和所有 `elif` 都不成立，而且你也没有写兜底的 `else`，会发生什么？",
+                qEn: "Comprehensive review: What happens if the program reaches a multi-branch structure, the `if` and all `elif` conditions are false, and you haven't written a fallback `else`?",
+                options: [
+                    { zh: "A. 程序会崩溃", en: "The program crashes" },
+                    { zh: "B. 程序会跳过多分支结构，什么也不做，继续执行下面的代码", en: "The program skips the structure, does nothing, and continues executing code below" },
+                    { zh: "C. 它会自动随机执行一个代码块", en: "It automatically executes a random block" },
+                    { zh: "D. 它会返回去重新检查第一行", en: "It goes back to re-check the first line" }
+                ],
+                correct: 1,
+                descZh: "解析：多分支中 `else` 并不是必需的（最多1个，可省略）。如果条件全都不成立且没有 `else`，程序就会直接跳过整个结构，什么也不做。",
+                descEn: "Explanation: The `else` branch is optional. If all conditions are false and there is no `else`, the program simply skips the entire block and does nothing."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr); 
+        }
+
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        function highlightDescCode(text) {
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#e8f7ee; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#1F7A44; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的优先级大师！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Priority Master!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你已经完全掌控了 if-elif-else 优先级阶梯，能够在混乱的战场上游刃有余！<br><span class="en-text">Amazing! You've completely mastered the if-elif-else priority ladder and can navigate chaotic battlefields with ease!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！多留意一下“命中即停”的顺序，下次一定拿满分！<br><span class="en-text">Good job! Pay closer attention to the 'hit and stop' order, and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
