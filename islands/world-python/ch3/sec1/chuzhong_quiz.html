@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>边际森林知识挑战 - 笛卡尔坐标系</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 --- */
+        :root {
+            --primary-color: #2E9E5B; /* 调整为边际森林的主题绿 */
+            --secondary-color: #4FBF7C;
+            --bg-color: #f7faf8;     
+            --card-bg: #FFFFFF;
+            --text-color: #2D3436;   
+            --en-text-color: #636e72; 
+            --correct-color: #00b894;
+            --wrong-color: #e17055;  
+            --accent-yellow: #fdcb6e;
+            
+            /* 代码高亮颜色 */
+            --code-bg: #1e2a22;
+            --code-text: #b6c2ba;
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d6e6dc 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #e1b12c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* 英文文本专用样式 */
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 题目中程序(代码)的专属样式 --- */
+        .question-title code, .en-text code {
+            background-color: #e8f7ee; 
+            font-family: 'YouYuan', '幼圆', monospace;
+            font-weight: bold; 
+            color: var(--primary-color); 
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #ecf0f1;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #bdc3c7;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        /* 选项中的代码区域 */
+        .option-code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #314538;
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); 
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(0,0,0,0.2);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #8fa697;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        /* --- 答题状态 --- */
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #00965e;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #b33939;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #e8f7ee;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); background: #e8f5e9; }
+        .feedback-section.wrong { border-color: var(--wrong-color); background: #fce4e4; }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: #2d3436;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* --- 下一题按钮 --- */
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #1F7A44;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #e1b12c;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: #636e72; font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画定义 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 20</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+            </div>
+
+            <div class="options-grid" id="options-container">
+            </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+        </div>
+    </div>
+
+    <script>
+        // --- 题目数据 (完整20题，结合边际森林单元知识) ---
+        const quizData = [
+            {
+                qZh: "1. 笛卡尔坐标系最伟大的贡献是将哪两个领域连接了起来？",
+                qEn: "Which two fields were connected by the Cartesian coordinate system's greatest contribution?",
+                options: [
+                    { zh: "A. 算术与统计", en: "Arithmetic and statistics" },
+                    { zh: "B. 几何与代数", en: "Geometry and algebra" },
+                    { zh: "C. 物理与化学", en: "Physics and chemistry" },
+                    { zh: "D. 相对与绝对", en: "Relative and absolute" }
+                ],
+                correct: 1, 
+                descZh: "解析：笛卡尔坐标系最伟大的贡献，是把几何（图形）和代数（数字）连接了起来，这门学问叫做解析几何。",
+                descEn: "Explanation: The greatest contribution of the Cartesian coordinate system is connecting geometry (shapes) and algebra (numbers), known as Analytic Geometry."
+            },
+            {
+                qZh: "2. 相比于 `hero.moveRight()` 这样的相对移动，使用绝对坐标的主要优势是什么？",
+                qEn: "Compared to relative movement like `hero.moveRight()`, what is the main advantage of absolute coordinates?",
+                options: [
+                    { zh: "A. 坐标总是正数，从不包含负数", en: "Coordinates are always positive, never negative" },
+                    { zh: "B. 给地图上的每一个位置分配固定的“门牌号”，不受英雄当前位置影响", en: "It assigns a fixed \"address\" to every location, unaffected by the hero's current position" },
+                    { zh: "C. 允许英雄直接穿越墙壁", en: "Allows the hero to walk directly through walls" },
+                    { zh: "D. 相对移动只能改变 x 轴", en: "Relative movement can only change the x-axis" }
+                ],
+                correct: 1,
+                descZh: "解析：绝对坐标给地图上的每一个位置都分配一个固定的“门牌号”，无论英雄当前站在哪里都不会变。相对移动则是相对当前位置朝某个方向走。",
+                descEn: "Explanation: Absolute coordinates provide a fixed \"address\" for every location, remaining the same regardless of where the hero currently stands."
+            },
+            {
+                qZh: "3. 一条完整的数轴必须包含哪三个要素？",
+                qEn: "What three essential elements must a complete number line have?",
+                options: [
+                    { zh: "A. x 轴、y 轴、原点", en: "x-axis, y-axis, origin" },
+                    { zh: "B. 整数、小数、分数", en: "Integers, decimals, fractions" },
+                    { zh: "C. 字符串、数字、布尔值", en: "Strings, numbers, booleans" },
+                    { zh: "D. 原点、正方向、单位长度", en: "Origin, positive direction, unit length" }
+                ],
+                correct: 3,
+                descZh: "解析：一维数轴必须有原点、正方向和单位长度，缺一不可。",
+                descEn: "Explanation: A 1D number line must have an origin, a positive direction, and a unit length."
+            },
+            {
+                qZh: "4. 在二维坐标系中，y 轴代表什么方向？",
+                qEn: "In a 2D coordinate system, what direction does the y-axis represent?",
+                options: [
+                    { zh: "A. 竖直方向，向上数值增大", en: "Vertical direction, values increase upwards" },
+                    { zh: "B. 水平方向，向右数值增大", en: "Horizontal direction, values increase to the right" },
+                    { zh: "C. 深度方向，向前数值增大", en: "Depth direction, values increase forwards" },
+                    { zh: "D. 对角线方向，向右上数值增大", en: "Diagonal direction, values increase to the top-right" }
+                ],
+                correct: 0,
+                descZh: "解析：y 轴（纵轴）代表竖直方向，从下到上数值增大。x 轴代表水平方向。",
+                descEn: "Explanation: The y-axis (vertical axis) represents the vertical direction, with values increasing from bottom to top."
+            },
+            {
+                qZh: "5. 在坐标系中，原点 (Origin) 的坐标是多少？",
+                qEn: "In a coordinate system, what are the coordinates of the origin?",
+                options: [
+                    { zh: "A. (1, 1)", en: "(1, 1)" },
+                    { zh: "B. (-1, -1)", en: "(-1, -1)" },
+                    { zh: "C. (0, 0)", en: "(0, 0)" },
+                    { zh: "D. (x, y)", en: "(x, y)" }
+                ],
+                correct: 2,
+                descZh: "解析：两条轴相交的那个点叫做原点，它的坐标是 (0, 0)，是整个坐标系的“基准点”。",
+                descEn: "Explanation: The intersection of the two axes is the origin, with coordinates (0, 0). It acts as the reference point for the whole system."
+            },
+            {
+                qZh: "6. 在扣哒世界的边际森林地图中，主要使用的是哪一个象限？",
+                qEn: "Which quadrant is primarily used in the Border Forest maps of CodeCombat?",
+                options: [
+                    { zh: "A. 第一象限（x 和 y 都是正数）", en: "First Quadrant (both x and y are positive)" },
+                    { zh: "B. 第二象限（x 是负数，y 是正数）", en: "Second Quadrant (x is negative, y is positive)" },
+                    { zh: "C. 第三象限（x 和 y 都是负数）", en: "Third Quadrant (both x and y are negative)" },
+                    { zh: "D. 第四象限（x 是正数，y 是负数）", en: "Fourth Quadrant (x is positive, y is negative)" }
+                ],
+                correct: 0,
+                descZh: "解析：边际森林的关卡里，所有坐标都是正数，因此使用的是第一象限。",
+                descEn: "Explanation: In the Border Forest levels, all coordinates are positive, meaning you are operating in the first quadrant."
+            },
+            {
+                qZh: "7. 坐标 (40, 20) 和 (20, 40) 表示的是地图上同一个位置吗？",
+                qEn: "Do the coordinates (40, 20) and (20, 40) represent the same location on the map?",
+                options: [
+                    { zh: "A. 是的，因为数字加起来都是 60", en: "Yes, because the numbers add up to 60" },
+                    { zh: "B. 是的，坐标的顺序不影响位置", en: "Yes, the order of coordinates does not affect the position" },
+                    { zh: "C. 不是，因为 x 总是必须大于 y", en: "No, because x must always be greater than y" },
+                    { zh: "D. 不是，(40, 20) 偏右下，而 (20, 40) 偏左上，完全不同", en: "No, (40, 20) is bottom-right while (20, 40) is top-left, completely different" }
+                ],
+                correct: 3,
+                descZh: "解析：坐标里两个数字的顺序绝不能颠倒！第一个数永远代表 x，第二个数永远代表 y。(40, 20) 和 (20, 40) 是地图上两个完全不同的位置。",
+                descEn: "Explanation: The order in a coordinate pair cannot be reversed! The first number is always x, and the second is y. They point to completely different locations."
+            },
+            {
+                qZh: "8. 在扣哒世界的地图上，如何快速获取一个目标位置的精准坐标？",
+                qEn: "How can you quickly get the exact coordinates of a target location on the CodeCombat map?",
+                options: [
+                    { zh: "A. 根据网格线目测估算", en: "Visually estimate based on grid lines" },
+                    { zh: "B. 编写代码让英雄四处寻找", en: "Write code to make the hero search around" },
+                    { zh: "C. 把鼠标悬停在地图目标位置上", en: "Hover your mouse over the target location on the map" },
+                    { zh: "D. 询问游戏中的食人魔", en: "Ask the ogres in the game" }
+                ],
+                correct: 2,
+                descZh: "解析：把鼠标悬停在地图上的任意位置，扣哒世界就会显示出那个位置的 x 和 y 坐标。",
+                descEn: "Explanation: Hovering your mouse over any position on the map will display the x and y coordinates for that location."
+            },
+            {
+                qZh: "9. `hero.buildXY()` 方法通常需要传入几个参数？",
+                qEn: "How many arguments does the `hero.buildXY()` method typically require?",
+                options: [
+                    { zh: "A. 1 个", en: "1" },
+                    { zh: "B. 2 个", en: "2" },
+                    { zh: "C. 3 个", en: "3" },
+                    { zh: "D. 4 个", en: "4" }
+                ],
+                correct: 2,
+                descZh: "解析：`buildXY` 需要三个参数：第一个是建造物类型（如 \"fence\"），后两个是位置的 x 和 y 坐标。",
+                descEn: "Explanation: `buildXY` requires three arguments: the build type (like \"fence\"), and the x and y coordinates for the location."
+            },
+            {
+                qZh: "10. 如果想在 x=40, y=53 的位置建造围栏，正确的代码格式是哪一项？",
+                qEn: "Which code format is correct to build a fence at x=40, y=53?",
+                options: [
+                    { zh: "A.", en: "", code: "hero.buildXY(40, 53, \"fence\")" },
+                    { zh: "B.", en: "", code: "hero.buildXY(\"fence\", 40, 53)" },
+                    { zh: "C.", en: "", code: "hero.buildXY(fence, 40, 53)" },
+                    { zh: "D.", en: "", code: "hero.buildXY(\"fence\", (40, 53))" }
+                ],
+                correct: 1,
+                descZh: "解析：正确的语法是 `hero.buildXY(\"fence\", 40, 53)`，第一个参数是带引号的字符串，后两个是不带引号的数字坐标。",
+                descEn: "Explanation: The correct syntax is `hero.buildXY(\"fence\", 40, 53)`. The first argument is a string with quotes, followed by unquoted coordinate numbers."
+            },
+            {
+                qZh: "11. 相比于传统的 `moveRight()`，`hero.moveXY()` 方法具备哪项高级内置功能？",
+                qEn: "Compared to the traditional `moveRight()`, what advanced built-in feature does `hero.moveXY()` have?",
+                options: [
+                    { zh: "A. 内置攻击，会自动消灭沿途敌人", en: "Built-in attack, automatically destroying enemies along the way" },
+                    { zh: "B. 内置隐身，移动时敌人看不见", en: "Built-in stealth, enemies can't see you while moving" },
+                    { zh: "C. 内置寻路，自动规划路线并绕开障碍物", en: "Built-in pathfinding, automatically planning routes and avoiding obstacles" },
+                    { zh: "D. 内置加速，能够瞬间移动", en: "Built-in acceleration, allowing teleportation" }
+                ],
+                correct: 2,
+                descZh: "解析：`moveXY` 内置了寻路（Pathfinding）功能，只要给出目标坐标，英雄会自动规划一条路线走过去并必要时绕开障碍物。",
+                descEn: "Explanation: `moveXY` has a built-in pathfinding feature. The hero automatically plans a route to the coordinates, dodging obstacles if necessary."
+            },
+            {
+                qZh: "12. 如果英雄执行代码从坐标 (36, 59) 移动到 (37, 12)，说明他主要朝着哪个方向走了很大一段距离？",
+                qEn: "If the hero executes code to move from (36, 59) to (37, 12), which direction did they primarily travel a long distance?",
+                options: [
+                    { zh: "A. 向上 (Up)", en: "Up" },
+                    { zh: "B. 向下 (Down)", en: "Down" },
+                    { zh: "C. 向左 (Left)", en: "Left" },
+                    { zh: "D. 向右 (Right)", en: "Right" }
+                ],
+                correct: 1,
+                descZh: "解析：y 坐标从 59 大幅降到 12，y 值减小代表向下移动；x 从 36 变到 37 则是向右微调了一点。",
+                descEn: "Explanation: The y-coordinate dropped significantly from 59 to 12. A decreasing y-value means moving downwards."
+            },
+            {
+                qZh: "13. 在“一步走错 (Misstep)”关卡中，为什么要修改一开始给出的默认坐标代码？",
+                qEn: "In the \"Misstep\" level, why must you edit the default coordinate code provided at the start?",
+                options: [
+                    { zh: "A. 因为默认代码运行会报错", en: "Because the default code throws an error when run" },
+                    { zh: "B. 默认代码是食人魔写的，会把英雄引向地雷陷阱", en: "The default code was written by an ogre to lead the hero into a mine trap" },
+                    { zh: "C. 为了让英雄跑得更快", en: "To make the hero run faster" },
+                    { zh: "D. 因为默认代码忘了加引号", en: "Because the default code forgot to use quotes" }
+                ],
+                correct: 1,
+                descZh: "解析：默认代码是食人魔写的，故意把坐标设成会让英雄踩中地雷的位置。你需要修改这些坐标来避开地雷并安全收集宝石。",
+                descEn: "Explanation: The default code was written by an ogre deliberately setting coordinates that lead onto mines. You must edit them to stay safe."
+            },
+            {
+                qZh: "14. 在规划收集多颗宝石的复杂路线时，最好的策略是什么？",
+                qEn: "When planning a complex route to collect multiple gems, what is the best strategy?",
+                options: [
+                    { zh: "A. 闭着眼随便填几个坐标碰运气", en: "Close your eyes, enter random coordinates and hope for the best" },
+                    { zh: "B. 只用 moveUp 和 moveRight 方法", en: "Only use moveUp and moveRight methods" },
+                    { zh: "C. 每次都回到 (0, 0) 原点重新出发", en: "Always return to the origin (0,0) before moving to the next" },
+                    { zh: "D. 获取每颗宝石的坐标顺序移动，必要时原路返回安全的交叉点", en: "Get coordinates for each gem sequentially, returning to safe intersections if needed" }
+                ],
+                correct: 3,
+                descZh: "解析：比较相邻坐标点预判路线，有时需要让英雄“原路返回”经过某个安全的交叉点，再前往下一颗宝石。",
+                descEn: "Explanation: Compare adjacent points to plan. Sometimes the hero needs to return to a safe intersection before heading to the next gem."
+            },
+            {
+                qZh: "15. Python 中 `while True:` 循环的作用是什么？",
+                qEn: "What is the purpose of a `while True:` loop in Python?",
+                options: [
+                    { zh: "A. 永远重复执行下方缩进的代码", en: "To forever repeat the indented code block below it" },
+                    { zh: "B. 让程序暂停等待真实玩家操作", en: "To pause the program and wait for real player input" },
+                    { zh: "C. 自动检查代码是否有错误", en: "To automatically check if the code has errors" },
+                    { zh: "D. 执行一次下方代码后结束", en: "To execute the code below exactly once then stop" }
+                ],
+                correct: 0,
+                descZh: "解析：`while True:` 循环的意思是“永远重复下面缩进的这些代码”，让一组动作不停地重复执行。",
+                descEn: "Explanation: A `while True:` loop means \"repeat the indented block of code below forever\", repeating a set of actions endlessly."
+            },
+            {
+                qZh: "16. 编写 `while True:` 循环时，循环体内的代码必须满足哪种关键的格式要求？",
+                qEn: "When writing a `while True:` loop, what key formatting requirement must the code inside the loop meet?",
+                options: [
+                    { zh: "A. 必须全部大写", en: "It must be entirely uppercase" },
+                    { zh: "B. 必须包含分号结尾", en: "It must end with a semicolon" },
+                    { zh: "C. 必须向右缩进（通常4个空格）", en: "It must be indented to the right (usually 4 spaces)" },
+                    { zh: "D. 必须加粗显示", en: "It must be bolded" }
+                ],
+                correct: 2,
+                descZh: "解析：`while True:` 后面有个冒号，下一行开始的代码要向右缩进（通常 4 个空格），这样才“属于”这个循环并被反复执行。",
+                descEn: "Explanation: After the colon in `while True:`, the subsequent lines must be indented to be recognized as part of the loop body."
+            },
+            {
+                qZh: "17. 在“森林逃避”关卡中，代码是如何利用坐标和循环来躲避猎头者的？",
+                qEn: "In the \"Forest Escape\" level, how did the code use coordinates and loops to dodge the headhunter?",
+                options: [
+                    { zh: "A. 循环建造围栏把猎头者困住", en: "Looping to build fences to trap the headhunter" },
+                    { zh: "B. 循环调用移动，让英雄沿着环形坐标系不停绕圈跑动", en: "Looping movements to make the hero constantly run in a circular path of coordinates" },
+                    { zh: "C. 用循环快速向右逃到地图边缘", en: "Using a loop to quickly escape right to the edge of the map" },
+                    { zh: "D. 原地循环不动进行隐身", en: "Looping to stay in place and turn invisible" }
+                ],
+                correct: 1,
+                descZh: "解析：用 `while True` 循环包含几个围成环形路线的坐标点，让英雄沿着这些坐标不停地绕圈跑动，保持移动避开视线。",
+                descEn: "Explanation: Using a `while True` loop with coordinates forming a ring lets the hero run continuously to dodge line of sight."
+            },
+            {
+                qZh: "18. (36, 59) 被称为“有序数对 (Ordered Pair)”。“有序”意味着什么？",
+                qEn: "(36, 59) is called an \"Ordered Pair\". What does \"ordered\" signify?",
+                options: [
+                    { zh: "A. 前后顺序不能调换，第一个数必须是 x", en: "The order cannot be swapped; the first number must be x" },
+                    { zh: "B. 数字必须从小到大排列", en: "Numbers must be sorted from smallest to largest" },
+                    { zh: "C. 代码会按时间顺序执行", en: "Code will execute in chronological order" },
+                    { zh: "D. 必须要先移动，后建造", en: "You must move first, then build" }
+                ],
+                correct: 0,
+                descZh: "解析：“有序”意味着前后顺序不能调换，第一个数永远代表横向 x，第二个数永远代表纵向 y。",
+                descEn: "Explanation: \"Ordered\" means the sequence cannot be switched. The first number is always x, and the second is always y."
+            },
+            {
+                qZh: "19. 在 `hero.buildXY(\"fence\", 40, 53)` 这行代码中，代表建造坐标的数字为什么没有加引号？",
+                qEn: "In `hero.buildXY(\"fence\", 40, 53)`, why aren't the coordinate numbers enclosed in quotes?",
+                options: [
+                    { zh: "A. 这是 Python 的一个错误", en: "This is an error in Python" },
+                    { zh: "B. 坐标参数是数字(Number)类型，而只有字符串(String)类型才需要加引号", en: "Coordinate parameters are Numbers, while only Strings require quotes" },
+                    { zh: "C. 引号已经被 \"fence\" 用光了", en: "The quotes were already used up by \"fence\"" },
+                    { zh: "D. 加引号会让英雄无视碰撞", en: "Adding quotes makes the hero ignore collisions" }
+                ],
+                correct: 1,
+                descZh: "解析：坐标参数是数字类型，用于表示具体位置计算，不加引号。而建造类型 `\"fence\"` 是字符串类型，代表文字字符，必须加引号。",
+                descEn: "Explanation: Coordinates are Number types used for calculations, so they don't use quotes. The build type `\"fence\"` is a text String, which requires quotes."
+            },
+            {
+                qZh: "20. 如果在执行某一行 `moveXY` 后，英雄的位置只有 x 坐标增大了，他是在往哪里走？",
+                qEn: "If after executing a `moveXY` line, only the hero's x-coordinate increased, which way did they go?",
+                options: [
+                    { zh: "A. 往上走", en: "Moved up" },
+                    { zh: "B. 往下走", en: "Moved down" },
+                    { zh: "C. 往右走", en: "Moved right" },
+                    { zh: "D. 往左走", en: "Moved left" }
+                ],
+                correct: 2,
+                descZh: "解析：x 轴代表水平方向，向右移动时 x 坐标增大；向上移动则是 y 坐标增大。",
+                descEn: "Explanation: The x-axis handles horizontal space. Moving to the right increases the x-coordinate."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        // --- 代码纯净渲染 ---
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr); 
+        }
+
+        // --- 初始化题目 ---
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            // 渲染题目
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            // 渲染选项
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // --- 检查答案 ---
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        // --- 代码内联样式 ---
+        function highlightDescCode(text) {
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#e8f7ee; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#1F7A44; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的坐标系大师！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Coordinate Master!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你已经完全掌握了坐标系定位，是时候去征服边际森林了！<br><span class="en-text">Amazing! You've mastered coordinates and are ready to conquer the Border Forest!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！复习一下错题，下次争取拿满分哦！<br><span class="en-text">Good job! Review your mistakes and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>

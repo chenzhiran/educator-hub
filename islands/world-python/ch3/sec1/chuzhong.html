@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一单元：笛卡尔坐标、moveXY 与 buildXY 基础 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1565c0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 坐标网格示意（纯 CSS/SVG，避免依赖外部图片） ===== */
+        .grid-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .grid-demo svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">边际森林-第一单元</div>
+
+    <a href="#section-1-1" class="nav-section">1.1 笛卡尔坐标系概述</a>
+    <a href="#sec-1-1-1" class="nav-sub">1.1.1 坐标的起源</a>
+    <a href="#sec-1-1-2" class="nav-sub">1.1.2 为什么需要坐标</a>
+    <a href="#sec-1-1-3" class="nav-sub">1.1.3 坐标与编程</a>
+
+    <a href="#section-1-2" class="nav-section">1.2 一维数轴</a>
+    <a href="#sec-1-2-1" class="nav-sub">1.2.1 数轴的定义</a>
+    <a href="#sec-1-2-2" class="nav-sub">1.2.2 数轴的三要素</a>
+    <a href="#sec-1-2-3" class="nav-sub">1.2.3 数轴上的点</a>
+
+    <a href="#section-1-3" class="nav-section">1.3 二维坐标系</a>
+    <a href="#sec-1-3-1" class="nav-sub">1.3.1 从一维到二维</a>
+    <a href="#sec-1-3-2" class="nav-sub">1.3.2 x 轴与 y 轴</a>
+    <a href="#sec-1-3-3" class="nav-sub">1.3.3 原点与象限</a>
+    <a href="#sec-1-3-4" class="nav-sub">1.3.4 扣哒世界的地图坐标</a>
+
+    <a href="#section-1-4" class="nav-section">1.4 坐标 (x, y)</a>
+    <a href="#sec-1-4-1" class="nav-sub">1.4.1 有序数对</a>
+    <a href="#sec-1-4-2" class="nav-sub">1.4.2 读写坐标</a>
+    <a href="#sec-1-4-3" class="nav-sub">1.4.3 顺序很重要</a>
+    <a href="#sec-1-4-4" class="nav-sub">1.4.4 悬停查看坐标</a>
+
+    <a href="#section-1-5" class="nav-section">1.5 buildXY 建造方法</a>
+    <a href="#sec-1-5-1" class="nav-sub">1.5.1 buildXY 语法</a>
+    <a href="#sec-1-5-2" class="nav-sub">1.5.2 三个参数详解</a>
+    <a href="#sec-1-5-3" class="nav-sub">1.5.3 平原森林保卫战</a>
+
+    <a href="#section-1-6" class="nav-section">1.6 moveXY 移动方法</a>
+    <a href="#sec-1-6-1" class="nav-sub">1.6.1 moveXY 语法</a>
+    <a href="#sec-1-6-2" class="nav-sub">1.6.2 moveXY 与 moveRight 对比</a>
+    <a href="#sec-1-6-3" class="nav-sub">1.6.3 内置寻路</a>
+    <a href="#sec-1-6-4" class="nav-sub">1.6.4 蜿蜒小径</a>
+
+    <a href="#section-1-7" class="nav-section">1.7 坐标的修改与调试</a>
+    <a href="#sec-1-7-1" class="nav-sub">1.7.1 修改坐标避开陷阱</a>
+    <a href="#sec-1-7-2" class="nav-sub">1.7.2 收集路线规划</a>
+
+    <a href="#section-1-8" class="nav-section">1.8 循环初步与坐标</a>
+    <a href="#sec-1-8-1" class="nav-sub">1.8.1 while True 循环</a>
+    <a href="#sec-1-8-2" class="nav-sub">1.8.2 森林逃避</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第一单元：笛卡尔坐标、moveXY 与 buildXY 基础</h1>
+    <div class="subtitle">Unit 1: Cartesian Coordinates, moveXY & buildXY</div>
+    <div class="badge">对应关卡 · 边际森林 Border Forest · 平原森林保卫战 → 森林逃避</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 1.1 ==================== -->
+<div class="section-header" id="section-1-1">
+    <h2>1.1 笛卡尔坐标系概述</h2>
+    <div class="en-title">Introduction to the Cartesian Coordinate System</div>
+</div>
+
+<h3 id="sec-1-1-1">1.1.1 坐标的起源（The Origin of Coordinates）</h3>
+
+<h4>1.1.1.1 一个关于苍蝇的传说
+    <span class="en">A legend about a fly on the ceiling</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-1-1-1_descartes_fly.png" alt="笛卡尔与天花板上的苍蝇">
+    <div class="caption">图1：传说笛卡尔通过观察天花板上的苍蝇，想到了用两个数字定位的方法</div>
+</div>
+
+<p>在你踏入<span class="keyword">边际森林（Border Forest）</span>之前，先听一个有趣的故事。三百多年前，法国数学家兼哲学家<span class="keyword">勒内·笛卡尔（René Descartes，1596–1650）</span>有一天躺在床上，盯着天花板发呆。一只苍蝇在天花板上爬来爬去，他突然想到：<strong>我该怎样精确地描述这只苍蝇的位置呢？</strong></p>
+
+<p>他发现，只要说出苍蝇离左边墙有多远、离前面墙有多远，用两个数字就能唯一地确定它在天花板上的位置。这个看似简单的想法，最终发展成了改变数学历史的<span class="keyword">笛卡尔坐标系（Cartesian Coordinate System）</span>。</p>
+
+<div class="info-box">
+    <span class="info-label">小历史：</span>笛卡尔于 1637 年在他的著作《几何学》（La Géométrie）中发表了这个思想。"Cartesian（笛卡尔的）"这个词就来自他的名字。法国数学家费马（Fermat）也独立发现了类似的方法。
+</div>
+
+<h4>1.1.1.2 坐标系做了什么了不起的事
+    <span class="en">Why it was revolutionary</span>
+</h4>
+
+<p>笛卡尔坐标系最伟大的贡献，是把<span class="keyword">几何（图形）</span>和<span class="keyword">代数（数字）</span>连接了起来。在此之前，"形状"和"数字"是两个几乎不相干的世界。有了坐标系之后，一个点可以用一对数字表示，一条直线、一个圆都可以用方程描述。这门学问叫做<span class="keyword-green">解析几何（Analytic Geometry）</span>，它也是后来微积分诞生的基石。</p>
+
+<p>而对你这位即将出发的英雄来说，坐标系还有一个更实在的用处：<strong>它能告诉你的英雄到底要走到哪里、在哪里建造围栏</strong>。</p>
+
+<h3 id="sec-1-1-2">1.1.2 为什么需要坐标（Why We Need Coordinates）</h3>
+
+<h4>1.1.2.1 "向右走三步"的局限
+    <span class="en">The limitation of relative movement</span>
+</h4>
+
+<p>在之前的暗影地牢里，你学过 <code>hero.moveRight()</code>、<code>hero.moveUp()</code> 这样的<span class="keyword">相对移动</span>方法——它们的意思是"相对当前位置，朝某个方向走"。这种方法在简单的关卡里很好用，但有两个明显的麻烦：</p>
+
+<p>第一，当目标位置离你很远、路线很曲折时，你需要写一大堆移动指令，还得在脑子里一步步推算英雄当前面朝哪、走到了哪。第二，如果你想直接"瞬间锁定"地图上某个固定的位置（比如那棵特定的大树旁），相对移动就显得很笨拙了。</p>
+
+<h4>1.1.2.2 绝对坐标：给地图上每个点一个"门牌号"
+    <span class="en">Absolute coordinates: an address for every point</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-1-2-2_absolute_vs_relative.png" alt="绝对坐标与相对移动对比">
+    <div class="caption">图2：相对移动是"往那边走几步"，绝对坐标是"去那个固定地址"</div>
+</div>
+
+<p>坐标的思路完全不同：它给地图上的<strong>每一个位置都分配一个固定的"门牌号"</strong>，无论英雄当前站在哪里，这个门牌号都不会变。这种"基于固定参照系的位置"叫做<span class="keyword">绝对坐标（Absolute Coordinates）</span>。</p>
+
+<p>有了门牌号，你就可以直接说："英雄，去 (36, 59) 这个位置！"——而不用关心英雄现在站在哪。这正是本单元两个核心方法 <code>moveXY</code> 和 <code>buildXY</code> 的工作方式。</p>
+
+<div class="remember-box">
+    <span class="remember-label">一句话记忆：</span>相对移动是"往那边走几步"，绝对坐标是"去那个固定地址"。
+</div>
+
+<h3 id="sec-1-1-3">1.1.3 坐标与编程（Coordinates in Programming）</h3>
+
+<h4>1.1.3.1 坐标无处不在
+    <span class="en">Coordinates are everywhere in computing</span>
+</h4>
+
+<p>坐标系不只是数学课本里的东西，它是几乎所有<span class="keyword">计算机图形（Computer Graphics）</span>的基础。你手机屏幕上的每一个像素、电子游戏里每个角色的位置、地图软件里的每个地点，背后都是一对对坐标在工作。学会用坐标思考，是你迈向更复杂编程的重要一步。</p>
+
+<div class="tip-box">
+    <span class="tip-label">小提示：</span>在屏幕和很多游戏里，y 轴有时是"向下为正"的。但在扣哒世界的边际森林地图中，遵循数学习惯：<strong>x 向右增大，y 向上增大</strong>。
+</div>
+
+<!-- ==================== 1.2 ==================== -->
+<div class="section-header" id="section-1-2">
+    <h2>1.2 一维数轴</h2>
+    <div class="en-title">The One-Dimensional Number Line</div>
+</div>
+
+<h3 id="sec-1-2-1">1.2.1 数轴的定义（Definition of the Number Line）</h3>
+
+<h4>1.2.1.1 一根带刻度的直线
+    <span class="en">A straight line with markings</span>
+</h4>
+
+<p>在理解二维地图之前，我们先从最简单的<span class="keyword">一维数轴（Number Line）</span>说起。数轴就是一根<strong>带方向、带刻度的直线</strong>。它上面的每一个点，都对应着一个数；反过来，每一个数，也都能在数轴上找到唯一的一个点。</p>
+
+<div class="grid-demo">
+    <svg viewBox="0 0 600 90" width="600" role="img" aria-label="一维数轴示意图">
+        <line x1="20" y1="50" x2="580" y2="50" stroke="#2E9E5B" stroke-width="3"/>
+        <polygon points="580,50 568,44 568,56" fill="#2E9E5B"/>
+        <polygon points="20,50 32,44 32,56" fill="#2E9E5B"/>
+        <!-- ticks -->
+        <g font-family="monospace" font-size="14" fill="#2d2d2d" text-anchor="middle">
+            <line x1="100" y1="44" x2="100" y2="56" stroke="#555" stroke-width="2"/><text x="100" y="74">-3</text>
+            <line x1="160" y1="44" x2="160" y2="56" stroke="#555" stroke-width="2"/><text x="160" y="74">-2</text>
+            <line x1="220" y1="44" x2="220" y2="56" stroke="#555" stroke-width="2"/><text x="220" y="74">-1</text>
+            <line x1="300" y1="40" x2="300" y2="60" stroke="#1F7A44" stroke-width="3"/><text x="300" y="78" fill="#1F7A44" font-weight="bold">0</text>
+            <line x1="380" y1="44" x2="380" y2="56" stroke="#555" stroke-width="2"/><text x="380" y="74">1</text>
+            <line x1="440" y1="44" x2="440" y2="56" stroke="#555" stroke-width="2"/><text x="440" y="74">2</text>
+            <line x1="500" y1="44" x2="500" y2="56" stroke="#555" stroke-width="2"/><text x="500" y="74">3</text>
+        </g>
+        <circle cx="440" cy="50" r="6" fill="#c2185b"/>
+        <text x="440" y="30" font-family="monospace" font-size="13" fill="#c2185b" text-anchor="middle" font-weight="bold">点 P (=2)</text>
+    </svg>
+    <div class="caption">图3：一维数轴——原点为 0，向右为正，向左为负</div>
+</div>
+
+<h3 id="sec-1-2-2">1.2.2 数轴的三要素（Three Elements of a Number Line）</h3>
+
+<h4>1.2.2.1 原点、正方向、单位长度
+    <span class="en">Origin, positive direction, unit length</span>
+</h4>
+
+<p>一条完整的数轴必须有三样东西，缺一不可：</p>
+
+<table class="styled-table">
+    <thead><tr><th>要素</th><th>含义</th><th>在图中的体现</th></tr></thead>
+    <tbody>
+        <tr><td><strong>原点（Origin）</strong></td><td>数轴的起点，代表 0</td><td>标着 0 的那个点</td></tr>
+        <tr><td><strong>正方向（Direction）</strong></td><td>规定哪边是"变大"的方向</td><td>箭头指向的方向（通常向右）</td></tr>
+        <tr><td><strong>单位长度（Unit）</strong></td><td>每一格代表多少</td><td>相邻刻度之间的距离</td></tr>
+    </tbody>
+</table>
+
+<p>原点右边是<span class="keyword">正数</span>（1, 2, 3……），左边是<span class="keyword">负数</span>（-1, -2, -3……）。这和你在暗影地牢里学过的"负数=反方向"是完全一致的道理。</p>
+
+<h3 id="sec-1-2-3">1.2.3 数轴上的点（Points on the Number Line）</h3>
+
+<h4>1.2.3.1 一个数字就能定位
+    <span class="en">One number locates a point</span>
+</h4>
+
+<p>在一维数轴上，<strong>只需要一个数字</strong>就能确定一个点的位置。这就是"一维"的含义——只有一个方向、一个自由度。比如数字 <code>2</code> 就唯一对应数轴上原点右侧第二格的那个点。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 想一想：森林小路上的英雄</div>
+    <p>想象边际森林里有一条笔直的小路，英雄只能在这条路上前后移动。这时一条数轴就够用了：你告诉英雄"去 5 号位置"，它就知道该走到哪。但真实的森林是一大片开阔地，英雄既能左右走、也能上下走——这就需要把一维数轴升级成二维坐标系了。</p>
+</div>
+
+<!-- ==================== 1.3 ==================== -->
+<div class="section-header" id="section-1-3">
+    <h2>1.3 二维坐标系</h2>
+    <div class="en-title">The Two-Dimensional Coordinate System</div>
+</div>
+
+<h3 id="sec-1-3-1">1.3.1 从一维到二维（From 1D to 2D）</h3>
+
+<h4>1.3.1.1 两条数轴的"交叉组合"
+    <span class="en">Two number lines crossing</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-3-1-1_1d_to_2d.png" alt="从一维数轴到二维坐标系">
+    <div class="caption">图4：把两条互相垂直的数轴组合在一起，就得到了二维坐标系</div>
+</div>
+
+<p>把<strong>两条互相垂直的数轴</strong>放在一起，让它们在各自的原点处相交，就得到了<span class="keyword">二维坐标系（也叫平面直角坐标系）</span>。其中一条水平放置，另一条竖直放置。这样一来，平面上的任何一个点都需要<strong>两个数字</strong>来描述：一个表示水平位置，一个表示竖直位置。</p>
+
+<p>这就是边际森林地图的本质——它是一个铺满坐标的平面，地图上每一棵树、每一颗宝石、每一个食人魔的位置，都能用一对数字精确表示。</p>
+
+<h3 id="sec-1-3-2">1.3.2 x 轴与 y 轴（The x-axis and y-axis）</h3>
+
+<h4>1.3.2.1 水平的 x，竖直的 y
+    <span class="en">Horizontal x, vertical y</span>
+</h4>
+
+<p>两条轴各有名字：</p>
+
+<ul style="margin: 10px 0 10px 24px; list-style: none;">
+    <li>● <span class="keyword-en">x 轴</span>（横轴）：<strong>水平方向</strong>，从左到右，向右数值增大。</li>
+    <li>● <span class="keyword-en">y 轴</span>（纵轴）：<strong>竖直方向</strong>，从下到上，向上数值增大。</li>
+</ul>
+
+<div class="grid-demo">
+    <svg viewBox="0 0 420 360" width="420" role="img" aria-label="二维坐标系示意图">
+        <!-- grid -->
+        <g stroke="#d6e6dc" stroke-width="1">
+            <line x1="60" y1="40" x2="60" y2="320"/>
+            <line x1="120" y1="40" x2="120" y2="320"/>
+            <line x1="180" y1="40" x2="180" y2="320"/>
+            <line x1="300" y1="40" x2="300" y2="320"/>
+            <line x1="360" y1="40" x2="360" y2="320"/>
+            <line x1="40" y1="60" x2="400" y2="60"/>
+            <line x1="40" y1="120" x2="400" y2="120"/>
+            <line x1="40" y1="180" x2="400" y2="180"/>
+            <line x1="40" y1="300" x2="400" y2="300"/>
+        </g>
+        <!-- axes -->
+        <line x1="40" y1="240" x2="405" y2="240" stroke="#2E9E5B" stroke-width="2.5"/>
+        <line x1="240" y1="330" x2="240" y2="35" stroke="#2E9E5B" stroke-width="2.5"/>
+        <polygon points="405,240 393,234 393,246" fill="#2E9E5B"/>
+        <polygon points="240,35 234,47 246,47" fill="#2E9E5B"/>
+        <text x="398" y="262" font-family="monospace" font-size="14" fill="#1F7A44" font-weight="bold">x</text>
+        <text x="252" y="46" font-family="monospace" font-size="14" fill="#1F7A44" font-weight="bold">y</text>
+        <text x="226" y="262" font-family="monospace" font-size="13" fill="#555">O</text>
+        <!-- point -->
+        <line x1="240" y1="120" x2="360" y2="120" stroke="#c2185b" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="360" y1="240" x2="360" y2="120" stroke="#c2185b" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <circle cx="360" cy="120" r="6" fill="#c2185b"/>
+        <text x="368" y="114" font-family="monospace" font-size="13" fill="#c2185b" font-weight="bold">(2, 2)</text>
+        <!-- quadrant labels -->
+        <text x="320" y="90" font-size="13" fill="#999">第一象限</text>
+        <text x="80" y="90" font-size="13" fill="#999">第二象限</text>
+        <text x="80" y="300" font-size="13" fill="#999">第三象限</text>
+        <text x="320" y="300" font-size="13" fill="#999">第四象限</text>
+    </svg>
+    <div class="caption">图5：二维坐标系——x 向右、y 向上，原点 O 把平面分成四个象限</div>
+</div>
+
+<h4>1.3.2.2 移动方法与坐标轴的关系
+    <span class="en">How movement relates to the axes</span>
+</h4>
+
+<table class="styled-table">
+    <thead><tr><th>动作</th><th>对坐标的影响</th></tr></thead>
+    <tbody>
+        <tr><td>向右走（moveRight）</td><td>x 值<strong>增大</strong>，y 不变</td></tr>
+        <tr><td>向左走（moveLeft）</td><td>x 值<strong>减小</strong>，y 不变</td></tr>
+        <tr><td>向上走（moveUp）</td><td>y 值<strong>增大</strong>，x 不变</td></tr>
+        <tr><td>向下走（moveDown）</td><td>y 值<strong>减小</strong>，x 不变</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-1-3-3">1.3.3 原点与象限（Origin and Quadrants）</h3>
+
+<h4>1.3.3.1 原点 (0, 0)
+    <span class="en">The origin (0, 0)</span>
+</h4>
+
+<p>两条轴相交的那个点叫做<span class="keyword">原点（Origin）</span>，它的坐标是 <code>(0, 0)</code>。原点是整个坐标系的"基准点"，所有其他位置都是相对它来度量的。</p>
+
+<h4>1.3.3.2 四个象限
+    <span class="en">The four quadrants</span>
+</h4>
+
+<p>两条轴把平面分成了四块区域，每一块叫做一个<span class="keyword">象限（Quadrant）</span>。按照数学惯例，从右上角开始，逆时针依次编号为第一、二、三、四象限。第一象限里 x 和 y 都是正数——这也是扣哒世界地图最常用的区域。</p>
+
+<div class="info-box">
+    <span class="info-label">好消息：</span>在边际森林的关卡里，所有坐标都是正数（位于第一象限），所以你暂时不用担心负坐标。但理解象限的概念，会让你在更高级的地图里更从容。
+</div>
+
+<h3 id="sec-1-3-4">1.3.4 扣哒世界的地图坐标（CodeCombat Map Coordinates）</h3>
+
+<h4>1.3.4.1 地图就是一张大坐标纸
+    <span class="en">The map is a giant coordinate grid</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-3-4-1_map_grid.png" alt="边际森林地图坐标网格">
+    <div class="caption">图6：边际森林的每一关地图，本质上就是一张铺好的坐标纸</div>
+</div>
+
+<p>边际森林的每一关地图，本质上就是一张铺好的坐标纸。地图左下角附近接近原点，向右 x 增大、向上 y 增大。地图上常见的坐标范围大约从 0 到 80 不等。当你看到一个 X 标记或一颗宝石时，它都对应着一对确定的 (x, y) 坐标——你的任务，就是把这对坐标"喂"给 <code>moveXY</code> 或 <code>buildXY</code> 方法。</p>
+
+<!-- ==================== 1.4 ==================== -->
+<div class="section-header" id="section-1-4">
+    <h2>1.4 坐标 (x, y)</h2>
+    <div class="en-title">Coordinates (x, y)</div>
+</div>
+
+<h3 id="sec-1-4-1">1.4.1 有序数对（Ordered Pairs）</h3>
+
+<h4>1.4.1.1 一对数字定位一个点
+    <span class="en">A pair of numbers locates a point</span>
+</h4>
+
+<p>平面上一个点的位置，用一对写在圆括号里、用逗号隔开的数字表示，形如 <code>(x, y)</code>。数学上把它叫做<span class="keyword">有序数对（Ordered Pair）</span>。"有序"两个字非常关键——它的意思是<strong>前后顺序不能调换</strong>，第一个数永远代表 x（水平），第二个数永远代表 y（竖直）。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 记忆口诀：先横后竖，先走廊后楼梯</div>
+    <p>读坐标时永远是"先 x 后 y"。一个经典的英文助记法是 "Walk along the hall, then up the stairs"——先沿着走廊走（横向 x），再爬楼梯上去（纵向 y）。坐标 (36, 59) 的意思就是：先到 x=36 的水平位置，再到 y=59 的竖直位置。</p>
+</div>
+
+<h3 id="sec-1-4-2">1.4.2 读写坐标（Reading and Writing Coordinates）</h3>
+
+<h4>1.4.2.1 坐标的标准写法
+    <span class="en">Standard notation</span>
+</h4>
+
+<p>坐标的标准写法是：圆括号 + 两个数字 + 中间一个逗号。例如 <code>(40, 53)</code>、<code>(8, 12)</code>、<code>(66, 17)</code>。在数学里它们带圆括号；而在 Python 代码里调用方法时，这两个数字会作为<strong>参数</strong>填进方法的括号中：<code>hero.moveXY(40, 53)</code>。</p>
+
+<table class="styled-table">
+    <thead><tr><th>数学写法</th><th>含义</th><th>Python 代码写法</th></tr></thead>
+    <tbody>
+        <tr><td>(40, 53)</td><td>x=40，y=53</td><td><code>hero.moveXY(40, 53)</code></td></tr>
+        <tr><td>(8, 12)</td><td>x=8，y=12</td><td><code>hero.moveXY(8, 12)</code></td></tr>
+        <tr><td>(0, 0)</td><td>原点</td><td><code>hero.moveXY(0, 0)</code></td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-1-4-3">1.4.3 顺序很重要（Order Matters）</h3>
+
+<h4>1.4.3.1 (x, y) ≠ (y, x)
+    <span class="en">(x, y) is not the same as (y, x)</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-4-3-1_order_matters.png" alt="坐标顺序对比 (40,20) 与 (20,40)">
+    <div class="caption">图7：(40, 20) 和 (20, 40) 是地图上两个完全不同的位置</div>
+</div>
+
+<p>这是初学者最容易踩的坑：<strong>坐标里两个数字的顺序绝不能颠倒！</strong> <code>(40, 20)</code> 和 <code>(20, 40)</code> 是地图上两个完全不同的位置。前者在偏右偏下，后者在偏左偏上。计算机严格按照"第一个数是 x、第二个数是 y"来理解，它不会替你纠错。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">20</span><span class="punc">)</span>   <span class="cmt"># ✓ 去 x=40, y=20 的位置</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">20</span><span class="punc">,</span> <span class="num">40</span><span class="punc">)</span>   <span class="cmt"># ✗ 完全不同的位置！x=20, y=40</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">牢记：</span>坐标是"有序"数对——x 在前，y 在后，顺序写反了，英雄就走错了地方。
+</div>
+
+<h3 id="sec-1-4-4">1.4.4 悬停查看坐标（Hover to See Coordinates）</h3>
+
+<h4>1.4.4.1 把鼠标移到地图上
+    <span class="en">Mouse over the map</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-4-4-1_hover_coordinates.png" alt="鼠标悬停查看坐标">
+    <div class="caption">图8：把鼠标悬停在地图任意位置，即可看到该处的 x 和 y 坐标</div>
+</div>
+
+<p>你怎么知道一个目标的坐标是多少？非常简单：<strong>把鼠标悬停在地图上的任意位置，扣哒世界就会显示出那个位置的 x 和 y 坐标。</strong> 这是边际森林里你最常用的小技巧——想让英雄去哪、想在哪建围栏，先把鼠标移过去看一眼坐标，再把数字填进代码里。</p>
+
+<div class="tip-box">
+    <span class="tip-label">实用流程：</span>① 鼠标悬停目标位置 → ② 记下显示的 (x, y) → ③ 写进 <code>moveXY(x, y)</code> 或 <code>buildXY("类型", x, y)</code> → ④ 运行检查。
+</div>
+
+<!-- ==================== 1.5 ==================== -->
+<div class="section-header" id="section-1-5">
+    <h2>1.5 buildXY 建造方法</h2>
+    <div class="en-title">The buildXY Method</div>
+</div>
+
+<h3 id="sec-1-5-1">1.5.1 buildXY 语法（Syntax of buildXY）</h3>
+
+<h4>1.5.1.1 在指定坐标建造物体
+    <span class="en">Build something at a given coordinate</span>
+</h4>
+
+<p><span class="keyword">buildXY</span> 是边际森林里你学到的第一个使用坐标的方法。它的作用是：<strong>在地图上你指定的 (x, y) 坐标处，建造一个物体</strong>（比如围栏）。它的基本语法是：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"建造物类型"</span><span class="punc">,</span> x<span class="punc">,</span> y<span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-1-5-2">1.5.2 三个参数详解（The Three Arguments）</h3>
+
+<h4>1.5.2.1 类型 + x + y
+    <span class="en">Type + x + y</span>
+</h4>
+
+<p><code>buildXY</code> 需要<strong>三个参数</strong>，按顺序分别是：</p>
+
+<table class="styled-table">
+    <thead><tr><th>位置</th><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td>第 1 个</td><td><code>"fence"</code></td><td>字符串（带引号）</td><td>要建造的东西，如围栏"fence"</td></tr>
+        <tr><td>第 2 个</td><td><code>40</code></td><td>数字</td><td>建造位置的 x 坐标</td></tr>
+        <tr><td>第 3 个</td><td><code>53</code></td><td>数字</td><td>建造位置的 y 坐标</td></tr>
+    </tbody>
+</table>
+
+<p>注意第一个参数是<span class="keyword">字符串</span>——它表示"建什么"，必须用引号括起来（单引号或双引号都行）；后两个是<span class="keyword">数字</span>——表示"建在哪"，不加引号。三个参数之间用<strong>逗号</strong>分隔。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> <span class="num">40</span><span class="punc">,</span> <span class="num">53</span><span class="punc">)</span>
+<span class="cmt">#         ^类型(字符串)  ^x   ^y</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">小提示：</span>在森林保卫战里，建造 <code>"fence"</code>（围栏）类型比建造 <code>"fire-trap"</code>（火焰陷阱）类型容易得多——围栏直接挡住敌人，简单又可靠。
+</div>
+
+<h3 id="sec-1-5-3">1.5.3 实战：平原森林保卫战（Plains Forest Defense）</h3>
+
+<h4>1.5.3.1 用两段围栏保护村庄
+    <span class="en">Protect the village with two fences</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-5-3-1_forest_defense.png" alt="平原森林保卫战关卡">
+    <div class="caption">图9：在两个 X 标记处建造围栏，堵住食人魔来袭的缺口</div>
+</div>
+
+<p>在"平原森林保卫战"中，食人魔从两个缺口来袭。你需要在两个 X 标记处分别建造一段围栏来堵住它们。把鼠标悬停在 X 标记上，得到坐标，然后写下：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 在标记上建造两段围栏来保护村民。</span>
+<span class="cmt"># 把鼠标悬停在地图上，以得到 x, y 坐标。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> <span class="num">40</span><span class="punc">,</span> <span class="num">53</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> <span class="num">40</span><span class="punc">,</span> <span class="num">21</span><span class="punc">)</span></pre>
+</div>
+
+<p>注意这两段围栏的 x 坐标都是 40（在同一条竖直线上），只是 y 坐标不同（一个 53、一个 21）——一个堵上方缺口，一个堵下方缺口。这正体现了坐标系的威力：<strong>同一个 x、不同的 y，就是竖直方向上的两个不同位置</strong>。</p>
+
+<!-- ==================== 1.6 ==================== -->
+<div class="section-header" id="section-1-6">
+    <h2>1.6 moveXY 移动方法</h2>
+    <div class="en-title">The moveXY Method</div>
+</div>
+
+<h3 id="sec-1-6-1">1.6.1 moveXY 语法（Syntax of moveXY）</h3>
+
+<h4>1.6.1.1 移动到任意坐标
+    <span class="en">Move to any coordinate</span>
+</h4>
+
+<p>和 <code>buildXY</code> 一样，<span class="keyword">moveXY</span> 也使用坐标，但它的作用是<strong>让英雄移动到地图上任意一个 (x, y) 位置</strong>。它只需要两个参数：目标的 x 和 y。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+
+<span class="cmt"># 例如：移动到 x=36, y=59 的位置</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">36</span><span class="punc">,</span> <span class="num">59</span><span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-1-6-2">1.6.2 moveXY 与 moveRight 对比（moveXY vs. moveRight）</h3>
+
+<h4>1.6.2.1 绝对定位 vs 相对移动
+    <span class="en">Absolute positioning vs. relative movement</span>
+</h4>
+
+<p>还记得暗影地牢里那双"又老又单一"的 <code>moveRight</code> 鞋子吗？现在你的新装备能让你用 <code>moveXY</code> 直接到达任何想去的地方。两者的核心区别在于：</p>
+
+<table class="styled-table">
+    <thead><tr><th>对比项</th><th>moveRight() 等</th><th>moveXY(x, y)</th></tr></thead>
+    <tbody>
+        <tr><td>定位方式</td><td>相对当前位置</td><td>地图绝对坐标</td></tr>
+        <tr><td>参数含义</td><td>步数（走几格）</td><td>目标的 x 和 y</td></tr>
+        <tr><td>方向</td><td>只能上下左右单方向</td><td>可斜着直奔目标</td></tr>
+        <tr><td>适合场景</td><td>简单的直线小步</td><td>远距离、精确定位</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">类比：</span><code>moveRight(3)</code> 像是对司机说"往前开三个路口"；<code>moveXY(36, 59)</code> 像是直接输入导航地址"去 36 号大街 59 号"。
+</div>
+
+<h3 id="sec-1-6-3">1.6.3 内置寻路（Built-in Pathfinding）</h3>
+
+<h4>1.6.3.1 英雄会自己找路
+    <span class="en">The hero finds its own way</span>
+</h4>
+
+<p><code>moveXY</code> 还内置了一个很贴心的功能：<span class="keyword">寻路（Pathfinding）</span>。这意味着只要你给出目标坐标，英雄会<strong>自动规划一条路线</strong>走过去，必要时还会绕开途中的障碍物。你不必再手动一格一格地指挥它——只管告诉它"终点在哪"就好。</p>
+
+<h3 id="sec-1-6-4">1.6.4 实战：蜿蜒小径（Winding Trail）</h3>
+
+<h4>1.6.4.1 依次移动并建造围栏
+    <span class="en">Move through waypoints, then build</span>
+</h4>
+
+<p>在"蜿蜒小径"中，你要带着英雄穿过森林、依次移动到几个目标点，最后在路的尽头建一道围栏挡住食人魔。每到一个目标，就把鼠标悬停查看坐标，写一行 <code>moveXY</code>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 到小路的尽头去，并在那儿修一个栅栏。</span>
+<span class="cmt"># 利用你的 moveXY(x, y) 坐标移动功能。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">36</span><span class="punc">,</span> <span class="num">59</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">37</span><span class="punc">,</span> <span class="num">12</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">66</span><span class="punc">,</span> <span class="num">17</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> <span class="num">71</span><span class="punc">,</span> <span class="num">24</span><span class="punc">)</span></pre>
+</div>
+
+<p>仔细观察这几行：英雄先到 (36, 59)，再到 (37, 12)——注意 y 从 59 大幅降到 12，说明它向<strong>下</strong>走了一大段；接着到 (66, 17)，x 大幅增大，说明向<strong>右</strong>走了一大段。代码依然是<span class="keyword">顺序执行</span>的：一行走完，才走下一行。</p>
+
+<!-- ==================== 1.7 ==================== -->
+<div class="section-header" id="section-1-7">
+    <h2>1.7 坐标的修改与调试</h2>
+    <div class="en-title">Editing Coordinates and Debugging</div>
+</div>
+
+<h3 id="sec-1-7-1">1.7.1 修改坐标避开陷阱（Edit Coordinates to Avoid Traps）</h3>
+
+<h4>1.7.1.1 代码是可以修改的
+    <span class="en">Code can be changed</span>
+</h4>
+
+<div class="figure">
+    <img src="images/1-7-1-1_misstep_mines.png" alt="一步走错关卡——避开地雷">
+    <div class="caption">图10：默认代码是食人魔写的，修改坐标让英雄避开地雷、收集宝石</div>
+</div>
+
+<p>在"一步走错"这一关里，默认代码是<strong>食人魔写的</strong>——它故意把坐标设成会让英雄踩中地雷的位置！你的任务是<span class="keyword">修改这些坐标</span>，把英雄引到每一颗宝石那里，安全地走完全程。这一关传递了一个重要观念：<strong>示例代码不是命运，你完全可以也应该去修改它。</strong></p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 英雄完全糊涂了！</span>
+<span class="cmt"># 纠正路径，别让其踩到地雷。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">11</span><span class="punc">,</span> <span class="num">35</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">35</span><span class="punc">,</span> <span class="num">24</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">55</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">77</span><span class="punc">,</span> <span class="num">57</span><span class="punc">)</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">通关要点：</span>你必须拿到<strong>每一颗</strong>宝石才能过关。所以修改坐标时，要让英雄的路线刚好经过所有宝石。
+</div>
+
+<h3 id="sec-1-7-2">1.7.2 收集路线规划（Planning a Collection Route）</h3>
+
+<h4>1.7.2.1 用坐标差判断方向和距离
+    <span class="en">Use coordinate differences to plan</span>
+</h4>
+
+<p>规划收集路线时，比较相邻两个坐标点，你就能预判英雄怎么走：x 增大表示向右，x 减小表示向左；y 增大表示向上，y 减小表示向下。在"宝石果子"概念挑战中，你要依次收集所有宝石、最后进入村庄（红色 X）。注意路线里有些坐标会<strong>重复出现</strong>——这是因为英雄需要"原路返回"经过某个安全的交叉点，再前往下一颗宝石：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 移动到所有宝石处，然后移动到红色 X 标记。</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">8</span><span class="punc">,</span> <span class="num">48</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">8</span><span class="punc">,</span> <span class="num">12</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="num">26</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">24</span><span class="punc">,</span> <span class="num">26</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">34</span><span class="punc">,</span> <span class="num">14</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">24</span><span class="punc">,</span> <span class="num">26</span><span class="punc">)</span>   <span class="cmt"># 回到交叉点</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">56</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">74</span><span class="punc">,</span> <span class="num">34</span><span class="punc">)</span>   <span class="cmt"># 进入村庄（红色 X）</span></pre>
+</div>
+
+<!-- ==================== 1.8 ==================== -->
+<div class="section-header" id="section-1-8">
+    <h2>1.8 循环初步与坐标</h2>
+    <div class="en-title">A First Look at Loops with Coordinates</div>
+</div>
+
+<h3 id="sec-1-8-1">1.8.1 while True 循环（The while True Loop）</h3>
+
+<h4>1.8.1.1 让一组动作不停重复
+    <span class="en">Repeating a set of actions forever</span>
+</h4>
+
+<p>到目前为止，你的代码都是"每行执行一次"的顺序结构。但有时候你希望一段动作<strong>不停地重复</strong>。这时就用到 <span class="keyword-en">while True:</span> 循环——它的意思是"永远重复下面缩进的这些代码"。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 缩进的重要性</div>
+    <p>注意 <code>while True:</code> 后面有个<strong>冒号</strong>，下一行开始的代码要<strong>向右缩进</strong>（通常 4 个空格）。缩进的代码才"属于"这个循环、会被反复执行。这是 Python 用缩进表示代码层级的独特设计——别忘了缩进！</p>
+</div>
+
+<h3 id="sec-1-8-2">1.8.2 实战：森林逃避（Forest Escape）</h3>
+
+<h4>1.8.2.1 用循环绕圈躲避猎头者
+    <span class="en">Loop around to dodge the headhunter</span>
+</h4>
+
+<p>致命的猎头者正盯着英雄的脑袋！只要它看不到你，就没法攻击你。解决办法是用 <code>while True</code> 循环，让英雄在森林里<strong>沿着一圈坐标不停地跑动</strong>，始终保持移动、不被锁定：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 区域内有一名猎头者！</span>
+<span class="cmt"># 在森林附近跑动，以躲避他的视线。</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">56</span><span class="punc">,</span> <span class="num">44</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">56</span><span class="punc">)</span>
+    <span class="cmt"># 用 moveXY 在森林中保持移动，以确保存活。</span>
+    <span class="cmt"># 不要忘记缩进。</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">24</span><span class="punc">,</span> <span class="num">44</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">24</span><span class="punc">,</span> <span class="num">24</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">12</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">56</span><span class="punc">,</span> <span class="num">24</span><span class="punc">)</span></pre>
+</div>
+
+<p>这六个坐标点围成了一个大致的环形路线。英雄跑完最后一个点 (56, 24) 后，循环又会从头开始回到 (56, 44)，如此周而复始，绕圈奔跑——猎头者永远抓不住一个不停移动的目标！</p>
+
+<div class="tip-box">
+    <span class="tip-label">观察：</span>把这六个坐标在脑中连成线，你会发现它们围出了一个闭合的圈。这就是"路径规划"和"坐标"结合的巧妙之处。
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成了边际森林第一单元！你已经从"相对移动"升级到了"坐标定位"，掌握了用一对数字精确指挥英雄的能力。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>笛卡尔坐标系</td><td>笛卡尔发明，连接几何与代数</td><td>—</td></tr>
+            <tr><td>一维数轴</td><td>原点、正方向、单位长度</td><td>—</td></tr>
+            <tr><td>二维坐标系</td><td>x 轴水平、y 轴竖直、四象限</td><td>全部</td></tr>
+            <tr><td>坐标 (x, y)</td><td>有序数对，x 在前 y 在后</td><td>全部</td></tr>
+            <tr><td>悬停查坐标</td><td>鼠标移到地图即可看坐标</td><td>全部</td></tr>
+            <tr><td>buildXY</td><td><code>buildXY("fence", x, y)</code></td><td>平原森林保卫战</td></tr>
+            <tr><td>moveXY</td><td><code>moveXY(x, y)</code>，自带寻路</td><td>蜿蜒小径</td></tr>
+            <tr><td>修改坐标调试</td><td>纠正路径、避开陷阱</td><td>一步走错</td></tr>
+            <tr><td>收集路线规划</td><td>依次经过所有目标</td><td>宝石果子</td></tr>
+            <tr><td>while True 循环</td><td>重复动作，注意缩进</td><td>森林逃避</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        现在你已经能给森林里的每个位置"指路"了。继续加油，勇敢的英雄！🌲🗡️
+    </p>
+</div>
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #9db0a4; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学2（边际森林）：第一单元</p>
+    <p style="margin-top:8px; color:#5e7567;">扣哒世界（CodeCombat）教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
