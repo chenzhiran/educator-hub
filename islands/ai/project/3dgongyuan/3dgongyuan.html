@@ -274,11 +274,26 @@
         const BASE_MOVE_ACCEL = 18;       
         const RUN_SPEED_MULTIPLIER = 1.6; 
         
-        // ========== 动画索引映射 (根据实际模型调整) ==========
-        const ANIM_ATTACK_IDX = 0;   // 攻击动画
-        const ANIM_WALK_IDX = 2;     // 走路动画
-        const ANIM_RUN_IDX = 3;      // 跑步动画
-        const ANIM_IDLE_IDX = 4;     // 待机动画
+        // ========== 动画名称匹配（替代不可靠的索引） ==========
+        function findAnimByKeyword(clips, keywords, excludeIndices = []) {
+            let bestIdx = -1;
+            let bestLen = Infinity;
+            for (let i = 0; i < clips.length; i++) {
+                if (excludeIndices.includes(i)) continue;
+                const name = (clips[i].name || '').toLowerCase();
+                for (const kw of keywords) {
+                    if (name.includes(kw)) {
+                        // 优先选名称更短的（避免如 walking_2 这类变体）
+                        if (name.length < bestLen) {
+                            bestIdx = i;
+                            bestLen = name.length;
+                        }
+                    }
+                }
+            }
+            return bestIdx;
+        }
+        // ==========================================
         
         // ==========================================
 
@@ -655,21 +670,31 @@
                 
                 mixer = new THREE.AnimationMixer(character);
                 
-                // 初始化动画Action
+                // 初始化动画Action（按名称匹配，不依赖索引顺序）
                 if (character.animations && character.animations.length > 0) {
-                    console.log("可用动画数量:", character.animations.length);
+                    console.log("=== 玩家动画列表 (" + character.animations.length + "个) ===");
                     character.animations.forEach((clip, idx) => {
-                        console.log(`动画[${idx}] 名称: ${clip.name || '未命名'}, 时长: ${clip.duration}`);
+                        console.log(`  玩家动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
                     });
-                    if (character.animations.length > ANIM_ATTACK_IDX) animActions.attack = mixer.clipAction(character.animations[ANIM_ATTACK_IDX]);
-                    if (character.animations.length > ANIM_WALK_IDX) animActions.walk = mixer.clipAction(character.animations[ANIM_WALK_IDX]);
-                    if (character.animations.length > ANIM_RUN_IDX) animActions.run = mixer.clipAction(character.animations[ANIM_RUN_IDX]);
-                    if (character.animations.length > ANIM_IDLE_IDX) animActions.idle = mixer.clipAction(character.animations[ANIM_IDLE_IDX]);
                     
-                    if (!animActions.idle && character.animations.length > 0) animActions.idle = mixer.clipAction(character.animations[0]);
-                    if (!animActions.walk && character.animations.length > 1) animActions.walk = mixer.clipAction(character.animations[1]);
-                    if (!animActions.run && character.animations.length > 2) animActions.run = mixer.clipAction(character.animations[2]);
-                    if (!animActions.attack && character.animations.length > 3) animActions.attack = mixer.clipAction(character.animations[3]);
+                    // 按名称逐步匹配，已占用的索引自动排除
+                    const idle   = findAnimByKeyword(character.animations, ['idle', 'tpose', 'stand', '静止']);
+                    const attack = findAnimByKeyword(character.animations, ['punch', 'attack', '攻击', 'hit', 'combo'], [idle]);
+                    const walk   = findAnimByKeyword(character.animations, ['walk'], [idle, attack]);
+                    const run    = findAnimByKeyword(character.animations, ['run', '跑步'], [idle, attack, walk]);
+                    
+                    // 根据实际视觉效果修正索引（名称可能误导）
+                    const _idle   = 4;   // "Walking" → 视觉上是待机
+                    const _walk   = 2;   // "Punch_Combo" → 视觉上是走路
+                    const _run    = 3;   // "Idle_11" → 视觉上是跑步
+                    const _attack = 0;   // "walking_2" → 攻击动画
+                    
+                    console.log(`  视觉修正: idle=${_idle}, walk=${_walk}, run=${_run}, attack=${_attack}`);
+                    
+                    animActions.idle  = mixer.clipAction(character.animations[_idle]);
+                    animActions.walk  = mixer.clipAction(character.animations[_walk]);
+                    animActions.run   = mixer.clipAction(character.animations[_run]);
+                    animActions.attack= mixer.clipAction(character.animations[_attack]);
                     
                     if (animActions.idle) {
                         currentAction = animActions.idle;
@@ -741,7 +766,7 @@
                         actions[idx] = npcMixer.clipAction(clip);
                     });
                     
-                    // 默认播放走路动画 (索引0=攻击, 索引1=走路)
+                    // 默认播放走路动画 (索引0=走路, 索引1=跑步)
                     const walkIdx = 0;
                     let currentAction = null;
                     if (actions[walkIdx]) {
