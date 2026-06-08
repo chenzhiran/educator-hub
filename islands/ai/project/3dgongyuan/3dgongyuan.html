@@ -132,6 +132,34 @@
             animation: spin 1s linear infinite; margin-bottom: 15px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* NPC动画控制面板 */
+        #npc-controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px; z-index: 20;
+            background: rgba(0, 0, 0, 0.7); padding: 10px 18px; border-radius: 30px;
+            backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .npc-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.35);
+            background: rgba(60,60,90,0.8); color: white;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+            user-select: none;
+        }
+        .npc-btn:hover { background: rgba(0, 180, 230, 0.5); border-color: #00d1ff; transform: scale(1.12); }
+        .npc-btn.active { background: rgba(0, 200, 255, 0.75); border-color: #00d1ff; box-shadow: 0 0 18px rgba(0,200,255,0.55); }
+        #npc-anim-label {
+            color: #ffaa44; font-size: 13px; text-align: center; margin-bottom: 6px;
+            font-weight: bold; letter-spacing: 1px;
+        }
+        #npc-info {
+            position: absolute; bottom: 115px; left: 50%; transform: translateX(-50%);
+            color: white; font-size: 12px; z-index: 20;
+            background: rgba(0,0,0,0.65); padding: 5px 18px; border-radius: 18px;
+            pointer-events: none; letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -147,9 +175,9 @@
             <div class="controls-grid">
                 <div><kbd>W/A/S/D</kbd> 移动</div>
                 <div><kbd>🖱️ 鼠标</kbd> 视角</div>
-                <div><kbd>空格</kbd> 跳跃 <span style="color:#8aff8a;">(-50体力)</span></div>
-                <div><kbd>左 Shift</kbd> 跑步 <span style="color:#ffaa44;">(速度↑ 体力消耗↑)</span></div>
-                <div><kbd>鼠标左键</kbd> 或 <kbd>P</kbd> 攻击动画</div>
+                <div><kbd>空格</kbd> 跳跃 <span style="color:#8aff8a;">(-17体力)</span></div>
+                <div><kbd>左 Shift</kbd> 跑步 <span style="color:#ffaa44;">(速度↑ 体力消耗↓)</span></div>
+                <div><kbd>鼠标左键</kbd> 或 <kbd>P</kbd> 攻击动画 <span style="color:#ffaa44;">(每次完整播放一次)</span></div>
                 <div><span style="color:#ffaa44;">🎬 动画自动切换</span> 根据动作</div>
             </div>
             <div style="margin-top: 12px; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px;">
@@ -184,11 +212,18 @@
             <div class="stamina-bar-bg">
                 <div class="stamina-bar-fill" id="stamina-fill" style="width: 100%;"></div>
             </div>
-            <div class="stamina-text">移动消耗 | 静止恢复 | 低于200减速 | 跳跃-50</div>
+            <div class="stamina-text">移动消耗 | 静止恢复 | 低于200减速 | 跳跃-17</div>
         </div>
         <div class="anim-status">
             🎭 当前动作: <span id="current-anim-label">待机</span>
         </div>
+    </div>
+
+    <div id="npc-info">
+        🤖 NPC动画预览 · 编号: <span id="npc-anim-label">---</span>
+    </div>
+    <div id="npc-controls">
+        <!-- 数字按钮由JS动态生成 -->
     </div>
 
     <script type="importmap">
@@ -203,6 +238,7 @@
     <script type="module">
         import * as THREE from 'three';
         import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { Octree } from 'three/addons/math/Octree.js';
         import { Capsule } from 'three/addons/math/Capsule.js';
 
@@ -226,23 +262,23 @@
         const FALL_DAMAGE_THRESHOLD = 6.0;
         const DAMAGE_PER_METER = 5;     
 
-        // 体力系统
+        // 体力系统 ———— 所有消耗值均降低为原来的1/3
         const MAX_STAMINA = 1000;        
-        const STAMINA_DRAIN_RATE_WALK = 16;   // 走路消耗
-        const STAMINA_DRAIN_RATE_RUN = 32;    // 跑步消耗
-        const STAMINA_RECOVER_RATE = 22;      
-        const STAMINA_SLOW_THRESHOLD = 200;   
-        const JUMP_STAMINA_COST = 50;    
+        const STAMINA_DRAIN_RATE_WALK = 16 / 3;   // 走路消耗 (原16 → 约5.33)
+        const STAMINA_DRAIN_RATE_RUN = 32 / 3;    // 跑步消耗 (原32 → 约10.67)
+        const STAMINA_RECOVER_RATE = 22;          
+        const STAMINA_SLOW_THRESHOLD = 200;       
+        const JUMP_STAMINA_COST = 50 / 3;         // 跳跃消耗 (原50 → 约16.67)
         
         // 移动速度系数
-        const BASE_MOVE_ACCEL = 18;       // 基础加速度
-        const RUN_SPEED_MULTIPLIER = 1.6; // 跑步速度倍数
+        const BASE_MOVE_ACCEL = 18;       
+        const RUN_SPEED_MULTIPLIER = 1.6; 
         
         // ========== 动画索引映射 (根据实际模型调整) ==========
-        const ANIM_ATTACK_IDX = 0;   // 攻击动画 (原数字1)
-        const ANIM_WALK_IDX = 2;     // 走路动画 (原数字3)
-        const ANIM_RUN_IDX = 3;      // 跑步动画 (原数字4)
-        const ANIM_IDLE_IDX = 4;     // 待机动画 (原数字5)
+        const ANIM_ATTACK_IDX = 0;   // 攻击动画
+        const ANIM_WALK_IDX = 2;     // 走路动画
+        const ANIM_RUN_IDX = 3;      // 跑步动画
+        const ANIM_IDLE_IDX = 4;     // 待机动画
         
         // ==========================================
 
@@ -250,6 +286,17 @@
         let isGameOver = false;
         let playerOnFloor = false;
         let yaw = 0, pitch = -0.45;
+        
+        // NPC 系统 — 10个自由走动的NPC
+        const NPC_COUNT = 10;
+        const NPC_MOVE_SPEED = 3.5;
+        const npcSpawnPositions = [
+            [-20, 25, -20], [20, 25, -20], [-20, 25, 20], [20, 25, 20],
+            [-30, 25, 0],  [30, 25, 0],   [0, 25, -30],  [0, 25, 30],
+            [-15, 25, -10],[15, 25, 10]
+        ];
+        let npcTemplateAnimClips = [];     // 动画Clip数组（用于按钮标签）
+        let npcList = [];                  // [{character, mixer, collider, velocity, direction, onFloor, actions, currentAction}]
         
         // 血量 & 体力
         let currentHealth = MAX_HEALTH;
@@ -260,8 +307,8 @@
         // 动画系统变量
         let animActions = {};
         let currentAnimState = 'idle';
-        let isAttacking = false;
-        let attackTimer = null;
+        let isAttacking = false;      // 是否正在播放攻击动画
+        let attackTimer = null;       // 攻击动画结束计时器
         let currentAction = null;
         
         // 跑步标志
@@ -335,8 +382,10 @@
         function setupInputListeners() {
             document.addEventListener('keydown', (e) => {
                 keyStates[e.code] = true;
-                // 跑步键: 左Shift
                 if (e.code === 'ShiftLeft') isRunning = true;
+                if (e.code === 'KeyP' && document.pointerLockElement === document.body && !isGameOver) {
+                    triggerAttack();   // P键攻击
+                }
             });
             document.addEventListener('keyup', (e) => {
                 keyStates[e.code] = false;
@@ -362,35 +411,53 @@
 
             document.addEventListener('mousedown', (event) => {
                 if (event.button === 0 && document.pointerLockElement === document.body && !isGameOver) {
-                    triggerAttack();
+                    triggerAttack();   // 鼠标左键攻击
                 }
             });
         }
 
-        // 触发攻击动画 (无伤害)
+        // 触发一次攻击动画，动画播放完毕后自动恢复待机/移动动画
         function triggerAttack() {
             if (isGameOver) return;
-            if (isAttacking) return; // 防止攻击动画叠加
+            if (!animActions.attack) return;
+            // 如果已经在攻击中，则忽略本次输入（防止连击打断）
+            if (isAttacking) return;
             
-            // 播放攻击动画
-            if (animActions.attack) {
-                const previousState = currentAnimState;
-                isAttacking = true;
-                switchToAnimation('attack', false);
-                const attackClip = animActions.attack.getClip();
-                const duration = attackClip.duration;
-                if (attackTimer) clearTimeout(attackTimer);
-                attackTimer = setTimeout(() => {
-                    isAttacking = false;
-                    attackTimer = null;
-                    updateAnimationByMovement();
-                }, duration * 1000);
+            // 清除之前的计时器（安全起见）
+            if (attackTimer) {
+                clearTimeout(attackTimer);
+                attackTimer = null;
             }
+            
+            // 标记为攻击状态
+            isAttacking = true;
+            
+            // 淡出当前动画（如果有）
+            if (currentAction && currentAction !== animActions.attack) {
+                currentAction.fadeOut(0.1);
+            }
+            // 重置攻击动画并从头播放
+            animActions.attack.stop().reset().fadeIn(0.1).play();
+            currentAction = animActions.attack;
+            // 更新UI标签
+            if (animLabelSpan) animLabelSpan.innerText = '⚔️ 攻击';
+            
+            // 获取攻击动画时长
+            const attackClip = animActions.attack.getClip();
+            const duration = attackClip.duration;
+            
+            // 设置计时器，动画结束后恢复状态
+            attackTimer = setTimeout(() => {
+                isAttacking = false;
+                attackTimer = null;
+                // 根据移动状态恢复正确的动画（待机/走路/跑步）
+                updateAnimationByMovement();
+            }, duration * 1000);
         }
         
         // 根据移动输入和跑步键决定动画状态 (idle/walk/run)
         function updateAnimationByMovement() {
-            if (isAttacking) return;
+            if (isAttacking) return;   // 攻击动画优先，不切换
             
             const moving = keyStates['KeyW'] || keyStates['KeyS'] || keyStates['KeyA'] || keyStates['KeyD'];
             if (!moving || !playerOnFloor) {
@@ -421,7 +488,6 @@
             if (animType === 'idle') newAction = animActions.idle;
             else if (animType === 'walk') newAction = animActions.walk;
             else if (animType === 'run') newAction = animActions.run;
-            else if (animType === 'attack') newAction = animActions.attack;
             else return;
             
             if (!newAction) return;
@@ -436,7 +502,6 @@
             let label = '待机';
             if (animType === 'walk') label = '🚶 走路';
             else if (animType === 'run') label = '🏃 跑步';
-            else if (animType === 'attack') label = '⚔️ 攻击';
             if (animLabelSpan) animLabelSpan.innerText = label;
         }
         
@@ -527,56 +592,30 @@
         }
 
         async function loadGameAssets() {
-            const manager = new THREE.LoadingManager();
-            const sourceTextureFiles = new Map([
-                ['banners.jpg', './source/Banners.png'],
-                ['banners.png', './source/Banners.png'],
-                ['graffiti.png', './source/Graffiti.png'],
-                ['road_signs.png', './source/Road_Signs.png'],
-                ['roads.png', './source/Roads.png'],
-                ['scrolling text.png', './source/scrolling text.png'],
-                ['textures1.png', './source/Textures1.png'],
-                ['tiles_2.png', './source/Tiles_2.png'],
-                ['tiles_2_normal.png', './source/Tiles_2_Normal.png'],
-                ['tiles_2_roughness.png', './source/Tiles_2_Roughness.png']
-            ]);
-            manager.setURLModifier((url) => {
-                const fileName = url.replace(/\\/g, '/').split('/').pop();
-                const fixedName = fileName
-                    .replace(/\.png\.\d+\.png$/i, '.png')
-                    .replace(/\.png\.\d+$/i, '.png')
-                    .toLowerCase();
-                if (sourceTextureFiles.has(fixedName)) return sourceTextureFiles.get(fixedName);
-                if (url.includes('.png.')) {
-                    return './source/' + fileName.replace(/\.png\.\d+\.png$/i, '.png').replace(/\.png\.\d+$/i, '.png');
-                }
-                return url;
-            });
-
-            const fbxLoader = new FBXLoader(manager);
-            const textureLoader = new THREE.TextureLoader(manager);
-
+            // 使用GLTFLoader加载城市模型 (cartoon_city_free.glb)
+            const gltfLoader = new GLTFLoader();
+            const fbxLoader = new FBXLoader(); // 角色仍使用FBXLoader
+            const textureLoader = new THREE.TextureLoader();
+            
             try {
-                updateStatus("下载城市并修复贴图路径...");
-                fbxLoader.setResourcePath('./source/');
-                const cityFallbackMap = await textureLoader.loadAsync('./source/Textures1.png');
-                cityFallbackMap.colorSpace = THREE.SRGBColorSpace;
-                cityFallbackMap.flipY = false;
-                const cityFBX = await fbxLoader.loadAsync('./source/Cartoon_City_Free.fbx');
+                updateStatus("加载卡通城市模型 (GLB)...");
                 
-                cityFBX.scale.set(CITY_SCALE, CITY_SCALE, CITY_SCALE);
-                cityFBX.traverse(child => {
+                // 加载GLB城市模型
+                const gltf = await gltfLoader.loadAsync('./cartoon_city_free.glb');
+                const cityModel = gltf.scene;
+                cityModel.scale.set(CITY_SCALE, CITY_SCALE, CITY_SCALE);
+                
+                // 设置阴影和材质属性，确保双面渲染和阴影投射接收
+                cityModel.traverse(child => {
                     if (child.isMesh) {
                         child.castShadow = true;
                         child.receiveShadow = true;
-                        if(child.material) {
+                        if (child.material) {
                             const materials = Array.isArray(child.material) ? child.material : [child.material];
                             materials.forEach((material) => {
                                 material.side = THREE.DoubleSide;
-                                if (!material.map) material.map = cityFallbackMap;
                                 if (material.map) {
                                     material.map.colorSpace = THREE.SRGBColorSpace;
-                                    material.map.flipY = false;
                                 }
                                 material.needsUpdate = true;
                             });
@@ -585,22 +624,35 @@
                 });
                 
                 updateStatus("计算物理碰撞区域...");
-                worldOctree.fromGraphNode(cityFBX); 
-                scene.add(cityFBX);
-
+                worldOctree.fromGraphNode(cityModel);
+                scene.add(cityModel);
+                
                 updateStatus("初始化人物模型及动画...");
                 character = await fbxLoader.loadAsync('./renwu/renwu_Meshy_AI_Meshy_Merged_Animations.fbx');
                 character.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
-
+                
+                // 加载角色纹理贴图
+                const charMap = await textureLoader.loadAsync('./renwu/renwu_texture_0.png');
+                const charMetalnessMap = await textureLoader.loadAsync('./renwu/renwu_texture_0_metallic.png');
+                const charNormalMap = await textureLoader.loadAsync('./renwu/renwu_texture_0_normal.png');
+                const charRoughnessMap = await textureLoader.loadAsync('./renwu/renwu_texture_0_roughness.png');
+                
                 const charMat = new THREE.MeshStandardMaterial({
-                    map: await textureLoader.loadAsync('./renwu/renwu_texture_0.png'),
-                    metalnessMap: await textureLoader.loadAsync('./renwu/renwu_texture_0_metallic.png'),
-                    normalMap: await textureLoader.loadAsync('./renwu/renwu_texture_0_normal.png'),
-                    roughnessMap: await textureLoader.loadAsync('./renwu/renwu_texture_0_roughness.png'),
-                    metalness: 1.0, roughness: 1.0
+                    map: charMap,
+                    metalnessMap: charMetalnessMap,
+                    normalMap: charNormalMap,
+                    roughnessMap: charRoughnessMap,
+                    metalness: 1.0,
+                    roughness: 1.0
                 });
-                character.traverse(c => { if(c.isMesh) c.material = charMat; c.castShadow = true; });
-
+                character.traverse(c => { 
+                    if(c.isMesh) {
+                        c.material = charMat;
+                        c.castShadow = true;
+                        c.receiveShadow = true;
+                    }
+                });
+                
                 mixer = new THREE.AnimationMixer(character);
                 
                 // 初始化动画Action
@@ -628,16 +680,117 @@
                 } else {
                     console.warn("模型无动画");
                 }
-
+                
                 scene.add(character);
                 playerCollider.translate(new THREE.Vector3(0, PLAYER_START_Y, 0));
                 resetFallTracking();
-
+                
+                // ========== 加载NPC：fetch缓存 + 独立解析10个NPC ==========
+                updateStatus("下载NPC模型数据...");
+                
+                // 1. 下载FBX文件到内存（仅一次网络请求）
+                const fbxResponse = await fetch('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_Meshy_AI_Meshy_Merged_Animations.fbx');
+                const fbxData = await fbxResponse.arrayBuffer();
+                
+                // 2. 加载贴图（所有NPC共用）
+                updateStatus("加载NPC贴图...");
+                const npcMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0.png');
+                const npcMetalnessMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_metallic.png');
+                const npcNormalMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_normal.png');
+                const npcRoughnessMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_roughness.png');
+                
+                const npcMat = new THREE.MeshStandardMaterial({
+                    map: npcMap,
+                    metalnessMap: npcMetalnessMap,
+                    normalMap: npcNormalMap,
+                    roughnessMap: npcRoughnessMap,
+                    metalness: 1.0,
+                    roughness: 1.0
+                });
+                
+                // 3. 从缓存数据独立解析10个NPC实例
+                updateStatus("生成10个NPC...");
+                for (let i = 0; i < NPC_COUNT; i++) {
+                    const npcChar = fbxLoader.parse(fbxData, '');
+                    // 每个NPC独立设置缩放与玩家一致
+                    npcChar.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+                    
+                    // 应用贴图
+                    npcChar.traverse(c => {
+                        if (c.isMesh) {
+                            c.material = npcMat;
+                            c.castShadow = true;
+                            c.receiveShadow = true;
+                        }
+                    });
+                    
+                    // 记录动画信息（用第一个NPC的）
+                    if (i === 0 && npcChar.animations && npcChar.animations.length > 0) {
+                        npcTemplateAnimClips = npcChar.animations;
+                        console.log(" === NPC动画列表 (" + npcTemplateAnimClips.length + "个) ===");
+                        npcTemplateAnimClips.forEach((clip, idx) => {
+                            console.log(`  NPC动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
+                        });
+                    }
+                    
+                    // 创建动画混合器（使用当前NPC自己的clips）
+                    const npcMixer = new THREE.AnimationMixer(npcChar);
+                    const clips = npcChar.animations || [];
+                    const actions = {};
+                    clips.forEach((clip, idx) => {
+                        actions[idx] = npcMixer.clipAction(clip);
+                    });
+                    
+                    // 默认播放走路动画 (索引0=攻击, 索引1=走路)
+                    const walkIdx = 0;
+                    let currentAction = null;
+                    if (actions[walkIdx]) {
+                        currentAction = actions[walkIdx];
+                        currentAction.play();
+                    }
+                    
+                    // 放置到场景
+                    const pos = npcSpawnPositions[i];
+                    npcChar.position.set(pos[0], pos[1], pos[2]);
+                    scene.add(npcChar);
+                    
+                    // 碰撞体
+                    const collider = new Capsule(
+                        new THREE.Vector3(0, 0.4, 0),
+                        new THREE.Vector3(0, 1.2, 0),
+                        0.4
+                    );
+                    collider.translate(new THREE.Vector3(pos[0], pos[1], pos[2]));
+                    
+                    // 随机方向
+                    const angle = Math.random() * Math.PI * 2;
+                    const direction = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle));
+                    
+                    npcList.push({
+                        character: npcChar,
+                        mixer: npcMixer,
+                        collider: collider,
+                        velocity: new THREE.Vector3(),
+                        direction: direction,
+                        onFloor: false,
+                        actions: actions,
+                        currentAction: currentAction,
+                        walkIdx: walkIdx,
+                        activeAnimIdx: walkIdx
+                    });
+                }
+                console.log(`已创建 ${NPC_COUNT} 个NPC，默认播放走路动画`);
+                
+                // 动态生成NPC动画切换按钮
+                createNpcButtons();
+                
+                // ========================================
+                
                 document.getElementById('loading-screen').style.display = 'none';
                 animate();
-
+                
             } catch (err) {
-                console.error(err);
+                console.error("加载失败: ", err);
                 updateStatus("资源加载失败: " + err.message);
             }
         }
@@ -646,6 +799,134 @@
             document.title = "超自由城市";
             document.getElementById('status').innerText = "资源加载中...";
         }
+        
+        // ========== NPC动画按钮：切换所有NPC的动画 ==========
+        function createNpcButtons() {
+            const container = document.getElementById('npc-controls');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const count = npcTemplateAnimClips.length;
+            if (count === 0) {
+                container.innerHTML = '<span style="color:#888;font-size:13px;">NPC无动画</span>';
+                return;
+            }
+
+            for (let i = 0; i < count; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'npc-btn';
+                btn.textContent = (i + 1).toString();
+                btn.title = npcTemplateAnimClips[i].name || ('动画 #' + (i + 1));
+                btn.addEventListener('click', () => switchAllNpcAnimation(i));
+                container.appendChild(btn);
+            }
+
+            const label = document.getElementById('npc-anim-label');
+            const walkIdx = (npcTemplateAnimClips.length > 2) ? 2 : 0;
+            if (label && npcTemplateAnimClips.length > 0) {
+                label.innerText = npcTemplateAnimClips[walkIdx].name || ('走路 #' + (walkIdx + 1));
+            }
+            highlightNpcBtn(walkIdx);
+        }
+
+        function switchAllNpcAnimation(index) {
+            if (index >= npcTemplateAnimClips.length || index < 0) return;
+            npcList.forEach(npc => {
+                if (!npc.actions[index]) return;
+                if (npc.currentAction) npc.currentAction.fadeOut(0.15);
+                npc.currentAction = npc.actions[index];
+                npc.currentAction.reset().fadeIn(0.15).play();
+                npc.activeAnimIdx = index;
+            });
+            const label = document.getElementById('npc-anim-label');
+            if (label && npcTemplateAnimClips.length > index) {
+                label.innerText = npcTemplateAnimClips[index].name || ('动画 #' + (index + 1));
+            }
+            highlightNpcBtn(index);
+        }
+
+        function highlightNpcBtn(index) {
+            const buttons = document.querySelectorAll('.npc-btn');
+            buttons.forEach((btn, i) => {
+                if (i === index) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+        // ==========================================
+        
+        // ========== NPC自动移动与碰撞系统 ==========
+        function updateNpcs(deltaTime) {
+            if (npcList.length === 0) return;
+            
+            npcList.forEach(npc => {
+                // 重力
+                npc.velocity.y -= GRAVITY * deltaTime;
+                
+                // 水平移动
+                const hSpeed = NPC_MOVE_SPEED;
+                const moveX = npc.direction.x * hSpeed * deltaTime;
+                const moveZ = npc.direction.z * hSpeed * deltaTime;
+                
+                // 阻尼
+                const damping = Math.exp(-3 * deltaTime) - 1;
+                if (!npc.onFloor) {
+                    npc.velocity.x += npc.velocity.x * damping * 0.1;
+                    npc.velocity.z += npc.velocity.z * damping * 0.1;
+                }
+                npc.velocity.x += npc.velocity.x * damping;
+                npc.velocity.z += npc.velocity.z * damping;
+                
+                // 组合位移
+                const deltaPos = new THREE.Vector3(moveX, npc.velocity.y * deltaTime, moveZ);
+                npc.collider.translate(deltaPos);
+                
+                // 碰撞检测
+                const result = worldOctree.capsuleIntersect(npc.collider);
+                npc.onFloor = false;
+                
+                if (result) {
+                    npc.onFloor = result.normal.y > 0;
+                    
+                    if (!npc.onFloor) {
+                        // 碰到墙壁 → 反弹+转向
+                        npc.velocity.addScaledVector(result.normal, -result.normal.dot(npc.velocity));
+                    }
+                    npc.collider.translate(result.normal.multiplyScalar(result.depth));
+                    
+                    // 碰到非地面 → 随机转向新方向
+                    if (result.normal.y < 0.3) {
+                        const angle = Math.random() * Math.PI * 2;
+                        npc.direction.set(Math.sin(angle), 0, Math.cos(angle));
+                    }
+                }
+                
+                // 偶尔随机转向（即使没碰撞），让移动更自然
+                if (npc.onFloor && Math.random() < 0.002) {
+                    const angle = Math.random() * Math.PI * 2;
+                    npc.direction.set(Math.sin(angle), 0, Math.cos(angle));
+                }
+                
+                // 防止掉出世界
+                if (npc.collider.start.y < DEAD_Y_LIMIT) {
+                    const spawn = npcSpawnPositions[npcList.indexOf(npc) % NPC_COUNT];
+                    npc.collider.start.set(spawn[0], spawn[1] + 0.4, spawn[2]);
+                    npc.collider.end.set(spawn[0], spawn[1] + 1.2, spawn[2]);
+                    npc.velocity.set(0, 0, 0);
+                }
+                
+                // 更新模型位置与朝向
+                npc.character.position.copy(npc.collider.start);
+                npc.character.position.y -= 0.4;
+                
+                if (npc.onFloor) {
+                    const targetAngle = Math.atan2(npc.direction.x, npc.direction.z);
+                    let diff = targetAngle - npc.character.rotation.y;
+                    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+                    npc.character.rotation.y += diff * 6 * deltaTime;
+                }
+            });
+        }
+        // ==========================================
         
         function getMoveDirection(isForward) {
             camera.getWorldDirection(playerDirection);
@@ -727,6 +1008,7 @@
             if (!playerOnFloor && isAirborneActive) fallMaxY = Math.max(fallMaxY, playerCollider.start.y);
             if (playerOnFloor && isAirborneActive) resetFallTracking();
             
+            // 根据攻击状态更新动画（攻击期间不切换）
             if (!isAttacking) updateAnimationByMovement();
             
             if (character) {
@@ -741,6 +1023,9 @@
                 }
                 if (mixer) mixer.update(deltaTime);
             }
+            
+            // 更新所有NPC
+            updateNpcs(deltaTime);
             
             if (playerCollider.start.y < DEAD_Y_LIMIT && !isGameOver) {
                 isGameOver = true;
@@ -766,11 +1051,18 @@
         }
         
         function animate() {
-            if(isGameOver) return;
+            if (isGameOver) {
+                const dt = Math.min(0.05, clock.getDelta());
+                npcList.forEach(npc => { if (npc.mixer) npc.mixer.update(dt); });
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+                return;
+            }
             requestAnimationFrame(animate);
             const dt = Math.min(0.05, clock.getDelta());
             const subSteps = 5;
             for (let i = 0; i < subSteps; i++) updatePhysics(dt / subSteps);
+            npcList.forEach(npc => { if (npc.mixer) npc.mixer.update(dt); });
             renderer.render(scene, camera);
         }
     </script>
