@@ -244,15 +244,15 @@ Case 3: 13</pre>
             </div>
             
             <div style="text-align: left; margin-top: 15px; background-color: #fdfefe; padding: 20px; border-radius: 12px; border: 2px dashed #d2b4de;">
-                <p>假设我们用 <strong>$f(i, j)$</strong> 表示 $i$ 个骑士比赛，最终产生了 $j$ 个名次的方案数。</p>
+                <p>假设我们用 <strong>f(i, j)</strong> 表示 i 个骑士比赛，最终产生了 j 个名次的方案数。</p>
                 <ul style="list-style: none; padding: 0; margin: 0;">
                     <li style="margin-bottom: 18px; border-bottom: 1px solid #f4ecf7; padding-bottom: 12px;">
                         <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">选择 1</span> 
-                        <span style="color: #4a235a;"><strong>选择并列：</strong> 第 i 个骑士入场时，他可以和前面的骑士并列！前面的 i-1 人已经占了 j 个名次，所以他有 j 个位置可以选择加入。<br><span style="margin-left: 80px; color: #8e44ad;">👉 带来的方案数：$j \times f(i-1, j)$</span></span>
+                        <span style="color: #4a235a;"><strong>选择并列：</strong> 第 i 个骑士入场时，他可以和前面的骑士并列！前面的 i-1 人已经占了 j 个名次，所以他有 j 个位置可以选择加入。<br><span style="margin-left: 80px; color: #8e44ad;">👉 带来的方案数：j  *  f(i-1, j)</span></span>
                     </li>
                     <li style="margin-bottom: 5px;">
                         <span style="display: inline-block; background-color: #9b59b6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-right: 10px; font-size: 0.9em;">选择 2</span> 
-                        <span style="color: #4a235a;"><strong>独占名次：</strong> 第 i 个骑士不愿并列，他自己霸占一个新名次！这意味着前面的人其实只占了 j-1 个名次，而他可以在最终这 j 个名次中挑选任意一个名次插入（比如抢第一，或者落到最后）。<br><span style="margin-left: 80px; color: #8e44ad;">👉 带来的方案数：$j \times f(i-1, j-1)$</span></span>
+                        <span style="color: #4a235a;"><strong>独占名次：</strong> 第 i 个骑士不愿并列，他自己霸占一个新名次！这意味着前面的人其实只占了 j-1 个名次，而他可以在最终这 j 个名次中挑选任意一个名次插入（比如抢第一，或者落到最后）。<br><span style="margin-left: 80px; color: #8e44ad;">👉 带来的方案数：j  *  f(i-1, j-1)</span></span>
                     </li>
                 </ul>
             </div>
@@ -262,7 +262,7 @@ Case 3: 13</pre>
             💡 状态转移公式（加起来并提取公因数 j）：
         </div>
         <div class="formula">
-            $$f(i, j) = (f(i-1, j) + f(i-1, j-1)) \times j \pmod{10056}$$
+            f(i, j) = (f(i-1, j) + f(i-1, j-1))  *  j  % 10056
         </div>
         <p style="text-align: center;">最终 n 个骑士的总方案数就是：<strong>把他们分出 1 个名次一直到分出 n 个名次的方案数全部加起来！</strong></p>
     </div>
@@ -283,7 +283,7 @@ Case 3: 13</pre>
 <span class="keyword">using namespace std;</span>
 
 <span class="keyword">const int</span> N = <span class="number">1005</span>;
-<span class="keyword">const int</span> MOD = <span class="number">10056</span>;
+<span class="keyword">const int</span> M = <span class="number">10056</span>;
 <span class="type">int</span> f[N][N], ans[N] = {<span class="number">0</span>, <span class="number">1</span>}; <span class="comment">// 魔法阵：f 是状态，ans 记录总和，ans 初始化为 1</span>
 
 <span class="type">int</span> main() {
@@ -294,10 +294,10 @@ Case 3: 13</pre>
     <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i &lt; N; i++) {
         <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= i; j++) {
             <span class="comment">// 并列现有名次 + 独占新名次 (注意处处取模)</span>
-            f[i][j] = (f[i-<span class="number">1</span>][j] * j + f[i-<span class="number">1</span>][j-<span class="number">1</span>] * j) % MOD; 
+            f[i][j] = (f[i-<span class="number">1</span>][j] * j + f[i-<span class="number">1</span>][j-<span class="number">1</span>] * j) % M; 
             
             <span class="comment">// 累加当前人数下，不同名次个数的方案数</span>
-            ans[i] = (ans[i] + f[i][j]) % MOD; 
+            ans[i] = (ans[i] + f[i][j]) % M; 
         }
     }
     
@@ -331,7 +331,7 @@ Case 3: 13</pre>
 <span class="keyword">import</span> sys
 
 <span class="keyword">def</span> <span class="type">main</span>():
-    MOD = <span class="number">10056</span>
+    M = <span class="number">10056</span>
     N = <span class="number">1005</span>
     
     <span class="comment"># 📖 准备魔法笔记本：f[i][j] 表示 i 个人排成 j 个名次的方案数</span>
@@ -347,10 +347,10 @@ Case 3: 13</pre>
     <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">2</span>, N):
         <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, i + <span class="number">1</span>):
             <span class="comment"># (并列现有名次 + 独占新名次) * 选取位置，步步取模</span>
-            f[i][j] = (f[i-<span class="number">1</span>][j] * j + f[i-<span class="number">1</span>][j-<span class="number">1</span>] * j) % MOD
+            f[i][j] = (f[i-<span class="number">1</span>][j] * j + f[i-<span class="number">1</span>][j-<span class="number">1</span>] * j) % M
             
             <span class="comment"># 累加结果</span>
-            ans[i] = (ans[i] + f[i][j]) % MOD
+            ans[i] = (ans[i] + f[i][j]) % M
             
     <span class="comment"># 📥 一次性读取所有魔法输入</span>
     input_data = sys.stdin.read().split()
@@ -373,8 +373,8 @@ Case 3: 13</pre>
         <h2>💡 技巧和重点总结 (划重点啦)</h2>
         <ul>
             <li><strong>🌟 组合数学的转化：</strong> 这道题在数学上相当于求「有序集合划分数」（Fubini numbers/Ordered Bell numbers）。我们通过动态规划，巧妙地将排名的逻辑转化为了向已有排名的缝隙里“插空”和“合并”的操作。</li>
-            <li><strong>🌟 取模运算的分配律：</strong> 在编程中，<span class="code-inline">(a + b) % M</span> 等价于 <span class="code-inline">((a % M) + (b % M)) % M</span>。同理，乘法也适用！所以我们在递推每一步都勇敢地放手去 <span class="code-inline">% MOD</span> 吧，它能保证答案正确且绝不溢出！</li>
-            <li><strong>🌟 时空复杂度的权衡：</strong> 虽然查询次数可能很多，但总人数最多才 1000 人。预先花 $O(N^2)$ 的时间算好所有的榜单存起来，之后每次查询只需 $O(1)$ 的时间，这叫做“以空间换时间”，是算法大师们的必修课哦！</li>
+            <li><strong>🌟 取模运算的分配律：</strong> 在编程中，<span class="code-inline">(a + b) % M</span> 等价于 <span class="code-inline">((a % M) + (b % M)) % M</span>。同理，乘法也适用！所以我们在递推每一步都勇敢地放手去 <span class="code-inline">% M</span> 吧，它能保证答案正确且绝不溢出！</li>
+            <li><strong>🌟 时空复杂度的权衡：</strong> 虽然查询次数可能很多，但总人数最多才 1000 人。预先花 O(N^2) 的时间算好所有的榜单存起来，之后每次查询只需 O(1) 的时间，这叫做“以空间换时间”，是算法大师们的必修课哦！</li>
         </ul>
     </div>
 
