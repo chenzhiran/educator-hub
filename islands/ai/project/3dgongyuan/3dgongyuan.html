@@ -686,19 +686,27 @@
                     // 构建名称→索引映射（环境无关，按名称精确查找）
                     const idxMap = {};
                     character.animations.forEach((clip, i) => {
-                        idxMap[(clip.name || '').toLowerCase()] = i;
+                        // 原始名称 + 去除所有非字母数字的归一化名称
+                        const raw = (clip.name || '').toLowerCase();
+                        const clean = raw.replace(/[^a-z0-9]/g, '');
+                        idxMap[raw] = i;
+                        idxMap[clean] = i;
                     });
-                    const safeGet = (name, fallbackKw) => {
-                        if (idxMap[name] !== undefined) return idxMap[name];
+                    console.log("  动画映射:", JSON.stringify(idxMap));
+                    
+                    const safeGet = (preferredNames, fallbackKw) => {
+                        for (const name of preferredNames) {
+                            if (idxMap[name] !== undefined) return idxMap[name];
+                        }
                         const found = findAnimByKeyword(character.animations, fallbackKw);
                         return found >= 0 ? found : 0;
                     };
                     
-                    // 按视觉效果用名称定位（不依赖数组顺序）
-                    const _idle   = safeGet('walking',     ['idle', 'tpose', 'stand']);
-                    const _walk   = safeGet('punch_combo', ['walk']);
-                    const _run    = safeGet('idle_11',     ['run']);
-                    const _attack = safeGet('walking_2',   ['attack', 'punch', 'hit']);
+                    // 按视觉效果用名称定位（尝试多个名称变体）
+                    const _idle   = safeGet(['walking', 'walk'],   ['idle', 'tpose', 'stand']);
+                    const _walk   = safeGet(['punch_combo', 'punchcombo', 'punch'], ['walk']);
+                    const _run    = safeGet(['idle_11', 'idle11'], ['run']);
+                    const _attack = safeGet(['walking_2', 'walking2'], ['attack', 'hit']);
                     
                     console.log(`  名称定位: idle=${_idle}, walk=${_walk}, run=${_run}, attack=${_attack}`);
                     
