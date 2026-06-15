@@ -670,45 +670,47 @@
                 
                 mixer = new THREE.AnimationMixer(character);
                 
-                // 初始化动画Action（按名称匹配，不依赖索引顺序）
+                // 初始化动画Action：根据FBX版本自动选择正确的映射
                 if (character.animations && character.animations.length > 0) {
                     console.log("=== 玩家动画列表 (" + character.animations.length + "个) ===");
                     character.animations.forEach((clip, idx) => {
                         console.log(`  玩家动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
                     });
                     
-                    // 按名称逐步匹配，已占用的索引自动排除
-                    const idle   = findAnimByKeyword(character.animations, ['idle', 'tpose', 'stand', '静止']);
-                    const attack = findAnimByKeyword(character.animations, ['punch', 'attack', '攻击', 'hit', 'combo'], [idle]);
-                    const walk   = findAnimByKeyword(character.animations, ['walk'], [idle, attack]);
-                    const run    = findAnimByKeyword(character.animations, ['run', '跑步'], [idle, attack, walk]);
+                    // 根据动画名称签名称检测FBX版本
+                    const names = character.animations.map(c => (c.name || '').toLowerCase());
+                    const isLocalFbx = names.includes('punch_combo') && names.includes('idle_11');
+                    const isOnlineFbx = names.some(n => n.includes('thoughtful')) || names.some(n => n.includes('character_output'));
                     
-                    // 构建名称→索引映射（环境无关，按名称精确查找）
-                    const idxMap = {};
-                    character.animations.forEach((clip, i) => {
-                        // 原始名称 + 去除所有非字母数字的归一化名称
-                        const raw = (clip.name || '').toLowerCase();
-                        const clean = raw.replace(/[^a-z0-9]/g, '');
-                        idxMap[raw] = i;
-                        idxMap[clean] = i;
-                    });
-                    console.log("  动画映射:", JSON.stringify(idxMap));
+                    let _idle, _walk, _run, _attack;
                     
-                    const safeGet = (preferredNames, fallbackKw) => {
-                        for (const name of preferredNames) {
-                            if (idxMap[name] !== undefined) return idxMap[name];
-                        }
-                        const found = findAnimByKeyword(character.animations, fallbackKw);
-                        return found >= 0 ? found : 0;
-                    };
+                    if (isLocalFbx) {
+                        // 本地版FBX：walking_2/attack, Punch_Combo/walk, Idle_11/run, Walking/idle
+                        _idle   = names.indexOf('walking');
+                        _walk   = names.indexOf('punch_combo');
+                        _run    = names.indexOf('idle_11');
+                        _attack = names.indexOf('walking_2');
+                        console.log("  检测到本地版FBX");
+                    } else if (isOnlineFbx) {
+                        // 线上版FBX：Walking, walking_2, Character_output, Running, Thoughtful_Walk
+                        _idle   = names.indexOf('running');
+                        _walk   = names.indexOf('walking');
+                        _run    = names.indexOf('walking_2');
+                        _attack = names.indexOf('thoughtful_walk');
+                        // 如果线上run动画跟idle重复，尝试其他
+                        if (_run === _idle || _run === _walk) _run = names.indexOf('walking_2');
+                        if (_attack < 0) _attack = 1; // 回退
+                        console.log("  检测到线上版FBX");
+                    } else {
+                        // 未知版本：用关键词回退
+                        _idle   = findAnimByKeyword(character.animations, ['idle', 'tpose', 'stand', 'walking']);
+                        _walk   = findAnimByKeyword(character.animations, ['walk'], [_idle]);
+                        _run    = findAnimByKeyword(character.animations, ['run', 'walking_2'], [_idle, _walk]);
+                        _attack = findAnimByKeyword(character.animations, ['attack', 'punch', 'thoughtful'], [_idle, _walk, _run]);
+                        console.log("  使用通用关键词匹配");
+                    }
                     
-                    // 按视觉效果用名称定位（尝试多个名称变体）
-                    const _idle   = safeGet(['walking', 'walk'],   ['idle', 'tpose', 'stand']);
-                    const _walk   = safeGet(['punch_combo', 'punchcombo', 'punch'], ['walk']);
-                    const _run    = safeGet(['idle_11', 'idle11'], ['run']);
-                    const _attack = safeGet(['walking_2', 'walking2'], ['attack', 'hit']);
-                    
-                    console.log(`  名称定位: idle=${_idle}, walk=${_walk}, run=${_run}, attack=${_attack}`);
+                    console.log(`  最终: idle=${_idle}, walk=${_walk}, run=${_run}, attack=${_attack}`);
                     
                     animActions.idle  = mixer.clipAction(character.animations[_idle]);
                     animActions.walk  = mixer.clipAction(character.animations[_walk]);
