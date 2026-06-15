@@ -133,32 +133,13 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* NPC动画控制面板 */
-        #npc-controls {
+        /* 玩家动画调试面板 */
+        #debug-panel {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 10px; z-index: 20;
-            background: rgba(0, 0, 0, 0.7); padding: 10px 18px; border-radius: 30px;
-            backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2);
-        }
-        .npc-btn {
-            width: 44px; height: 44px; border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.35);
-            background: rgba(60,60,90,0.8); color: white;
-            font-size: 18px; font-weight: bold; cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
-            user-select: none;
-        }
-        .npc-btn:hover { background: rgba(0, 180, 230, 0.5); border-color: #00d1ff; transform: scale(1.12); }
-        .npc-btn.active { background: rgba(0, 200, 255, 0.75); border-color: #00d1ff; box-shadow: 0 0 18px rgba(0,200,255,0.55); }
-        #npc-anim-label {
-            color: #ffaa44; font-size: 13px; text-align: center; margin-bottom: 6px;
-            font-weight: bold; letter-spacing: 1px;
-        }
-        #npc-info {
-            position: absolute; bottom: 115px; left: 50%; transform: translateX(-50%);
-            color: white; font-size: 12px; z-index: 20;
-            background: rgba(0,0,0,0.65); padding: 5px 18px; border-radius: 18px;
-            pointer-events: none; letter-spacing: 0.5px;
+            z-index: 20; background: rgba(0,0,0,0.7); padding: 8px 20px;
+            border-radius: 20px; backdrop-filter: blur(6px);
+            color: #00ff88; font-size: 14px; text-align: center;
+            pointer-events: none; letter-spacing: 1px;
         }
     </style>
 </head>
@@ -219,11 +200,8 @@
         </div>
     </div>
 
-    <div id="npc-info">
-        🤖 NPC动画预览 · 编号: <span id="npc-anim-label">---</span>
-    </div>
-    <div id="npc-controls">
-        <!-- 数字按钮由JS动态生成 -->
+    <div id="debug-panel">
+        🔍 玩家动画调试：按 1-5 切换 | 当前: <span id="debug-anim-idx">0</span> (<span id="debug-anim-name">---</span>)
     </div>
 
     <script type="importmap">
@@ -305,12 +283,6 @@
         // NPC 系统 — 10个自由走动的NPC
         const NPC_COUNT = 10;
         const NPC_MOVE_SPEED = 3.5;
-        const npcSpawnPositions = [
-            [-20, 25, -20], [20, 25, -20], [-20, 25, 20], [20, 25, 20],
-            [-30, 25, 0],  [30, 25, 0],   [0, 25, -30],  [0, 25, 30],
-            [-15, 25, -10],[15, 25, 10]
-        ];
-        let npcTemplateAnimClips = [];     // 动画Clip数组（用于按钮标签）
         let npcList = [];                  // [{character, mixer, collider, velocity, direction, onFloor, actions, currentAction}]
         
         // 血量 & 体力
@@ -405,6 +377,14 @@
             document.addEventListener('keyup', (e) => {
                 keyStates[e.code] = false;
                 if (e.code === 'ShiftLeft') isRunning = false;
+            });
+            
+            // 调试：按数字键1-5播放对应动画
+            document.addEventListener('keydown', (e) => {
+                if (e.code >= 'Digit1' && e.code <= 'Digit5') {
+                    const idx = parseInt(e.code.replace('Digit', '')) - 1;
+                    debugPlayAnim(idx);
+                }
             });
 
             const blocker = document.getElementById('blocker');
@@ -772,9 +752,8 @@
                     
                     // 记录动画信息（用第一个NPC的）
                     if (i === 0 && npcChar.animations && npcChar.animations.length > 0) {
-                        npcTemplateAnimClips = npcChar.animations;
-                        console.log(" === NPC动画列表 (" + npcTemplateAnimClips.length + "个) ===");
-                        npcTemplateAnimClips.forEach((clip, idx) => {
+                        console.log(" === NPC动画列表 (" + npcChar.animations.length + "个) ===");
+                        npcChar.animations.forEach((clip, idx) => {
                             console.log(`  NPC动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
                         });
                     }
@@ -795,9 +774,15 @@
                         currentAction.play();
                     }
                     
-                    // 放置到场景
-                    const pos = npcSpawnPositions[i];
-                    npcChar.position.set(pos[0], pos[1], pos[2]);
+                    // 在玩家附近生成
+                    const px = character ? character.position.x : 0;
+                    const py = character ? character.position.y + 0.4 : PLAYER_START_Y;
+                    const pz = character ? character.position.z : 0;
+                    const r = 2 + Math.random() * 3;
+                    const a = Math.random() * Math.PI * 2;
+                    const sx = px + Math.sin(a) * r;
+                    const sz = pz + Math.cos(a) * r;
+                    npcChar.position.set(sx, py, sz);
                     scene.add(npcChar);
                     
                     // 碰撞体
@@ -806,7 +791,7 @@
                         new THREE.Vector3(0, 1.2, 0),
                         0.4
                     );
-                    collider.translate(new THREE.Vector3(pos[0], pos[1], pos[2]));
+                    collider.translate(new THREE.Vector3(sx, py, sz));
                     
                     // 随机方向
                     const angle = Math.random() * Math.PI * 2;
@@ -827,9 +812,6 @@
                 }
                 console.log(`已创建 ${NPC_COUNT} 个NPC，默认播放走路动画`);
                 
-                // 动态生成NPC动画切换按钮
-                createNpcButtons();
-                
                 // ========================================
                 
                 document.getElementById('loading-screen').style.display = 'none';
@@ -846,57 +828,29 @@
             document.getElementById('status').innerText = "资源加载中...";
         }
         
-        // ========== NPC动画按钮：切换所有NPC的动画 ==========
-        function createNpcButtons() {
-            const container = document.getElementById('npc-controls');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const count = npcTemplateAnimClips.length;
-            if (count === 0) {
-                container.innerHTML = '<span style="color:#888;font-size:13px;">NPC无动画</span>';
-                return;
-            }
-
-            for (let i = 0; i < count; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'npc-btn';
-                btn.textContent = (i + 1).toString();
-                btn.title = npcTemplateAnimClips[i].name || ('动画 #' + (i + 1));
-                btn.addEventListener('click', () => switchAllNpcAnimation(i));
-                container.appendChild(btn);
-            }
-
-            const label = document.getElementById('npc-anim-label');
-            const walkIdx = (npcTemplateAnimClips.length > 2) ? 2 : 0;
-            if (label && npcTemplateAnimClips.length > 0) {
-                label.innerText = npcTemplateAnimClips[walkIdx].name || ('走路 #' + (walkIdx + 1));
-            }
-            highlightNpcBtn(walkIdx);
-        }
-
-        function switchAllNpcAnimation(index) {
-            if (index >= npcTemplateAnimClips.length || index < 0) return;
-            npcList.forEach(npc => {
-                if (!npc.actions[index]) return;
-                if (npc.currentAction) npc.currentAction.fadeOut(0.15);
-                npc.currentAction = npc.actions[index];
-                npc.currentAction.reset().fadeIn(0.15).play();
-                npc.activeAnimIdx = index;
-            });
-            const label = document.getElementById('npc-anim-label');
-            if (label && npcTemplateAnimClips.length > index) {
-                label.innerText = npcTemplateAnimClips[index].name || ('动画 #' + (index + 1));
-            }
-            highlightNpcBtn(index);
-        }
-
-        function highlightNpcBtn(index) {
-            const buttons = document.querySelectorAll('.npc-btn');
-            buttons.forEach((btn, i) => {
-                if (i === index) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
+        // ========== 玩家动画调试：按数字键切换动画 ==========
+        let debugAnimIdx = -1;
+        function debugPlayAnim(index) {
+            if (!character || !character.animations || index >= character.animations.length || index < 0) return;
+            // 停止当前所有玩家动画
+            if (animActions.idle)  animActions.idle.stop();
+            if (animActions.walk)  animActions.walk.stop();
+            if (animActions.run)   animActions.run.stop();
+            if (animActions.attack)animActions.attack.stop();
+            // 播放指定索引的动画
+            const tempMixer = new THREE.AnimationMixer(character);
+            const action = tempMixer.clipAction(character.animations[index]);
+            action.play();
+            // 存储以便在animate中更新
+            window._debugMixer = tempMixer;
+            window._debugAction = action;
+            debugAnimIdx = index;
+            // 更新UI
+            const nameEl = document.getElementById('debug-anim-name');
+            const idxEl = document.getElementById('debug-anim-idx');
+            if (idxEl) idxEl.innerText = index;
+            if (nameEl) nameEl.innerText = character.animations[index].name || '未命名';
+            console.log(`🔍 播放动画[${index}]: "${character.animations[index].name}" (${character.animations[index].duration.toFixed(2)}s)`);
         }
         // ==========================================
         
@@ -952,11 +906,15 @@
                     npc.direction.set(Math.sin(angle), 0, Math.cos(angle));
                 }
                 
-                // 防止掉出世界
+                // 防止掉出世界：重生到玩家附近
                 if (npc.collider.start.y < DEAD_Y_LIMIT) {
-                    const spawn = npcSpawnPositions[npcList.indexOf(npc) % NPC_COUNT];
-                    npc.collider.start.set(spawn[0], spawn[1] + 0.4, spawn[2]);
-                    npc.collider.end.set(spawn[0], spawn[1] + 1.2, spawn[2]);
+                    const px = character ? character.position.x : 0;
+                    const py = character ? character.position.y + 0.4 : PLAYER_START_Y;
+                    const pz = character ? character.position.z : 0;
+                    const r = 2 + Math.random() * 3;
+                    const a = Math.random() * Math.PI * 2;
+                    npc.collider.start.set(px + Math.sin(a) * r, py, pz + Math.cos(a) * r);
+                    npc.collider.end.set(px + Math.sin(a) * r, py + 0.8, pz + Math.cos(a) * r);
                     npc.velocity.set(0, 0, 0);
                 }
                 
@@ -1100,6 +1058,7 @@
             if (isGameOver) {
                 const dt = Math.min(0.05, clock.getDelta());
                 npcList.forEach(npc => { if (npc.mixer) npc.mixer.update(dt); });
+                if (window._debugMixer) window._debugMixer.update(dt);
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
                 return;
@@ -1109,6 +1068,8 @@
             const subSteps = 5;
             for (let i = 0; i < subSteps; i++) updatePhysics(dt / subSteps);
             npcList.forEach(npc => { if (npc.mixer) npc.mixer.update(dt); });
+            if (window._debugMixer) window._debugMixer.update(dt);
+            if (debugAnimIdx >= 0 && character && mixer) mixer.update(dt);
             renderer.render(scene, camera);
         }
     </script>
