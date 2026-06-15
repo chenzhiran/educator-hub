@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>超自由城市 - 体力与动画系统</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: "Microsoft YaHei", sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: "Microsoft YaHei", sans-serif; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         
         #ui-overlay {
             position: absolute; top: 20px; left: 20px; color: white;
@@ -98,14 +98,23 @@
 
         #blocker {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); display: flex; flex-direction: column;
+            background: rgba(0, 0, 0, 0.55); display: flex; flex-direction: column;
             justify-content: center; align-items: center; color: white; z-index: 50;
-            cursor: pointer;
         }
-        #instructions { text-align: center; font-size: 18px; line-height: 1.8; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 20px; max-width: 90%; }
-        #instructions span { font-size: 24px; font-weight: bold; color: #00d1ff; }
-        .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; text-align: left; }
-        .controls-grid kbd { background: #222; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #ffaa44; }
+        #instructions { text-align: center; line-height: 1.6; background: rgba(10,10,30,0.85); padding: 28px 24px; border-radius: 20px; max-width: 440px; width: 88%; border: 2px solid rgba(255,255,255,0.15); }
+        #instructions .title { font-size: 22px; font-weight: bold; color: #00d1ff; display: block; margin-bottom: 14px; }
+        .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; text-align: left; font-size: 14px; }
+        .controls-grid div { padding: 2px 0; }
+        .controls-grid kbd { background: #222; padding: 2px 7px; border-radius: 4px; font-weight: bold; color: #ffaa44; font-size: 14px; }
+        #start-btn {
+            display: block; margin: 18px auto 0 auto; padding: 14px 48px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            background: linear-gradient(135deg, #00d1ff, #0088cc);
+            border: none; border-radius: 30px; color: white;
+            letter-spacing: 2px; transition: 0.2s;
+            box-shadow: 0 4px 20px rgba(0,200,255,0.4);
+        }
+        #start-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px rgba(0,200,255,0.6); }
 
         #game-over {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -141,6 +150,41 @@
             color: #00ff88; font-size: 14px; text-align: center;
             pointer-events: none; letter-spacing: 1px;
         }
+
+        /* 手机端触屏控件 */
+        #mobile-controls-ui { display: none; }
+        @media (max-width: 768px) and (hover: none) {
+            #mobile-controls-ui { display: block; }
+            #debug-panel { font-size: 10px; padding: 4px 12px; bottom: 110px; }
+            #ui-overlay { font-size: 10px; padding: 8px; min-width: 140px; top: 8px; left: 8px; }
+            #ui-overlay h3 { font-size: 13px; }
+            #instructions { padding: 16px; width: 90%; }
+            #instructions .title { font-size: 17px; }
+            .controls-grid { font-size: 11px; }
+            #start-btn { font-size: 15px; padding: 12px 36px; }
+        }
+        #touch-joystick {
+            position: absolute; bottom: 30px; left: 30px; z-index: 30;
+            width: 110px; height: 110px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25);
+            touch-action: none; pointer-events: auto;
+        }
+        #touch-joystick .knob {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 46px; height: 46px; border-radius: 50%;
+            background: rgba(255,255,255,0.3); pointer-events: none;
+        }
+        .mobile-btn {
+            position: absolute; z-index: 30; pointer-events: auto; touch-action: manipulation;
+            border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.15); color: white;
+            font-size: 13px; font-weight: bold; text-align: center;
+            display: flex; align-items: center; justify-content: center;
+            user-select: none; -webkit-user-select: none;
+        }
+        #btn-run  { width: 55px; height: 55px; bottom: 50px; right: 120px; }
+        #btn-jump { width: 65px; height: 65px; bottom: 40px; right: 40px; }
+        #btn-attack { width: 50px; height: 50px; bottom: 120px; right: 50px; }
     </style>
 </head>
 <body>
@@ -152,19 +196,35 @@
 
     <div id="blocker">
         <div id="instructions">
-            <span>🏙️ 超自由城市</span><br/><br/>
-            <div class="controls-grid">
+            <span class="title">🏙️ 超自由城市</span>
+            <div class="controls-grid" id="desktop-controls">
                 <div><kbd>W/A/S/D</kbd> 移动</div>
                 <div><kbd>🖱️ 鼠标</kbd> 视角</div>
-                <div><kbd>空格</kbd> 跳跃 <span style="color:#8aff8a;">(-17体力)</span></div>
-                <div><kbd>左 Shift</kbd> 跑步 <span style="color:#ffaa44;">(速度↑ 体力消耗↓)</span></div>
-                <div><kbd>鼠标左键</kbd> 或 <kbd>P</kbd> 攻击动画 <span style="color:#ffaa44;">(每次完整播放一次)</span></div>
-                <div><span style="color:#ffaa44;">🎬 动画自动切换</span> 根据动作</div>
+                <div><kbd>空格</kbd> 跳跃</div>
+                <div><kbd>左 Shift</kbd> 跑步</div>
+                <div><kbd>鼠标左键</kbd> 攻击</div>
+                <div>🎬 动画自动切换</div>
             </div>
-            <div style="margin-top: 12px; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px;">
-                ⚠️ 高度超过6米会摔伤！ &nbsp;|&nbsp; 🏃 体力低于200减速 &nbsp;|&nbsp; 体力耗尽无法移动
+            <div class="controls-grid" id="mobile-controls" style="display:none;">
+                <div>🕹️ 虚拟摇杆 移动</div>
+                <div>👆 滑动屏幕 视角</div>
+                <div>双击屏幕 跳跃</div>
+                <div>🏃 跑步按钮</div>
+                <div>⚔️ 攻击按钮</div>
+                <div>🎬 动画自动切换</div>
             </div>
+            <div style="margin-top: 10px; font-size: 13px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 8px; line-height: 1.5;">
+                ⚠️ 高度超过6米会摔伤 &nbsp;|&nbsp; 体力低于200减速
+            </div>
+            <button id="start-btn">▶ 开始游戏</button>
         </div>
+    </div>
+
+    <div id="mobile-controls-ui">
+        <div id="touch-joystick"><div class="knob"></div></div>
+        <div class="mobile-btn" id="btn-run">🏃</div>
+        <div class="mobile-btn" id="btn-jump">⬆</div>
+        <div class="mobile-btn" id="btn-attack">⚔</div>
     </div>
 
     <div id="game-over">
@@ -280,8 +340,8 @@
         let playerOnFloor = false;
         let yaw = 0, pitch = -0.45;
         
-        // NPC 系统 — 10个自由走动的NPC
-        const NPC_COUNT = 10;
+        // NPC 系统 — 随机1-3个自由走动的NPC
+        const NPC_COUNT = Math.floor(Math.random() * 3) + 1;
         const NPC_MOVE_SPEED = 3.5;
         let npcList = [];                  // [{character, mixer, collider, velocity, direction, onFloor, actions, currentAction}]
         
@@ -361,6 +421,7 @@
             scene.add(dirLight);
 
             setupInputListeners();
+            setupMobileControls();
             loadGameAssets();
 
             window.addEventListener('resize', onWindowResize);
@@ -388,8 +449,18 @@
             });
 
             const blocker = document.getElementById('blocker');
+            const startBtn = document.getElementById('start-btn');
+            if (startBtn) {
+                startBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (!isGameOver) document.body.requestPointerLock();
+                });
+            }
+            // 手机端：点击弹窗任意位置隐藏弹窗
             blocker.addEventListener('click', () => {
-                if(!isGameOver) document.body.requestPointerLock();
+                if (!isGameOver && isMobileDevice()) {
+                    blocker.style.display = 'none';
+                }
             });
 
             document.addEventListener('pointerlockchange', () => {
@@ -407,6 +478,94 @@
             document.addEventListener('mousedown', (event) => {
                 if (event.button === 0 && document.pointerLockElement === document.body && !isGameOver) {
                     triggerAttack();   // 鼠标左键攻击
+                }
+            });
+        }
+        
+        // 检测是否手机设备
+        function isMobileDevice() {
+            return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                   ('ontouchstart' in window && window.innerWidth < 768);
+        }
+        
+        // 手机触屏控件
+        function setupMobileControls() {
+            if (!isMobileDevice()) return;
+            
+            // 显示移动端控件UI和移动端说明
+            document.getElementById('mobile-controls-ui').style.display = 'block';
+            document.getElementById('desktop-controls').style.display = 'none';
+            document.getElementById('mobile-controls').style.display = 'grid';
+            
+            const joystick = document.getElementById('touch-joystick');
+            const knob = joystick.querySelector('.knob');
+            let joyCenter = { x: 0, y: 0 };
+            
+            joystick.addEventListener('touchstart', (e) => {
+                const t = e.touches[0];
+                const rect = joystick.getBoundingClientRect();
+                joyCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                updateJoystick(t.clientX, t.clientY);
+            });
+            joystick.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                updateJoystick(e.touches[0].clientX, e.touches[0].clientY);
+            });
+            joystick.addEventListener('touchend', () => {
+                knob.style.transform = 'translate(-50%,-50%)';
+                keyStates['KeyW'] = keyStates['KeyS'] = keyStates['KeyA'] = keyStates['KeyD'] = false;
+            });
+            
+            function updateJoystick(tx, ty) {
+                const dx = tx - joyCenter.x;
+                const dy = ty - joyCenter.y;
+                const maxR = 35;
+                const dist = Math.min(Math.sqrt(dx * dx + dy * dy), maxR);
+                const angle = Math.atan2(dy, dx);
+                const mx = Math.cos(angle) * dist / maxR;
+                const my = Math.sin(angle) * dist / maxR;
+                knob.style.transform = `translate(calc(-50% + ${mx * 32}px), calc(-50% + ${my * 32}px))`;
+                keyStates['KeyW'] = my < -0.2;
+                keyStates['KeyS'] = my > 0.2;
+                keyStates['KeyA'] = mx < -0.2;
+                keyStates['KeyD'] = mx > 0.2;
+            }
+            
+            // 跑步按钮
+            const btnRun = document.getElementById('btn-run');
+            btnRun.addEventListener('touchstart', () => { isRunning = true; });
+            btnRun.addEventListener('touchend', () => { isRunning = false; });
+            btnRun.addEventListener('touchcancel', () => { isRunning = false; });
+            
+            // 跳跃按钮
+            const btnJump = document.getElementById('btn-jump');
+            btnJump.addEventListener('touchstart', () => { keyStates['Space'] = true; });
+            btnJump.addEventListener('touchend', () => { keyStates['Space'] = false; });
+            
+            // 攻击按钮
+            const btnAttack = document.getElementById('btn-attack');
+            btnAttack.addEventListener('touchstart', () => { triggerAttack(); });
+            
+            // 滑动屏幕旋转视角
+            let lastTouchX = 0, lastTouchY = 0;
+            document.addEventListener('touchmove', (e) => {
+                if (e.target.closest('#touch-joystick') || e.target.closest('.mobile-btn')) return;
+                if (e.touches.length === 1 && document.pointerLockElement === document.body && !isGameOver) {
+                    const dx = e.touches[0].clientX - lastTouchX;
+                    const dy = e.touches[0].clientY - lastTouchY;
+                    yaw -= dx * 0.005;
+                    pitch -= dy * 0.005;
+                    pitch = Math.max(MIN_PITCH, Math.min(MAX_PITCH, pitch));
+                }
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }, { passive: false });
+            
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.closest('#touch-joystick') || e.target.closest('.mobile-btn')) return;
+                if (e.touches.length === 1) {
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
                 }
             });
         }
@@ -901,6 +1060,15 @@
                 if (npc.onFloor && Math.random() < 0.002) {
                     const angle = Math.random() * Math.PI * 2;
                     npc.direction.set(Math.sin(angle), 0, Math.cos(angle));
+                }
+                
+                // NPC与玩家碰撞：推开NPC，防止穿模
+                const dx = npc.collider.start.x - playerCollider.start.x;
+                const dz = npc.collider.start.z - playerCollider.start.z;
+                const hDist = Math.sqrt(dx * dx + dz * dz);
+                if (hDist < 1.2 && hDist > 0.01) {
+                    npc.collider.translate(new THREE.Vector3(dx / hDist * 0.08, 0, dz / hDist * 0.08));
+                    npc.direction.set(dx / hDist, 0, dz / hDist);
                 }
                 
                 // 防止掉出世界：重生到玩家附近
