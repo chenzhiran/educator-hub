@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>天空悬浮岛 · 昆虫花园冒险</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      overflow: hidden;
+      background: #82d9ff;
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      color: #fff;
+      touch-action: none;
+    }
+
+    #game {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+
+    .hud {
+      position: fixed;
+      left: 18px;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+
+    .panel {
+      min-width: 250px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(35, 102, 71, .78), rgba(12, 38, 62, .64));
+      box-shadow: 0 12px 35px rgba(0,0,0,.25);
+      backdrop-filter: blur(14px);
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      margin-bottom: 8px;
+      text-shadow: 0 3px 12px rgba(0,0,0,.35);
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      font-size: 14px;
+      line-height: 1.9;
+      opacity: .96;
+    }
+
+    .value {
+      font-weight: 900;
+      color: #ffe76a;
+      text-shadow: 0 0 12px rgba(255, 231, 106, .35);
+      max-width: 140px;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tips {
+      position: fixed;
+      right: 18px;
+      top: 64px;
+      z-index: 10;
+      width: 370px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,.20);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(30, 84, 75, .76), rgba(13, 40, 72, .60));
+      backdrop-filter: blur(14px);
+      font-size: 13px;
+      line-height: 1.8;
+      box-shadow: 0 12px 35px rgba(0,0,0,.25);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px) scale(.98);
+      transform-origin: top right;
+      transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+    }
+
+    .tips b { color: #fff28a; }
+
+    .tips.open {
+      pointer-events: auto;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .infoButton {
+      position: fixed;
+      right: 18px;
+      top: 16px;
+      z-index: 12;
+      min-width: 74px;
+      height: 40px;
+      padding: 0 15px;
+      border: 1px solid rgba(255,255,255,.30);
+      border-radius: 999px;
+      background: rgba(13, 40, 72, .66);
+      color: #fff;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.20);
+      touch-action: manipulation;
+    }
+
+    .centerTip {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: min(840px, calc(100vw - 36px));
+      padding: 13px 18px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 999px;
+      background: rgba(7, 24, 42, .50);
+      backdrop-filter: blur(12px);
+      text-align: center;
+      font-size: 14px;
+      color: rgba(255,255,255,.96);
+      pointer-events: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,.20);
+    }
+
+    .onboardingHint {
+      position: fixed;
+      left: 50%;
+      top: 52%;
+      z-index: 13;
+      transform: translate(-50%, -50%);
+      width: min(560px, calc(100vw - 36px));
+      padding: 14px 20px;
+      border: 1px solid rgba(255,255,255,.32);
+      border-radius: 20px;
+      background: rgba(8, 31, 54, .68);
+      color: #fff;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.65;
+      letter-spacing: .02em;
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 36px rgba(0,0,0,.24);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+
+    .onboardingHint.hidden {
+      opacity: 0;
+      transform: translate(-50%, -44%);
+    }
+
+    .mobileHintText { display: none; }
+
+    .mobileControls {
+      position: fixed;
+      inset: 0;
+      z-index: 11;
+      pointer-events: none;
+      display: none;
+    }
+
+    .joyBase {
+      position: absolute;
+      left: 24px;
+      bottom: 28px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.28);
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    .joyKnob {
+      position: absolute;
+      left: 36px;
+      top: 36px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.35);
+      border: 1px solid rgba(255,255,255,.48);
+      box-shadow: 0 5px 18px rgba(0,0,0,.25);
+    }
+
+    .btnGroup {
+      position: absolute;
+      right: 24px;
+      bottom: 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .gameBtn {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.15);
+      color: white;
+      font-weight: 900;
+      font-size: 16px;
+      backdrop-filter: blur(12px);
+      touch-action: none;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255, 245, 151, .24), transparent 28%),
+        linear-gradient(180deg, #9fe8ff, #78c7ff 45%, #5165c7);
+      transition: opacity .5s ease;
+    }
+
+    .loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loadingCard {
+      width: min(500px, calc(100vw - 36px));
+      padding: 26px 24px;
+      border-radius: 26px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.26);
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
+      text-align: center;
+      backdrop-filter: blur(18px);
+    }
+
+    .loadingCard h1 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .loadingCard p {
+      line-height: 1.8;
+      opacity: .92;
+      font-size: 14px;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 99px;
+      margin-top: 18px;
+      overflow: hidden;
+      background: rgba(255,255,255,.20);
+    }
+
+    .barInner {
+      width: 35%;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #8eff87, #fff176, #80d8ff);
+      animation: loadingMove 1.1s infinite alternate ease-in-out;
+    }
+
+    @keyframes loadingMove {
+      from { transform: translateX(-55%); }
+      to { transform: translateX(230%); }
+    }
+
+    .errorBox {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 91, 91, .18);
+      color: #ffe1e1;
+      font-size: 12px;
+      line-height: 1.6;
+      display: none;
+      text-align: left;
+    }
+
+    .deathOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: center;
+      background: rgba(4, 8, 20, .55);
+      backdrop-filter: blur(10px);
+    }
+
+    .deathCard {
+      width: min(440px, calc(100vw - 36px));
+      padding: 28px 24px;
+      border-radius: 26px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(40, 54, 88, .92), rgba(16, 24, 46, .92));
+      border: 1px solid rgba(255,255,255,.24);
+      box-shadow: 0 24px 80px rgba(0,0,0,.42);
+    }
+
+    .deathCard h2 {
+      font-size: 30px;
+      margin-bottom: 10px;
+      color: #ffdf70;
+    }
+
+    .deathCard p {
+      line-height: 1.8;
+      color: rgba(255,255,255,.9);
+      margin-bottom: 18px;
+    }
+
+    .restartBtn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 900;
+      color: #17351f;
+      background: linear-gradient(90deg, #fff176, #91ff9d);
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+
+    code {
+      color: #fff176;
+    }
+
+    @media (max-width: 820px) {
+      .infoButton {
+        top: max(10px, env(safe-area-inset-top));
+        right: max(10px, env(safe-area-inset-right));
+        height: 36px;
+        min-width: 64px;
+        font-size: 13px;
+      }
+      .tips {
+        top: calc(max(10px, env(safe-area-inset-top)) + 44px);
+        right: max(10px, env(safe-area-inset-right));
+        width: min(330px, calc(100vw - 20px));
+        max-height: calc(100vh - 90px);
+        overflow-y: auto;
+        font-size: 12px;
+        line-height: 1.65;
+      }
+      .hud {
+        left: max(8px, env(safe-area-inset-left));
+        top: max(8px, env(safe-area-inset-top));
+      }
+      .panel {
+        min-width: 168px;
+        max-width: 54vw;
+        padding: 8px 10px;
+        border-radius: 14px;
+      }
+      .title { font-size: 15px; margin-bottom: 3px; }
+      .row { font-size: 11px; line-height: 1.55; gap: 8px; }
+      .value { max-width: 92px; }
+      .centerTip {
+        bottom: calc(154px + env(safe-area-inset-bottom));
+        width: min(520px, calc(100vw - 28px));
+        border-radius: 18px;
+        font-size: 11px;
+        padding: 8px 10px;
+      }
+      .onboardingHint {
+        top: 48%;
+        width: min(360px, calc(100vw - 32px));
+        padding: 11px 14px;
+        border-radius: 16px;
+        font-size: 13px;
+      }
+      .desktopHintText { display: none; }
+      .mobileHintText { display: inline; }
+      .mobileControls { display: block; }
+      .joyBase {
+        left: max(14px, env(safe-area-inset-left));
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        width: 108px;
+        height: 108px;
+      }
+      .joyKnob {
+        left: 32px;
+        top: 32px;
+        width: 44px;
+        height: 44px;
+      }
+      .btnGroup {
+        right: max(14px, env(safe-area-inset-right));
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: repeat(2, 62px);
+        gap: 9px;
+      }
+      .gameBtn {
+        width: 62px;
+        height: 62px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      .panel { max-width: 38vw; }
+      .centerTip { display: none; }
+      .joyBase { width: 96px; height: 96px; }
+      .joyKnob { left: 29px; top: 29px; width: 38px; height: 38px; }
+      .btnGroup { grid-template-columns: repeat(3, 54px); }
+      .gameBtn { width: 54px; height: 54px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div class="loading" id="loading">
+    <div class="loadingCard">
+      <h1>天空悬浮岛</h1>
+      <p id="loadingText">正在加载角色、动画和食人花 GLB 模型。</p>
+      <div class="bar"><div class="barInner"></div></div>
+      <div class="errorBox" id="errorBox"></div>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="panel">
+      <div class="title">🐝 天空任务</div>
+      <div class="row"><span>花粉</span><span class="value" id="score">0</span></div>
+      <div class="row"><span>当前昆虫</span><span class="value" id="bugName">加载中</span></div>
+      <div class="row"><span>所在岛屿</span><span class="value" id="islandName">花园岛</span></div>
+      <div class="row"><span>移动模式</span><span class="value" id="modeText">加载中</span></div>
+      <div class="row"><span>生命值</span><span class="value" id="health">100</span></div>
+    </div>
+  </div>
+
+  <button class="infoButton" id="infoButton" type="button" aria-expanded="false" aria-controls="tipsPanel">说明</button>
+
+  <div class="tips" id="tipsPanel">
+    <b>角色规则</b><br>
+    Flying bee.glb：蜜蜂，体积很小，可以在天空自由飞行，穿梭 4 个悬浮岛。<br>
+    model3d2.glb：甲虫，只能在地面行走，离开花园岛边缘会坠落死亡。<br>
+    model3d3.glb：松果，和甲虫一样只能在地面行走，离开当前岛屿会坠落死亡。<br>
+    Flying pterodactyl.glb：翼龙，空中飞、地面走、静止待机。文件缺失时自动使用 model3d4.glb。<br>
+    Fluttering butterfly.glb：蝴蝶，可按数字 5 切换。<br>
+    Snapping Venus flytrap.glb：随机分布在岛上的食人花，5 米红色球形范围是危险区。<br>
+    <br>
+    <b>操作方式</b><br>
+    WASD / 方向键：移动　鼠标拖拽：旋转视角<br>
+    所有角色：按住 Space 平滑上升，按住 Shift 平滑下降<br>
+    鼠标滚轮：缩放视角　数字 1 / 2 / 3 / 4 / 5：切换角色
+  </div>
+
+  <div class="centerTip" id="message">蜜蜂和蝴蝶可以飞；甲虫、松果只能在地面；小心会锁定玩家的食人花。</div>
+
+  <div class="onboardingHint" id="onboardingHint">
+    <span class="desktopHintText">WASD 移动 · Space 上升 · Shift 下降<br>拖动鼠标旋转视角 · 滚轮缩放</span>
+    <span class="mobileHintText">左侧摇杆移动 · 滑动画面旋转视角<br>右侧按钮上升、下降、切换和缩放</span>
+  </div>
+
+  <div class="mobileControls">
+    <div class="joyBase" id="joyBase"><div class="joyKnob" id="joyKnob"></div></div>
+    <div class="btnGroup">
+      <button class="gameBtn" id="jumpBtn">上升</button>
+      <button class="gameBtn" id="descendBtn">下降</button>
+      <button class="gameBtn" id="switchBtn">换</button>
+      <button class="gameBtn" id="zoomInBtn">放大</button>
+      <button class="gameBtn" id="zoomOutBtn">缩小</button>
+    </div>
+  </div>
+
+  <div class="deathOverlay" id="deathOverlay">
+    <div class="deathCard">
+      <h2>坠落死亡</h2>
+      <p>地面角色不能飞行，离开当前岛屿后掉进了天空虚空。<br>点击按钮回到岛上重新开始。</p>
+      <button class="restartBtn" id="restartBtn">重新开始</button>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+    import { clone as cloneSkeleton } from "three/addons/utils/SkeletonUtils.js";
+
+    const canvas = document.getElementById("game");
+    const scoreEl = document.getElementById("score");
+    const bugNameEl = document.getElementById("bugName");
+    const islandNameEl = document.getElementById("islandName");
+    const modeTextEl = document.getElementById("modeText");
+    const healthEl = document.getElementById("health");
+    const messageEl = document.getElementById("message");
+    const loadingEl = document.getElementById("loading");
+    const loadingTextEl = document.getElementById("loadingText");
+    const errorBoxEl = document.getElementById("errorBox");
+    const deathOverlayEl = document.getElementById("deathOverlay");
+    const restartBtn = document.getElementById("restartBtn");
+    const infoButtonEl = document.getElementById("infoButton");
+    const tipsPanelEl = document.getElementById("tipsPanel");
+    const onboardingHintEl = document.getElementById("onboardingHint");
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x9fe8ff);
+    scene.fog = new THREE.Fog(0x9fe8ff, 80, 190);
+
+    const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.002, 1200);
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      powerPreference: "high-performance"
+    });
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+
+    const clock = new THREE.Clock();
+    const loader = new GLTFLoader();
+
+    const characterDefs = [
+      { role: "bee", name: "蜜蜂 Flying bee", files: ["Flying bee.glb"], targetSize: 0.032, optional: false },
+      { role: "beetle", name: "甲虫 model3d2", files: ["model3d2.glb"], targetSize: 0.26, optional: false },
+      { role: "pinecone", name: "松果 model3d3", files: ["model3d3.glb"], targetSize: 1.3, optional: false },
+      { role: "pterosaur", name: "翼龙 Flying pterodactyl", files: ["Flying pterodactyl.glb", "model3d4.glb"], targetSize: 100, optional: false },
+      { role: "butterfly", name: "蝴蝶 Fluttering butterfly", files: ["Fluttering butterfly.glb"], targetSize: 0.12, optional: true }
+    ];
+
+    const islands = [
+      { name: "花园岛", type: "garden", center: new THREE.Vector3(0, 0, 0), radius: 18, colorTop: 0x72d26b, colorSide: 0x8b6b45 },
+      { name: "森林岛", type: "forest", center: new THREE.Vector3(48, 8, -34), radius: 16, colorTop: 0x4fb05f, colorSide: 0x73552f },
+      { name: "糖果岛", type: "candy", center: new THREE.Vector3(-47, 13, -38), radius: 15, colorTop: 0xffb7e4, colorSide: 0xcf83b1 },
+      { name: "蘑菇云朵岛", type: "mushroom", center: new THREE.Vector3(22, 18, 48), radius: 17, colorTop: 0xa4e4ff, colorSide: 0x7d9cd8 }
+    ];
+
+    const bugs = [];
+    const flytraps = [];
+    const animationMixers = [];
+    const pollen = [];
+    const rings = [];
+    const movingDecor = [];
+    const keys = new Set();
+    const mobileMove = new THREE.Vector2(0, 0);
+
+    let score = 0;
+    let currentIndex = 0;
+    let player = null;
+    let playerRole = "bee";
+    let health = 100;
+    let velocityY = 0;
+    let cameraYaw = Math.PI * 0.25;
+    let cameraPitch = -0.25;
+    let cameraZoom = 0.20;
+    let cameraDistance = 13;
+    let dragging = false;
+    let lastPointer = { x: 0, y: 0 };
+    let lastSwitchTime = 0;
+    let gameDead = false;
+    let activeTrap = null;
+    let onboardingVisible = true;
+    let currentIsland = islands[0];
+
+    initLights();
+    createSkyWorld();
+    createFloatingIslands();
+    createCollectibles();
+
+    try {
+      await loadAllBugModels();
+      await loadFlytraps();
+      setupInput();
+      const defaultBeeIndex = bugs.findIndex(bug => bug.userData.role === "bee");
+      switchPlayer(defaultBeeIndex >= 0 ? defaultBeeIndex : 0, true);
+      animationMixers.forEach(mixer => mixer.update(0));
+      updateCamera(0);
+      renderer.render(scene, camera);
+      loadingEl.classList.add("hidden");
+      animate();
+    } catch (err) {
+      console.error(err);
+      loadingTextEl.textContent = "模型加载失败，页面没有启动。";
+      errorBoxEl.style.display = "block";
+      errorBoxEl.innerHTML =
+        "请检查：<br>" +
+        "1. HTML 文件和所有 GLB 文件是否在同一个文件夹。<br>" +
+        "2. 文件名大小写是否完全一致。<br>" +
+        "3. 建议在该文件夹运行本地服务器：<br>" +
+        "<code>python -m http.server 8000</code><br>" +
+        "然后访问 <code>http://localhost:8000/sky_insect_floating_islands.html</code>";
+    }
+
+    function initLights() {
+      const hemi = new THREE.HemisphereLight(0xe7fbff, 0x5c6bc0, 1.75);
+      scene.add(hemi);
+
+      const sun = new THREE.DirectionalLight(0xffffff, 2.5);
+      sun.position.set(-45, 70, 30);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      sun.shadow.camera.near = 1;
+      sun.shadow.camera.far = 180;
+      sun.shadow.camera.left = -110;
+      sun.shadow.camera.right = 110;
+      sun.shadow.camera.top = 110;
+      sun.shadow.camera.bottom = -110;
+      scene.add(sun);
+
+      const warm = new THREE.PointLight(0xfff0ac, 1.3, 80);
+      warm.position.set(0, 18, 0);
+      scene.add(warm);
+    }
+
+    function createSkyWorld() {
+      const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, transparent: true, opacity: .82 });
+      for (let i = 0; i < 34; i++) {
+        const group = new THREE.Group();
+        for (let j = 0; j < 5; j++) {
+          const cloud = new THREE.Mesh(new THREE.SphereGeometry(2.5 + Math.random() * 2.4, 16, 10), cloudMat);
+          cloud.position.set(j * 2.2, Math.random() * .7, (Math.random() - .5) * 2);
+          cloud.scale.y = .42;
+          group.add(cloud);
+        }
+        group.position.set((Math.random() - .5) * 170, -10 + Math.random() * 55, (Math.random() - .5) * 170);
+        group.userData.speed = .35 + Math.random() * .65;
+        group.userData.cloud = true;
+        movingDecor.push(group);
+        scene.add(group);
+      }
+
+      const sunDisk = new THREE.Mesh(
+        new THREE.SphereGeometry(9, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0xfff3a6, transparent: true, opacity: .85 })
+      );
+      sunDisk.position.set(-62, 68, -80);
+      scene.add(sunDisk);
+
+      const glow = new THREE.Mesh(
+        new THREE.SphereGeometry(16, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0xfff8cc, transparent: true, opacity: .23 })
+      );
+      glow.position.copy(sunDisk.position);
+      scene.add(glow);
+    }
+
+    function createFloatingIslands() {
+      islands.forEach((island, index) => {
+        const group = new THREE.Group();
+        group.position.copy(island.center);
+        island.group = group;
+
+        const top = new THREE.Mesh(
+          new THREE.CylinderGeometry(island.radius, island.radius * .9, 2.2, 48),
+          new THREE.MeshStandardMaterial({ color: island.colorTop, roughness: .95 })
+        );
+        top.position.y = 0;
+        top.castShadow = true;
+        top.receiveShadow = true;
+        group.add(top);
+
+        const underside = new THREE.Mesh(
+          new THREE.ConeGeometry(island.radius * .95, 12 + index * 1.5, 48),
+          new THREE.MeshStandardMaterial({ color: island.colorSide, roughness: 1 })
+        );
+        underside.position.y = -7.1;
+        underside.rotation.y = Math.PI / 48;
+        underside.castShadow = true;
+        group.add(underside);
+
+        const rim = new THREE.Mesh(
+          new THREE.TorusGeometry(island.radius * .98, .55, 12, 64),
+          new THREE.MeshStandardMaterial({ color: 0xf2d083, roughness: .85 })
+        );
+        rim.rotation.x = Math.PI / 2;
+        rim.position.y = 1.15;
+        rim.castShadow = true;
+        group.add(rim);
+
+        createIslandDecorations(group, island);
+        createFloatingCrystals(group, island);
+
+        scene.add(group);
+      });
+
+      createSkyPathRings();
+    }
+
+    function createIslandDecorations(group, island) {
+      if (island.type === "garden") createGardenDecor(group, island.radius);
+      if (island.type === "forest") createForestDecor(group, island.radius);
+      if (island.type === "candy") createCandyDecor(group, island.radius);
+      if (island.type === "mushroom") createMushroomDecor(group, island.radius);
+    }
+
+    function randomPointOnIsland(radius, margin = 3) {
+      const r = Math.sqrt(Math.random()) * (radius - margin);
+      const a = Math.random() * Math.PI * 2;
+      return { x: Math.cos(a) * r, z: Math.sin(a) * r };
+    }
+
+    function createGardenDecor(group, radius) {
+      const stemMat = new THREE.MeshStandardMaterial({ color: 0x2f8a39, roughness: 1 });
+      const flowerMats = [
+        new THREE.MeshStandardMaterial({ color: 0xff6fae, roughness: .7 }),
+        new THREE.MeshStandardMaterial({ color: 0xffd54f, roughness: .7 }),
+        new THREE.MeshStandardMaterial({ color: 0xa78bfa, roughness: .7 }),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .7 })
+      ];
+      const centerMat = new THREE.MeshStandardMaterial({ color: 0xffef7a, roughness: .45, emissive: 0x4b3300 });
+
+      for (let i = 0; i < 38; i++) {
+        const p = randomPointOnIsland(radius, 2.5);
+        const flower = new THREE.Group();
+        const h = .8 + Math.random() * 1.7;
+
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(.04, .06, h, 8), stemMat);
+        stem.position.y = h / 2 + 1.15;
+        stem.castShadow = true;
+        flower.add(stem);
+
+        const mat = flowerMats[Math.floor(Math.random() * flowerMats.length)];
+        for (let k = 0; k < 6; k++) {
+          const petal = new THREE.Mesh(new THREE.SphereGeometry(.18, 10, 8), mat);
+          const a = k / 6 * Math.PI * 2;
+          petal.position.set(Math.cos(a) * .25, h + 1.15, Math.sin(a) * .25);
+          petal.scale.set(1.2, .38, .8);
+          petal.castShadow = true;
+          flower.add(petal);
+        }
+
+        const center = new THREE.Mesh(new THREE.SphereGeometry(.14, 12, 8), centerMat);
+        center.position.y = h + 1.15;
+        center.castShadow = true;
+        flower.add(center);
+
+        flower.position.set(p.x, 0, p.z);
+        flower.scale.setScalar((.9 + Math.random() * .65) * 0.5);
+        group.add(flower);
+      }
+
+      const fountain = new THREE.Group();
+      const bowl = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.6, 2.2, .55, 32),
+        new THREE.MeshStandardMaterial({ color: 0xb8f4ff, roughness: .35, metalness: .05 })
+      );
+      bowl.position.y = 1.5;
+      bowl.castShadow = true;
+      fountain.add(bowl);
+
+      const water = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.15, 2.1, .08, 32),
+        new THREE.MeshStandardMaterial({ color: 0x64d8ff, transparent: true, opacity: .75, roughness: .15 })
+      );
+      water.position.y = 1.82;
+      fountain.add(water);
+
+      group.add(fountain);
+    }
+
+    function createForestDecor(group, radius) {
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8d5a32, roughness: 1 });
+      const leafMats = [
+        new THREE.MeshStandardMaterial({ color: 0x1f8f45, roughness: .9 }),
+        new THREE.MeshStandardMaterial({ color: 0x3eb45d, roughness: .9 }),
+        new THREE.MeshStandardMaterial({ color: 0x76c267, roughness: .9 })
+      ];
+
+      for (let i = 0; i < 20; i++) {
+        const p = randomPointOnIsland(radius, 3.5);
+        const tree = new THREE.Group();
+
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.35, .52, 3.2, 9), trunkMat);
+        trunk.position.y = 2.75;
+        trunk.castShadow = true;
+        trunk.receiveShadow = true;
+        tree.add(trunk);
+
+        const mat = leafMats[Math.floor(Math.random() * leafMats.length)];
+        for (let j = 0; j < 3; j++) {
+          const leaves = new THREE.Mesh(new THREE.SphereGeometry(1.5 + j * .35, 16, 10), mat);
+          leaves.position.set((Math.random() - .5) * .6, 4.2 + j * .8, (Math.random() - .5) * .6);
+          leaves.scale.y = .8;
+          leaves.castShadow = true;
+          tree.add(leaves);
+        }
+
+        tree.position.set(p.x, 0, p.z);
+        tree.scale.setScalar((.75 + Math.random() * .45) * 2);
+        group.add(tree);
+      }
+
+      const log = new THREE.Mesh(
+        new THREE.CylinderGeometry(.6, .6, 6, 14),
+        new THREE.MeshStandardMaterial({ color: 0x7b4b2b, roughness: 1 })
+      );
+      log.rotation.z = Math.PI / 2;
+      log.rotation.y = .4;
+      log.position.set(-5, 1.55, 3);
+      log.castShadow = true;
+      group.add(log);
+    }
+
+    function createCandyDecor(group, radius) {
+      const candyMats = [
+        new THREE.MeshStandardMaterial({ color: 0xff5fa2, roughness: .45 }),
+        new THREE.MeshStandardMaterial({ color: 0xfff176, roughness: .45 }),
+        new THREE.MeshStandardMaterial({ color: 0x7ce8ff, roughness: .45 }),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .45 })
+      ];
+
+      for (let i = 0; i < 26; i++) {
+        const p = randomPointOnIsland(radius, 3);
+        const candy = new THREE.Group();
+
+        const stick = new THREE.Mesh(
+          new THREE.CylinderGeometry(.08, .08, 1.9, 10),
+          new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .55 })
+        );
+        stick.position.y = 2;
+        stick.castShadow = true;
+        candy.add(stick);
+
+        const disk = new THREE.Mesh(
+          new THREE.CylinderGeometry(.55 + Math.random() * .25, .55 + Math.random() * .25, .18, 32),
+          candyMats[Math.floor(Math.random() * candyMats.length)]
+        );
+        disk.position.y = 3;
+        disk.rotation.x = Math.PI / 2;
+        disk.castShadow = true;
+        candy.add(disk);
+
+        candy.position.set(p.x, 0, p.z);
+        candy.rotation.y = Math.random() * Math.PI * 2;
+        candy.scale.setScalar(.8 + Math.random() * .6);
+        group.add(candy);
+      }
+
+      for (let i = 0; i < 9; i++) {
+        const p = randomPointOnIsland(radius, 4);
+        const gumdrop = new THREE.Mesh(
+          new THREE.SphereGeometry(1.0, 18, 10),
+          candyMats[Math.floor(Math.random() * candyMats.length)]
+        );
+        gumdrop.position.set(p.x, 1.65, p.z);
+        gumdrop.scale.y = .55;
+        gumdrop.castShadow = true;
+        group.add(gumdrop);
+      }
+    }
+
+    function createMushroomDecor(group, radius) {
+      const stemMat = new THREE.MeshStandardMaterial({ color: 0xfff0d6, roughness: .9 });
+      const capMats = [
+        new THREE.MeshStandardMaterial({ color: 0xff5f5f, roughness: .7 }),
+        new THREE.MeshStandardMaterial({ color: 0xffa726, roughness: .7 }),
+        new THREE.MeshStandardMaterial({ color: 0xab47bc, roughness: .7 }),
+        new THREE.MeshStandardMaterial({ color: 0x80d8ff, roughness: .7 })
+      ];
+
+      for (let i = 0; i < 28; i++) {
+        const p = randomPointOnIsland(radius, 3);
+        const mushroom = new THREE.Group();
+        const h = 1 + Math.random() * 2.2;
+
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(.16, .25, h, 12), stemMat);
+        stem.position.y = 1.15 + h / 2;
+        stem.castShadow = true;
+        mushroom.add(stem);
+
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(.7 + Math.random() * .35, 16, 8), capMats[Math.floor(Math.random() * capMats.length)]);
+        cap.position.y = 1.15 + h;
+        cap.scale.y = .42;
+        cap.castShadow = true;
+        mushroom.add(cap);
+
+        mushroom.position.set(p.x, 0, p.z);
+        mushroom.scale.setScalar(.75 + Math.random() * .9);
+        group.add(mushroom);
+      }
+
+      const cloudPad = new THREE.Mesh(
+        new THREE.TorusGeometry(4.5, .35, 12, 60),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .85, transparent: true, opacity: .85 })
+      );
+      cloudPad.rotation.x = Math.PI / 2;
+      cloudPad.position.y = 1.25;
+      group.add(cloudPad);
+    }
+
+    function createFloatingCrystals(group, island) {
+      const mat = new THREE.MeshStandardMaterial({
+        color: island.type === "candy" ? 0xfff176 : 0x9cf7ff,
+        emissive: island.type === "candy" ? 0xff80ab : 0x2de7ff,
+        emissiveIntensity: .35,
+        roughness: .4,
+        metalness: .05
+      });
+
+      for (let i = 0; i < 8; i++) {
+        const a = i / 8 * Math.PI * 2;
+        const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(.55 + Math.random() * .35, 0), mat);
+        crystal.position.set(Math.cos(a) * (island.radius + 2), -4 - Math.random() * 4, Math.sin(a) * (island.radius + 2));
+        crystal.rotation.set(Math.random(), Math.random(), Math.random());
+        crystal.castShadow = true;
+        group.add(crystal);
+      }
+    }
+
+    function createSkyPathRings() {
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0xbaffff,
+        emissive: 0x3fffff,
+        emissiveIntensity: .6,
+        roughness: .35,
+        transparent: true,
+        opacity: .85,
+        side: THREE.DoubleSide
+      });
+
+      const pairs = [[0,1], [0,2], [0,3], [1,3], [2,3]];
+      pairs.forEach(pair => {
+        const a = islands[pair[0]].center;
+        const b = islands[pair[1]].center;
+        const mid = a.clone().lerp(b, .5);
+        const dir = b.clone().sub(a).normalize();
+
+        for (let i = 1; i <= 2; i++) {
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(2.25, .13, 16, 64), mat);
+          const t = i / 3;
+          ring.position.copy(a.clone().lerp(b, t));
+          ring.position.y += 7 + Math.sin(t * Math.PI) * 5;
+          ring.lookAt(ring.position.clone().add(dir));
+          ring.userData.cooldown = 0;
+          scene.add(ring);
+          rings.push(ring);
+        }
+      });
+    }
+
+    function createCollectibles() {
+      const pollenMat = new THREE.MeshStandardMaterial({
+        color: 0xfff176,
+        emissive: 0xffc400,
+        emissiveIntensity: .95,
+        roughness: .35
+      });
+
+      islands.forEach((island, islandIndex) => {
+        const count = island.type === "garden" ? 16 : 10;
+        for (let i = 0; i < count; i++) {
+          const group = new THREE.Group();
+          const core = new THREE.Mesh(new THREE.SphereGeometry(.36, 18, 12), pollenMat);
+          const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(.62, .045, 8, 32),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffe96a, emissiveIntensity: .55 })
+          );
+          ring.rotation.x = Math.PI / 2;
+          core.castShadow = true;
+          group.add(core, ring);
+
+          const p = randomPointOnIsland(island.radius, 4);
+          group.position.set(island.center.x + p.x, island.center.y + 2.1 + Math.random() * 2.2, island.center.z + p.z);
+          group.userData.taken = false;
+          group.userData.baseY = group.position.y;
+          group.userData.islandIndex = islandIndex;
+          scene.add(group);
+          pollen.push(group);
+        }
+      });
+    }
+
+    async function loadAllBugModels() {
+      bugs.length = 0;
+
+      for (const def of characterDefs) {
+        loadingTextEl.textContent = `正在加载 ${def.files[0]} ...`;
+
+        let loaded;
+        try {
+          loaded = await loadCharacterModel(def);
+        } catch (error) {
+          if (def.optional) {
+            console.warn(`${def.files[0]} 不存在，已暂时跳过这个可选角色。`);
+            continue;
+          }
+          throw error;
+        }
+
+        const bug = loaded.model;
+        const index = bugs.length;
+        const spawn = getCharacterSpawn(def.role);
+        bug.position.copy(spawn);
+
+        bug.userData.home = bug.position.clone();
+        bug.userData.spawnPosition = bug.position.clone();
+        bug.userData.wanderAngle = Math.random() * Math.PI * 2;
+        bug.userData.wanderTimer = Math.random() * 2;
+        bug.userData.isPlayer = false;
+        bug.userData.modelName = def.name;
+        bug.userData.fileIndex = index;
+        bug.userData.role = def.role;
+        bug.userData.baseScale = bug.scale.x;
+        bug.userData.loadedFile = loaded.file;
+        bug.userData.animationSpeed = def.role === "bee" ? .55 : 1;
+
+        if (def.role === "bee" || def.role === "butterfly" || def.role === "pterosaur") {
+          setModelAnimation(bug, 0);
+        }
+
+        bugs.push(bug);
+        scene.add(bug);
+      }
+
+      if (bugs.length < 4) {
+        throw new Error("没有成功加载全部必需角色模型。");
+      }
+
+      if (!bugs.some(bug => bug.userData.role === "butterfly")) {
+        showMessage("未找到 Fluttering butterfly.glb；加入该文件后即可按数字 5 切换蝴蝶。");
+      }
+    }
+
+    async function loadCharacterModel(def) {
+      let lastError;
+
+      for (const file of def.files) {
+        try {
+          const gltf = await loadGLTF(file);
+          await applyEmbeddedModelTextures(gltf);
+          const model = makeModelUsable(gltf.scene, file, def.targetSize);
+          setupModelAnimations(model, gltf.scene, gltf.animations);
+          return { model, file };
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error(`无法加载 ${def.files.join(" 或 ")}。`);
+    }
+
+    function loadGLTF(file) {
+      return new Promise((resolve, reject) => {
+        loader.load(
+          file,
+          resolve,
+          undefined,
+          () => {
+            reject(new Error(`无法加载 ${file}。请检查文件名、路径和本地服务器。`));
+          }
+        );
+      });
+    }
+
+    async function applyEmbeddedModelTextures(gltf) {
+      const parser = gltf.parser;
+      const materialDefs = parser.json.materials || [];
+      const textureTasks = [];
+
+      gltf.scene.traverse(obj => {
+        if (!obj.isMesh) return;
+
+        const meshMaterials = Array.isArray(obj.material) ? obj.material : [obj.material];
+        meshMaterials.forEach(material => {
+          const association = parser.associations.get(material);
+          const materialDef = materialDefs[association?.materials];
+          const specGloss = materialDef?.extensions?.KHR_materials_pbrSpecularGlossiness;
+          if (!specGloss?.diffuseTexture) return;
+
+          textureTasks.push(
+            parser.getDependency("texture", specGloss.diffuseTexture.index).then(texture => {
+              texture.colorSpace = THREE.SRGBColorSpace;
+              material.map = texture;
+              material.color.set(0xffffff);
+              material.roughness = .72;
+              material.metalness = 0;
+              material.needsUpdate = true;
+            })
+          );
+        });
+      });
+
+      await Promise.all(textureTasks);
+    }
+
+    function setupModelAnimations(model, animationRoot, clips) {
+      if (!clips?.length) return;
+
+      const mixer = new THREE.AnimationMixer(animationRoot);
+      const actions = clips.map(clip => ({
+        name: clip.name,
+        action: mixer.clipAction(clip),
+        duration: clip.duration
+      }));
+
+      actions.forEach(item => {
+        item.action.enabled = true;
+        item.action.clampWhenFinished = false;
+        item.action.setLoop(THREE.LoopRepeat, Infinity);
+        item.action.stop();
+      });
+
+      animationMixers.push(mixer);
+      model.userData.animationMixer = mixer;
+      model.userData.animationActions = actions;
+      model.userData.currentAnimation = -1;
+    }
+
+    function setModelAnimation(model, animationIndex, loop = true) {
+      const actions = model?.userData.animationActions;
+      if (!actions?.[animationIndex]) return;
+      if (
+        model.userData.currentAnimation === animationIndex &&
+        model.userData.currentAnimationLoops === loop &&
+        actions[animationIndex].action.isRunning()
+      ) return;
+
+      actions.forEach((item, index) => {
+        if (index === animationIndex) {
+          item.action.reset();
+          item.action.timeScale = model.userData.animationSpeed || 1;
+          item.action.clampWhenFinished = !loop;
+          item.action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
+          item.action.play();
+        } else {
+          item.action.stop();
+        }
+      });
+
+      model.userData.currentAnimation = animationIndex;
+      model.userData.currentAnimationLoops = loop;
+    }
+
+    function stopModelAnimations(model) {
+      const actions = model?.userData.animationActions;
+      if (!actions) return;
+      actions.forEach(item => item.action.stop());
+      model.userData.currentAnimation = -1;
+      model.userData.currentAnimationLoops = true;
+    }
+
+    function makeModelUsable(originalScene, file, targetSize) {
+      const modelRoot = originalScene;
+      const wrapper = new THREE.Group();
+      wrapper.name = file;
+
+      const box = new THREE.Box3().setFromObject(modelRoot);
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+
+      modelRoot.position.sub(center);
+
+      const maxDim = Math.max(size.x, size.y, size.z);
+
+      const scale = maxDim > 0 ? targetSize / maxDim : 1;
+      modelRoot.scale.setScalar(scale);
+
+      const fixedBox = new THREE.Box3().setFromObject(modelRoot);
+      const minY = fixedBox.min.y;
+      modelRoot.position.y -= minY;
+
+      wrapper.add(modelRoot);
+
+      wrapper.traverse(obj => {
+        if (obj.isMesh) {
+          obj.castShadow = true;
+          obj.receiveShadow = true;
+          if (obj.material) {
+            obj.material.needsUpdate = true;
+          }
+        }
+      });
+
+      wrapper.userData.originalFile = file;
+      wrapper.userData.loadedFromGLB = true;
+      wrapper.userData.baseScale = 1;
+      wrapper.userData.visualSize = targetSize;
+      const visualBox = new THREE.Box3().setFromObject(modelRoot);
+      const visualCenter = visualBox.getCenter(new THREE.Vector3());
+      wrapper.userData.visualCenter = visualCenter;
+      wrapper.userData.visualCenterY = visualCenter.y;
+      wrapper.userData.cameraAnchor =
+        modelRoot.getObjectByName("body_jnt.3") ||
+        modelRoot.getObjectByName("center.5") ||
+        null;
+
+      return wrapper;
+    }
+
+    function getCharacterSpawn(role) {
+      if (role === "bee") return islands[0].center.clone().add(new THREE.Vector3(-4, 7, 1));
+      if (role === "beetle") return islands[0].center.clone().add(new THREE.Vector3(4, 1.25, 0));
+      if (role === "pinecone") return islands[0].center.clone().add(new THREE.Vector3(-5, 1.25, -2));
+      if (role === "pterosaur") return islands[1].center.clone().add(new THREE.Vector3(0, 16, 0));
+      return islands[0].center.clone().add(new THREE.Vector3(2, 4.2, 3));
+    }
+
+    async function loadFlytraps() {
+      loadingTextEl.textContent = "正在加载 Snapping Venus flytrap.glb ...";
+      const gltf = await loadGLTF("Snapping Venus flytrap.glb");
+      await applyEmbeddedModelTextures(gltf);
+
+      const trapCount = 6;
+      const beeSize = characterDefs.find(def => def.role === "bee").targetSize;
+      for (let i = 0; i < trapCount; i++) {
+        const animationRoot = cloneSkeleton(gltf.scene);
+        const trap = makeModelUsable(animationRoot, "Snapping Venus flytrap.glb", beeSize * 5 / 3);
+        setupModelAnimations(trap, animationRoot, gltf.animations);
+        setModelAnimation(trap, 0);
+
+        const island = islands[i % islands.length];
+        const point = randomPointOnIsland(island.radius, 5);
+        trap.position.set(island.center.x + point.x, island.center.y + 1.25, island.center.z + point.z);
+        trap.userData.role = "flytrap";
+        trap.userData.island = island;
+        trap.userData.attackElapsed = 0;
+        trap.userData.attackDuration = trap.userData.animationActions?.[1]?.duration || 1.5;
+
+        const dangerZone = new THREE.Mesh(
+          new THREE.SphereGeometry(5, 32, 20),
+          new THREE.MeshBasicMaterial({
+            color: 0xff1f2d,
+            transparent: true,
+            opacity: .28,
+            wireframe: true,
+            depthWrite: false
+          })
+        );
+        dangerZone.position.y = 0;
+        dangerZone.visible = false;
+        dangerZone.renderOrder = 20;
+        trap.add(dangerZone);
+        trap.userData.dangerZone = dangerZone;
+
+        flytraps.push(trap);
+        scene.add(trap);
+      }
+    }
+
+    function setupInput() {
+      window.addEventListener("keydown", e => {
+        keys.add(e.code);
+        if (e.code === "Digit1") switchPlayer(0);
+        if (e.code === "Digit2") switchPlayer(1);
+        if (e.code === "Digit3") switchPlayer(2);
+        if (e.code === "Digit4") switchPlayer(3);
+        if (e.code === "Digit5") {
+          const butterflyIndex = bugs.findIndex(bug => bug.userData.role === "butterfly");
+          if (butterflyIndex >= 0) switchPlayer(butterflyIndex);
+          else showMessage("请先把 Fluttering butterfly.glb 放到 index.html 同一文件夹。");
+        }
+      });
+
+      window.addEventListener("keyup", e => keys.delete(e.code));
+
+      window.addEventListener("pointerdown", e => {
+        if (
+          e.target.closest(".joyBase") ||
+          e.target.closest(".gameBtn") ||
+          e.target.closest(".infoButton") ||
+          e.target.closest(".tips") ||
+          e.target.closest(".deathOverlay")
+        ) return;
+        dragging = true;
+        lastPointer.x = e.clientX;
+        lastPointer.y = e.clientY;
+      });
+
+      window.addEventListener("pointermove", e => {
+        if (!dragging) return;
+        const dx = e.clientX - lastPointer.x;
+        const dy = e.clientY - lastPointer.y;
+        lastPointer.x = e.clientX;
+        lastPointer.y = e.clientY;
+        cameraYaw -= dx * 0.006;
+        cameraPitch -= dy * 0.0045;
+        cameraPitch = THREE.MathUtils.clamp(cameraPitch, -0.85, 0.24);
+      });
+
+      window.addEventListener("pointerup", () => { dragging = false; });
+
+      window.addEventListener("wheel", e => {
+        e.preventDefault();
+        cameraZoom = THREE.MathUtils.clamp(cameraZoom + Math.sign(e.deltaY) * .055, 0, 1);
+        updateCamera(0);
+      }, { passive: false });
+
+      window.addEventListener("resize", onResize);
+
+      restartBtn.addEventListener("click", restartAfterDeath);
+      infoButtonEl.addEventListener("click", () => {
+        const isOpen = tipsPanelEl.classList.toggle("open");
+        infoButtonEl.setAttribute("aria-expanded", String(isOpen));
+        infoButtonEl.textContent = isOpen ? "关闭" : "说明";
+      });
+
+      setupMobileControls();
+    }
+
+    function setupMobileControls() {
+      const joyBase = document.getElementById("joyBase");
+      const joyKnob = document.getElementById("joyKnob");
+      const jumpBtn = document.getElementById("jumpBtn");
+      const descendBtn = document.getElementById("descendBtn");
+      const switchBtn = document.getElementById("switchBtn");
+      const zoomInBtn = document.getElementById("zoomInBtn");
+      const zoomOutBtn = document.getElementById("zoomOutBtn");
+
+      let activeId = null;
+
+      const rectCenter = () => {
+        const rect = joyBase.getBoundingClientRect();
+        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, radius: rect.width / 2 };
+      };
+
+      joyBase.addEventListener("pointerdown", e => {
+        activeId = e.pointerId;
+        joyBase.setPointerCapture(activeId);
+        updateJoy(e);
+      });
+
+      joyBase.addEventListener("pointermove", e => {
+        if (e.pointerId === activeId) updateJoy(e);
+      });
+
+      joyBase.addEventListener("pointerup", e => {
+        if (e.pointerId !== activeId) return;
+        activeId = null;
+        mobileMove.set(0, 0);
+        centerJoyKnob();
+      });
+
+      joyBase.addEventListener("pointercancel", () => {
+        activeId = null;
+        mobileMove.set(0, 0);
+        centerJoyKnob();
+      });
+
+      function centerJoyKnob() {
+        const baseRect = joyBase.getBoundingClientRect();
+        const knobRect = joyKnob.getBoundingClientRect();
+        const origin = (baseRect.width - knobRect.width) / 2;
+        joyKnob.style.left = `${origin}px`;
+        joyKnob.style.top = `${origin}px`;
+      }
+
+      function updateJoy(e) {
+        const c = rectCenter();
+        const knobRect = joyKnob.getBoundingClientRect();
+        const origin = (c.radius * 2 - knobRect.width) / 2;
+        let dx = e.clientX - c.x;
+        let dy = e.clientY - c.y;
+        const len = Math.hypot(dx, dy);
+        const max = c.radius - knobRect.width / 2 - 4;
+
+        if (len > max) {
+          dx = dx / len * max;
+          dy = dy / len * max;
+        }
+
+        mobileMove.set(dx / max, dy / max);
+        joyKnob.style.left = `${origin + dx}px`;
+        joyKnob.style.top = `${origin + dy}px`;
+      }
+
+      jumpBtn.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        keys.add("Space");
+      });
+
+      jumpBtn.addEventListener("pointerup", e => {
+        e.preventDefault();
+        keys.delete("Space");
+      });
+
+      jumpBtn.addEventListener("pointercancel", () => keys.delete("Space"));
+
+      descendBtn.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        keys.add("ShiftLeft");
+      });
+
+      descendBtn.addEventListener("pointerup", e => {
+        e.preventDefault();
+        keys.delete("ShiftLeft");
+      });
+
+      descendBtn.addEventListener("pointercancel", () => keys.delete("ShiftLeft"));
+
+      switchBtn.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        const now = performance.now();
+        if (now - lastSwitchTime > 350) {
+          lastSwitchTime = now;
+          switchPlayer(currentIndex + 1);
+        }
+      });
+
+      zoomInBtn.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        cameraZoom = THREE.MathUtils.clamp(cameraZoom - .08, 0, 1);
+        updateCamera(0);
+      });
+
+      zoomOutBtn.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        cameraZoom = THREE.MathUtils.clamp(cameraZoom + .08, 0, 1);
+        updateCamera(0);
+      });
+
+      centerJoyKnob();
+    }
+
+    function switchPlayer(index, silent = false) {
+      if (bugs.length === 0) return;
+
+      currentIndex = ((index % bugs.length) + bugs.length) % bugs.length;
+      player = bugs[currentIndex];
+      playerRole = player.userData.role;
+
+      gameDead = false;
+      deathOverlayEl.style.display = "none";
+      health = 100;
+      healthEl.textContent = health;
+      player.visible = true;
+      velocityY = 0;
+
+      bugs.forEach((bug, i) => {
+        bug.userData.isPlayer = i === currentIndex;
+        const targetScale = i === currentIndex ? 1.12 : .9;
+        bug.scale.setScalar(targetScale);
+      });
+
+      if (playerRole === "beetle") {
+        player.position.copy(islands[0].center).add(new THREE.Vector3(4, 1.25, 0));
+        currentIsland = islands[0];
+      }
+
+      if (playerRole === "pinecone") {
+        player.position.copy(currentIsland.center).add(new THREE.Vector3(-5, 1.25, -2));
+      }
+
+      if ((playerRole === "bee" || playerRole === "butterfly" || playerRole === "pterosaur") && player.position.y < 3) {
+        player.position.y = islands[0].center.y + (playerRole === "pterosaur" ? 16 : 6);
+      }
+
+      bugNameEl.textContent = player.userData.modelName;
+      modeTextEl.textContent =
+        playerRole === "bee" || playerRole === "butterfly" ? "飞行" :
+        playerRole === "beetle" || playerRole === "pinecone" ? "地面行走" :
+        "巨型飞行";
+      islandNameEl.textContent = getNearestIslandName(player.position);
+
+      if (!silent) {
+        if (playerRole === "bee") showMessage("你现在是蜜蜂：体积很小，可以飞到 4 个悬浮岛之间穿梭。Space 上升，Shift 下降。");
+        else if (playerRole === "butterfly") showMessage("你现在是蝴蝶：Space 上升，Shift 下降；飞行、落地和上升各有独立循环动画。");
+        else if (playerRole === "beetle") showMessage("你现在是甲虫：只能在花园岛地面行走，离开边缘会坠落死亡。");
+        else if (playerRole === "pinecone") showMessage("你现在是松果：只能在当前岛屿地面行走，离开岛屿会坠落死亡。");
+        else if (playerRole === "pterosaur") showMessage("你现在是翼龙：空中播放飞行动画，地面移动播放走路动画，地面静止播放待机动画。");
+        else showMessage(`已切换为 ${player.userData.modelName}。`);
+      }
+    }
+
+    function updatePlayer(dt) {
+      if (!player || gameDead) return;
+
+      if (
+        onboardingVisible &&
+        (
+          mobileMove.lengthSq() > .001 ||
+          keys.has("KeyW") || keys.has("KeyA") || keys.has("KeyS") || keys.has("KeyD") ||
+          keys.has("ArrowUp") || keys.has("ArrowDown") || keys.has("ArrowLeft") || keys.has("ArrowRight") ||
+          keys.has("Space") || keys.has("ShiftLeft") || keys.has("ShiftRight")
+        )
+      ) {
+        dismissOnboarding();
+      }
+
+      if (playerRole === "bee") updateBee(dt);
+      else if (playerRole === "butterfly") updateButterfly(dt);
+      else if (playerRole === "beetle") updateBeetle(dt);
+      else if (playerRole === "pinecone") updatePinecone(dt);
+      else if (playerRole === "pterosaur") updatePterosaur(dt);
+      else updateFreeExplorer(dt);
+    }
+
+    function dismissOnboarding() {
+      if (!onboardingVisible) return;
+      onboardingVisible = false;
+      onboardingHintEl.classList.add("hidden");
+    }
+
+    function getMoveVector() {
+      const forward = new THREE.Vector3(Math.sin(cameraYaw), 0, Math.cos(cameraYaw));
+      const right = new THREE.Vector3(Math.cos(cameraYaw), 0, -Math.sin(cameraYaw));
+      const move = new THREE.Vector3();
+
+      if (keys.has("KeyW") || keys.has("ArrowUp")) move.add(forward);
+      if (keys.has("KeyS") || keys.has("ArrowDown")) move.sub(forward);
+      if (keys.has("KeyD") || keys.has("ArrowRight")) move.add(right);
+      if (keys.has("KeyA") || keys.has("ArrowLeft")) move.sub(right);
+
+      if (mobileMove.lengthSq() > .001) {
+        move.addScaledVector(forward, -mobileMove.y);
+        move.addScaledVector(right, mobileMove.x);
+      }
+
+      return move;
+    }
+
+    function updateBee(dt) {
+      updateWingedInsect(dt, 11.2, 8.5, "蜜蜂");
+    }
+
+    function updateButterfly(dt) {
+      updateWingedInsect(dt, 10.4, 8.2, "蝴蝶");
+    }
+
+    function updateWingedInsect(dt, speed, verticalSpeed, roleLabel) {
+      const move = getMoveVector();
+
+      if (move.lengthSq() > 0.001) {
+        move.normalize();
+        player.position.addScaledVector(move, speed * dt);
+
+        const targetRot = Math.atan2(move.x, move.z);
+        player.rotation.y = lerpAngle(player.rotation.y, targetRot, 10 * dt);
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, -move.x * .16 + Math.sin(clock.elapsedTime * 24) * .08, 8 * dt);
+      } else {
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, Math.sin(clock.elapsedTime * 18) * .04, 5 * dt);
+      }
+
+      const vertical = updateSmoothVerticalMovement(dt, verticalSpeed, -5, 45);
+
+      const touchedIsland = collideWithIslandGround(player, true);
+
+      if (!touchedIsland) {
+        player.position.y = THREE.MathUtils.clamp(player.position.y, -5, 45);
+        islandNameEl.textContent = getNearestIslandName(player.position);
+      }
+
+      if (vertical.rising) {
+        setModelAnimation(player, 2);
+        modeTextEl.textContent = `${roleLabel}上升`;
+      } else if (touchedIsland) {
+        setModelAnimation(player, 1);
+        modeTextEl.textContent = `${roleLabel}落地`;
+      } else {
+        setModelAnimation(player, 0);
+        modeTextEl.textContent = `${roleLabel}飞行`;
+      }
+    }
+
+    function updateBeetle(dt) {
+      const move = getMoveVector();
+      const speed = 5.8;
+
+      if (move.lengthSq() > 0.001) {
+        move.normalize();
+        player.position.addScaledVector(move, speed * dt);
+
+        const targetRot = Math.atan2(move.x, move.z);
+        player.rotation.y = lerpAngle(player.rotation.y, targetRot, 10 * dt);
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, -move.x * .08 + Math.sin(clock.elapsedTime * 18) * .035, 8 * dt);
+      } else {
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, 0, 5 * dt);
+      }
+
+      const vertical = updateSmoothVerticalMovement(dt, 7.2, -5, 45);
+      const touchedIsland = collideWithIslandGround(player, true);
+
+      const onGarden = distanceXZ(player.position, islands[0].center) <= islands[0].radius - .3;
+
+      if (!onGarden) {
+        triggerBeetleFallDeath();
+      }
+
+      modeTextEl.textContent =
+        vertical.rising ? "甲虫平滑上升" :
+        vertical.descending ? "甲虫平滑下降" :
+        touchedIsland ? "地面行走" : "甲虫空中悬停";
+      islandNameEl.textContent = "花园岛";
+    }
+
+    function updatePinecone(dt) {
+      const move = getMoveVector();
+      const speed = 5.0;
+
+      if (move.lengthSq() > 0.001) {
+        move.normalize();
+        player.position.addScaledVector(move, speed * dt);
+
+        const targetRot = Math.atan2(move.x, move.z);
+        player.rotation.y = lerpAngle(player.rotation.y, targetRot, 10 * dt);
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, -move.x * .08 + Math.sin(clock.elapsedTime * 14) * .03, 8 * dt);
+      } else {
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, 0, 5 * dt);
+      }
+
+      const island = currentIsland || islands[0];
+      const vertical = updateSmoothVerticalMovement(dt, 6.8, -5, 45);
+      const touchedIsland = collideWithIslandGround(player, true);
+
+      const onCurrentIsland = distanceXZ(player.position, island.center) <= island.radius - .3;
+
+      if (!onCurrentIsland) {
+        triggerGroundFallDeath("松果");
+      }
+
+      modeTextEl.textContent =
+        vertical.rising ? "松果平滑上升" :
+        vertical.descending ? "松果平滑下降" :
+        touchedIsland ? "地面行走" : "松果空中悬停";
+      islandNameEl.textContent = island.name;
+    }
+
+    function updatePterosaur(dt) {
+      const move = getMoveVector();
+      const isMoving = move.lengthSq() > 0.001;
+      const speed = 13.5;
+      const verticalSpeed = 9.5;
+
+      if (isMoving) {
+        move.normalize();
+        player.position.addScaledVector(move, speed * dt);
+
+        const targetRot = Math.atan2(move.x, move.z);
+        player.rotation.y = lerpAngle(player.rotation.y, targetRot, 8 * dt);
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, -move.x * .11 + Math.sin(clock.elapsedTime * 5) * .035, 6 * dt);
+      } else {
+        player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, Math.sin(clock.elapsedTime * 4) * .025, 4 * dt);
+      }
+
+      const vertical = updateSmoothVerticalMovement(dt, verticalSpeed, -2, 95);
+
+      const touchedIsland = collideWithIslandGround(player, true);
+      if (vertical.rising) {
+        setModelAnimation(player, 0);
+        modeTextEl.textContent = "翼龙平滑上升";
+      } else if (vertical.descending && !touchedIsland) {
+        setModelAnimation(player, 0);
+        modeTextEl.textContent = "翼龙平滑下降";
+      } else if (touchedIsland) {
+        if (isMoving) {
+          setModelAnimation(player, 1);
+          modeTextEl.textContent = "翼龙地面行走";
+        } else {
+          setModelAnimation(player, 2);
+          modeTextEl.textContent = "翼龙待机";
+        }
+      } else {
+        setModelAnimation(player, 0);
+        player.position.y = THREE.MathUtils.clamp(player.position.y, -2, 95);
+        modeTextEl.textContent = "巨型飞行";
+        islandNameEl.textContent = getNearestIslandName(player.position);
+      }
+    }
+
+    function updateSmoothVerticalMovement(dt, speed, minY, maxY) {
+      const rising = keys.has("Space");
+      const descending = keys.has("ShiftLeft") || keys.has("ShiftRight");
+
+      if (rising && !descending) player.position.y += speed * dt;
+      if (descending && !rising) player.position.y -= speed * dt;
+      player.position.y = THREE.MathUtils.clamp(player.position.y, minY, maxY);
+
+      return { rising: rising && !descending, descending: descending && !rising };
+    }
+
+    function updateFreeExplorer(dt) {
+      const move = getMoveVector();
+      const speed = 6.4;
+
+      if (move.lengthSq() > 0.001) {
+        move.normalize();
+        player.position.addScaledVector(move, speed * dt);
+        const targetRot = Math.atan2(move.x, move.z);
+        player.rotation.y = lerpAngle(player.rotation.y, targetRot, 10 * dt);
+      }
+
+      const vertical = updateSmoothVerticalMovement(dt, 7, -5, 45);
+      const island = getIslandSurfaceUnderPosition(player.position);
+      if (island) {
+        currentIsland = island;
+        const groundY = island.center.y + 1.25;
+        if (player.position.y <= groundY) {
+          player.position.y = groundY;
+        }
+      }
+
+      modeTextEl.textContent =
+        vertical.rising ? "平滑上升" :
+        vertical.descending ? "平滑下降" :
+        "自由探索";
+      islandNameEl.textContent = getNearestIslandName(player.position);
+    }
+
+    function triggerBeetleFallDeath() {
+      triggerGroundFallDeath("甲虫");
+    }
+
+    function triggerGroundFallDeath(roleName = "地面角色") {
+      gameDead = true;
+      messageEl.textContent = `${roleName}离开了岛屿边缘，正在坠入天空虚空……`;
+      deathOverlayEl.style.display = "grid";
+
+      const startY = player.position.y;
+      const fallingRole = playerRole;
+      const fallStart = performance.now();
+
+      function fallAnim() {
+        if (!gameDead || playerRole !== fallingRole) return;
+        const t = (performance.now() - fallStart) / 1000;
+        player.position.y = startY - t * t * 18;
+        player.rotation.x += .08;
+        player.rotation.z += .05;
+        if (t < 1.2) requestAnimationFrame(fallAnim);
+      }
+
+      fallAnim();
+    }
+
+    function restartAfterDeath() {
+      gameDead = false;
+      deathOverlayEl.style.display = "none";
+      health = 100;
+      healthEl.textContent = health;
+      player.visible = true;
+      velocityY = 0;
+
+      if (playerRole === "pinecone") {
+        player.position.copy((currentIsland || islands[0]).center).add(new THREE.Vector3(-5, 1.25, -2));
+        player.rotation.set(0, Math.PI, 0);
+        messageEl.textContent = "松果已回到当前岛屿。注意不要走出岛屿边缘。";
+      } else {
+        switchPlayer(1, true);
+        player.position.copy(islands[0].center).add(new THREE.Vector3(4, 1.25, 0));
+        player.rotation.set(0, Math.PI, 0);
+        messageEl.textContent = "甲虫已回到花园岛。注意不要走出岛屿边缘。";
+      }
+    }
+
+    function updateFlytraps(dt) {
+      if (!player) return;
+
+      if (gameDead) {
+        flytraps.forEach(trap => {
+          trap.userData.dangerZone.visible = false;
+          trap.userData.attackElapsed = 0;
+          setModelAnimation(trap, 0);
+        });
+        activeTrap = null;
+        return;
+      }
+
+      let nearestTrap = null;
+      let nearestDistance = Infinity;
+
+      flytraps.forEach(trap => {
+        const distance = trap.position.distanceTo(player.position);
+        const inDanger = distance <= 5;
+        trap.userData.dangerZone.visible = inDanger;
+
+        if (inDanger) {
+          const dx = player.position.x - trap.position.x;
+          const dz = player.position.z - trap.position.z;
+          const targetYaw = Math.atan2(dx, dz);
+          trap.rotation.y = lerpAngle(trap.rotation.y, targetYaw, 9 * dt);
+
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestTrap = trap;
+          }
+        } else if (trap !== activeTrap) {
+          trap.userData.attackElapsed = 0;
+          setModelAnimation(trap, 0);
+        }
+      });
+
+      if (activeTrap && activeTrap !== nearestTrap) {
+        activeTrap.userData.attackElapsed = 0;
+        setModelAnimation(activeTrap, 0);
+        activeTrap = null;
+      }
+
+      if (!activeTrap && nearestTrap) {
+        activeTrap = nearestTrap;
+        activeTrap.userData.attackElapsed = 0;
+        setModelAnimation(activeTrap, 1, false);
+        showMessage("危险！食人花锁定了玩家，快离开红色球形范围！");
+      }
+
+      if (activeTrap) {
+        activeTrap.userData.attackElapsed += dt;
+        if (activeTrap.userData.attackElapsed >= activeTrap.userData.attackDuration) {
+          triggerFlytrapDeath();
+        }
+      }
+    }
+
+    function triggerFlytrapDeath() {
+      if (gameDead || !player) return;
+
+      gameDead = true;
+      health = 0;
+      healthEl.textContent = health;
+      stopModelAnimations(player);
+      player.visible = false;
+      messageEl.textContent = "食人花攻击命中，生命值归零！正在回到角色初始位置……";
+
+      setTimeout(() => {
+        if (!player) return;
+
+        player.position.copy(player.userData.spawnPosition || getCharacterSpawn(playerRole));
+        player.rotation.set(0, Math.PI, 0);
+        player.visible = true;
+        velocityY = 0;
+        health = 100;
+        healthEl.textContent = health;
+        gameDead = false;
+
+        flytraps.forEach(trap => {
+          trap.userData.attackElapsed = 0;
+          trap.userData.dangerZone.visible = false;
+          setModelAnimation(trap, 0);
+        });
+        activeTrap = null;
+        messageEl.textContent = `${player.userData.modelName} 已在初始位置重生。`;
+      }, 650);
+    }
+
+    function updateNPCs(dt) {
+      bugs.forEach((bug, index) => {
+        if (bug === player) return;
+
+        if (bug.userData.role === "beetle") {
+          bug.position.copy(islands[0].center).add(new THREE.Vector3(4, 1.25, 0));
+          return;
+        }
+
+        if (bug.userData.role === "pinecone") {
+          const island = islands[0];
+          bug.userData.wanderTimer -= dt;
+          if (bug.userData.wanderTimer <= 0) {
+            bug.userData.wanderTimer = 1.2 + Math.random() * 2.2;
+            bug.userData.wanderAngle += (Math.random() - .5) * 1.6;
+          }
+          const dir = new THREE.Vector3(Math.sin(bug.userData.wanderAngle), 0, Math.cos(bug.userData.wanderAngle));
+          bug.position.addScaledVector(dir, 1.8 * dt);
+          bug.position.y = island.center.y + 1.25;
+          if (!isInsideIsland(bug.position, island, 1.2)) {
+            bug.userData.wanderAngle += Math.PI;
+            const toCenter = bug.position.clone().sub(island.center);
+            toCenter.y = 0;
+            if (toCenter.length() > island.radius - 1.2) {
+              toCenter.setLength(island.radius - 1.2);
+              bug.position.x = island.center.x + toCenter.x;
+              bug.position.z = island.center.z + toCenter.z;
+            }
+          }
+          bug.rotation.y = lerpAngle(bug.rotation.y, bug.userData.wanderAngle, 5 * dt);
+          return;
+        }
+
+        bug.userData.wanderTimer -= dt;
+
+        if (bug.userData.wanderTimer <= 0) {
+          bug.userData.wanderTimer = 1.2 + Math.random() * 2.2;
+          bug.userData.wanderAngle += (Math.random() - .5) * 1.8;
+        }
+
+        const home = bug.userData.home || bug.position;
+        const fly =
+          bug.userData.role === "bee" ||
+          bug.userData.role === "butterfly" ||
+          bug.userData.role === "pterosaur";
+
+        if (fly) {
+          setModelAnimation(bug, 0);
+          const targetIsland = islands[(index + Math.floor(clock.elapsedTime / 8)) % islands.length];
+          const target = targetIsland.center.clone().add(new THREE.Vector3(
+            Math.sin(clock.elapsedTime * .45 + index) * 8,
+            5 + Math.sin(clock.elapsedTime * .8 + index) * 3,
+            Math.cos(clock.elapsedTime * .45 + index) * 8
+          ));
+          const dir = target.sub(bug.position);
+          if (dir.lengthSq() > .1) {
+            dir.normalize();
+            bug.position.addScaledVector(dir, (bug.userData.role === "pterosaur" ? 4.6 : 3.2 + index) * dt);
+            collideWithIslandGround(bug, false);
+            bug.rotation.y = lerpAngle(bug.rotation.y, Math.atan2(dir.x, dir.z), 4 * dt);
+          }
+          bug.rotation.z = Math.sin(clock.elapsedTime * 8 + index) * .06;
+        } else {
+          const dir = new THREE.Vector3(Math.sin(bug.userData.wanderAngle), 0, Math.cos(bug.userData.wanderAngle));
+          bug.position.addScaledVector(dir, 2 * dt);
+          const away = bug.position.clone().sub(home);
+          if (away.length() > 9) bug.userData.wanderAngle = Math.atan2(-away.x, -away.z);
+          bug.rotation.y = lerpAngle(bug.rotation.y, bug.userData.wanderAngle, 5 * dt);
+        }
+      });
+    }
+
+    function updateCollectibles(dt) {
+      pollen.forEach((item, i) => {
+        if (item.userData.taken) return;
+
+        item.rotation.y += dt * 2.2;
+        item.rotation.x += dt * .7;
+        item.position.y = item.userData.baseY + Math.sin(clock.elapsedTime * 2.5 + i) * .22;
+
+        const isSmallFlyer = playerRole === "bee" || playerRole === "butterfly";
+        if (player && !gameDead && item.position.distanceTo(player.position.clone().add(new THREE.Vector3(0, isSmallFlyer ? 0.2 : 1, 0))) < (isSmallFlyer ? 1.15 : 1.85)) {
+          item.userData.taken = true;
+          item.visible = false;
+          score += 10;
+          scoreEl.textContent = score;
+          showMessage(score % 50 === 0 ? "连续收集！天空花粉能量变强了！" : "获得 10 点花粉！");
+          setTimeout(() => respawnPollen(item), 4500 + Math.random() * 3500);
+        }
+      });
+
+      rings.forEach(ring => {
+        ring.rotation.z += dt * .8;
+        ring.userData.cooldown = Math.max(0, ring.userData.cooldown - dt);
+
+        if (!player || gameDead || ring.userData.cooldown > 0) return;
+
+        const d = player.position.distanceTo(ring.position);
+
+        if (d < (playerRole === 'pterosaur' ? 7.5 : 2.55)) {
+          ring.userData.cooldown = 2.5;
+          score += 30;
+          scoreEl.textContent = score;
+
+          if (playerRole === "bee" || playerRole === "butterfly") {
+            showMessage("飞行昆虫穿过天空花环！+30，飞行能量提升！");
+          } else {
+            velocityY = Math.max(velocityY, 5.5);
+            showMessage("穿过花环！+30，获得一次弹跳加速！");
+          }
+        }
+      });
+    }
+
+    function respawnPollen(item) {
+      const island = islands[item.userData.islandIndex || 0];
+      const p = randomPointOnIsland(island.radius, 4);
+      item.position.set(island.center.x + p.x, island.center.y + 2.1 + Math.random() * 2.2, island.center.z + p.z);
+      item.userData.baseY = item.position.y;
+      item.userData.taken = false;
+      item.visible = true;
+    }
+
+    function updateMovingDecor(dt) {
+      movingDecor.forEach(obj => {
+        if (obj.userData.cloud) {
+          obj.position.x += dt * obj.userData.speed;
+          if (obj.position.x > 95) obj.position.x = -95;
+        }
+      });
+
+      islands.forEach((island, i) => {
+        island.group.position.y = island.center.y + Math.sin(clock.elapsedTime * .55 + i) * .25;
+      });
+    }
+
+    function updateCamera(dt) {
+      if (!player) return;
+
+      player.updateWorldMatrix(true, true);
+
+      let visualSize = (player.userData.visualSize || 1) * player.scale.x;
+      let target = null;
+
+      if (playerRole === "bee" && player.userData.visualCenter) {
+        target = player.localToWorld(player.userData.visualCenter.clone());
+      }
+
+      const cameraRange = getCameraRange(playerRole, visualSize);
+      cameraDistance = Math.exp(
+        THREE.MathUtils.lerp(Math.log(cameraRange.min), Math.log(cameraRange.max), cameraZoom)
+      );
+
+      const cameraAnchor = player.userData.cameraAnchor;
+      if (!target && playerRole === "pterosaur" && cameraAnchor) {
+        target = cameraAnchor.getWorldPosition(new THREE.Vector3());
+      } else if (!target) {
+        const targetHeight = (player.userData.visualCenterY ?? visualSize * .5) * player.scale.y;
+        target = player.position.clone().add(new THREE.Vector3(0, targetHeight, 0));
+      }
+      const offset = new THREE.Vector3(
+        Math.sin(cameraYaw) * Math.cos(cameraPitch) * cameraDistance,
+        Math.sin(cameraPitch) * cameraDistance,
+        Math.cos(cameraYaw) * Math.cos(cameraPitch) * cameraDistance
+      );
+
+      const desired = target.clone().sub(offset);
+      camera.position.copy(desired);
+      camera.lookAt(target);
+    }
+
+    function getCameraRange(role, visualSize) {
+      const fullScreenDistance = visualSize / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * .5)));
+
+      if (role === "bee" || role === "butterfly") {
+        return {
+          min: Math.max(.018, fullScreenDistance * 1.02),
+          max: Math.max(16, visualSize * 90)
+        };
+      }
+
+      if (role === "pterosaur") {
+        return {
+          min: fullScreenDistance / .9,
+          max: fullScreenDistance / .2
+        };
+      }
+
+      return {
+        min: Math.max(.7, fullScreenDistance / .8),
+        max: Math.max(22, visualSize * 12)
+      };
+    }
+
+    function getIslandUnderPosition(pos) {
+      for (const island of islands) {
+        if (isInsideIsland(pos, island, 0)) return island;
+      }
+      return null;
+    }
+
+    function getNearestIslandName(pos) {
+      let best = islands[0];
+      let bestDist = Infinity;
+      for (const island of islands) {
+        const d = distanceXZ(pos, island.center);
+        if (d < bestDist) {
+          bestDist = d;
+          best = island;
+        }
+      }
+      return best.name;
+    }
+
+    function isInsideIsland(pos, island, shrink = 0) {
+      const d = distanceXZ(pos, island.center);
+      const vertical = Math.abs(pos.y - (island.center.y + 1.25));
+      return d <= island.radius - shrink && vertical < 5.5;
+    }
+
+    function distanceXZ(a, b) {
+      const dx = a.x - b.x;
+      const dz = a.z - b.z;
+      return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    function getIslandSurfaceUnderPosition(pos) {
+      for (const island of islands) {
+        const d = distanceXZ(pos, island.center);
+        if (d <= island.radius - 0.6) {
+          return island;
+        }
+      }
+      return null;
+    }
+
+    function collideWithIslandGround(object, allowWalkOnGround = true) {
+      if (!object) return null;
+
+      const island = getIslandSurfaceUnderPosition(object.position);
+      if (!island) return null;
+
+      const groundY = island.center.y + 1.25;
+
+      // 角色从空中向下碰到岛面时，不能继续向下穿模。
+      if (object.position.y <= groundY) {
+        object.position.y = groundY;
+
+        // 玩家落地后清掉向下速度，之后可以贴着岛面行走。
+        if (object === player && velocityY < 0) {
+          velocityY = 0;
+        }
+
+        currentIsland = island;
+
+        if (object === player) {
+          islandNameEl.textContent = island.name;
+          if (allowWalkOnGround && (playerRole === "bee" || playerRole === "butterfly" || playerRole === "pterosaur")) {
+            modeTextEl.textContent = playerRole === "pterosaur" ? "巨型落地行走" : "落地";
+          }
+        }
+
+        return island;
+      }
+
+      return null;
+    }
+
+    function animate() {
+      const dt = Math.min(clock.getDelta(), 0.035);
+      animationMixers.forEach(mixer => mixer.update(dt));
+      updatePlayer(dt);
+      updateNPCs(dt);
+      updateFlytraps(dt);
+      updateCollectibles(dt);
+      updateMovingDecor(dt);
+      updateCamera(dt);
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    function showMessage(text) {
+      messageEl.textContent = text;
+      clearTimeout(showMessage.timer);
+      showMessage.timer = setTimeout(() => {
+        if (!gameDead) {
+          messageEl.textContent = "所有角色可用 Space / Shift 平滑升降；进入食人花 5 米红色危险区会被锁定攻击。";
+        }
+      }, 2600);
+    }
+
+    function lerpAngle(a, b, t) {
+      const delta = Math.atan2(Math.sin(b - a), Math.cos(b - a));
+      return a + delta * Math.min(1, t);
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+  </script>
+</body>
+</html>
