@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#ffb8d1">
+  <title>糖豆别生气！</title>
+  <style>
+    :root {
+      --ink: #553b68;
+      --cream: #fff8ee;
+      --pink: #ff78ad;
+      --pink-dark: #dc4f8b;
+      --mint: #66d6bd;
+      --yellow: #ffd75d;
+      --shadow: rgba(87, 55, 107, .22);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #ffc6da;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      touch-action: none;
+      user-select: none;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,255,255,.7) 0 4px, transparent 5px),
+        radial-gradient(circle at 82% 30%, rgba(255,255,255,.55) 0 5px, transparent 6px),
+        linear-gradient(145deg, #ffd3e2, #f7c8ff 55%, #bcecff);
+      background-size: 90px 90px, 130px 130px, auto;
+    }
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+    }
+    #game-shell {
+      position: relative;
+      width: min(100vw, calc(100vh * 16 / 9));
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #bdeeff;
+      box-shadow: 0 24px 80px rgba(83,51,103,.28);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    #hud {
+      position: absolute;
+      inset: 0 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 18px 20px;
+      pointer-events: none;
+      gap: 12px;
+    }
+    .pill {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      border: 3px solid rgba(255,255,255,.82);
+      border-radius: 18px;
+      background: rgba(255,248,238,.88);
+      box-shadow: 0 6px 0 rgba(105,75,125,.16);
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .pill small {
+      opacity: .62;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    #level-pill { max-width: 48%; }
+    #stats { display: flex; gap: 8px; }
+    #pause-btn {
+      pointer-events: auto;
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,.82);
+      border-radius: 15px;
+      background: rgba(255,248,238,.9);
+      color: var(--ink);
+      font: 900 20px/1 sans-serif;
+      box-shadow: 0 5px 0 rgba(105,75,125,.16);
+      cursor: pointer;
+    }
+    #tip {
+      position: absolute;
+      left: 50%;
+      top: 82px;
+      transform: translate(-50%, -12px);
+      padding: 10px 18px;
+      border-radius: 16px;
+      background: rgba(85,59,104,.88);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      opacity: 0;
+      transition: .25s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #tip.show { opacity: 1; transform: translate(-50%, 0); }
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 28px;
+      background: rgba(255,214,230,.45);
+      backdrop-filter: blur(9px);
+      z-index: 20;
+    }
+    .screen.show { display: grid; }
+    .panel {
+      width: min(680px, 94%);
+      max-height: 92%;
+      overflow: auto;
+      padding: 32px;
+      text-align: center;
+      border: 5px solid #fff;
+      border-radius: 34px;
+      background: rgba(255,248,238,.96);
+      box-shadow: 0 18px 0 rgba(108,69,129,.15), 0 28px 70px var(--shadow);
+    }
+    .logo {
+      margin: 0;
+      font-size: clamp(40px, 7vw, 76px);
+      line-height: .96;
+      color: var(--pink-dark);
+      letter-spacing: -4px;
+      text-shadow: 0 5px 0 #fff, 0 9px 0 #ffc1d8;
+    }
+    .subtitle {
+      margin: 15px 0 22px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #806590;
+    }
+    .mascot {
+      display: inline-grid;
+      place-items: center;
+      width: 82px;
+      height: 82px;
+      margin-bottom: 5px;
+      border-radius: 44% 56% 48% 52%;
+      background: var(--pink);
+      border: 5px solid #fff;
+      box-shadow: 0 8px 0 #db5a91;
+      font-size: 41px;
+      animation: bob 1.3s ease-in-out infinite alternate;
+    }
+    @keyframes bob { to { transform: translateY(-7px) rotate(3deg); } }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    button.big {
+      min-width: 170px;
+      padding: 14px 22px;
+      border: 0;
+      border-radius: 18px;
+      background: var(--pink);
+      color: #fff;
+      font: 900 18px/1.2 inherit;
+      box-shadow: 0 7px 0 var(--pink-dark);
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s;
+    }
+    button.big.secondary {
+      background: var(--mint);
+      box-shadow: 0 7px 0 #3aaf98;
+    }
+    button.big.cream {
+      color: var(--ink);
+      background: #fff;
+      box-shadow: 0 7px 0 #e5dce8;
+    }
+    button.big:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--pink-dark); }
+    .howto {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 22px 0;
+    }
+    .howto div {
+      padding: 12px 8px;
+      border-radius: 16px;
+      background: #f5eaf7;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .howto b { display: block; margin-bottom: 5px; color: var(--pink-dark); }
+    #level-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 9px;
+      margin: 20px 0;
+    }
+    .level-button {
+      aspect-ratio: 1;
+      border: 0;
+      border-radius: 14px;
+      background: #f0e7f2;
+      color: var(--ink);
+      font: 900 16px/1 inherit;
+      cursor: pointer;
+      box-shadow: inset 0 -4px 0 rgba(83,59,104,.10);
+    }
+    .level-button.done { background: #b8efda; }
+    .level-button.current { outline: 4px solid var(--pink); background: #fff2a9; }
+    .level-button:disabled { opacity: .35; cursor: not-allowed; }
+    .chapter-title {
+      margin: 0;
+      color: var(--pink-dark);
+      font-size: 30px;
+    }
+    .result-score {
+      margin: 16px auto 22px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+    .result-score span {
+      min-width: 110px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #f4eaf6;
+      font-weight: 900;
+    }
+    #touch-controls {
+      position: absolute;
+      inset: auto 0 max(12px, env(safe-area-inset-bottom));
+      display: none;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 22px;
+      z-index: 8;
+      pointer-events: none;
+    }
+    .touch-group { display: flex; gap: 12px; }
+    .touch-btn {
+      pointer-events: auto;
+      width: 72px;
+      height: 72px;
+      border: 4px solid rgba(255,255,255,.8);
+      border-radius: 24px;
+      background: rgba(85,59,104,.68);
+      color: #fff;
+      font: 900 30px/1 sans-serif;
+      box-shadow: 0 7px 0 rgba(59,39,72,.45);
+    }
+    .touch-btn.jump {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: rgba(255,100,158,.8);
+    }
+    @media (pointer: coarse), (max-width: 800px) {
+      #touch-controls { display: flex; }
+      #hud { padding: 9px; }
+      .pill { min-height: 34px; padding: 6px 10px; border-width: 2px; font-size: 12px; }
+      .pill small { display: none; }
+      #pause-btn { width: 36px; height: 36px; border-width: 2px; }
+      #tip { top: 56px; font-size: 12px; }
+      .panel { padding: 22px; }
+    }
+    @media (max-height: 520px) {
+      .panel { padding: 16px 22px; }
+      .mascot { display: none; }
+      .subtitle { margin: 8px 0 12px; }
+      .howto { margin: 12px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="game-shell">
+      <canvas id="game" width="1280" height="720" aria-label="糖豆别生气游戏画面"></canvas>
+
+      <div id="hud" hidden>
+        <div id="level-pill" class="pill"><span id="level-text">1-1</span><small id="level-name"></small></div>
+        <div id="stats">
+          <div class="pill">💥 <span id="death-text">0</span></div>
+          <div class="pill">⏱ <span id="time-text">00:00</span></div>
+          <button id="pause-btn" aria-label="暂停">Ⅱ</button>
+        </div>
+      </div>
+      <div id="tip"></div>
+
+      <div id="menu" class="screen show">
+        <div class="panel">
+          <div class="mascot">•ᴗ•</div>
+          <h1 class="logo">糖豆别生气！</h1>
+          <p class="subtitle">一款笑眯眯挖坑的原创平台跳跃游戏 · 共 30 关</p>
+          <div class="howto">
+            <div><b>移动</b>A / D 或 ← / →</div>
+            <div><b>跳跃</b>W / ↑ / 空格</div>
+            <div><b>秘诀</b>死一次，就聪明一点</div>
+          </div>
+          <div class="buttons">
+            <button id="continue-btn" class="big">开始冒险</button>
+            <button id="select-btn" class="big secondary">选择关卡</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="select-screen" class="screen">
+        <div class="panel">
+          <h2 class="chapter-title">关卡糖果盒</h2>
+          <p class="subtitle">每 5 关换一种坏心眼。已通过的关卡可以随时重玩。</p>
+          <div id="level-grid"></div>
+          <button class="big cream" data-action="menu">返回</button>
+        </div>
+      </div>
+
+      <div id="pause-screen" class="screen">
+        <div class="panel">
+          <div class="mascot">˘︹˘</div>
+          <h2 class="chapter-title">先消消气</h2>
+          <p class="subtitle">关卡不会偷偷跑掉，大概。</p>
+          <div class="buttons">
+            <button class="big" data-action="resume">继续</button>
+            <button class="big secondary" data-action="restart">重新挑战</button>
+            <button class="big cream" data-action="menu">主菜单</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="result-screen" class="screen">
+        <div class="panel">
+          <div class="mascot">≧▽≦</div>
+          <h2 id="result-title" class="chapter-title">过关啦！</h2>
+          <p id="result-copy" class="subtitle"></p>
+          <div class="result-score">
+            <span>本关死亡<br><b id="result-deaths">0</b></span>
+            <span>本关用时<br><b id="result-time">00:00</b></span>
+          </div>
+          <div class="buttons">
+            <button id="next-btn" class="big">下一关</button>
+            <button class="big secondary" data-action="restart">再玩一次</button>
+            <button class="big cream" data-action="select">关卡选择</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="ending-screen" class="screen">
+        <div class="panel">
+          <div class="mascot">★ᴗ★</div>
+          <h2 class="logo" style="font-size:58px">毕业啦！</h2>
+          <p class="subtitle">你穿过了 30 个甜蜜陷阱。糖豆承认：你比它更有耐心。</p>
+          <div class="result-score">
+            <span>总死亡<br><b id="ending-deaths">0</b></span>
+            <span>总用时<br><b id="ending-time">00:00</b></span>
+          </div>
+          <div class="buttons">
+            <button class="big" data-action="select">重玩关卡</button>
+            <button class="big cream" data-action="menu">回到首页</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="touch-controls">
+        <div class="touch-group">
+          <button class="touch-btn" data-key="left" aria-label="向左">←</button>
+          <button class="touch-btn" data-key="right" aria-label="向右">→</button>
+        </div>
+        <button class="touch-btn jump" data-key="jump" aria-label="跳跃">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const W = 1280, H = 720;
+    const FLOOR_Y = 640;
+    const PLAYER_W = 36, PLAYER_H = 48;
+    const SAVE_KEY = "tangdou-devil-save-v1";
+
+    const THEMES = [
+      { name: "草莓早晨", sky: ["#bfefff", "#fce1f0"], ground: "#72d6a6", edge: "#43ad82", accent: "#ff78ad", emoji: "🌸" },
+      { name: "布丁洞穴", sky: ["#ead6ff", "#ffcfe1"], ground: "#b683df", edge: "#8158b0", accent: "#ffd75d", emoji: "🍮" },
+      { name: "云朵马戏团", sky: ["#8de1ff", "#fff3bf"], ground: "#fff8ee", edge: "#b7dce8", accent: "#ff875f", emoji: "🎪" },
+      { name: "镜面厨房", sky: ["#d5fff4", "#bfe3ff"], ground: "#6ed6c1", edge: "#3caa99", accent: "#ff8cb7", emoji: "🪞" },
+      { name: "月亮甜品屋", sky: ["#5c4e91", "#aa74bf"], ground: "#f6d678", edge: "#d2a843", accent: "#9df2e0", emoji: "🌙" },
+      { name: "淘气糖果堡", sky: ["#ffbad1", "#9573c9"], ground: "#ffefb0", edge: "#dca850", accent: "#ff5f95", emoji: "🏰" }
+    ];
+
+    const rawLevels = [
+      { name:"第一口很甜", tip:"去右边的小门。真的，就这么简单。", hidden:[[455,625,42,15,390]], holes:[[760,105]], coins:[[620,570]] },
+      { name:"草地打哈欠", tip:"有些草地站久了会困。", holes:[[410,125],[850,115]], crumbles:[[410,640,125,80],[850,640,115,80]], hidden:[[680,625,42,15,620]] },
+      { name:"头顶的问候", tip:"向前跑之前，也许先抬头看看。", holes:[[540,120]], drops:[[430,90,70,70,350],[900,60,76,76,820]], platforms:[[540,555,120,22]] },
+      { name:"门前一小步", tip:"终点附近往往最热情。", hidden:[[330,625,45,15,280],[1030,625,52,15,930]], popWalls:[[990,520,32,120,880]], holes:[[610,110]] },
+      { name:"草莓毕业考", tip:"熟悉的招数，也可能换个顺序。", holes:[[285,105],[690,125],[965,95]], hidden:[[520,625,45,15,430],[1115,625,45,15,1030]], drops:[[780,70,68,68,720]], doorDodge:1, platforms:[[690,555,125,22]] },
+
+      { name:"会走路的甜甜圈", tip:"圆圆的东西，不一定是点心。", holes:[[520,115]], saws:[[400,605,330,500,95],[800,555,760,980,120]], platforms:[[520,550,115,22],[790,500,190,22]] },
+      { name:"布丁也会碎", tip:"紫色饼干的保质期非常短。", holes:[[300,130],[620,120],[960,125]], crumbles:[[300,640,130,80],[620,640,120,80],[960,640,125,80]], saws:[[790,606,760,900,100]] },
+      { name:"果冻弹簧", tip:"黄色果冻会把你弹得很高。", holes:[[390,170],[800,180]], bounces:[[330,618,60,22],[730,618,60,22]], platforms:[[470,490,115,22],[880,430,135,22]], hidden:[[1050,625,45,15,980]] },
+      { name:"糖果传送带", tip:"闪光圈圈很方便。方便谁就不知道了。", holes:[[460,135],[910,135]], teleporters:[[385,565,52,70,760,470]], platforms:[[535,535,130,22],[760,535,135,22],[985,520,135,22]], saws:[[760,595,710,870,110]] },
+      { name:"布丁洞穴大餐", tip:"慢一点，甜点不会跑。锯片会。", holes:[[250,110],[520,125],[830,120],[1080,90]], crumbles:[[520,640,125,80]], bounces:[[770,618,50,22]], platforms:[[250,550,110,22],[600,500,115,22],[900,465,120,22]], saws:[[420,600,380,500,115],[990,430,900,1060,130]], doorDodge:1 },
+
+      { name:"云端拍翅膀", tip:"这一关可以连续按跳跃，像小鸟一样飞。", mode:"flappy", floor:false, platforms:[[0,650,1280,70],[0,0,1280,55],[300,55,45,330],[300,500,45,150],[610,55,45,160],[610,345,45,305],[920,55,45,340],[920,525,45,125]], door:[1180,570] },
+      { name:"横风棉花糖", tip:"空中的风比糖豆更有主见。", holes:[[360,135],[690,150],[1010,120]], wind:[[300,600,80],[650,960,-105]], platforms:[[360,540,135,22],[690,500,150,22],[1010,550,120,22]] },
+      { name:"移动云朵", tip:"云会等你——但只等一下。", holes:[[230,800]], moving:[[250,555,130,22,250,470,85],[570,470,130,22,470,720,100],[850,530,130,22,780,1040,115]], platforms:[[1080,565,200,75]] },
+      { name:"雨点往上掉", tip:"蓝色气泡区域里，世界会倒过来。", ceiling:true, gravityZones:[[400,850,-1]], holes:[[400,450]], platforms:[[400,80,450,24],[850,520,130,24]], hidden:[[1030,625,44,15,950]] },
+      { name:"马戏团谢幕", tip:"表演最后，总会有一个假谢幕。", holes:[[320,125],[670,145],[1010,110]], moving:[[330,535,120,22,300,470,100],[690,480,130,22,650,860,115]], wind:[[500,940,80]], drops:[[895,70,70,70,820]], doorDodge:2, platforms:[[1010,555,110,22]] },
+
+      { name:"左右不分", tip:"走进粉色镜光后，左右会交换。", reverseZones:[[430,820]], holes:[[550,110],[870,120]], platforms:[[550,550,110,22],[870,520,120,22]], hidden:[[1020,625,45,15,930]] },
+      { name:"镜子里的路", tip:"半透明的方块，摸过一次就看得见。", holes:[[300,730]], invisible:[[300,560,120,22],[500,490,120,22],[700,550,120,22],[900,470,120,22],[1090,550,130,22]], reverseZones:[[650,980]] },
+      { name:"假门真门", tip:"如果门把你送回来，它大概只是害羞。", holes:[[460,130],[820,120]], fakeDoors:[[620,565,55,75,120,560]], platforms:[[460,535,130,22],[820,500,120,22]], door:[1160,565] },
+      { name:"厨房计时器", tip:"叮！地板会按顺序消失。", holes:[[300,115],[540,115],[780,115],[1020,115]], crumbles:[[300,640,115,80],[540,640,115,80],[780,640,115,80],[1020,640,115,80]], reverseZones:[[700,1120]], drops:[[660,75,64,64,610]] },
+      { name:"镜面大扫除", tip:"你会的它全会，而且顺序不讲理。", holes:[[260,105],[570,125],[900,135]], invisible:[[260,550,105,22],[570,505,125,22]], reverseZones:[[470,860]], saws:[[780,605,720,870,120]], teleporters:[[930,565,50,70,1040,450]], platforms:[[1040,520,120,22]], doorDodge:1 },
+
+      { name:"月亮拉我上去", tip:"紫色月光里，跳跃方向也会反过来。", ceiling:true, gravityZones:[[330,760,-1]], holes:[[330,430]], platforms:[[330,80,430,24],[760,520,130,24]], hidden:[[980,625,45,15,900]] },
+      { name:"上下三明治", tip:"落下和升起，都要找准落脚点。", ceiling:true, gravityZones:[[260,500,-1],[760,1010,-1]], holes:[[260,240],[760,250]], platforms:[[260,80,240,24],[500,520,170,24],[760,80,250,24],[1010,530,140,24]] },
+      { name:"环月列车", tip:"移动平台在倒着的世界里也照常上班。", ceiling:true, gravityZones:[[360,920,-1]], holes:[[360,560]], moving:[[390,105,130,22,360,560,95],[630,170,130,22,560,760,110],[830,100,120,22,760,920,100]], platforms:[[920,510,140,24]] },
+      { name:"星星别乱捡", tip:"星星是奖励，但落脚处才是正事。", holes:[[280,720]], platforms:[[280,540,95,22],[455,455,95,22],[635,540,95,22],[815,430,95,22],[995,530,125,22]], coins:[[320,490],[495,405],[675,490],[855,380],[1040,480]], drops:[[740,65,65,65,680]] },
+      { name:"月亮甜品拼盘", tip:"上下、左右、风和锯片，今天都来了。", ceiling:true, gravityZones:[[280,620,-1]], reverseZones:[[660,990]], holes:[[280,340],[720,130],[1020,105]], platforms:[[280,80,340,24],[720,515,130,22],[1020,550,105,22]], moving:[[620,500,100,22,600,760,90]], wind:[[650,1050,-80]], saws:[[900,600,850,990,115]], doorDodge:1 },
+
+      { name:"城堡欢迎垫", tip:"欢迎垫的主要工作，是不欢迎你。", holes:[[360,125],[720,125]], collapses:[[360,640,125,80],[720,640,125,80]], hidden:[[540,625,45,15,470],[1020,625,45,15,930]], drops:[[880,70,70,70,810]], doorDodge:1 },
+      { name:"礼貌地敲门", tip:"门前的墙可能只是想击个掌。", holes:[[300,120],[590,130],[890,120]], platforms:[[300,550,120,22],[590,500,130,22],[890,540,120,22]], popWalls:[[1080,500,34,140,960]], saws:[[760,470,650,850,120]], reverseZones:[[450,760]] },
+      { name:"糖果保龄球", tip:"大糖球经过时，站高一点比较体面。", holes:[[500,150],[960,130]], platforms:[[360,520,130,22],[500,555,150,22],[800,470,135,22],[960,535,130,22]], rollers:[[520,600,28,430,850,150],[1020,505,25,880,1120,130]], bounces:[[710,618,55,22]] },
+      { name:"全员恶作剧", tip:"每一种坏心眼，都只出现一点点。大概。", holes:[[250,100],[500,115],[760,115],[1020,105]], crumbles:[[250,640,100,80]], hidden:[[430,625,42,15,360]], moving:[[500,535,115,22,480,650,90]], reverseZones:[[650,900]], gravityZones:[[760,1020,-1]], ceiling:true, platforms:[[760,80,260,24],[1020,535,105,22]], drops:[[660,80,65,65,600]], saws:[[1120,600,1080,1180,100]], doorDodge:1 },
+      { name:"最后一颗糖", tip:"别相信提示。也别不相信。祝你好运！", holes:[[220,100],[430,110],[650,120],[880,115],[1080,90]], collapses:[[220,640,100,80]], invisible:[[430,540,110,22]], moving:[[650,490,120,22,620,790,105]], bounces:[[820,618,55,22]], hidden:[[1010,625,45,15,930]], drops:[[535,65,70,70,480],[950,60,66,66,900]], reverseZones:[[520,820]], saws:[[760,450,690,830,115]], popWalls:[[1130,500,30,140,1040]], doorDodge:2, final:true }
+    ];
+
+    const ui = {
+      hud: document.getElementById("hud"),
+      levelText: document.getElementById("level-text"),
+      levelName: document.getElementById("level-name"),
+      deathText: document.getElementById("death-text"),
+      timeText: document.getElementById("time-text"),
+      tip: document.getElementById("tip"),
+      menu: document.getElementById("menu"),
+      select: document.getElementById("select-screen"),
+      pause: document.getElementById("pause-screen"),
+      result: document.getElementById("result-screen"),
+      ending: document.getElementById("ending-screen"),
+      levelGrid: document.getElementById("level-grid")
+    };
+
+    let save = loadSave();
+    let state = "menu";
+    let levelIndex = Math.min(save.unlocked - 1, rawLevels.length - 1);
+    let level = null;
+    let player = null;
+    let particles = [];
+    let keys = { left:false, right:false, jump:false };
+    let jumpPressed = false;
+    let totalDeaths = save.totalDeaths || 0;
+    let levelDeaths = 0;
+    let runStarted = 0;
+    let levelStarted = 0;
+    let elapsedBeforePause = 0;
+    let lastTime = performance.now();
+    let shake = 0;
+    let tipTimer = 0;
+    let audioCtx = null;
+
+    function loadSave() {
+      try {
+        return Object.assign({ unlocked:1, completed:{}, totalDeaths:0, totalTime:0 }, JSON.parse(localStorage.getItem(SAVE_KEY) || "{}"));
+      } catch (_) {
+        return { unlocked:1, completed:{}, totalDeaths:0, totalTime:0 };
+      }
+    }
+    function writeSave() {
+      try {
+        save.totalDeaths = totalDeaths;
+        localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+      } catch (_) {
+        // 某些浏览器的隐私模式会禁用本地存储；游戏本身仍可正常游玩。
+      }
+    }
+    function clone(o) { return JSON.parse(JSON.stringify(o)); }
+    function clamp(v,a,b) { return Math.max(a, Math.min(b,v)); }
+    function overlap(a,b) { return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+    function formatTime(ms) {
+      const s = Math.max(0, Math.floor(ms / 1000));
+      return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+    }
+    function rectFrom(a) { return { x:a[0], y:a[1], w:a[2], h:a[3] }; }
+
+    function makeFloor(holes) {
+      const sorted = (holes || []).slice().sort((a,b)=>a[0]-b[0]);
+      const result = [];
+      let x = 0;
+      for (const [hx, hw] of sorted) {
+        if (hx > x) result.push({x, y:FLOOR_Y, w:hx-x, h:80, kind:"floor"});
+        x = Math.max(x, hx+hw);
+      }
+      if (x < W) result.push({x, y:FLOOR_Y, w:W-x, h:80, kind:"floor"});
+      return result;
+    }
+
+    function buildLevel(index) {
+      const src = clone(rawLevels[index]);
+      const t = THEMES[Math.floor(index/5)];
+      const lvl = Object.assign({
+        theme:t, platforms:[], hidden:[], crumbles:[], collapses:[], drops:[],
+        saws:[], rollers:[], moving:[], bounces:[], popWalls:[], teleporters:[],
+        fakeDoors:[], reverseZones:[], gravityZones:[], wind:[], invisible:[],
+        coins:[], floor:true, mode:"normal", door:[1188,565]
+      }, src);
+      lvl.solids = lvl.floor === false ? [] : makeFloor(lvl.holes || []);
+      lvl.platforms.forEach(a => lvl.solids.push(Object.assign(rectFrom(a), {kind:"platform"})));
+      if (lvl.ceiling) lvl.solids.push({x:0,y:55,w:W,h:25,kind:"ceiling"});
+      lvl.crumbles = lvl.crumbles.map((a,i)=>Object.assign(rectFrom(a),{kind:"crumble",id:"c"+i,timer:0,broken:false,vy:0}));
+      lvl.collapses = lvl.collapses.map((a,i)=>Object.assign(rectFrom(a),{kind:"collapse",id:"k"+i,timer:0,broken:false,vy:0}));
+      lvl.hidden = lvl.hidden.map((a,i)=>({x:a[0],y:a[1],w:a[2],h:a[3],trigger:a[4],active:false,id:"h"+i}));
+      lvl.drops = lvl.drops.map((a,i)=>({x:a[0],y:a[1],w:a[2],h:a[3],trigger:a[4],active:false,vy:0,id:"d"+i}));
+      lvl.saws = lvl.saws.map((a,i)=>({x:a[0],y:a[1],r:24,min:a[2],max:a[3],speed:a[4],dir:1,angle:0,id:"s"+i}));
+      lvl.rollers = lvl.rollers.map((a,i)=>({x:a[0],y:a[1],r:a[2],min:a[3],max:a[4],speed:a[5],dir:1,angle:0,id:"r"+i}));
+      lvl.moving = lvl.moving.map((a,i)=>({x:a[0],y:a[1],w:a[2],h:a[3],min:a[4],max:a[5],speed:a[6],dir:1,dx:0,kind:"moving",id:"m"+i}));
+      lvl.bounces = lvl.bounces.map((a,i)=>Object.assign(rectFrom(a),{kind:"bounce",id:"b"+i}));
+      lvl.popWalls = lvl.popWalls.map((a,i)=>({x:a[0],y:FLOOR_Y,w:a[2],h:0,targetY:a[1],targetH:a[3],trigger:a[4],active:false,kind:"wall",id:"w"+i}));
+      lvl.teleporters = lvl.teleporters.map((a,i)=>({x:a[0],y:a[1],w:a[2],h:a[3],tx:a[4],ty:a[5],used:false,id:"t"+i}));
+      lvl.fakeDoors = lvl.fakeDoors.map((a,i)=>({x:a[0],y:a[1],w:a[2],h:a[3],tx:a[4],ty:a[5],used:false,id:"f"+i}));
+      lvl.invisible = lvl.invisible.map((a,i)=>Object.assign(rectFrom(a),{kind:"invisible",seen:false,id:"i"+i}));
+      lvl.coins = lvl.coins.map((a,i)=>({x:a[0],y:a[1],r:14,taken:false,id:"coin"+i}));
+      lvl.doorObj = {x:lvl.door[0],y:lvl.door[1],w:58,h:75,dodges:lvl.doorDodge||0,wiggle:0};
+      return lvl;
+    }
+
+    function startLevel(index) {
+      levelIndex = clamp(index, 0, rawLevels.length-1);
+      level = buildLevel(levelIndex);
+      levelDeaths = 0;
+      runStarted = performance.now();
+      resetPlayer(false);
+      state = "playing";
+      hideScreens();
+      ui.hud.hidden = false;
+      ui.levelText.textContent = `${Math.floor(levelIndex/5)+1}-${levelIndex%5+1}`;
+      ui.levelName.textContent = `${level.theme.emoji} ${level.name}`;
+      showTip(level.tip, 3200);
+      sound("start");
+    }
+
+    function resetPlayer(countDeath=true) {
+      if (countDeath) {
+        totalDeaths++;
+        levelDeaths++;
+        save.totalDeaths = totalDeaths;
+        writeSave();
+      }
+      player = {
+        x:62, y:FLOOR_Y-PLAYER_H, w:PLAYER_W, h:PLAYER_H,
+        vx:0, vy:0, onGround:false, gravity:1, face:1,
+        coyote:0, jumpBuffer:0, dead:false, squash:0, invuln:.2
+      };
+      particles = [];
+      levelStarted = performance.now();
+      elapsedBeforePause = 0;
+      if (level) {
+        const fresh = buildLevel(levelIndex);
+        level = fresh;
+      }
+    }
+
+    function kill(reason) {
+      if (!player || player.dead || state !== "playing") return;
+      player.dead = true;
+      shake = 14;
+      burst(player.x+player.w/2, player.y+player.h/2, level.theme.accent, 18);
+      sound("die");
+      const messages = {
+        spike:"尖尖的，但很有礼貌。",
+        fall:"下面没有隐藏关，只有重来。",
+        squash:"天花板向你发送了好友申请。",
+        saw:"甜甜圈今天不甜。",
+        trick:"糖豆：嘿嘿。"
+      };
+      showTip(messages[reason] || "没关系，这次记住了。", 850);
+      setTimeout(() => {
+        if (state === "playing") {
+          resetPlayer(true);
+          showTip("再来！", 650);
+        }
+      }, 480);
+    }
+
+    function completeLevel() {
+      if (state !== "playing") return;
+      state = "result";
+      const time = performance.now() - runStarted;
+      const old = save.completed[levelIndex];
+      if (!old || time < old.time) save.completed[levelIndex] = {time:Math.round(time), deaths:levelDeaths};
+      save.unlocked = Math.max(save.unlocked, Math.min(rawLevels.length, levelIndex+2));
+      save.totalTime = (save.totalTime || 0) + Math.round(time);
+      writeSave();
+      sound("win");
+      burst(level.doorObj.x+29, level.doorObj.y+20, "#ffd75d", 34);
+      ui.hud.hidden = true;
+      if (levelIndex === rawLevels.length-1) {
+        document.getElementById("ending-deaths").textContent = totalDeaths;
+        document.getElementById("ending-time").textContent = formatTime(save.totalTime);
+        ui.ending.classList.add("show");
+      } else {
+        document.getElementById("result-deaths").textContent = levelDeaths;
+        document.getElementById("result-time").textContent = formatTime(time);
+        document.getElementById("result-copy").textContent =
+          levelDeaths === 0 ? "零死亡！糖豆开始怀疑豆生。" :
+          levelDeaths < 4 ? "漂亮！陷阱只尝到了一小口。" :
+          "每一次摔倒，都给胜利加了一点糖。";
+        ui.result.classList.add("show");
+      }
+    }
+
+    function pauseGame() {
+      if (state !== "playing") return;
+      state = "paused";
+      elapsedBeforePause += performance.now() - levelStarted;
+      ui.pause.classList.add("show");
+      sound("click");
+    }
+    function resumeGame() {
+      if (state !== "paused") return;
+      state = "playing";
+      levelStarted = performance.now();
+      ui.pause.classList.remove("show");
+    }
+    function hideScreens() {
+      document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
+    }
+    function showMenu() {
+      state = "menu";
+      ui.hud.hidden = true;
+      hideScreens();
+      ui.menu.classList.add("show");
+      document.getElementById("continue-btn").textContent = save.unlocked > 1 ? `继续第 ${Math.min(save.unlocked,30)} 关` : "开始冒险";
+    }
+    function showSelect() {
+      state = "select";
+      ui.hud.hidden = true;
+      hideScreens();
+      renderLevelGrid();
+      ui.select.classList.add("show");
+    }
+    function renderLevelGrid() {
+      ui.levelGrid.innerHTML = "";
+      rawLevels.forEach((l,i)=>{
+        const b = document.createElement("button");
+        b.className = "level-button" + (save.completed[i] ? " done" : "") + (i===save.unlocked-1 ? " current" : "");
+        b.textContent = i+1;
+        b.title = `${THEMES[Math.floor(i/5)].name}：${l.name}`;
+        b.disabled = i >= save.unlocked;
+        b.addEventListener("click",()=>startLevel(i));
+        ui.levelGrid.appendChild(b);
+      });
+    }
+    function showTip(text, duration=1800) {
+      ui.tip.textContent = text;
+      ui.tip.classList.add("show");
+      clearTimeout(tipTimer);
+      tipTimer = setTimeout(()=>ui.tip.classList.remove("show"), duration);
+    }
+
+    function getSolids() {
+      return [
+        ...level.solids,
+        ...level.crumbles.filter(o=>!o.broken),
+        ...level.collapses.filter(o=>!o.broken),
+        ...level.moving,
+        ...level.bounces,
+        ...level.popWalls.filter(o=>o.h>2),
+        ...level.invisible
+      ];
+    }
+
+    function update(dt) {
+      if (state !== "playing" || !player || player.dead) return;
+      player.invuln = Math.max(0, player.invuln-dt);
+      const now = performance.now();
+      ui.timeText.textContent = formatTime(now-runStarted);
+      ui.deathText.textContent = totalDeaths;
+
+      for (const m of level.moving) {
+        const oldX = m.x;
+        m.x += m.speed*m.dir*dt;
+        if (m.x < m.min || m.x > m.max) {
+          m.x = clamp(m.x,m.min,m.max);
+          m.dir *= -1;
+        }
+        m.dx = m.x-oldX;
+      }
+      for (const s of [...level.saws,...level.rollers]) {
+        s.x += s.speed*s.dir*dt;
+        if (s.x < s.min || s.x > s.max) { s.x=clamp(s.x,s.min,s.max); s.dir*=-1; }
+        s.angle += dt*5*s.dir;
+      }
+
+      for (const h of level.hidden) if (!h.active && player.x > h.trigger) { h.active=true; sound("pop"); }
+      for (const d of level.drops) {
+        if (!d.active && player.x > d.trigger) { d.active=true; sound("warning"); }
+        if (d.active) { d.vy += 1250*dt; d.y += d.vy*dt; }
+      }
+      for (const w of level.popWalls) {
+        if (!w.active && player.x > w.trigger) { w.active=true; sound("pop"); }
+        if (w.active && w.h < w.targetH) {
+          const add = Math.min(w.targetH-w.h, 520*dt);
+          w.h += add; w.y -= add;
+        }
+      }
+      for (const c of [...level.crumbles,...level.collapses]) {
+        if (c.timer > 0 && !c.broken) {
+          c.timer -= dt;
+          if (c.timer <= 0) { c.broken=true; c.vy=40; sound("crumble"); }
+        }
+        if (c.broken) { c.vy += 900*dt; c.y += c.vy*dt; }
+      }
+
+      let reverse = level.reverseZones.some(z=>player.x+player.w/2>z[0] && player.x+player.w/2<z[1]);
+      let gravity = 1;
+      for (const z of level.gravityZones) if (player.x+player.w/2>z[0] && player.x+player.w/2<z[1]) gravity=z[2];
+      if (gravity !== player.gravity) {
+        player.gravity=gravity;
+        player.onGround=false;
+        sound("flip");
+        burst(player.x+18,player.y+24,"#9df2e0",10);
+      }
+
+      const left = reverse ? keys.right : keys.left;
+      const right = reverse ? keys.left : keys.right;
+      const accel = player.onGround ? 2000 : 1450;
+      const target = (right?1:0)-(left?1:0);
+      if (target) {
+        player.vx += target*accel*dt;
+        player.vx = clamp(player.vx,-285,285);
+        player.face=target;
+      } else {
+        player.vx *= Math.pow(player.onGround ? .0005 : .035, dt);
+      }
+      for (const z of level.wind) if (player.x+player.w/2>z[0] && player.x+player.w/2<z[1]) player.vx += z[2]*dt;
+
+      if (jumpPressed) player.jumpBuffer=.13;
+      jumpPressed=false;
+      player.jumpBuffer=Math.max(0,player.jumpBuffer-dt);
+      player.coyote=player.onGround?.11:Math.max(0,player.coyote-dt);
+
+      if (level.mode==="flappy" && player.jumpBuffer>0) {
+        player.vy=-370;
+        player.jumpBuffer=0;
+        player.onGround=false;
+        sound("jump");
+      } else if (player.jumpBuffer>0 && player.coyote>0) {
+        player.vy=-500*player.gravity;
+        player.jumpBuffer=0;
+        player.coyote=0;
+        player.onGround=false;
+        player.squash=-.13;
+        sound("jump");
+      }
+
+      player.vy += 1450*player.gravity*dt;
+      player.vy = clamp(player.vy,-760,760);
+
+      // Horizontal movement and collision.
+      player.x += player.vx*dt;
+      player.x = clamp(player.x,0,W-player.w);
+      for (const s of getSolids()) {
+        if (!overlap(player,s)) continue;
+        if (player.vx>0) player.x=s.x-player.w;
+        else if (player.vx<0) player.x=s.x+s.w;
+        player.vx=0;
+        if (s.kind==="invisible") s.seen=true;
+      }
+
+      // Vertical movement and collision.
+      const oldY=player.y;
+      player.y += player.vy*dt;
+      player.onGround=false;
+      for (const s of getSolids()) {
+        if (!overlap(player,s)) continue;
+        const down = player.gravity>0;
+        const landing = down ? (player.vy>=0 && oldY+player.h<=s.y+12) : (player.vy<=0 && oldY>=s.y+s.h-12);
+        if (landing) {
+          if (down) player.y=s.y-player.h; else player.y=s.y+s.h;
+          if (Math.abs(player.vy)>260) { player.squash=.18; sound("land"); }
+          player.vy=0; player.onGround=true;
+          if (s.kind==="moving") player.x+=s.dx;
+          if (s.kind==="crumble" && s.timer===0) s.timer=.42;
+          if (s.kind==="collapse" && s.timer===0) s.timer=.10;
+          if (s.kind==="bounce") { player.vy=-690*player.gravity; player.onGround=false; sound("bounce"); burst(player.x+18,s.y,"#ffd75d",8); }
+          if (s.kind==="invisible") s.seen=true;
+        } else {
+          if (down) player.y=s.y+s.h; else player.y=s.y-player.h;
+          player.vy=0;
+          if (s.kind==="invisible") s.seen=true;
+        }
+      }
+
+      for (const d of level.drops) {
+        if (overlap(player,d)) kill("squash");
+        if (d.y+d.h>=FLOOR_Y && d.vy>0) { d.y=FLOOR_Y-d.h; d.vy=0; }
+      }
+      for (const h of level.hidden) if (h.active && overlap(player,{x:h.x+5,y:h.y,w:h.w-10,h:h.h})) kill("spike");
+      for (const s of [...level.saws,...level.rollers]) {
+        const hit={x:s.x-s.r*.72,y:s.y-s.r*.72,w:s.r*1.44,h:s.r*1.44};
+        if (overlap(player,hit)) kill("saw");
+      }
+      for (const t of level.teleporters) if (!t.used && overlap(player,t)) {
+        t.used=true; player.x=t.tx; player.y=t.ty; player.vx=0; player.vy=0;
+        sound("flip"); burst(t.x+t.w/2,t.y+t.h/2,"#9df2e0",18);
+      }
+      for (const f of level.fakeDoors) if (!f.used && overlap(player,f)) {
+        f.used=true; player.x=f.tx; player.y=f.ty; player.vx=0; player.vy=0;
+        showTip("这扇门只负责送客。",1200); sound("trick");
+      }
+      for (const c of level.coins) if (!c.taken && overlap(player,{x:c.x-c.r,y:c.y-c.r,w:c.r*2,h:c.r*2})) {
+        c.taken=true; sound("coin"); burst(c.x,c.y,"#ffd75d",10);
+      }
+
+      const door=level.doorObj;
+      if (door.wiggle>0) door.wiggle-=dt;
+      if (overlap(player,door)) {
+        if (door.dodges>0) {
+          door.dodges--; door.x=Math.max(760,door.x-150); door.wiggle=.7;
+          player.x-=30; player.vx=-170;
+          showTip(door.dodges ? "门：再猜一次！" : "门：好啦，这次不跑。",1000);
+          sound("trick");
+        } else completeLevel();
+      }
+
+      player.squash *= Math.pow(.02,dt);
+      updateParticles(dt);
+      shake*=Math.pow(.015,dt);
+      if (player.y>H+100 || player.y+player.h<-100) kill("fall");
+    }
+
+    function burst(x,y,color,count) {
+      for (let i=0;i<count;i++) particles.push({
+        x,y,vx:(Math.random()-.5)*360,vy:(Math.random()-.8)*330,
+        life:.45+Math.random()*.45,max:.9,color,size:4+Math.random()*8
+      });
+    }
+    function updateParticles(dt) {
+      for (const p of particles) { p.life-=dt; p.vy+=650*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; }
+      particles=particles.filter(p=>p.life>0);
+    }
+
+    function roundRect(x,y,w,h,r,fill,stroke) {
+      ctx.beginPath();
+      ctx.roundRect(x,y,w,h,r);
+      if (fill) { ctx.fillStyle=fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle=stroke; ctx.lineWidth=stroke.width||3; ctx.stroke(); }
+    }
+    function drawCloud(x,y,s=1,alpha=1) {
+      ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle="#fff";
+      ctx.beginPath(); ctx.arc(x,y,26*s,0,Math.PI*2); ctx.arc(x+30*s,y-12*s,35*s,0,Math.PI*2);
+      ctx.arc(x+68*s,y,28*s,0,Math.PI*2); ctx.fillRect(x,y,68*s,28*s); ctx.fill(); ctx.restore();
+    }
+    function drawBackground(t, time) {
+      const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,t.sky[0]); g.addColorStop(1,t.sky[1]);
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      for (let i=0;i<7;i++) drawCloud(((i*225+time*.008*(i%2?1:-1))%(W+220))-110,110+(i%3)*105,.7+(i%2)*.35,.55);
+      ctx.globalAlpha=.22; ctx.fillStyle=t.accent;
+      for (let i=0;i<16;i++) { ctx.beginPath(); ctx.arc((i*97)%W,70+(i*83)%430,5+(i%4)*2,0,Math.PI*2); ctx.fill(); }
+      ctx.globalAlpha=1;
+      // Distant candy hills.
+      ctx.fillStyle="rgba(255,255,255,.28)";
+      ctx.beginPath(); ctx.moveTo(0,FLOOR_Y);
+      for(let x=0;x<=W;x+=110) ctx.quadraticCurveTo(x+55,490-(x%220)*.12,x+110,FLOOR_Y);
+      ctx.closePath(); ctx.fill();
+    }
+    function drawSolid(s,t) {
+      if (s.kind==="invisible" && !s.seen) {
+        ctx.save(); ctx.globalAlpha=.07; roundRect(s.x,s.y,s.w,s.h,8,"#fff"); ctx.restore(); return;
+      }
+      let fill=t.ground, edge=t.edge;
+      if (s.kind==="crumble" || s.kind==="collapse") { fill="#c69be5"; edge="#8a60b2"; }
+      if (s.kind==="moving") { fill="#fff7ef"; edge="#9dcddd"; }
+      if (s.kind==="bounce") { fill="#ffd75d"; edge="#e7a93f"; }
+      if (s.kind==="wall") { fill="#ff9fbe"; edge="#d95c8f"; }
+      if (s.kind==="invisible") { fill="rgba(255,255,255,.62)"; edge="rgba(110,180,210,.65)"; }
+      roundRect(s.x,s.y,s.w,s.h,Math.min(12,s.h/2),fill);
+      ctx.fillStyle=edge; ctx.fillRect(s.x,s.y+s.h-8,s.w,8);
+      if (s.kind==="crumble" || s.kind==="collapse") {
+        ctx.strokeStyle="rgba(80,50,100,.35)"; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(s.x+s.w*.3,s.y+4); ctx.lineTo(s.x+s.w*.42,s.y+s.h*.5); ctx.lineTo(s.x+s.w*.62,s.y+s.h*.3); ctx.stroke();
+      }
+      if (s.kind==="bounce") {
+        ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(s.x+s.w*.35,s.y+7,4,0,7); ctx.arc(s.x+s.w*.65,s.y+7,4,0,7); ctx.fill();
+      }
+    }
+    function drawSpike(h) {
+      const progress=h.active?1:0;
+      ctx.save(); ctx.translate(0,(1-progress)*18);
+      ctx.fillStyle="#ff5f7e"; ctx.strokeStyle="#fff"; ctx.lineWidth=3;
+      const n=Math.max(1,Math.round(h.w/18));
+      for(let i=0;i<n;i++) {
+        const x=h.x+i*h.w/n, w=h.w/n;
+        ctx.beginPath(); ctx.moveTo(x,h.y+h.h); ctx.lineTo(x+w/2,h.y-12); ctx.lineTo(x+w,h.y+h.h); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    function drawSaw(s) {
+      ctx.save(); ctx.translate(s.x,s.y); ctx.rotate(s.angle);
+      ctx.fillStyle="#fff8ee"; ctx.strokeStyle="#8c6a9d"; ctx.lineWidth=5;
+      ctx.beginPath();
+      const teeth=12;
+      for(let i=0;i<teeth*2;i++) {
+        const a=i*Math.PI/teeth-Math.PI/2, r=i%2?s.r*.72:s.r;
+        const x=Math.cos(a)*r,y=Math.sin(a)*r;
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle="#ff78ad"; ctx.beginPath(); ctx.arc(0,0,s.r*.3,0,7); ctx.fill();
+      ctx.restore();
+    }
+    function drawDoor(d,t,time) {
+      const wobble=d.wiggle>0?Math.sin(time*.035)*7:0;
+      ctx.save(); ctx.translate(wobble,0);
+      ctx.fillStyle="rgba(255,255,255,.3)"; ctx.beginPath(); ctx.ellipse(d.x+29,FLOOR_Y+4,45,10,0,0,7); ctx.fill();
+      roundRect(d.x,d.y,d.w,d.h,22,t.accent);
+      roundRect(d.x+9,d.y+10,d.w-18,d.h-10,16,"#fff1bd");
+      ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(d.x+22,d.y+35,5,0,7); ctx.arc(d.x+39,d.y+35,5,0,7); ctx.fill();
+      ctx.fillStyle="#6b4c78"; ctx.beginPath(); ctx.arc(d.x+23,d.y+36,2,0,7); ctx.arc(d.x+40,d.y+36,2,0,7); ctx.fill();
+      ctx.strokeStyle="#6b4c78";ctx.lineWidth=3;ctx.beginPath();ctx.arc(d.x+31,d.y+44,8,.15*Math.PI,.85*Math.PI);ctx.stroke();
+      ctx.fillStyle="#fff"; ctx.font="900 13px sans-serif"; ctx.textAlign="center"; ctx.fillText("出口",d.x+29,d.y-8);
+      ctx.restore();
+    }
+    function drawPlayer(p,time) {
+      if (p.dead) return;
+      const sx=1-p.squash*.65, sy=1+p.squash;
+      ctx.save(); ctx.translate(p.x+p.w/2,p.y+p.h/2); ctx.scale(sx,sy); ctx.translate(-p.w/2,-p.h/2);
+      ctx.fillStyle="rgba(75,45,90,.18)"; ctx.beginPath(); ctx.ellipse(p.w/2,p.h+5,22,7,0,0,7);ctx.fill();
+      roundRect(0,0,p.w,p.h,14,"#ff78ad");
+      ctx.fillStyle="#fff"; ctx.beginPath();ctx.ellipse(12,18,5,7,0,0,7);ctx.ellipse(25,18,5,7,0,0,7);ctx.fill();
+      ctx.fillStyle="#5b3d68";ctx.beginPath();ctx.arc(13+p.face,19,2.2,0,7);ctx.arc(26+p.face,19,2.2,0,7);ctx.fill();
+      ctx.strokeStyle="#5b3d68";ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(19,28,7,.15*Math.PI,.85*Math.PI);ctx.stroke();
+      ctx.fillStyle="#ffb2cd";ctx.beginPath();ctx.arc(6,27,4,0,7);ctx.arc(31,27,4,0,7);ctx.fill();
+      ctx.restore();
+    }
+    function drawPortal(t) {
+      ctx.save();
+      const grad=ctx.createLinearGradient(t.x,t.y,t.x+t.w,t.y+t.h);grad.addColorStop(0,"#91f0dd");grad.addColorStop(1,"#a68cff");
+      ctx.strokeStyle=grad;ctx.lineWidth=8;ctx.setLineDash([8,7]);ctx.lineDashOffset=-performance.now()*.02;
+      ctx.strokeRect(t.x,t.y,t.w,t.h);ctx.restore();
+    }
+    function draw(time) {
+      const t=level ? level.theme : THEMES[0];
+      ctx.save();
+      if (shake>1) ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+      drawBackground(t,time);
+      if (level) {
+        for(const s of getSolids()) drawSolid(s,t);
+        for(const c of [...level.crumbles,...level.collapses].filter(o=>o.broken)) drawSolid(c,t);
+        for(const d of level.drops) drawSolid(Object.assign({},d,{kind:"crumble"}),t);
+        for(const h of level.hidden) if(h.active) drawSpike(h);
+        for(const z of level.reverseZones) {
+          const g=ctx.createLinearGradient(z[0],0,z[1],0);g.addColorStop(0,"transparent");g.addColorStop(.5,"rgba(255,100,170,.12)");g.addColorStop(1,"transparent");
+          ctx.fillStyle=g;ctx.fillRect(z[0],0,z[1]-z[0],H);
+        }
+        for(const z of level.gravityZones) {
+          const g=ctx.createLinearGradient(z[0],0,z[1],0);g.addColorStop(0,"transparent");g.addColorStop(.5,"rgba(130,100,230,.15)");g.addColorStop(1,"transparent");
+          ctx.fillStyle=g;ctx.fillRect(z[0],0,z[1]-z[0],H);
+          ctx.fillStyle="rgba(255,255,255,.7)";ctx.font="28px sans-serif";ctx.fillText(z[2]<0?"↑  ↑  ↑":"↓  ↓  ↓",z[0]+20,140);
+        }
+        for(const z of level.wind) {
+          ctx.strokeStyle="rgba(255,255,255,.5)";ctx.lineWidth=4;
+          for(let x=z[0]+20;x<z[1];x+=65){ctx.beginPath();ctx.moveTo(x,300+(x%120));ctx.lineTo(x+Math.sign(z[2])*35,300+(x%120));ctx.stroke();}
+        }
+        for(const s of [...level.saws,...level.rollers]) drawSaw(s);
+        for(const p of level.teleporters) drawPortal(p);
+        for(const f of level.fakeDoors) if(!f.used) drawDoor(f,t,time);
+        for(const c of level.coins) if(!c.taken) {
+          ctx.save();ctx.translate(c.x,c.y);ctx.rotate(time*.002);ctx.fillStyle="#ffd75d";ctx.strokeStyle="#fff";ctx.lineWidth=3;
+          ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?7:15;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+        }
+        drawDoor(level.doorObj,t,time);
+        drawPlayer(player,time);
+        for(const p of particles) {
+          ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,7);ctx.fill();
+        }
+        ctx.globalAlpha=1;
+      } else {
+        ctx.fillStyle=THEMES[0].ground;ctx.fillRect(0,FLOOR_Y,W,H-FLOOR_Y);
+      }
+      ctx.restore();
+    }
+
+    function sound(type) {
+      try {
+        audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        const now=audioCtx.currentTime;
+        const map={
+          jump:[420,620,.09,"sine"], land:[180,120,.05,"sine"], die:[210,65,.25,"sawtooth"],
+          win:[520,880,.35,"triangle"], click:[440,480,.05,"sine"], pop:[260,520,.10,"square"],
+          crumble:[150,80,.15,"square"], warning:[330,220,.12,"triangle"], bounce:[350,720,.16,"sine"],
+          flip:[240,680,.2,"sine"], coin:[700,1050,.12,"triangle"], trick:[520,180,.22,"square"], start:[360,560,.18,"triangle"]
+        };
+        const m=map[type]||map.click;
+        o.type=m[3];o.frequency.setValueAtTime(m[0],now);o.frequency.exponentialRampToValueAtTime(Math.max(30,m[1]),now+m[2]);
+        g.gain.setValueAtTime(.055,now);g.gain.exponentialRampToValueAtTime(.001,now+m[2]);
+        o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(now+m[2]);
+      } catch(_) {}
+    }
+
+    function setKey(code,down) {
+      if (["ArrowLeft","KeyA"].includes(code)) keys.left=down;
+      if (["ArrowRight","KeyD"].includes(code)) keys.right=down;
+      if (["ArrowUp","KeyW","Space"].includes(code)) {
+        if (down && !keys.jump) jumpPressed=true;
+        keys.jump=down;
+      }
+    }
+    window.addEventListener("keydown",e=>{
+      if (["ArrowLeft","ArrowRight","ArrowUp","Space","KeyA","KeyD","KeyW"].includes(e.code)) e.preventDefault();
+      if (e.code==="Escape") { state==="playing"?pauseGame():state==="paused"&&resumeGame(); return; }
+      if (e.code==="KeyR" && state==="playing") { resetPlayer(false); showTip("重新来过！",700); return; }
+      setKey(e.code,true);
+    });
+    window.addEventListener("keyup",e=>setKey(e.code,false));
+    window.addEventListener("blur",()=>{ keys={left:false,right:false,jump:false}; if(state==="playing")pauseGame(); });
+
+    document.querySelectorAll(".touch-btn").forEach(btn=>{
+      const k=btn.dataset.key;
+      const down=e=>{e.preventDefault();if(k==="jump"&&!keys.jump)jumpPressed=true;keys[k]=true;};
+      const up=e=>{e.preventDefault();keys[k]=false;};
+      btn.addEventListener("pointerdown",down);btn.addEventListener("pointerup",up);btn.addEventListener("pointercancel",up);btn.addEventListener("pointerleave",up);
+    });
+    document.getElementById("pause-btn").addEventListener("click",pauseGame);
+    document.getElementById("continue-btn").addEventListener("click",()=>startLevel(Math.min(save.unlocked-1,rawLevels.length-1)));
+    document.getElementById("select-btn").addEventListener("click",showSelect);
+    document.getElementById("next-btn").addEventListener("click",()=>startLevel(levelIndex+1));
+    document.addEventListener("click",e=>{
+      const action=e.target.dataset.action;
+      if(!action)return;
+      sound("click");
+      if(action==="menu")showMenu();
+      if(action==="select")showSelect();
+      if(action==="resume")resumeGame();
+      if(action==="restart")startLevel(levelIndex);
+    });
+
+    function loop(now) {
+      const dt=Math.min(.033,(now-lastTime)/1000||0);lastTime=now;
+      update(dt);draw(now);requestAnimationFrame(loop);
+    }
+    showMenu();
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>
