@@ -2,14 +2,19 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>扣哒宇宙 | 开发者作品集</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
+            --bg-card: #171717;
             --text-white: #ffffff;
             --text-gray: #b8b8b8;
             --gold: #FFD700;
+            --line: rgba(255,255,255,0.09);
         }
+
+        * { box-sizing: border-box; }
 
         body { 
             margin: 0; background-color: var(--bg-body); color: var(--text-white); 
@@ -32,49 +37,103 @@
         .hero-container { position: relative; width: 100%; height: 75vh; overflow: hidden; }
         .hero-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; }
         .hero-slide.active { opacity: 1; }
-        .hero-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-slide::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.28) 52%, rgba(0,0,0,0.12) 100%),
+                        linear-gradient(0deg, rgba(0,0,0,0.65) 0%, transparent 50%);
+        }
+        .hero-slide img { width: 100%; height: 100%; object-fit: cover; transition: transform 6s ease; }
+        .hero-slide.active img { transform: scale(1.035); }
         
         /* 轮播图文案：精简版 */
         .hero-caption {
             position: absolute; bottom: 80px; left: 80px;
-            max-width: 600px;
+            max-width: 680px; z-index: 2;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
         }
         .hero-caption h2 { 
-            font-size: 42px; margin: 0 0 10px 0; 
+            font-size: clamp(36px, 5vw, 64px); margin: 0 0 12px 0; 
             color: #FFFFFF !important;
         }
-        .hero-caption p { font-size: 16px; color: var(--text-gray); margin: 0; }
+        .hero-caption p { font-size: 17px; color: #eeeeee; line-height: 1.7; margin: 0; }
+        .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .hero-meta span {
+            padding: 7px 12px; border: 1px solid rgba(255,255,255,0.28);
+            border-radius: 999px; background: rgba(0,0,0,0.32);
+            font-size: 13px; color: #fff; backdrop-filter: blur(8px);
+        }
 
         /* 轮播切换按钮 */
         .arrow { 
-            position: absolute; top: 50%; transform: translateY(-50%); 
-            padding: 20px; cursor: pointer; font-size: 30px; 
-            background: rgba(255,255,255,0.1); border-radius: 5px; 
+            position: absolute; top: 37.5vh; transform: translateY(-50%); 
+            width: 52px; height: 52px; display: grid; place-items: center;
+            cursor: pointer; font-size: 26px; 
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; 
             transition: 0.3s; z-index: 50; 
         }
-        .arrow:hover { background: rgba(255,255,255,0.3); }
+        .arrow:hover { background: rgba(255,215,0,0.85); color: #111; }
         .arrow.left { left: 20px; }
         .arrow.right { right: 20px; }
 
         /* 项目列表 */
+        .section-heading { max-width: 1400px; margin: 60px auto 0; padding: 0 24px; }
+        .section-heading span { color: var(--gold); font-size: 13px; font-weight: bold; letter-spacing: 3px; }
+        .section-heading h2 { margin: 8px 0 0; font-size: 32px; }
+        .section-heading p { margin: 10px 0 0; color: var(--text-gray); }
         .grid-container { 
-            max-width: 1200px; margin: 50px auto; 
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding: 0 20px;
+            max-width: 1560px; margin: 30px auto 50px; 
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding: 0 28px;
         }
         .game-card { 
-            background: #1a1a1a; border-radius: 6px; overflow: hidden; 
-            transition: 0.4s; cursor: pointer; text-decoration: none; color: inherit;
+            display: flex; flex-direction: column; min-height: 100%;
+            background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; 
+            transition: 0.35s; cursor: pointer; text-decoration: none; color: inherit;
         }
-        .game-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); background: #252525; }
-        .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-        .content { padding: 20px; }
-        .content h3 { margin: 0 0 10px 0; font-size: 20px; color: var(--text-white); }
-        .content p { font-size: 14px; color: var(--text-gray); line-height: 1.5; }
-        .dev-badge { font-size: 12px; font-weight: bold; color: #fff; background: #333; padding: 3px 8px; border-radius: 3px; }
+        .game-card:hover { transform: translateY(-8px); border-color: rgba(255,215,0,0.5); box-shadow: 0 22px 50px rgba(0,0,0,0.55); background: #202020; }
+        .poster-wrap { position: relative; overflow: hidden; }
+        .poster-wrap::after {
+            content: "进入游戏  →"; position: absolute; right: 14px; bottom: 14px;
+            padding: 7px 11px; border-radius: 999px; background: rgba(0,0,0,0.66);
+            color: #fff; font-size: 12px; font-weight: bold; opacity: 0; transform: translateY(6px); transition: 0.3s;
+        }
+        .game-card:hover .poster-wrap::after { opacity: 1; transform: translateY(0); }
+        .game-card img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; transition: transform 0.45s; }
+        .game-card:hover img { transform: scale(1.04); }
+        .content { display: flex; flex: 1; flex-direction: column; padding: 22px; }
+        .content h3 { margin: 0 0 12px 0; font-size: 22px; color: var(--text-white); }
+        .content p { flex: 1; margin: 0; font-size: 14px; color: var(--text-gray); line-height: 1.75; }
+        .project-meta {
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line);
+        }
+        .meta-item { min-width: 0; padding-right: 8px; }
+        .meta-item + .meta-item { padding-left: 10px; border-left: 1px solid var(--line); }
+        .meta-label { display: block; margin-bottom: 5px; color: #777; font-size: 11px; }
+        .meta-value { display: block; overflow: hidden; color: #eee; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 
         /* 页脚 */
         .footer { text-align: center; padding: 60px 20px; color: #555; font-size: 14px; letter-spacing: 1px; }
+
+        @media (max-width: 720px) {
+            .nav-bar { padding: 22px 20px; }
+            .nav-bar h1 { font-size: 20px; }
+            .hero-container { height: 68vh; min-height: 500px; }
+            .hero-caption { left: 24px; right: 24px; bottom: 42px; }
+            .hero-caption p { font-size: 15px; }
+            .arrow { top: 34vh; width: 42px; height: 42px; font-size: 20px; }
+            .arrow.left { left: 8px; }
+            .arrow.right { right: 8px; }
+            .grid-container { grid-template-columns: 1fr; padding: 0 16px; }
+            .section-heading { margin-top: 42px; padding: 0 16px; }
+        }
+
+        @media (min-width: 721px) and (max-width: 1050px) {
+            .grid-container { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 0 16px; }
+            .content { padding: 16px; }
+            .content h3 { font-size: 19px; }
+            .content p { font-size: 13px; }
+            .meta-value { font-size: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -86,6 +145,11 @@
     <div class="arrow left" onclick="plusSlides(-1)">❮</div>
     <div class="arrow right" onclick="plusSlides(1)">❯</div>
 
+    <div class="section-heading">
+        <span>STUDENT GAMES</span>
+        <h2>孩子们创造的游戏世界</h2>
+        <p>点开一张海报，走进每位小开发者亲手搭建的奇妙世界。</p>
+    </div>
     <div class="grid-container" id="grid"></div>
 
     <div class="footer">
@@ -94,12 +158,15 @@
 
     <script>
         const projects = [
-            { id: '3dgongyuan', name: '3D 城市冒险', dev: '李同学', shortDesc: '沉浸式都市跑酷，挑战极限高度。', desc: '在这个高自由度的开放世界中，体验极具张力的城市跑酷。玩家将穿梭于错综复杂的摩天大楼与街巷，通过精确的跳跃与攀爬，挑战极限速度与高度。这不仅是视觉的冒险，更是对物理交互的极致考验，带你领略未来城市的每一个角落。', file: '3dgongyuan.html', img: '3dgongyuan/3dgongyuan.png' },
-            { id: '3dkongbubieshu', name: '3D 恐怖别墅', dev: '郝同学', shortDesc: '幽闭空间内的悬疑解谜冒险。', desc: '踏入这座被遗忘的深宅大院，在这场极具沉浸感的心理惊悚冒险中，每一道暗影都隐藏着秘密。通过精细的场景渲染与动态光影，玩家需在幽闭的空间内寻找线索，解开重重谜题，在恐惧与解谜的边缘挑战你的逻辑思考能力。', file: '3dkongbubieshu.html', img: '3dkongbubieshu/3dkongbubieshu.png' },
-            { id: '3dxiangsufeng', name: '3D 像素方块', dev: '陈同学', shortDesc: '无限像素沙盒，构建无限奇迹。', desc: '进入一个由无限方块组成的数字沙盒，这里不仅是简单的构建，更是想象力的画布。无论是宏伟的建筑还是复杂的地下迷宫，你都可以自由摆放与创造。结合生存挑战与资源采集，在像素构建的 3D 世界中，打造属于你的独一无二的奇迹空间。', file: '3dxiangsufeng.html', img: '3dxiangsufeng/3dxiangsufeng.png' },
-            { id: 'chengyugushi', name: '成语奇缘', dev: '郭同学', shortDesc: '益智闯关，沉浸式成语学习。', desc: '这不仅仅是一个益智游戏，更是通往传统文化智慧殿堂的钥匙。精心设计的成语填字谜题，涵盖 1-6 年级核心词汇。通过趣味十足的交互界面，让抽象的成语变得具象可感，在快乐闯关的同时，不仅提升了文学素养，更极大地锻炼了记忆力与反应速度。', file: 'chengyugushi.html', img: 'chengyugushi/chengyugushi.png' },
-            { id: 'liuxingtiangong', name: '流形天工', dev: '包同学', shortDesc: '3D 几何互动，探索空间数学。', desc: '告别枯燥的平面几何，进入三维空间下的数学实验场。通过直观的旋转、缩放与拆解，全方位剖析 1-6 年级数学课中的几何图形构成。这款工具不仅能帮助你构建牢固的空间想象力，更能让你在互动中发现数学的结构之美。', file: 'liuxingtiangong.html', img: 'liuxingtiangong/liuxingtiangong.png' },
-            { id: 'guodongpaidui', name: '果冻派对', dev: '刘同学', shortDesc: '快节奏双人竞技，欢乐乱斗。', desc: '准备好迎接一场软萌又激烈的竞技了吗？控制形态各异的果冻小人，在多变的高难度平台中展开弹射与碰撞。这款双人竞技游戏完美结合了物理反馈与平台跳跃机制，考验反应速度与默契配合。快节奏的对局，让你与朋友在欢声笑语中分出胜负。', file: 'guodongpaidui.html', img: 'guodongpaidui/guodongpaidui.png' }
+            { id: '3dgongyuan', name: '超自由城市', dev: '李承霖', age: '五年级', learning: '两个月', shortDesc: '我画了自己的游戏角色，再把他送进一座可以到处探索的城市。', desc: '我很喜欢自由探索，所以做了一座可以跑、跳、攀爬的城市。游戏里的玩家角色是我自己画的，城市建筑、车辆和街道素材是从网上下载后再组合设计的。我希望大家能控制我的角色穿过街道、登上高楼，找到城市里每一个好玩的角落。', file: '3dgongyuan.html', img: '3dgongyuan/3dgongyuan.png' },
+            { id: '3dkongbubieshu', name: '3D 恐怖别墅', dev: '郝思诚', age: '15岁', learning: '三个月', shortDesc: '我把线索藏进一座黑暗别墅，想看看你敢不敢走进去。', desc: '我想做一个让人有一点紧张、又忍不住继续探索的游戏。我在别墅里安排了昏暗的房间、突然出现的声音和需要仔细寻找的线索。希望你能鼓起勇气走进每个角落，解开谜题，找到离开别墅的方法。', file: '3dkongbubieshu.html', img: '3dkongbubieshu/3dkongbubieshu.png' },
+            { id: '3dhuayuan', name: '3D 花园漫游', dev: '松松', age: '四年级', learning: '一个月', shortDesc: '我把花园放到了天空中，还邀请昆虫和翼龙来做客。', desc: '我想做一个像梦一样漂浮在云上的花园，所以设计了很多不同的小岛、花朵和探索任务。游戏里的蜜蜂、蝴蝶、甲虫等昆虫素材是从网上下载的，我再把它们放进自己设计的场景和玩法里。希望你能飞过云朵，观察每一种小动物。', file: 'index.html', img: '3dhuayuan/3dhuayuan.png' },
+            { id: 'tangdoudevil', name: '糖豆别生气', dev: '郭同学', age: '三年级', learning: '六个月', shortDesc: '我做了一个看起来很可爱、其实到处都会偷偷捉弄你的跳跃游戏。', desc: '我想让玩家一边生气一边笑，所以设计了三十个很短、但藏着许多恶作剧的关卡。地板会突然掉下去，尖刺会冒出来，方向和重力也可能改变。每次失败都能记住一点新东西，希望你最后能比糖豆更聪明。', file: 'index.html', img: 'tangdoudevil/tangdoudevil.png' },
+            { id: '3dxiangsufeng', name: '3D 像素方块', dev: '陈小宇', age: '五年级', learning: '三个月', shortDesc: '我用一块块像素积木，搭了一个可以自由创造的小世界。', desc: '我喜欢像搭积木一样创造东西，所以做了这个像素沙盒。你可以在里面收集方块、改变地形，也可以建房子和想象中的秘密基地。我希望每个玩家都能用同一套方块，做出完全不一样的世界。', file: '3dxiangsufeng.html', img: '3dxiangsufeng/3dxiangsufeng.png' },
+            { id: 'chengyugushi', name: '成语起源', dev: '周语桐', age: '四年级', learning: '两个月', shortDesc: '我把学过的成语变成关卡，让记忆成语像玩游戏一样。', desc: '有些成语只靠背很容易忘，所以我把它们做成了填字和闯关游戏。玩家要观察提示、回忆词语，再把正确的字放进格子里。我希望大家在过关的时候，不知不觉记住更多成语，也能发现汉字组合起来很有趣。', file: 'chengyugushi.html', img: 'chengyugushi/chengyugushi.png' },
+            { id: 'guodongpaidui', name: '果冻派对', dev: '刘同学', age: '二年级', learning: '两个月', shortDesc: '我做了两个软乎乎的果冻小人，让朋友们可以一起欢乐乱斗。', desc: '我最想做的是一个能和朋友一起玩的游戏，所以设计了两个会跳、会撞、还会弹来弹去的果冻小人。场地里有不同的平台和障碍，谁都可能在最后一秒翻盘。我希望大家玩的时候会大笑，也会研究出自己的获胜办法。', file: 'guodongpaidui.html', img: 'guodongpaidui/guodongpaidui.png' },
+            { id: 'liuxingtiangong', name: '流形天宫', dev: '包子墨', age: '六年级', learning: '三个月', shortDesc: '我想把课本里的几何图形搬到三维空间里，用手转着看。', desc: '平面图上的几何有时不容易想象，所以我做了一个可以旋转、缩放和拆解图形的三维实验场。你可以从不同方向观察它们，看看一个立体图形到底由哪些部分组成。我希望大家能像做实验一样理解空间和数学。', file: 'liuxingtiangong.html', img: 'liuxingtiangong/liuxingtiangong.png' },
+            { id: 'shuimo', name: '墨剑文道', dev: '陶同学', age: '三年级', learning: '两个月', shortDesc: '我把语文题变成了墨剑招式，答对才能斩出漂亮的一剑。', desc: '我喜欢水墨画和武侠故事，也想让语文学习更有动作感，于是做了这款墨剑闯关游戏。你要观察诗词、成语和英语词汇题，再朝正确答案挥剑。我希望大家每次斩击都像在练习一套新的知识剑法。', file: 'shuimo.html', img: 'shuimo/shuimo.png' }
         ];
 
         let slideIndex = 0;
@@ -110,21 +177,41 @@
             // 轮播图修改为 div，不再跳转
             heroWrapper.innerHTML += `
                 <div class="hero-slide ${i===0?'active':''}">
-                    <img src="${p.img}">
+                    <img src="${p.img}" alt="${p.name}游戏海报">
                     <div class="hero-caption">
                         <h2>${p.name}</h2>
                         <p>${p.shortDesc}</p>
+                        <div class="hero-meta">
+                            <span>开发学生：${p.dev}</span>
+                            <span>年龄：${p.age}</span>
+                            <span>开发时长：${p.learning}</span>
+                        </div>
                     </div>
                 </div>
             `;
             // 下方游戏卡片跳转，且使用长描述
             grid.innerHTML += `
                 <a href="${p.id}/${p.file}" class="game-card">
-                    <img src="${p.img}">
+                    <div class="poster-wrap">
+                        <img src="${p.img}" alt="${p.name}游戏海报" loading="lazy">
+                    </div>
                     <div class="content">
-                        <span class="dev-badge">${p.dev}</span>
                         <h3>${p.name}</h3>
                         <p>${p.desc}</p>
+                        <div class="project-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">开发学生</span>
+                                <span class="meta-value">${p.dev}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">年龄</span>
+                                <span class="meta-value">${p.age}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">开发时长</span>
+                                <span class="meta-value">${p.learning}</span>
+                            </div>
+                        </div>
                     </div>
                 </a>
             `;
