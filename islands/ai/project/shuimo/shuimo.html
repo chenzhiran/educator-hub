@@ -33,6 +33,7 @@
   .howto h4 { color:#a33; margin-bottom:.4em; letter-spacing:.08em; text-align:center; }
   .howto .row { display:flex; align-items:flex-start; gap:.6em; margin:.3em 0; }
   .howto .ic { flex:0 0 auto; font-weight:bold; color:#a33; }
+  .poem-mark { color:#8a2020; font-weight:bold; }
   /* 开始按钮：更大更醒目，居中 */
   #startBtn { margin-top:1.6vh; padding:.6em 2.6em; font-weight:bold; letter-spacing:.2em;
     border-width:4px; background:#a33; color:#fff; border-color:#a33;
@@ -47,6 +48,11 @@
   #tip { position:absolute; bottom:10px; left:0; right:0; text-align:center;
     color:rgba(26,26,26,.6); pointer-events:none; transition:opacity .5s; }
   #flash { position:fixed; inset:0; background:#fff; opacity:0; pointer-events:none; }
+  @media (max-height:680px), (max-width:720px) {
+    #menu { justify-content:flex-start; overflow-y:auto; padding-top:max(18px,env(safe-area-inset-top)); padding-bottom:max(24px,env(safe-area-inset-bottom)); }
+    .howto { margin:1vh auto; line-height:1.55; }
+    .picker { margin-top:1vh; }
+  }
 </style>
 </head>
 <body>
@@ -59,10 +65,10 @@
     <div class="sub" id="menuSub"></div>
     <div class="picker">
       <div class="lbl">◈ 择 学 科 ◈</div>
-      <span class="btn subjBtn sel" data-subj="poem">语文·诗词</span>
-      <span class="btn subjBtn" data-subj="idiom">语文·成语</span>
+      <span class="btn subjBtn sel" data-subj="idiom">语文·成语</span>
       <span class="btn subjBtn" data-subj="english">英语·词汇</span>
       <span class="btn subjBtn" data-subj="mix">综合·混斩</span>
+      <span class="btn subjBtn" data-subj="poem">语文·诗词</span>
     </div>
     <div class="howto">
       <h4>◈ 玩法 ◈</h4>
@@ -199,7 +205,7 @@ window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 resize();
 
 //============ 学科选择 ============
-let SUBJECT='poem';
+let SUBJECT='idiom';
 document.querySelectorAll('.subjBtn').forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll('.subjBtn').forEach(x=>x.classList.remove('sel'));
@@ -657,6 +663,7 @@ function drawPlayer(){
   ctx.restore();
 }
 function optFont(text){
+  if(text.length>=8) return 'bold 14px serif';
   if(text.length>=6) return 'bold 15px serif';
   if(text.length>=4) return 'bold 17px serif';
   return 'bold 19px serif';
@@ -665,15 +672,20 @@ function roundRect(x,y,w,h,r){ ctx.beginPath();
   ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
   ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function drawOptions(cx,cy,r,options,correctDir,reveal){
-  const off=r+44;
+  const poemMode=SUBJECT==='poem';
+  const off=r+(poemMode?68:44);
   const pos={ U:[cx,cy-off], D:[cx,cy+off], L:[cx-off-r*0.5,cy], R:[cx+off+r*0.5,cy] };
   ctx.textAlign='center'; ctx.textBaseline='middle';
   for(const dir of ['U','D','L','R']){
     const t=options[dir]; if(t==null) continue;
-    const [ox,oy]=pos[dir];
+    let [ox,oy]=pos[dir];
     ctx.font=optFont(t);
-    const tw=ctx.measureText(t).width;
-    const pad=11, bw=tw+pad*2+18, bh=30;
+    const maxTextW=Math.min(poemMode?150:175,W*.34);
+    const textLines=splitCanvasText(t,maxTextW,2);
+    const tw=Math.min(maxTextW,Math.max(...textLines.map(line=>ctx.measureText(line).width)));
+    const pad=11, bw=tw+pad*2+20, bh=Math.max(30,18*textLines.length+12);
+    ox=Math.max(bw/2+6,Math.min(W-bw/2-6,ox));
+    oy=Math.max(bh/2+48,Math.min(H-bh/2-12,oy));
     const isCorrect = reveal && dir===correctDir;
     ctx.save();
     ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
@@ -689,10 +701,42 @@ function drawOptions(cx,cy,r,options,correctDir,reveal){
     ctx.font='bold 13px serif'; ctx.fillText(DIR_ARROW[dir], bx, by+1);
     ctx.fillStyle = isCorrect ? '#fff' : '#1a1a1a';
     ctx.font=optFont(t);
-    ctx.fillText(t, ox+11, oy);
+    textLines.forEach((line,index)=>ctx.fillText(line,ox+11,oy+(index-(textLines.length-1)/2)*17));
     ctx.restore();
   }
   ctx.textBaseline='alphabetic';
+}
+function splitCanvasText(text,maxW,maxLines=3){
+  const chars=[...text],lines=[];let line='';
+  for(const c of chars){
+    if(ctx.measureText(line+c).width>maxW&&line){lines.push(line);line=c;}
+    else line+=c;
+  }
+  if(line)lines.push(line);
+  if(lines.length>maxLines){
+    const kept=lines.slice(0,maxLines);
+    kept[maxLines-1]=kept[maxLines-1].slice(0,-1)+'…';
+    return kept;
+  }
+  return lines;
+}
+function drawQuestionScroll(text,cx,cy,maxW){
+  ctx.save();
+  const fontSize=Math.max(15,Math.min(20,W*.025));
+  ctx.font=`bold ${fontSize}px "STKaiti","KaiTi",serif`;
+  const lines=splitCanvasText(text,maxW-34,3);
+  const lineH=fontSize+7,boxH=lines.length*lineH+22,boxW=Math.min(maxW,W-20);
+  const x=Math.max(10,Math.min(W-boxW-10,cx-boxW/2));
+  const y=Math.max(54,Math.min(H-boxH-14,cy-boxH/2));
+  const grad=ctx.createLinearGradient(x,y,x+boxW,y);
+  grad.addColorStop(0,'rgba(239,226,193,.96)');grad.addColorStop(.5,'rgba(255,250,232,.98)');grad.addColorStop(1,'rgba(229,211,174,.96)');
+  ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=10;ctx.shadowOffsetY=4;
+  roundRect(x,y,boxW,boxH,8);ctx.fillStyle=grad;ctx.fill();
+  ctx.shadowColor='transparent';ctx.lineWidth=2;ctx.strokeStyle='#6f4a34';ctx.stroke();
+  ctx.fillStyle='#a33';ctx.fillRect(x+8,y+8,4,boxH-16);ctx.fillRect(x+boxW-12,y+8,4,boxH-16);
+  ctx.fillStyle='#271c18';ctx.textAlign='center';ctx.textBaseline='middle';
+  lines.forEach((line,index)=>ctx.fillText(line,x+boxW/2,y+boxH/2+(index-(lines.length-1)/2)*lineH));
+  ctx.restore();
 }
 function wrapTextStroke(text,x,y,maxW,lh){
   const chars=text.split(''); let line='',lines=[];
@@ -719,11 +763,14 @@ function drawEnemy(en){
   ctx.beginPath(); ctx.arc(en.x-en.r*0.3,en.y-en.r*0.12,en.r*0.15,0,TAU);
   ctx.arc(en.x+en.r*0.3,en.y-en.r*0.12,en.r*0.15,0,TAU); ctx.fill();
   if(en.quiz){
-    ctx.save();
-    ctx.font='bold 14px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.lineWidth=3; ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineJoin='round';
-    wrapTextStroke(en.quiz.q, en.x, en.y+en.r*0.05, en.r*1.8, 16);
-    ctx.restore();
+    if(SUBJECT==='poem') drawQuestionScroll(en.quiz.q,en.x,en.y,Math.min(250,W*.5));
+    else{
+      ctx.save();
+      ctx.font='bold 14px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.lineWidth=3; ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineJoin='round';
+      wrapTextStroke(en.quiz.q, en.x, en.y+en.r*0.05, en.r*1.8, 16);
+      ctx.restore();
+    }
     drawOptions(en.x,en.y,en.r,en.quiz.options,en.quiz.correctDir, en.wrongFlash>0);
   }
   if(en.hp<en.maxHp){
@@ -756,11 +803,14 @@ function drawBoss(b){
   ctx.beginPath(); ctx.arc(b.x-b.r*0.32+Math.sin(b.eye)*4,b.y-b.r*0.1,er*0.5,0,TAU);
   ctx.arc(b.x+b.r*0.32+Math.sin(b.eye)*4,b.y-b.r*0.1,er*0.5,0,TAU); ctx.fill();
   if(b.vulnerable && b.quiz){
-    ctx.save();
-    ctx.font='bold 15px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.lineWidth=3; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineJoin='round';
-    wrapTextStroke(b.quiz.q,b.x,b.y+b.r*0.05,b.r*1.6,17);
-    ctx.restore();
+    if(SUBJECT==='poem') drawQuestionScroll(b.quiz.q,b.x,b.y,Math.min(280,W*.55));
+    else{
+      ctx.save();
+      ctx.font='bold 15px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.lineWidth=3; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineJoin='round';
+      wrapTextStroke(b.quiz.q,b.x,b.y+b.r*0.05,b.r*1.6,17);
+      ctx.restore();
+    }
     drawOptions(b.x,b.y,b.r,b.quiz.options,b.bossCorrectDir,b.wrongFlash>0);
     ctx.globalAlpha=0.4+Math.sin(b.t*0.2)*0.3; ctx.strokeStyle='#a33'; ctx.lineWidth=4;
     ctx.beginPath(); ctx.arc(b.x,b.y,b.r+14,0,TAU); ctx.stroke(); ctx.globalAlpha=1;
