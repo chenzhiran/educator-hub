@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Rail in the Air - HTML Prototype</title>
+<title>空中铁轨 · 云端极速挑战</title>
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -24,9 +24,39 @@
   }
   #hud .title { font-size: 22px; letter-spacing: 1px; }
   #hud .small { font-size: 13px; opacity: .95; font-weight: 500; }
+  #curveHint {
+    position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 6;
+    min-width: 240px; padding: 10px 18px; border-radius: 14px; color: #fff; text-align: center;
+    background: rgba(8,34,72,.48); border: 1px solid rgba(255,255,255,.42);
+    box-shadow: 0 10px 30px rgba(0,45,100,.22); backdrop-filter: blur(8px);
+    text-shadow: 0 2px 7px rgba(0,0,0,.45); pointer-events: none; transition: .2s;
+  }
+  #curveHint strong { display: block; font-size: 18px; }
+  #curveHint span { font-size: 12px; opacity: .9; }
+  #curveHint.danger { background: rgba(190,34,28,.72); animation: pulseWarning .55s infinite alternate; }
+  @keyframes pulseWarning { to { transform: translateX(-50%) scale(1.04); } }
+  #racePanel {
+    position: fixed; left: 18px; bottom: 18px; z-index: 6; width: min(330px, calc(100vw - 36px));
+    padding: 12px 14px; border-radius: 15px; color: #fff; background: rgba(8,34,72,.52);
+    border: 1px solid rgba(255,255,255,.4); backdrop-filter: blur(8px);
+    font-size: 12px; text-shadow: 0 2px 5px rgba(0,0,0,.4); pointer-events: none;
+  }
+  .meter-line { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .meter-line label { width: 55px; }
+  .meter { flex: 1; height: 10px; border-radius: 999px; overflow: hidden; background: rgba(0,0,0,.34); border: 1px solid rgba(255,255,255,.25); }
+  .meter > i { display: block; height: 100%; width: 100%; border-radius: inherit; transition: width .12s, background .12s; }
+  #gripFill { background: linear-gradient(90deg,#ff514f,#ffe059,#60f09e); }
+  #boostFill { background: linear-gradient(90deg,#24a9ff,#61f8ff,#fff); width: 0; }
+  #raceStats { display: flex; justify-content: space-between; margin-top: 7px; color: #dff6ff; }
+  #floatingTip {
+    position: fixed; left: 50%; top: 36%; transform: translate(-50%,-8px); z-index: 7;
+    padding: 9px 15px; border-radius: 999px; color: #fff; background: rgba(0,35,80,.72);
+    font-weight: 800; opacity: 0; transition: .22s; pointer-events: none; text-shadow: 0 2px 5px rgba(0,0,0,.5);
+  }
+  #floatingTip.show { opacity: 1; transform: translate(-50%,0); }
   #centerMsg {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    z-index: 8; color: white; text-align: center; pointer-events: none;
+    z-index: 8; color: white; text-align: center; pointer-events: auto;
     text-shadow: 0 3px 12px rgba(0,0,0,.55);
   }
   #centerMsg .box {
@@ -38,6 +68,7 @@
   }
   #centerMsg h1 { margin: 0 0 8px; font-size: 34px; }
   #centerMsg p { margin: 6px 0; font-size: 15px; }
+  #centerMsg .start-action { display:inline-block; margin-top:12px; padding:10px 22px; border-radius:999px; background:#ffcf38; color:#17325e; font-weight:900; text-shadow:none; }
   #mapPanel {
     position: fixed; right: 18px; top: 18px; z-index: 9; width: 290px;
     color: #26324a; background: rgba(255,255,255,.9);
@@ -55,13 +86,14 @@
     position: fixed; left: 0; right: 0; bottom: 18px; display: none; justify-content: space-between;
     padding: 0 22px; z-index: 10; pointer-events: none;
   }
-  .cluster { display:flex; gap:12px; pointer-events:auto; }
+  .cluster { display:flex; gap:10px; pointer-events:auto; align-items:flex-end; }
   .btn {
     width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(255,255,255,.55);
     background: rgba(20,40,70,.38); color: white; font-weight: 900; font-size: 20px;
     box-shadow: 0 10px 28px rgba(0,0,0,.25); backdrop-filter: blur(6px);
   }
   .btn:active { transform: scale(.95); background: rgba(20,40,70,.58); }
+  .btn.boost { width:76px; height:76px; background:rgba(29,181,255,.62); font-size:14px; }
   @media (max-width: 900px) {
     #mobileControls { display:flex; }
     #hud { left: 12px; top: 10px; }
@@ -69,6 +101,10 @@
     #hud .small { font-size: 12px; }
     #mapPanel { right: 10px; left: 10px; width: auto; }
     #centerMsg h1 { font-size: 25px; }
+    #curveHint { top: 8px; min-width: 190px; padding: 7px 12px; }
+    #curveHint strong { font-size: 14px; }
+    #racePanel { left: 10px; bottom: 96px; width: 210px; padding: 8px 10px; }
+    #raceStats { font-size: 10px; }
   }
 </style>
 </head>
@@ -79,14 +115,23 @@
   <div class="title">RAIL IN THE AIR · 空中铁轨</div>
   <div>速度：<span id="speed">0</span> km/h　关卡：<span id="levelName">云端入门</span></div>
   <div>距离：<span id="distance">0</span>%　最佳：<span id="best">0</span>%</div>
-  <div class="small">W/↑ 加速　S/↓ 刹车　A/D 微调　C 视角　M 地图　R 重开　ESC 暂停</div>
+  <div class="small">W/↑ 加速　S/↓ 刹车漂移　A/D 转向　空格爆发　C 视角　M 地图　R 重开</div>
 </div>
+
+<div id="curveHint"><strong>前方直道</strong><span>安全速度 230 km/h</span></div>
+<div id="racePanel">
+  <div class="meter-line"><label>护轨值</label><div class="meter"><i id="gripFill"></i></div><b id="gripText">100</b></div>
+  <div class="meter-line"><label>爆发能量</label><div class="meter"><i id="boostFill"></i></div><b id="boostText">0</b></div>
+  <div id="raceStats"><span>⭐ <b id="score">0</b></span><span>漂移 ×<b id="combo">1</b></span><span>救援 <b id="rescue">1</b></span></div>
+</div>
+<div id="floatingTip"></div>
 
 <div id="centerMsg">
   <div class="box">
     <h1>别一直按着 W</h1>
-    <p>油门是资源，不是本能。入弯前提前刹车，出弯再加速。</p>
-    <p>按 W 开始驾驶</p>
+    <p>弯前刹车，弯中转向，出弯爆发。偏离轨道时护轨值会先发出警告。</p>
+    <p>刹车并转向可以漂移蓄能，收集蓝色能量环也能补充爆发。</p>
+    <span class="start-action">点击或按 W 出发</span>
   </div>
 </div>
 
@@ -104,6 +149,7 @@
   <div class="cluster">
     <button class="btn" data-key="s">刹</button>
     <button class="btn" data-key="w">油</button>
+    <button class="btn boost" data-key=" ">爆发</button>
   </div>
 </div>
 
@@ -118,6 +164,15 @@
   const centerMsg = document.getElementById("centerMsg");
   const mapPanel = document.getElementById("mapPanel");
   const levelsBox = document.getElementById("levels");
+  const curveHint = document.getElementById("curveHint");
+  const gripFill = document.getElementById("gripFill");
+  const gripText = document.getElementById("gripText");
+  const boostFill = document.getElementById("boostFill");
+  const boostText = document.getElementById("boostText");
+  const scoreEl = document.getElementById("score");
+  const comboEl = document.getElementById("combo");
+  const rescueEl = document.getElementById("rescue");
+  const floatingTip = document.getElementById("floatingTip");
 
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   let W = 0, H = 0;
@@ -135,7 +190,7 @@
   const keys = {};
   addEventListener("keydown", e => {
     const k = e.key.toLowerCase();
-    if (["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright","c","m","r","escape"].includes(k)) e.preventDefault();
+    if (["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright","c","m","r","escape"," "].includes(k)) e.preventDefault();
     keys[k] = true;
     if (k === "r") restart();
     if (k === "c") cameraMode = (cameraMode + 1) % 2;
@@ -150,6 +205,10 @@
     btn.addEventListener("pointerup", e => { e.preventDefault(); keys[k] = false; });
     btn.addEventListener("pointercancel", () => keys[k] = false);
     btn.addEventListener("pointerleave", () => keys[k] = false);
+  });
+  centerMsg.addEventListener("pointerdown", e => {
+    if (e.target.closest(".level")) return;
+    if (gameState === "ready" || gameState === "fallen") restart();
   });
 
   const levels = [
@@ -175,6 +234,23 @@
         [0,0], [150,120], [300,-130], [470,140], [650,-150], [860,110], [1040,-130],
         [1220,160], [1440,-150], [1680,120], [1880,-135], [2100,165], [2350,-80], [2700,20]
       ]
+    },
+    {
+      name: "落日回旋", unlocked: false, len: 3100, width: 70,
+      color: "#58455d", accent: "#ffb75d",
+      segments: [
+        [0,0],[180,40],[360,170],[560,190],[760,20],[960,-180],[1180,-210],
+        [1400,10],[1600,210],[1820,175],[2050,-80],[2280,-220],[2520,-50],[2780,190],[3100,30]
+      ]
+    },
+    {
+      name: "雷暴极限线", unlocked: false, len: 3500, width: 64,
+      color: "#252d4d", accent: "#76ecff",
+      segments: [
+        [0,0],[150,-120],[310,150],[480,-175],[670,185],[870,-205],[1080,180],
+        [1300,-210],[1530,225],[1770,-190],[2020,210],[2280,-225],[2550,190],
+        [2830,-160],[3100,210],[3350,-80],[3500,0]
+      ]
     }
   ];
 
@@ -182,9 +258,35 @@
   let car, cameraMode = 0, paused = false, gameState = "ready";
   let best = Number(localStorage.getItem("railAirBest") || 0);
   let lastTime = performance.now();
+  let pickups = [], particles = [], tipTimer = 0;
 
   function lerp(a,b,t){ return a + (b-a)*t; }
   function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+  function showTip(text, duration=1100) {
+    floatingTip.textContent = text;
+    floatingTip.classList.add("show");
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(() => floatingTip.classList.remove("show"), duration);
+  }
+
+  function curveInfo(level, z) {
+    const near = trackPoint(level, z + 25);
+    const far = trackPoint(level, z + 150);
+    const farther = trackPoint(level, z + 260);
+    const delta = (far.x - near.x) + (farther.x - far.x) * .55;
+    const severity = clamp(Math.abs(delta) / 150, 0, 1);
+    const safeSpeed = Math.round(215 - severity * (currentLevel === 0 ? 75 : currentLevel === 1 ? 100 : 120));
+    return { severity, direction: delta > 8 ? "右弯" : delta < -8 ? "左弯" : "直道", safeSpeed };
+  }
+
+  function buildPickups(level) {
+    pickups = [];
+    for (let z = 260; z < level.len - 130; z += 210) {
+      const road = trackPoint(level, z);
+      const offset = Math.sin(z * .037) * level.width * .2;
+      pickups.push({ z, x: road.x + offset, taken: false, spin: Math.random() * Math.PI * 2 });
+    }
+  }
 
   function trackPoint(level, z) {
     const pts = level.segments;
@@ -207,12 +309,17 @@
     const lv = levels[currentLevel];
     car = {
       z: 0, x: trackPoint(lv,0).x, vx: 0, speed: 0,
-      tilt: 0, fallenY: 0, wobble: 0
+      tilt: 0, fallenY: 0, wobble: 0, grip: 100, boost: 22,
+      boosting: 0, score: 0, combo: 1, comboTimer: 0, rescue: 1,
+      drift: 0, checkpoint: 0, dangerReason: ""
     };
+    buildPickups(lv);
+    particles = [];
     gameState = "playing";
     paused = false;
     centerMsg.style.display = "none";
     levelNameEl.textContent = lv.name;
+    showTip("稳住方向，蓝色能量环可以补充爆发");
     renderLevels();
   }
 
@@ -338,6 +445,24 @@
       ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
     }
 
+    // Curve signs make the next dangerous bend readable before the player reaches it.
+    for (let z = Math.ceil(start/240)*240; z < end; z += 240) {
+      const info = curveInfo(lv, z);
+      if (info.severity < .32) continue;
+      const road = trackPoint(lv, z);
+      const sign = project(road.x + lv.width*.68, z, 35);
+      const size = clamp(sign.s * 11, 9, 28);
+      ctx.save();
+      ctx.translate(sign.x, sign.y);
+      ctx.fillStyle = info.severity > .68 ? "#ff554d" : "#ffd34d";
+      roundRect(ctx,-size,-size,size*2,size*2,size*.2); ctx.fill();
+      ctx.fillStyle = "#17325e";
+      ctx.font = `900 ${size*1.2}px sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(info.direction === "左弯" ? "‹" : "›",0,-1);
+      ctx.restore();
+    }
+
     // finish gate
     if (lv.len - car.z < 900) {
       const z = lv.len;
@@ -354,6 +479,41 @@
       ctx.textAlign = "center";
       ctx.fillText("FINISH", (topA.x+topB.x)/2, (topA.y+topB.y)/2 - 12);
     }
+  }
+
+  function drawPickups() {
+    const start = car.z - 80, end = car.z + 850;
+    pickups.forEach(item => {
+      if (item.taken || item.z < start || item.z > end) return;
+      item.spin += .035;
+      const p = project(item.x,item.z,30+Math.sin(item.spin)*5);
+      const r = clamp(p.s*7,4,24);
+      ctx.save();
+      ctx.translate(p.x,p.y); ctx.rotate(item.spin);
+      ctx.shadowColor="#35d9ff";ctx.shadowBlur=18;
+      ctx.strokeStyle="#8ff5ff";ctx.lineWidth=Math.max(2,r*.22);
+      ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
+      ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(0,0,r*.25,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function spawnSparks(color="#6eeaff", count=8) {
+    for(let i=0;i<count;i++) particles.push({
+      x: car.x, z: car.z+25, y: 12, life:.45+Math.random()*.4,
+      vx:(Math.random()-.5)*45, vz:-20-Math.random()*80, vy:(Math.random()-.2)*35, color
+    });
+  }
+
+  function drawParticles(dt) {
+    for(let i=particles.length-1;i>=0;i--){
+      const part=particles[i];part.life-=dt;part.x+=part.vx*dt;part.z+=part.vz*dt;part.y+=part.vy*dt;part.vy-=30*dt;
+      if(part.life<=0){particles.splice(i,1);continue;}
+      const p=project(part.x,part.z,part.y);
+      ctx.globalAlpha=clamp(part.life*2,0,1);ctx.fillStyle=part.color;
+      ctx.beginPath();ctx.arc(p.x,p.y,clamp(p.s*2.2,1,6),0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
   }
 
   function drawCar() {
@@ -392,6 +552,12 @@
     ctx.beginPath(); ctx.arc(-size*.32, -size*.12, size*.055,0,Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(size*.32, -size*.12, size*.055,0,Math.PI*2); ctx.fill();
 
+    if(car.boosting>0){
+      const flame=ctx.createLinearGradient(0,size*.1,0,size*.72);
+      flame.addColorStop(0,"#fff");flame.addColorStop(.35,"#58eaff");flame.addColorStop(1,"rgba(30,105,255,0)");
+      ctx.fillStyle=flame;ctx.beginPath();ctx.moveTo(-size*.22,size*.18);ctx.lineTo(0,size*.78+Math.random()*size*.18);ctx.lineTo(size*.22,size*.18);ctx.closePath();ctx.fill();
+    }
+
     ctx.restore();
   }
 
@@ -415,7 +581,11 @@
       car.z += car.speed * dt * .3;
       car.speed *= .985;
       if (car.fallenY > 520) {
-        showMessage("坠落了", ["速度太快或入弯太晚，车被甩出轨道。", "按 R 立即重来，记住这段轨道。"]);
+        showMessage("列车坠落", [
+          car.dangerReason || "护轨值耗尽，列车失去了轨道吸附。",
+          "弯前观察安全速度，刹车漂移可以增加稳定性并积攒爆发。",
+          '<span class="start-action">点击或按 R 再试一次</span>'
+        ]);
       }
       return;
     }
@@ -424,27 +594,51 @@
     const brake = keys.s || keys.arrowdown;
     const left = keys.a || keys.arrowleft;
     const right = keys.d || keys.arrowright;
+    const boostKey = keys[" "];
+    const turnInput = (right ? 1 : 0) - (left ? 1 : 0);
+    const curve = curveInfo(lv, car.z);
 
-    if (throttle) car.speed += 62 * dt;
-    else car.speed -= 14 * dt;
-    if (brake) car.speed -= 92 * dt;
-    car.speed = clamp(car.speed, 0, 230);
+    if (boostKey && car.boost > 0 && car.speed > 35) {
+      car.boosting = .16;
+      car.boost = Math.max(0,car.boost-30*dt);
+      car.speed += 108*dt;
+      if(Math.random()<dt*22)spawnSparks("#73e9ff",2);
+    } else car.boosting=Math.max(0,car.boosting-dt);
+
+    if (throttle) car.speed += 68 * dt;
+    else car.speed -= 13 * dt;
+    if (brake) car.speed -= 108 * dt;
+    car.speed = clamp(car.speed, 0, car.boosting>0 ? 285 : 238);
 
     const future = trackPoint(lv, car.z + 42);
     const here = trackPoint(lv, car.z);
     const curveForce = (future.x - here.x) * .012 * (car.speed / 110) ** 2;
 
-    if (left) car.vx -= 120 * dt;
-    if (right) car.vx += 120 * dt;
+    if (left) car.vx -= 145 * dt;
+    if (right) car.vx += 145 * dt;
 
-    // road tries to pull car along its direction, but too much speed creates outward drift
     const desiredX = here.x;
-    car.vx += (desiredX - car.x) * .42 * dt;
+    car.vx += (desiredX - car.x) * (brake ? .62 : .42) * dt;
     car.vx += curveForce * dt * 70;
     car.vx *= Math.pow(.82, dt * 8);
 
-    // braking stabilizes the bottom
     if (brake) car.vx *= Math.pow(.45, dt);
+    const drifting = brake && turnInput !== 0 && car.speed > 72;
+    if (drifting) {
+      car.drift += dt;
+      car.boost = clamp(car.boost + (8 + curve.severity*18)*dt,0,100);
+      car.comboTimer = 2.2;
+      if (car.drift > .35) {
+        car.combo = clamp(1+Math.floor(car.drift/.65),1,8);
+        car.score += Math.round(14*car.combo*dt*10);
+        if(Math.random()<dt*18)spawnSparks("#ffd45c",1);
+      }
+    } else {
+      if(car.drift>.55)showTip(`漂亮漂移！爆发能量 +${Math.round(car.drift*12)}`);
+      car.drift=0;
+    }
+    car.comboTimer-=dt;
+    if(car.comboTimer<=0)car.combo=1;
 
     car.x += car.vx * dt;
     car.z += car.speed * dt;
@@ -455,13 +649,31 @@
     const danger = Math.abs(offset) / (roadWidth/2);
     car.tilt = lerp(car.tilt, clamp(offset / (roadWidth/2), -1.2, 1.2), .12);
 
-    // Overspeed on sharp bends widens allowed error less, creating skill pressure
-    const bend = Math.abs(trackPoint(lv, car.z+80).x - trackPoint(lv, car.z-20).x) / 100;
-    const fallLimit = 1.05 - clamp((car.speed - 130) / 220, 0, .28) - clamp(bend*.09,0,.18);
-    if (danger > fallLimit) {
-      gameState = "fallen";
-      car.fallenY = 0;
-      car.vx += Math.sign(offset) * 90;
+    const overspeed = Math.max(0,(car.speed-curve.safeSpeed)/Math.max(60,curve.safeSpeed));
+    if (danger < .58 && overspeed < .2) car.grip = Math.min(100,car.grip+25*dt);
+    else {
+      const edgeDrain=Math.max(0,danger-.58)*50;
+      const speedDrain=overspeed*(18+curve.severity*32);
+      car.grip=Math.max(0,car.grip-(edgeDrain+speedDrain)*dt);
+    }
+    if(danger>.82) car.dangerReason="列车长时间压在轨道边缘，护轨值耗尽。";
+    else if(overspeed>.45) car.dangerReason=`以 ${Math.round(car.speed*1.2)} km/h 冲入${curve.direction}，超过安全速度。`;
+
+    if (car.grip <= 0) {
+      if(car.rescue>0){
+        car.rescue--;
+        car.grip=68;
+        car.x=road.x;
+        car.vx=0;
+        car.speed=Math.min(car.speed,curve.safeSpeed*.72);
+        car.boost=Math.max(0,car.boost-20);
+        showTip("磁力护轨救援！已自动减速并拉回中心",1900);
+        spawnSparks("#ffef78",20);
+      }else{
+        gameState="fallen";
+        car.fallenY=0;
+        car.vx+=Math.sign(offset||1)*90;
+      }
     }
 
     const progress = clamp(Math.floor((car.z / lv.len) * 100), 0, 100);
@@ -470,9 +682,25 @@
       localStorage.setItem("railAirBest", best);
     }
 
+    for(const item of pickups){
+      if(item.taken||Math.abs(item.z-car.z)>35)continue;
+      if(Math.abs(item.x-car.x)<roadWidth*.38){
+        item.taken=true;
+        car.boost=clamp(car.boost+24,0,100);
+        car.score+=500*car.combo;
+        showTip("能量环 +24 爆发");
+        spawnSparks("#6eeaff",18);
+      }
+    }
+    car.score += Math.round(car.speed*dt*(.25+car.combo*.08));
+
     if (car.z >= lv.len) {
       if (currentLevel < levels.length - 1) levels[currentLevel + 1].unlocked = true;
-      showMessage("通关！", ["你稳稳开到了终点。下一关已解锁。", "按 R 重玩，或按 M 选择关卡。"]);
+      showMessage("冲线成功！", [
+        `本局得分 ${Math.round(car.score)} · 剩余护轨 ${Math.round(car.grip)}%`,
+        currentLevel < levels.length-1 ? "下一条更刺激的轨道已经解锁。" : "你征服了目前所有空中轨道！",
+        '<span class="start-action">点击重玩 · 按 M 选择关卡</span>'
+      ]);
       gameState = "ready";
       car.speed = 0;
       renderLevels();
@@ -481,10 +709,15 @@
 
   function drawSpeedWarning() {
     const lv = levels[currentLevel];
-    const bend = Math.abs(trackPoint(lv, car.z+120).x - trackPoint(lv, car.z+20).x);
-    if (bend > 90 && car.speed > 115 && gameState === "playing") {
+    const info = curveInfo(lv,car.z);
+    const displayedSpeed=Math.round(car.speed*1.2);
+    curveHint.querySelector("strong").textContent = info.direction==="直道" ? "前方直道 · 可以加速" : `前方${info.direction} ${info.severity>.68?"⚠":"↪"}`;
+    curveHint.querySelector("span").textContent = `建议不超过 ${Math.round(info.safeSpeed*1.2)} km/h`;
+    const risky=car.speed>info.safeSpeed*1.08&&info.severity>.28;
+    curveHint.classList.toggle("danger",risky);
+    if ((risky || car.grip<38) && gameState === "playing") {
       ctx.save();
-      ctx.fillStyle = "rgba(255,70,70,.18)";
+      ctx.fillStyle = `rgba(255,45,45,${car.grip<20?.24:.12})`;
       ctx.fillRect(0,0,W,H);
       ctx.fillStyle = "#fff";
       ctx.font = "bold 24px sans-serif";
@@ -492,15 +725,25 @@
       ctx.textBaseline = "middle";
       ctx.shadowColor = "rgba(0,0,0,.45)";
       ctx.shadowBlur = 10;
-      ctx.fillText("前方急弯：提前刹车！", W/2, H*.24);
+      ctx.fillText(car.grip<38 ? `护轨值低！向轨道中心修正` : `${info.direction}超速：松油门并提前刹车`, W/2, H*.24);
+      ctx.restore();
+    }
+    if(car.boosting>0){
+      ctx.save();ctx.strokeStyle="rgba(110,235,255,.52)";ctx.lineWidth=3;
+      for(let i=0;i<22;i++){
+        const x=(i*89+performance.now()*.42)%W,y=(i*53)%H;
+        ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-35-Math.random()*45,y+25);ctx.stroke();
+      }
       ctx.restore();
     }
   }
 
-  function render() {
+  function render(dt) {
     drawSky();
     drawTrack();
+    drawPickups();
     drawCar();
+    drawParticles(dt);
     drawSpeedWarning();
 
     if (paused) {
@@ -515,6 +758,16 @@
     speedEl.textContent = Math.round((car?.speed || 0) * 1.2);
     distEl.textContent = car ? clamp(Math.floor(car.z / levels[currentLevel].len * 100),0,100) : 0;
     bestEl.textContent = best;
+    if(car){
+      gripFill.style.width=`${car.grip}%`;
+      gripText.textContent=Math.round(car.grip);
+      gripFill.style.background=car.grip<25?"#ff4d4d":car.grip<55?"#ffd94d":"linear-gradient(90deg,#4fe19b,#9affc9)";
+      boostFill.style.width=`${car.boost}%`;
+      boostText.textContent=Math.round(car.boost);
+      scoreEl.textContent=Math.round(car.score);
+      comboEl.textContent=car.combo;
+      rescueEl.textContent=car.rescue;
+    }
   }
 
   function loop(now) {
@@ -522,7 +775,7 @@
     lastTime = now;
     if (!car) restart(), gameState = "ready", centerMsg.style.display = "flex";
     update(dt);
-    render();
+    render(dt);
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
