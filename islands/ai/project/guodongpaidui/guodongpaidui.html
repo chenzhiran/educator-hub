@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+    <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>果冻恶魔大跳跳小人 - 全屏版</title>
     <style>
         * { box-sizing: border-box; }
@@ -12,6 +13,7 @@
             height: 100%;
             overflow: hidden;
             background-color: #000;
+            touch-action: none;
         }
         canvas {
             display: block;
@@ -49,6 +51,23 @@
             border-radius: 3px;
             font-family: monospace;
         }
+        #touch-controls { display: none; position: fixed; inset: auto 0 max(10px, env(safe-area-inset-bottom)); z-index: 20; justify-content: space-between; padding: 0 max(12px, env(safe-area-inset-left)); pointer-events: none; }
+        .touch-player { display: grid; grid-template-columns: repeat(3, 54px); gap: 8px; pointer-events: auto; }
+        .touch-key { height: 54px; border: 2px solid rgba(255,255,255,.7); border-radius: 16px; color: #fff; font: 900 20px/1 sans-serif; background: rgba(22,33,62,.7); touch-action: none; }
+        .touch-player.p2 .touch-key { background: rgba(150,35,70,.72); }
+        .touch-key.active { filter: brightness(1.5); transform: scale(.94); }
+        #touch-reset { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: auto; padding: 0 15px; font-size: 12px; pointer-events: auto; }
+        @media (hover: none), (pointer: coarse), (max-width: 900px) {
+            #touch-controls { display: flex; }
+            #ui-layer { padding: 8px; }
+            .instruction-box { padding: 7px 9px; font-size: 10px; }
+            .instruction-box br:not(:first-child) { display: none; }
+        }
+        @media (orientation: portrait) and (max-width: 600px) {
+            .touch-player { grid-template-columns: repeat(3, 46px); gap: 5px; }
+            .touch-key { height: 46px; }
+            #ui-layer { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -66,6 +85,19 @@
     </div>
 
     <canvas id="gameCanvas"></canvas>
+    <div id="touch-controls">
+        <div class="touch-player p1">
+            <button class="touch-key" data-key="a">◀</button>
+            <button class="touch-key" data-key="w">跳</button>
+            <button class="touch-key" data-key="d">▶</button>
+        </div>
+        <button id="touch-reset" class="touch-key">重置</button>
+        <div class="touch-player p2">
+            <button class="touch-key" data-key="arrowleft">◀</button>
+            <button class="touch-key" data-key="arrowup">跳</button>
+            <button class="touch-key" data-key="arrowright">▶</button>
+        </div>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -113,6 +145,28 @@
             if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
         };
         window.onkeyup = (e) => keys[e.key.toLowerCase()] = false;
+
+        document.querySelectorAll('.touch-key[data-key]').forEach(btn => {
+            const key = btn.dataset.key;
+            const press = e => {
+                e.preventDefault();
+                keys[key] = true;
+                btn.classList.add('active');
+            };
+            const release = e => {
+                e.preventDefault();
+                keys[key] = false;
+                btn.classList.remove('active');
+            };
+            btn.addEventListener('pointerdown', press);
+            btn.addEventListener('pointerup', release);
+            btn.addEventListener('pointercancel', release);
+            btn.addEventListener('pointerleave', release);
+        });
+        document.getElementById('touch-reset').addEventListener('pointerdown', e => {
+            e.preventDefault();
+            resetGame();
+        });
 
         class Player {
             constructor(x, y, controls, color, imgs) {
@@ -272,6 +326,10 @@
             gameState = "PLAY";
             initLevel(currentLevel);
         }
+
+        window.addEventListener('resize', () => {
+            if (p1 && p2) initLevel(currentLevel);
+        });
 
         function update() {
             if (gameState !== "PLAY") return;
