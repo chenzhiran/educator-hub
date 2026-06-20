@@ -316,10 +316,25 @@ let gameOver = false;
 
 const keys = {};
 window.addEventListener("keydown", e => {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key.toLowerCase() === "r") restartGame();
-});
-window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+    const k = e.key.toLowerCase();
+
+    // 防止浏览器默认行为干扰游戏操作，尤其是空格、方向键等。
+    if (["w", "a", "s", "d", " ", "shift", "j", "e", "q", "r", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
+        e.preventDefault();
+    }
+
+    keys[k] = true;
+    if (k === "r") restartGame();
+}, { passive: false });
+
+window.addEventListener("keyup", e => {
+    const k = e.key.toLowerCase();
+    if (["w", "a", "s", "d", " ", "shift", "j", "e", "q", "r", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
+        e.preventDefault();
+    }
+    keys[k] = false;
+}, { passive: false });
+
 window.addEventListener("mousedown", () => tryAttack("normal"));
 
 ui.startBtn.onclick = () => {
@@ -777,30 +792,22 @@ function updatePlayer(dt) {
         tryAttack("burst");
     }
 
-    const input = new THREE.Vector3(
-        (keys["d"] ? 1 : 0) - (keys["a"] ? 1 : 0),
-        0,
-        (keys["s"] ? 1 : 0) - (keys["w"] ? 1 : 0)
-    );
+    // 修复点：
+    // 之前移动方向依赖 camera.getWorldDirection()，而镜头又依赖角色朝向，
+    // 导致按住 W 时角色转向会反过来带动镜头旋转，看起来像“视角转换”。
+    // 现在改为固定世界坐标移动：W 向场景前方，S 向后，A/D 左右。
+    const inputX = (keys["d"] ? 1 : 0) - (keys["a"] ? 1 : 0);
+    const inputZ = (keys["s"] ? 1 : 0) - (keys["w"] ? 1 : 0);
+    const move = new THREE.Vector3(inputX, 0, inputZ);
 
-    const cameraForward = new THREE.Vector3();
-    camera.getWorldDirection(cameraForward);
-    cameraForward.y = 0;
-    cameraForward.normalize();
-
-    const cameraRight = new THREE.Vector3().crossVectors(cameraForward, new THREE.Vector3(0,1,0)).normalize();
-    const move = new THREE.Vector3();
-
-    if (input.lengthSq() > 0) {
-        input.normalize();
-        move.addScaledVector(cameraRight, input.x);
-        move.addScaledVector(cameraForward, input.z);
+    if (move.lengthSq() > 0) {
         move.normalize();
 
         const sprint = keys["shift"];
         const speed = sprint ? playerState.sprintSpeed : playerState.speed;
         player.position.addScaledVector(move, speed * dt);
 
+        // 只让角色模型朝移动方向转身，不再让镜头围着角色旋转。
         const targetRot = Math.atan2(move.x, move.z);
         let diff = targetRot - player.rotation.y;
         diff = Math.atan2(Math.sin(diff), Math.cos(diff));
@@ -834,7 +841,7 @@ function updatePlayer(dt) {
 
     // idle / run animation
     const t = clock.elapsedTime;
-    const moving = input.lengthSq() > 0;
+    const moving = move.lengthSq() > 0;
     player.children.forEach((child, idx) => {
         if (idx % 5 === 0 && child.isMesh) child.rotation.x += Math.sin(t * 8 + idx) * .0008;
     });
@@ -842,14 +849,12 @@ function updatePlayer(dt) {
 }
 
 function updateCamera(dt) {
-    const targetOffset = new THREE.Vector3(0, 4.4, 8.6);
-    const forward = new THREE.Vector3(Math.sin(player.rotation.y), 0, Math.cos(player.rotation.y));
-    const desired = player.position.clone()
-        .add(new THREE.Vector3(0, targetOffset.y, 0))
-        .addScaledVector(forward, -targetOffset.z);
-
+    // 固定第三人称跟随镜头：跟随角色位置，但不跟随角色转向。
+    // 这样按住 W/A/S/D 只会移动角色，不会自动切换视角。
+    const desired = player.position.clone().add(new THREE.Vector3(0, 6.2, 10.8));
     camera.position.lerp(desired, 1 - Math.pow(.001, dt));
-    const lookAt = player.position.clone().add(new THREE.Vector3(0, 2.15, 0));
+
+    const lookAt = player.position.clone().add(new THREE.Vector3(0, 2.1, -1.8));
     camera.lookAt(lookAt);
 }
 
