@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Rail in the Air - HTML Prototype</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    overflow: hidden;
+    background: #89c9ff;
+    font-family: "Microsoft YaHei", system-ui, sans-serif;
+    touch-action: none;
+    user-select: none;
+  }
+  #game { display:block; width:100vw; height:100vh; background: linear-gradient(#72c4ff 0%, #d9f4ff 48%, #ffffff 100%); }
+  #hud {
+    position: fixed; left: 18px; top: 16px; color: #fff; z-index: 5;
+    text-shadow: 0 2px 8px rgba(0,0,0,.45);
+    line-height: 1.7;
+    font-weight: 700;
+    pointer-events: none;
+  }
+  #hud .title { font-size: 22px; letter-spacing: 1px; }
+  #hud .small { font-size: 13px; opacity: .95; font-weight: 500; }
+  #centerMsg {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 8; color: white; text-align: center; pointer-events: none;
+    text-shadow: 0 3px 12px rgba(0,0,0,.55);
+  }
+  #centerMsg .box {
+    padding: 22px 28px; border-radius: 18px;
+    background: rgba(10, 20, 38, .42);
+    border: 1px solid rgba(255,255,255,.35);
+    backdrop-filter: blur(8px);
+    max-width: min(620px, 92vw);
+  }
+  #centerMsg h1 { margin: 0 0 8px; font-size: 34px; }
+  #centerMsg p { margin: 6px 0; font-size: 15px; }
+  #mapPanel {
+    position: fixed; right: 18px; top: 18px; z-index: 9; width: 290px;
+    color: #26324a; background: rgba(255,255,255,.9);
+    border-radius: 16px; padding: 16px; box-shadow: 0 16px 40px rgba(0,0,0,.22);
+    display: none;
+  }
+  #mapPanel h2 { margin: 0 0 10px; font-size: 18px; }
+  .level {
+    padding: 10px 12px; margin: 8px 0; border-radius: 12px;
+    background: #eef6ff; border: 1px solid #d7e9ff; cursor: pointer;
+  }
+  .level.locked { opacity: .45; cursor: not-allowed; filter: grayscale(1); }
+  .level.active { background: #ffe7a3; border-color: #ffd058; }
+  #mobileControls {
+    position: fixed; left: 0; right: 0; bottom: 18px; display: none; justify-content: space-between;
+    padding: 0 22px; z-index: 10; pointer-events: none;
+  }
+  .cluster { display:flex; gap:12px; pointer-events:auto; }
+  .btn {
+    width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(255,255,255,.55);
+    background: rgba(20,40,70,.38); color: white; font-weight: 900; font-size: 20px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.25); backdrop-filter: blur(6px);
+  }
+  .btn:active { transform: scale(.95); background: rgba(20,40,70,.58); }
+  @media (max-width: 900px) {
+    #mobileControls { display:flex; }
+    #hud { left: 12px; top: 10px; }
+    #hud .title { font-size: 17px; }
+    #hud .small { font-size: 12px; }
+    #mapPanel { right: 10px; left: 10px; width: auto; }
+    #centerMsg h1 { font-size: 25px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div class="title">RAIL IN THE AIR · 空中铁轨</div>
+  <div>速度：<span id="speed">0</span> km/h　关卡：<span id="levelName">云端入门</span></div>
+  <div>距离：<span id="distance">0</span>%　最佳：<span id="best">0</span>%</div>
+  <div class="small">W/↑ 加速　S/↓ 刹车　A/D 微调　C 视角　M 地图　R 重开　ESC 暂停</div>
+</div>
+
+<div id="centerMsg">
+  <div class="box">
+    <h1>别一直按着 W</h1>
+    <p>油门是资源，不是本能。入弯前提前刹车，出弯再加速。</p>
+    <p>按 W 开始驾驶</p>
+  </div>
+</div>
+
+<div id="mapPanel">
+  <h2>关卡列表 M</h2>
+  <div id="levels"></div>
+  <p style="font-size:12px;margin:10px 0 0;opacity:.7">通关前一关后解锁下一关。点击已解锁关卡可切换。</p>
+</div>
+
+<div id="mobileControls">
+  <div class="cluster">
+    <button class="btn" data-key="a">A</button>
+    <button class="btn" data-key="d">D</button>
+  </div>
+  <div class="cluster">
+    <button class="btn" data-key="s">刹</button>
+    <button class="btn" data-key="w">油</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const speedEl = document.getElementById("speed");
+  const distEl = document.getElementById("distance");
+  const levelNameEl = document.getElementById("levelName");
+  const bestEl = document.getElementById("best");
+  const centerMsg = document.getElementById("centerMsg");
+  const mapPanel = document.getElementById("mapPanel");
+  const levelsBox = document.getElementById("levels");
+
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0;
+  function resize() {
+    W = innerWidth; H = innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  addEventListener("resize", resize);
+  resize();
+
+  const keys = {};
+  addEventListener("keydown", e => {
+    const k = e.key.toLowerCase();
+    if (["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright","c","m","r","escape"].includes(k)) e.preventDefault();
+    keys[k] = true;
+    if (k === "r") restart();
+    if (k === "c") cameraMode = (cameraMode + 1) % 2;
+    if (k === "m") toggleMap();
+    if (k === "escape") paused = !paused;
+  });
+  addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+  document.querySelectorAll(".btn").forEach(btn => {
+    const k = btn.dataset.key;
+    btn.addEventListener("pointerdown", e => { e.preventDefault(); keys[k] = true; });
+    btn.addEventListener("pointerup", e => { e.preventDefault(); keys[k] = false; });
+    btn.addEventListener("pointercancel", () => keys[k] = false);
+    btn.addEventListener("pointerleave", () => keys[k] = false);
+  });
+
+  const levels = [
+    {
+      name: "云端入门", unlocked: true, len: 1800, width: 110,
+      color: "#5f6672", accent: "#ffc857",
+      segments: [
+        [0,0], [170,0], [330,60], [520,0], [720,-95], [940,-80], [1120,65], [1380,20], [1600,-120], [1800,-80]
+      ]
+    },
+    {
+      name: "窄桥急弯", unlocked: false, len: 2200, width: 86,
+      color: "#4e5969", accent: "#ff7a59",
+      segments: [
+        [0,0], [170,-30], [320,100], [470,-125], [650,-70], [790,115], [980,135],
+        [1160,-150], [1350,-120], [1560,105], [1770,85], [2000,-80], [2200,0]
+      ]
+    },
+    {
+      name: "高海拔蛇形线", unlocked: false, len: 2700, width: 76,
+      color: "#39465c", accent: "#a6f0ff",
+      segments: [
+        [0,0], [150,120], [300,-130], [470,140], [650,-150], [860,110], [1040,-130],
+        [1220,160], [1440,-150], [1680,120], [1880,-135], [2100,165], [2350,-80], [2700,20]
+      ]
+    }
+  ];
+
+  let currentLevel = 0;
+  let car, cameraMode = 0, paused = false, gameState = "ready";
+  let best = Number(localStorage.getItem("railAirBest") || 0);
+  let lastTime = performance.now();
+
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+
+  function trackPoint(level, z) {
+    const pts = level.segments;
+    if (z <= pts[0][0]) return {x: pts[0][1], angle: 0};
+    for (let i=0;i<pts.length-1;i++) {
+      const a = pts[i], b = pts[i+1];
+      if (z >= a[0] && z <= b[0]) {
+        const t = (z-a[0])/(b[0]-a[0]);
+        const smooth = t*t*(3-2*t);
+        const x = lerp(a[1], b[1], smooth);
+        const dx = (b[1]-a[1])/(b[0]-a[0]);
+        return {x, angle: Math.atan(dx)};
+      }
+    }
+    const p = pts[pts.length-1];
+    return {x:p[1], angle:0};
+  }
+
+  function restart() {
+    const lv = levels[currentLevel];
+    car = {
+      z: 0, x: trackPoint(lv,0).x, vx: 0, speed: 0,
+      tilt: 0, fallenY: 0, wobble: 0
+    };
+    gameState = "playing";
+    paused = false;
+    centerMsg.style.display = "none";
+    levelNameEl.textContent = lv.name;
+    renderLevels();
+  }
+
+  function showMessage(title, lines) {
+    centerMsg.innerHTML = `<div class="box"><h1>${title}</h1>${lines.map(s=>`<p>${s}</p>`).join("")}</div>`;
+    centerMsg.style.display = "flex";
+  }
+
+  function toggleMap() {
+    mapPanel.style.display = mapPanel.style.display === "block" ? "none" : "block";
+    renderLevels();
+  }
+
+  function renderLevels() {
+    levelsBox.innerHTML = "";
+    levels.forEach((lv, i) => {
+      const div = document.createElement("div");
+      div.className = "level" + (lv.unlocked ? "" : " locked") + (i === currentLevel ? " active" : "");
+      div.innerHTML = `<b>${i+1}. ${lv.name}</b><br><span style="font-size:12px">${lv.unlocked ? "已解锁" : "未解锁"} · 轨道宽度 ${lv.width}</span>`;
+      div.onclick = () => {
+        if (!lv.unlocked) return;
+        currentLevel = i;
+        restart();
+        mapPanel.style.display = "none";
+      };
+      levelsBox.appendChild(div);
+    });
+  }
+  renderLevels();
+
+  function project(worldX, worldZ, worldY = 0) {
+    const camZ = cameraMode ? car.z - 70 : car.z - 170;
+    const camY = cameraMode ? 74 : 150;
+    const lookAhead = cameraMode ? 190 : 260;
+    const center = trackPoint(levels[currentLevel], car.z + lookAhead).x;
+    const relZ = worldZ - camZ;
+    const relX = worldX - center * .35;
+    const depth = Math.max(18, relZ);
+    const scale = cameraMode ? 720 / depth : 610 / depth;
+    return {
+      x: W/2 + relX * scale,
+      y: H*0.62 + (camY - worldY) * scale - relZ * 0.018,
+      s: scale,
+      depth
+    };
+  }
+
+  function drawSky() {
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, "#6ec4ff");
+    g.addColorStop(.45, "#cdefff");
+    g.addColorStop(1, "#ffffff");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    // distant clouds
+    for(let i=0;i<12;i++){
+      const x = (i*260 - (car.z*.08)%260) - 90;
+      const y = 90 + (i%4)*70;
+      ctx.globalAlpha = .42;
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 80, 20, 0, 0, Math.PI*2);
+      ctx.ellipse(x+55, y+7, 65, 18, 0, 0, Math.PI*2);
+      ctx.ellipse(x-45, y+8, 55, 16, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawTrack() {
+    const lv = levels[currentLevel];
+    const step = 24;
+    const start = Math.max(0, car.z - 90);
+    const end = Math.min(lv.len + 260, car.z + 950);
+
+    // support shadows / abyss guide
+    ctx.strokeStyle = "rgba(0,0,0,.09)";
+    ctx.lineWidth = 2;
+    for (let z = Math.ceil(start/120)*120; z < end; z += 120) {
+      const p = trackPoint(lv,z);
+      const a = project(p.x, z, -160);
+      const b = project(p.x, z, 0);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    }
+
+    const left = [], right = [], center = [];
+    for (let z = start; z <= end; z += step) {
+      const p = trackPoint(lv,z);
+      const w = lv.width * (1 + Math.sin(z*.021)*.035);
+      left.push(project(p.x - w/2, z, 0));
+      right.push(project(p.x + w/2, z, 0));
+      center.push(project(p.x, z, 2));
+    }
+
+    // track body
+    ctx.beginPath();
+    left.forEach((p,i)=> i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+    right.slice().reverse().forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.closePath();
+    const tg = ctx.createLinearGradient(0,H*.2,0,H);
+    tg.addColorStop(0, "#798391");
+    tg.addColorStop(1, lv.color);
+    ctx.fillStyle = tg;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.35)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // edges
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = lv.accent;
+    ctx.beginPath(); left.forEach((p,i)=> i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke();
+    ctx.beginPath(); right.forEach((p,i)=> i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke();
+
+    // sleepers
+    for (let z = Math.ceil(start/48)*48; z < end; z += 48) {
+      const p = trackPoint(lv,z);
+      const w = lv.width * .86;
+      const a = project(p.x-w/2,z,4), b = project(p.x+w/2,z,4);
+      ctx.strokeStyle = "rgba(35,28,25,.42)";
+      ctx.lineWidth = Math.max(1, a.s*4);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    }
+
+    // finish gate
+    if (lv.len - car.z < 900) {
+      const z = lv.len;
+      const p = trackPoint(lv,z);
+      const a = project(p.x-lv.width*.7,z,0), b = project(p.x+lv.width*.7,z,0);
+      const topA = project(p.x-lv.width*.7,z,120), topB = project(p.x+lv.width*.7,z,120);
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y); ctx.lineTo(topA.x,topA.y); ctx.lineTo(topB.x,topB.y); ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 22px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("FINISH", (topA.x+topB.x)/2, (topA.y+topB.y)/2 - 12);
+    }
+  }
+
+  function drawCar() {
+    const p = project(car.x, car.z + (cameraMode ? 50 : 40), gameState === "fallen" ? -car.fallenY : 16);
+    const size = cameraMode ? Math.min(100, p.s*14) : Math.min(86, p.s*13);
+    const wob = car.tilt * 16;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(car.tilt * .22);
+    ctx.shadowColor = "rgba(0,0,0,.35)";
+    ctx.shadowBlur = 18;
+
+    // wheels
+    ctx.fillStyle = "#151821";
+    ctx.fillRect(-size*.48, size*.14, size*.22, size*.22);
+    ctx.fillRect(size*.26, size*.14, size*.22, size*.22);
+
+    // body
+    const body = ctx.createLinearGradient(0,-size*.45,0,size*.35);
+    body.addColorStop(0, "#ffef75");
+    body.addColorStop(1, "#f1872e");
+    ctx.fillStyle = body;
+    roundRect(ctx, -size*.55, -size*.35 + wob*.04, size*1.1, size*.55, size*.12);
+    ctx.fill();
+
+    // cockpit
+    ctx.fillStyle = "#27324a";
+    roundRect(ctx, -size*.27, -size*.55, size*.54, size*.32, size*.08);
+    ctx.fill();
+    ctx.fillStyle = "rgba(180,235,255,.75)";
+    roundRect(ctx, -size*.18, -size*.5, size*.36, size*.18, size*.05);
+    ctx.fill();
+
+    // headlights
+    ctx.fillStyle = "#fff8be";
+    ctx.beginPath(); ctx.arc(-size*.32, -size*.12, size*.055,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(size*.32, -size*.12, size*.055,0,Math.PI*2); ctx.fill();
+
+    ctx.restore();
+  }
+
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  }
+
+  function update(dt) {
+    if (paused) return;
+    const lv = levels[currentLevel];
+
+    if (gameState === "ready") {
+      if (keys.w || keys.arrowup) restart();
+      return;
+    }
+
+    if (gameState === "fallen") {
+      car.fallenY += 520 * dt;
+      car.z += car.speed * dt * .3;
+      car.speed *= .985;
+      if (car.fallenY > 520) {
+        showMessage("坠落了", ["速度太快或入弯太晚，车被甩出轨道。", "按 R 立即重来，记住这段轨道。"]);
+      }
+      return;
+    }
+
+    const throttle = keys.w || keys.arrowup;
+    const brake = keys.s || keys.arrowdown;
+    const left = keys.a || keys.arrowleft;
+    const right = keys.d || keys.arrowright;
+
+    if (throttle) car.speed += 62 * dt;
+    else car.speed -= 14 * dt;
+    if (brake) car.speed -= 92 * dt;
+    car.speed = clamp(car.speed, 0, 230);
+
+    const future = trackPoint(lv, car.z + 42);
+    const here = trackPoint(lv, car.z);
+    const curveForce = (future.x - here.x) * .012 * (car.speed / 110) ** 2;
+
+    if (left) car.vx -= 120 * dt;
+    if (right) car.vx += 120 * dt;
+
+    // road tries to pull car along its direction, but too much speed creates outward drift
+    const desiredX = here.x;
+    car.vx += (desiredX - car.x) * .42 * dt;
+    car.vx += curveForce * dt * 70;
+    car.vx *= Math.pow(.82, dt * 8);
+
+    // braking stabilizes the bottom
+    if (brake) car.vx *= Math.pow(.45, dt);
+
+    car.x += car.vx * dt;
+    car.z += car.speed * dt;
+
+    const road = trackPoint(lv, car.z);
+    const roadWidth = lv.width * (1 + Math.sin(car.z*.021)*.035);
+    const offset = car.x - road.x;
+    const danger = Math.abs(offset) / (roadWidth/2);
+    car.tilt = lerp(car.tilt, clamp(offset / (roadWidth/2), -1.2, 1.2), .12);
+
+    // Overspeed on sharp bends widens allowed error less, creating skill pressure
+    const bend = Math.abs(trackPoint(lv, car.z+80).x - trackPoint(lv, car.z-20).x) / 100;
+    const fallLimit = 1.05 - clamp((car.speed - 130) / 220, 0, .28) - clamp(bend*.09,0,.18);
+    if (danger > fallLimit) {
+      gameState = "fallen";
+      car.fallenY = 0;
+      car.vx += Math.sign(offset) * 90;
+    }
+
+    const progress = clamp(Math.floor((car.z / lv.len) * 100), 0, 100);
+    if (progress > best) {
+      best = progress;
+      localStorage.setItem("railAirBest", best);
+    }
+
+    if (car.z >= lv.len) {
+      if (currentLevel < levels.length - 1) levels[currentLevel + 1].unlocked = true;
+      showMessage("通关！", ["你稳稳开到了终点。下一关已解锁。", "按 R 重玩，或按 M 选择关卡。"]);
+      gameState = "ready";
+      car.speed = 0;
+      renderLevels();
+    }
+  }
+
+  function drawSpeedWarning() {
+    const lv = levels[currentLevel];
+    const bend = Math.abs(trackPoint(lv, car.z+120).x - trackPoint(lv, car.z+20).x);
+    if (bend > 90 && car.speed > 115 && gameState === "playing") {
+      ctx.save();
+      ctx.fillStyle = "rgba(255,70,70,.18)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 24px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "rgba(0,0,0,.45)";
+      ctx.shadowBlur = 10;
+      ctx.fillText("前方急弯：提前刹车！", W/2, H*.24);
+      ctx.restore();
+    }
+  }
+
+  function render() {
+    drawSky();
+    drawTrack();
+    drawCar();
+    drawSpeedWarning();
+
+    if (paused) {
+      ctx.fillStyle = "rgba(0,0,0,.22)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 36px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("已暂停", W/2, H/2);
+    }
+
+    speedEl.textContent = Math.round((car?.speed || 0) * 1.2);
+    distEl.textContent = car ? clamp(Math.floor(car.z / levels[currentLevel].len * 100),0,100) : 0;
+    bestEl.textContent = best;
+  }
+
+  function loop(now) {
+    const dt = Math.min(.035, (now - lastTime) / 1000);
+    lastTime = now;
+    if (!car) restart(), gameState = "ready", centerMsg.style.display = "flex";
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
