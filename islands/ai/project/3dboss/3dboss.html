@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>二次元第三人称 Boss 战 3D 网页游戏原型</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,6 +13,7 @@
         background: #8fd8ff;
         font-family: "Microsoft YaHei", system-ui, sans-serif;
         user-select: none;
+        touch-action: none;
     }
     #game { width: 100%; height: 100%; display: block; }
 
@@ -207,6 +208,41 @@
     }
 
     .hidden { display: none; }
+    #mobileControls { display: none; position: fixed; inset: 0; z-index: 12; pointer-events: none; }
+    .mobile-dpad { position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); gap: 7px; pointer-events: auto; }
+    .mobile-actions { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 58px); gap: 7px; align-items: end; pointer-events: auto; }
+    .mobile-control {
+        height: 52px; border: 2px solid rgba(255,255,255,.68); border-radius: 17px;
+        background: rgba(20,40,78,.68); color: #fff; font: 800 13px/1 "Microsoft YaHei", sans-serif;
+        box-shadow: 0 6px 18px rgba(0,0,0,.25); backdrop-filter: blur(6px); touch-action: none;
+    }
+    .mobile-control.active { background: rgba(80,170,255,.9); transform: scale(.94); }
+    .mobile-control.burst { height: 70px; border-radius: 50%; background: rgba(225,145,35,.82); }
+    .mobile-control.skill { height: 62px; border-radius: 50%; }
+    .d-up { grid-column: 2; }.d-left { grid-column: 1; grid-row: 2; }.d-down { grid-column: 2; grid-row: 2; }.d-right { grid-column: 3; grid-row: 2; }
+    @media (hover: none), (pointer: coarse), (max-width: 900px) {
+        #mobileControls { display: block; }
+        .top-left { top: max(8px, env(safe-area-inset-top)); left: max(8px, env(safe-area-inset-left)); padding: 7px 9px; font-size: 10px; line-height: 1.45; }
+        .top-left b { font-size: 12px; }
+        .boss-panel { top: max(10px, env(safe-area-inset-top)); width: min(56vw, 430px); }
+        .boss-title { font-size: 13px; margin-bottom: 4px; }
+        .bar { height: 11px; }
+        .player-panel { left: max(8px, env(safe-area-inset-left)); bottom: 132px; width: 190px; padding: 8px 10px; font-size: 10px; }
+        .player-panel .name-line { margin-bottom: 4px; }
+        .energy-wrap { margin-top: 5px; }
+        .skill-hud, .center-tip { display: none; }
+        .card { max-height: 90vh; overflow: auto; padding: 22px; }
+        .card h1 { font-size: clamp(28px, 8vw, 40px); }
+        .card p { font-size: 14px; line-height: 1.65; }
+    }
+    @media (max-width: 560px) {
+        .mobile-dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 44px); gap: 5px; }
+        .mobile-control { height: 44px; }
+        .mobile-actions { grid-template-columns: repeat(3, 50px); gap: 5px; }
+        .mobile-control.skill { height: 54px; }
+        .mobile-control.burst { height: 62px; }
+        .top-left { display: none; }
+    }
 </style>
 </head>
 <body>
@@ -248,6 +284,22 @@
     <div class="center-tip" id="centerTip">靠近 Boss 后攻击，注意躲避红色预警圈。</div>
 </div>
 
+<div id="mobileControls" aria-label="手机战斗控制">
+    <div class="mobile-dpad">
+        <button class="mobile-control d-up" data-hold="w">▲</button>
+        <button class="mobile-control d-left" data-hold="a">◀</button>
+        <button class="mobile-control d-down" data-hold="s">▼</button>
+        <button class="mobile-control d-right" data-hold="d">▶</button>
+    </div>
+    <div class="mobile-actions">
+        <button class="mobile-control" data-hold="shift">冲刺</button>
+        <button class="mobile-control" data-action="jump">跳跃</button>
+        <button class="mobile-control" data-action="normal">普攻</button>
+        <button class="mobile-control skill" data-action="skill">技能</button>
+        <button class="mobile-control burst" data-action="burst">爆发</button>
+    </div>
+</div>
+
 <div class="start-screen" id="startScreen">
     <div class="card">
         <h1>幻想旷野 Boss 战</h1>
@@ -280,7 +332,7 @@ import * as THREE from "three";
 
 const canvas = document.getElementById("game");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, matchMedia("(pointer: coarse)").matches ? 1.35 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -337,6 +389,36 @@ window.addEventListener("keyup", e => {
 
 window.addEventListener("mousedown", () => tryAttack("normal"));
 
+document.querySelectorAll("[data-hold]").forEach(btn => {
+    const key = btn.dataset.hold;
+    const press = e => { e.preventDefault(); keys[key] = true; btn.classList.add("active"); };
+    const release = e => { e.preventDefault(); keys[key] = false; btn.classList.remove("active"); };
+    btn.addEventListener("pointerdown", press);
+    btn.addEventListener("pointerup", release);
+    btn.addEventListener("pointercancel", release);
+    btn.addEventListener("pointerleave", release);
+});
+document.querySelectorAll("[data-action]").forEach(btn => {
+    btn.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        const action = btn.dataset.action;
+        btn.classList.add("active");
+        if (action === "jump") {
+            if (playerState.grounded) keys[" "] = true;
+        } else {
+            tryAttack(action);
+        }
+    });
+    const release = e => {
+        e.preventDefault();
+        if (btn.dataset.action === "jump") keys[" "] = false;
+        btn.classList.remove("active");
+    };
+    btn.addEventListener("pointerup", release);
+    btn.addEventListener("pointercancel", release);
+    btn.addEventListener("pointerleave", release);
+});
+
 ui.startBtn.onclick = () => {
     gameStarted = true;
     ui.startScreen.classList.add("hidden");
@@ -374,7 +456,7 @@ scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffffff, 3.2);
 sun.position.set(-28, 45, 22);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(matchMedia("(pointer: coarse)").matches ? 1024 : 2048, matchMedia("(pointer: coarse)").matches ? 1024 : 2048);
 sun.shadow.camera.left = -70;
 sun.shadow.camera.right = 70;
 sun.shadow.camera.top = 70;
