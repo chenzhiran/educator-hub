@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>二次元第三人称 Boss 战 3D 网页游戏原型</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #8fd8ff;
+        font-family: "Microsoft YaHei", system-ui, sans-serif;
+        user-select: none;
+    }
+    #game { width: 100%; height: 100%; display: block; }
+
+    .ui {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(0,0,0,.45);
+    }
+
+    .top-left {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(12, 25, 45, .38);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,.25);
+        line-height: 1.7;
+        font-size: 14px;
+    }
+
+    .player-panel {
+        position: absolute;
+        left: 30px;
+        bottom: 36px;
+        width: 330px;
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(10, 18, 35, .45);
+        border: 1px solid rgba(255,255,255,.25);
+        backdrop-filter: blur(10px);
+    }
+
+    .name-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .bar {
+        width: 100%;
+        height: 18px;
+        border-radius: 20px;
+        background: rgba(0,0,0,.35);
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,.3);
+    }
+
+    .bar-fill {
+        height: 100%;
+        width: 100%;
+        border-radius: 20px;
+        transition: width .18s ease;
+    }
+
+    #playerHpFill { background: linear-gradient(90deg, #7dffad, #14c96e); }
+    #playerEnergyFill { background: linear-gradient(90deg, #7edcff, #5f72ff); }
+
+    .energy-wrap { margin-top: 10px; }
+
+    .boss-panel {
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(620px, 72vw);
+        text-align: center;
+    }
+
+    .boss-title {
+        font-size: 21px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        margin-bottom: 9px;
+        color: #ffe9b8;
+    }
+
+    #bossHpFill { background: linear-gradient(90deg, #ff785d, #ff1f63); }
+
+    .skill-hud {
+        position: absolute;
+        right: 32px;
+        bottom: 40px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-end;
+    }
+
+    .skill {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,.65);
+        background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.85), rgba(90,154,255,.75) 35%, rgba(20,44,95,.75));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 8px 28px rgba(0,0,0,.25);
+    }
+
+    .skill.big {
+        width: 92px;
+        height: 92px;
+        background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.92), rgba(255,205,84,.9) 35%, rgba(214,85,29,.85));
+    }
+
+    .center-tip {
+        position: absolute;
+        left: 50%;
+        bottom: 170px;
+        transform: translateX(-50%);
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: rgba(0,0,0,.35);
+        border: 1px solid rgba(255,255,255,.25);
+        font-size: 14px;
+        opacity: .92;
+    }
+
+    .damage-text {
+        position: fixed;
+        color: #fff0a8;
+        font-size: 28px;
+        font-weight: 900;
+        text-shadow: 0 2px 0 #9a230b, 0 0 16px rgba(255, 110, 46, .9);
+        pointer-events: none;
+        animation: floatDamage .75s ease-out forwards;
+    }
+
+    @keyframes floatDamage {
+        from { transform: translate(-50%, -50%) scale(.8); opacity: 1; }
+        to   { transform: translate(-50%, -140%) scale(1.35); opacity: 0; }
+    }
+
+    .start-screen, .end-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+            radial-gradient(circle at 50% 36%, rgba(255,255,255,.2), transparent 30%),
+            linear-gradient(180deg, rgba(70, 160, 255, .65), rgba(16, 32, 67, .9));
+        color: #fff;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .card {
+        max-width: 720px;
+        padding: 34px 38px;
+        border-radius: 28px;
+        background: rgba(10, 20, 45, .52);
+        border: 1px solid rgba(255,255,255,.28);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 26px 80px rgba(0,0,0,.34);
+    }
+
+    .card h1 {
+        font-size: 42px;
+        margin-bottom: 12px;
+        letter-spacing: 2px;
+    }
+
+    .card p {
+        font-size: 16px;
+        line-height: 1.9;
+        opacity: .95;
+        margin-bottom: 22px;
+    }
+
+    .btn {
+        display: inline-block;
+        pointer-events: auto;
+        cursor: pointer;
+        padding: 13px 28px;
+        border-radius: 999px;
+        border: 0;
+        color: #fff;
+        font-weight: 900;
+        font-size: 17px;
+        background: linear-gradient(135deg, #5cc8ff, #665dff);
+        box-shadow: 0 10px 24px rgba(46, 95, 255, .35);
+    }
+
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div class="ui">
+    <div class="top-left">
+        <b>操作说明</b><br>
+        WASD：移动　Shift：冲刺<br>
+        鼠标左键 / J：普通攻击<br>
+        E：元素技能　Q：爆发技能<br>
+        空格：跳跃　R：重新开始
+    </div>
+
+    <div class="boss-panel">
+        <div class="boss-title">风蚀遗迹 · 巨像守卫</div>
+        <div class="bar"><div id="bossHpFill" class="bar-fill"></div></div>
+    </div>
+
+    <div class="player-panel">
+        <div class="name-line">
+            <span>星羽旅人</span><span id="playerHpText">HP 100 / 100</span>
+        </div>
+        <div class="bar"><div id="playerHpFill" class="bar-fill"></div></div>
+        <div class="energy-wrap">
+            <div class="name-line">
+                <span>元素能量</span><span id="energyText">0 / 100</span>
+            </div>
+            <div class="bar"><div id="playerEnergyFill" class="bar-fill"></div></div>
+        </div>
+    </div>
+
+    <div class="skill-hud">
+        <div class="skill">J<br>普攻</div>
+        <div class="skill">E<br>技能</div>
+        <div class="skill big">Q<br>爆发</div>
+    </div>
+
+    <div class="center-tip" id="centerTip">靠近 Boss 后攻击，注意躲避红色预警圈。</div>
+</div>
+
+<div class="start-screen" id="startScreen">
+    <div class="card">
+        <h1>幻想旷野 Boss 战</h1>
+        <p>
+            一个可直接运行的网页 3D 游戏原型：第三人称跟随镜头、二次元角色、开放场景、Boss 战、普攻、元素技能、爆发技能、冲刺与跳跃。
+            <br>本原型为原创风格，不包含任何商业游戏素材。
+        </p>
+        <button class="btn" id="startBtn">开始冒险</button>
+    </div>
+</div>
+
+<div class="end-screen hidden" id="endScreen">
+    <div class="card">
+        <h1 id="endTitle">战斗结束</h1>
+        <p id="endDesc">按 R 或点击按钮重新开始。</p>
+        <button class="btn" id="restartBtn">重新开始</button>
+    </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+
+const canvas = document.getElementById("game");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x94d9ff);
+scene.fog = new THREE.Fog(0x94d9ff, 35, 155);
+
+const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(0, 7, 12);
+
+const clock = new THREE.Clock();
+
+const ui = {
+    bossHpFill: document.getElementById("bossHpFill"),
+    playerHpFill: document.getElementById("playerHpFill"),
+    playerHpText: document.getElementById("playerHpText"),
+    energyFill: document.getElementById("playerEnergyFill"),
+    energyText: document.getElementById("energyText"),
+    centerTip: document.getElementById("centerTip"),
+    startScreen: document.getElementById("startScreen"),
+    endScreen: document.getElementById("endScreen"),
+    endTitle: document.getElementById("endTitle"),
+    endDesc: document.getElementById("endDesc"),
+    startBtn: document.getElementById("startBtn"),
+    restartBtn: document.getElementById("restartBtn")
+};
+
+let gameStarted = false;
+let gameOver = false;
+
+const keys = {};
+window.addEventListener("keydown", e => {
+    const k = e.key.toLowerCase();
+
+    // 防止浏览器默认行为干扰游戏操作，尤其是空格、方向键等。
+    if (["w", "a", "s", "d", " ", "shift", "j", "e", "q", "r", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
+        e.preventDefault();
+    }
+
+    keys[k] = true;
+    if (k === "r") restartGame();
+}, { passive: false });
+
+window.addEventListener("keyup", e => {
+    const k = e.key.toLowerCase();
+    if (["w", "a", "s", "d", " ", "shift", "j", "e", "q", "r", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
+        e.preventDefault();
+    }
+    keys[k] = false;
+}, { passive: false });
+
+window.addEventListener("mousedown", () => tryAttack("normal"));
+
+ui.startBtn.onclick = () => {
+    gameStarted = true;
+    ui.startScreen.classList.add("hidden");
+};
+ui.restartBtn.onclick = restartGame;
+
+// ---------- Materials ----------
+const matGrass = new THREE.MeshStandardMaterial({ color: 0x7ad977, roughness: 0.95 });
+const matGrass2 = new THREE.MeshStandardMaterial({ color: 0xa0e889, roughness: 0.9 });
+const matRock = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: 0.9 });
+const matWater = new THREE.MeshPhysicalMaterial({
+    color: 0x5acbff,
+    transmission: 0.25,
+    opacity: 0.72,
+    transparent: true,
+    roughness: 0.08,
+    metalness: 0.0
+});
+const matGold = new THREE.MeshStandardMaterial({ color: 0xffd375, roughness: .4, metalness: .15 });
+const matWhite = new THREE.MeshStandardMaterial({ color: 0xf6f8ff, roughness: .45 });
+const matBlue = new THREE.MeshStandardMaterial({ color: 0x4aa8ff, roughness: .4 });
+const matSkin = new THREE.MeshStandardMaterial({ color: 0xffdec8, roughness: .6 });
+const matHair = new THREE.MeshStandardMaterial({ color: 0x26203a, roughness: .6 });
+const matBoss = new THREE.MeshStandardMaterial({ color: 0x4a4657, roughness: .78, metalness: .08 });
+const matBossCore = new THREE.MeshStandardMaterial({ color: 0xff5d2c, emissive: 0xff2600, emissiveIntensity: 1.4 });
+const matWarning = new THREE.MeshBasicMaterial({ color: 0xff2c2c, transparent: true, opacity: 0.28, side: THREE.DoubleSide });
+const matSlash = new THREE.MeshBasicMaterial({ color: 0xbfffff, transparent: true, opacity: 0.85, side: THREE.DoubleSide });
+const matSkill = new THREE.MeshBasicMaterial({ color: 0x66e3ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
+const matBurst = new THREE.MeshBasicMaterial({ color: 0xffe385, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
+
+// ---------- Lights ----------
+const hemi = new THREE.HemisphereLight(0xeaf7ff, 0x7d9970, 2.2);
+scene.add(hemi);
+
+const sun = new THREE.DirectionalLight(0xffffff, 3.2);
+sun.position.set(-28, 45, 22);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -70;
+sun.shadow.camera.right = 70;
+sun.shadow.camera.top = 70;
+sun.shadow.camera.bottom = -70;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 120;
+scene.add(sun);
+
+// ---------- Helpers ----------
+function add(mesh, parent = scene) {
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    parent.add(mesh);
+    return mesh;
+}
+
+function makeCylinder(radiusTop, radiusBottom, height, colorMat, segments = 24) {
+    const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, segments);
+    return new THREE.Mesh(geo, colorMat);
+}
+
+function makeSphere(r, mat, sx=1, sy=1, sz=1) {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 20), mat);
+    mesh.scale.set(sx, sy, sz);
+    return mesh;
+}
+
+function makeBox(x, y, z, mat) {
+    return new THREE.Mesh(new THREE.BoxGeometry(x, y, z), mat);
+}
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+
+// ---------- World ----------
+const ground = new THREE.Mesh(new THREE.CircleGeometry(80, 128), matGrass);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const water = new THREE.Mesh(new THREE.RingGeometry(64, 95, 160), matWater);
+water.rotation.x = -Math.PI / 2;
+water.position.y = -0.04;
+scene.add(water);
+
+const arenaRing = new THREE.Mesh(new THREE.RingGeometry(18, 18.25, 96), new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .32}));
+arenaRing.rotation.x = -Math.PI / 2;
+arenaRing.position.y = .03;
+scene.add(arenaRing);
+
+for (let i = 0; i < 42; i++) {
+    const angle = rand(0, Math.PI * 2);
+    const r = rand(20, 72);
+    const x = Math.cos(angle) * r;
+    const z = Math.sin(angle) * r;
+
+    if (Math.abs(x) < 14 && Math.abs(z) < 14) continue;
+
+    const tree = new THREE.Group();
+    const trunk = add(makeCylinder(.25, .34, rand(1.8, 2.8), new THREE.MeshStandardMaterial({color: 0x795437, roughness: .8}), 10), tree);
+    trunk.position.y = trunk.geometry.parameters.height / 2;
+    const crown = add(makeSphere(rand(1.1, 1.8), matGrass2, 1, rand(1.15, 1.55), 1), tree);
+    crown.position.y = trunk.geometry.parameters.height + 1.1;
+    tree.position.set(x, 0, z);
+    tree.rotation.y = rand(0, Math.PI);
+    scene.add(tree);
+}
+
+for (let i = 0; i < 24; i++) {
+    const angle = rand(0, Math.PI * 2);
+    const r = rand(24, 75);
+    const rock = add(makeSphere(rand(.55, 1.4), matRock, rand(1.0,1.8), rand(.45,.9), rand(.8,1.5)));
+    rock.position.set(Math.cos(angle) * r, rock.scale.y * .28, Math.sin(angle) * r);
+    rock.rotation.set(rand(0,.4), rand(0, Math.PI), rand(0,.4));
+}
+
+// floating fantasy crystals
+for (let i = 0; i < 9; i++) {
+    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(rand(.35,.65), 0), new THREE.MeshStandardMaterial({
+        color: 0x6ee6ff,
+        emissive: 0x1d8fff,
+        emissiveIntensity: .45,
+        roughness: .2,
+        metalness: .05
+    }));
+    const angle = i / 9 * Math.PI * 2;
+    const r = rand(27, 45);
+    crystal.position.set(Math.cos(angle)*r, rand(2.6, 5.8), Math.sin(angle)*r);
+    crystal.castShadow = true;
+    scene.add(crystal);
+}
+
+// ---------- Player ----------
+const player = new THREE.Group();
+scene.add(player);
+
+const playerState = {
+    hp: 100,
+    maxHp: 100,
+    energy: 0,
+    maxEnergy: 100,
+    speed: 8.2,
+    sprintSpeed: 13,
+    velocityY: 0,
+    grounded: true,
+    attackCooldown: 0,
+    skillCooldown: 0,
+    burstCooldown: 0,
+    invincible: 0,
+    facing: 0
+};
+
+function buildAnimePlayer() {
+    player.clear();
+
+    // lower body
+    const skirt = add(makeCylinder(.72, .95, .75, matBlue, 6), player);
+    skirt.position.y = 1.15;
+
+    const body = add(makeCylinder(.55, .72, 1.15, matWhite, 10), player);
+    body.position.y = 1.85;
+
+    const chestCape = add(makeBox(1.35, .13, .88, matBlue), player);
+    chestCape.position.set(0, 2.08, -.12);
+    chestCape.rotation.x = .18;
+
+    const head = add(makeSphere(.48, matSkin, 1, 1.08, 1), player);
+    head.position.y = 2.75;
+
+    const hairBack = add(makeSphere(.53, matHair, 1.05, 1.05, .92), player);
+    hairBack.position.set(0, 2.82, -.08);
+
+    const bang1 = add(makeCylinder(.05, .12, .55, matHair, 6), player);
+    bang1.position.set(-.18, 2.72, .42);
+    bang1.rotation.x = .5;
+
+    const bang2 = add(makeCylinder(.05, .13, .55, matHair, 6), player);
+    bang2.position.set(.18, 2.72, .42);
+    bang2.rotation.x = .5;
+
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(.045, 12, 8), new THREE.MeshBasicMaterial({color: 0x233466}));
+    eyeL.position.set(-.17, 2.78, .455);
+    player.add(eyeL);
+    const eyeR = eyeL.clone();
+    eyeR.position.x = .17;
+    player.add(eyeR);
+
+    const armL = add(makeCylinder(.11, .13, .95, matSkin, 10), player);
+    armL.position.set(-.72, 1.9, .03);
+    armL.rotation.z = -.25;
+    const armR = add(makeCylinder(.11, .13, .95, matSkin, 10), player);
+    armR.position.set(.72, 1.9, .03);
+    armR.rotation.z = .25;
+
+    const legL = add(makeCylinder(.12, .14, .95, new THREE.MeshStandardMaterial({color:0x2e2a45, roughness:.7}), 10), player);
+    legL.position.set(-.28, .55, 0);
+    const legR = legL.clone();
+    legR.position.x = .28;
+    player.add(legR);
+
+    const sword = add(makeBox(.12, 1.45, .08, matGold), player);
+    sword.position.set(.95, 1.75, .18);
+    sword.rotation.z = -.45;
+    const blade = add(makeBox(.08, 1.15, .04, new THREE.MeshStandardMaterial({color:0xdff8ff, metalness:.35, roughness:.2})), player);
+    blade.position.set(1.12, 2.05, .2);
+    blade.rotation.z = -.45;
+
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(.72, .025, 8, 48), new THREE.MeshBasicMaterial({color:0xcfffff, transparent:true, opacity:.65}));
+    halo.position.y = 3.32;
+    halo.rotation.x = Math.PI / 2;
+    player.add(halo);
+}
+buildAnimePlayer();
+player.position.set(0, 0, 13);
+
+// ---------- Boss ----------
+const boss = new THREE.Group();
+scene.add(boss);
+boss.position.set(0, 0, -12);
+
+const bossState = {
+    hp: 650,
+    maxHp: 650,
+    attackTimer: 2.2,
+    phase: 1,
+    enraged: false,
+    hitFlash: 0
+};
+
+function buildBoss() {
+    boss.clear();
+    const base = add(makeCylinder(1.75, 2.25, 1.15, matBoss, 8), boss);
+    base.position.y = .58;
+
+    const torso = add(makeCylinder(1.25, 1.65, 2.4, matBoss, 8), boss);
+    torso.position.y = 2.25;
+
+    const head = add(makeSphere(.92, matBoss, 1.08, .85, .92), boss);
+    head.position.y = 3.9;
+
+    const core = add(makeSphere(.32, matBossCore), boss);
+    core.position.set(0, 2.55, 1.15);
+
+    const eye = add(makeSphere(.18, matBossCore, 1.5, .55, .4), boss);
+    eye.position.set(0, 3.95, .82);
+
+    const armL = add(makeCylinder(.38, .48, 2.3, matBoss, 8), boss);
+    armL.position.set(-1.8, 2.35, 0);
+    armL.rotation.z = -.25;
+
+    const armR = add(makeCylinder(.38, .48, 2.3, matBoss, 8), boss);
+    armR.position.set(1.8, 2.35, 0);
+    armR.rotation.z = .25;
+
+    const fistL = add(makeSphere(.58, matBoss, 1.2, .8, 1.1), boss);
+    fistL.position.set(-2.15, 1.15, .35);
+
+    const fistR = add(makeSphere(.58, matBoss, 1.2, .8, 1.1), boss);
+    fistR.position.set(2.15, 1.15, .35);
+
+    for (let i = 0; i < 8; i++) {
+        const shard = add(new THREE.Mesh(new THREE.ConeGeometry(.22, .75, 4), matBoss), boss);
+        const a = i / 8 * Math.PI * 2;
+        shard.position.set(Math.cos(a)*1.1, 4.55, Math.sin(a)*.65);
+        shard.rotation.set(rand(-.4,.4), a, rand(-.4,.4));
+    }
+}
+buildBoss();
+
+// ---------- Effects ----------
+const effects = [];
+
+function spawnSlash() {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.6, .035, 8, 80, Math.PI * 1.28), matSlash);
+    ring.position.copy(player.position);
+    ring.position.y += 1.15;
+    ring.rotation.set(Math.PI / 2, 0, player.rotation.y + Math.PI / 2);
+    scene.add(ring);
+    effects.push({ mesh: ring, life: .22, max: .22, type: "fadeScale" });
+}
+
+function spawnSkillWave() {
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.7, .9, 80), matSkill);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.copy(player.position);
+    ring.position.y = .08;
+    scene.add(ring);
+    effects.push({ mesh: ring, life: .55, max: .55, type: "expand", speed: 22 });
+}
+
+function spawnBurst() {
+    const ring = new THREE.Mesh(new THREE.RingGeometry(1.0, 1.45, 96), matBurst);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.copy(player.position);
+    ring.position.y = .1;
+    scene.add(ring);
+    effects.push({ mesh: ring, life: .95, max: .95, type: "expand", speed: 32 });
+    for (let i = 0; i < 20; i++) {
+        const p = new THREE.Mesh(new THREE.SphereGeometry(.11, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffee9e, transparent: true, opacity: .9 }));
+        p.position.copy(player.position);
+        p.position.y = rand(.4, 1.4);
+        scene.add(p);
+        effects.push({ mesh: p, life: rand(.45,.8), max: .8, type: "particle", dir: new THREE.Vector3(rand(-1,1), rand(.5,1.8), rand(-1,1)).normalize().multiplyScalar(rand(5,10)) });
+    }
+}
+
+function showDamage(amount, worldPos) {
+    const pos = worldPos.clone();
+    pos.y += 3.2;
+    pos.project(camera);
+    const x = (pos.x * .5 + .5) * window.innerWidth;
+    const y = (-pos.y * .5 + .5) * window.innerHeight;
+    const div = document.createElement("div");
+    div.className = "damage-text";
+    div.textContent = amount;
+    div.style.left = `${x}px`;
+    div.style.top = `${y}px`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 760);
+}
+
+function damageBoss(amount) {
+    if (gameOver) return;
+    bossState.hp = clamp(bossState.hp - amount, 0, bossState.maxHp);
+    bossState.hitFlash = .12;
+    playerState.energy = clamp(playerState.energy + Math.ceil(amount * .28), 0, playerState.maxEnergy);
+    showDamage(amount, boss.position);
+
+    if (bossState.hp <= bossState.maxHp * .45 && !bossState.enraged) {
+        bossState.enraged = true;
+        bossState.phase = 2;
+        ui.centerTip.textContent = "Boss 进入狂暴阶段！攻击频率提高。";
+    }
+
+    if (bossState.hp <= 0) endGame(true);
+}
+
+function damagePlayer(amount) {
+    if (gameOver || playerState.invincible > 0) return;
+    playerState.hp = clamp(playerState.hp - amount, 0, playerState.maxHp);
+    playerState.invincible = .65;
+    ui.centerTip.textContent = `受到 ${amount} 点伤害！冲刺可短暂无敌。`;
+    if (playerState.hp <= 0) endGame(false);
+}
+
+function tryAttack(type) {
+    if (!gameStarted || gameOver) return;
+    const dist = player.position.distanceTo(boss.position);
+
+    if (type === "normal") {
+        if (playerState.attackCooldown > 0) return;
+        playerState.attackCooldown = .38;
+        spawnSlash();
+        if (dist < 4.3) damageBoss(32);
+    }
+
+    if (type === "skill") {
+        if (playerState.skillCooldown > 0) return;
+        playerState.skillCooldown = 3.2;
+        spawnSkillWave();
+        if (dist < 8.2) damageBoss(78);
+        ui.centerTip.textContent = "元素技能释放！命中 Boss 可获得大量能量。";
+    }
+
+    if (type === "burst") {
+        if (playerState.burstCooldown > 0 || playerState.energy < 100) return;
+        playerState.energy = 0;
+        playerState.burstCooldown = 8;
+        spawnBurst();
+        if (dist < 12) damageBoss(185);
+        ui.centerTip.textContent = "元素爆发！造成大范围伤害。";
+    }
+}
+
+// ---------- Boss attack ----------
+let warningCircle = null;
+let pendingBossAttack = null;
+
+function createWarningCircle(pos, radius) {
+    if (warningCircle) scene.remove(warningCircle);
+    warningCircle = new THREE.Mesh(new THREE.CircleGeometry(radius, 80), matWarning);
+    warningCircle.rotation.x = -Math.PI / 2;
+    warningCircle.position.copy(pos);
+    warningCircle.position.y = .045;
+    scene.add(warningCircle);
+}
+
+function bossSlamAttack() {
+    const target = player.position.clone();
+    const radius = bossState.phase === 2 ? 5.2 : 4.2;
+    createWarningCircle(target, radius);
+    pendingBossAttack = {
+        type: "slam",
+        pos: target,
+        radius,
+        timer: .82,
+        damage: bossState.phase === 2 ? 26 : 20
+    };
+    ui.centerTip.textContent = "地面出现红圈，快冲刺离开！";
+}
+
+function bossShockwaveAttack() {
+    const target = boss.position.clone();
+    const radius = bossState.phase === 2 ? 10.5 : 8.2;
+    createWarningCircle(target, radius);
+    pendingBossAttack = {
+        type: "shockwave",
+        pos: target,
+        radius,
+        timer: 1.05,
+        damage: bossState.phase === 2 ? 32 : 24
+    };
+    ui.centerTip.textContent = "Boss 蓄力冲击波，拉开距离！";
+}
+
+function resolveBossAttack() {
+    if (!pendingBossAttack) return;
+    const d = player.position.distanceTo(pendingBossAttack.pos);
+    if (d <= pendingBossAttack.radius) damagePlayer(pendingBossAttack.damage);
+
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.8, 1.1, 96), new THREE.MeshBasicMaterial({
+        color: 0xff5435,
+        transparent: true,
+        opacity: .7,
+        side: THREE.DoubleSide
+    }));
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.copy(pendingBossAttack.pos);
+    ring.position.y = .1;
+    scene.add(ring);
+    effects.push({ mesh: ring, life: .45, max: .45, type: "expand", speed: pendingBossAttack.radius * 3.2 });
+
+    pendingBossAttack = null;
+    if (warningCircle) {
+        scene.remove(warningCircle);
+        warningCircle = null;
+    }
+}
+
+// ---------- Controls ----------
+function updatePlayer(dt) {
+    playerState.attackCooldown -= dt;
+    playerState.skillCooldown -= dt;
+    playerState.burstCooldown -= dt;
+    playerState.invincible -= dt;
+
+    if (keys["j"]) tryAttack("normal");
+    if (keys["e"]) {
+        keys["e"] = false;
+        tryAttack("skill");
+    }
+    if (keys["q"]) {
+        keys["q"] = false;
+        tryAttack("burst");
+    }
+
+    // 修复点：
+    // 之前移动方向依赖 camera.getWorldDirection()，而镜头又依赖角色朝向，
+    // 导致按住 W 时角色转向会反过来带动镜头旋转，看起来像“视角转换”。
+    // 现在改为固定世界坐标移动：W 向场景前方，S 向后，A/D 左右。
+    const inputX = (keys["d"] ? 1 : 0) - (keys["a"] ? 1 : 0);
+    const inputZ = (keys["s"] ? 1 : 0) - (keys["w"] ? 1 : 0);
+    const move = new THREE.Vector3(inputX, 0, inputZ);
+
+    if (move.lengthSq() > 0) {
+        move.normalize();
+
+        const sprint = keys["shift"];
+        const speed = sprint ? playerState.sprintSpeed : playerState.speed;
+        player.position.addScaledVector(move, speed * dt);
+
+        // 只让角色模型朝移动方向转身，不再让镜头围着角色旋转。
+        const targetRot = Math.atan2(move.x, move.z);
+        let diff = targetRot - player.rotation.y;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        player.rotation.y += diff * Math.min(1, dt * 12);
+
+        if (sprint) playerState.invincible = Math.max(playerState.invincible, .08);
+    }
+
+    if (keys[" "] && playerState.grounded) {
+        playerState.velocityY = 8.2;
+        playerState.grounded = false;
+    }
+
+    playerState.velocityY -= 22 * dt;
+    player.position.y += playerState.velocityY * dt;
+
+    if (player.position.y <= 0) {
+        player.position.y = 0;
+        playerState.velocityY = 0;
+        playerState.grounded = true;
+    }
+
+    // arena bounds
+    const maxR = 58;
+    const flat = new THREE.Vector2(player.position.x, player.position.z);
+    if (flat.length() > maxR) {
+        flat.setLength(maxR);
+        player.position.x = flat.x;
+        player.position.z = flat.y;
+    }
+
+    // idle / run animation
+    const t = clock.elapsedTime;
+    const moving = move.lengthSq() > 0;
+    player.children.forEach((child, idx) => {
+        if (idx % 5 === 0 && child.isMesh) child.rotation.x += Math.sin(t * 8 + idx) * .0008;
+    });
+    player.scale.y = 1 + Math.sin(t * (moving ? 12 : 2.2)) * (moving ? .025 : .01);
+}
+
+function updateCamera(dt) {
+    // 固定第三人称跟随镜头：跟随角色位置，但不跟随角色转向。
+    // 这样按住 W/A/S/D 只会移动角色，不会自动切换视角。
+    const desired = player.position.clone().add(new THREE.Vector3(0, 6.2, 10.8));
+    camera.position.lerp(desired, 1 - Math.pow(.001, dt));
+
+    const lookAt = player.position.clone().add(new THREE.Vector3(0, 2.1, -1.8));
+    camera.lookAt(lookAt);
+}
+
+function updateBoss(dt) {
+    const toPlayer = player.position.clone().sub(boss.position);
+    toPlayer.y = 0;
+    const dist = toPlayer.length();
+    if (dist > .1) {
+        const targetRot = Math.atan2(toPlayer.x, toPlayer.z);
+        let diff = targetRot - boss.rotation.y;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        boss.rotation.y += diff * Math.min(1, dt * 6);
+    }
+
+    // slow chase if far
+    if (dist > 9 && bossState.hp > 0) {
+        toPlayer.normalize();
+        boss.position.addScaledVector(toPlayer, (bossState.phase === 2 ? 2.1 : 1.35) * dt);
+    }
+
+    bossState.attackTimer -= dt;
+    if (bossState.attackTimer <= 0 && !pendingBossAttack) {
+        if (dist < 7 || Math.random() < .46) bossSlamAttack();
+        else bossShockwaveAttack();
+        bossState.attackTimer = bossState.phase === 2 ? rand(1.55, 2.35) : rand(2.1, 3.2);
+    }
+
+    if (pendingBossAttack) {
+        pendingBossAttack.timer -= dt;
+        if (warningCircle) {
+            warningCircle.material.opacity = .18 + Math.sin(clock.elapsedTime * 18) * .08;
+        }
+        if (pendingBossAttack.timer <= 0) resolveBossAttack();
+    }
+
+    boss.position.y = Math.sin(clock.elapsedTime * 1.8) * .05;
+    boss.scale.setScalar(bossState.enraged ? 1.08 + Math.sin(clock.elapsedTime * 5) * .015 : 1);
+
+    if (bossState.hitFlash > 0) {
+        bossState.hitFlash -= dt;
+        boss.traverse(obj => {
+            if (obj.isMesh && obj.material && obj.material.color && obj.material !== matBossCore) {
+                obj.material.emissive = new THREE.Color(0xff2a00);
+                obj.material.emissiveIntensity = 0.6;
+            }
+        });
+    } else {
+        boss.traverse(obj => {
+            if (obj.isMesh && obj.material && obj.material !== matBossCore && obj.material.emissive) {
+                obj.material.emissiveIntensity = 0;
+            }
+        });
+    }
+}
+
+function updateEffects(dt) {
+    for (let i = effects.length - 1; i >= 0; i--) {
+        const e = effects[i];
+        e.life -= dt;
+        const p = clamp(1 - e.life / e.max, 0, 1);
+
+        if (e.type === "fadeScale") {
+            e.mesh.scale.setScalar(1 + p * .8);
+            e.mesh.material.opacity = .85 * (1 - p);
+        }
+
+        if (e.type === "expand") {
+            e.mesh.scale.setScalar(1 + p * e.speed);
+            e.mesh.material.opacity = Math.max(0, .7 * (1 - p));
+        }
+
+        if (e.type === "particle") {
+            e.mesh.position.addScaledVector(e.dir, dt);
+            e.mesh.material.opacity = Math.max(0, 1 - p);
+        }
+
+        if (e.life <= 0) {
+            scene.remove(e.mesh);
+            effects.splice(i, 1);
+        }
+    }
+}
+
+function updateUI() {
+    ui.bossHpFill.style.width = `${bossState.hp / bossState.maxHp * 100}%`;
+    ui.playerHpFill.style.width = `${playerState.hp / playerState.maxHp * 100}%`;
+    ui.playerHpText.textContent = `HP ${Math.ceil(playerState.hp)} / ${playerState.maxHp}`;
+    ui.energyFill.style.width = `${playerState.energy / playerState.maxEnergy * 100}%`;
+    ui.energyText.textContent = `${Math.floor(playerState.energy)} / ${playerState.maxEnergy}`;
+}
+
+function endGame(win) {
+    gameOver = true;
+    ui.endScreen.classList.remove("hidden");
+    ui.endTitle.textContent = win ? "挑战成功！" : "挑战失败";
+    ui.endDesc.textContent = win
+        ? "你击败了风蚀遗迹的巨像守卫。按 R 或点击按钮重新开始。"
+        : "你被 Boss 击败了。注意红圈预警，利用 Shift 冲刺躲避。";
+}
+
+function restartGame() {
+    gameStarted = true;
+    gameOver = false;
+    ui.startScreen.classList.add("hidden");
+    ui.endScreen.classList.add("hidden");
+
+    playerState.hp = 100;
+    playerState.energy = 0;
+    playerState.velocityY = 0;
+    playerState.attackCooldown = 0;
+    playerState.skillCooldown = 0;
+    playerState.burstCooldown = 0;
+    playerState.invincible = 0;
+
+    bossState.hp = 650;
+    bossState.attackTimer = 2.2;
+    bossState.phase = 1;
+    bossState.enraged = false;
+    bossState.hitFlash = 0;
+
+    player.position.set(0, 0, 13);
+    player.rotation.set(0, Math.PI, 0);
+    boss.position.set(0, 0, -12);
+    boss.rotation.set(0, 0, 0);
+
+    if (warningCircle) {
+        scene.remove(warningCircle);
+        warningCircle = null;
+    }
+    pendingBossAttack = null;
+
+    for (const e of effects) scene.remove(e.mesh);
+    effects.length = 0;
+
+    ui.centerTip.textContent = "靠近 Boss 后攻击，注意躲避红色预警圈。";
+    updateUI();
+}
+
+// ---------- Resize ----------
+window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------- Main Loop ----------
+function animate() {
+    requestAnimationFrame(animate);
+    const dt = Math.min(clock.getDelta(), .033);
+
+    if (gameStarted && !gameOver) {
+        updatePlayer(dt);
+        updateBoss(dt);
+    }
+
+    updateCamera(dt);
+    updateEffects(dt);
+    updateUI();
+
+    renderer.render(scene, camera);
+}
+restartGame();
+gameStarted = false;
+ui.startScreen.classList.remove("hidden");
+animate();
+</script>
+</body>
+</html>
