@@ -22,6 +22,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; user-select: none; }
+        .shape-item, .nav-tab, .tool-btn { touch-action: manipulation; }
         
         body {
             background-color: var(--bg-deep);
@@ -90,7 +91,7 @@
             flex-shrink: 0;
             gap: 8px;
         }
-        .shape-list { display: flex; flex-direction: column; gap: 8px; }
+        .shape-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 3px; }
         .shape-item {
             padding: 12px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--text-sub); display: flex; align-items: center; gap: 12px; transition: 0.2s; border: 1px solid transparent;
         }
@@ -150,6 +151,35 @@
         .tool-btn i { font-size: 18px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.2s; background: rgba(255,255,255,0.05); }
         .tool-btn:hover i, .tool-btn.active i { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
         .tool-btn:hover { color: var(--text-main); }
+
+        @media (max-width: 900px), (pointer: coarse) {
+            body { height: auto; min-height: 100dvh; overflow-y: auto; }
+            .header { height: auto; min-height: 58px; padding: 8px 10px; gap: 8px; flex-wrap: wrap; }
+            .logo-icon { width: 30px; height: 30px; }
+            .logo-text h1 { font-size: 15px; }
+            .logo-text span { display: none; }
+            .header > div:last-child { order: 3; width: 100%; padding: 4px 8px !important; font-size: 11px !important; text-align: center; }
+            .header > div:last-child i { display: none; }
+            .nav-tabs { gap: 3px; overflow-x: auto; }
+            .nav-tab { min-width: 62px; padding: 7px 6px; font-size: 10px; }
+            .nav-tab i { font-size: 14px; }
+            .nav-tab.active::after { bottom: -4px; }
+            .main-container { display: flex; flex-direction: column; padding: 8px; gap: 8px; overflow: visible; }
+            .sidebar { padding: 9px; border-radius: 10px; }
+            .sidebar-left { width: 100%; overflow-x: auto; }
+            .sidebar-left .panel-title { margin-bottom: 7px; }
+            .shape-list { flex-direction: row; gap: 6px; width: max-content; overflow: visible; }
+            .shape-item { padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+            .shape-item[style] { margin-top: 0 !important; }
+            .center-area { flex: none; width: 100%; height: min(52vh, 430px); min-height: 300px; }
+            .axis-label { font-size: 10px; padding: 3px 6px; }
+            .bottom-toolbar { bottom: 9px; max-width: calc(100% - 14px); overflow-x: auto; padding: 7px 12px; gap: 12px; border-radius: 20px; }
+            .tool-btn { min-width: 45px; font-size: 9px; }
+            .tool-btn i { width: 30px; height: 30px; font-size: 15px; }
+            .sidebar-right { width: 100%; max-height: none; overflow: visible; }
+            .info-section { margin-bottom: 12px; }
+            .formula-card { padding: 11px; }
+        }
     </style>
 </head>
 <body>
@@ -169,7 +199,7 @@
             <div class="nav-tab" data-mode="test"><i class="fas fa-edit"></i>自我测评</div>
         </div>
         <div style="color: var(--neon-purple); font-size: 13px; border: 1px solid var(--neon-purple); padding: 6px 12px; border-radius: 20px; background: rgba(157, 78, 221, 0.1);">
-            <i class="fas fa-mouse"></i> 提示：在中间按住鼠标左键拖拽可旋转图形，滚轮可缩放
+            <i class="fas fa-mouse"></i> 提示：用鼠标或手指拖动可旋转图形，滚轮或双指可缩放
         </div>
     </header>
 
@@ -178,12 +208,16 @@
         <div class="sidebar sidebar-left">
             <div class="panel-title">选择图形 (点击切换)</div>
             <div class="shape-list" id="shape-list">
-                <div class="shape-item active" data-shape="cube"><i class="fas fa-dice-d6"></i> 正方体 (3D)</div>
-                <div class="shape-item" data-shape="cuboid"><i class="fas fa-box"></i> 长方体 (3D)</div>
-                <div class="shape-item" data-shape="cylinder"><i class="fas fa-database"></i> 圆柱体 (3D)</div>
-                <div class="shape-item" data-shape="sphere"><i class="fas fa-globe"></i> 球体 (3D)</div>
-                <div class="shape-item" style="margin-top: 10px;" data-shape="triangle"><i class="fas fa-caret-up"></i> 三角形 (2D)</div>
-                <div class="shape-item" data-shape="circle"><i class="fas fa-circle-notch"></i> 圆形 (2D)</div>
+                <div class="shape-item active" data-shape="cube"><i class="fas fa-dice-d6"></i> 正方体</div>
+                <div class="shape-item" data-shape="cuboid"><i class="fas fa-box"></i> 长方体</div>
+                <div class="shape-item" data-shape="cylinder"><i class="fas fa-database"></i> 圆柱体</div>
+                <div class="shape-item" data-shape="sphere"><i class="fas fa-circle"></i> 水晶球</div>
+                <div class="shape-item" data-shape="cone"><i class="fas fa-mountain"></i> 圆锥体</div>
+                <div class="shape-item" data-shape="prism"><i class="fas fa-gem"></i> 三棱柱</div>
+                <div class="shape-item" data-shape="torus"><i class="fas fa-ring"></i> 圆环体</div>
+                <div class="shape-item" data-shape="dodeca"><i class="fas fa-dice-d20"></i> 十二面体</div>
+                <div class="shape-item" data-shape="earth"><i class="fas fa-earth-asia"></i> 3D 地球</div>
+                <div class="shape-item" data-shape="saturn"><i class="fas fa-circle-notch"></i> 星环行星</div>
             </div>
         </div>
 
@@ -195,7 +229,7 @@
             <div class="bottom-toolbar">
                 <div class="tool-btn active"><i class="fas fa-mouse-pointer"></i>选中</div>
                 <div class="tool-btn active" id="btn-autorotate"><i class="fas fa-sync"></i>自动旋转</div>
-                <div class="tool-btn"><i class="fas fa-ruler-combined"></i>测量尺寸</div>
+                <div class="tool-btn" id="btn-measure"><i class="fas fa-ruler-combined"></i>测量尺寸</div>
                 <div style="width: 2px; height: 30px; background: var(--border-color);"></div>
                 <div class="tool-btn active" id="btn-grid"><i class="fas fa-border-all"></i>显示网格</div>
                 <div class="tool-btn" id="btn-reset"><i class="fas fa-undo"></i>重置视角</div>
@@ -260,22 +294,58 @@
                     { label: '体积 (V)', math: 'V = \\frac{4}{3}\\pi r^3' }
                 ]
             },
-            'triangle': {
-                title: '什么是三角形？',
-                desc: '三角形是由不在同一直线上的三条线段首尾顺次连接所组成的封闭二维图形。它是多边形的基础。',
-                grade: '四年级',
+            'cone': {
+                title: '什么是圆锥体？',
+                desc: '圆锥由一个圆形底面和一个弯曲侧面组成，所有侧面的母线最终汇聚到同一个顶点。',
+                grade: '六年级',
                 formulas: [
-                    { label: '周长 (C)', math: 'C = a + b + c' },
-                    { label: '面积 (S)', math: 'S = (a \\times h) \\div 2 = \\frac{1}{2}ah' }
+                    { label: '底面积 (S底)', math: 'S_{底}=\\pi r^2' },
+                    { label: '体积 (V)', math: 'V=\\frac{1}{3}\\pi r^2h' }
                 ]
             },
-            'circle': {
-                title: '什么是圆形？',
-                desc: '圆形是一个封闭的二维曲线图形。圆上所有的点到圆心的距离（半径）都相等。',
-                grade: '五年级',
+            'prism': {
+                title: '什么是三棱柱？',
+                desc: '三棱柱有两个互相平行且完全相同的三角形底面，以及三个长方形侧面。',
+                grade: '六年级',
                 formulas: [
-                    { label: '周长 (C)', math: 'C = \\pi \\times d = 2\\pi r' },
-                    { label: '面积 (S)', math: 'S = \\pi \\times r^2 = \\pi r^2' }
+                    { label: '体积 (V)', math: 'V=S_{底}\\times h' },
+                    { label: '表面积 (S表)', math: 'S_{表}=2S_{底}+S_{侧}' }
+                ]
+            },
+            'torus': {
+                title: '什么是圆环体？',
+                desc: '把一个圆绕着与它不相交的轴旋转一周，就能得到像甜甜圈一样的圆环体。',
+                grade: '拓展知识',
+                formulas: [
+                    { label: '体积 (V)', math: 'V=2\\pi^2Rr^2' },
+                    { label: '表面积 (S)', math: 'S=4\\pi^2Rr' }
+                ]
+            },
+            'dodeca': {
+                title: '正十二面体',
+                desc: '正十二面体由 12 个完全相同的正五边形组成，是五种正多面体之一，拥有非常漂亮的对称结构。',
+                grade: '拓展知识',
+                formulas: [
+                    { label: '面、棱、顶点', math: 'F=12,\\ E=30,\\ V=20' },
+                    { label: '欧拉公式', math: 'V-E+F=2' }
+                ]
+            },
+            'earth': {
+                title: '会发光的 3D 地球',
+                desc: '地球接近球体。这个模型用程序绘制海洋、大陆、云层与大气光晕，还加入了一颗绕地球运行的小月球。',
+                grade: '科学拓展',
+                formulas: [
+                    { label: '近似半径', math: 'r\\approx 6371\\ km' },
+                    { label: '球体积', math: 'V=\\frac{4}{3}\\pi r^3' }
+                ]
+            },
+            'saturn': {
+                title: '星环行星',
+                desc: '行星外侧的光环可以看作许多同心圆环组成的薄盘。模型还加入了环绕运行的发光卫星。',
+                grade: '科学拓展',
+                formulas: [
+                    { label: '球体表面积', math: 'S=4\\pi r^2' },
+                    { label: '圆环面积', math: 'S_{环}=\\pi(R^2-r^2)' }
                 ]
             }
         };
@@ -293,7 +363,8 @@
         // 渲染器设置
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
+        renderer.outputEncoding = THREE.sRGBEncoding;
         container.appendChild(renderer.domElement);
 
         // 轨道控制器 (支持鼠标拖拽旋转、滚轮缩放)
@@ -314,43 +385,50 @@
         pointLight2.position.set(-20, -10, -20);
         scene.add(pointLight2);
 
+        const starGeometry = new THREE.BufferGeometry();
+        const starPositions = [];
+        for (let i = 0; i < 700; i++) {
+            const radius = 45 + Math.random() * 80;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            starPositions.push(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+        const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0x8defff, size: .42, transparent: true, opacity: .75 }));
+        scene.add(stars);
+
         // 空间辅助网格 (地基)
         const gridHelper = new THREE.GridHelper(40, 20, 0x00d2ff, 0x002244);
         gridHelper.position.y = -10;
         scene.add(gridHelper);
 
         // 全息发光材质 (双面渲染，确保 2D 图形旋转时不消失)
-        const hologramMaterial = new THREE.MeshPhongMaterial({
-            color: 0x00d2ff,
-            emissive: 0x001133,
-            specular: 0xffffff,
-            shininess: 100,
-            transparent: true,
-            opacity: 0.8,
-            side: THREE.DoubleSide // 核心：开启双面渲染
-        });
-
         // 几何体边缘线材质 (让小学生看清棱和边)
-        const edgeMaterial = new THREE.LineBasicMaterial({ 
-            color: 0xffffff, 
-            linewidth: 2 
-        });
-
         let currentGroup = new THREE.Group();
         scene.add(currentGroup);
+        let currentShape = 'cube';
+        let measureEnabled = false;
 
         // ==========================================
         // 3. 图形生成与切换逻辑
         // ==========================================
         function createGeometryMesh(type) {
-            // 清除旧图形
-            while(currentGroup.children.length > 0){ 
-                currentGroup.remove(currentGroup.children); 
-            }
+            // 旧版本把 children 数组作为一个对象传给 remove，旧模型实际没有被移除，
+            // 每点击一次都会继续叠加，最终导致卡顿。这里彻底释放 GPU 资源。
+            disposeGroup(currentGroup);
+            scene.remove(currentGroup);
+            currentGroup = new THREE.Group();
+            scene.add(currentGroup);
+            currentShape = type;
+
+            if (type === 'earth') return createEarth();
+            if (type === 'saturn') return createSaturn();
 
             let geometry;
-            
-            // 根据类型生成对应的 Three.js 几何体
             switch(type) {
                 case 'cube': 
                     geometry = new THREE.BoxGeometry(12, 12, 12); 
@@ -362,34 +440,122 @@
                     geometry = new THREE.CylinderGeometry(6, 6, 16, 32); 
                     break;
                 case 'sphere': 
-                    geometry = new THREE.SphereGeometry(8, 32, 32); 
+                    geometry = new THREE.SphereGeometry(8, 48, 32); 
                     break;
-                case 'triangle': 
-                    // 自定义 2D 三角形
-                    const triangleShape = new THREE.Shape();
-                    triangleShape.moveTo(0, 8);
-                    triangleShape.lineTo(-10, -8);
-                    triangleShape.lineTo(10, -8);
-                    triangleShape.lineTo(0, 8);
-                    geometry = new THREE.ShapeGeometry(triangleShape);
+                case 'cone':
+                    geometry = new THREE.ConeGeometry(7, 16, 48);
                     break;
-                case 'circle': 
-                    // 2D 圆形
-                    geometry = new THREE.CircleGeometry(10, 64); 
+                case 'prism':
+                    geometry = new THREE.CylinderGeometry(7, 7, 16, 3);
+                    break;
+                case 'torus':
+                    geometry = new THREE.TorusGeometry(7, 2.4, 28, 90);
+                    break;
+                case 'dodeca':
+                    geometry = new THREE.DodecahedronGeometry(8, 0);
                     break;
             }
 
-            // 1. 添加实体 Mesh
-            const mesh = new THREE.Mesh(geometry, hologramMaterial);
+            const material = type === 'sphere'
+                ? new THREE.MeshPhysicalMaterial({ color: 0x65dfff, emissive: 0x063c78, emissiveIntensity: .6, roughness: .12, metalness: .15, transmission: .32, transparent: true, opacity: .9 })
+                : new THREE.MeshPhysicalMaterial({ color: type === 'dodeca' ? 0xc26cff : 0x00d2ff, emissive: type === 'dodeca' ? 0x35005f : 0x001d4a, emissiveIntensity: .7, roughness: .18, metalness: .32, transparent: true, opacity: .88, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(geometry, material);
             currentGroup.add(mesh);
 
-            // 2. 添加清晰的白色轮廓线 (EdgesGeometry)
             const edges = new THREE.EdgesGeometry(geometry);
-            const line = new THREE.LineSegments(edges, edgeMaterial);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xe9fbff, transparent: true, opacity: .9 }));
             currentGroup.add(line);
-
-            // 重置旋转
             currentGroup.rotation.set(0, 0, 0);
+            updateMeasureLabel();
+        }
+
+        function disposeGroup(group) {
+            group.traverse(obj => {
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) {
+                    const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                    materials.forEach(material => {
+                        if (material.map) material.map.dispose();
+                        material.dispose();
+                    });
+                }
+            });
+            group.clear();
+        }
+
+        function createEarthTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; canvas.height = 512;
+            const g = canvas.getContext('2d');
+            const ocean = g.createLinearGradient(0, 0, 0, 512);
+            ocean.addColorStop(0, '#1689c9'); ocean.addColorStop(.55, '#07598e'); ocean.addColorStop(1, '#052b62');
+            g.fillStyle = ocean; g.fillRect(0, 0, 1024, 512);
+            g.fillStyle = '#52b96c';
+            const continents = [
+                [160,120,150,90,-.2],[310,280,95,130,.3],[500,110,210,100,.05],
+                [610,250,125,165,-.2],[815,155,155,85,.18],[895,330,100,55,-.1]
+            ];
+            continents.forEach(([x,y,w,h,r]) => {
+                g.save(); g.translate(x,y); g.rotate(r); g.beginPath();
+                for (let i=0;i<14;i++) {
+                    const a=i/14*Math.PI*2, wobble=.72+Math.sin(i*2.4)*.13+Math.random()*.12;
+                    const px=Math.cos(a)*w*.5*wobble, py=Math.sin(a)*h*.5*wobble;
+                    i?g.lineTo(px,py):g.moveTo(px,py);
+                }
+                g.closePath(); g.fill(); g.restore();
+            });
+            g.fillStyle='rgba(255,255,255,.72)';
+            g.fillRect(0,0,1024,23); g.fillRect(0,489,1024,23);
+            for(let i=0;i<30;i++){g.globalAlpha=.1+Math.random()*.25;g.beginPath();g.ellipse(Math.random()*1024,Math.random()*512,40+Math.random()*90,4+Math.random()*12,Math.random(),0,Math.PI*2);g.fill();}
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.encoding = THREE.sRGBEncoding;
+            return texture;
+        }
+
+        function createEarth() {
+            const earth = new THREE.Mesh(
+                new THREE.SphereGeometry(8, 64, 48),
+                new THREE.MeshPhongMaterial({ map: createEarthTexture(), shininess: 42, specular: 0x9adfff })
+            );
+            currentGroup.add(earth);
+            const clouds = new THREE.Mesh(
+                new THREE.SphereGeometry(8.15, 48, 32),
+                new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: .13, side: THREE.DoubleSide })
+            );
+            clouds.userData.spin = .0018;
+            currentGroup.add(clouds);
+            const atmosphere = new THREE.Mesh(
+                new THREE.SphereGeometry(8.65, 48, 32),
+                new THREE.MeshBasicMaterial({ color: 0x53cfff, transparent: true, opacity: .12, side: THREE.BackSide })
+            );
+            currentGroup.add(atmosphere);
+            const moonPivot = new THREE.Group();
+            const moon = new THREE.Mesh(new THREE.SphereGeometry(1.15, 24, 18), new THREE.MeshPhongMaterial({ color: 0xdde5ef, roughness: .9 }));
+            moon.position.x = 13;
+            moonPivot.add(moon);
+            moonPivot.userData.orbit = .006;
+            currentGroup.add(moonPivot);
+            currentGroup.rotation.z = -.23;
+            updateMeasureLabel();
+        }
+
+        function createSaturn() {
+            const planet = new THREE.Mesh(
+                new THREE.SphereGeometry(7, 56, 40),
+                new THREE.MeshPhysicalMaterial({ color: 0xf2b768, roughness: .42, metalness: .05, emissive: 0x3c1d08, emissiveIntensity: .25 })
+            );
+            planet.scale.y = .92;
+            currentGroup.add(planet);
+            [9, 10.7, 12.3].forEach((radius, index) => {
+                const ring = new THREE.Mesh(
+                    new THREE.RingGeometry(radius, radius + 1.05, 96),
+                    new THREE.MeshBasicMaterial({ color: [0x8defff,0xffd68a,0xc485ff][index], transparent: true, opacity: .58, side: THREE.DoubleSide })
+                );
+                ring.rotation.x = Math.PI / 2;
+                currentGroup.add(ring);
+            });
+            currentGroup.rotation.z = -.28;
+            updateMeasureLabel();
         }
 
         // ==========================================
@@ -423,8 +589,10 @@
             // 调用 KaTeX 渲染刚刚插入的数学公式 (使用 displayMode 保证公式居中放大显示)
             document.querySelectorAll('.math-render').forEach(el => {
                 const texString = el.textContent;
-                el.innerHTML = '';
-                katex.render(texString, el, { throwOnError: false, displayMode: true });
+                if (window.katex) {
+                    el.innerHTML = '';
+                    window.katex.render(texString, el, { throwOnError: false, displayMode: true });
+                }
             });
 
             // 更新 3D 画布图形
@@ -434,6 +602,7 @@
         // 绑定左侧列表点击事件
         document.querySelectorAll('.shape-item').forEach(item => {
             item.addEventListener('click', function() {
+                if (this.classList.contains('active')) return;
                 // 切换激活状态样式
                 document.querySelectorAll('.shape-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
@@ -459,7 +628,38 @@
             camera.position.set(25, 20, 35);
             controls.target.set(0, 0, 0);
             currentGroup.rotation.set(0, 0, 0);
+            controls.update();
         });
+
+        document.getElementById('btn-measure').addEventListener('click', function() {
+            measureEnabled = !measureEnabled;
+            this.classList.toggle('active', measureEnabled);
+            updateMeasureLabel();
+        });
+
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+                const target = ({base:'cube', combo:'dodeca', unfold:'prism', test:'earth'})[this.dataset.mode];
+                const item = document.querySelector(`.shape-item[data-shape="${target}"]`);
+                if (item) item.click();
+            });
+        });
+
+        function updateMeasureLabel() {
+            const label = document.querySelector('.axis-label');
+            if (!measureEnabled) {
+                label.textContent = currentShape === 'earth' ? '拖动观察地球 · 双指缩放' : '↑ 高度 (h) / 顶点';
+                return;
+            }
+            const sizes = {
+                cube:'边长 12', cuboid:'长 18 · 宽 12 · 高 8', cylinder:'半径 6 · 高 16',
+                sphere:'半径 8', cone:'半径 7 · 高 16', prism:'底边约 12 · 高 16',
+                torus:'主半径 7 · 管半径 2.4', dodeca:'外接半径 8', earth:'模型半径 8', saturn:'行星半径 7 · 星环半径 9—13'
+            };
+            label.textContent = '📐 ' + (sizes[currentShape] || '拖动查看尺寸');
+        }
 
         // 默认初始化正方体
         updateUIPanel('cube');
@@ -475,6 +675,11 @@
                 currentGroup.rotation.y += 0.005;
                 currentGroup.rotation.x += 0.002;
             }
+            currentGroup.traverse(obj => {
+                if (obj.userData.spin) obj.rotation.y += obj.userData.spin;
+                if (obj.userData.orbit) obj.rotation.y += obj.userData.orbit;
+            });
+            stars.rotation.y += .00015;
 
             // 更新轨道控制器 (响应鼠标拖拽)
             controls.update(); 
@@ -490,6 +695,15 @@
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
         });
+        if ('ResizeObserver' in window) {
+            new ResizeObserver(() => {
+                const width = Math.max(1, container.clientWidth);
+                const height = Math.max(1, container.clientHeight);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height, false);
+            }).observe(container);
+        }
     </script>
 </body>
 </html>
