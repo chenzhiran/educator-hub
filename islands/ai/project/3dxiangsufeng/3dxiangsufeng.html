@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+    <head>
     <meta charset="UTF-8">
-    <title>Cube Craft - 纯净漫游版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>像素方块世界 - 建造冒险版</title>
     <style>
         body {
             margin: 0;
@@ -10,6 +11,7 @@
             background-color: #BFDBFE;
             font-family: 'Courier New', Courier, monospace;
             user-select: none;
+            touch-action: none;
         }
 
         #crosshair {
@@ -41,6 +43,31 @@
             pointer-events: none;
         }
         #hud_guide b { color: #86EFAC; }
+        #game_status {
+            position: absolute; top: 10px; left: 10px; z-index: 12;
+            padding: 10px 12px; border: 2px solid rgba(255,255,255,.55); border-radius: 10px;
+            color: #fff; background: rgba(18,35,48,.55); font: 700 13px/1.65 "Microsoft YaHei", sans-serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,.45); backdrop-filter: blur(6px); pointer-events: none;
+        }
+        #mission { color: #ffe36e; }
+        #hotbar {
+            position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+            z-index: 22; display: flex; gap: 7px; padding: 7px; border-radius: 12px;
+            background: rgba(20,25,30,.66); border: 2px solid rgba(255,255,255,.42); backdrop-filter: blur(7px);
+        }
+        .slot {
+            width: 54px; height: 54px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.34);
+            border-radius: 8px; color: #fff; background: rgba(255,255,255,.1); cursor: pointer;
+            font: 700 11px/1.2 "Microsoft YaHei", sans-serif; text-align: center; touch-action: manipulation;
+        }
+        .slot.selected { border-color: #ffe36e; background: rgba(255,227,110,.25); transform: translateY(-4px); }
+        .slot i { display: block; width: 23px; height: 23px; margin-bottom: 2px; border: 2px solid rgba(255,255,255,.55); }
+        #toast {
+            position: fixed; left: 50%; top: 22%; transform: translate(-50%,-12px); z-index: 40;
+            padding: 9px 16px; border-radius: 999px; color: #fff; background: rgba(20,30,36,.78);
+            font: 700 14px/1 "Microsoft YaHei", sans-serif; opacity: 0; transition: .22s; pointer-events: none;
+        }
+        #toast.show { opacity: 1; transform: translate(-50%,0); }
 
         #pause_overlay {
             position: absolute;
@@ -51,8 +78,28 @@
             justify-content: center;
             background-color: rgba(0,0,0,0.5);
             color: white;
-            z-index: 20;
+            z-index: 50;
             cursor: pointer;
+        }
+        #mobile_controls { display: none; position: fixed; inset: 0; z-index: 15; pointer-events: none; }
+        #look_zone { position: absolute; inset: 0; pointer-events: auto; }
+        .move_pad { position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(2, 50px); gap: 7px; pointer-events: auto; }
+        .touch_btn { border: 2px solid rgba(255,255,255,.68); border-radius: 14px; background: rgba(24,42,50,.62); color: white; font: 800 18px/1 sans-serif; touch-action: none; }
+        .touch_btn.active { background: rgba(60,190,120,.85); }
+        .move_up { grid-column: 2; }.move_left { grid-column: 1; grid-row: 2; }.move_down { grid-column: 2; grid-row: 2; }.move_right { grid-column: 3; grid-row: 2; }
+        .mobile_actions { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(82px, calc(env(safe-area-inset-bottom) + 82px)); display: grid; grid-template-columns: repeat(2, 62px); gap: 8px; pointer-events: auto; }
+        .mobile_actions .touch_btn { height: 58px; font-size: 12px; }
+        #jump_btn { border-radius: 50%; }
+        @media (hover: none), (pointer: coarse), (max-width: 900px) {
+            #mobile_controls { display: block; }
+            .move_pad { bottom: max(64px, calc(env(safe-area-inset-bottom) + 64px)); }
+            #hud_guide { top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); padding: 7px 9px; font-size: 11px; }
+            #game_status { top: max(8px, env(safe-area-inset-top)); left: max(8px, env(safe-area-inset-left)); padding: 7px 9px; font-size: 11px; }
+            #pause_overlay h1 { font-size: clamp(20px, 6vw, 32px); text-align: center; padding: 20px; }
+            #hotbar { bottom: max(8px, env(safe-area-inset-bottom)); gap: 3px; padding: 4px; }
+            .slot { width: 43px; height: 43px; font-size: 9px; }
+            .slot i { width: 18px; height: 18px; margin: 0; }
+            #hud_guide { display: none; }
         }
     </style>
     <script type="importmap">
@@ -71,12 +118,40 @@
     <div id="hud_guide">
         <b>W,A,S,D / 方向键</b>: 移动<br/>
         <b>SPACE</b>: 跳跃<br/>
-        <b>鼠标移动</b>: 旋转视角<br/>
-        <b>ESC</b>: 释放鼠标
+        <b>左键</b>: 挖掘　<b>右键</b>: 放置<br/>
+        <b>1-5</b>: 切换方块　<b>N</b>: 切换昼夜
+    </div>
+    <div id="game_status">
+        <div>🌤️ <span id="time_label">白昼</span>　💎 水晶 <span id="crystal_count">0</span>/8</div>
+        <div id="mission">任务：探索世界并收集发光水晶</div>
+    </div>
+    <div id="toast"></div>
+    <div id="hotbar">
+        <button class="slot selected" data-block="grass"><i style="background:#57a842"></i>草方块</button>
+        <button class="slot" data-block="stone"><i style="background:#8a8f98"></i>石头</button>
+        <button class="slot" data-block="wood"><i style="background:#8b572f"></i>木头</button>
+        <button class="slot" data-block="glass"><i style="background:#9de8ff"></i>玻璃</button>
+        <button class="slot" data-block="glow"><i style="background:#ffe45c"></i>灯石</button>
     </div>
 
     <div id="pause_overlay">
-        <h1>点击屏幕开始游玩</h1>
+        <h1>像素方块世界<br><small style="font-size:.48em;font-weight:normal">探索 · 挖掘 · 建造 · 收集水晶<br>点击屏幕开始，手机可用触控按钮游玩</small></h1>
+    </div>
+
+    <div id="mobile_controls">
+        <div id="look_zone"></div>
+        <div class="move_pad">
+            <button class="touch_btn move_up" data-move="forward">▲</button>
+            <button class="touch_btn move_left" data-move="left">◀</button>
+            <button class="touch_btn move_down" data-move="backward">▼</button>
+            <button class="touch_btn move_right" data-move="right">▶</button>
+        </div>
+        <div class="mobile_actions">
+            <button id="mine_btn" class="touch_btn">挖掘</button>
+            <button id="place_btn" class="touch_btn">放置</button>
+            <button id="jump_btn" class="touch_btn">跳跃</button>
+            <button id="day_btn" class="touch_btn">昼夜</button>
+        </div>
     </div>
 
     <script type="module">
@@ -84,8 +159,9 @@
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
         // --- 全局变量 ---
-        let camera, scene, renderer, controls;
+        let camera, scene, renderer, controls, ambientLight, sunLight;
         let audioCtx; 
+        const touchMode = matchMedia('(hover: none), (pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 
         // 移动控制变量
         let moveForward = false;
@@ -97,10 +173,20 @@
         let prevTime = performance.now();
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
+        const raycaster = new THREE.Raycaster();
+        const blockMeshes = [];
+        const blockMap = new Map();
+        const heightMap = new Map();
+        const creatures = [];
+        const crystals = [];
+        let selectedBlock = 'grass';
+        let collectedCrystals = 0;
+        let worldTime = 0.18;
+        let toastTimer = 0;
 
-        // 核心设置 (大地图)
-        const blockSize = 50; 
-        const worldSize = 60; 
+        // 核心设置：缩小单块尺寸并控制地图规模，手机也能流畅运行。
+        const blockSize = 24; 
+        const worldSize = 34; 
         const cubeGeo = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
 
         // --- 动态生成像素纹理 ---
@@ -163,6 +249,13 @@
             new THREE.MeshLambertMaterial({ map: texLogSide })  
         ];
         const matLeaves = new THREE.MeshLambertMaterial({ map: texLeaves, transparent: true, opacity: 0.95 });
+        const matGlass = new THREE.MeshPhongMaterial({ color: 0x9de8ff, transparent: true, opacity: .48, shininess: 90 });
+        const matGlow = new THREE.MeshLambertMaterial({ color: 0xffe45c, emissive: 0xffa800, emissiveIntensity: .85 });
+        const matSand = new THREE.MeshLambertMaterial({ color: 0xe9d18d });
+        const materialByType = {
+            grass: matGrassBlock, stone: matStone, wood: matLog, leaves: matLeaves,
+            flower: matFlower, glass: matGlass, glow: matGlow, sand: matSand
+        };
 
         // 生成跳跃声音
         function playSound(frequency, type, duration) {
@@ -189,23 +282,24 @@
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xBFDBFE); 
-            scene.fog = new THREE.Fog(0xBFDBFE, blockSize * 10, blockSize * worldSize);
+            scene.fog = new THREE.Fog(0xBFDBFE, blockSize * 9, blockSize * worldSize * .8);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, blockSize * worldSize * 2);
-            // 人物开始的视角稍高
-            camera.position.set(0, blockSize * 18, 0); 
+            camera.position.set(0, blockSize * 4, 0); 
 
-            scene.add(new THREE.AmbientLight(0xeeeeee)); 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            directionalLight.position.set(1, 1, 0.5).normalize();
-            scene.add(directionalLight);
+            ambientLight = new THREE.AmbientLight(0xeeeeee, 1); 
+            scene.add(ambientLight); 
+            sunLight = new THREE.DirectionalLight(0xffffff, 1.25);
+            sunLight.position.set(1, 1, 0.5).normalize();
+            scene.add(sunLight);
 
             controls = new PointerLockControls(camera, document.body);
             const pauseOverlay = document.getElementById('pause_overlay');
 
             pauseOverlay.addEventListener('click', function () {
                 window.focus(); // 强制窗口获取焦点，防止按键被拦截
-                controls.lock();
+                if (touchMode) pauseOverlay.style.display = 'none';
+                else controls.lock();
             });
             controls.addEventListener('lock', function () {
                 pauseOverlay.style.display = 'none';
@@ -221,79 +315,127 @@
             scene.add(controls.getObject());
 
             buildWorld();
+            camera.position.y = getGroundHeight(0, 0) + blockSize * 1.6;
 
             // 将键盘事件绑定到最高层级的 window，防止丢失焦点
             window.addEventListener('keydown', onKeyDown);
             window.addEventListener('keyup', onKeyUp);
             // 禁用了原生的右键菜单
             window.addEventListener('contextmenu', e => e.preventDefault()); 
+            setupTouchControls();
 
             renderer = new THREE.WebGLRenderer({ antialias: false }); 
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, touchMode ? 1.25 : 2));
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
+            setupBlockInteractions();
             window.addEventListener('resize', onWindowResize);
+            document.querySelectorAll('.slot').forEach((slot, index) => {
+                slot.addEventListener('click', () => selectBlock(slot.dataset.block, index));
+            });
         }
 
         function buildWorld() {
-            const halfSize = worldSize / 2;
-            
-            for (let i = -halfSize; i < halfSize; i++) {
-                for (let j = -halfSize; j < halfSize; j++) {
-                    const posX = i * blockSize;
-                    const posZ = j * blockSize;
-                    
-                    const voxel = new THREE.Mesh(cubeGeo, matGrassBlock);
-                    voxel.position.set(posX, 0, posZ);
-                    voxel.position.divideScalar(blockSize).floor().multiplyScalar(blockSize).addScalar(blockSize / 2);
-                    scene.add(voxel);
-
-                    const randomVal = Math.random();
-                    if (randomVal < 0.03) {
-                        createSingleBlock(posX, blockSize, posZ, matStone);
-                    } else if (randomVal > 0.96) {
-                        createSingleBlock(posX, blockSize, posZ, matFlower);
+            const half = Math.floor(worldSize / 2);
+            for (let gx = -half; gx < half; gx++) {
+                for (let gz = -half; gz < half; gz++) {
+                    const distance = Math.hypot(gx, gz);
+                    const hill = Math.sin(gx * .42) * .7 + Math.cos(gz * .35) * .65 + Math.sin((gx + gz) * .18) * .55;
+                    const height = Math.max(0, Math.min(3, Math.round(1 + hill)));
+                    heightMap.set(columnKey(gx, gz), height);
+                    for (let gy = 0; gy <= height; gy++) {
+                        const topType = distance > half - 3 ? 'sand' : 'grass';
+                        createBlock(gx, gy, gz, gy === height ? topType : 'stone', gy === 0, true);
+                    }
+                    const chance = seededRandom(gx, gz);
+                    if (distance > 4 && distance < half - 3 && chance > .965) {
+                        createTree(gx, height + 1, gz, 3 + Math.floor(chance * 3));
+                    } else if (chance < .018) {
+                        createBlock(gx, height + 1, gz, 'flower');
                     }
                 }
             }
 
-            const treeCount = 80; 
-            for (let i = 0; i < treeCount; i++) {
-                const x = (Math.random() - 0.5) * worldSize * blockSize;
-                const z = (Math.random() - 0.5) * worldSize * blockSize;
-                const posX = Math.floor(x / blockSize) * blockSize + blockSize/2;
-                const posZ = Math.floor(z / blockSize) * blockSize + blockSize/2;
-                
-                const trunkHeight = Math.floor(Math.random() * 4) + 3;
-                createTree(posX, blockSize, posZ, trunkHeight);
+            // 中央出生区、发光水晶和方块生物。
+            for (let i = 0; i < 12; i++) {
+                const angle = i / 12 * Math.PI * 2;
+                const radius = 7 + (i % 4) * 2;
+                createCrystal(Math.round(Math.cos(angle) * radius), Math.round(Math.sin(angle) * radius));
             }
+            for (let i = 0; i < 7; i++) createCreature(i % 2 ? '羊' : '小猪', -10 + i * 3, 6 - (i % 3) * 5);
+
+            const water = new THREE.Mesh(
+                new THREE.PlaneGeometry(worldSize * blockSize * 1.15, worldSize * blockSize * 1.15),
+                new THREE.MeshPhongMaterial({ color: 0x4fbbeb, transparent: true, opacity: .38, shininess: 100 })
+            );
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = blockSize * .28;
+            scene.add(water);
         }
 
-        function createSingleBlock(x, y, z, material) {
-            const block = new THREE.Mesh(cubeGeo, material);
-            block.position.set(x, y, z);
-            block.position.divideScalar(blockSize).floor().multiplyScalar(blockSize).addScalar(blockSize / 2);
+        function columnKey(x, z) { return `${x},${z}`; }
+        function blockKey(x, y, z) { return `${x},${y},${z}`; }
+        function seededRandom(x, z) {
+            const value = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
+            return value - Math.floor(value);
+        }
+        function createBlock(gx, gy, gz, type, protectedBlock = false, terrain = false) {
+            const key = blockKey(gx, gy, gz);
+            if (blockMap.has(key)) return blockMap.get(key);
+            const block = new THREE.Mesh(cubeGeo, materialByType[type] || matStone);
+            block.position.set((gx + .5) * blockSize, (gy + .5) * blockSize, (gz + .5) * blockSize);
+            block.userData = { gx, gy, gz, type, protectedBlock, terrain, isBlock: true };
             scene.add(block);
+            blockMeshes.push(block);
+            blockMap.set(key, block);
+            return block;
         }
 
-        function createTree(x, yBase, z, trunkHeight) {
+        function createTree(gx, gy, gz, trunkHeight) {
             for (let i = 0; i < trunkHeight; i++) {
-                const log = new THREE.Mesh(cubeGeo, matLog);
-                log.position.set(x, yBase + i * blockSize, z);
-                scene.add(log);
+                createBlock(gx, gy + i, gz, 'wood');
             }
-
-            const leafBaseY = yBase + (trunkHeight - 1) * blockSize;
+            const leafY = gy + trunkHeight - 1;
             for (let ix = -1; ix <= 1; ix++) {
                 for (let iy = 1; iy <= 3; iy++) {
                     for (let iz = -1; iz <= 1; iz++) {
                         if (Math.abs(ix) + Math.abs(iz) > 1 && iy > 2) continue;
-                        const leaf = new THREE.Mesh(cubeGeo, matLeaves);
-                        leaf.position.set(x + ix * blockSize, leafBaseY + iy * blockSize, z + iz * blockSize);
-                        scene.add(leaf);
+                        createBlock(gx + ix, leafY + iy, gz + iz, 'leaves');
                     }
                 }
             }
+        }
+
+        function createCrystal(gx, gz) {
+            const gy = (heightMap.get(columnKey(gx, gz)) || 0) + 1;
+            const crystal = new THREE.Mesh(
+                new THREE.OctahedronGeometry(blockSize * .34),
+                new THREE.MeshPhongMaterial({ color: 0x75f6ff, emissive: 0x167fff, emissiveIntensity: 1.2, shininess: 120 })
+            );
+            crystal.position.set((gx + .5) * blockSize, (gy + .75) * blockSize, (gz + .5) * blockSize);
+            crystal.userData.baseY = crystal.position.y;
+            scene.add(crystal);
+            crystals.push(crystal);
+        }
+
+        function createCreature(kind, gx, gz) {
+            const group = new THREE.Group();
+            const color = kind === '羊' ? 0xf4f4e8 : 0xff91ac;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(blockSize * .85, blockSize * .55, blockSize * .5), new THREE.MeshLambertMaterial({ color }));
+            const head = new THREE.Mesh(new THREE.BoxGeometry(blockSize * .42, blockSize * .42, blockSize * .42), new THREE.MeshLambertMaterial({ color: kind === '羊' ? 0x4c4b48 : 0xffa3b8 }));
+            head.position.set(0, blockSize * .08, -blockSize * .42);
+            group.add(body, head);
+            const gy = (heightMap.get(columnKey(gx, gz)) || 0) + 1;
+            group.position.set((gx + .5) * blockSize, (gy + .32) * blockSize, (gz + .5) * blockSize);
+            group.userData = { angle: seededRandom(gx, gz) * Math.PI * 2, speed: blockSize * (.25 + seededRandom(gz, gx) * .2), kind };
+            scene.add(group);
+            creatures.push(group);
+        }
+
+        function getGroundHeight(x, z) {
+            const gx = Math.floor(x / blockSize), gz = Math.floor(z / blockSize);
+            const height = heightMap.get(columnKey(gx, gz));
+            return ((height == null ? 0 : height) + 1) * blockSize;
         }
 
         function onKeyDown(event) {
@@ -304,6 +446,15 @@
             if (code === 'KeyA' || key === 'a' || code === 'ArrowLeft') moveLeft = true;
             if (code === 'KeyS' || key === 's' || code === 'ArrowDown') moveBackward = true;
             if (code === 'KeyD' || key === 'd' || code === 'ArrowRight') moveRight = true;
+            if (/^Digit[1-5]$/.test(code)) {
+                const index = Number(code.slice(-1)) - 1;
+                const slots = [...document.querySelectorAll('.slot')];
+                if (slots[index]) selectBlock(slots[index].dataset.block, index);
+            }
+            if (code === 'KeyN') {
+                worldTime = worldTime < .5 ? .72 : .18;
+                showToast(worldTime < .5 ? '切换到白昼' : '切换到夜晚');
+            }
             if (code === 'Space' || key === ' ') {
                 if (canJump === true) {
                     velocity.y += 350; 
@@ -323,6 +474,123 @@
             if (code === 'KeyD' || key === 'd' || code === 'ArrowRight') moveRight = false;
         }
 
+        function selectBlock(type, index) {
+            selectedBlock = type;
+            document.querySelectorAll('.slot').forEach((slot, i) => slot.classList.toggle('selected', i === index));
+            showToast(`已选择：${document.querySelectorAll('.slot')[index]?.textContent.trim() || type}`);
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 1200);
+        }
+
+        function setupBlockInteractions() {
+            renderer.domElement.addEventListener('mousedown', event => {
+                if (!controls.isLocked || touchMode) return;
+                if (event.button === 0) editBlock('break');
+                if (event.button === 2) editBlock('place');
+            });
+        }
+
+        function getTargetBlock() {
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            raycaster.far = blockSize * 6;
+            return raycaster.intersectObjects(blockMeshes, false)[0] || null;
+        }
+
+        function editBlock(action) {
+            const hit = getTargetBlock();
+            if (!hit) return showToast('距离太远了');
+            const block = hit.object;
+            if (action === 'break') {
+                if (block.userData.protectedBlock) return showToast('最底层方块不能挖');
+                scene.remove(block);
+                blockMap.delete(blockKey(block.userData.gx, block.userData.gy, block.userData.gz));
+                const index = blockMeshes.indexOf(block);
+                if (index >= 0) blockMeshes.splice(index, 1);
+                recalculateColumn(block.userData.gx, block.userData.gz);
+                playSound(105, 'square', .12);
+                showToast(`挖下了${blockName(block.userData.type)}`);
+            } else {
+                const normal = hit.face.normal.clone().transformDirection(block.matrixWorld).round();
+                const gx = block.userData.gx + normal.x;
+                const gy = block.userData.gy + normal.y;
+                const gz = block.userData.gz + normal.z;
+                if (gy < 0 || gy > 18 || blockMap.has(blockKey(gx, gy, gz))) return;
+                const worldPos = new THREE.Vector3((gx + .5) * blockSize, (gy + .5) * blockSize, (gz + .5) * blockSize);
+                if (worldPos.distanceTo(camera.position) < blockSize * 1.25) return showToast('不能把方块放在自己身上');
+                createBlock(gx, gy, gz, selectedBlock);
+                recalculateColumn(gx, gz);
+                playSound(260, 'square', .08);
+                showToast(`放置了${blockName(selectedBlock)}`);
+            }
+        }
+
+        function blockName(type) {
+            return ({grass:'草方块', stone:'石头', wood:'木头', glass:'玻璃', glow:'灯石', leaves:'树叶', flower:'花方块', sand:'沙子'})[type] || '方块';
+        }
+
+        function recalculateColumn(gx, gz) {
+            let highest = 0;
+            for (const block of blockMeshes) {
+                if (block.userData.terrain && block.userData.gx === gx && block.userData.gz === gz && block.userData.gy > highest) highest = block.userData.gy;
+            }
+            heightMap.set(columnKey(gx, gz), highest);
+        }
+
+        function setupTouchControls() {
+            const setters = {
+                forward: value => moveForward = value,
+                backward: value => moveBackward = value,
+                left: value => moveLeft = value,
+                right: value => moveRight = value
+            };
+            document.querySelectorAll('[data-move]').forEach(btn => {
+                const set = setters[btn.dataset.move];
+                const press = e => { e.preventDefault(); set(true); btn.classList.add('active'); };
+                const release = e => { e.preventDefault(); set(false); btn.classList.remove('active'); };
+                btn.addEventListener('pointerdown', press);
+                btn.addEventListener('pointerup', release);
+                btn.addEventListener('pointercancel', release);
+                btn.addEventListener('pointerleave', release);
+            });
+            document.getElementById('jump_btn').addEventListener('pointerdown', e => {
+                e.preventDefault();
+                if (canJump) {
+                    velocity.y += 350;
+                    playSound(150, 'sine', .1);
+                }
+                canJump = false;
+            });
+            document.getElementById('mine_btn').addEventListener('pointerdown', e => { e.preventDefault(); editBlock('break'); });
+            document.getElementById('place_btn').addEventListener('pointerdown', e => { e.preventDefault(); editBlock('place'); });
+            document.getElementById('day_btn').addEventListener('pointerdown', e => {
+                e.preventDefault();
+                worldTime = worldTime < .5 ? .72 : .18;
+                showToast(worldTime < .5 ? '切换到白昼' : '切换到夜晚');
+            });
+            const look = document.getElementById('look_zone');
+            let id = null, x = 0, y = 0;
+            camera.rotation.order = 'YXZ';
+            look.addEventListener('pointerdown', e => {
+                id = e.pointerId; x = e.clientX; y = e.clientY;
+                look.setPointerCapture(e.pointerId);
+            });
+            look.addEventListener('pointermove', e => {
+                if (e.pointerId !== id) return;
+                camera.rotation.y -= (e.clientX - x) * .006;
+                camera.rotation.x = Math.max(-1.35, Math.min(1.25, camera.rotation.x - (e.clientY - y) * .006));
+                x = e.clientX; y = e.clientY;
+            });
+            const stop = e => { if (e.pointerId === id) id = null; };
+            look.addEventListener('pointerup', stop);
+            look.addEventListener('pointercancel', stop);
+        }
+
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -332,10 +600,12 @@
         function animate() {
             requestAnimationFrame(animate);
             const time = performance.now();
+            const frameDelta = Math.min((time - prevTime) / 1000, 0.1);
+            updateWorld(frameDelta, time);
 
-            if (controls.isLocked === true) {
+            if (controls.isLocked === true || touchMode) {
                 // 限制最大 delta 防止时间计算爆炸导致坐标丢失
-                const delta = Math.min((time - prevTime) / 1000, 0.1);
+                const delta = frameDelta;
 
                 velocity.x -= velocity.x * 10.0 * delta; 
                 velocity.z -= velocity.z * 10.0 * delta; 
@@ -356,16 +626,53 @@
                 controls.moveForward(- velocity.z * delta);
                 controls.getObject().position.y += (velocity.y * delta);
 
-                // 简单的地板碰撞检测
-                if (controls.getObject().position.y < blockSize * 1.5) {
+                const groundY = getGroundHeight(controls.getObject().position.x, controls.getObject().position.z) + blockSize * 1.45;
+                if (controls.getObject().position.y < groundY) {
                     velocity.y = 0;
-                    controls.getObject().position.y = blockSize * 1.5;
+                    controls.getObject().position.y = groundY;
                     canJump = true;
                 }
             }
 
             prevTime = time;
             renderer.render(scene, camera);
+        }
+
+        function updateWorld(delta, time) {
+            worldTime = (worldTime + delta * .008) % 1;
+            const daylight = Math.max(.08, Math.sin(worldTime * Math.PI * 2 - Math.PI / 2) * .5 + .5);
+            const sky = new THREE.Color().lerpColors(new THREE.Color(0x101936), new THREE.Color(0x9edcff), daylight);
+            scene.background.copy(sky);
+            scene.fog.color.copy(sky);
+            ambientLight.intensity = .18 + daylight * .92;
+            sunLight.intensity = .12 + daylight * 1.25;
+            sunLight.position.set(Math.cos(worldTime * Math.PI * 2), Math.sin(worldTime * Math.PI * 2), .45).normalize();
+            document.getElementById('time_label').textContent = daylight > .55 ? '白昼' : daylight > .25 ? '黄昏' : '夜晚';
+
+            for (let i = crystals.length - 1; i >= 0; i--) {
+                const crystal = crystals[i];
+                crystal.rotation.y += delta * 1.8;
+                crystal.position.y = crystal.userData.baseY + Math.sin(time * .002 + i) * blockSize * .12;
+                if (crystal.position.distanceTo(camera.position) < blockSize * 1.35) {
+                    scene.remove(crystal);
+                    crystals.splice(i, 1);
+                    collectedCrystals++;
+                    document.getElementById('crystal_count').textContent = collectedCrystals;
+                    playSound(720, 'sine', .22);
+                    showToast(collectedCrystals >= 8 ? '任务完成！你找齐了水晶！' : `找到水晶 ${collectedCrystals}/8`);
+                    if (collectedCrystals >= 8) document.getElementById('mission').textContent = '任务完成：现在去建造你的像素基地吧！';
+                }
+            }
+
+            const limit = worldSize * blockSize * .42;
+            creatures.forEach((creature, index) => {
+                creature.userData.angle += Math.sin(time * .0004 + index) * delta * .25;
+                creature.position.x += Math.cos(creature.userData.angle) * creature.userData.speed * delta;
+                creature.position.z += Math.sin(creature.userData.angle) * creature.userData.speed * delta;
+                if (Math.abs(creature.position.x) > limit || Math.abs(creature.position.z) > limit) creature.userData.angle += Math.PI;
+                creature.position.y = getGroundHeight(creature.position.x, creature.position.z) + blockSize * .3;
+                creature.rotation.y = -creature.userData.angle + Math.PI / 2;
+            });
         }
     </script>
 </body>
