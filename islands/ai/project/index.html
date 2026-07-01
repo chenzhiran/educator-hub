@@ -3,69 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>扣哒宇宙 | 开发者作品集</title>
+    <title>扣哒宇宙｜学生 AI 作品展</title>
     <style>
         :root {
-            --bg-body: #0a0a0a;
-            --bg-card: #171717;
+            --bg-body: #0b0e1a;
+            --bg-card: rgba(255,255,255,0.045);
+            --bg-card-hover: rgba(255,255,255,0.085);
             --text-white: #ffffff;
-            --text-gray: #b8b8b8;
-            --gold: #FFD700;
-            --line: rgba(255,255,255,0.09);
+            --text-gray: #94a3b8;
+            --text-muted: #64748b;
+            --gold: #ffc107;
+            --gold-soft: rgba(255,193,7,0.16);
+            --blue: #60a5fa;
+            --cyan: #22d3ee;
+            --purple: #a78bfa;
+            --green: #34d399;
+            --pink: #f472b6;
+            --line: rgba(255,255,255,0.08);
+            --shadow: 0 24px 70px rgba(0,0,0,0.34);
         }
 
         * { box-sizing: border-box; }
 
         body { 
             margin: 0; background-color: var(--bg-body); color: var(--text-white); 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
             overflow-x: hidden;
+            line-height: 1.7;
         }
 
         /* 顶部菜单 */
         .nav-bar { 
-            position: absolute; top: 0; width: 100%; padding: 30px 50px; 
-            z-index: 100; pointer-events: none;
+            position: fixed; top: 0; left: 0; right: 0; width: 100%; padding: 12px 40px; 
+            z-index: 1000; display: flex; align-items: center; gap: 24px;
+            background: rgba(11,14,26,0.88); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
         }
-        .nav-bar h1 { 
-            margin: 0; font-size: 26px; letter-spacing: 2px; 
-            text-transform: uppercase; color: var(--gold); 
-            text-shadow: 0 0 10px rgba(255,215,0,0.3);
+        .nav-brand {
+            display: flex; align-items: center; gap: 12px; margin-right: auto;
+            color: var(--gold); text-decoration: none; font-weight: 800;
+            letter-spacing: 0.02em;
         }
+        .nav-logo { height: 36px; width: auto; }
+        .nav-links { display: flex; align-items: center; gap: 18px; }
+        .nav-links a {
+            color: var(--text-gray); text-decoration: none; font-size: 14px; font-weight: 600;
+            transition: color .2s ease, background .2s ease;
+        }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-links .nav-cta {
+            color: #111827; background: var(--gold); padding: 8px 14px; border-radius: 8px;
+        }
+        .nav-links .nav-cta:hover { color: #111827; background: #ffd65a; }
 
         /* 全屏轮播图 */
-        .hero-container { position: relative; width: 100%; height: 75vh; overflow: hidden; }
+        .hero-container { position: relative; width: 100%; height: 78vh; overflow: hidden; }
         .hero-slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; }
         .hero-slide.active { opacity: 1; }
         .hero-slide::after {
             content: ""; position: absolute; inset: 0;
-            background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.28) 52%, rgba(0,0,0,0.12) 100%),
-                        linear-gradient(0deg, rgba(0,0,0,0.65) 0%, transparent 50%);
+            background: linear-gradient(90deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.32) 52%, rgba(0,0,0,0.12) 100%),
+                        linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 50%);
         }
         .hero-slide img { width: 100%; height: 100%; object-fit: cover; transition: transform 6s ease; }
         .hero-slide.active img { transform: scale(1.035); }
-        
-        /* 轮播图文案：精简版 */
+
+        /* 首屏总标题：固定在轮播上层，讲清"这是作品展" */
+        .hero-headline {
+            position: absolute; top: 96px; left: 80px; right: 80px; z-index: 3;
+            max-width: 760px; pointer-events: none;
+        }
+        .hero-headline .kicker {
+            display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px;
+            border-radius: 999px; background: var(--gold-soft); color: var(--gold);
+            font-size: 12px; font-weight: 800; letter-spacing: 2px; margin-bottom: 14px;
+        }
+        .hero-headline h1 {
+            margin: 0 0 12px; font-size: clamp(30px, 4.6vw, 54px); line-height: 1.14;
+            text-shadow: 2px 3px 14px rgba(0,0,0,0.85);
+        }
+        .hero-headline .sub {
+            margin: 0; font-size: 15px; color: #e2e8f0; line-height: 1.75;
+            text-shadow: 1px 2px 8px rgba(0,0,0,0.8);
+        }
+        .hero-headline .actions {
+            display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; pointer-events: auto;
+        }
+        .hero-btn {
+            padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 800;
+            text-decoration: none; transition: 0.25s; cursor: pointer; border: 1px solid transparent;
+        }
+        .hero-btn.primary { background: var(--gold); color: #111827; }
+        .hero-btn.primary:hover { background: #ffd65a; transform: translateY(-2px); }
+        .hero-btn.ghost { background: rgba(0,0,0,0.35); color: #fff; border-color: rgba(255,255,255,0.3); backdrop-filter: blur(8px); }
+        .hero-btn.ghost:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+
+        /* 轮播图作品文案：底部 */
         .hero-caption {
-            position: absolute; bottom: 80px; left: 80px;
+            position: absolute; bottom: 74px; left: 80px;
             max-width: 680px; z-index: 2;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.85);
         }
-        .hero-caption h2 { 
-            font-size: clamp(36px, 5vw, 64px); margin: 0 0 12px 0; 
-            color: #FFFFFF !important;
+        .hero-caption .work-name { 
+            font-size: clamp(26px, 3.4vw, 42px); margin: 0 0 10px 0; font-weight: 800;
+            color: #FFFFFF;
         }
-        .hero-caption p { font-size: 17px; color: #eeeeee; line-height: 1.7; margin: 0; }
-        .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .hero-caption .work-story { font-size: 16px; color: #f1f5f9; line-height: 1.7; margin: 0; font-style: italic; }
+        .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
         .hero-meta span {
             padding: 7px 12px; border: 1px solid rgba(255,255,255,0.28);
-            border-radius: 999px; background: rgba(0,0,0,0.32);
+            border-radius: 999px; background: rgba(0,0,0,0.4);
             font-size: 13px; color: #fff; backdrop-filter: blur(8px);
         }
 
         /* 轮播切换按钮 */
         .arrow { 
-            position: absolute; top: 37.5vh; transform: translateY(-50%); 
+            position: absolute; top: 39vh; transform: translateY(-50%); 
             width: 52px; height: 52px; display: grid; place-items: center;
             cursor: pointer; font-size: 26px; 
             background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; 
@@ -75,82 +128,417 @@
         .arrow.left { left: 20px; }
         .arrow.right { right: 20px; }
 
-        /* 项目列表 */
-        .section-heading { max-width: 1400px; margin: 60px auto 0; padding: 0 24px; }
+        /* 通用区块 */
+        .section-heading { max-width: 1560px; margin: 64px auto 0; padding: 0 28px; }
         .section-heading span { color: var(--gold); font-size: 13px; font-weight: bold; letter-spacing: 3px; }
-        .section-heading h2 { margin: 8px 0 0; font-size: 32px; }
-        .section-heading p { margin: 10px 0 0; color: var(--text-gray); }
+        .section-heading h2 { margin: 8px 0 0; font-size: clamp(26px, 3vw, 38px); line-height: 1.25; }
+        .section-heading p { margin: 12px 0 0; color: var(--text-gray); max-width: 860px; }
+
+        /* 页面轻说明条 */
+        .intro-band {
+            max-width: 1560px; margin: 28px auto 0; padding: 0 28px;
+        }
+        .intro-band .band-inner {
+            padding: 22px 26px; border-radius: 12px; border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.028));
+            color: #cbd5e1; font-size: 15px; line-height: 1.8;
+        }
+        .intro-band .band-inner strong { color: #fff; }
+        .intro-band .band-inner a { color: var(--gold); text-decoration: none; font-weight: 700; }
+        .intro-band .band-inner a:hover { text-decoration: underline; }
+
+        /* 筛选区 */
+        .filter-wrap { max-width: 1560px; margin: 26px auto 0; padding: 0 28px; }
+        .search-box {
+            display: flex; align-items: center; gap: 10px; max-width: 460px;
+            padding: 11px 16px; border-radius: 10px; border: 1px solid var(--line);
+            background: rgba(255,255,255,0.04); margin-bottom: 18px;
+        }
+        .search-box input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: #fff; font-size: 15px;
+        }
+        .search-box input::placeholder { color: var(--text-muted); }
+        .search-box .ico { color: var(--text-muted); font-size: 16px; }
+        .filter-group { margin-bottom: 14px; }
+        .filter-group .fg-label {
+            display: block; color: var(--text-muted); font-size: 12px; font-weight: 700;
+            letter-spacing: 1px; margin-bottom: 9px; text-transform: uppercase;
+        }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 9px; }
+        .chip {
+            padding: 7px 15px; border-radius: 999px; border: 1px solid var(--line);
+            background: rgba(255,255,255,0.04); color: var(--text-gray);
+            font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; user-select: none;
+        }
+        .chip:hover { color: #fff; border-color: rgba(255,193,7,0.4); }
+        .chip.active { background: var(--gold); color: #111827; border-color: var(--gold); }
+
+        /* 作品档案卡列表 */
         .grid-container { 
-            max-width: 1560px; margin: 30px auto 50px; 
+            max-width: 1560px; margin: 26px auto 40px; 
             display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding: 0 28px;
         }
+        .result-empty { text-align: center; color: var(--text-muted); padding: 60px 0; font-size: 16px; }
+
         .game-card { 
             display: flex; flex-direction: column; min-height: 100%;
-            background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; 
-            transition: 0.35s; cursor: pointer; text-decoration: none; color: inherit;
+            background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; 
+            transition: 0.35s;
         }
-        .game-card:hover { transform: translateY(-8px); border-color: rgba(255,215,0,0.5); box-shadow: 0 22px 50px rgba(0,0,0,0.55); background: #202020; }
+        .game-card:hover { transform: translateY(-6px); border-color: rgba(255,193,7,0.45); box-shadow: var(--shadow); background: var(--bg-card-hover); }
         .poster-wrap { position: relative; overflow: hidden; }
-        .poster-wrap::after {
-            content: "进入游戏  →"; position: absolute; right: 14px; bottom: 14px;
-            padding: 7px 11px; border-radius: 999px; background: rgba(0,0,0,0.66);
-            color: #fff; font-size: 12px; font-weight: bold; opacity: 0; transform: translateY(6px); transition: 0.3s;
+        .poster-wrap img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; transition: transform 0.45s; }
+        .game-card:hover .poster-wrap img { transform: scale(1.04); }
+        .poster-type {
+            position: absolute; left: 12px; top: 12px; padding: 5px 11px; border-radius: 999px;
+            background: rgba(0,0,0,0.62); backdrop-filter: blur(6px);
+            font-size: 12px; font-weight: 800; color: #fff; border: 1px solid rgba(255,255,255,0.2);
         }
-        .game-card:hover .poster-wrap::after { opacity: 1; transform: translateY(0); }
-        .game-card img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; transition: transform 0.45s; }
-        .game-card:hover img { transform: scale(1.04); }
+
         .content { display: flex; flex: 1; flex-direction: column; padding: 22px; }
-        .content h3 { margin: 0 0 12px 0; font-size: 22px; color: var(--text-white); }
-        .content p { flex: 1; margin: 0; font-size: 14px; color: var(--text-gray); line-height: 1.75; }
+        .content h3 { margin: 0 0 4px 0; font-size: 22px; color: var(--text-white); }
+        .author-line { margin: 0 0 14px; color: var(--text-muted); font-size: 13px; }
+        .author-line b { color: var(--gold); font-weight: 700; }
+
+        /* 孩子的话 */
+        .kid-quote {
+            position: relative; margin: 0 0 16px; padding: 14px 16px 14px 40px;
+            border-radius: 10px; background: rgba(244,114,182,0.07); border: 1px solid rgba(244,114,182,0.2);
+        }
+        .kid-quote::before {
+            content: "“"; position: absolute; left: 12px; top: 2px;
+            font-size: 40px; color: var(--pink); font-family: Georgia, serif; line-height: 1;
+        }
+        .kid-quote p { margin: 0; font-size: 14px; color: #fbcfe8; line-height: 1.7; font-style: italic; }
+
+        /* 作品怎么玩 */
+        .play-block { margin: 0 0 14px; }
+        .block-title {
+            display: block; margin-bottom: 6px; color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: 1px;
+        }
+        .play-block p { margin: 0; font-size: 14px; color: var(--text-gray); line-height: 1.75; }
+
+        /* 亮点标签 */
+        .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 16px; }
+        .tag-pill {
+            display: inline-flex; align-items: center; min-height: 24px; padding: 3px 10px;
+            border-radius: 999px; background: rgba(96,165,250,0.1); color: #bfdbfe;
+            border: 1px solid rgba(96,165,250,0.22); font-size: 12px; font-weight: 700;
+        }
+
+        /* 老师看点 / 家长看点 双栏 */
+        .see-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+        .see-box { padding: 13px; border-radius: 9px; border: 1px solid var(--line); }
+        .see-box.teacher { background: rgba(255,193,7,0.07); border-color: rgba(255,193,7,0.22); }
+        .see-box.parent { background: rgba(52,211,153,0.07); border-color: rgba(52,211,153,0.22); }
+        .see-box .see-label { display: block; margin-bottom: 5px; font-size: 12px; font-weight: 800; }
+        .see-box.teacher .see-label { color: var(--gold); }
+        .see-box.parent .see-label { color: var(--green); }
+        .see-box p { margin: 0; font-size: 12.5px; color: #cbd5e1; line-height: 1.6; }
+
+        /* 创作档案 */
         .project-meta {
             display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-            margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line);
+            margin-bottom: 18px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
         }
         .meta-item { min-width: 0; padding-right: 8px; }
         .meta-item + .meta-item { padding-left: 10px; border-left: 1px solid var(--line); }
         .meta-label { display: block; margin-bottom: 5px; color: #777; font-size: 11px; }
         .meta-value { display: block; overflow: hidden; color: #eee; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 
+        /* 卡片底部按钮组 */
+        .card-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+        .story-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px; border-radius: 10px; background: rgba(244,114,182,0.1);
+            border: 1px solid rgba(244,114,182,0.35); color: #f9a8d4;
+            font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.25s;
+        }
+        .story-btn:hover { background: rgba(244,114,182,0.2); color: #fce7f3; transform: translateY(-2px); }
+        .play-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 13px; border-radius: 10px; background: var(--gold); color: #111827;
+            font-size: 15px; font-weight: 800; text-decoration: none; transition: 0.25s;
+        }
+        .play-btn:hover { background: #ffd65a; transform: translateY(-2px); box-shadow: 0 10px 26px rgba(255,193,7,0.25); }
+
+        /* 故事弹窗 */
+        .story-modal {
+            position: fixed; inset: 0; z-index: 2000; display: none;
+            align-items: center; justify-content: center; padding: 24px;
+            background: rgba(5,7,15,0.82); backdrop-filter: blur(6px);
+        }
+        .story-modal.open { display: flex; }
+        .story-panel {
+            position: relative; max-width: 640px; width: 100%; max-height: 88vh; overflow-y: auto;
+            background: linear-gradient(180deg, #141926, #0d111c);
+            border: 1px solid rgba(244,114,182,0.3); border-radius: 18px;
+            box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+            animation: pop .3s ease;
+        }
+        @keyframes pop { from { transform: translateY(18px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+        .story-cover { position: relative; height: 200px; overflow: hidden; border-radius: 18px 18px 0 0; }
+        .story-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .story-cover::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(20,25,38,0.1) 0%, rgba(20,25,38,0.95) 100%);
+        }
+        .story-cover .cover-title {
+            position: absolute; left: 26px; bottom: 18px; z-index: 2;
+        }
+        .story-cover .cover-title h3 { margin: 0 0 4px; font-size: 26px; color: #fff; }
+        .story-cover .cover-title span { color: var(--gold); font-size: 13px; font-weight: 700; }
+        .story-close {
+            position: absolute; right: 16px; top: 16px; z-index: 3;
+            width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+            background: rgba(0,0,0,0.5); color: #fff; font-size: 20px; line-height: 1;
+            display: grid; place-items: center; transition: 0.2s;
+        }
+        .story-close:hover { background: rgba(244,114,182,0.6); }
+        .story-body { padding: 26px 30px 30px; }
+        .story-body .story-label {
+            display: inline-flex; align-items: center; gap: 7px; margin-bottom: 16px;
+            padding: 5px 13px; border-radius: 999px; background: rgba(244,114,182,0.14);
+            color: var(--pink); font-size: 12px; font-weight: 800;
+        }
+        .story-body p {
+            margin: 0 0 16px; color: #dbe3ef; font-size: 15.5px; line-height: 1.95;
+        }
+        .story-body p:last-child { margin-bottom: 0; }
+        .story-body .signoff {
+            margin-top: 22px; padding-top: 18px; border-top: 1px dashed rgba(255,255,255,0.12);
+            color: var(--text-muted); font-size: 14px; text-align: right;
+        }
+        .story-body .signoff b { color: var(--gold); }
+        .story-modal-play {
+            display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
+            padding: 12px 24px; border-radius: 10px; background: var(--gold); color: #111827;
+            font-size: 15px; font-weight: 800; text-decoration: none; transition: 0.25s;
+        }
+        .story-modal-play:hover { background: #ffd65a; transform: translateY(-2px); }
+
+        /* 老师家长使用（轻量，放在作品后） */
+        .use-section { max-width: 1560px; margin: 70px auto 0; padding: 0 28px; }
+        .use-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 26px; }
+        .use-col {
+            padding: 26px; border-radius: 14px; border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+        }
+        .use-col.teacher-col { border-top: 3px solid var(--gold); }
+        .use-col.parent-col { border-top: 3px solid var(--green); }
+        .use-col h3 { margin: 0 0 16px; font-size: 20px; }
+        .use-col.teacher-col h3 { color: var(--gold); }
+        .use-col.parent-col h3 { color: var(--green); }
+        .use-col ul { margin: 0; padding: 0; list-style: none; }
+        .use-col li {
+            position: relative; padding: 9px 0 9px 26px; color: var(--text-gray); font-size: 14.5px; line-height: 1.65;
+            border-bottom: 1px dashed rgba(255,255,255,0.06);
+        }
+        .use-col li:last-child { border-bottom: none; }
+        .use-col li::before {
+            content: "→"; position: absolute; left: 0; top: 9px; font-weight: 800;
+        }
+        .use-col.teacher-col li::before { color: var(--gold); }
+        .use-col.parent-col li::before { color: var(--green); }
+
+        /* 轻量三向说明卡 */
+        .audience-grid {
+            max-width: 1560px; margin: 30px auto 0; padding: 0 28px;
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;
+        }
+        .audience-card {
+            padding: 24px; border-radius: 12px; border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.028));
+        }
+        .audience-card .ac-kicker {
+            display: inline-flex; margin-bottom: 12px; padding: 4px 11px; border-radius: 999px;
+            font-size: 12px; font-weight: 800;
+        }
+        .audience-card.a-teacher .ac-kicker { background: var(--gold-soft); color: var(--gold); }
+        .audience-card.a-parent .ac-kicker { background: rgba(52,211,153,0.14); color: var(--green); }
+        .audience-card.a-student .ac-kicker { background: rgba(167,139,250,0.16); color: var(--purple); }
+        .audience-card b { display: block; font-size: 17px; margin-bottom: 8px; color: #fff; }
+        .audience-card p { margin: 0; color: var(--text-gray); font-size: 14px; }
+
+        /* 底部课程入口 */
+        .course-cta {
+            max-width: 1560px; margin: 66px auto 0; padding: 40px 28px; text-align: center;
+        }
+        .course-cta .cta-inner {
+            padding: 40px 32px; border-radius: 16px; border: 1px solid rgba(255,193,7,0.28);
+            background: linear-gradient(135deg, rgba(255,193,7,0.09), rgba(96,165,250,0.06));
+        }
+        .course-cta h2 { margin: 0 0 12px; font-size: clamp(22px, 3vw, 32px); }
+        .course-cta p { margin: 0 auto 24px; max-width: 620px; color: var(--text-gray); font-size: 15px; }
+        .course-cta a {
+            display: inline-flex; align-items: center; gap: 8px; padding: 14px 30px; border-radius: 12px;
+            background: var(--gold); color: #111827; font-size: 16px; font-weight: 800; text-decoration: none; transition: 0.25s;
+        }
+        .course-cta a:hover { background: #ffd65a; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,193,7,0.3); }
+
         /* 页脚 */
-        .footer { text-align: center; padding: 60px 20px; color: #555; font-size: 14px; letter-spacing: 1px; }
+        .footer { text-align: center; padding: 56px 20px; color: #555; font-size: 14px; letter-spacing: 1px; }
 
         @media (max-width: 720px) {
-            .nav-bar { padding: 22px 20px; }
-            .nav-bar h1 { font-size: 20px; }
-            .hero-container { height: 68vh; min-height: 500px; }
-            .hero-caption { left: 24px; right: 24px; bottom: 42px; }
-            .hero-caption p { font-size: 15px; }
-            .arrow { top: 34vh; width: 42px; height: 42px; font-size: 20px; }
+            .nav-bar { padding: 10px 16px; flex-wrap: wrap; }
+            .nav-links { width: 100%; gap: 12px; overflow-x: auto; padding-bottom: 2px; }
+            .hero-container { height: auto; min-height: 620px; }
+            .hero-headline { left: 20px; right: 20px; top: 84px; }
+            .hero-caption { left: 20px; right: 20px; bottom: 30px; }
+            .hero-caption .work-story { font-size: 14px; }
+            .arrow { top: 42%; width: 40px; height: 40px; font-size: 20px; }
             .arrow.left { left: 8px; }
             .arrow.right { right: 8px; }
-            .grid-container { grid-template-columns: 1fr; padding: 0 16px; }
-            .section-heading { margin-top: 42px; padding: 0 16px; }
+            .grid-container, .use-grid, .audience-grid { grid-template-columns: 1fr; padding: 0 16px; }
+            .see-grid { grid-template-columns: 1fr; }
+            .section-heading, .filter-wrap, .intro-band, .use-section, .course-cta { padding-left: 16px; padding-right: 16px; }
+            .story-panel { max-height: 92vh; }
+            .story-body { padding: 22px 22px 26px; }
         }
 
         @media (min-width: 721px) and (max-width: 1050px) {
-            .grid-container { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 0 16px; }
-            .content { padding: 16px; }
-            .content h3 { font-size: 19px; }
-            .content p { font-size: 13px; }
-            .meta-value { font-size: 12px; }
+            .grid-container { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+            .audience-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <h1>扣哒宇宙学生作品</h1>
-    </div>
+    <nav class="nav-bar">
+        <a class="nav-brand" href="../index.html" aria-label="返回 AI 课程首页">
+            <img src="../images/ai-logo.png" alt="扣哒宇宙" class="nav-logo">
+            <span>学生 AI 作品展</span>
+        </a>
+        <div class="nav-links">
+            <a href="#works">全部作品</a>
+            <a href="#" onclick="randomPlay(event)">随机试玩</a>
+            <a href="#use">老师/家长怎么用</a>
+            <a class="nav-cta" href="../index.html">AI课程介绍</a>
+        </div>
+    </nav>
 
     <div class="hero-container" id="hero-wrapper">
+        <div class="hero-headline">
+            <span class="kicker">STUDENT AI GALLERY</span>
+            <h1>走进孩子们用 AI 创造的世界</h1>
+            <p class="sub">这里展示的是扣哒宇宙学生真实完成的 AI 创作作品。每一个都可以试玩，也保留了孩子的创作想法、年级和开发时长——方便老师作为课堂案例，也方便家长直观看见孩子的创造力。</p>
+            <div class="actions">
+                <a href="#works" class="hero-btn primary">查看全部作品</a>
+                <a href="#" onclick="randomPlay(event)" class="hero-btn ghost">随机试玩一个</a>
+            </div>
         </div>
+    </div>
     <div class="arrow left" onclick="plusSlides(-1)">❮</div>
     <div class="arrow right" onclick="plusSlides(1)">❯</div>
 
-    <div class="section-heading">
-        <h2>学生游戏作品 · 走进孩子们创造的世界</h2>
+    <!-- 页面轻说明 -->
+    <div class="intro-band">
+        <div class="band-inner">
+            这些作品来自 <strong>扣哒宇宙 AI 课程</strong> 中的学生创作。它们不是截图或获奖名单，而是<strong>可以真正打开、动手体验的数字作品</strong>。你可以先随便挑一个玩玩看，再回来读孩子当时是怎么想的。想了解作品背后的课程，可以 <a href="../index.html">查看 AI 课程介绍 →</a>
+        </div>
     </div>
+
+    <!-- 作品筛选 -->
+    <div class="section-heading" id="works">
+        <span>PROJECT GALLERY</span>
+        <h2>作品档案卡 · 每一个都能试玩</h2>
+        <p>用下面的搜索和标签快速找到想看的作品：可以按作品类型浏览，也可以按适合的年级阶段筛选。</p>
+    </div>
+
+    <div class="filter-wrap">
+        <div class="search-box">
+            <span class="ico">🔍</span>
+            <input type="text" id="searchInput" placeholder="搜索作品名、作者或关键词…" oninput="applyFilters()">
+        </div>
+        <div class="filter-group">
+            <span class="fg-label">按作品类型</span>
+            <div class="chip-row" id="typeChips"></div>
+        </div>
+        <div class="filter-group">
+            <span class="fg-label">按年级阶段</span>
+            <div class="chip-row" id="stageChips"></div>
+        </div>
+    </div>
+
     <div class="grid-container" id="grid"></div>
+
+    <!-- 故事弹窗 -->
+    <div class="story-modal" id="storyModal" onclick="closeStory(event)">
+        <div class="story-panel" onclick="event.stopPropagation()">
+            <button class="story-close" onclick="closeStory()">✕</button>
+            <div class="story-cover">
+                <img id="storyCoverImg" src="" alt="">
+                <div class="cover-title">
+                    <span id="storyCoverAuthor"></span>
+                    <h3 id="storyCoverName"></h3>
+                </div>
+            </div>
+            <div class="story-body">
+                <span class="story-label">🖊️ 我的创作故事</span>
+                <div id="storyText"></div>
+                <div class="signoff" id="storySignoff"></div>
+                <a href="#" id="storyModalPlay" class="story-modal-play">▶ 去试玩这个作品</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 老师和家长怎么用（轻量，靠后） -->
+    <section class="use-section" id="use">
+        <div class="section-heading" style="margin: 0; padding: 0;">
+            <span>HOW TO USE</span>
+            <h2>老师和家长可以这样使用这个页面</h2>
+            <p>不需要复杂流程——最简单的用法，往往最有效。</p>
+        </div>
+        <div class="use-grid">
+            <div class="use-col teacher-col">
+                <h3>老师可以这样用</h3>
+                <ul>
+                    <li>课堂开场：先让学生试玩 1 个作品，用兴趣把注意力抓住</li>
+                    <li>案例讨论：请学生说出作品的目标、规则和交互方式</li>
+                    <li>创作启发：让学生说一句"我也想做一个什么样的作品"</li>
+                    <li>家长沟通：把作品链接直接发给家长，让成长看得见</li>
+                </ul>
+            </div>
+            <div class="use-col parent-col">
+                <h3>家长可以这样看</h3>
+                <ul>
+                    <li>看孩子的创意表达是否清楚、有没有自己的想法</li>
+                    <li>看作品的规则是否完整、玩起来是否顺畅</li>
+                    <li>看孩子能不能把一个想法真正做成可体验的作品</li>
+                    <li>看孩子是否具备持续修改、测试和表达的能力</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 三向轻说明 -->
+        <div class="audience-grid">
+            <article class="audience-card a-teacher">
+                <span class="ac-kicker">给老师看</span>
+                <b>可作为课堂案例</b>
+                <p>这些作品可以用于课堂导入、项目拆解和作品复盘。让学生先试玩，再讨论作品的规则、交互、画面与改进方向。</p>
+            </article>
+            <article class="audience-card a-parent">
+                <span class="ac-kicker">给家长看</span>
+                <b>可看见真实成果</b>
+                <p>家长可以直接试玩，看到孩子不只是在学 AI 工具，而是在表达想法、设计规则、测试问题并完成一个可交互作品。</p>
+            </article>
+            <article class="audience-card a-student">
+                <span class="ac-kicker">给学生看</span>
+                <b>可激发创作灵感</b>
+                <p>同龄人的作品最容易点燃兴趣。看见别人做出的城市、Boss 战、成语游戏和空中铁轨，孩子会更想"我也来做一个"。</p>
+            </article>
+        </div>
+    </section>
+
+    <!-- 底部课程入口 -->
+    <section class="course-cta">
+        <div class="cta-inner">
+            <h2>想了解这些作品背后的 AI 课程？</h2>
+            <p>作品页负责让你看见孩子做出了什么；课程介绍页会告诉你，扣哒宇宙 AI 课程是怎么一步步带孩子走到这里的。</p>
+            <a href="../index.html">查看扣哒宇宙 AI 课程介绍 →</a>
+        </div>
+    </section>
 
     <div class="footer">
         扣哒宇宙 —— 扣哒世界面向青少年的生成式人工智能教学平台
@@ -158,56 +546,297 @@
 
     <script>
         const projects = [
-            { id: '3dgongyuan', name: '超自由城市', dev: '李承霖', age: '五年级', learning: '两个月', shortDesc: '我画了自己的游戏角色，再把他送进一座可以到处探索的城市。', desc: '我很喜欢自由探索，所以做了一座可以跑、跳、攀爬的城市。游戏里的玩家角色是我自己画的，城市建筑、车辆和街道素材是从网上下载后再组合设计的。我希望大家能控制我的角色穿过街道、登上高楼，找到城市里每一个好玩的角落。', file: '3dgongyuan.html', img: '3dgongyuan/3dgongyuan.webp' },
-            { id: '3dkongbubieshu', name: '3D 恐怖别墅', dev: '郝思诚', age: '15岁', learning: '三个月', shortDesc: '我把线索藏进一座黑暗别墅，想看看你敢不敢走进去。', desc: '我想做一个让人有一点紧张、又忍不住继续探索的游戏。我在别墅里安排了昏暗的房间、突然出现的声音和需要仔细寻找的线索。希望你能鼓起勇气走进每个角落，解开谜题，找到离开别墅的方法。', file: '3dkongbubieshu.html', img: '3dkongbubieshu/3dkongbubieshu.webp' },
-            { id: '3dhuayuan', name: '3D 花园漫游', dev: '松松', age: '四年级', learning: '一个月', shortDesc: '我把花园放到了天空中，还邀请昆虫和翼龙来做客。', desc: '我想做一个像梦一样漂浮在云上的花园，所以设计了很多不同的小岛、花朵和探索任务。游戏里的蜜蜂、蝴蝶、甲虫等昆虫素材是从网上下载的，我再把它们放进自己设计的场景和玩法里。希望你能飞过云朵，观察每一种小动物。', file: 'index.html', img: '3dhuayuan/3dhuayuan.webp' },
-            { id: 'tangdoudevil', name: '糖豆别生气', dev: '郭同学', age: '三年级', learning: '六个月', shortDesc: '我做了一个看起来很可爱、其实到处都会偷偷捉弄你的跳跃游戏。', desc: '我想让玩家一边生气一边笑，所以设计了三十个很短、但藏着许多恶作剧的关卡。地板会突然掉下去，尖刺会冒出来，方向和重力也可能改变。每次失败都能记住一点新东西，希望你最后能比糖豆更聪明。', file: 'index.html', img: 'tangdoudevil/tangdoudevil.webp' },
-            { id: '3dxiangsufeng', name: '3D 像素方块', dev: '陈小宇', age: '五年级', learning: '三个月', shortDesc: '我模仿《我的世界》，用像素方块搭了一个可以挖掘和建造的小世界。', desc: '我很喜欢《我的世界》里自由探索、挖掘方块和建造建筑的玩法，所以模仿它制作了这个像素沙盒。你可以改变地形、收集水晶、选择不同材料搭房子，还能观察昼夜变化和方块生物。我希望每个玩家都能在同一个世界里创造出完全不同的冒险。', file: '3dxiangsufeng.html', img: '3dxiangsufeng/3dxiangsufeng.webp' },
-            { id: 'chengyugushi', name: '成语起源', dev: '周语桐', age: '四年级', learning: '两个月', shortDesc: '我把学过的成语变成关卡，让记忆成语像玩游戏一样。', desc: '有些成语只靠背很容易忘，所以我把它们做成了填字和闯关游戏。玩家要观察提示、回忆词语，再把正确的字放进格子里。我希望大家在过关的时候，不知不觉记住更多成语，也能发现汉字组合起来很有趣。', file: 'chengyugushi.html', img: 'chengyugushi/chengyugushi.webp' },
-            { id: 'guodongpaidui', name: '果冻派对', dev: '刘同学', age: '二年级', learning: '两个月', shortDesc: '我做了两个软乎乎的果冻小人，想和妈妈一起闯关。', desc: '我想开发一款可以和妈妈一起玩的游戏，所以设计了两个会跳、会撞、还会弹来弹去的果冻小人。我们可以一人控制一个角色，在不同的平台和障碍之间互相帮助，一起寻找出口。我希望自己和妈妈玩的时候会大笑，也能研究出默契通关的办法。', file: 'guodongpaidui.html', img: 'guodongpaidui/guodongpaidui.webp' },
-            { id: 'liuxingtiangong', name: '流形天宫', dev: '包子墨', age: '六年级', learning: '三个月', shortDesc: '我想把课本里的几何图形搬到三维空间里，用手转着看。', desc: '平面图上的几何有时不容易想象，所以我做了一个可以旋转、缩放和拆解图形的三维实验场。你可以从不同方向观察它们，看看一个立体图形到底由哪些部分组成。我希望大家能像做实验一样理解空间和数学。', file: 'liuxingtiangong.html', img: 'liuxingtiangong/liuxingtiangong.webp' },
-            { id: 'shuimo', name: '墨剑文道', dev: '陶同学', age: '三年级', learning: '两个月', shortDesc: '我把语文题变成了墨剑招式，答对才能斩出漂亮的一剑。', desc: '我喜欢水墨画和武侠故事，也想让语文学习更有动作感，于是做了这款墨剑闯关游戏。你要观察诗词、成语和英语词汇题，再朝正确答案挥剑。我希望大家每次斩击都像在练习一套新的知识剑法。', file: 'shuimo.html', img: 'shuimo/shuimo.webp' },
-            { id: '3dsheji', name: '作战代号：暴风行动', dev: '唯唯', age: '六年级', learning: '一个月', shortDesc: '我参考《三角洲行动》《彩虹六号》等射击游戏，制作了一场黑夜战斗任务。', desc: '我很喜欢《三角洲行动》《彩虹六号》等讲究战术和配合的射击游戏，所以参考它们的玩法，设计了这场发生在黑夜城区里的特别行动。玩家可以移动、瞄准、射击和补充弹药，还要观察生命值、护甲与任务进度，灵活利用掩体完成每一关的作战目标。', file: '3dsheji.html', img: '3dsheji/3dsheji.webp' },
-            { id: '3dboss', name: '幻想旷野 Boss 战', dev: '宏熙', age: '六年级', learning: '一个月', shortDesc: '我参考《原神》等游戏，制作了一场幻想旷野里的巨像 Boss 战。', desc: '我喜欢《原神》等拥有幻想世界、角色技能和强大 Boss 的游戏，所以参考这类玩法，创造了开阔的旷野和巨大的遗迹守卫。玩家要观察巨像的攻击，一边移动、闪避，一边使用普通攻击、元素技能和爆发技能反击，最终找到规律打败它。', file: '3dboss.html', img: '3dboss/3dboss.webp' },
-            { id: 'rail_in_the_air', name: '空中铁轨', dev: '林星野', age: '五年级', learning: '两个月', shortDesc: '我把列车开到了云层上，让每一道弯都变成速度挑战。', desc: '我很喜欢高速列车和漂浮在天空中的奇妙建筑，所以设计了这条穿过云海的空中铁轨。玩家不能只顾着一直加速，要在弯道前刹车、出弯后再冲刺，还要控制列车不要被甩出轨道。我希望大家能记住每段路线，挑战更快的通关纪录。', file: 'rail_in_the_air.html', img: 'rail_in_the_air/rail_in_the_air.webp' }
+            {
+                id: '3dgongyuan', name: '超自由城市', dev: '李承霖', age: '五年级', learning: '两个月',
+                type: '3D探索', stage: '中年级',
+                kidQuote: '我想做一座属于自己的城市，让玩家能到处跑、到处跳，在每个角落都发现一点小惊喜。',
+                howto: '玩家控制角色在城市里自由移动、跳跃、攀爬，探索街道和高楼，体验一个开放式的 3D 城市。',
+                highlights: ['3D城市', '角色控制', '生命值', '体力值', '移动端交互'],
+                teacherSee: '很好的"大想法拆成小功能"案例，可拆角色移动、场景搭建、状态数值和交互。',
+                parentSee: '能看到孩子把一个大想法拆成一个个功能，靠反复测试让角色和城市慢慢变完整。',
+                fullStory: [
+                    '其实一开始，我只是想画一个属于自己的游戏角色。我在纸上画了好多版，改了又改，最后终于画出一个我特别满意的小人——我一直盼着能让他"活"起来，能自己在屏幕里走来走去。',
+                    '后来我想，光让他站着多没意思呀，得给他一座能到处跑的城市才行。我特别喜欢自由探索的感觉，所以我下决心做一座可以跑、可以跳、还能攀爬的城市。城市里的建筑、车辆和街道，是我从网上一点点找来素材，再自己一块块拼进脑子里想象的样子。',
+                    '做的时候我遇到过好多次卡壳：角色总是会莫名其妙地卡进墙里出不来，我改了很多很多次，才让他终于能顺顺当当地穿过街道、爬上高楼。那一刻我特别有成就感。',
+                    '我最大的心愿，就是希望玩到它的人，能操控着我画的这个小人，把城市的每一个角落都逛一遍，找到我藏在里面的那些小惊喜。'
+                ],
+                file: '3dgongyuan.html', img: '3dgongyuan/3dgongyuan.webp'
+            },
+            {
+                id: '3dkongbubieshu', name: '3D 恐怖别墅', dev: '郝思诚', age: '15岁', learning: '三个月',
+                type: 'Boss战', stage: '初中',
+                kidQuote: '我把线索一个个藏进黑暗的别墅里，就想看看——你到底敢不敢一间一间走进去。',
+                howto: '玩家在昏暗的别墅中探索房间、收集线索、解开谜题，最终找到离开别墅的方法。',
+                highlights: ['叙事探索', '氛围营造', '线索解谜', '3D场景'],
+                teacherSee: '叙事型 3D 作品案例，可讲氛围营造、线索布局与"把故事写成可交互任务"。',
+                parentSee: '能看到孩子懂得站在玩家角度设计体验，反复打磨节奏和分寸感。',
+                fullStory: [
+                    '我想做一个让人心里有点发毛、但又忍不住想往前走的游戏。那种"明明有点怕，却更好奇下一个房间里有什么"的感觉，是我最想让玩家体会到的。',
+                    '为了做到这一点，我在别墅里安排了很多细节：昏暗的房间、突然响起来的声音，还有一些必须很仔细才能找到的线索。每一样东西放在哪儿、什么时候出现，我都反复琢磨过。',
+                    '最难的其实是把握"害怕"的分寸。太吓人了，玩家会直接被劝退，不敢玩下去；太平淡了，又一点紧张感都没有。为了找到那个刚刚好的点，我一遍又一遍地调灯光、调音效，测试了无数次，这也是我花时间最多的地方。',
+                    '我希望你能鼓起勇气，一间一间地走进这座别墅，把我藏起来的线索一个个找出来，解开谜题，最后靠自己的本事走出去。如果你走出来的时候心跳还有点快——那我就成功了。'
+                ],
+                file: '3dkongbubieshu.html', img: '3dkongbubieshu/3dkongbubieshu.webp'
+            },
+            {
+                id: '3dhuayuan', name: '3D 花园漫游', dev: '松松', age: '四年级', learning: '一个月',
+                type: '3D探索', stage: '低年级',
+                kidQuote: '我把花园搬到了天空上，还请了蜜蜂、蝴蝶和翼龙来我这里做客。',
+                howto: '玩家可以在漂浮于云端的花园中飞行、漫游，观察各种昆虫和动物，完成探索小任务。',
+                highlights: ['低龄创意', '自然观察', '场景搭建', '主题表达'],
+                teacherSee: '适合低年级理解场景创作与审美选择，可结合自然观察做跨学科展示。',
+                parentSee: '能看到孩子把一个美好的想象，认真地一点点搭建成可以进去玩的空间。',
+                fullStory: [
+                    '我一直有一个想象：如果花园不是长在地上，而是飘在云朵上面，那该有多好看呀。我做梦都在想这件事，所以就干脆把它做了出来。',
+                    '我设计了好多不同的小岛，每个小岛上都开着不一样的花，还有要一个个去完成的探索小任务。我希望玩的人能像在梦里一样，从一朵云飞到另一朵云。',
+                    '游戏里的蜜蜂、蝴蝶、甲虫这些昆虫，是我从网上找来的素材，我再把它们一只一只地放进自己搭好的场景里，就像请它们来我的花园做客一样。',
+                    '看着这些小动物在我亲手做的花园里飞来飞去，我心里特别开心。我最想让大家做的，就是飞过云朵，慢慢地、仔细地去观察每一种小动物，就像我观察它们时那样。'
+                ],
+                file: 'index.html', img: '3dhuayuan/3dhuayuan.webp'
+            },
+            {
+                id: 'tangdoudevil', name: '糖豆别生气', dev: '郭同学', age: '三年级', learning: '六个月',
+                type: '闯关游戏', stage: '低年级',
+                kidQuote: '我想让玩家一边生气一边笑，所以偷偷在关卡里塞了好多恶作剧。',
+                howto: '玩家操控糖豆闯过 30 个短小却机关重重的关卡，躲避陷阱、适应变化的重力和方向。',
+                highlights: ['关卡设计', '失败反馈', '机关陷阱', '节奏挑战'],
+                teacherSee: '讲关卡节奏与失败反馈的好案例，帮学生理解"有趣的挑战"靠规则而非纯堆难度。',
+                parentSee: '六个月的坚持，能看到孩子的耐心、对细节的打磨和一次次自我测试的过程。',
+                fullStory: [
+                    '我想做一个特别"坏"又特别好玩的游戏——它看起来超级可爱，让人放松警惕，其实到处都在偷偷捉弄你。我最想看到的，就是玩家一边气得不行，一边又忍不住笑出来。',
+                    '所以我设计了三十个关卡，每一关都很短，但里面藏着各种各样的恶作剧：地板会突然掉下去，尖刺会冷不丁地冒出来，有时候连方向和重力都会整个反过来。你永远猜不到下一秒会发生什么。',
+                    '我自己在测试的时候，就被自己设计的机关坑得团团转，被自己气笑了好多好多次。不过我发现，每一次失败其实都能让人记住一点新东西，下一次就会更聪明一些。',
+                    '这个游戏我做了整整六个月，是我花的时间最长、也最舍不得的作品。我真的希望，你玩到最后的时候，能变得比糖豆还要聪明，把我设的所有坑都躲过去。'
+                ],
+                file: 'index.html', img: 'tangdoudevil/tangdoudevil.webp'
+            },
+            {
+                id: '3dxiangsufeng', name: '3D 像素方块', dev: '陈小宇', age: '五年级', learning: '三个月',
+                type: '沙盒建造', stage: '中年级',
+                kidQuote: '我照着最喜欢的《我的世界》，自己搭了一个能挖、能造的小世界。',
+                howto: '玩家在像素沙盒世界中挖掘方块、收集水晶、选择材料建造房屋，体验昼夜变化。',
+                highlights: ['沙盒建造', '方块网格', '材料系统', '自由创造'],
+                teacherSee: '讲沙盒世界底层规则的案例：方块网格、材料系统、地形编辑与自由中的限制。',
+                parentSee: '能看到孩子不满足于"玩"，而是想弄懂喜欢的游戏是怎么做出来的。',
+                fullStory: [
+                    '我特别特别喜欢《我的世界》，喜欢那种可以自由探索、挖掉一块块方块、再用它们盖出自己想要的建筑的感觉。玩得多了，我就冒出一个大胆的念头：我能不能自己也做一个这样的世界？',
+                    '于是我就动手了。在我的世界里，你可以改变地形，可以收集水晶，可以选择不同的材料来盖属于自己的房子，还能看到白天和黑夜慢慢变换，遇到会动的方块生物。',
+                    '做这个游戏最难的地方，是要让每一个方块都能被正确地放上去、又能被正确地拆下来。为了搞懂背后那套方块网格的规则，我研究了好久好久，失败了很多次才终于弄明白。',
+                    '我最开心的一件事，就是想到：同一个世界，交到不同人手里，最后会长成完全不一样的模样。我希望每一个玩的人，都能在这里创造出只属于他自己的那场冒险。'
+                ],
+                file: '3dxiangsufeng.html', img: '3dxiangsufeng/3dxiangsufeng.webp'
+            },
+            {
+                id: 'chengyugushi', name: '成语起源', dev: '周语桐', age: '四年级', learning: '两个月',
+                type: '学科融合', stage: '中年级',
+                kidQuote: '成语光靠背太容易忘了，所以我把它们做成了可以闯关的游戏。',
+                howto: '玩家通过看提示、填字、闯关的方式记忆成语，在游戏过程中积累词汇。',
+                highlights: ['语文融合', '互动答题', '提示设计', '关卡递进'],
+                teacherSee: '语文融合课案例，可拆提示设计、答案验证与关卡难度递进。',
+                parentSee: '能看到孩子懂得把自己学习中的难点，转化成帮别人学习的好方法。',
+                fullStory: [
+                    '我发现一件很烦人的事：有些成语我明明记住了，可过几天又忘了，忘了再背，背了又忘，怎么都记不牢。我就想，有没有什么办法，能让记成语变得不那么枯燥呢？',
+                    '后来我想到了：如果把成语做成游戏，是不是就好多了？于是我把学过的成语做成了填字和闯关的玩法。玩家要先观察提示，努力回忆那个词语，再把正确的字一个个填进格子里。',
+                    '我特意把关卡设计得越来越难，就像升级打怪一样，让人有一直想往下闯的动力。',
+                    '我最大的希望，是大家在忙着过关的时候，其实不知不觉就把更多成语记住了。而且我也想让大家发现——原来那些方方正正的汉字，拼在一起竟然能这么有意思。'
+                ],
+                file: 'chengyugushi.html', img: 'chengyugushi/chengyugushi.webp'
+            },
+            {
+                id: 'guodongpaidui', name: '果冻派对', dev: '刘同学', age: '二年级', learning: '两个月',
+                type: '亲子合作', stage: '低年级',
+                kidQuote: '我做了两个软乎乎的果冻小人，因为我想和妈妈一起玩。',
+                howto: '两名玩家各控制一个果冻角色，在平台和障碍间互相配合、协作通关。',
+                highlights: ['双人合作', '亲子互动', '角色控制', '协作通关'],
+                teacherSee: '低龄创意与合作任务案例，可讨论双角色控制、协作与通关目标设计。',
+                parentSee: '能看到孩子把"想和家人一起玩"这份心意，做成了真实的亲子作品。',
+                fullStory: [
+                    '我做这个游戏，其实是因为一个很简单的原因——我想和妈妈一起玩。平常我们各玩各的，我就想，要是能有一个游戏，是我们俩一起才能通关的，那该多好。',
+                    '所以我设计了两个软乎乎的果冻小人，它们会跳、会撞，还会弹来弹去，特别可爱。我们可以一人控制一个，在各种平台和障碍中间互相帮忙，一起去找出口。',
+                    '一个人是没办法通关的，必须两个人配合才行。这样妈妈就一定要陪我一起玩啦。',
+                    '我最喜欢的，就是我和妈妈一起研究怎么配合的时候——我们一起失败、一起大笑，妈妈笑得可开心了。那种感觉，比通关本身还要让我高兴。'
+                ],
+                file: 'guodongpaidui.html', img: 'guodongpaidui/guodongpaidui.webp'
+            },
+            {
+                id: 'liuxingtiangong', name: '流形天宫', dev: '包子墨', age: '六年级', learning: '三个月',
+                type: '数学可视化', stage: '高年级',
+                kidQuote: '课本上的几何图形太扁了，我想让它们立起来，能用手转着看。',
+                howto: '玩家可以旋转、缩放、拆解三维几何图形，从不同角度观察其空间结构。',
+                highlights: ['数学融合', '3D可视化', '空间结构', '视角变换'],
+                teacherSee: '数学可视化案例，讲 3D 模型、视角变化、旋转缩放与空间结构观察。',
+                parentSee: '能看到孩子把自己学习中的困惑，变成了一个帮自己也帮别人理解的工具。',
+                fullStory: [
+                    '我在学几何的时候一直有个困扰：课本上的图形都是画在平面上的，扁扁的，我怎么努力也想象不出来它们立体起来到底是什么样子。这让我做题的时候特别头疼。',
+                    '我就想，既然想不出来，那我干脆把它们真的做成立体的，让它们从纸上"站"起来。于是我做了一个可以旋转、缩放、还能把图形一块块拆开的三维实验场。',
+                    '在里面，你可以从上面看、从侧面看、甚至钻到里面去看，慢慢就能弄清楚：一个立体图形到底是由哪些部分拼起来的。就像做实验一样，一点点把它研究透。',
+                    '最让我惊喜的是，做完这个游戏之后，我自己再做几何题，一下子就觉得清楚多了。所以我特别想把它分享出来，希望别的同学也能像我一样，把空间和数学真正"看"明白。'
+                ],
+                file: 'liuxingtiangong.html', img: 'liuxingtiangong/liuxingtiangong.webp'
+            },
+            {
+                id: 'shuimo', name: '墨剑文道', dev: '陶同学', age: '三年级', learning: '两个月',
+                type: '学科融合', stage: '低年级',
+                kidQuote: '我把语文题变成了墨剑的招式——答对了，才能帅气地斩出一剑。',
+                howto: '玩家通过回答诗词、成语、英语等题目来挥剑攻击，答对即可斩出招式过关。',
+                highlights: ['语文融合', '水墨风格', '动作反馈', '文化表达'],
+                teacherSee: '讲学科内容如何结合视觉风格与动作反馈，适合语文、英语或传统文化主题。',
+                parentSee: '能看到孩子把自己的兴趣和学习结合起来，让枯燥的练习变得有动力。',
+                fullStory: [
+                    '我特别喜欢水墨画，也超爱看武侠故事，总幻想自己是个会武功的大侠。同时我又想，能不能让做语文题变得没那么枯燥、更有"打斗感"一点呢？',
+                    '把这两个想法凑到一起，我就做出了这款墨剑闯关游戏。在游戏里，你要观察诗词、成语和英语词汇题，想好答案，然后朝正确的那个选项挥出一剑。',
+                    '答对的时候，那一剑劈出去真的特别好看，墨汁飞溅开来的样子，让我自己都看得入迷。',
+                    '我最想让大家感受到的是：做题的时候，你不是在被逼着背书，而是在练习一套越来越厉害的"知识剑法"。每答对一题，就是又学会了一招。'
+                ],
+                file: 'shuimo.html', img: 'shuimo/shuimo.webp'
+            },
+            {
+                id: '3dsheji', name: '作战代号：暴风行动', dev: '唯唯', age: '六年级', learning: '一个月',
+                type: '射击任务', stage: '高年级',
+                kidQuote: '我参考了《三角洲行动》《彩虹六号》，想自己做一场真正讲战术的黑夜任务。',
+                howto: '玩家在夜间城区中移动、瞄准、射击、补给弹药，利用掩体完成每一关的作战目标。',
+                highlights: ['系统设计', '任务进度', '射击逻辑', 'UI状态'],
+                teacherSee: '讲"复杂游戏由多个系统组成"的案例：角色控制、射击逻辑、敌人反馈、任务进度与 UI。',
+                parentSee: '能看到孩子有能力同时驾驭多个复杂系统，并让它们协调运作。',
+                fullStory: [
+                    '我很喜欢《三角洲行动》《彩虹六号》这一类射击游戏，但吸引我的不是"突突突"，而是它们特别讲究战术和配合——什么时候前进、什么时候躲掩体，都得动脑子。我一直想，我能不能也做一个这样的游戏？',
+                    '于是我参考它们的玩法，设计了一场发生在黑夜城区里的特别行动。玩家可以移动、瞄准、射击、补充弹药，还要一直盯着自己的生命值、护甲和任务进度，学会灵活地利用掩体，一关一关完成作战目标。',
+                    '做这个游戏最难、但也最过瘾的地方，是要同时管好这么多东西：角色怎么动、子弹怎么打、敌人怎么反应、任务进度怎么显示……这些系统得一个个做出来，还得让它们彼此配合、不打架。',
+                    '每当所有系统终于顺畅地运转起来，玩起来就像一场真正的行动时，我就觉得，之前烧的那些脑子全都值了。'
+                ],
+                file: '3dsheji.html', img: '3dsheji/3dsheji.webp'
+            },
+            {
+                id: '3dboss', name: '幻想旷野 Boss 战', dev: '宏熙', age: '六年级', learning: '一个月',
+                type: 'Boss战', stage: '高年级',
+                kidQuote: '我照着《原神》的感觉，造了一座会攻击的巨像，就等你来找它的破绽。',
+                howto: '玩家在开阔旷野中观察巨像 Boss 的攻击规律，通过移动、闪避与技能反击将其击败。',
+                highlights: ['Boss战', '技能系统', '攻击规律', '策略闪避'],
+                teacherSee: '讲 Boss 战规则设计：技能冷却、攻击范围、闪避判断与"难度靠规则实现"。',
+                parentSee: '能看到孩子懂得"好的挑战要有规律可循"，会为玩家设计公平又有趣的难度。',
+                fullStory: [
+                    '我特别喜欢《原神》这样的游戏——有一整个幻想的世界，有各种炫酷的角色技能，还有那种打起来让人热血沸腾的强大 Boss。我一直想，要是能自己造一个这样的 Boss，那多酷啊。',
+                    '于是我参考这类玩法，创造了一片开阔的旷野，还有一个守在遗迹旁边的巨大守卫。玩家要一边观察巨像是怎么出招的，一边不停地移动、闪避，再抓住机会用普通攻击、元素技能和爆发技能去反击它。',
+                    '我特意给这个巨像设计了固定的攻击规律，而不是让它乱打一通。因为我觉得，好的挑战不应该靠"耍赖"，而应该是有规律可循、只要用心就能找到破绽的。',
+                    '最有成就感的一刻，就是当玩家终于摸清了它的规律、找准时机把它打败的时候。我希望每一个战胜它的人，都能体会到那种"我靠自己想明白了"的痛快。'
+                ],
+                file: '3dboss.html', img: '3dboss/3dboss.webp'
+            },
+            {
+                id: 'rail_in_the_air', name: '空中铁轨', dev: '林星野', age: '五年级', learning: '两个月',
+                type: '闯关游戏', stage: '中年级',
+                kidQuote: '我把列车开到了云上，让每一个弯道都变成一次速度的考验。',
+                howto: '玩家驾驶列车在云端铁轨上行驶，需在弯道前减速、直道加速，避免被甩出轨道。',
+                highlights: ['路线规划', '速度控制', '弯道预判', '关卡节奏'],
+                teacherSee: '讲速度、路线、弯道预判与失败复盘，帮学生理解简单操作如何变成有挑战的关卡。',
+                parentSee: '能看到孩子善于观察和总结规律，会通过反复练习不断优化自己的表现。',
+                fullStory: [
+                    '我从小就特别喜欢高速列车，喜欢它们飞驰而过的样子；我也很着迷那些漂浮在天空里的奇妙建筑。有一天我就想：要是把列车开到云上去，那会是什么样呢？',
+                    '于是我设计了这条穿过云海的空中铁轨。但我不想做一个只要一直踩加速就能赢的游戏，那样太没意思了。',
+                    '在我的游戏里，你得动脑子：在弯道前要提前刹车，出了弯再猛地冲刺，还要小心别把列车甩出轨道。速度和控制之间的那个平衡，是最考验人的地方。',
+                    '我希望大家能把每一段路线都记在心里，一次比一次开得更稳、更快，去挑战一个又一个新的通关纪录。就像我一遍遍练习、一点点变快的那样。'
+                ],
+                file: 'rail_in_the_air.html', img: 'rail_in_the_air/rail_in_the_air.webp'
+            }
         ];
 
         let slideIndex = 0;
         const heroWrapper = document.getElementById('hero-wrapper');
         const grid = document.getElementById('grid');
 
-        projects.forEach((p, i) => {
-            // 轮播图修改为 div，不再跳转
-            heroWrapper.innerHTML += `
-                <div class="hero-slide ${i===0?'active':''}">
-                    <img src="${p.img}" alt="${p.name}游戏海报">
-                    <div class="hero-caption">
-                        <h2>${p.name}</h2>
-                        <p>${p.shortDesc}</p>
-                        <div class="hero-meta">
-                            <span>开发学生：${p.dev}</span>
-                            <span>年龄：${p.age}</span>
-                            <span>开发时长：${p.learning}</span>
-                        </div>
+        // 渲染轮播（选取前 5 个代表作品）
+        const heroPicks = projects.slice(0, 5);
+        heroPicks.forEach((p, i) => {
+            const slide = document.createElement('div');
+            slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+            slide.innerHTML = `
+                <img src="${p.img}" alt="${p.name}作品海报">
+                <div class="hero-caption">
+                    <div class="work-name">${p.name}</div>
+                    <p class="work-story">"${p.kidQuote}"</p>
+                    <div class="hero-meta">
+                        <span>作者：${p.dev}</span>
+                        <span>${p.age}</span>
+                        <span>开发时长：${p.learning}</span>
+                        <span>${p.type}</span>
                     </div>
                 </div>
             `;
-            // 下方游戏卡片跳转，且使用长描述
-            grid.innerHTML += `
-                <a href="${p.id}/${p.file}" class="game-card">
+            heroWrapper.appendChild(slide);
+        });
+
+        // 生成筛选标签
+        const allTypes = [...new Set(projects.map(p => p.type))];
+        const stageOrder = ['低年级', '中年级', '高年级', '初中'];
+        const allStages = stageOrder.filter(s => projects.some(p => p.stage === s));
+        let activeType = '全部';
+        let activeStage = '全部';
+
+        function buildChips(containerId, values, onPick, group) {
+            const box = document.getElementById(containerId);
+            const list = ['全部', ...values];
+            box.innerHTML = list.map(v =>
+                `<span class="chip ${v === '全部' ? 'active' : ''}" data-val="${v}">${v}</span>`
+            ).join('');
+            box.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    box.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    onPick(chip.dataset.val);
+                    applyFilters();
+                });
+            });
+        }
+        buildChips('typeChips', allTypes, v => activeType = v);
+        buildChips('stageChips', allStages, v => activeStage = v);
+
+        // 渲染作品卡
+        function renderCards(list) {
+            if (!list.length) {
+                grid.innerHTML = `<div class="result-empty" style="grid-column:1/-1;">没有找到匹配的作品，换个关键词或标签试试吧。</div>`;
+                return;
+            }
+            grid.innerHTML = list.map(p => `
+                <div class="game-card">
                     <div class="poster-wrap">
-                        <img src="${p.img}" alt="${p.name}游戏海报" loading="lazy">
+                        <img src="${p.img}" alt="${p.name}作品海报" loading="lazy">
+                        <span class="poster-type">${p.type}</span>
                     </div>
                     <div class="content">
                         <h3>${p.name}</h3>
-                        <p>${p.desc}</p>
+                        <p class="author-line">作者 <b>${p.dev}</b> · ${p.age} · 用时 ${p.learning}</p>
+
+                        <div class="kid-quote">
+                            <p>${p.kidQuote}</p>
+                        </div>
+
+                        <div class="play-block">
+                            <span class="block-title">这个作品怎么玩</span>
+                            <p>${p.howto}</p>
+                        </div>
+
+                        <div class="tag-row">
+                            ${p.highlights.map(h => `<span class="tag-pill">${h}</span>`).join('')}
+                        </div>
+
+                        <div class="see-grid">
+                            <div class="see-box teacher">
+                                <span class="see-label">老师看点</span>
+                                <p>${p.teacherSee}</p>
+                            </div>
+                            <div class="see-box parent">
+                                <span class="see-label">家长看点</span>
+                                <p>${p.parentSee}</p>
+                            </div>
+                        </div>
+
                         <div class="project-meta">
                             <div class="meta-item">
-                                <span class="meta-label">开发学生</span>
+                                <span class="meta-label">作者</span>
                                 <span class="meta-value">${p.dev}</span>
                             </div>
                             <div class="meta-item">
-                                <span class="meta-label">年龄</span>
+                                <span class="meta-label">年级</span>
                                 <span class="meta-value">${p.age}</span>
                             </div>
                             <div class="meta-item">
@@ -215,18 +844,71 @@
                                 <span class="meta-value">${p.learning}</span>
                             </div>
                         </div>
+
+                        <div class="card-actions">
+                            <button class="story-btn" onclick="openStory('${p.id}')">🖊️ 查看创作故事</button>
+                            <a href="${p.id}/${p.file}" class="play-btn">▶ 试玩这个作品</a>
+                        </div>
                     </div>
-                </a>
-            `;
+                </div>
+            `).join('');
+        }
+
+        // 筛选逻辑
+        function applyFilters() {
+            const kw = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const filtered = projects.filter(p => {
+                const matchType = activeType === '全部' || p.type === activeType;
+                const matchStage = activeStage === '全部' || p.stage === activeStage;
+                const haystack = (p.name + p.dev + p.type + p.stage + p.highlights.join('') + p.kidQuote).toLowerCase();
+                const matchKw = !kw || haystack.includes(kw);
+                return matchType && matchStage && matchKw;
+            });
+            renderCards(filtered);
+        }
+        renderCards(projects);
+
+        // 打开创作故事弹窗
+        function openStory(id) {
+            const p = projects.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('storyCoverImg').src = p.img;
+            document.getElementById('storyCoverImg').alt = p.name;
+            document.getElementById('storyCoverName').textContent = p.name;
+            document.getElementById('storyCoverAuthor').textContent = `${p.dev} · ${p.age}`;
+            document.getElementById('storyText').innerHTML = p.fullStory.map(t => `<p>${t}</p>`).join('');
+            document.getElementById('storySignoff').innerHTML = `—— <b>${p.dev}</b>（${p.age}），历时 ${p.learning}`;
+            document.getElementById('storyModalPlay').setAttribute('href', `${p.id}/${p.file}`);
+            document.getElementById('storyModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeStory(e) {
+            if (e && e.target && e.target.id && e.target.id !== 'storyModal' && e.type === 'click') {
+                // 仅当点击遮罩层或关闭按钮时关闭
+            }
+            document.getElementById('storyModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        // ESC 关闭
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeStory();
         });
 
+        // 随机试玩
+        function randomPlay(e) {
+            if (e) e.preventDefault();
+            const p = projects[Math.floor(Math.random() * projects.length)];
+            window.location.href = `${p.id}/${p.file}`;
+        }
+
+        // 轮播控制
         function plusSlides(n) {
             const slides = document.getElementsByClassName("hero-slide");
+            if (!slides.length) return;
             slides[slideIndex].classList.remove('active');
             slideIndex = (slideIndex + n + slides.length) % slides.length;
             slides[slideIndex].classList.add('active');
         }
-
         setInterval(() => plusSlides(1), 5000);
     </script>
 </body>
