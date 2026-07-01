@@ -1,176 +1,414 @@
-# 扣哒世界教学中心
+# 扣哒世界教学中心使用说明
 
-这是一个面向老师、教研、机构运营与课程展示使用的静态教学资源中心。首页汇总扣哒世界主线课程、AI 课程、竞技场课程、信奥课程、考级真题、CSP 真题与计算机科学探索等入口；各课程模块放在 `islands/` 下，每个模块通过自己的 `index.html` 进入。
+扣哒世界教学中心是面向老师、教研人员、机构管理者和课程顾问的教学资源入口。这里集中整理了扣哒世界 Python、C++、AI、竞技场、信奥、考级真题、CSP 真题和计算机科学探索等课程内容，方便老师备课、上课、选课、展示课程体系。
 
-## 快速打开
+在线访问地址：
 
-推荐从项目根目录打开：
+[https://educator-hub.koudashijie.cn/](https://educator-hub.koudashijie.cn/)
+
+打开链接即可使用，不需要安装软件。
+
+## 适合谁使用
+
+| 使用者 | 可以用它做什么 |
+| --- | --- |
+| 新老师 | 通过“新老师入门指引”快速了解怎么选课、备课和上第一节课 |
+| 授课老师 | 按课程类型进入 Python、C++、AI、竞技场、信奥等模块，直接查看知识点、题目、练习和课堂资源 |
+| 教研人员 | 查看完整课程结构，梳理课程大纲、章节安排和教学路径 |
+| 校区/机构负责人 | 快速了解可开设的课程方向，用于排课、课程介绍和内部培训 |
+| 课程顾问 | 用首页和各课程页向家长展示课程体系、学习路径、作品成果和竞赛方向 |
+
+## 快速开始
+
+1. 打开 [https://educator-hub.koudashijie.cn/](https://educator-hub.koudashijie.cn/)。
+2. 在顶部菜单选择要查看的课程方向。
+3. 如果是第一次使用，建议先点击首页的“新老师入门指引”。
+4. 如果已经知道要上什么课，可以直接进入对应课程模块。
+5. 进入课程模块后，按照章节、主题或按钮提示查看知识讲解、课堂练习、测验题、真题或作品。
+
+## 首页怎么用
+
+首页是整个教学中心的总入口，主要分为几个区域：
+
+| 区域 | 用途 |
+| --- | --- |
+| 顶部菜单 | 直接进入 AI、竞技场、Python、C++、信奥基础、信奥算法等核心课程 |
+| 更多资源 | 进入考级真题、CSP 真题、计算机科学探索和线上编程课介绍 |
+| 首屏操作按钮 | 新老师可以进入入门指引；老师也可以查看学生 AI 作品 |
+| 老师常用入口 | 按课程类型进入主要模块，适合备课前快速定位 |
+| 上课流程说明 | 帮助老师理解一节课从备课到授课的大致流程 |
+| 班型建议 | 根据不同班型选择合适课程资源 |
+| 联系与支持 | 查看商务合作和课程支持方式 |
+
+## 核心课程入口
+
+首页顶部菜单包含 6 个核心课程入口：
+
+| 课程入口 | 说明 |
+| --- | --- |
+| 扣哒宇宙AI课 | 面向生成式 AI 学习、提示词工程、AI 项目创作与学生作品展示 |
+| 竞技场课 | 面向编程竞技、策略对战、班级活动和赛事展示 |
+| 扣哒世界Python课 | 面向 Python 入门、兴趣课、常规编程课和基础代码能力训练 |
+| 扣哒世界C++课 | 面向 C++ 入门、语法基础和后续信奥衔接 |
+| 扣哒信奥基础课 | 面向信息学竞赛入门、基础语法、输入输出和基础题型训练 |
+| 扣哒信奥算法课 | 面向算法专题、竞赛提高、CSP/信奥训练 |
+
+## 更多资源入口
+
+首页右上角“更多资源”提供补充教学内容：
+
+| 资源 | 说明 |
+| --- | --- |
+| 考级真题 | 小学生编程考级真题与练习入口 |
+| CSP真题 | CSP-J/S 相关专题与真题训练入口 |
+| 计算机科学探索 | 面向计算机科学基础概念和拓展课程 |
+| 线上编程课 | 线上编程课/花儿实验班课程介绍页面 |
+
+## 各模块说明
+
+### 扣哒宇宙 AI 课程
+
+入口：`islands/ai/index.html`
+
+内容包括：
+
+- AI 课程体系介绍
+- AI 入门课程
+- 人工智能探索课程
+- AI 沙盒课程
+- 学生 AI 作品展示
+- 老师授课指引、课程介绍、常见问题和安全说明
+
+适合用于：
+
+- 开设 AI 兴趣课
+- 给家长展示 AI 课程成果
+- 查看学生作品案例
+- 了解 AI 课程从入门到项目创作的路径
+
+### 竞技场课程
+
+入口：`islands/arena/index.html`
+
+内容包括：
+
+- 竞技场教学中心
+- 多人对战项目入口
+- 课堂活动素材
+- 竞技场玩法说明
+- 适合班级挑战、阶段展示、比赛训练的内容
+
+适合用于：
+
+- 组织班级活动
+- 做阶段性编程挑战
+- 将游戏化对战转化为算法和策略训练
+- 向家长展示学生的实战能力
+
+### 扣哒世界 Python 课程
+
+入口：`islands/world-python/index.html`
+
+内容包括：
+
+- Python 主线课程
+- 第 1 章到第 7 章课程内容
+- 知识讲解、关卡练习、测验题等资源
+- 适合零基础学生逐步建立真实代码能力
+
+适合用于：
+
+- Python 启蒙课
+- 编程兴趣课
+- 小学高年级和初中入门课程
+- 常规班长期授课
+
+### 扣哒世界 C++ 课程
+
+入口：`islands/world-cpp/index.html`
+
+内容包括：
+
+- C++ 主线课程
+- 第 1 章到第 7 章课程内容
+- C++ 基础语法、练习和测验
+- 与信奥课程衔接的基础内容
+
+适合用于：
+
+- C++ 入门班
+- 信奥预备班
+- 需要从 Python 转向 C++ 的学生
+- 竞赛方向前置训练
+
+### 扣哒信奥基础篇
+
+入口：`islands/oj-basic/index.html`
+
+内容包括：
+
+- 信奥基础知识体系
+- 语法、输入输出、条件、循环、数组、函数等基础内容
+- 基础练习、专题讲解、测验和 OJ 题目
+- 适合从 C++ 基础过渡到竞赛训练
+
+适合用于：
+
+- 信奥入门班
+- CSP-J 基础准备
+- C++ 基础巩固
+- 语法和基础题型训练
+
+### 扣哒信奥算法篇
+
+入口：`islands/oj-algo/index.html`
+
+内容包括：
+
+- 算法专题课程
+- 排序、枚举、递归、搜索、贪心、动态规划等方向内容
+- 专题练习、题解、测验和 OJ 训练
+
+适合用于：
+
+- 信奥提高班
+- CSP-J/S 备考
+- 算法专题训练
+- 有一定 C++ 基础的学生进阶学习
+
+### 考级真题
+
+入口：`islands/grade-exam/index.html`
+
+内容包括：
+
+- 1 级到 6 级编程考级内容
+- 真题、测验和知识总结
+- Python 与 C++ 相关练习
+
+适合用于：
+
+- 考级备考
+- 阶段复习
+- 课后练习
+- 家长可见的学习成果展示
+
+### CSP 真题
+
+入口：`islands/csp-real/index.html`
+
+内容包括：
+
+- CSP-J/S 相关专题入口
+- 选择题、阅读程序、完善程序和专题训练
+- 与竞赛相关的题目练习
+
+适合用于：
+
+- CSP 备考
+- 竞赛班课后训练
+- 算法课配套练习
+- 赛前专题复习
+
+### 计算机科学探索
+
+入口：`islands/cs-science/index.html`
+
+内容包括：
+
+- 计算机科学基础课程
+- 第 1 章到第 9 章内容
+- 计算机思维、科学概念和拓展知识
+
+适合用于：
+
+- 计算机科学启蒙
+- 编程课之外的知识拓展
+- 信息科技素养课程
+- 学校或机构的综合科创课程
+
+## 推荐使用方式
+
+### 新老师第一次使用
+
+建议路径：
 
 ```text
-educator-hub-main/index.html
+首页 → 新老师入门指引 → 选择课程方向 → 进入对应课程模块 → 查看章节内容
 ```
 
-如果需要用本地服务器预览，可以在 `educator-hub-main` 目录下运行：
+推荐先看：
+
+- 新老师入门指引
+- Python 课程
+- AI 课程
+- 信奥基础篇
+
+### 老师备课
+
+建议路径：
+
+```text
+首页 → 老师常用入口 → 选择课程模块 → 找到章节 → 打开知识/练习/测验
+```
+
+备课时可以重点关注：
+
+- 本节课知识点
+- 课堂练习
+- 测验题
+- 题解或总结
+- 是否需要搭配作品、竞技场或真题展示
+
+### 课程展示
+
+建议路径：
+
+```text
+首页 → 课程模块 → 学生作品/课程体系/成果展示
+```
+
+适合展示给家长或合作方的内容：
+
+- 扣哒宇宙 AI 学生作品
+- 竞技场课程
+- Python/C++ 主线课程
+- 信奥课程体系
+- 考级与 CSP 真题资源
+
+### 竞赛与提高班
+
+建议路径：
+
+```text
+首页 → 扣哒信奥基础课 / 扣哒信奥算法课 / CSP真题 / 竞技场课
+```
+
+适合组合使用：
+
+- C++ 课程打基础
+- 信奥基础篇做语法与基础题型训练
+- 信奥算法篇做专题提高
+- CSP 真题做赛前训练
+- 竞技场课做策略与算法实践
+
+## 项目架构
+
+项目是静态网页结构，主要由 HTML 页面、图片资源和课程内容文件组成。
+
+```text
+educator-hub-main/
+├─ index.html
+├─ teacher-first-class.html
+├─ flower-experiment-class.html
+├─ README.md
+├─ logo-cn.webp
+├─ qr.png
+├─ assets/
+├─ images/
+└─ islands/
+   ├─ ai/
+   ├─ arena/
+   ├─ csp-real/
+   ├─ cs-science/
+   ├─ grade-exam/
+   ├─ oj-algo/
+   ├─ oj-basic/
+   ├─ world-cpp/
+   └─ world-python/
+```
+
+### 根目录
+
+| 文件/文件夹 | 说明 |
+| --- | --- |
+| `index.html` | 教学中心主页 |
+| `teacher-first-class.html` | 新老师入门指引 |
+| `flower-experiment-class.html` | 线上编程课介绍页 |
+| `README.md` | 当前说明文档 |
+| `logo-cn.webp` | 页面顶部使用的扣哒世界 logo |
+| `qr.png` | 联系二维码 |
+| `assets/` | 首页使用的课程封面、插图等图片 |
+| `images/` | 其他图片资源 |
+| `islands/` | 各课程模块和资源模块 |
+
+### `islands/` 目录
+
+`islands/` 是课程内容的核心目录。每个子文件夹代表一个课程模块，每个模块都有自己的 `index.html` 作为入口。
+
+| 文件夹 | 说明 |
+| --- | --- |
+| `ai/` | 扣哒宇宙 AI 课程 |
+| `arena/` | 竞技场课程 |
+| `world-python/` | Python 主线课程 |
+| `world-cpp/` | C++ 主线课程 |
+| `oj-basic/` | 信奥基础篇 |
+| `oj-algo/` | 信奥算法篇 |
+| `grade-exam/` | 编程考级真题 |
+| `csp-real/` | CSP 真题与训练 |
+| `cs-science/` | 计算机科学探索 |
+
+### 章节内容
+
+多数课程模块按章节组织，常见命名方式如下：
+
+```text
+ch1/
+ch2/
+ch3/
+...
+```
+
+章节里常见文件包括：
+
+| 文件 | 常见用途 |
+| --- | --- |
+| `knowledge.html` | 知识讲解 |
+| `quiz.html` | 测验或练习 |
+| `levels.html` | 关卡或练习列表 |
+| `pknowledge.html` | 补充知识讲解 |
+| `pquiz.html` | 补充测验 |
+
+不同模块内容形式会略有差异，实际使用时以页面按钮为准。
+
+## 图片与加载优化
+
+首页图片已经使用 WebP 格式，以便更快加载。主要图片包括：
+
+| 图片 | 用途 |
+| --- | --- |
+| `logo-cn.webp` | 顶部 logo |
+| `assets/educator.webp` | 首页老师插图 |
+| `assets/home-world.webp` | Python/C++ 课程封面 |
+| `assets/home-ai.webp` | AI 课程封面 |
+| `assets/home-arena.webp` | 竞技场课程封面 |
+| `assets/home-oj.webp` | 信奥课程封面 |
+
+如果页面加载慢，建议优先检查图片体积，新增图片尽量使用 WebP。
+
+## 本地预览
+
+如果需要在本地电脑预览项目，可以直接双击打开 `index.html`。如果某些浏览器安全限制导致资源无法正常加载，建议使用本地服务器：
 
 ```bash
 python -m http.server 8000
 ```
 
-然后访问：
+访问：
 
 ```text
 http://localhost:8000/
 ```
 
-## 当前入口结构
+## 使用建议
 
-主入口文件：
+- 日常备课从首页进入，不建议直接记忆某个深层文件路径。
+- 给家长或合作方展示时，优先使用线上地址：[https://educator-hub.koudashijie.cn/](https://educator-hub.koudashijie.cn/)。
+- 新老师第一次上课前，建议先阅读“新老师入门指引”。
+- 开设 Python 或 C++ 常规课时，优先从对应主线课程进入。
+- 开设竞赛方向课程时，可以组合使用 C++、信奥基础、信奥算法、CSP 真题和竞技场课程。
+- 开设 AI 方向课程时，可以组合使用扣哒宇宙 AI 课程和学生 AI 作品展示。
 
-| 页面 | 说明 |
-| --- | --- |
-| `index.html` | 教学中心主页，老师最常用的总入口 |
-| `teacher-first-class.html` | 新老师入门指引 |
-| `flower-experiment-class.html` | 线上编程课/花儿实验班展示页 |
+## 联系支持
 
-首页顶部菜单当前跳转路径：
-
-| 菜单 | 当前路径 |
-| --- | --- |
-| 扣哒宇宙AI课 | `islands/ai/index.html` |
-| 竞技场课 | `islands/arena/index.html` |
-| 扣哒世界Python课 | `islands/world-python/index.html` |
-| 扣哒世界C++课 | `islands/world-cpp/index.html` |
-| 扣哒信奥基础课 | `islands/oj-basic/index.html` |
-| 扣哒信奥算法课 | `islands/oj-algo/index.html` |
-
-首页“更多资源”菜单当前跳转路径：
-
-| 菜单 | 当前路径 |
-| --- | --- |
-| 考级真题 | `islands/grade-exam/index.html` |
-| CSP真题 | `islands/csp-real/index.html` |
-| 计算机科学探索 | `islands/cs-science/index.html` |
-| 线上编程课 | `flower-experiment-class.html` |
-
-## `islands/` 模块说明
-
-当前目录已经改为扁平模块结构，所有课程岛屿都直接位于 `islands/` 第一层。
-
-```text
-islands/
-├─ ai/
-├─ arena/
-├─ csp-real/
-├─ cs-science/
-├─ grade-exam/
-├─ oj-algo/
-├─ oj-basic/
-├─ world-cpp/
-└─ world-python/
-```
-
-各模块用途：
-
-| 模块 | 入口 | 内容概览 |
-| --- | --- | --- |
-| `ai` | `islands/ai/index.html` | 扣哒宇宙 AI 课程介绍、AI 入门、AI 探索、AI 沙盒、学生作品集 |
-| `arena` | `islands/arena/index.html` | 竞技场教学中心，包含竞技场项目、规则介绍与课堂活动素材 |
-| `world-python` | `islands/world-python/index.html` | Python 主线课程，包含 `ch1` 到 `ch7` 的知识、关卡、测验等内容 |
-| `world-cpp` | `islands/world-cpp/index.html` | C++ 主线课程，包含 `ch1` 到 `ch7` 的知识、关卡、测验等内容 |
-| `oj-basic` | `islands/oj-basic/index.html` | 扣哒信奥基础篇，包含语法、输入输出、基础结构、练习、真题与 OJ |
-| `oj-algo` | `islands/oj-algo/index.html` | 扣哒信奥算法篇，包含算法专题、训练题、专题讲解与 OJ |
-| `grade-exam` | `islands/grade-exam/index.html` | 编程考级真题入口，按 `level1` 到 `level6` 组织 |
-| `csp-real` | `islands/csp-real/index.html` | CSP 真题与专题训练入口，当前有效内容在 `cspj/` 下 |
-| `cs-science` | `islands/cs-science/index.html` | 计算机科学探索课程，按 `ch1` 到 `ch9` 组织 |
-
-## 当前路径约定
-
-因为目录已调整为扁平结构，链接应按以下规则维护：
-
-1. 从根目录首页跳到课程模块：使用 `islands/<模块名>/index.html`。
-2. 从课程模块首页返回教学中心主页：使用 `../../index.html`。
-3. 从课程模块首页引用本模块内部章节：使用相对路径，例如 `ch1/sec1/knowledge.html`、`ch3/quiz.html`。
-4. 从 `islands/ai/project/index.html` 返回 AI 课程首页：使用 `../index.html`。
-5. 不再使用旧路径：
-   - `islands/world/world-python/index.html`
-   - `islands/world/world-cpp/index.html`
-   - `islands/oj/oj-basic/index.html`
-   - `islands/oj/oj-algo/index.html`
-   - `islands/other/grade-exam/index.html`
-   - `islands/other/csp-real/index.html`
-   - `islands/other/cs-science/index.html`
-   - `../../menu.html`
-
-旧路径与新路径对应关系：
-
-| 旧路径 | 新路径 |
-| --- | --- |
-| `islands/world/world-python/index.html` | `islands/world-python/index.html` |
-| `islands/world/world-cpp/index.html` | `islands/world-cpp/index.html` |
-| `islands/oj/oj-basic/index.html` | `islands/oj-basic/index.html` |
-| `islands/oj/oj-algo/index.html` | `islands/oj-algo/index.html` |
-| `islands/other/grade-exam/index.html` | `islands/grade-exam/index.html` |
-| `islands/other/csp-real/index.html` | `islands/csp-real/index.html` |
-| `islands/other/cs-science/index.html` | `islands/cs-science/index.html` |
-| `../../menu.html` | `../../index.html` |
-
-## 图片资源
-
-首页图片已转换为更小的 WebP 格式以提升加载速度，原始 PNG/JPG 文件仍保留作为备份。
-
-首页正在使用的图片：
-
-| 用途 | 当前文件 |
-| --- | --- |
-| 顶部 logo | `logo-cn.webp` |
-| 首页老师插图 | `assets/educator.webp` |
-| Python/C++ 模块封面 | `assets/home-world.webp` |
-| AI 模块封面 | `assets/home-ai.webp` |
-| 竞技场模块封面 | `assets/home-arena.webp` |
-| 信奥模块封面 | `assets/home-oj.webp` |
-
-其他已生成的 WebP 文件：
-
-| 文件 | 说明 |
-| --- | --- |
-| `assets/story_left_6.webp` | 从原 `story_left_6.png` 转换，用于后续需要时替换 |
-| `assets/home-world-jpg.webp` | 从原 `home-world.jpg` 转换，当前首页未引用 |
-| `assets/home-arena-jpg.webp` | 从原 `home-arena.jpg` 转换，当前首页未引用 |
-| `images/logo.webp` | 从 `images/logo.png` 转换，当前首页未引用 |
-
-## 维护建议
-
-新增或移动课程目录时，建议按下面顺序检查：
-
-1. 确认新目录下是否有 `index.html`。
-2. 更新根目录 `index.html` 的顶部导航、模块卡片和资源菜单。
-3. 更新对应模块 `index.html` 中的返回首页链接。
-4. 检查模块内部链接是否仍能落到真实文件，例如 `knowledge.html`、`quiz.html`、`levels.html`。
-5. 如果替换图片，优先使用 `.webp`，并保留原图作为备份。
-6. 修改后打开 `index.html`，逐一点击顶部菜单、模块按钮和“更多资源”菜单确认跳转。
-
-## 当前已校正的链接
-
-本次目录调整后已修正：
-
-- `index.html` 中所有指向旧 `islands/world/`、`islands/oj/`、`islands/other/` 的链接。
-- `islands/world-python/index.html` 和 `islands/world-cpp/index.html` 中返回按钮的旧 `../../menu.html` 链接。
-- `islands/csp-real/index.html` 中不存在的 `csps/array1d/quiz.html` 与 `csps/string/quiz.html` 链接，已改为当前存在的 `cspj/array1d/quiz.html` 与 `cspj/string/quiz.html`。
-
-## 内容规模概览
-
-当前各模块 HTML 文件数量概览：
-
-| 模块 | HTML 数量 |
-| --- | ---: |
-| `ai` | 19 |
-| `arena` | 72 |
-| `csp-real` | 11 |
-| `cs-science` | 73 |
-| `grade-exam` | 79 |
-| `oj-algo` | 179 |
-| `oj-basic` | 231 |
-| `world-cpp` | 191 |
-| `world-python` | 213 |
-
-这些数量用于快速了解内容规模，后续新增或删减课程后可以同步更新。
+如需课程合作、开课支持或资源咨询，请通过教学中心页面底部提供的联系方式联系扣哒世界团队。
