@@ -1,573 +1,1053 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>扣哒世界竞技场教学指南</title>
-    <style>
-        :root {
-            --bg-color: #161c22; /* 游戏背景深蓝 */
-            --card-bg: #232c38; /* 卡片背景 */
-            --accent-gold: #f4d03f; /* 游戏金币色 */
-            --accent-red: #e74c3c; /* 攻击/敌人色 */
-            --accent-green: #2ecc71; /* 成功/宝石色 */
-            --text-main: #ecf0f1;
-            --text-muted: #bdc3c7;
-            --border-style: 2px solid var(--accent-gold);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>扣哒世界｜竞技场机制与教学指南</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #0a0e1a;
+      --bg-1: #0f1623;
+      --bg-2: #151d2e;
+      --bg-card: rgba(14, 20, 35, 0.92);
+      --bg-card-hover: rgba(20, 28, 48, 0.95);
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --border-gold: rgba(197, 163, 96, 0.35);
+      --text-0: #e8ecf2;
+      --text-1: #b0bdd0;
+      --text-2: #6e7f96;
+      --gold: #c5a360;
+      --gold-light: #e2cb8b;
+      --gold-deep: #8b6d2e;
+      --blue: #4a9eff;
+      --blue-deep: #2563a8;
+      --green: #45b87a;
+      --green-deep: #2a7a4e;
+      --purple: #8b6cce;
+      --red: #cf5c56;
+      --red-deep: #8b3a35;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-lg: 0 16px 64px rgba(0,0,0,0.5);
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            background-image: linear-gradient(rgba(22, 28, 34, 0.95), rgba(22, 28, 34, 0.95)), url('https://assets.codecombat.com/art/bg_battle_full.jpg'); /* 模拟游戏背景纹理 */
-            background-size: cover;
-            background-attachment: fixed;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+    body {
+      font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+      color: var(--text-0);
+      background: var(--bg-0);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      word-break: break-word;
+    }
 
-        /* 游戏感标题 */
-        h1, h2, h3 {
-            font-family: 'Courier New', monospace; /* 模拟代码/复古感 */
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
 
-        h1 {
-            text-align: center;
-            color: var(--accent-gold);
-            text-shadow: 2px 2px 0px #000;
-            border-bottom: 3px double var(--accent-gold);
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-        }
+    /* ─── Layout ─── */
+    .shell { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
 
-        h2 {
-            border-left: 6px solid var(--accent-red);
-            padding-left: 15px;
-            margin-top: 60px;
-            margin-bottom: 25px;
-            color: #fff;
-            background: linear-gradient(90deg, #2c3e50 0%, transparent 100%);
-            padding: 10px 15px;
-            border-radius: 0 5px 5px 0;
-            font-size: 1.8em;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
-        }
+    /* ─── Topbar ─── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 26, 0.88);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .brand-logo {
+      width: 118px;
+      height: auto;
+      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.28));
+    }
+    .brand-text {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .brand-text span {
+      color: var(--text-2);
+      font-weight: 500;
+      margin-left: 6px;
+      padding-left: 8px;
+      border-left: 1px solid var(--border);
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .top-nav a, .top-nav button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-1);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .top-nav a:hover, .top-nav button:hover {
+      color: var(--text-0);
+      background: var(--surface-hover);
+    }
 
-        h3 {
-            color: var(--accent-gold);
-            margin-top: 30px;
-            border-bottom: 1px dashed #555;
-            padding-bottom: 10px;
-            display: inline-block;
-        }
+    /* ─── Hero ─── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(10,14,26,0.74) 0%, rgba(10,14,26,0.84) 55%, rgba(10,14,26,0.96) 100%),
+        url('src/hero-background-poster.png') center/cover no-repeat;
+    }
+    .hero-bg::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 160px;
+      background: linear-gradient(to bottom, transparent, var(--bg-0));
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 68px 0 80px;
+    }
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      background: rgba(197,163,96,0.12);
+      border: 1px solid rgba(197,163,96,0.2);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+    .hero h1 .en {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(16px, 2.5vw, 28px);
+      color: var(--gold-light);
+      margin-top: 6px;
+      letter-spacing: 0.06em;
+      opacity: 0.72;
+    }
+    .hero-desc {
+      color: var(--text-1);
+      font-size: 16px;
+      line-height: 1.8;
+      max-width: 740px;
+      margin: 0 auto 30px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-        h4 {
-            color: var(--text-main);
-            margin-top: 20px;
-            font-weight: bold;
-        }
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-0);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      line-height: 1.3;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--border-hover);
+      background: var(--surface-hover);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #c5a360, #a0803a);
+      border-color: rgba(197,163,96,0.5);
+      color: #1a1408;
+      box-shadow: 0 2px 16px rgba(197,163,96,0.2);
+    }
+    .btn-gold:hover { box-shadow: 0 4px 24px rgba(197,163,96,0.35); }
+    .btn-blue {
+      background: linear-gradient(135deg, #2a6db5, #3d8fd4);
+      border-color: rgba(74,158,255,0.35);
+      color: #fff;
+    }
+    .btn-green {
+      background: linear-gradient(135deg, #2a7a4e, #3d9e68);
+      border-color: rgba(69,184,122,0.35);
+      color: #fff;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #b87d2a, #d4a040);
+      border-color: rgba(197,163,96,0.4);
+      color: #1a1408;
+    }
+    .btn-ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text-1);
+    }
+    .btn-ghost:hover { color: var(--text-0); }
+    .btn-sm { padding: 7px 12px; font-size: 12px; }
 
-        /* 卡片容器 */
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid #34495e;
-            border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            transition: transform 0.2s, border-color 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
+    /* ─── Sections ─── */
+    section { padding: 46px 0; }
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap; 
+      gap: 24px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .section-desc {
+      color: var(--text-2);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 460px;
+      min-width: 280px; 
+      text-align: right;
+    }
 
-        .card::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-gold), var(--accent-red));
-            opacity: 0.5;
-        }
+    /* ─── Card ─── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 18px;
+      transition: all 0.2s ease;
+    }
+    .card:hover { border-color: var(--border-hover); }
+    .card h3 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h3::before {
+      content: "";
+      width: 4px;
+      height: 18px;
+      border-radius: 2px;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+    .card h4 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-0);
+      margin: 18px 0 8px;
+    }
+    .card p {
+      color: var(--text-1);
+      font-size: 14px;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+    .card strong { color: var(--gold-light); font-weight: 700; }
+    .card code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background: rgba(197,163,96,0.1);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--gold-light);
+      font-size: 13px;
+    }
 
-        .card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent-gold);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
+    /* 修复重点：废弃 display: grid，改用绝对定位，防止文本节点断列 */
+    .a-list { 
+      list-style: none; 
+      margin: 8px 0; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
+    .a-list li {
+      position: relative;
+      padding-left: 18px; /* 留出圆点的位置 */
+      color: var(--text-1);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .a-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 6px; 
+      height: 6px;
+      border-radius: 2px;
+      background: var(--gold);
+    }
+    .a-list li strong { color: var(--gold-light); }
 
-        /* 强调文字 */
-        strong {
-            color: var(--accent-gold);
-            font-weight: bold;
-        }
+    /* 同理修复有序列表 */
+    .step-list { 
+      list-style: none; 
+      margin: 8px 0; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      counter-reset: step; 
+    }
+    .step-list li {
+      position: relative;
+      padding-left: 36px; /* 留出数字圆圈的位置 */
+      color: var(--text-1);
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 26px;
+    }
+    .step-list li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: -2px;
+      width: 26px; 
+      height: 26px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--bg-0);
+      font-size: 13px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-list li strong { color: var(--gold-light); }
 
-        /* 列表样式 */
-        ul {
-            list-style-type: none;
-            padding-left: 10px;
-        }
+    /* ─── Comparison grid ─── */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .compare-box {
+      padding: 22px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .compare-box.blue { border-color: rgba(74,158,255,0.3); }
+    .compare-box.gold { border-color: var(--border-gold); background: rgba(197,163,96,0.05); }
+    .compare-title {
+      font-size: 15px;
+      font-weight: 800;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .compare-box.blue .compare-title { color: var(--blue); }
+    .compare-box.gold .compare-title { color: var(--gold-light); }
+    .compare-role {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-0);
+      margin-bottom: 12px;
+    }
+    .compare-role strong { color: var(--gold-light); }
 
-        ul li {
-            position: relative;
-            padding-left: 30px;
-            margin-bottom: 12px;
-        }
+    /* ─── Badges ─── */
+    .badge {
+      display: inline-block;
+      padding: 3px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      margin-right: 5px;
+    }
+    .badge-python { background: rgba(53,114,165,0.25); color: #7db8e8; border: 1px solid rgba(74,158,255,0.35); }
+    .badge-cpp { background: rgba(0,89,156,0.25); color: #6db3e8; border: 1px solid rgba(74,158,255,0.35); }
 
-        ul li::before {
-            content: "⚔️"; /* 剑图标 */
-            position: absolute;
-            left: 0;
-            font-size: 16px;
-            color: var(--accent-red);
-        }
-        
-        /* 有序列表 */
-        ol {
-            counter-reset: item;
-            list-style-type: none;
-            padding-left: 10px;
-        }
-        ol li {
-            position: relative;
-            padding-left: 35px;
-            margin-bottom: 15px;
-        }
-        ol li::before {
-            content: counter(item);
-            counter-increment: item;
-            position: absolute;
-            left: 0;
-            top: 2px;
-            width: 24px;
-            height: 24px;
-            background-color: var(--accent-gold);
-            color: #000;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 24px;
-            font-weight: bold;
-            font-family: monospace;
-        }
+    /* ─── Code block ─── */
+    pre {
+      background: #0a0d16;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      overflow-x: auto;
+      color: #d4dce8;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      position: relative;
+      margin: 14px 0;
+    }
+    pre::before {
+      content: "PYTHON";
+      position: absolute;
+      top: 0; right: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      background: rgba(197,163,96,0.08);
+      padding: 3px 8px;
+      border-radius: 0 0 4px 4px;
+    }
+    pre .cmt { color: var(--text-2); }
+    pre .kw { color: #c586c0; }
+    pre .fn { color: var(--gold-light); }
+    pre .str { color: #6bbd8a; }
 
-        /* 代码块样式 */
-        pre {
-            background-color: #0d1117;
-            border: 1px solid #30363d;
-            padding: 20px;
-            border-radius: 6px;
-            overflow-x: auto;
-            color: #e6edf3;
-            font-family: 'Consolas', 'Monaco', monospace;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            position: relative;
-        }
-        
-        pre::before {
-            content: "PYTHON";
-            position: absolute;
-            top: 0;
-            right: 10px;
-            font-size: 10px;
-            color: #555;
-            background: #111;
-            padding: 2px 5px;
-            border-radius: 0 0 4px 4px;
-        }
+    /* ─── Table ─── */
+    .table-wrap { overflow-x: auto; margin: 14px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      background: var(--surface);
+      font-size: 13.5px;
+    }
+    th, td {
+      padding: 13px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      background: rgba(197,163,96,0.08);
+      color: var(--gold-light);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    td { color: var(--text-1); line-height: 1.65; }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--gold-light); }
 
-        code {
-            font-family: 'Consolas', monospace;
-            background-color: rgba(255,255,255,0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: var(--accent-gold);
-        }
+    /* ─── Callout boxes ─── */
+    .tip-box {
+      background: rgba(197,163,96,0.06);
+      border: 1px solid rgba(197,163,96,0.2);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin: 16px 0;
+    }
+    .tip-box p { margin: 0; font-size: 13.5px; }
+    .highlight-box {
+      background: rgba(69,184,122,0.08);
+      border: 1px solid rgba(69,184,122,0.3);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      text-align: center;
+      margin: 16px 0;
+      font-size: 14px;
+      color: var(--text-0);
+    }
+    .highlight-box strong { color: var(--green); }
+    .highlight-box small { color: var(--text-2); display: block; margin-top: 4px; }
+    blockquote {
+      border-left: 3px solid var(--gold);
+      background: var(--surface);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 13.5px;
+      color: var(--text-1);
+      font-style: italic;
+    }
+    blockquote strong { color: var(--gold-light); font-style: normal; }
 
-        /* 表格样式 */
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin: 20px 0;
-            background-color: #1a252f;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #34495e;
-        }
+    /* ─── Phase flow (先人机→班级→全球) ─── */
+    .phase-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .phase-item {
+      position: relative;
+      padding: 18px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .phase-item::after {
+      content: "";
+      position: absolute;
+      right: -8px; top: 50%;
+      width: 6px; height: 6px;
+      border-top: 2px solid var(--gold);
+      border-right: 2px solid var(--gold);
+      transform: translateY(-50%) rotate(45deg);
+      z-index: 1;
+    }
+    .phase-item:last-child::after { display: none; }
+    .phase-no {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+    .phase-item h4 { margin: 6px 0; font-size: 15px; color: var(--text-0); font-weight: 800; }
+    .phase-item p { margin: 0; font-size: 12.5px; color: var(--text-2); line-height: 1.55; }
 
-        th, td {
-            border-bottom: 1px solid #34495e;
-            border-right: 1px solid #34495e;
-            padding: 15px;
-            text-align: left;
-        }
+    /* ─── Loop cycle (训练闭环) ─── */
+    .cycle-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .cycle-card {
+      padding: 16px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+    }
+    .cycle-card .cn { font-family: 'Cinzel', serif; font-size: 11px; color: var(--gold); letter-spacing: 0.08em; }
+    .cycle-card strong { display: block; font-size: 14px; color: var(--text-0); margin: 4px 0; }
+    .cycle-card span { font-size: 12px; color: var(--text-2); line-height: 1.5; display: block; }
 
-        th {
-            background-color: #2c3e50;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 1px;
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr td:last-child, tr th:last-child {
-            border-right: none;
-        }
+    /* ─── Strategy cards ─── */
+    .strategy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+    .strategy-card {
+      padding: 18px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--blue);
+    }
+    .strategy-card.s-red { border-left-color: var(--red); }
+    .strategy-card.s-green { border-left-color: var(--green); }
+    .strategy-card h4 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+    .strategy-card p { margin: 0; font-size: 13px; color: var(--text-2); line-height: 1.6; }
 
-        /* 按钮风格的提示 */
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-right: 5px;
-            vertical-align: middle;
-            text-transform: uppercase;
-        }
-        .badge-python { background-color: #3572A5; color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .badge-cpp { background-color: #00599C; color: white; border: 1px solid rgba(255,255,255,0.2); }
+    /* ─── QA ─── */
+    .qa-item {
+      padding: 16px 18px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .qa-q { font-size: 14px; font-weight: 800; color: var(--red); margin-bottom: 6px; }
+    .qa-a { font-size: 13.5px; color: var(--text-1); line-height: 1.7; }
+    .qa-a strong { color: var(--gold-light); }
 
-        /* 特殊布局：对比 */
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-top: 15px;
-        }
+    /* ─── Course timeline ─── */
+    .quote-final {
+      text-align: center;
+      padding: 40px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-gold);
+      background: rgba(197,163,96,0.04);
+    }
+    .quote-final p { max-width: 720px; margin: 0 auto; color: var(--text-1); font-size: 15px; line-height: 1.9; }
+    .quote-final .punch {
+      display: block;
+      margin-top: 18px;
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 900;
+      color: var(--gold-light);
+      text-shadow: 0 0 24px rgba(197,163,96,0.3);
+    }
 
-        @media (max-width: 768px) {
-            .comparison-grid { grid-template-columns: 1fr; }
-        }
+    /* ─── CTA banner ─── */
+    .cta-banner {
+      position: relative;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-gold);
+      background:
+        linear-gradient(90deg, rgba(10,14,26,0.94), rgba(10,14,26,0.7)),
+        url('src/hero-background-poster.png') center/cover no-repeat;
+      overflow: hidden;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 200px;
+      gap: 32px;
+      align-items: center;
+    }
+    .cta-text .cta-kicker { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .cta-text h2 { font-size: clamp(22px, 3vw, 28px); font-weight: 900; margin-bottom: 12px; line-height: 1.25; }
+    .cta-text p { color: var(--text-1); font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+    .cta-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .cta-qr { text-align: center; }
+    .cta-qr img { width: 160px; aspect-ratio: 1; object-fit: contain; border-radius: 8px; background: #fff; padding: 10px; margin: 0 auto 10px; }
+    .cta-qr span { font-size: 12px; color: var(--text-2); }
 
-        .highlight-box {
-            background: rgba(46, 204, 113, 0.1); 
-            border: 1px solid var(--accent-green); 
-            color: var(--text-main); 
-            padding: 15px; 
-            text-align: center; 
-            border-radius: 5px; 
-            margin-top: 20px;
-        }
+    /* ─── Footer ─── */
+    .footer {
+      padding: 32px 0;
+      text-align: center;
+      color: var(--text-2);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+    }
 
-        .tip-box {
-            background: rgba(244, 208, 63, 0.1);
-            border-left: 4px solid var(--accent-gold);
-            padding: 15px;
-            margin: 20px 0;
-        }
+    .section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
 
-        /* 引用框 */
-        blockquote {
-            border-left: 4px solid var(--accent-red);
-            margin: 20px 0;
-            padding-left: 20px;
-            font-style: italic;
-            color: var(--text-muted);
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-        }
-    </style>
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .comparison-grid, .phase-flow, .strategy-grid, .cycle-grid, .cta-banner { grid-template-columns: 1fr; }
+      .cta-qr { justify-self: start; }
+      .phase-item::after { display: none; }
+    }
+    @media (max-width: 760px) {
+      .shell { padding: 0 16px; }
+      .topbar-inner { height: auto; padding: 10px 0; flex-wrap: wrap; }
+      .top-nav { width: 100%; overflow-x: auto; }
+      .hero-content { padding: 44px 0 60px; }
+      .section-head { flex-direction: column; align-items: flex-start; text-align: left; }
+      .section-desc { text-align: left; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>扣哒世界竞技场教学指南</h1>
-        <div style="text-align: center; color: var(--text-muted); margin-bottom: 30px; font-family: 'Courier New', monospace;">
-            &lt; TEACHER_GUIDE_MODE_ON /&gt; <br>
-            面向新老师的实战指南
+  <nav class="topbar">
+    <div class="shell">
+      <div class="topbar-inner">
+        <a href="index.html" class="brand" aria-label="返回教学中心首页">
+          <img class="brand-logo" src="https://koudashijie.com/images/pages/base/logo-cn.png" alt="扣哒世界">
+          <div class="brand-text">竞技场机制指南<span>Teacher Guide</span></div>
+        </a>
+        <div class="top-nav">
+          <a href="#what">什么是竞技场</a>
+          <a href="#flow">上课流程</a>
+          <a href="#example">完整课例</a>
+          <a href="#advanced">竞赛进阶</a>
+          <a href="#tips">技巧与答疑</a>
+          <a href="index.html" class="btn btn-ghost btn-sm">返回资源库</a>
         </div>
-    </header>
+      </div>
+    </div>
+  </nav>
 
-    
-    
-    <section>
-        <h2>一、什么是扣哒世界的“竞技场”？</h2>
-        
-        <div class="card">
-            <h3>1. 竞技场的核心定位</h3>
-            <p>在扣哒世界里，普通关卡与竞技场有着本质的区别：</p>
-            
-            <div class="comparison-grid">
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid #34495e;">
-                    <h4 style="color: #3498db; margin-top:0; border-bottom: 1px solid #3498db; padding-bottom:10px;">🛡️ 普通关卡</h4>
-                    <p style="text-align:center; font-size:1.1em; color:#fff;">定位：<strong>“做题练习”</strong></p>
-                    <ul style="font-size: 0.9em;">
-                        <li>系统给你一个固定任务</li>
-                        <li>你写出一套能过关的代码就算完成</li>
-                        <li><strong>核心：练“基本功”</strong></li>
-                    </ul>
-                </div>
-                <div style="background: rgba(244, 208, 63, 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--accent-gold);">
-                    <h4 style="color: var(--accent-gold); margin-top:0; border-bottom: 1px solid var(--accent-gold); padding-bottom:10px;">⚔️ 竞技场</h4>
-                    <p style="text-align:center; font-size:1.1em; color:#fff;">定位：<strong>“实战 + 策略 + 竞赛”</strong></p>
-                    <ul style="font-size: 0.9em;">
-                        <li>不仅要“会写代码”，还要“会设计策略”</li>
-                        <li>对手不再是固定的电脑，而是“活的策略”</li>
-                        <li>是“学–练–赛–评”的封闭循环</li>
-                        <li><strong>核心：练“实战能力 + 策略思维”</strong></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="tip-box">
-                <p><strong>本质差别：</strong>学生用 Python 或 C++ 写程序控制英雄，决定怎么移动、什么时候攻击、招募什么单位、建什么塔。在有限金币 / 时间 / 地形限制下，自己设计作战方案。你的代码要能“打赢各种不同写法的同学”。</p>
-            </div>
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="shell">
+      <div class="hero-content">
+        <div class="hero-kicker">Arena Mechanics Guide</div>
+        <h1>
+          看懂竞技场机制，第一次就能上好课
+          <span class="en">Arena Teaching Guide</span>
+        </h1>
+        <p class="hero-desc">这是一份面向新老师的竞技场实战指南。从竞技场到底是什么、和普通关卡有何不同，到课前准备、学生端逐步操作、完整课例、竞赛进阶玩法和常见问题答疑，一次讲清。看完这一页，你就能自然地组织一整套"学 — 练 — 赛 — 评"的编程课堂。</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="#flow">直接看上课流程</a>
+          <a class="btn btn-blue" href="#example">查看完整课例</a>
+          <a class="btn btn-green" href="index.html">前往竞技场资源库</a>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <div class="card">
-            <h3>2. 竞技场的核心特点</h3>
-            
-            <h4>（1）双语言支持：Python & C++</h4>
-            <p>
-                <span class="badge badge-python">Python</span> 语法简洁，适合入门、兴趣班、普及班。<br>
-                <span class="badge badge-cpp">C++</span> 贴近信奥 / CSP-J / USACO 的主流竞赛语言，适合进阶班和竞赛班。
-            </p>
-            <blockquote>
-                <strong>通常建议：</strong>零基础 / 初学先统一用 Python；有明确信奥 / CSP 目标后期转 C++ 竞技场。
-            </blockquote>
+  <main>
 
-            <h4>（2）多种对战模式</h4>
-            <ul>
-                <li><strong>人机练习模式：</strong>对战预设电脑 AI（简单 / 中等 / 困难），适合作为入门和策略试验场。</li>
-                <li><strong>班级对战模式：</strong>同一个班的学生用各自代码互相对战，可用于课堂小比赛、班级联赛等。</li>
-                <li><strong>全球玩家对战模式：</strong>参加 AI 世青赛或 Code Quest 等比赛，和全世界玩家/其他学校学生的代码对决。学生可以看到自己在更大范围内的水平。</li>
-            </ul>
-            
-            <div class="highlight-box">
-                建议教学顺序：<strong>先人机 → 再班级 → 再全球</strong> <br>
-                <small>（学生心理压力小、体验感更好）</small>
-            </div>
-
-            <h4>（3）完整训练闭环</h4>
-            <p>竞技场的一个优势是提供了一个完整闭环，这特别适合作为<strong>阶段性总结课、单元项目课、竞赛集训课</strong>的核心内容：</p>
-            <ol>
-                <li><strong>规则学习：</strong>阅读说明、提示、函数栏</li>
-                <li><strong>代码编写：</strong>写出自己的英雄行为逻辑</li>
-                <li><strong>实战对抗：</strong>与电脑/同学/全球玩家对战</li>
-                <li><strong>评分反馈：</strong>系统模拟大量对战，生成胜率 / 积分 / 排名</li>
-                <li><strong>回放观战：</strong>复盘关键对局</li>
-                <li><strong>策略优化：</strong>改代码 → 再对战 → 再复盘</li>
-            </ol>
+    <!-- ─── 一、什么是竞技场 ─── -->
+    <section class="shell" id="what">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Part 01</div>
+          <h2 class="section-title">什么是扣哒世界的竞技场</h2>
         </div>
-    </section>
+        <p class="section-desc">先理解竞技场的定位与特点，才能想清楚这节课要带学生达成什么目标。</p>
+      </div>
 
-    <section>
-        <h2>二、如何使用竞技场：老师 & 学生双视角流程</h2>
-        <p>下面是一套可直接照着走的流程，适合新老师第一次上竞技场课。</p>
-        
-        <div class="card" style="border-left: 5px solid #3498db;">
-            <h3 style="color: #3498db;">（一）课前：老师需要做什么？</h3>
-            <ul>
-                <li><strong>确认技术环境：</strong>所有学生设备能正常访问扣哒世界；登录账号没问题（建议提前统一安排账号）；目标竞技场能正常打开、加载不慢。</li>
-                <li><strong>选好本节要用的竞技场：</strong>一般计算机科学类地图最后一关就是竞技场。尽量选一个与当前教学进度匹配的竞技场（比如前面刚学完循环与条件，则选用此类知识点为主的竞技场）。</li>
-                <li><strong>自己先进去一遍：</strong>
-                    <br> - 看清胜利条件
-                    <br> - 试着写一份最简单、能打赢“简单电脑”的代码
-                    <br> - 熟悉函数栏里都有什么函数
-                </li>
-                <li><strong>准备一点辅助材料（可选）：</strong>简单的“函数速查表”、一段自己录制的对战小视频或者几张关键截图用于导入、打印/电子版“规则要点 + 金币消耗表”（如士兵 20 金币，弓箭手 25 金币）。</li>
-            </ul>
-        </div>
-
-        <div class="card" style="border-left: 5px solid var(--accent-green);">
-            <h3 style="color: var(--accent-green);">（二）学生端操作：一步一步带着走</h3>
-            
-            <h4>1. 进入竞技场（约 5 分钟）</h4>
-            <p>老师可以口头带步骤，全班同步操作：</p>
-            <p>学生登录扣哒世界账号 -> 找到“竞技场”（Arenas）入口 -> 进入本节要用的竞技场 -> 选择语言（建议用 Python） -> <strong>初次建议选择“人机对战 – 简单”</strong>。</p>
-            <p><em>小提示：第一次上竞技场课，要给学生几分钟“瞎点一下、看看界面”的时间，减轻陌生感。</em></p>
-
-            <h4>2. 引导学生“先看说明再写代码”（约 10–15 分钟）</h4>
-            <p>三件事必须先做：</p>
-            
-            
-
-            <table>
-                <tr>
-                    <th width="30%">项目</th>
-                    <th>内容 & 老师引导</th>
-                </tr>
-                <tr>
-                    <td><strong>看顶部目标说明 (Goals)</strong></td>
-                    <td>例：“收集所有宝石并击败对手”。<br>老师提问：“这一关想赢，需要做到哪几件事？”</td>
-                </tr>
-                <tr>
-                    <td><strong>看代码注释 (Comments)</strong></td>
-                    <td>系统通常在代码区留有注释，如 <code>hero.attack("g")</code>。<br>老师提醒：注释里藏着关键玩法信息，必须认真读完。</td>
-                </tr>
-                <tr>
-                    <td><strong>看函数栏 & 提示</strong></td>
-                    <td>函数栏介绍可用函数；提示页面会写字母门对应关系、金币花费等。<br>老师提问：“招募弓箭手要花多少金币？”“哪个函数用来寻找最近的敌人？”</td>
-                </tr>
-            </table>
-
-            <h4>3. 人机练习：先打败简单电脑（约 20 分钟）</h4>
-            <p><strong>1）老师示范：给一个“足够简单但能赢”的写法</strong></p>
-            <pre>
-# 无限循环：让英雄持续执行
-while True:
-    # 1. 先按照固定路线移动（示例，具体要按地图调整）
-    hero.moveDown()
-    hero.moveRight()
-    
-    # 2. 攻击标记为 "g" 的门，释放盟友
-    hero.attack("g")
-    
-    # 3. 拿到宝石后有金币，可以招募士兵
-    if hero.gold >= 20:
-        hero.say("soldier")
-    
-    # 4. 简单攻击逻辑：看到敌人就打
-    enemy = hero.findNearestEnemy()
-    if enemy:
-        hero.attack(enemy)
-</pre>
-            <p>老师讲解时重点强调：<code>while True:</code> 后面的冒号不能少；循环内部要统一缩进（4 空格 / 1 Tab）；字符串参数要加引号 <code>"g"</code> / <code>"soldier"</code>；用注释 <code># ...</code> 简单说明每一步。</p>
-            
-            <p><strong>2）学生模仿 & 自己调整</strong></p>
-            <p>老师巡视时分层指导：基础弱的先保证语法不报错；基础好的鼓励加判断逻辑（如金币够了再招募）。</p>
-
-            <h4>4. 升级到“班级对战”（约 5 分钟）</h4>
-            <p>当多数学生能打败“简单电脑”后，让他们点击“升级比赛”按钮，进入班级竞技场模式。说明：现在的对手是真人同学，同样的代码结果可能不同。</p>
-
-            <h4>5. 同学对战：策略迭代（约 20–25 分钟）</h4>
-            <p><strong>1）对战前，小优化一轮</strong></p>
-            <p>引导学生思考：“我的代码现在最大的弱点是什么？”提供可选策略：</p>
-            <ul>
-                <li><strong>策略 A：经济优先</strong>（先收集地图上所有宝石，再集中攻击门、招募单位）</li>
-                <li><strong>策略 B：速攻流</strong>（快速打开几个关键门，迅速召唤高输出单位）</li>
-                <li><strong>策略 C：稳健防守 + 反击</strong>（优先建塔或招募防守单位保护自己，等对手浪费资源后再反扑）</li>
-            </ul>
-            <p><strong>2）开始对战</strong></p>
-            <p>学生在班级列表中互相挑战。老师可以在投影上选几场典型对战现场观看，让全班一起看到不同策略的效果差异。</p>
-
-            <h4>6. 评分、观战与反思</h4>
-            <p><strong>代码评分与排名：</strong>点击“为我的代码评分”，系统生成胜率/积分。鼓励关注“比上一节课有没有进步”。</p>
-            <p><strong>观战学习：</strong>组织学生观看班级积分靠前或全球高分玩家的对战。记录：“对手谁先收宝石？如果你是他，你会改哪一两行代码？”</p>
-        </div>
-    </section>
-
-    <section>
-        <h2>三、竞技场上课：完整课例 + 进阶玩法</h2>
-        
-        <div class="card">
-            <h3>📖 课例示范：竞技场入门课（约 90 分钟）</h3>
-            <table>
-                <tr>
-                    <th style="width: 15%;">时间</th>
-                    <th style="width: 20%;">环节</th>
-                    <th>核心活动</th>
-                </tr>
-                <tr>
-                    <td><strong>10 min</strong></td>
-                    <td>导入</td>
-                    <td>展示排行榜/对战视频。提问：“高分玩家差在哪？”明确目标：认识规则、赢简单电脑、学习改进。</td>
-                </tr>
-                <tr>
-                    <td><strong>20 min</strong></td>
-                    <td>规则 & 函数探索</td>
-                    <td>学生自读目标/注释/提示。老师提问检查（胜利条件？必用函数？金币来源？）。</td>
-                </tr>
-                <tr>
-                    <td><strong>20 min</strong></td>
-                    <td>人机练习</td>
-                    <td>老师示范拆解步骤。学生实操写代码（独立或结对），保证无报错。展示部分学生代码并点评。</td>
-                </tr>
-                <tr>
-                    <td><strong>25 min</strong></td>
-                    <td>同学对战</td>
-                    <td>升级到班级模式。学生自选策略（攻/防/经济）并微调代码。自由对战。记录：“策略是什么？下一步想改什么？”</td>
-                </tr>
-                <tr>
-                    <td><strong>15 min</strong></td>
-                    <td>思路分享 & 优化</td>
-                    <td>选典型战例（胜vs败）。双方陈述思路。全班提出改进方案并现场小改代码验证效果。</td>
-                </tr>
-            </table>
-            <div class="tip-box" style="margin-top:0;">
-                <strong>课后延伸：</strong>优化代码尝试新策略；至少观看 2 场他人对战；挑战“更难的人机模式”。
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>🚀 竞技场用于竞赛/进阶训练</h3>
-            <ul>
-                <li><strong>配合信奥 / CSP-J / USACO：</strong>在讲完某类算法（贪心 / 模拟 / 搜索）后，让学生在竞技场中用更高效的策略实现“占领资源”“拦截敌人”等。</li>
-                <li><strong>班级/校内联赛：</strong>一段时间内（如 2–4 周）只用一个竞技场。每周固定一节“联赛课”。记录积分变化，设置段位（青铜、白银、黄金、铂金）。</li>
-                <li><strong>分层目标：</strong>
-                    <br> - 新手：能打败简单电脑，代码不报错
-                    <br> - 中级：在班级对战中胜率 ≥ 50%，能说清自己策略
-                    <br> - 高阶：能熟练使用建塔 / 技能等高级函数，冲击班级/年级排行榜前列
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <section>
-        <h2>四、给新老师的教学小技巧 & 常见问题</h2>
-        
+      <div class="card">
+        <h3>竞技场的核心定位</h3>
+        <p>在扣哒世界里，普通关卡与竞技场有着本质的区别：</p>
         <div class="comparison-grid">
-            <div class="card">
-                <h3>💡 教学小技巧</h3>
-                <ul>
-                    <li><strong>反复强调：</strong>“先看说明再写代码”。</li>
-                    <li><strong>语法口诀：</strong>“循环冒号不能少，缩进四格要记牢”。</li>
-                    <li><strong>游戏话术：</strong>“现在你的英雄就是你写的 AI 机器人。”“优化代码 = 给你的英雄升级装备。”</li>
-                    <li><strong>鼓励“观战学习”：</strong>每周花 5–10 分钟，全班一起看几场优秀对战并讨论。</li>
-                    <li><strong>用进步榜：</strong>标注“本周进步最多”的学生，培养成长型思维，而不是只看绝对名次。</li>
-                </ul>
-            </div>
-            
-            <div class="card">
-                <h3>❓ 常见问题 QA</h3>
-                <dl>
-                    <dt style="color:var(--accent-red); font-weight:bold; margin-top:10px;">Q: 代码总报错？</dt>
-                    <dd>A: 引导学生按顺序排查：1）冒号有没有；2）缩进是否对齐；3）字符串有没有加引号；4）变量是否先定义。读错误信息。</dd>
-                    
-                    <dt style="color:var(--accent-red); font-weight:bold; margin-top:10px;">Q: 英雄走不到宝石那儿？</dt>
-                    <dd>A: 让学生打开地图，手指划一下英雄的路线，再把路线变成一行一行的 moveUp()/moveRight()；必要时画在纸上。</dd>
-                    
-                    <dt style="color:var(--accent-red); font-weight:bold; margin-top:10px;">Q: 金币老是不够？</dt>
-                    <dd>A: 提醒：要么路线问题导致宝石收集少，要么招募花太多钱；让学生算算“招募数 × 单价”，看合不合理。</dd>
-                    
-                    <dt style="color:var(--accent-red); font-weight:bold; margin-top:10px;">Q: 一直被对手秒杀？</dt>
-                    <dd>A: 引导反思：对手是不是先建塔？先招募远程？自己的英雄是不是“冲太前”？鼓励加上“血量过低就后退”的逻辑。</dd>
+          <div class="compare-box blue">
+            <div class="compare-title">普通关卡</div>
+            <div class="compare-role">定位：<strong>做题练习</strong></div>
+            <ul class="a-list">
+              <li>系统给你一个固定任务</li>
+              <li>写出一套能过关的代码就算完成</li>
+              <li><strong>核心：练基本功</strong></li>
+            </ul>
+          </div>
+          <div class="compare-box gold">
+            <div class="compare-title">竞技场</div>
+            <div class="compare-role">定位：<strong>实战 + 策略 + 竞赛</strong></div>
+            <ul class="a-list">
+              <li>不仅要会写代码，还要会设计策略</li>
+              <li>对手不再是固定电脑，而是"活的策略"</li>
+              <li>是"学 — 练 — 赛 — 评"的封闭循环</li>
+              <li><strong>核心：练实战能力 + 策略思维</strong></li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip-box">
+          <p><strong>本质差别：</strong>学生用 Python 或 C++ 写程序控制英雄，决定怎么移动、什么时候攻击、招募什么单位、建什么塔。在有限金币、时间、地形限制下自己设计作战方案，代码要能打赢各种不同写法的同学。</p>
+        </div>
+      </div>
 
-                    <dt style="color:var(--accent-red); font-weight:bold; margin-top:10px;">Q: 不会用高级函数？</dt>
-                    <dd>A: 带他看函数栏中的说明示例，先照着抄一小段实现一个最简单功能，再逐步加入条件判断。</dd>
-                </dl>
-            </div>
+      <div class="card">
+        <h3>竞技场的核心特点</h3>
+
+        <h4>（1）双语言支持：Python 与 C++</h4>
+        <p>
+          <span class="badge badge-python">Python</span>语法简洁，适合入门、兴趣班、普及班。<br>
+          <span class="badge badge-cpp">C++</span>贴近信奥 / CSP-J / USACO 的主流竞赛语言，适合进阶班和竞赛班。
+        </p>
+        <blockquote><strong>通常建议：</strong>零基础 / 初学先统一用 Python；有明确信奥 / CSP 目标后，后期再转 C++ 竞技场。</blockquote>
+
+        <h4>（2）多种对战模式</h4>
+        <ul class="a-list">
+          <li><strong>人机练习模式：</strong>对战预设电脑 AI（简单 / 中等 / 困难），适合作为入门和策略试验场。</li>
+          <li><strong>班级对战模式：</strong>同班学生用各自代码互相对战，可用于课堂小比赛、班级联赛等。</li>
+          <li><strong>全球玩家对战模式：</strong>参加 AI 世青赛或 Code Quest 等比赛，和全世界玩家、其他学校学生的代码对决，学生能看到自己在更大范围内的水平。</li>
+        </ul>
+
+        <p style="margin-top:16px; color:var(--text-2); font-size:13px;">建议教学顺序：先人机、再班级、再全球——学生心理压力小、体验感更好。</p>
+        <div class="phase-flow">
+          <div class="phase-item">
+            <div class="phase-no">STAGE 01</div>
+            <h4>人机练习</h4>
+            <p>对战电脑 AI，先建立信心，把语法和基础策略跑通。</p>
+          </div>
+          <div class="phase-item">
+            <div class="phase-no">STAGE 02</div>
+            <h4>班级对战</h4>
+            <p>和同学代码互搏，理解"对手是活的"，开始迭代策略。</p>
+          </div>
+          <div class="phase-item">
+            <div class="phase-no">STAGE 03</div>
+            <h4>全球对战</h4>
+            <p>参加赛事，与全球选手同台，找到差距与提升方向。</p>
+          </div>
         </div>
 
-        <div style="text-align: center; margin-top: 40px; border-top: 1px solid #555; padding-top: 30px;">
-            <p style="font-size: 1.2em; max-width: 700px; margin: 0 auto;">
-                只要按照上面的思路走：先让学生在关卡里打好语法和基础，再把竞技场引入课堂做实战对抗，配合观战复盘。
-                <br><br>
-                新老师就可以非常自然地开展一整套“学–练–赛–评”的编程课堂，让学生在对战中真正体会到：
-                <br>
-                <strong style="font-size: 1.4em; color: var(--accent-gold); display:block; margin-top:15px; text-shadow: 0 0 10px rgba(244, 208, 63, 0.5);">“我写的代码，真的能决定胜负。”</strong>
-            </p>
+        <h4>（3）完整训练闭环</h4>
+        <p>竞技场提供了一个完整闭环，特别适合作为<strong>阶段性总结课、单元项目课、竞赛集训课</strong>的核心内容：</p>
+        <div class="cycle-grid">
+          <div class="cycle-card"><div class="cn">STEP 01</div><strong>规则学习</strong><span>阅读说明、提示、函数栏</span></div>
+          <div class="cycle-card"><div class="cn">STEP 02</div><strong>代码编写</strong><span>写出自己的英雄行为逻辑</span></div>
+          <div class="cycle-card"><div class="cn">STEP 03</div><strong>实战对抗</strong><span>与电脑 / 同学 / 全球玩家对战</span></div>
+          <div class="cycle-card"><div class="cn">STEP 04</div><strong>评分反馈</strong><span>系统模拟大量对战，生成胜率 / 积分 / 排名</span></div>
+          <div class="cycle-card"><div class="cn">STEP 05</div><strong>回放观战</strong><span>复盘关键对局</span></div>
+          <div class="cycle-card"><div class="cn">STEP 06</div><strong>策略优化</strong><span>改代码 → 再对战 → 再复盘</span></div>
         </div>
+      </div>
     </section>
 
-</div>
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 二、如何使用竞技场 ─── -->
+    <section class="shell" id="flow">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Part 02</div>
+          <h2 class="section-title">如何使用竞技场：老师与学生双视角流程</h2>
+        </div>
+        <p class="section-desc">一套可直接照着走的流程，适合新老师第一次上竞技场课。</p>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--blue);">
+        <h3>（一）课前：老师需要做什么</h3>
+        <ul class="a-list">
+          <li><strong>确认技术环境：</strong>所有学生设备能正常访问扣哒世界；登录账号没问题（建议提前统一安排账号）；目标竞技场能正常打开、加载不慢。</li>
+          <li><strong>选好本节要用的竞技场：</strong>一般计算机科学类地图最后一关就是竞技场，尽量选一个与当前教学进度匹配的竞技场（比如刚学完循环与条件，就选以这类知识点为主的竞技场）。</li>
+          <li><strong>自己先进去一遍：</strong>看清胜利条件；试着写一份最简单、能打赢"简单电脑"的代码；熟悉函数栏里都有什么函数。</li>
+          <li><strong>准备一点辅助材料（可选）：</strong>简单的"函数速查表"、一段自己录制的对战小视频或几张关键截图用于导入、"规则要点 + 金币消耗表"（如士兵 20 金币、弓箭手 25 金币）。</li>
+        </ul>
+        <div class="tip-box">
+          <p><strong>一句话备课自检：</strong>今天用哪个竞技场？胜利条件是什么？我能写出赢简单电脑的最简代码吗？学生大概会卡在哪一步？想清这四点，这节课就稳了。</p>
+        </div>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--green);">
+        <h3>（二）学生端操作：一步一步带着走</h3>
+
+        <h4>1. 进入竞技场（约 5 分钟）</h4>
+        <p>老师可口头带步骤，全班同步操作：登录账号 → 找到"竞技场"（Arenas）入口 → 进入本节要用的竞技场 → 选择语言（建议用 Python）→ <strong>初次建议选择"人机对战 — 简单"</strong>。</p>
+        <blockquote>第一次上竞技场课，要给学生几分钟"瞎点一下、看看界面"的时间，减轻陌生感。</blockquote>
+
+        <h4>2. 引导学生"先看说明再写代码"（约 10–15 分钟）</h4>
+        <p>三件事必须先做：</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th style="width:30%;">项目</th><th>内容 & 老师引导</th></tr>
+            <tr>
+              <td><strong>看顶部目标说明 Goals</strong></td>
+              <td>例："收集所有宝石并击败对手"。老师提问："这一关想赢，需要做到哪几件事？"</td>
+            </tr>
+            <tr>
+              <td><strong>看代码注释 Comments</strong></td>
+              <td>系统通常在代码区留有注释，如 <code>hero.attack("g")</code>。老师提醒：注释里藏着关键玩法信息，必须认真读完。</td>
+            </tr>
+            <tr>
+              <td><strong>看函数栏 & 提示</strong></td>
+              <td>函数栏介绍可用函数；提示页面会写字母门对应关系、金币花费等。老师提问："招募弓箭手要花多少金币？""哪个函数用来寻找最近的敌人？"</td>
+            </tr>
+          </table>
+        </div>
+
+        <h4>3. 人机练习：先打败简单电脑（约 20 分钟）</h4>
+        <p><strong>1）老师示范：给一个足够简单但能赢的写法</strong></p>
+        <pre><span class="cmt"># 无限循环：让英雄持续执行</span>
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="cmt"># 1. 先按照固定路线移动（示例，具体按地图调整）</span>
+    hero.<span class="fn">moveDown</span>()
+    hero.<span class="fn">moveRight</span>()
+
+    <span class="cmt"># 2. 攻击标记为 "g" 的门，释放盟友</span>
+    hero.<span class="fn">attack</span>(<span class="str">"g"</span>)
+
+    <span class="cmt"># 3. 拿到宝石后有金币，可以招募士兵</span>
+    <span class="kw">if</span> hero.gold >= <span class="str">20</span>:
+        hero.<span class="fn">say</span>(<span class="str">"soldier"</span>)
+
+    <span class="cmt"># 4. 简单攻击逻辑：看到敌人就打</span>
+    enemy = hero.<span class="fn">findNearestEnemy</span>()
+    <span class="kw">if</span> enemy:
+        hero.<span class="fn">attack</span>(enemy)</pre>
+        <p>老师讲解时重点强调：<code>while True:</code> 后面的冒号不能少；循环内部要统一缩进（4 空格 / 1 Tab）；字符串参数要加引号 <code>"g"</code> / <code>"soldier"</code>；用注释 <code># ...</code> 简单说明每一步。</p>
+        <p><strong>2）学生模仿 & 自己调整。</strong>老师巡视时分层指导：基础弱的先保证语法不报错；基础好的鼓励加判断逻辑（如金币够了再招募）。</p>
+
+        <h4>4. 升级到班级对战（约 5 分钟）</h4>
+        <p>当多数学生能打败"简单电脑"后，让他们点击"升级比赛"按钮，进入班级竞技场模式。说明：现在的对手是真人同学，同样的代码结果可能不同。</p>
+
+        <h4>5. 同学对战：策略迭代（约 20–25 分钟）</h4>
+        <p><strong>1）对战前，小优化一轮。</strong>引导学生思考："我的代码现在最大的弱点是什么？"提供三种可选策略：</p>
+        <div class="strategy-grid">
+          <div class="strategy-card s-green">
+            <h4>策略 A · 经济优先</h4>
+            <p>先收集地图上所有宝石，再集中攻击门、招募单位。</p>
+          </div>
+          <div class="strategy-card s-red">
+            <h4>策略 B · 速攻流</h4>
+            <p>快速打开几个关键门，迅速召唤高输出单位。</p>
+          </div>
+          <div class="strategy-card">
+            <h4>策略 C · 稳健防守反击</h4>
+            <p>优先建塔或招募防守单位保护自己，等对手浪费资源后再反扑。</p>
+          </div>
+        </div>
+        <p><strong>2）开始对战。</strong>学生在班级列表中互相挑战。老师可以在投影上选几场典型对战现场观看，让全班一起看到不同策略的效果差异。</p>
+
+        <h4>6. 评分、观战与反思</h4>
+        <p><strong>代码评分与排名：</strong>点击"为我的代码评分"，系统生成胜率 / 积分。鼓励关注"比上一节课有没有进步"。</p>
+        <p><strong>观战学习：</strong>组织学生观看班级积分靠前或全球高分玩家的对战，记录："对手谁先收宝石？如果你是他，你会改哪一两行代码？"</p>
+      </div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 三、完整课例 + 进阶 ─── -->
+    <section class="shell" id="example">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Part 03</div>
+          <h2 class="section-title">竞技场上课：完整课例与进阶玩法</h2>
+        </div>
+        <p class="section-desc">一个 90 分钟入门课例，加上竞赛集训与班级联赛的进阶用法。</p>
+      </div>
+
+      <div class="card">
+        <h3>课例示范：竞技场入门课（约 90 分钟）</h3>
+        <div class="table-wrap">
+          <table>
+            <tr><th style="width:14%;">时间</th><th style="width:20%;">环节</th><th>核心活动</th></tr>
+            <tr><td><strong>10 min</strong></td><td>导入</td><td>展示排行榜 / 对战视频。提问："高分玩家差在哪？"明确目标：认识规则、赢简单电脑、学习改进。</td></tr>
+            <tr><td><strong>20 min</strong></td><td>规则 & 函数探索</td><td>学生自读目标 / 注释 / 提示。老师提问检查（胜利条件？必用函数？金币来源？）。</td></tr>
+            <tr><td><strong>20 min</strong></td><td>人机练习</td><td>老师示范拆解步骤。学生实操写代码（独立或结对），保证无报错。展示部分学生代码并点评。</td></tr>
+            <tr><td><strong>25 min</strong></td><td>同学对战</td><td>升级到班级模式。学生自选策略（攻 / 防 / 经济）并微调代码，自由对战。记录："策略是什么？下一步想改什么？"</td></tr>
+            <tr><td><strong>15 min</strong></td><td>思路分享 & 优化</td><td>选典型战例（胜 vs 败）。双方陈述思路。全班提出改进方案并现场小改代码验证效果。</td></tr>
+          </table>
+        </div>
+        <div class="tip-box">
+          <p><strong>课后延伸：</strong>优化代码尝试新策略；至少观看 2 场他人对战；挑战"更难的人机模式"。</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>竞技场用于竞赛 / 进阶训练</h3>
+        <ul class="a-list">
+          <li><strong>配合信奥 / CSP-J / USACO：</strong>在讲完某类算法（贪心 / 模拟 / 搜索）后，让学生在竞技场中用更高效的策略实现"占领资源""拦截敌人"等。</li>
+          <li><strong>班级 / 校内联赛：</strong>一段时间内（如 2–4 周）只用一个竞技场，每周固定一节"联赛课"，记录积分变化，设置段位（青铜、白银、黄金、铂金）。</li>
+          <li><strong>分层目标：</strong>新手——能打败简单电脑、代码不报错；中级——班级对战胜率 ≥ 50%、能说清自己策略；高阶——熟练使用建塔 / 技能等高级函数，冲击班级 / 年级排行榜前列。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>教学阶段与达成目标对照</h3>
+        <p>用这张表快速判断学生处于哪个阶段、下一步该往哪儿推。</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>学生阶段</th><th>推荐模式</th><th>达成标志</th><th>下一步引导</th></tr>
+            <tr><td><strong>新手</strong></td><td>人机 · 简单</td><td>代码不报错，能赢简单电脑</td><td>加入条件判断，尝试收集宝石</td></tr>
+            <tr><td><strong>入门</strong></td><td>人机 · 中等</td><td>会用循环 + 条件控制英雄</td><td>升级到班级对战，观察真人对手</td></tr>
+            <tr><td><strong>中级</strong></td><td>班级对战</td><td>胜率 ≥ 50%，能说清策略</td><td>对比强者回放，优化策略稳定性</td></tr>
+            <tr><td><strong>高阶</strong></td><td>全球 / 赛事</td><td>熟练用建塔、技能等高级函数</td><td>参加 AI 世青赛，冲击排行榜</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 四、技巧与答疑 ─── -->
+    <section class="shell" id="tips">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Part 04</div>
+          <h2 class="section-title">给新老师的教学技巧与常见问题</h2>
+        </div>
+        <p class="section-desc">课堂话术、语法口诀与高频报错的排查方法，直接拿去用。</p>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="card" style="margin-bottom:0;">
+          <h3>教学小技巧</h3>
+          <ul class="a-list">
+            <li><strong>反复强调：</strong>"先看说明再写代码"。</li>
+            <li><strong>语法口诀：</strong>"循环冒号不能少，缩进四格要记牢"。</li>
+            <li><strong>游戏话术：</strong>"现在你的英雄就是你写的 AI 机器人""优化代码 = 给你的英雄升级装备"。</li>
+            <li><strong>鼓励观战学习：</strong>每周花 5–10 分钟，全班一起看几场优秀对战并讨论。</li>
+            <li><strong>用进步榜：</strong>标注"本周进步最多"的学生，培养成长型思维，而不是只看绝对名次。</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <h3>常见问题答疑</h3>
+          <div class="qa-item">
+            <div class="qa-q">Q：代码总报错？</div>
+            <div class="qa-a">按顺序排查：1）冒号有没有；2）缩进是否对齐；3）字符串有没有加引号；4）变量是否先定义。<strong>先读错误信息。</strong></div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q">Q：英雄走不到宝石那儿？</div>
+            <div class="qa-a">让学生打开地图，用手指划一下英雄路线，再把路线变成一行行的 <code>moveUp()</code> / <code>moveRight()</code>；必要时画在纸上。</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q">Q：金币老是不够？</div>
+            <div class="qa-a">提醒：要么路线问题导致宝石收集少，要么招募花太多钱；让学生算算"招募数 × 单价"，看合不合理。</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q">Q：一直被对手秒杀？</div>
+            <div class="qa-a">引导反思：对手是不是先建塔、先招募远程？自己的英雄是不是冲太前？鼓励加上"血量过低就后退"的逻辑。</div>
+          </div>
+          <div class="qa-item">
+            <div class="qa-q">Q：不会用高级函数？</div>
+            <div class="qa-a">带他看函数栏中的说明示例，先照着抄一小段实现最简单功能，再逐步加入条件判断。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quote-final" style="margin-top:18px;">
+        <p>只要按照上面的思路走：先让学生在关卡里打好语法和基础，再把竞技场引入课堂做实战对抗，配合观战复盘。新老师就可以非常自然地开展一整套"学 — 练 — 赛 — 评"的编程课堂，让学生在对战中真正体会到：
+          <span class="punch">"我写的代码，真的能决定胜负。"</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ─── 底部引导 + 二维码 ─── -->
+    <section class="shell" id="support">
+      <div class="cta-banner">
+        <div class="cta-text">
+          <div class="cta-kicker">Next Step</div>
+          <h2>准备好了？去挑一个竞技场开始上课</h2>
+          <p>回到竞技场资源库，按学生水平和课堂场景挑选合适的竞技场，配套课件、视频与课堂模板都已备齐。使用中遇到任何问题，欢迎扫码联系教研团队。</p>
+          <div class="cta-actions">
+            <a class="btn btn-gold" href="index.html">前往竞技场资源库</a>
+            <a class="btn btn-ghost" href="#what">重新阅读机制</a>
+          </div>
+        </div>
+        <div class="cta-qr">
+          <img src="bug_qr.jpeg" alt="教研支持二维码">
+          <span>扫码进入教研支持</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="shell">扣哒世界教研团队 · 竞技场教学资源持续更新中</div>
+  </footer>
 
 </body>
 </html>

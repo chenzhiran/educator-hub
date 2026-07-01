@@ -1,518 +1,2168 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeCombat Style Arena Selection</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #2c3e50;
-            --parchment: #f4e7c3;
-            --border-brown: #5d4037;
-            --text-gold: #ffec3d;
-            --text-silver: #bdc3c7;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>扣哒世界｜竞技场教学中心</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #0a0e1a;
+      --bg-1: #0f1623;
+      --bg-2: #151d2e;
+      --bg-card: rgba(14, 20, 35, 0.92);
+      --bg-card-hover: rgba(20, 28, 48, 0.95);
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --border-gold: rgba(197, 163, 96, 0.35);
+      --text-0: #e8ecf2;
+      --text-1: #b0bdd0;
+      --text-2: #6e7f96;
+      --gold: #c5a360;
+      --gold-light: #e2cb8b;
+      --gold-deep: #8b6d2e;
+      --blue: #4a9eff;
+      --blue-deep: #2563a8;
+      --green: #45b87a;
+      --green-deep: #2a7a4e;
+      --purple: #8b6cce;
+      --red: #cf5c56;
+      --red-deep: #8b3a35;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-lg: 0 16px 64px rgba(0,0,0,0.5);
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at center, #455a64 0%, #1c2833 100%);
-            font-family: 'Noto Sans SC', 'Cinzel', sans-serif;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        .container {
-            width: 95%;
-            max-width: 1200px; 
-            background-color: var(--parchment);
-            border: 8px solid var(--border-brown);
-            border-radius: 10px;
-            margin: 40px 0;
-            padding: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
+    body {
+      font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+      color: var(--text-0);
+      background: var(--bg-0);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
 
-        .header {
-            text-align: center;
-            border-bottom: 3px double rgba(93, 64, 55, 0.5);
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-        }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
 
-        .header h1 {
-            color: #3e2723;
-            margin: 0;
-            font-family: 'Cinzel', serif;
-            font-size: 2.5em;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
+    /* ─── Layout ─── */
+    .shell { max-width: 1340px; margin: 0 auto; padding: 0 28px; }
 
-        .header p {
-            color: #5d4037;
-            font-size: 1.1em;
-            margin: 10px 0 0 0;
-            font-weight: bold;
-        }
+    /* ─── Topbar ─── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 26, 0.88);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .brand-logo {
+      width: 118px;
+      height: auto;
+      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.28));
+    }
+    .brand-text {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .brand-text span {
+      color: var(--text-2);
+      font-weight: 500;
+      margin-left: 6px;
+      padding-left: 8px;
+      border-left: 1px solid var(--border);
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .top-nav a, .top-nav button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-1);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .top-nav a:hover, .top-nav button:hover {
+      color: var(--text-0);
+      background: var(--surface-hover);
+    }
+    .top-nav .icon-sm {
+      width: 16px; height: 16px;
+      opacity: 0.65;
+    }
 
-        /* === 功能入口 === */
-        .guide-section {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 40px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+    /* ─── Hero ─── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(10,14,26,0.72) 0%, rgba(10,14,26,0.82) 55%, rgba(10,14,26,0.95) 100%),
+        url('src/hero-background-poster.png') center/cover no-repeat;
+    }
+    .hero-bg::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 160px;
+      background: linear-gradient(to bottom, transparent, var(--bg-0));
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 76px 0 88px;
+    }
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      background: rgba(197,163,96,0.12);
+      border: 1px solid rgba(197,163,96,0.2);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+    .hero h1 .en {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(18px, 2.5vw, 32px);
+      color: var(--gold-light);
+      margin-top: 6px;
+      letter-spacing: 0.06em;
+      opacity: 0.72;
+    }
+    .hero-desc {
+      color: var(--text-1);
+      font-size: 16px;
+      line-height: 1.8;
+      max-width: 760px;
+      margin: 0 auto 30px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 34px auto 0;
+      max-width: 620px;
+      width: 100%;
+    }
+    .stat-block {
+      padding: 16px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-top: 6px;
+    }
 
-        .guide-card {
-            flex: 1;
-            text-decoration: none;
-            padding: 20px 25px;
-            border-radius: 12px;
-            border: 3px solid rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-            min-width: 280px;
-            max-width: 380px;
-            cursor: pointer;
-            box-sizing: border-box;
-        }
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-0);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      line-height: 1.3;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--border-hover);
+      background: var(--surface-hover);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #c5a360, #a0803a);
+      border-color: rgba(197,163,96,0.5);
+      color: #1a1408;
+      box-shadow: 0 2px 16px rgba(197,163,96,0.2);
+    }
+    .btn-gold:hover { box-shadow: 0 4px 24px rgba(197,163,96,0.35); }
+    .btn-blue {
+      background: linear-gradient(135deg, #2a6db5, #3d8fd4);
+      border-color: rgba(74,158,255,0.35);
+      color: #fff;
+    }
+    .btn-green {
+      background: linear-gradient(135deg, #2a7a4e, #3d9e68);
+      border-color: rgba(69,184,122,0.35);
+      color: #fff;
+    }
+    .btn-purple {
+      background: linear-gradient(135deg, #5a3ea8, #7e5ecc);
+      border-color: rgba(139,108,206,0.35);
+      color: #fff;
+    }
+    .btn-red {
+      background: linear-gradient(135deg, #8b3a35, #b85550);
+      border-color: rgba(207,92,86,0.35);
+      color: #fff;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #b87d2a, #d4a040);
+      border-color: rgba(197,163,96,0.4);
+      color: #1a1408;
+    }
+    .btn-ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text-1);
+    }
+    .btn-ghost:hover { color: var(--text-0); }
+    .btn-sm { padding: 7px 12px; font-size: 12px; }
+    .btn-full { width: 100%; }
 
-        .guide-intro { background: linear-gradient(135deg, #134e5e 0%, #71b280 100%); border-color: #a3e4d7; }
-        .guide-arena-intro { background: linear-gradient(135deg, #4b134f 0%, #c94b4b 100%); border-color: #d7bde2; }
-        .guide-bug-intro { background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); border-color: #ffcba4; }
+    /* ─── Sections ─── */
+    section { padding: 48px 0; }
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .section-desc {
+      color: var(--text-2);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 480px;
+      text-align: right;
+    }
 
-        .guide-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .guide-icon { font-size: 2.5rem; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.3)); }
-        .guide-text h3 { margin: 0; font-size: 1.4rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-weight: 900; }
-        .guide-text p { margin: 5px 0 0 0; font-size: 0.9rem; color: rgba(255,255,255,0.9); }
+    /* ─── Quick Start ─── */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .quest-card {
+      position: relative;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      transition: all 0.2s ease;
+      text-decoration: none;
+      cursor: pointer;
+      overflow: hidden;
+      display: block;
+    }
+    .quest-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .quest-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .quest-card:hover::before { opacity: 1; }
+    .quest-card.q-teal::before { background: linear-gradient(90deg, #2a8a7a, #45b87a); }
+    .quest-card.q-purple::before { background: linear-gradient(90deg, #6a42b8, #8b6cce); }
+    .quest-card.q-amber::before { background: linear-gradient(90deg, #b87d2a, #c5a360); }
+    .quest-card.q-red::before { background: linear-gradient(90deg, #8b3a35, #cf5c56); }
+    .quest-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+    .q-teal .quest-tag { background: rgba(42,138,122,0.18); color: #45b87a; }
+    .q-purple .quest-tag { background: rgba(106,66,184,0.18); color: #8b6cce; }
+    .q-amber .quest-tag { background: rgba(184,125,42,0.18); color: #c5a360; }
+    .q-red .quest-tag { background: rgba(139,58,53,0.22); color: #cf5c56; }
+    .quest-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .quest-card p {
+      color: var(--text-2);
+      font-size: 13px;
+      line-height: 1.6;
+    }
 
-        /* === 竞技场列表 === */
-        .arena-list { display: flex; flex-direction: column; gap: 40px; }
+    /* ─── Featured Spotlight ─── */
+    .spotlight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .spotlight-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-gold);
+      background: var(--bg-card);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .spotlight-card:hover {
+      border-color: rgba(197,163,96,0.5);
+      box-shadow: var(--shadow-lg), 0 0 40px rgba(197,163,96,0.05);
+    }
+    .spotlight-img {
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    .spotlight-img::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, var(--bg-card), transparent 55%);
+    }
+    .spotlight-tag {
+      position: absolute;
+      top: 12px; left: 12px;
+      z-index: 1;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: rgba(10,14,26,0.82);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .spotlight-content { padding: 20px; margin-top: -16px; position: relative; z-index: 2; }
+    .arena-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+    .arena-heading h3 { font-size: 24px; font-weight: 900; color: var(--gold-light); }
+    .arena-en { font-family: 'Cinzel', serif; font-size: 11px; color: var(--text-2); letter-spacing: 0.08em; }
+    .stars { color: var(--gold); font-size: 13px; letter-spacing: 2px; flex-shrink: 0; }
+    .game-desc { color: var(--text-1); font-size: 13px; line-height: 1.65; margin: 10px 0; }
 
-        .arena-card {
-            background-color: #1a1a1a;
-            border: 4px solid #4a3b32;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+    /* ─── 老师选用说明 (Teacher Pick) ─── */
+    .teacher-pick {
+      margin: 14px 0;
+      border-radius: var(--radius);
+      border: 1px solid rgba(197,163,96,0.16);
+      background: rgba(197,163,96,0.05);
+      overflow: hidden;
+    }
+    .teacher-pick-head {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(197,163,96,0.14);
+      background: rgba(197,163,96,0.06);
+    }
+    .teacher-pick-body { padding: 6px 14px 10px; }
+    .pick-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.06);
+      font-size: 12.5px;
+    }
+    .pick-row:last-child { border-bottom: none; }
+    .pick-k { color: var(--text-2); font-weight: 700; }
+    .pick-v { color: var(--text-1); }
+    .pick-v.warn { color: var(--red); }
 
-        .featured-arena {
-            border: 4px solid #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-            animation: goldenGlow 3s infinite alternate;
-        }
+    .resource-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .resource-box {
+      padding: 14px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .resource-box h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .resource-box .btn { width: 100%; margin-top: 6px; border-radius: 6px; padding: 9px 10px; font-size: 12px; }
+    .resource-box .btn:first-of-type { margin-top: 0; }
 
-        @keyframes goldenGlow {
-            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); border-color: #b7950b; }
-            100% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.6); border-color: #ffd700; }
-        }
+    /* ─── Class Templates ─── */
+    .tpl-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tpl-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-1);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      font-family: inherit;
+    }
+    .tpl-tab .tpl-min {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text-2);
+    }
+    .tpl-tab:hover { color: var(--text-0); border-color: var(--border-hover); }
+    .tpl-tab.active {
+      color: var(--gold-light);
+      background: rgba(197,163,96,0.08);
+      border-color: rgba(197,163,96,0.35);
+    }
+    .tpl-tab.active .tpl-min { background: var(--gold); color: var(--bg-0); }
+    .tpl-panel { display: none; }
+    .tpl-panel.active { display: block; }
+    .tpl-wrap {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      padding: 24px;
+    }
+    .tpl-step {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 18px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+    .tpl-step:last-child { border-bottom: none; }
+    .tpl-time {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tpl-time::before {
+      content: "";
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+    .tpl-step h4 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+    .tpl-step p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
 
-        .arena-card:hover { transform: translateY(-5px); border-color: #ffd700; }
+    /* ─── Path ─── */
+    .path-wrap {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      padding: 24px;
+    }
+    .path-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .path-step {
+      padding: 18px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .path-step::after {
+      content: "";
+      position: absolute;
+      right: -9px;
+      top: 50%;
+      width: 6px; height: 6px;
+      border-top: 2px solid var(--text-2);
+      border-right: 2px solid var(--text-2);
+      transform: translateY(-50%) rotate(45deg);
+    }
+    .path-step:last-child::after { display: none; }
+    .step-no {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--gold);
+      color: var(--bg-0);
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    .path-step h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+    .path-step p { font-size: 12px; color: var(--text-2); line-height: 1.5; }
 
-        .card-info-section {
-            padding: 18px 25px;
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 50%, #22313f 100%);
-            border-bottom: 3px solid #b7950b;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 2;
-        }
+    /* ─── Toolbar ─── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-0);
+      border-radius: 6px;
+      padding: 10px 14px;
+      outline: none;
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .search-input::placeholder { color: var(--text-2); }
+    .search-input:focus { border-color: var(--border-hover); }
 
-        .cn-title { font-size: 1.8rem; color: var(--text-gold); font-weight: 900; margin: 0; text-shadow: 2px 2px 0 #000; }
-        .en-title { font-family: 'Cinzel', serif; font-size: 1rem; color: #aab7b8; text-transform: uppercase; }
-        .story-desc { font-size: 0.95rem; color: #bdc3c7; margin: 10px 0 0 0; font-style: italic; }
-        .stars { color: #f1c40f; font-size: 1.3rem; margin-left: 20px; }
+    /* ─── Filter Groups (教学化筛选) ─── */
+    .filter-groups {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .filter-group {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+    .filter-group-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .filter-btn:hover {
+      color: var(--text-0);
+      background: var(--surface-hover);
+    }
+    .filter-btn.active {
+      color: var(--gold-light);
+      background: rgba(197,163,96,0.1);
+      border-color: rgba(197,163,96,0.3);
+    }
 
-        .card-visual-section { width: 100%; height: 240px; position: relative; overflow: hidden; background-color: #000; }
-        .card-visual-section img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-        .visual-overlay { position: absolute; top: 0; right: 0; width: 60%; height: 100%; background: linear-gradient(to left, rgba(0,0,0,0.9), transparent); pointer-events: none; z-index: 1;}
+    /* ─── Arena Grid (Steam-style) ─── */
+    .arena-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .game-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .game-cover {
+      height: 155px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .game-cover::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, var(--bg-card), transparent 50%);
+    }
+    .badge-row {
+      position: absolute;
+      z-index: 1;
+      top: 10px; left: 10px; right: 10px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mini-badge {
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: rgba(10,14,26,0.8);
+      border: 1px solid var(--border);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .mini-badge.hot {
+      background: linear-gradient(135deg, #b83a3a, #d47730);
+      border-color: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .game-body {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .game-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .game-title {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .game-en {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      color: var(--text-2);
+      letter-spacing: 0.08em;
+      margin-top: 3px;
+    }
+    .game-desc {
+      font-size: 12px;
+      margin: 8px 0;
+    }
+    .teach-value {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(197,163,96,0.06);
+      border: 1px solid rgba(197,163,96,0.1);
+      font-size: 11px;
+      color: var(--text-1);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .teach-value strong { color: var(--gold-light); font-weight: 700; }
+    .resource-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: auto;
+    }
+    .resource-tag {
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+    .game-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .game-actions .btn {
+      flex: 1 1 auto;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
 
-        .overlay-btn-group {
-            position: absolute;
-            top: 50%;
-            right: 30px;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 2;
-        }
+    /* ─── Teacher Toolkit / Checklist ─── */
+    .teacher-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .teacher-panel {
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .teacher-panel h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text-0);
+    }
+    .check-list {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+    .check-list li {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      color: var(--text-1);
+      font-size: 13px;
+      line-height: 1.6;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .check-mark {
+      width: 20px; height: 20px;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      background: rgba(69,184,122,0.1);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 900;
+      margin-top: 2px;
+      border: 1px solid rgba(69,184,122,0.25);
+      transition: all 0.15s;
+    }
+    .check-list li.done { opacity: 0.5; }
+    .check-list li.done .check-mark { background: var(--green); color: #fff; }
+    .check-list li.done .check-text { text-decoration: line-through; }
+    .class-flow { display: grid; gap: 8px; }
+    .flow-item {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      align-items: start;
+    }
+    .flow-time {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--gold-light);
+    }
+    .flow-item strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+    .flow-item span {
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
 
-        .teacher-dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            background: #151515;
-            padding: 25px 30px;
-            border-top: 3px solid #b7950b;
-        }
+    /* ─── Control (课堂控场) ─── */
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .control-card {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      transition: all 0.2s;
+    }
+    .control-card:hover { background: var(--bg-card-hover); }
+    .control-card.c-blue { border-left-color: var(--blue); }
+    .control-card.c-green { border-left-color: var(--green); }
+    .control-card.c-gold { border-left-color: var(--gold); }
+    .control-card.c-purple { border-left-color: var(--purple); }
+    .control-situ {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      margin-bottom: 8px;
+    }
+    .control-card h4 { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+    .control-sol { font-size: 12.5px; color: var(--text-1); line-height: 1.6; }
+    .control-sol strong { color: var(--gold-light); font-weight: 700; }
 
-        .dashboard-panel {
-            background: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.5));
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(255,215,0,0.3);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+    /* ─── Review (复盘与展示) ─── */
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 14px;
+    }
+    .qa-item {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--text-1);
+      line-height: 1.5;
+    }
+    .qa-num { color: var(--gold); font-weight: 900; }
+    .award-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .award-item {
+      padding: 14px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-0);
+      transition: all 0.18s;
+    }
+    .award-item:hover {
+      border-color: var(--border-gold);
+      background: rgba(197,163,96,0.06);
+    }
+    .show-copy {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: rgba(197,163,96,0.06);
+      border: 1px dashed rgba(197,163,96,0.22);
+    }
+    .show-copy .sc-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .show-copy p { font-size: 12.5px; color: var(--text-2); line-height: 1.7; font-style: italic; }
 
-        .panel-header {
-            color: #ffd700;
-            font-weight: 900;
-            font-size: 1.25rem;
-            text-align: center;
-            border-bottom: 2px dashed rgba(255,215,0,0.4);
-            padding-bottom: 12px;
-            margin-bottom: 8px;
-            text-shadow: 0 0 10px rgba(255,215,0,0.6);
-            letter-spacing: 1px;
-        }
+    /* ─── Empty State ─── */
+    .empty-state {
+      display: none;
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+    }
 
-        .big-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 25px;
-            font-size: 1.05rem;
-            font-weight: 800;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid transparent;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            color: white;
-            width: 100%;
-            box-sizing: border-box;
-            letter-spacing: 1px;
-        }
+    /* ─── CTA Banner (底部引导) ─── */
+    .cta-banner {
+      position: relative;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-gold);
+      background:
+        linear-gradient(90deg, rgba(10,14,26,0.94), rgba(10,14,26,0.7)),
+        url('src/hero-background-poster.png') center/cover no-repeat;
+      overflow: hidden;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 32px;
+      align-items: center;
+    }
+    .cta-text .cta-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .cta-text h2 {
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 900;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+    .cta-text p {
+      color: var(--text-1);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      max-width: 640px;
+    }
+    .cta-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .cta-qr {
+      text-align: center;
+    }
+    .cta-qr img {
+      width: 160px;
+      aspect-ratio: 1;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      margin: 0 auto 10px;
+    }
+    .cta-qr span { font-size: 12px; color: var(--text-2); }
 
-        .big-btn:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,255,255,0.25); }
+    /* ─── Footer ─── */
+    .footer {
+      padding: 32px 0;
+      text-align: center;
+      color: var(--text-2);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+    }
 
-        .glow-blue { background: linear-gradient(135deg, #1e3c72, #2a5298); border-color: #3498db; box-shadow: 0 0 10px rgba(52, 152, 219, 0.5); }
-        .glow-gold { background: linear-gradient(135deg, #b7950b, #f1c40f); color: #3e2723; border-color: #fff; animation: pulseGold 2s infinite; }
-        .glow-green { background: linear-gradient(135deg, #138d75, #1abc9c); border-color: #48c9b0; }
-        .glow-purple { background: linear-gradient(135deg, #6c3483, #a569bd); border-color: #d2b4de; }
+    /* ─── Modal ─── */
+    .modal {
+      display: none;
+      position: fixed; z-index: 200; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      width: min(400px, 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-gold);
+      background: var(--bg-2);
+      padding: 28px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .modal-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .modal-card p { font-size: 13px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
+    .close {
+      position: absolute;
+      right: 14px; top: 10px;
+      border: none;
+      background: transparent;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-2);
+      transition: color 0.15s;
+    }
+    .close:hover { color: var(--text-0); }
+    .qr {
+      width: min(220px, 80%);
+      aspect-ratio: 1;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      margin: 0 auto;
+    }
 
-        @keyframes pulseGold {
-            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-        }
+    /* ─── Divider ─── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0;
+    }
 
-        .game-btn {
-            display: flex; align-items: center; justify-content: center; padding: 8px 20px; min-width: 140px;
-            text-decoration: none; font-weight: 800; border-radius: 8px; transition: all 0.2s; border: 2px solid;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-        }
-        .btn-blue { background: linear-gradient(to bottom, #2980b9, #075586); color: #fff; border-color: #1c4e75; }
-        .btn-gold { background: linear-gradient(to bottom, #f7971e, #ffd200); color: #3e2723; border-color: #b7950b; text-shadow: none; }
-        .btn-red { background: linear-gradient(to bottom, #c0392b, #8e44ad); color: #fff; border-color: #641e16; }
+    /* ─── Responsive ─── */
+    @media (max-width: 1100px) {
+      .quick-grid { grid-template-columns: repeat(2, 1fr); }
+      .arena-grid { grid-template-columns: repeat(2, 1fr); }
+      .spotlight-grid { grid-template-columns: 1fr; }
+      .teacher-grid { grid-template-columns: 1fr; }
+      .path-grid { grid-template-columns: repeat(3, 1fr); }
+      .control-grid { grid-template-columns: repeat(2, 1fr); }
+      .review-grid { grid-template-columns: 1fr; }
+      .cta-banner { grid-template-columns: 1fr; }
+      .cta-qr { justify-self: start; }
+    }
 
-        .game-btn:hover { transform: translateY(-3px) scale(1.02); }
-
-        .special-tag {
-            position: absolute; top: 15px; left: 15px; background: linear-gradient(to right, #d35400, #e67e22);
-            color: white; padding: 6px 14px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; z-index: 3;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.5); border: 2px solid #f39c12;
-        }
-
-        .super-glow-tag {
-            background: linear-gradient(135deg, #ff0000, #ff5e00);
-            border: 2px solid #ffeb3b !important;
-            font-size: 1rem !important;
-            padding: 8px 18px;
-            animation: superGlow 1.5s infinite alternate;
-        }
-
-        @keyframes superGlow {
-            0% { box-shadow: 0 0 10px #ff0000, 0 0 20px #ff5e00; text-shadow: 0 0 5px #fff, 0 0 10px #ffeb3b; transform: scale(1); }
-            100% { box-shadow: 0 0 20px #ff0000, 0 0 40px #ff5e00, 0 0 60px #ffeb3b; text-shadow: 0 0 10px #fff, 0 0 20px #ffeb3b, 0 0 30px #ff9800; transform: scale(1.03); }
-        }
-
-        .footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 2px solid rgba(93, 64, 55, 0.2); color: #7f8c8d; font-weight: bold; }
-
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
-        .modal-content { background: radial-gradient(circle, #fff 0%, #f4e7c3 100%); padding: 20px; border: 5px solid var(--border-brown); border-radius: 15px; width: 80%; max-width: 400px; text-align: center; position: relative; }
-        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-
-        @media (max-width: 768px) {
-            .container { padding: 15px; margin: 20px 0; }
-            .header h1 { font-size: 1.8em; }
-            .guide-section { flex-direction: column; align-items: center; }
-            .guide-card { width: 100%; max-width: 100%; }
-            .teacher-dashboard { grid-template-columns: 1fr; padding: 15px; gap: 15px; }
-            .card-info-section { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .stars { margin-left: 0; }
-            .card-visual-section { height: 260px; }
-            .overlay-btn-group { top: auto; bottom: 15px; right: 50%; transform: translateX(50%); flex-direction: row; flex-wrap: wrap; justify-content: center; width: 90%; }
-            .visual-overlay { width: 100%; height: 60%; top: auto; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
-        }
-    </style>
+    @media (max-width: 760px) {
+      .shell { padding: 0 16px; }
+      .topbar-inner { height: auto; padding: 10px 0; flex-wrap: wrap; }
+      .top-nav { width: 100%; overflow-x: auto; }
+      .hero-content { padding: 44px 0 64px; }
+      .hero h1 { font-size: 32px; }
+      .hero-stats { grid-template-columns: repeat(3, 1fr); }
+      .quick-grid, .arena-grid, .path-grid, .control-grid { grid-template-columns: 1fr; }
+      .filter-groups { grid-template-columns: 1fr; }
+      .resource-columns { grid-template-columns: 1fr; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .section-head { flex-direction: column; align-items: flex-start; }
+      .section-desc { text-align: left; }
+      .spotlight-img { height: 180px; }
+      .path-step::after { display: none; }
+      .tpl-step { grid-template-columns: 1fr; gap: 6px; }
+      .award-list { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>扣哒世界竞技场</h1>
-        <p>选择你的战场，分阶段挑战，从基础到冲刺，夺取最终胜利！</p>
-    </div>
-
-    <div class="guide-section">
-        <a href="about_codecombat.html" class="guide-card guide-intro">
-            <div class="guide-icon">🏰</div>
-            <div class="guide-text"><h3>初识扣哒世界</h3><p>致新导师：平台理念与教学入门</p></div>
+  <nav class="topbar">
+    <div class="shell">
+      <div class="topbar-inner">
+        <a href="../../index.html" class="brand" aria-label="返回教学中心首页">
+          <img class="brand-logo" src="https://koudashijie.com/images/pages/base/logo-cn.png" alt="扣哒世界">
+          <div class="brand-text">竞技场教学中心</div>
         </a>
-        <a href="about_arena.html" class="guide-card guide-arena-intro">
-            <div class="guide-icon">⚔️</div>
-            <div class="guide-text"><h3>竞技场机制解析</h3><p>如何组织赛事与评估学生表现</p></div>
-        </a>
-        <div class="guide-card guide-bug-intro" onclick="openBugModal()">
-            <div class="guide-icon">🐞</div>
-            <div class="guide-text"><h3>问题反馈</h3><p>扫码向教研团队反馈Bug</p></div>
+        <div class="top-nav">
+          <a href="about_codecombat.html">教师入门</a>
+          <a href="about_arena.html">竞技场机制</a>
+          <a href="#templates">课堂流程</a>
+          <a href="#library">竞技场资源库</a>
+          <a href="#checklist">班级活动方案</a>
+          <a href="#featured">赛事冲刺</a>
+          <a href="#review">复盘与展示</a>
+          <button type="button" onclick="openBugModal()">反馈支持</button>
         </div>
+      </div>
     </div>
+  </nav>
 
-    <div class="arena-list" id="arenaList"></div>
-
-    <div class="footer">来自扣哒世界教研团队</div>
-</div>
-
-<div id="bugModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeBugModal()">&times;</span>
-        <h3>扫码反馈 Bug</h3>
-        <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">请使用微信或相机扫码</p>
-        <img src="bug_qr.jpeg" alt="Bug Feedback QR Code">
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="shell">
+      <div class="hero-content">
+        <div class="hero-kicker">ARENA TEACHING HUB</div>
+        <h1>
+          把竞技场变成一堂可复用的算法课
+          <span class="en">Arena Teaching Center</span>
+        </h1>
+        <p class="hero-desc">这里为老师整理了竞技场教学页面、PPT课件、教学视频、基础代码讲解、强化策略、赛事冲刺资源和课堂复盘方法。适用于日常编程课、班级挑战赛、公开课展示和 AI 世青赛赛前训练。打开页面就知道：今天选哪个、这节课怎么讲、学生怎么练、怎么组织对战、怎么复盘。</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="#templates">快速备一节课</a>
+          <a class="btn btn-blue" href="#library">找竞技场课件</a>
+          <a class="btn btn-green" href="#checklist">组织班级挑战赛</a>
+          <a class="btn btn-primary" href="#featured">赛事冲刺资源</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-block">
+            <div class="stat-val" id="statArena">35+</div>
+            <div class="stat-label">竞技场资源</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-val">3 阶段</div>
+            <div class="stat-label">基础 / 强化 / 冲刺</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-val">一站式</div>
+            <div class="stat-label">课件 · 视频 · 讲解</div>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </header>
 
-<script>
-    const modal = document.getElementById("bugModal");
-    function openBugModal() { modal.style.display = "flex"; }
-    function closeBugModal() { modal.style.display = "none"; }
-    window.onclick = function(event) { if (event.target == modal) modal.style.display = "none"; }
+  <main>
 
-    const arenas = [
-        { 
-            id: 35, 
-            en: "TUNDRA TOWER", 
-            cn: "苔原塔", 
-            img: "tundra-tower.jpeg", 
-            stars: "★★★", 
-            desc: "在寒冷的苔原中攀登高塔，迎接决赛的终极挑战！",
-            tag: "2026年AI世青赛春季决赛竞技场，火热进行中"
-        },
-        { 
-            id: 17, 
-            en: "IRON AND ICE", 
-            cn: "冰封竞速", 
-            img: "iron-and-ice.jpg", 
-            stars: "★★★", 
-            desc: "钢铁与寒冰的碰撞！在滑溜的冰面上操控重型机甲，保持平衡并摧毁目标。"
-        },
-        { 
-            id: 1, 
-            en: "SUNFIRE", 
-            cn: "阳炎", 
-            img: "sunfire.png", 
-            stars: "★★★", 
-            desc: "在烈火燎原的峰顶，召唤你的元素大军，利用地形将敌人化为灰烬！",
-            tag: "2025年AI世青赛秋季赛决赛竞技场"
-        },
-        { 
-            id: 2, 
-            en: "WAKKA MAUL", 
-            cn: "逃出地牢", 
-            img: "wakka-maul.jpg", 
-            stars: "★", 
-            desc: "在阴暗的地牢中痛击钻地的地鼠！比拼手速与基础算法的反应力。",
-            tag: "计算机科学入门竞技场"
-        },
-        { 
-            id: 3, 
-            en: "POWER PEAK", 
-            cn: "力量的顶峰", 
-            img: "power-peak.png", 
-            stars: "★★", 
-            desc: "攀登逻辑的高峰！利用函数和循环的力量，在暴风雪中击败对手。",
-            tag: "计算机科学2竞技场"
-        },
-        { 
-            id: 4, 
-            en: "CROSS BONES", 
-            cn: "十字骨头", 
-            img: "cross-bones.png", 
-            stars: "★★", 
-            desc: "在荒凉的埋骨之地，使用复杂的条件判断来指挥骷髅大军。",
-            tag: "计算机科学3竞技场"
-        },
-        { 
-            id: 5, 
-            en: "SUMMATION SUMMIT", 
-            cn: "综合格斗", 
-            img: "summation-summit.png", 
-            stars: "★★", 
-            desc: "这是一场算法的综合格斗！只有精通数组和对象的勇士才能站到最后。",
-            tag: "计算机科学4竞技场"
-        },
-        { 
-            id: 6, 
-            en: "ACE OF CODERS", 
-            cn: "王牌程序员", 
-            img: "ace-of-coders.png", 
-            stars: "★★★★", 
-            desc: "电子竞技的巅峰舞台！控制多兵种协同作战，争夺王牌程序员的桂冠。",
-            tag: "计算机科学6竞技场"
-        },
-        { 
-            id: 7, 
-            en: "SOLAR SKIRMISH", 
-            cn: "绿色能源", 
-            img: "solar-skirmish.png", 
-            stars: "★★", 
-            desc: "资源争夺战！收集散落的光能核心，维持你的能源网络并击溃对手。"
-        },
-        { id: 8, en: "EQUINOX", cn: "春分", img: "equinox.jpg", stars: "★★★", desc: "平衡即是力量。在昼夜交替的神秘森林中，利用光影变化扭转战局。" },
-        { id: 9, en: "BLAZING BATTLE", cn: "烈焰战场", img: "blazing-battle.jpg", stars: "★★", desc: "这是一个纯粹的火力对决！在燃烧的土地上指挥你的英雄冲锋陷阵。" },
-        { id: 10, en: "INFINITE INFERNO", cn: "英雄荣耀", img: "infinite-inferno.jpg", stars: "★★★", desc: "无尽的炼狱模式！在不断生成的怪物潮中生存，证明谁才是真正的英雄。" },
-        { id: 11, en: "MAGES MIGHT", cn: "巫师之战", img: "mages-might.jpg", stars: "★★", desc: "这是一场魔法的较量。计算法力消耗，用精准的咒语轰炸对手的塔楼。" },
-        { id: 12, en: "SORCERERS", cn: "巫师闪电战", img: "sorcerers.jpg", stars: "★★", desc: "快节奏的法术对决！在狭小的空间内快速吟唱，看谁的魔法反应更快。" },
-        { id: 13, en: "GIANTS GATE", cn: "巨人之门", img: "giants-gate.jpg", stars: "★★★", desc: "守护古老的巨人之门！指挥投石车与巨人，在宏大的攻城战中守住防线。" },
-        { id: 14, en: "MAGIC RUSH", cn: "魔力冲刺", img: "magic-rush.jpg", stars: "★★", desc: "这是一场速度与智慧的赛跑，用代码铺平道路，率先冲过终点线！" },
-        { id: 15, en: "THE BATTLE OF SKY SPAN", cn: "天际之战", img: "sky-Span-banner.jpeg", stars: "★★★", desc: "在云端之上的浮空岛屿作战，小心脚下！利用飞行单位掌控制空权。" },
-        { id: 16, en: "COUNTER ATTACK", cn: "反戈一击", img: "counter-attack.png", stars: "★★", desc: "防守就是最好的进攻。在敌人的攻势中寻找破绽，给予致命的反击。" },
-        { id: 18, en: "COLOSSUS", cn: "巨神之战", img: "colossus.jpg", stars: "★★★", desc: "唤醒沉睡的巨像。围绕着巨大的古代兵器，展开一场史诗级的阵地战。" },
-        { id: 19, en: "SANDSTORM", cn: "篮坛麦加", img: "sandstorm.jpg", stars: "★★", desc: "沙尘暴中的夺球大战！编写策略让你的队员传球、突破并完成绝杀。", tag: "体育类算法" },
-        { id: 20, en: "DESERT DUEL", cn: "灌篮高手", img: "desert-duel.jpg", stars: "★★", desc: "烈日下的宿命对决。在开阔的沙漠中，指挥你的小队进行战术包抄。" },
-        { id: 21, en: "FARMERS FEUD", cn: "春华秋实", img: "farmers-feud.jpg", stars: "★", desc: "在丰收的季节，保卫你的庄稼，同时去掠夺对手的资源！" },
-        { id: 22, en: "FARMSCAPE", cn: "农场景观", img: "farmscape.jpg", stars: "★★", desc: "春华秋实升级版！更大的农场，更复杂的经济系统，成为最强农场主。", tag: "春华秋实升级版" },
-        { id: 23, en: "FROZEN FORTRESS", cn: "冰酷堡垒", img: "frozen-fortress.jpg", stars: "★★★", desc: "极寒之地的攻防战。利用冰墙和暴风雪作为掩护，攻破敌人的坚固堡垒。" },
-        { id: 24, en: "FIERCE FORCES", cn: "热血无双", img: "fierce-forces.png", stars: "★★★", desc: "召唤神话生物加入战场！这是一场没有任何规则限制的混沌大乱斗。" },
-        { id: 25, en: "MAGMA MOUNTAIN", cn: "智取火焰山", img: "magma-mountain.jpg", stars: "★★★", desc: "在喷发的火山和流动的岩浆之间寻找落脚点，将对手推入火海！" },
-        { id: 26, en: "ANTI GRAVITY", cn: "反重力", img: "anti-gravity.png", stars: "★★★★", desc: "物理法则失效！在失重环境中控制单位的轨迹，这是一场烧脑的物理战。", tag: "物理引擎" },
-        { id: 27, en: "STORM SIEGE", cn: "风暴围城", img: "storm-siege.png", stars: "★★★", desc: "风暴圈正在缩小！像大逃杀一样，在不断压缩的安全区内决一死战。" },
-        { id: 28, en: "SNOWHOLD", cn: "雪之堡垒", img: "snowhold.png", stars: "★★★", desc: "在漫天飞雪中争夺控制点。利用暴风雪隐蔽你的行踪，突袭敌人基地。" },
-        { id: 29, en: "PAWNS PASSAGE", cn: "棋逢对手", img: "pawns-passage.jpg", stars: "★★", desc: "像国际象棋一样思考。控制你的“棋子”步步为营，将死对方的国王。" },
-        { id: 30, en: "ZERO SUM", cn: "零和博弈", img: "zero-sum.png", stars: "★★★", desc: "这不仅是战斗，更是数学博弈。只有让你的收益最大化，才能赢得胜利。" },
-        { id: 31, en: "CAVERN SURVIVAL", cn: "洞穴求生", img: "cavern-survival.jpg", stars: "★", desc: "在危机四伏的地下洞穴中存活越久越好，避开陷阱，击退怪物。", tag: "生存挑战" },
-        { id: 32, en: "DUELING GROUNDS", cn: "决斗场", img: "dueling-grounds.jpg", stars: "★", desc: "最纯粹的1v1战斗。在这里磨练你的基础战斗代码，击败对手的英雄。" },
-        { id: 33, en: "MULTIPLAYER TREASURE GROVE", cn: "多人宝藏森林", img: "multiplayer-treasure-grove.jpg", stars: "★★", desc: "森林里遍地黄金！比你的朋友更快地收集金币，但要小心潜伏的食人魔。" },
-        { id: 34, en: "HARROWLAND", cn: "痛苦荒原", img: "harrowland.png", stars: "★★★", desc: "只有最强者才能在这片被诅咒的荒原上立足。即死陷阱无处不在。" }
-    ];
+    <!-- ─── 老师快速开始 ─── -->
+    <section class="shell" id="quick">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Quick Start</div>
+          <h2 class="section-title">老师快速开始</h2>
+        </div>
+        <p class="section-desc">无论第一次带课，还是今天马上上课、组织班级赛或准备比赛，都能从这里一键进入。</p>
+      </div>
+      <div class="quick-grid">
+        <a href="about_arena.html" class="quest-card q-teal">
+          <span class="quest-tag">新老师</span>
+          <h3>第一次带竞技场课</h3>
+          <p>了解扣哒世界与竞技场机制，从规则讲解和评分逻辑开始入门。</p>
+        </a>
+        <a href="#templates" class="quest-card q-purple">
+          <span class="quest-tag">今天上课</span>
+          <h3>今天上一节竞技场课</h3>
+          <p>直接进入推荐课堂模板与课件下载，照着分钟级流程就能开课。</p>
+        </a>
+        <a href="#checklist" class="quest-card q-amber">
+          <span class="quest-tag">班级活动</span>
+          <h3>组织班级挑战赛</h3>
+          <p>班级赛规则、排行榜说明与课堂组织清单，一站配齐。</p>
+        </a>
+        <a href="#featured" class="quest-card q-red">
+          <span class="quest-tag">赛事冲刺</span>
+          <h3>准备赛事冲刺</h3>
+          <p>AI 世青赛重点竞技场、强化篇与冲刺篇，带学生赛前拉练。</p>
+        </a>
+      </div>
+    </section>
 
-    const listContainer = document.getElementById('arenaList');
-    function getSlug(name) { return name.toLowerCase().replace(/\s+/g, ''); }
+    <div class="shell"><hr class="section-divider"></div>
 
-    arenas.forEach(arena => {
-        const slug = getSlug(arena.en);
-        const card = document.createElement('div');
-        card.className = 'arena-card' + ((arena.id === 17 || arena.id === 35) ? ' featured-arena' : '');
+    <!-- ─── 本期重点竞技场（含老师选用说明） ─── -->
+    <section class="shell" id="featured">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Featured</div>
+          <h2 class="section-title">本期重点竞技场</h2>
+        </div>
+        <p class="section-desc">每个竞技场都附带老师选用说明，帮你判断这节课适不适合你的学生、要讲什么、学生容易卡在哪。</p>
+      </div>
+      <div class="spotlight-grid" id="spotlightGrid">
 
-        let contentHtml = `
-            <div class="card-info-section">
-                <div class="info-left">
-                    <div class="title-row"><h2 class="cn-title">${arena.cn}</h2><div class="en-title">${arena.en}</div></div>
-                    <p class="story-desc">${arena.desc}</p>
-                </div>
-                <div class="stars">${arena.stars}</div>
+        <article class="spotlight-card">
+          <div class="spotlight-img" style="background-image:url('src/tundra-tower.jpeg')">
+            <div class="spotlight-tag">2026年AI世青赛春季决赛竞技场</div>
+          </div>
+          <div class="spotlight-content">
+            <div class="arena-heading">
+              <div><h3>苔原塔</h3><div class="arena-en">TUNDRA TOWER</div></div>
+              <div class="stars">★★★</div>
             </div>
-            <div class="card-visual-section">
-        `;
+            <p class="game-desc">在寒冷的苔原中攀登高塔，迎接决赛的终极挑战。多轮策略对战，是赛前训练的核心场。</p>
+            <div class="teacher-pick">
+              <div class="teacher-pick-head">老师选用说明</div>
+              <div class="teacher-pick-body">
+                <div class="pick-row"><span class="pick-k">适合学生</span><span class="pick-v">有基础 / 参赛学生</span></div>
+                <div class="pick-row"><span class="pick-k">前置知识</span><span class="pick-v">循环、条件判断、函数、数组</span></div>
+                <div class="pick-row"><span class="pick-k">建议课时</span><span class="pick-v">3–5 课时（45–90 分钟）</span></div>
+                <div class="pick-row"><span class="pick-k">课堂目标</span><span class="pick-v">策略拆解 · 多轮提交 · 排行榜复盘</span></div>
+                <div class="pick-row"><span class="pick-k">常见卡点</span><span class="pick-v warn">只会写固定动作，不会根据战况调整策略</span></div>
+                <div class="pick-row"><span class="pick-k">推荐用法</span><span class="pick-v">赛前训练 · 公开课 · 结课展示</span></div>
+              </div>
+            </div>
+            <div class="resource-columns">
+              <div class="resource-box"><h4>基础教学</h4>
+                <a class="btn btn-blue btn-sm" href="tundra-tower.html">教学页面讲解</a>
+                <a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/tundratower/tundratower_basic_ppt.pptx" target="_blank">基础课件下载</a>
+              </div>
+              <div class="resource-box"><h4>强化冲刺</h4>
+                <a class="btn btn-primary btn-sm" href="tundra-tower_advanced.html">强化篇讲解</a>
+                <a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/tundratower/tundratower_advanced_ppt.pptx" target="_blank">强化课件下载</a>
+              </div>
+            </div>
+          </div>
+        </article>
 
-        if (arena.tag) {
-            const tagClass = (arena.id === 17 || arena.id === 35) ? 'special-tag super-glow-tag' : 'special-tag';
-            contentHtml += `<div class="${tagClass}">${arena.tag}</div>`;
-        }
+        <article class="spotlight-card">
+          <div class="spotlight-img" style="background-image:url('src/iron-and-ice.jpg')">
+            <div class="spotlight-tag">重点竞技场</div>
+          </div>
+          <div class="spotlight-content">
+            <div class="arena-heading">
+              <div><h3>冰封竞速</h3><div class="arena-en">IRON AND ICE</div></div>
+              <div class="stars">★★★</div>
+            </div>
+            <p class="game-desc">钢铁与寒冰的碰撞，在滑溜的冰面上操控重型机甲，保持平衡并摧毁目标。</p>
+            <div class="teacher-pick">
+              <div class="teacher-pick-head">老师选用说明</div>
+              <div class="teacher-pick-body">
+                <div class="pick-row"><span class="pick-k">适合学生</span><span class="pick-v">有基础学生</span></div>
+                <div class="pick-row"><span class="pick-k">前置知识</span><span class="pick-v">循环、函数封装</span></div>
+                <div class="pick-row"><span class="pick-k">建议课时</span><span class="pick-v">3 课时（45 分钟）</span></div>
+                <div class="pick-row"><span class="pick-k">课堂目标</span><span class="pick-v">完成第一版代码 · 优化步数排名</span></div>
+                <div class="pick-row"><span class="pick-k">常见卡点</span><span class="pick-v warn">能跑通但不会精简，代码冗余步数偏多</span></div>
+                <div class="pick-row"><span class="pick-k">推荐用法</span><span class="pick-v">日常课 · 阶段挑战赛 · 公开课</span></div>
+              </div>
+            </div>
+            <div class="resource-columns">
+              <div class="resource-box"><h4>基础教学</h4>
+                <a class="btn btn-blue btn-sm" href="ironandice_basic.html">教学页面讲解</a>
+                <a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_basic_ppt.pptx" target="_blank">基础课件下载</a>
+                <a class="btn btn-purple btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_basic.mp4" target="_blank">基础教学视频</a>
+              </div>
+              <div class="resource-box"><h4>强化冲刺</h4>
+                <a class="btn btn-primary btn-sm" href="ironandice_advanced.html">进阶篇讲解</a>
+                <a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_advanced_ppt.pptx" target="_blank">进阶课件下载</a>
+                <a class="btn btn-purple btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_advanced.mp4" target="_blank">进阶教学视频</a>
+              </div>
+            </div>
+          </div>
+        </article>
 
-        contentHtml += `<img src="src/${arena.img}" alt="${arena.en}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="img-fallback" style="display:none;">⚔️</div>`;
+      </div>
+    </section>
 
-        if (arena.id !== 17 && arena.id !== 35) {
-            contentHtml += `<div class="visual-overlay"></div>`;
-        }
+    <div class="shell"><hr class="section-divider"></div>
 
-        if (arena.id === 17 || arena.id === 35) {
-            let basicLinks = '';
-            let advancedLinks = '';
+    <!-- ─── 三种课堂模板（新增核心模块） ─── -->
+    <section class="shell" id="templates">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Class Templates</div>
+          <h2 class="section-title">三种课堂模板 · 照着就能上</h2>
+        </div>
+        <p class="section-desc">把教学路径落成一节课的分钟级操作方案。选一个模板，打开课件，就能开始上课。</p>
+      </div>
+      <div class="tpl-tabs">
+        <button class="tpl-tab active" data-tpl="t1"><span>模板一 · 体验课</span><span class="tpl-min">45 分钟</span></button>
+        <button class="tpl-tab" data-tpl="t2"><span>模板二 · 常规课</span><span class="tpl-min">90 分钟</span></button>
+        <button class="tpl-tab" data-tpl="t3"><span>模板三 · 赛事冲刺课</span><span class="tpl-min">冲刺</span></button>
+      </div>
 
-            if (arena.id === 17) {
-                basicLinks = `
-                    <a href="${slug}_basic.html" class="big-btn glow-blue">📖 教学页面讲解</a>
-                    <a href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_basic_ppt.pptx" target="_blank" class="big-btn glow-green">📥 基础课件下载 (PPT)</a>
-                    <a href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_basic.mp4" target="_blank" class="big-btn glow-purple">🎬 基础教学视频导读</a>
-                `;
-                advancedLinks = `
-                    <a href="${slug}_advanced.html" class="big-btn glow-gold">🚀 进阶页面讲解</a>
-                    <a href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_advanced_ppt.pptx" target="_blank" class="big-btn glow-green">📥 进阶课件下载 (PPT)</a>
-                    <a href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_advanced.mp4" target="_blank" class="big-btn glow-purple">🎬 进阶教学视频导读</a>
-                `;
-            } else if (arena.id === 35) {
-                basicLinks = `
-                    <a href="tundra-tower.html" class="big-btn glow-blue">📖 教学页面讲解</a>
-                    <a href="https://assets.koudashijie.com/arena-ppt/tundratower/tundratower_basic_ppt.pptx" target="_blank" class="big-btn glow-green">📥 基础课件下载 (PPT)</a>
-                `;
-                advancedLinks = `
-                    <a href="tundra-tower_advanced.html" class="big-btn glow-gold">🚀 强化篇页面讲解</a>
-                    <a href="https://assets.koudashijie.com/arena-ppt/tundratower/tundratower_advanced_ppt.pptx" target="_blank" class="big-btn glow-green">📥 强化篇课件下载 (PPT)</a>
-                `;
-            }
+      <div class="tpl-panel active" id="t1">
+        <div class="tpl-wrap">
+          <div class="tpl-step"><div class="tpl-time">0–5 分钟</div><div><h4>展示对战效果</h4><p>直接展示竞技场对战画面，用视觉冲击调动学生兴趣。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">5–12 分钟</div><div><h4>讲解规则与胜负目标</h4><p>说清楚怎么算赢，让学生带着目标去写代码。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">12–25 分钟</div><div><h4>完成第一版代码</h4><p>学生动手写出可运行的第一版，不追求排名。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">25–35 分钟</div><div><h4>提交对战 · 看排行榜</h4><p>让学生看到代码改动会直接影响对战结果。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">35–45 分钟</div><div><h4>引导复盘 · 布置优化任务</h4><p>让每个学生说出这次改了哪一行代码，并留下优化方向。</p></div></div>
+        </div>
+      </div>
 
-            contentHtml += `</div> <div class="teacher-dashboard">
-                    <div class="dashboard-panel">
-                        <div class="panel-header">🟢 基础阶段 (初赛必修)</div>
-                        ${basicLinks}
-                    </div>
-                    <div class="dashboard-panel">
-                        <div class="panel-header">🟠 进阶阶段 (高分冲刺)</div>
-                        ${advancedLinks}
-                    </div>
-                </div>
-            `;
-        } else {
-            let btns = '';
-            if (arena.id === 1) {
-                btns = `<a href="${slug}_basic.html" class="game-btn btn-blue">📘 基础篇</a>
-                        <a href="${slug}_advanced.html" class="game-btn btn-gold">⚔️ 强化篇</a>
-                        <a href="${slug}_sprint.html" class="game-btn btn-red">🔥 冲刺篇</a>`;
-            } else if (arena.id >= 2 && arena.id <= 6) {
-                btns = `<a href="${slug}_basic.html" class="game-btn btn-blue">📘 基础篇</a>
-                        <a href="${slug}_advanced.html" class="game-btn btn-gold">⚔️ 强化篇</a>`;
-            } else if (arena.id >= 30 && arena.id <= 34) {
-                btns = '';
-            } else {
-                btns = `<a href="${slug}_basic.html" class="game-btn btn-blue">📘 基础篇</a>`;
-            }
+      <div class="tpl-panel" id="t2">
+        <div class="tpl-wrap">
+          <div class="tpl-step"><div class="tpl-time">0–10 分钟</div><div><h4>规则导入</h4><p>用对战演示加规则讲解，让学生理解目标与限制条件。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">10–25 分钟</div><div><h4>基础代码讲解</h4><p>结合 PPT 拆解基础篇代码，讲清核心指令与逻辑。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">25–50 分钟</div><div><h4>学生独立完成第一版</h4><p>老师巡场，针对卡点给伪代码提示而非直接答案。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">50–70 分钟</div><div><h4>策略优化</h4><p>引导学生分析对战结果，改进判断条件与循环逻辑。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">70–85 分钟</div><div><h4>排行榜对战与回放分析</h4><p>观看高分回放，对比不同策略的差异。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">85–90 分钟</div><div><h4>总结算法知识点</h4><p>把本节课涉及的循环、条件、函数收束成知识清单。</p></div></div>
+        </div>
+      </div>
 
-            contentHtml += `
-                <div class="overlay-btn-group">${btns}</div>
-            </div>`;
-        }
+      <div class="tpl-panel" id="t3">
+        <div class="tpl-wrap">
+          <div class="tpl-step"><div class="tpl-time">环节一</div><div><h4>规则拆解</h4><p>逐条拆解赛题规则与评分细则，明确得分点。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">环节二</div><div><h4>样例策略分析</h4><p>分析优秀样例策略，提炼可复用的解题思路。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">环节三</div><div><h4>多轮提交</h4><p>学生反复提交对战，快速迭代自己的策略。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">环节四</div><div><h4>排行榜对比</h4><p>横向对比排名，找出与高分选手的策略差距。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">环节五</div><div><h4>优秀代码复盘</h4><p>集体复盘高分代码的关键改动与判断逻辑。</p></div></div>
+          <div class="tpl-step"><div class="tpl-time">环节六</div><div><h4>下次优化方向</h4><p>为每位参赛学生列出明确的下轮优化清单。</p></div></div>
+        </div>
+      </div>
+    </section>
 
-        card.innerHTML = contentHtml;
-        listContainer.appendChild(card);
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 推荐教学路径 ─── -->
+    <section class="shell" id="path">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Teaching Path</div>
+          <h2 class="section-title">推荐教学路径</h2>
+        </div>
+        <p class="section-desc">按学生水平组织入门、训练、进阶和冲刺。</p>
+      </div>
+      <div class="path-wrap">
+        <div class="path-grid">
+          <div class="path-step">
+            <div class="step-no">1</div>
+            <h3>认识竞技场</h3>
+            <p>讲规则、目标和排行榜，让学生理解代码如何影响对战。</p>
+          </div>
+          <div class="path-step">
+            <div class="step-no">2</div>
+            <h3>基础训练</h3>
+            <p>从低难度竞技场开始，完成第一版可运行代码。</p>
+          </div>
+          <div class="path-step">
+            <div class="step-no">3</div>
+            <h3>算法进阶</h3>
+            <p>引入条件判断、循环、函数，让学生开始优化策略。</p>
+          </div>
+          <div class="path-step">
+            <div class="step-no">4</div>
+            <h3>赛事冲刺</h3>
+            <p>使用重点竞技场资源，进行强化和多轮对战提交。</p>
+          </div>
+          <div class="path-step">
+            <div class="step-no">5</div>
+            <h3>课堂复盘</h3>
+            <p>围绕排行榜与回放，讨论策略差异与优化方向。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 竞技场资源库（教学化筛选 + 全部竞技场） ─── -->
+    <section class="shell" id="library">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Arena Library</div>
+          <h2 class="section-title">竞技场资源库</h2>
+        </div>
+        <p class="section-desc">按学生水平、课堂场景和资源完整度筛选，快速找到适合本节课的竞技场。</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" class="search-input" placeholder="搜索竞技场名称、关键词（如：循环、逃出地牢、公开课）…" />
+      </div>
+
+      <div class="filter-groups">
+        <div class="filter-group">
+          <div class="filter-group-label">按学生水平</div>
+          <div class="filters" data-group="level">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="beginner">零基础 / 入门</button>
+            <button class="filter-btn" data-filter="basic">有基础</button>
+            <button class="filter-btn" data-filter="advanced">进阶</button>
+            <button class="filter-btn" data-filter="featured">参赛 / 赛事</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-label">按资源完整度</div>
+          <div class="filters" data-group="res">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="ppt">有 PPT</button>
+            <button class="filter-btn" data-filter="video">有视频</button>
+            <button class="filter-btn" data-filter="sprint">有冲刺篇</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="arena-grid" id="arenaGrid">
+        <article class="game-card" data-level="featured" data-featured="true" data-ppt="true" data-video="false" data-sprint="true">
+          <div class="game-cover" style="background-image:url('src/tundra-tower.jpeg')">
+            <div class="badge-row"><span class="mini-badge hot">2026年AI世青赛春季决赛竞技场</span><span class="mini-badge">赛事</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">苔原塔</h3><div class="game-en">TUNDRA TOWER</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">在寒冷的苔原中攀登高塔，迎接决赛的终极挑战。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合赛事冲刺和课堂复盘，训练策略拆解、代码优化与排行榜分析。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span><span class="resource-tag">PPT</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="tundra-tower.html">基础讲解</a><a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/tundratower/tundratower_basic_ppt.pptx" target="_blank">基础PPT</a><a class="btn btn-primary btn-sm" href="tundra-tower_advanced.html">强化篇</a><a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/tundratower/tundratower_advanced_ppt.pptx" target="_blank">强化PPT</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="featured" data-featured="true" data-ppt="true" data-video="true" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/iron-and-ice.jpg')">
+            <div class="badge-row"><span class="mini-badge hot">重点竞技场</span><span class="mini-badge">赛事</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">冰封竞速</h3><div class="game-en">IRON AND ICE</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">钢铁与寒冰的碰撞，在滑溜的冰面上操控重型机甲，保持平衡并摧毁目标。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合赛事冲刺和课堂复盘，训练策略拆解、代码优化与排行榜分析。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span><span class="resource-tag">PPT</span><span class="resource-tag">视频</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="ironandice_basic.html">基础讲解</a><a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_basic_ppt.pptx" target="_blank">基础PPT</a><a class="btn btn-purple btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_basic.mp4" target="_blank">基础视频</a><a class="btn btn-primary btn-sm" href="ironandice_advanced.html">进阶篇</a><a class="btn btn-green btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_advanced_ppt.pptx" target="_blank">进阶PPT</a><a class="btn btn-purple btn-sm" href="https://assets.koudashijie.com/arena-ppt/ironandice/ironandice_advanced.mp4" target="_blank">进阶视频</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="featured" data-featured="true" data-ppt="false" data-video="false" data-sprint="true">
+          <div class="game-cover" style="background-image:url('src/sunfire.png')">
+            <div class="badge-row"><span class="mini-badge hot">2025年AI世青赛秋季决赛竞技场</span><span class="mini-badge">赛事</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">阳炎</h3><div class="game-en">SUNFIRE</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">在烈火燎原的峰顶，召唤元素大军，利用地形将敌人化为灰烬。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合赛事冲刺和课堂复盘，训练策略拆解、代码优化与排行榜分析。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span><span class="resource-tag">冲刺篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="sunfire_basic.html">基础篇</a><a class="btn btn-primary btn-sm" href="sunfire_advanced.html">强化篇</a><a class="btn btn-red btn-sm" href="sunfire_sprint.html">冲刺篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="beginner" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/wakka-maul.jpg')">
+            <div class="badge-row"><span class="mini-badge hot">计算机科学入门竞技场</span><span class="mini-badge">入门</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">逃出地牢</h3><div class="game-en">WAKKA MAUL</div></div><div class="stars">★</div></div>
+            <p class="game-desc">在阴暗的地牢中痛击钻地的地鼠，比拼手速与基础算法的反应力。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合第一次接触竞技场的学生，用最短路径让学生理解代码会影响对战结果，重点训练基本指令、条件判断和第一版可运行代码。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="wakkamaul.html">基础篇</a><a class="btn btn-primary btn-sm" href="wakkamaul_advanced.html">强化篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/power-peak.png')">
+            <div class="badge-row"><span class="mini-badge hot">计算机科学2竞技场</span><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">力量的顶峰</h3><div class="game-en">POWER PEAK</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">攀登逻辑的高峰，利用函数和循环的力量在暴风雪中击败对手。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合已掌握基础语法的学生，重点训练函数封装和循环优化，适合讲解同一目标下不同代码的效率差异。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="powerpeak.html">基础篇</a><a class="btn btn-primary btn-sm" href="powerpeak_advanced.html">强化篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/cross-bones.png')">
+            <div class="badge-row"><span class="mini-badge hot">计算机科学3竞技场</span><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">十字骨头</h3><div class="game-en">CROSS BONES</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">在荒凉的埋骨之地，使用复杂的条件判断来指挥骷髅大军。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合训练复杂条件判断与分支逻辑，引导学生梳理多种战况下的应对策略。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="crossbones.html">基础篇</a><a class="btn btn-primary btn-sm" href="crossbones_advanced.html">强化篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/summation-summit.png')">
+            <div class="badge-row"><span class="mini-badge hot">计算机科学4竞技场</span><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">综合格斗</h3><div class="game-en">SUMMATION SUMMIT</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">算法的综合格斗，只有精通数组和对象的勇士才能站到最后。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合训练数组与对象操作，引导学生用数据结构组织和管理战场信息。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="summationsummit.html">基础篇</a><a class="btn btn-primary btn-sm" href="summationsummit_advanced.html">强化篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/ace-of-coders.png')">
+            <div class="badge-row"><span class="mini-badge hot">计算机科学6竞技场</span><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">王牌程序员</h3><div class="game-en">ACE OF CODERS</div></div><div class="stars">★★★★</div></div>
+            <p class="game-desc">电子竞技的巅峰舞台，控制多兵种协同作战，争夺王牌程序员的桂冠。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合高阶学生和竞赛班，训练多单位协同、策略优先级与复杂战况判断，不建议作为新手第一节竞技场课。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span><span class="resource-tag">强化篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="aceofcoders.html">基础篇</a><a class="btn btn-primary btn-sm" href="aceofcoders_advanced.html">强化篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/solar-skirmish.png')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">绿色能源</h3><div class="game-en">SOLAR SKIRMISH</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">资源争夺战，收集散落的光能核心，维持能源网络并击溃对手。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="solarskirmish.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/equinox.jpg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">春分</h3><div class="game-en">EQUINOX</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">平衡即是力量。在昼夜交替的神秘森林中，利用光影变化扭转战局。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="equinox.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/blazing-battle.jpg')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">烈焰战场</h3><div class="game-en">BLAZING BATTLE</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">纯粹的火力对决，在燃烧的土地上指挥英雄冲锋陷阵。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="blazingbattle.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/infinite-inferno.jpg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">英雄荣耀</h3><div class="game-en">INFINITE INFERNO</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">无尽的炼狱模式，在不断生成的怪物潮中生存，证明谁才是真正的英雄。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="infiniteinferno.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/mages-might_bg.png')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">巫师之战</h3><div class="game-en">MAGES MIGHT</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">魔法的较量。计算法力消耗，用精准的咒语轰炸对手的塔楼。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="magesmight_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/sorcerers.jpg')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">巫师闪电战</h3><div class="game-en">SORCERERS</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">快节奏的法术对决，在狭小空间内快速吟唱，比拼魔法反应速度。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="sorcerers_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/giants-gate.jpg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">巨人之门</h3><div class="game-en">GIANTS GATE</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">守护古老的巨人之门，指挥投石车与巨人在攻城战中守住防线。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="giantsgate_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/magic-rush.jpg')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">魔力冲刺</h3><div class="game-en">MAGIC RUSH</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">速度与智慧的赛跑，用代码铺平道路，率先冲过终点线。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="magicrush_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/sky-Span-banner.jpeg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">天际之战</h3><div class="game-en">THE BATTLE OF SKY SPAN</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">在云端浮空岛屿作战，利用飞行单位掌控制空权。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="thebattleofskyspan_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/counter-attack.png')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">反戈一击</h3><div class="game-en">COUNTER ATTACK</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">防守就是最好的进攻。在敌人攻势中寻找破绽，给予致命反击。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="counterattack_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/colossus.jpg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">巨神之战</h3><div class="game-en">COLOSSUS</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">唤醒沉睡的巨像，围绕古代兵器展开史诗级阵地战。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="colossus_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/sandstorm.jpg')">
+            <div class="badge-row"><span class="mini-badge hot">体育类算法</span><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">篮坛麦加</h3><div class="game-en">SANDSTORM</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">沙尘暴中的夺球大战，编写策略让队员传球、突破并完成绝杀。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="sandstorm_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/desert-duel.jpg')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">灌篮高手</h3><div class="game-en">DESERT DUEL</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">烈日下的宿命对决，在开阔沙漠中指挥小队进行战术包抄。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="desertduel_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="beginner" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/farmers-feud.jpg')">
+            <div class="badge-row"><span class="mini-badge">入门</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">春华秋实</h3><div class="game-en">FARMERS FEUD</div></div><div class="stars">★</div></div>
+            <p class="game-desc">在丰收季节保卫庄稼，同时掠夺对手的资源。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合课堂导入和零基础训练，帮助学生完成第一版可运行代码。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="farmersfeud_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/farmscape.jpg')">
+            <div class="badge-row"><span class="mini-badge hot">春华秋实升级版</span><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">农场景观</h3><div class="game-en">FARMSCAPE</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">春华秋实升级版，更大的农场和更复杂的经济系统。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="farmscape_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/frozen-fortress.jpg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">冰酷堡垒</h3><div class="game-en">FROZEN FORTRESS</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">极寒之地的攻防战，利用冰墙和暴风雪攻破敌人堡垒。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="frozenfortress_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/fierce-forces.png')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">热血无双</h3><div class="game-en">FIERCE FORCES</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">召唤神话生物加入战场，一场没有规则限制的混沌大乱斗。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="fierceforces_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/magma-mountain.jpg')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">智取火焰山</h3><div class="game-en">MAGMA MOUNTAIN</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">在喷发的火山和流动的岩浆间寻找落脚点，将对手推入火海。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="magmamountain_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/anti-gravity.png')">
+            <div class="badge-row"><span class="mini-badge hot">物理引擎</span><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">反重力</h3><div class="game-en">ANTI GRAVITY</div></div><div class="stars">★★★★</div></div>
+            <p class="game-desc">物理法则失效，在失重环境中控制单位轨迹的烧脑物理战。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="antigravity_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/storm-siege.png')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">风暴围城</h3><div class="game-en">STORM SIEGE</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">风暴圈正在缩小，在不断压缩的安全区内决一死战。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="stormsiege_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/snowhold.png')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">雪之堡垒</h3><div class="game-en">SNOWHOLD</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">在漫天飞雪中争夺控制点，利用暴风雪隐蔽行踪突袭敌人基地。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合进阶策略训练，引导学生对比代码效果并优化对战表现。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="snowhold_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/pawns-passage.jpg')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">棋逢对手</h3><div class="game-en">PAWNS PASSAGE</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">像国际象棋一样思考，控制棋子步步为营，将死对方的国王。</p>
+            <div class="teach-value"><strong>教学价值：</strong>适合基础竞技场训练，重点理解规则、条件判断和循环控制。</div>
+            <div class="resource-tags"><span class="resource-tag">基础篇</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="pawnspassage_basic.html">基础篇</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/zero-sum.png')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">零和博弈</h3><div class="game-en">ZERO SUM</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">不仅是战斗，更是数学博弈。让收益最大化才能赢得胜利。</p>
+            <div class="teach-value"><strong>教学价值：</strong>可作为拓展挑战资源，用于丰富课堂活动和学生自主探索。</div>
+            <div class="resource-tags"><span class="resource-tag">拓展挑战</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="zerosum.html">进入页面</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="beginner" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/cavern-survival.jpg')">
+            <div class="badge-row"><span class="mini-badge hot">生存挑战</span><span class="mini-badge">入门</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">洞穴求生</h3><div class="game-en">CAVERN SURVIVAL</div></div><div class="stars">★</div></div>
+            <p class="game-desc">在危机四伏的地下洞穴中存活越久越好，避开陷阱击退怪物。</p>
+            <div class="teach-value"><strong>教学价值：</strong>可作为拓展挑战资源，用于丰富课堂活动和学生自主探索。</div>
+            <div class="resource-tags"><span class="resource-tag">拓展挑战</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="cavernsurvival.html">进入页面</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="beginner" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/dueling-grounds.jpg')">
+            <div class="badge-row"><span class="mini-badge">入门</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">决斗场</h3><div class="game-en">DUELING GROUNDS</div></div><div class="stars">★</div></div>
+            <p class="game-desc">最纯粹的1v1战斗，在这里磨练基础战斗代码。</p>
+            <div class="teach-value"><strong>教学价值：</strong>可作为拓展挑战资源，用于丰富课堂活动和学生自主探索。</div>
+            <div class="resource-tags"><span class="resource-tag">拓展挑战</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="duelinggrounds.html">进入页面</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="basic" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/multiplayer-treasure-grove.jpg')">
+            <div class="badge-row"><span class="mini-badge">基础</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">多人宝藏森林</h3><div class="game-en">MULTIPLAYER TREASURE GROVE</div></div><div class="stars">★★</div></div>
+            <p class="game-desc">森林里遍地黄金，比对手更快收集金币，但要小心食人魔。</p>
+            <div class="teach-value"><strong>教学价值：</strong>可作为拓展挑战资源，用于丰富课堂活动和学生自主探索。</div>
+            <div class="resource-tags"><span class="resource-tag">拓展挑战</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="multiplayertreasuregrove.html">进入页面</a></div>
+          </div>
+        </article>
+
+        <article class="game-card" data-level="advanced" data-featured="false" data-ppt="false" data-video="false" data-sprint="false">
+          <div class="game-cover" style="background-image:url('src/harrowland.png')">
+            <div class="badge-row"><span class="mini-badge">进阶</span></div>
+          </div>
+          <div class="game-body">
+            <div class="game-title-row"><div><h3 class="game-title">痛苦荒原</h3><div class="game-en">HARROWLAND</div></div><div class="stars">★★★</div></div>
+            <p class="game-desc">只有最强者才能在被诅咒的荒原上立足，即死陷阱无处不在。</p>
+            <div class="teach-value"><strong>教学价值：</strong>可作为拓展挑战资源，用于丰富课堂活动和学生自主探索。</div>
+            <div class="resource-tags"><span class="resource-tag">拓展挑战</span></div>
+            <div class="game-actions"><a class="btn btn-blue btn-sm" href="harrowland.html">进入页面</a></div>
+          </div>
+        </article>
+
+      </div>
+      <div class="empty-state" id="emptyState">没有找到匹配的竞技场资源，请尝试其他关键词。</div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 课前检查清单 + 班级活动方案 ─── -->
+    <section class="shell" id="checklist">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Before Class</div>
+          <h2 class="section-title">课前检查清单 & 班级活动方案</h2>
+        </div>
+        <p class="section-desc">很多课堂问题不是内容问题，而是流程准备不足。上课前逐项确认，让课堂顺畅开跑。</p>
+      </div>
+      <div class="teacher-grid">
+        <div class="teacher-panel">
+          <h3>老师课前需要确认</h3>
+          <ul class="check-list">
+            <li><span class="check-mark">✓</span><span class="check-text">学生是否已经登录账号</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">是否能进入指定竞技场</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">学生是否知道提交代码和运行对战的位置</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">本节课使用基础篇、强化篇还是冲刺篇</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">是否提前打开 PPT 和教学页面</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">是否准备好排行榜展示方式</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">是否准备课后截图或优秀代码展示</span></li>
+          </ul>
+        </div>
+        <div class="teacher-panel">
+          <h3>组织班级挑战赛</h3>
+          <ul class="check-list">
+            <li><span class="check-mark">✓</span><span class="check-text">选定一个适合全班水平的竞技场</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">设置基础目标 / 挑战目标 / 高手目标三层任务</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">公布规则、时间限制与提交次数</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">投屏实时排行榜，营造对战氛围</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">设置多元奖项，让不同学生都有获得感</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">保存优秀代码与排行榜截图用于展示</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">整理成果，发送家长群或校区展示</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 课堂控场建议 ─── -->
+    <section class="shell" id="control">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">In-Class Control</div>
+          <h2 class="section-title">课堂控场建议</h2>
+        </div>
+        <p class="section-desc">针对竞技场课最常见的现场问题，给出可直接执行的应对方法。</p>
+      </div>
+      <div class="control-grid">
+        <div class="control-card">
+          <div class="control-situ">场景 01</div>
+          <h4>学生只关注输赢，不关注代码</h4>
+          <p class="control-sol"><strong>建议：</strong>每轮对战后，必须让学生说出"我这次改了哪一行代码"。</p>
+        </div>
+        <div class="control-card c-blue">
+          <div class="control-situ">场景 02</div>
+          <h4>学生水平差异大</h4>
+          <p class="control-sol"><strong>建议：</strong>设置基础目标、挑战目标、高手目标三层任务，人人有事做。</p>
+        </div>
+        <div class="control-card c-gold">
+          <div class="control-situ">场景 03</div>
+          <h4>排行榜导致学生焦虑</h4>
+          <p class="control-sol"><strong>建议：</strong>除了排名，还展示进步最快、策略最特别、代码最清晰。</p>
+        </div>
+        <div class="control-card c-green">
+          <div class="control-situ">场景 04</div>
+          <h4>课堂时间不够</h4>
+          <p class="control-sol"><strong>建议：</strong>第一节课只要求完成可运行代码，不追求高排名。</p>
+        </div>
+        <div class="control-card c-purple">
+          <div class="control-situ">场景 05</div>
+          <h4>学生卡住不动</h4>
+          <p class="control-sol"><strong>建议：</strong>给提示词或伪代码，引导思路，不直接给完整答案。</p>
+        </div>
+        <div class="control-card c-blue">
+          <div class="control-situ">场景 06</div>
+          <h4>高手学生很快做完</h4>
+          <p class="control-sol"><strong>建议：</strong>安排高手目标，或让其担任小助教，帮助同伴优化策略。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 复盘与成果展示 ─── -->
+    <section class="shell" id="review">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Review & Showcase</div>
+          <h2 class="section-title">复盘与成果展示</h2>
+        </div>
+        <p class="section-desc">竞技场最大的价值不只是对战，而是复盘。把排行榜、回放、代码优化变成可评价、可展示的课堂活动。</p>
+      </div>
+      <div class="review-grid">
+        <div class="teacher-panel">
+          <h3>课堂复盘问题（可直接问学生）</h3>
+          <div class="qa-item"><span class="qa-num">1</span><span>你第一版代码的策略是什么？</span></div>
+          <div class="qa-item"><span class="qa-num">2</span><span>这次输在哪里？</span></div>
+          <div class="qa-item"><span class="qa-num">3</span><span>你修改了哪一个判断条件？</span></div>
+          <div class="qa-item"><span class="qa-num">4</span><span>排名提升的关键改动是什么？</span></div>
+          <div class="qa-item"><span class="qa-num">5</span><span>你的代码是否能应对不同情况？</span></div>
+          <div class="qa-item"><span class="qa-num">6</span><span>有没有更简单、更稳定的写法？</span></div>
+          <div class="qa-item"><span class="qa-num">7</span><span>如果再给你 10 分钟，你会优先优化哪里？</span></div>
+        </div>
+        <div class="teacher-panel">
+          <h3>展示与班级奖项维度</h3>
+          <div class="award-list">
+            <div class="award-item">最快完成第一版</div>
+            <div class="award-item">策略最清晰</div>
+            <div class="award-item">优化次数最多</div>
+            <div class="award-item">代码结构最整洁</div>
+            <div class="award-item">排名提升最快</div>
+            <div class="award-item">最有创意策略</div>
+          </div>
+          <div class="show-copy">
+            <div class="sc-label">家长群 / 校区展示文案（可直接复制）</div>
+            <p>今天孩子在苔原塔竞技场完成了自己的算法策略，经过 5 轮代码优化，排名从班级第 12 名提升到第 3 名。从"能跑通"到"跑得赢"，每一次进步都是真实的思维成长。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell"><hr class="section-divider"></div>
+
+    <!-- ─── 课堂使用建议（原有模块保留） ─── -->
+    <section class="shell" id="teacher">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Teacher Toolkit</div>
+          <h2 class="section-title">课堂使用建议</h2>
+        </div>
+        <p class="section-desc">学生分层方案和标准课堂流程。</p>
+      </div>
+      <div class="teacher-grid">
+        <div class="teacher-panel">
+          <h3>不同学生怎么安排</h3>
+          <ul class="check-list">
+            <li><span class="check-mark">✓</span><span class="check-text">零基础学生：先完成基础篇，目标是理解规则并让代码成功运行。</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">有基础学生：进入强化篇，重点训练条件判断、循环和策略调整。</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">比赛学生：使用冲刺资源，围绕排行榜进行多轮提交和代码优化。</span></li>
+            <li><span class="check-mark">✓</span><span class="check-text">高水平学生：进行对战复盘、代码重构和策略稳定性分析。</span></li>
+          </ul>
+        </div>
+        <div class="teacher-panel">
+          <h3>一节竞技场课怎么上</h3>
+          <div class="class-flow">
+            <div class="flow-item">
+              <div class="flow-time">5 min</div>
+              <div><strong>战场导入</strong><span>展示竞技场画面、胜负目标和排行榜，激发挑战欲。</span></div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-time">15 min</div>
+              <div><strong>规则讲解</strong><span>使用页面讲解或 PPT，讲清单位、资源与代码目标。</span></div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-time">25 min</div>
+              <div><strong>学生实战</strong><span>提交第一版代码，老师巡视并解决常见报错。</span></div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-time">15 min</div>
+              <div><strong>排行榜复盘</strong><span>对比策略，讨论胜负原因与优化方向。</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 底部引导 + 二维码 ─── -->
+    <section class="shell" id="support">
+      <div class="cta-banner">
+        <div class="cta-text">
+          <div class="cta-kicker">Teaching Support</div>
+          <h2>教研支持与反馈</h2>
+          <p>使用中遇到任何问题都可以联系我们：教研支持、资源反馈、链接报错或课件需求。扫码提交给教研团队，我们会尽快跟进，让每一位老师都能顺利把竞技场用起来。</p>
+          <div class="cta-actions">
+            <button class="btn btn-gold" type="button" onclick="openBugModal()">扫码反馈问题</button>
+            <a class="btn btn-ghost" href="#library">返回资源库</a>
+          </div>
+        </div>
+        <div class="cta-qr">
+          <img src="bug_qr.jpeg" alt="教研支持二维码">
+          <span>扫码进入教研支持</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="shell">扣哒世界教研团队 · 竞技场教学资源持续更新中</div>
+  </footer>
+
+  <div id="bugModal" class="modal" onclick="handleModalBackdrop(event)">
+    <div class="modal-card">
+      <button class="close" type="button" onclick="closeBugModal()">&times;</button>
+      <h3>反馈问题</h3>
+      <p>扫码向教研团队提交页面、课件、链接或赛事相关问题。</p>
+      <img class="qr" src="bug_qr.jpeg" alt="反馈二维码">
+    </div>
+  </div>
+
+  <script>
+    /* ─── Class Templates 切换 ─── */
+    document.querySelectorAll('.tpl-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tpl-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tpl-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tpl).classList.add('active');
+      });
     });
-</script>
+
+    /* ─── 分组筛选逻辑（学生水平 + 资源完整度组合筛选） ─── */
+    const filterState = { level: 'all', res: 'all' };
+
+    document.querySelectorAll('.filters').forEach(group => {
+      const groupName = group.dataset.group;
+      group.addEventListener('click', e => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterState[groupName] = btn.dataset.filter;
+        filterArenas();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', filterArenas);
+
+    function filterArenas() {
+      const kw = document.getElementById('searchInput').value.trim().toLowerCase();
+      const cards = document.querySelectorAll('.game-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matchKw = !kw || text.includes(kw);
+
+        // 学生水平筛选
+        let matchLevel = true;
+        const lv = filterState.level;
+        if (lv === 'featured') matchLevel = card.dataset.featured === 'true';
+        else if (lv === 'advanced') matchLevel = card.dataset.level === 'advanced';
+        else if (lv === 'basic') matchLevel = card.dataset.level === 'basic';
+        else if (lv === 'beginner') matchLevel = card.dataset.level === 'beginner';
+
+        // 资源完整度筛选
+        let matchRes = true;
+        const rs = filterState.res;
+        if (rs === 'ppt') matchRes = card.dataset.ppt === 'true';
+        else if (rs === 'video') matchRes = card.dataset.video === 'true';
+        else if (rs === 'sprint') matchRes = card.dataset.sprint === 'true';
+
+        if (matchKw && matchLevel && matchRes) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    /* ─── 检查清单勾选 ─── */
+    document.querySelectorAll('.check-list li').forEach(li => {
+      li.addEventListener('click', () => li.classList.toggle('done'));
+    });
+
+    /* ─── Modal ─── */
+    function openBugModal() { document.getElementById('bugModal').classList.add('show'); }
+    function closeBugModal() { document.getElementById('bugModal').classList.remove('show'); }
+    function handleModalBackdrop(e) { if (e.target.id === 'bugModal') closeBugModal(); }
+  </script>
 </body>
 </html>
