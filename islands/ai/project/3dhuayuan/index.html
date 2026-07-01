@@ -351,7 +351,7 @@
       place-items: center;
       background:
         linear-gradient(180deg, rgba(6, 22, 38, .18), rgba(6, 22, 38, .46)),
-        url("3dhuayuan.png") center / cover no-repeat,
+        url("3dhuayuan.webp") center / cover no-repeat,
         linear-gradient(180deg, #9fe8ff, #78c7ff 45%, #5165c7);
       transition: opacity .5s ease;
     }
@@ -567,7 +567,7 @@
 
   <div class="loading" id="loading">
     <div class="loadingCard">
-      <img class="loadingPoster" src="3dhuayuan.png" alt="昆虫模拟器游戏海报">
+      <img class="loadingPoster" src="3dhuayuan.webp" alt="昆虫模拟器游戏海报">
       <h1>昆虫模拟器</h1>
       <p class="loadingMeta">开发者：松松 · 可爱天空花园冒险</p>
       <p id="loadingText">正在加载岛屿、角色、动画和食人花 GLB 模型。</p>
@@ -643,8 +643,8 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+        "three": "./vendor/three/build/three.module.js",
+        "three/addons/": "./vendor/three/examples/jsm/"
       }
     }
   </script>
@@ -652,6 +652,7 @@
   <script type="module">
     import * as THREE from "three";
     import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+    import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     import { clone as cloneSkeleton } from "three/addons/utils/SkeletonUtils.js";
 
     const canvas = document.getElementById("game");
@@ -697,6 +698,10 @@
 
     const clock = new THREE.Clock();
     const loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("./vendor/three/examples/jsm/libs/draco/");
+    dracoLoader.preload();
+    loader.setDRACOLoader(dracoLoader);
     const groundRaycaster = new THREE.Raycaster();
     const groundRayOrigin = new THREE.Vector3();
     const groundRayDirection = new THREE.Vector3(0, -1, 0);
@@ -787,13 +792,15 @@
       console.error(err);
       loadingTextEl.textContent = "模型加载失败，页面没有启动。";
       errorBoxEl.style.display = "block";
+      const detail = err?.message ? `<br><br><strong>具体错误：</strong><br>${escapeHtml(err.message)}` : "";
       errorBoxEl.innerHTML =
         "请检查：<br>" +
         "1. HTML 文件和所有 GLB 文件是否在同一个文件夹。<br>" +
         "2. 文件名大小写是否完全一致。<br>" +
         "3. 建议在该文件夹运行本地服务器：<br>" +
         "<code>python -m http.server 8000</code><br>" +
-        "然后访问 <code>http://localhost:8000/index.html</code>";
+        "然后访问 <code>http://localhost:8000/index.html</code>" +
+        detail;
     }
 
     function initLights() {
@@ -1258,14 +1265,25 @@
       throw lastError || new Error(`无法加载 ${def.files.join(" 或 ")}。`);
     }
 
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
     function loadGLTF(file) {
       return new Promise((resolve, reject) => {
         loader.load(
           file,
           resolve,
           undefined,
-          () => {
-            reject(new Error(`无法加载 ${file}。请检查文件名、路径和本地服务器。`));
+          error => {
+            const message = error?.message || error?.target?.statusText || "未知错误";
+            reject(new Error(`无法加载 ${file}：${message}。请检查文件名、路径、Draco 解码器和服务器配置。`));
           }
         );
       });
