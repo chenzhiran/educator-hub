@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>超自由城市 - 体力与动画系统</title>
+    <title>超自由城市 - 完整版</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: "Microsoft YaHei", sans-serif; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         
@@ -96,6 +96,336 @@
             font-weight: bold;
         }
 
+        #money-display {
+            margin-top: 8px;
+            font-size: 14px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 4px 12px;
+            text-align: center;
+            color: #ffd700;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+        #money-display span { font-weight: bold; font-size: 16px; }
+
+        #achievement-btn-wrap {
+            margin-top: 8px;
+            text-align: center;
+            pointer-events: auto;
+        }
+        #achievement-btn {
+            background: rgba(255,215,0,0.2);
+            border: 1px solid rgba(255,215,0,0.5);
+            color: #ffd700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+            pointer-events: auto;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+        }
+        #achievement-btn:hover {
+            background: rgba(255,215,0,0.35);
+            transform: scale(1.04);
+        }
+        #achievement-btn .badge {
+            display: inline-block;
+            background: #ffd700;
+            color: #1a1a1a;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 4px;
+            text-align: center;
+        }
+
+        #achievement-panel {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 60;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(6px);
+            pointer-events: auto;
+        }
+        #achievement-panel .panel-box {
+            background: rgba(20,20,40,0.92);
+            border-radius: 20px;
+            padding: 20px 24px 28px;
+            max-width: 560px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,215,0,0.25);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            pointer-events: auto;
+        }
+        #achievement-panel .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        #achievement-panel .panel-header h2 {
+            color: #ffd700;
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+        #achievement-panel .panel-header .close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #aaa;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            pointer-events: auto;
+        }
+        #achievement-panel .panel-header .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        #achievement-panel .achieve-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+        #achievement-panel .achieve-item.unlocked {
+            border-left-color: #ffd700;
+            background: rgba(255,215,0,0.08);
+        }
+        #achievement-panel .achieve-item.locked {
+            opacity: 0.5;
+            border-left-color: #555;
+        }
+        #achievement-panel .achieve-item .icon {
+            font-size: 26px;
+            margin-right: 14px;
+            width: 36px;
+            text-align: center;
+        }
+        #achievement-panel .achieve-item .info {
+            flex: 1;
+        }
+        #achievement-panel .achieve-item .info .name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #fff;
+        }
+        #achievement-panel .achieve-item .info .desc {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        #achievement-panel .achieve-item .status-icon {
+            font-size: 18px;
+            margin-left: 10px;
+        }
+        #achievement-panel .achieve-item.unlocked .status-icon {
+            color: #ffd700;
+        }
+        #achievement-panel .achieve-item.locked .status-icon {
+            color: #555;
+        }
+        #achievement-panel .progress-text {
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 12px;
+        }
+
+        #achievement-notification {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 70;
+            pointer-events: none;
+            display: none;
+            animation: notifPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform-origin: top right;
+        }
+        @keyframes notifPop {
+            0% { opacity: 0; transform: scale(0.6); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        #achievement-notification .notif-box {
+            background: rgba(10,10,30,0.92);
+            backdrop-filter: blur(12px);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 16px 28px 18px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 40px rgba(255,215,0,0.2);
+            min-width: 180px;
+        }
+        #achievement-notification .notif-box .notif-icon {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        #achievement-notification .notif-box .notif-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 1px;
+        }
+        #achievement-notification .notif-box .notif-name {
+            font-size: 15px;
+            margin-top: 2px;
+            color: #fff;
+        }
+        #achievement-notification .notif-box .notif-desc {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        #shop-panel {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 55;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(6px);
+            pointer-events: auto;
+        }
+        #shop-panel .shop-box {
+            background: rgba(20,30,40,0.95);
+            border-radius: 24px;
+            padding: 28px 32px;
+            max-width: 420px;
+            width: 90%;
+            border: 2px solid rgba(255,215,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            pointer-events: auto;
+            text-align: center;
+        }
+        #shop-panel .shop-box h2 {
+            color: #ffd700;
+            margin: 0 0 6px 0;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+        #shop-panel .shop-box .shop-money {
+            color: #aaa;
+            font-size: 16px;
+            margin-bottom: 18px;
+        }
+        #shop-panel .shop-box .shop-money span {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        #shop-panel .shop-item {
+            background: rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: 0.2s;
+        }
+        #shop-panel .shop-item .info {
+            text-align: left;
+        }
+        #shop-panel .shop-item .info .name {
+            color: #fff;
+            font-size: 17px;
+            font-weight: bold;
+        }
+        #shop-panel .shop-item .info .desc {
+            color: #aaa;
+            font-size: 13px;
+        }
+        #shop-panel .shop-item .buy-btn {
+            background: #ffd700;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: bold;
+            font-size: 15px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: 0.2s;
+            pointer-events: auto;
+            box-shadow: 0 2px 12px rgba(255,215,0,0.3);
+        }
+        #shop-panel .shop-item .buy-btn:hover {
+            transform: scale(1.05);
+            background: #ffe44d;
+        }
+        #shop-panel .shop-item .buy-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #shop-panel .close-shop-btn {
+            margin-top: 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ccc;
+            padding: 8px 28px;
+            border-radius: 30px;
+            font-size: 15px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: 0.2s;
+        }
+        #shop-panel .close-shop-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        #message-toast {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 80;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid rgba(255,215,0,0.3);
+            display: none;
+            animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.8); bottom: 80px; }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); bottom: 120px; }
+        }
+
         #blocker {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.55); display: flex; flex-direction: column;
@@ -142,26 +472,33 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 玩家动画调试面板 */
-        #debug-panel {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 20; background: rgba(0,0,0,0.7); padding: 8px 20px;
-            border-radius: 20px; backdrop-filter: blur(6px);
-            color: #00ff88; font-size: 14px; text-align: center;
-            pointer-events: none; letter-spacing: 1px;
-        }
-
-        /* 手机端触屏控件 */
         #mobile-controls-ui { display: none; }
         @media (max-width: 768px) and (hover: none) {
             #mobile-controls-ui { display: block; }
-            #debug-panel { font-size: 10px; padding: 4px 12px; bottom: 110px; }
             #ui-overlay { font-size: 10px; padding: 8px; min-width: 140px; top: 8px; left: 8px; }
             #ui-overlay h3 { font-size: 13px; }
             #instructions { padding: 16px; width: 90%; }
             #instructions .title { font-size: 17px; }
             .controls-grid { font-size: 11px; }
             #start-btn { font-size: 15px; padding: 12px 36px; }
+            #achievement-btn { font-size: 11px; padding: 3px 10px; }
+            #achievement-btn .badge { width: 16px; height: 16px; line-height: 16px; font-size: 10px; }
+            #achievement-panel .panel-box { padding: 14px 16px 20px; max-width: 98%; }
+            #achievement-panel .achieve-item .icon { font-size: 20px; margin-right: 10px; width: 28px; }
+            #achievement-panel .achieve-item .info .name { font-size: 13px; }
+            #achievement-panel .achieve-item .info .desc { font-size: 11px; }
+            #achievement-notification { top: 60px; right: 10px; }
+            #achievement-notification .notif-box { padding: 12px 18px 14px; min-width: 140px; }
+            #achievement-notification .notif-box .notif-icon { font-size: 28px; }
+            #achievement-notification .notif-box .notif-title { font-size: 15px; }
+            #achievement-notification .notif-box .notif-name { font-size: 13px; }
+            #shop-panel .shop-box { padding: 20px 16px; }
+            #shop-panel .shop-item { flex-direction: column; gap: 10px; align-items: stretch; }
+            #shop-panel .shop-item .buy-btn { width: 100%; }
+            #message-toast { font-size: 14px; padding: 10px 20px; bottom: 100px; white-space: normal; }
+            #money-display { font-size: 12px; }
+            /* 右上角提示调整 */
+            #elytra-tip { font-size: 11px; max-width: 200px; right: 8px; top: 8px; padding: 6px 10px; }
         }
         #touch-joystick {
             position: absolute; bottom: 30px; left: 30px; z-index: 30;
@@ -185,6 +522,42 @@
         #btn-run  { width: 55px; height: 55px; bottom: 50px; right: 120px; }
         #btn-jump { width: 65px; height: 65px; bottom: 40px; right: 40px; }
         #btn-attack { width: 50px; height: 50px; bottom: 120px; right: 50px; }
+        #btn-shop { width: 50px; height: 50px; bottom: 120px; right: 120px; font-size: 20px; }
+        #shop-btn-desktop { display: inline-block; margin-left: 10px; pointer-events: auto; }
+        @media (max-width: 768px) and (hover: none) {
+            #shop-btn-desktop { display: none; }
+        }
+
+        /* ===== 鞘翅提示（右上角） ===== */
+        #elytra-tip {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 15;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            color: #ffd700;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,215,0,0.3);
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 260px;
+            text-align: center;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #elytra-tip .tip-icon {
+            margin-right: 4px;
+        }
+        #elytra-tip .tip-text {
+            color: #eee;
+        }
+        #elytra-tip .key {
+            color: #ffaa44;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -200,9 +573,11 @@
             <div class="controls-grid" id="desktop-controls">
                 <div><kbd>W/A/S/D</kbd> 移动</div>
                 <div><kbd>🖱️ 鼠标</kbd> 视角</div>
-                <div><kbd>空格</kbd> 跳跃</div>
+                <div><kbd>空格</kbd> 跳跃 / 滑翔切换</div>
                 <div><kbd>左 Shift</kbd> 跑步</div>
-                <div><kbd>鼠标左键</kbd> 攻击</div>
+                <div><kbd>鼠标左键</kbd> / <kbd>P</kbd> 攻击</div>
+                <div><kbd>B</kbd> 打开商店</div>
+                <div><kbd>E</kbd> 装备/取消鞘翅</div>
                 <div>🎬 动画自动切换</div>
             </div>
             <div class="controls-grid" id="mobile-controls" style="display:none;">
@@ -211,10 +586,11 @@
                 <div>双击屏幕 跳跃</div>
                 <div>🏃 跑步按钮</div>
                 <div>⚔️ 攻击按钮</div>
+                <div>🛒 商店按钮</div>
                 <div>🎬 动画自动切换</div>
             </div>
             <div style="margin-top: 10px; font-size: 13px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 8px; line-height: 1.5;">
-                ⚠️ 高度超过6米会摔伤 &nbsp;|&nbsp; 体力低于200减速
+                ⚠️ 高度超过6米会摔伤 &nbsp;|&nbsp; 体力低于200减速 &nbsp;|&nbsp; 💰 击败NPC得50金币
             </div>
             <button id="start-btn">▶ 开始游戏</button>
         </div>
@@ -225,6 +601,7 @@
         <div class="mobile-btn" id="btn-run">🏃</div>
         <div class="mobile-btn" id="btn-jump">⬆</div>
         <div class="mobile-btn" id="btn-attack">⚔</div>
+        <div class="mobile-btn" id="btn-shop">🛒</div>
     </div>
 
     <div id="game-over">
@@ -255,14 +632,86 @@
             </div>
             <div class="stamina-text">移动消耗 | 静止恢复 | 低于200减速 | 跳跃-17</div>
         </div>
+        <div id="money-display">
+            💰 金币: <span id="money-value">0</span>
+        </div>
         <div class="anim-status">
             🎭 当前动作: <span id="current-anim-label">待机</span>
         </div>
+        <div id="achievement-btn-wrap">
+            <button id="achievement-btn">🏆 成就 <span class="badge" id="achieve-badge">0</span></button>
+            <button id="shop-btn-desktop" style="background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.5);color:#ffd700;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;pointer-events:auto;margin-left:6px;">🛒 商店</button>
+        </div>
     </div>
 
-    <div id="debug-panel">
-        🔍 玩家动画调试：按 1-5 切换 | 当前: <span id="debug-anim-idx">0</span> (<span id="debug-anim-name">---</span>)
+    <!-- 鞘翅提示（右上角） -->
+    <div id="elytra-tip">
+        <span class="tip-icon">🪂</span>
+        <span class="tip-text">空中再按一次 <span class="key">空格</span> 滑翔，无落地伤害<br>按 <span class="key">E</span> 取消装备，再按重新装备</span>
     </div>
+
+    <!-- 商店面板 -->
+    <div id="shop-panel">
+        <div class="shop-box">
+            <h2>🛒 商店</h2>
+            <div class="shop-money">💰 当前金币: <span id="shop-money-display">0</span></div>
+            <div class="shop-item">
+                <div class="info">
+                    <div class="name">❤️ 生命药剂</div>
+                    <div class="desc">恢复 50 生命值</div>
+                </div>
+                <button class="buy-btn" id="buy-health" data-cost="100">💰 100</button>
+            </div>
+            <div class="shop-item">
+                <div class="info">
+                    <div class="name">⚡ 体力药剂</div>
+                    <div class="desc">恢复全部体力</div>
+                </div>
+                <button class="buy-btn" id="buy-stamina" data-cost="100">💰 100</button>
+            </div>
+            <div class="shop-item">
+                <div class="info">
+                    <div class="name">💀 不死图腾</div>
+                    <div class="desc">致命伤害时满血复活（一次性）</div>
+                </div>
+                <button class="buy-btn" id="buy-totem" data-cost="200">💰 200</button>
+            </div>
+            <!-- 新增鞘翅 -->
+            <div class="shop-item">
+                <div class="info">
+                    <div class="name">🪂 鞘翅</div>
+                    <div class="desc">空中滑翔，无落地伤害</div>
+                </div>
+                <button class="buy-btn" id="buy-elytra" data-cost="150">💰 150</button>
+            </div>
+            <button class="close-shop-btn" id="close-shop">关闭商店</button>
+        </div>
+    </div>
+
+    <!-- 成就面板 -->
+    <div id="achievement-panel">
+        <div class="panel-box">
+            <div class="panel-header">
+                <h2>🏆 成就列表</h2>
+                <button class="close-btn" id="achievement-panel-close">✕</button>
+            </div>
+            <div id="achievement-list"></div>
+            <div class="progress-text" id="achieve-progress">已解锁 0 / 15</div>
+        </div>
+    </div>
+
+    <!-- 成就通知 -->
+    <div id="achievement-notification">
+        <div class="notif-box">
+            <span class="notif-icon" id="notif-icon">🏆</span>
+            <div class="notif-title">🎉 成就解锁</div>
+            <div class="notif-name" id="notif-name">成就名称</div>
+            <div class="notif-desc" id="notif-desc">成就描述</div>
+        </div>
+    </div>
+
+    <!-- 消息提示 -->
+    <div id="message-toast"></div>
 
     <script type="importmap">
         {
@@ -283,7 +732,6 @@
         // ==========================================
         // 数值调整区
         // ==========================================
-        
         const CITY_SCALE = 1.0;        
         const MODEL_SCALE = 0.008;     
         const JUMP_FORCE = 12;         
@@ -295,24 +743,34 @@
         const MIN_PITCH = -0.95;
         const MAX_PITCH = -0.15;
         
-        // 血量 & 摔伤系统
         const MAX_HEALTH = 100;         
         const FALL_DAMAGE_THRESHOLD = 6.0;
         const DAMAGE_PER_METER = 5;     
 
-        // 体力系统 ———— 所有消耗值均降低为原来的1/3
         const MAX_STAMINA = 1000;        
-        const STAMINA_DRAIN_RATE_WALK = 16 / 3;   // 走路消耗 (原16 → 约5.33)
-        const STAMINA_DRAIN_RATE_RUN = 32 / 3;    // 跑步消耗 (原32 → 约10.67)
+        const STAMINA_DRAIN_RATE_WALK = 16 / 3;
+        const STAMINA_DRAIN_RATE_RUN = 32 / 3;
         const STAMINA_RECOVER_RATE = 22;          
         const STAMINA_SLOW_THRESHOLD = 200;       
-        const JUMP_STAMINA_COST = 50 / 3;         // 跳跃消耗 (原50 → 约16.67)
+        const JUMP_STAMINA_COST = 50 / 3;
         
-        // 移动速度系数
         const BASE_MOVE_ACCEL = 18;       
         const RUN_SPEED_MULTIPLIER = 1.6; 
         
-        // ========== 动画名称匹配（替代不可靠的索引） ==========
+        const ATTACK_RANGE = 2.8;
+        const NPC_MAX_HP = 6;
+        const NPC_ATTACK_RANGE = 2.0;
+        const NPC_ATTACK_DAMAGE = 4;
+        const NPC_ATTACK_COOLDOWN = 1.0;
+        const NPC_SPAWN_INTERVAL = 15; // 秒
+        const MAX_NPC_COUNT = 30;
+        const NPC_SPAWN_COUNT_PER_BATCH = 5; // 每次刷新生成5个
+
+        // 滑翔参数
+        const GLIDE_GRAVITY_MULTIPLIER = 0.15; // 滑翔时重力倍数
+        const GLIDE_MAX_VERTICAL_SPEED = -3.0; // 滑翔最大下落速度（正数表示向下）
+
+        // ========== 动画名称匹配 ==========
         function findAnimByKeyword(clips, keywords, excludeIndices = []) {
             let bestIdx = -1;
             let bestLen = Infinity;
@@ -321,7 +779,6 @@
                 const name = (clips[i].name || '').toLowerCase();
                 for (const kw of keywords) {
                     if (name.includes(kw)) {
-                        // 优先选名称更短的（避免如 walking_2 这类变体）
                         if (name.length < bestLen) {
                             bestIdx = i;
                             bestLen = name.length;
@@ -332,34 +789,52 @@
             return bestIdx;
         }
         // ==========================================
-        
-        // ==========================================
 
         let scene, camera, renderer, clock, mixer, character;
         let isGameOver = false;
         let playerOnFloor = false;
         let yaw = 0, pitch = -0.45;
         
-        // NPC 系统 — 随机1-3个自由走动的NPC
-        const NPC_COUNT = Math.floor(Math.random() * 3) + 1;
+        let npcList = [];
         const NPC_MOVE_SPEED = 3.5;
-        let npcList = [];                  // [{character, mixer, collider, velocity, direction, onFloor, actions, currentAction}]
+        let npcSpawnTimer = 0;
+        let fbxDataCache = null;
         
-        // 血量 & 体力
         let currentHealth = MAX_HEALTH;
         let fallMaxY = PLAYER_START_Y;
         let isAirborneActive = false;
         let currentStamina = MAX_STAMINA;
+        let playerMoney = 0;
+        let hasTotem = false;
         
-        // 动画系统变量
+        // 鞘翅相关
+        let hasElytra = false;
+        let isElytraEquipped = false;
+        let isGliding = false;
+        
         let animActions = {};
+        let playerTestActions = [];
         let currentAnimState = 'idle';
-        let isAttacking = false;      // 是否正在播放攻击动画
-        let attackTimer = null;       // 攻击动画结束计时器
         let currentAction = null;
-        
-        // 跑步标志
+        let activePlayerTestKey = null;
+        let activePlayerTestAnimIdx = null;
+        let activeNpcTestAnimIdx = null;
         let isRunning = false;
+        let attackTimer = null;
+        const PLAYER_TEST_KEY_TO_INDEX = {
+            Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3,
+            Digit5: 4, Digit6: 5, Digit7: 6, Digit8: 7,
+            Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3,
+            Numpad5: 4, Numpad6: 5, Numpad7: 6, Numpad8: 7
+        };
+        const NPC_TEST_KEY_TO_INDEX = {
+            KeyU: 0,
+            KeyI: 1,
+            KeyO: 2,
+            KeyJ: 3,
+            KeyK: 4
+        };
+        const NPC_TEST_KEY_LABELS = ['U', 'I', 'O', 'J', 'K'];
         
         const keyStates = {};
         const playerVelocity = new THREE.Vector3();
@@ -372,12 +847,334 @@
         );
         const worldOctree = new Octree();
 
-        // UI元素
         let healthFillElement, healthValueElement;
         let staminaFillElement, staminaValueElement;
+        let moneyValueElement;
         let deathMessageElement;
         let animLabelSpan;
 
+        // ==========================================
+        // 成就系统（添加 "天空即为极限"）
+        // ==========================================
+        const ACHIEVEMENT_CONFIG = [
+            { id: 'first_step',   name: '迈出第一步',   desc: '第一次向前移动',   icon: '👣' },
+            { id: 'jump_first',   name: '一跃而起',     desc: '完成第一次跳跃',   icon: '🦘' },
+            { id: 'run_first',    name: '疾风步',       desc: '第一次奔跑起来',   icon: '💨' },
+            { id: 'attack_first', name: '初试锋芒',     desc: '发起第一次攻击',   icon: '⚔️' },
+            { id: 'fall_damage',  name: '坠落体验',     desc: '承受一次跌落伤害', icon: '💥' },
+            { id: 'walk_100',     name: '城市漫步',     desc: '累计移动 100 米',  icon: '🚶' },
+            { id: 'walk_1000',    name: '马拉松',       desc: '累计移动 1000 米', icon: '🏃' },
+            { id: 'air_time',     name: '空中飞人',     desc: '累计滞空 10 秒',   icon: '🕊️' },
+            { id: 'social',       name: '社交达人',     desc: '靠近 NPC 打个招呼', icon: '🤝' },
+            { id: 'city_resident',name: '城市居民',     desc: '在城市中生活 5 分钟', icon: '🏡' },
+            { id: 'survivor',     name: '生存专家',     desc: '重伤后存活下来',   icon: '🛡️' },
+            { id: 'first_purchase', name: '购物狂',     desc: '在商店购买任意商品', icon: '🛍️' },
+            { id: 'npc_slayer',   name: '猎手',         desc: '击败一名 NPC',    icon: '🗡️' },
+            { id: 'beyond_death', name: '超越生死',     desc: '触发不死图腾复活', icon: '💀' },
+            { id: 'sky_limit',    name: '天空即为极限', desc: '首次进入滑翔模式', icon: '🪂' }
+        ];
+
+        class AchievementManager {
+            constructor() {
+                this.achievements = ACHIEVEMENT_CONFIG.map(a => ({ ...a, unlocked: false }));
+                this.unlockedCount = 0;
+                this.total = this.achievements.length;
+                this.isPanelOpen = false;
+                this.notifTimer = null;
+                this.track = {
+                    totalDistance: 0,
+                    totalAirTime: 0,
+                    gameTime: 0,
+                    prevPos: null,
+                    _first_step: false,
+                    _jump_first: false,
+                    _run_first: false,
+                    _attack_first: false,
+                    _fall_damage: false,
+                    _social: false,
+                    _survivor: false,
+                    _walk_100: false,
+                    _walk_1000: false,
+                    _air_time: false,
+                    _city_resident: false,
+                    wasLowHealth: false,
+                };
+                this._initUI();
+            }
+
+            _initUI() {
+                const btn = document.getElementById('achievement-btn');
+                const panel = document.getElementById('achievement-panel');
+                const closeBtn = document.getElementById('achievement-panel-close');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.togglePanel();
+                    });
+                }
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => this.closePanel());
+                }
+                if (panel) {
+                    panel.addEventListener('click', (e) => {
+                        if (e.target === panel) this.closePanel();
+                    });
+                }
+                const startBtn = document.getElementById('start-btn');
+                if (startBtn) {
+                    startBtn.addEventListener('click', () => {
+                        this._resetTrack();
+                    });
+                }
+                this._renderList();
+                this._updateBadge();
+            }
+
+            _resetTrack() {
+                this.track.totalDistance = 0;
+                this.track.totalAirTime = 0;
+                this.track.gameTime = 0;
+                this.track.prevPos = null;
+                this.track._first_step = false;
+                this.track._jump_first = false;
+                this.track._run_first = false;
+                this.track._attack_first = false;
+                this.track._fall_damage = false;
+                this.track._social = false;
+                this.track._survivor = false;
+                this.track._walk_100 = false;
+                this.track._walk_1000 = false;
+                this.track._air_time = false;
+                this.track._city_resident = false;
+                this.track.wasLowHealth = false;
+            }
+
+            togglePanel() {
+                this.isPanelOpen = !this.isPanelOpen;
+                const panel = document.getElementById('achievement-panel');
+                if (panel) {
+                    panel.style.display = this.isPanelOpen ? 'flex' : 'none';
+                    if (this.isPanelOpen) this._renderList();
+                }
+            }
+
+            closePanel() {
+                this.isPanelOpen = false;
+                const panel = document.getElementById('achievement-panel');
+                if (panel) panel.style.display = 'none';
+            }
+
+            _getAchievement(id) {
+                return this.achievements.find(a => a.id === id);
+            }
+
+            unlock(id) {
+                const ach = this._getAchievement(id);
+                if (!ach || ach.unlocked) return false;
+                ach.unlocked = true;
+                this.unlockedCount++;
+                this._updateBadge();
+                this._renderList();
+                this._showNotification(ach);
+                return true;
+            }
+
+            _updateBadge() {
+                const badge = document.getElementById('achieve-badge');
+                if (badge) badge.textContent = this.unlockedCount;
+            }
+
+            _renderList() {
+                const container = document.getElementById('achievement-list');
+                if (!container) return;
+                container.innerHTML = '';
+                this.achievements.forEach(ach => {
+                    const div = document.createElement('div');
+                    div.className = `achieve-item ${ach.unlocked ? 'unlocked' : 'locked'}`;
+                    div.innerHTML = `
+                        <span class="icon">${ach.icon}</span>
+                        <span class="info">
+                            <span class="name">${ach.name}</span>
+                            <span class="desc">${ach.desc}</span>
+                        </span>
+                        <span class="status-icon">${ach.unlocked ? '✅' : '🔒'}</span>
+                    `;
+                    container.appendChild(div);
+                });
+                const prog = document.getElementById('achieve-progress');
+                if (prog) prog.textContent = `已解锁 ${this.unlockedCount} / ${this.total}`;
+            }
+
+            _showNotification(ach) {
+                const notif = document.getElementById('achievement-notification');
+                if (!notif) return;
+                const icon = document.getElementById('notif-icon');
+                const name = document.getElementById('notif-name');
+                const desc = document.getElementById('notif-desc');
+                if (icon) icon.textContent = ach.icon;
+                if (name) name.textContent = ach.name;
+                if (desc) desc.textContent = ach.desc;
+                
+                notif.style.display = 'block';
+                notif.style.animation = 'none';
+                void notif.offsetHeight;
+                notif.style.animation = 'notifPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+                
+                if (this.notifTimer) clearTimeout(this.notifTimer);
+                this.notifTimer = setTimeout(() => {
+                    notif.style.display = 'none';
+                    this.notifTimer = null;
+                }, 3500);
+            }
+
+            update(deltaTime, playerPos, onFloor, health, stamina, movingForward, isRunningNow, npcs) {
+                if (isGameOver) return;
+
+                if (this.track.prevPos && playerPos) {
+                    const dx = playerPos.x - this.track.prevPos.x;
+                    const dz = playerPos.z - this.track.prevPos.z;
+                    const dist = Math.sqrt(dx*dx + dz*dz);
+                    if (dist > 0.01) {
+                        this.track.totalDistance += dist;
+                        if (!this.track._walk_100 && this.track.totalDistance >= 100) {
+                            this.track._walk_100 = true;
+                            this.unlock('walk_100');
+                        }
+                        if (!this.track._walk_1000 && this.track.totalDistance >= 1000) {
+                            this.track._walk_1000 = true;
+                            this.unlock('walk_1000');
+                        }
+                    }
+                }
+                if (playerPos) {
+                    this.track.prevPos = playerPos.clone();
+                }
+
+                if (!onFloor) {
+                    this.track.totalAirTime += deltaTime;
+                    if (!this.track._air_time && this.track.totalAirTime >= 10) {
+                        this.track._air_time = true;
+                        this.unlock('air_time');
+                    }
+                }
+
+                this.track.gameTime += deltaTime;
+                if (!this.track._city_resident && this.track.gameTime >= 300) {
+                    this.track._city_resident = true;
+                    this.unlock('city_resident');
+                }
+
+                if (!this.track._first_step && movingForward && onFloor) {
+                    this.track._first_step = true;
+                    this.unlock('first_step');
+                }
+
+                if (!this.track._run_first && isRunningNow && onFloor && movingForward) {
+                    this.track._run_first = true;
+                    this.unlock('run_first');
+                }
+
+                const healthPercent = (health / MAX_HEALTH) * 100;
+                if (healthPercent < 20) {
+                    this.track.wasLowHealth = true;
+                }
+                if (!this.track._survivor && this.track.wasLowHealth && healthPercent >= 25) {
+                    this.track._survivor = true;
+                    this.unlock('survivor');
+                }
+
+                if (!this.track._social && npcs && npcs.length > 0 && playerPos) {
+                    for (const npc of npcs) {
+                        if (npc.isDead) continue;
+                        const npcPos = npc.character.position;
+                        const dx = npcPos.x - playerPos.x;
+                        const dz = npcPos.z - playerPos.z;
+                        if (dx*dx + dz*dz < 4) {
+                            this.track._social = true;
+                            this.unlock('social');
+                            break;
+                        }
+                    }
+                }
+            }
+
+            onJump() {
+                if (!this.track._jump_first) {
+                    this.track._jump_first = true;
+                    this.unlock('jump_first');
+                }
+            }
+
+            onFallDamage() {
+                if (!this.track._fall_damage) {
+                    this.track._fall_damage = true;
+                    this.unlock('fall_damage');
+                }
+            }
+
+            onAttack() {
+                if (!this.track._attack_first) {
+                    this.track._attack_first = true;
+                    this.unlock('attack_first');
+                }
+            }
+
+            onPurchase() {
+                this.unlock('first_purchase');
+            }
+
+            onNpcSlain() {
+                this.unlock('npc_slayer');
+            }
+
+            onBeyondDeath() {
+                this.unlock('beyond_death');
+            }
+
+            onGlide() {
+                this.unlock('sky_limit');
+            }
+
+            resetAll() {
+                this.achievements.forEach(a => a.unlocked = false);
+                this.unlockedCount = 0;
+                this._resetTrack();
+                this._updateBadge();
+                this._renderList();
+                const notif = document.getElementById('achievement-notification');
+                if (notif) notif.style.display = 'none';
+                if (this.notifTimer) {
+                    clearTimeout(this.notifTimer);
+                    this.notifTimer = null;
+                }
+            }
+        }
+
+        let achievementManager = null;
+        // ==========================================
+
+        // ==========================================
+        // 消息提示
+        // ==========================================
+        let toastTimer = null;
+        function showMessage(text) {
+            const toast = document.getElementById('message-toast');
+            if (!toast) return;
+            toast.textContent = text;
+            toast.style.display = 'block';
+            toast.style.animation = 'none';
+            void toast.offsetHeight;
+            toast.style.animation = 'toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+                toastTimer = null;
+            }, 2500);
+        }
+
+        // ==========================================
+        // 初始化
+        // ==========================================
         init();
 
         function init() {
@@ -387,10 +1184,12 @@
             healthValueElement = document.getElementById('health-value');
             staminaFillElement = document.getElementById('stamina-fill');
             staminaValueElement = document.getElementById('stamina-value');
+            moneyValueElement = document.getElementById('money-value');
             deathMessageElement = document.getElementById('death-message');
             animLabelSpan = document.getElementById('current-anim-label');
             updateHealthUI();
             updateStaminaUI();
+            updateMoneyUI();
 
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87CEEB);
@@ -422,30 +1221,186 @@
 
             setupInputListeners();
             setupMobileControls();
+            setupShop();
             loadGameAssets();
 
             window.addEventListener('resize', onWindowResize);
+
+            achievementManager = new AchievementManager();
         }
 
+        // ==========================================
+        // 商店系统（添加鞘翅）
+        // ==========================================
+        function setupShop() {
+            const shopPanel = document.getElementById('shop-panel');
+            const closeBtn = document.getElementById('close-shop');
+            const shopBtnDesktop = document.getElementById('shop-btn-desktop');
+            const buyHealth = document.getElementById('buy-health');
+            const buyStamina = document.getElementById('buy-stamina');
+            const buyTotem = document.getElementById('buy-totem');
+            const buyElytra = document.getElementById('buy-elytra');
+            const shopMoneyDisplay = document.getElementById('shop-money-display');
+
+            function updateShopUI() {
+                if (shopMoneyDisplay) shopMoneyDisplay.textContent = playerMoney;
+                const healthCost = parseInt(buyHealth.dataset.cost);
+                const staminaCost = parseInt(buyStamina.dataset.cost);
+                const totemCost = parseInt(buyTotem.dataset.cost);
+                const elytraCost = parseInt(buyElytra.dataset.cost);
+                buyHealth.disabled = playerMoney < healthCost;
+                buyStamina.disabled = playerMoney < staminaCost;
+                buyTotem.disabled = playerMoney < totemCost || hasTotem;
+                buyElytra.disabled = playerMoney < elytraCost || hasElytra; // 只能买一次
+            }
+
+            function openShop() {
+                if (document.pointerLockElement) document.exitPointerLock();
+                shopPanel.style.display = 'flex';
+                updateShopUI();
+            }
+
+            function closeShop() {
+                shopPanel.style.display = 'none';
+            }
+
+            if (shopBtnDesktop) shopBtnDesktop.addEventListener('click', openShop);
+            if (closeBtn) closeBtn.addEventListener('click', closeShop);
+            shopPanel.addEventListener('click', (e) => {
+                if (e.target === shopPanel) closeShop();
+            });
+
+            function buyItem(button, cost, applyEffect, successMsg, isTotem = false, isElytra = false) {
+                if (playerMoney < cost) {
+                    showMessage('❌ 金币不足！');
+                    return;
+                }
+                if (isTotem && hasTotem) {
+                    showMessage('⚠️ 已拥有不死图腾！');
+                    return;
+                }
+                if (isElytra && hasElytra) {
+                    showMessage('⚠️ 已拥有鞘翅！');
+                    return;
+                }
+                playerMoney -= cost;
+                updateMoneyUI();
+                applyEffect();
+                showMessage('✅ ' + successMsg);
+                if (achievementManager) achievementManager.onPurchase();
+                updateShopUI();
+            }
+
+            buyHealth.addEventListener('click', () => {
+                const cost = parseInt(buyHealth.dataset.cost);
+                buyItem(buyHealth, cost, () => {
+                    const heal = 50;
+                    currentHealth = Math.min(MAX_HEALTH, currentHealth + heal);
+                    updateHealthUI();
+                }, '已恢复 50 生命值');
+            });
+
+            buyStamina.addEventListener('click', () => {
+                const cost = parseInt(buyStamina.dataset.cost);
+                buyItem(buyStamina, cost, () => {
+                    currentStamina = MAX_STAMINA;
+                    updateStaminaUI();
+                }, '已恢复至满体力');
+            });
+
+            buyTotem.addEventListener('click', () => {
+                const cost = parseInt(buyTotem.dataset.cost);
+                buyItem(buyTotem, cost, () => {
+                    hasTotem = true;
+                }, '获得不死图腾！', true);
+            });
+
+            buyElytra.addEventListener('click', () => {
+                const cost = parseInt(buyElytra.dataset.cost);
+                buyItem(buyElytra, cost, () => {
+                    hasElytra = true;
+                    isElytraEquipped = true; // 购买后自动装备
+                    updateElytraTip(); // 显示提示
+                }, '获得鞘翅！自动装备', false, true);
+            });
+
+            window._updateShopUI = updateShopUI;
+        }
+
+        // ==========================================
+        // 鞘翅提示显示控制
+        // ==========================================
+        function updateElytraTip() {
+            const tip = document.getElementById('elytra-tip');
+            if (!tip) return;
+            if (hasElytra && isElytraEquipped) {
+                tip.style.display = 'block';
+            } else {
+                tip.style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // 输入监听（添加 E 键处理，移除数字键调试）
+        // ==========================================
         function setupInputListeners() {
             document.addEventListener('keydown', (e) => {
                 keyStates[e.code] = true;
+                if (PLAYER_TEST_KEY_TO_INDEX[e.code] !== undefined) {
+                    e.preventDefault();
+                    if (!e.repeat) startPlayerTestAnimation(PLAYER_TEST_KEY_TO_INDEX[e.code], e.code);
+                    return;
+                }
+                if (NPC_TEST_KEY_TO_INDEX[e.code] !== undefined) {
+                    e.preventDefault();
+                    if (!e.repeat) switchNpcTestAnimation(NPC_TEST_KEY_TO_INDEX[e.code]);
+                    return;
+                }
                 if (e.code === 'ShiftLeft') isRunning = true;
                 if (e.code === 'KeyP' && document.pointerLockElement === document.body && !isGameOver) {
-                    triggerAttack();   // P键攻击
+                    triggerAttack();
+                }
+                if (e.code === 'KeyB' && !isGameOver) {
+                    const shopPanel = document.getElementById('shop-panel');
+                    if (shopPanel) {
+                        if (shopPanel.style.display === 'flex') {
+                            shopPanel.style.display = 'none';
+                        } else {
+                            if (document.pointerLockElement) document.exitPointerLock();
+                            shopPanel.style.display = 'flex';
+                            if (window._updateShopUI) window._updateShopUI();
+                        }
+                    }
+                }
+                // ---- 鞘翅装备切换 E 键 ----
+                if (e.code === 'KeyE' && !isGameOver && hasElytra) {
+                    if (isElytraEquipped) {
+                        // 取消装备，弹出确认对话框
+                        if (confirm('确定取消装备鞘翅吗？')) {
+                            isElytraEquipped = false;
+                            // 如果正在滑翔，取消滑翔状态
+                            if (isGliding) {
+                                isGliding = false;
+                            }
+                            updateElytraTip();
+                            showMessage('🪂 已取消装备鞘翅');
+                        }
+                    } else {
+                        // 重新装备，无提示
+                        isElytraEquipped = true;
+                        updateElytraTip();
+                        // 不显示消息（要求无提示）
+                    }
                 }
             });
             document.addEventListener('keyup', (e) => {
                 keyStates[e.code] = false;
-                if (e.code === 'ShiftLeft') isRunning = false;
-            });
-            
-            // 调试：按数字键1-5播放对应动画
-            document.addEventListener('keydown', (e) => {
-                if (e.code >= 'Digit1' && e.code <= 'Digit5') {
-                    const idx = parseInt(e.code.replace('Digit', '')) - 1;
-                    debugPlayAnim(idx);
+                if (PLAYER_TEST_KEY_TO_INDEX[e.code] !== undefined) {
+                    e.preventDefault();
+                    refreshPlayerTestAnimation();
+                    return;
                 }
+                if (e.code === 'ShiftLeft') isRunning = false;
             });
 
             const blocker = document.getElementById('blocker');
@@ -456,7 +1411,6 @@
                     if (!isGameOver) document.body.requestPointerLock();
                 });
             }
-            // 手机端：点击弹窗任意位置隐藏弹窗
             blocker.addEventListener('click', () => {
                 if (!isGameOver && isMobileDevice()) {
                     blocker.style.display = 'none';
@@ -477,22 +1431,19 @@
 
             document.addEventListener('mousedown', (event) => {
                 if (event.button === 0 && document.pointerLockElement === document.body && !isGameOver) {
-                    triggerAttack();   // 鼠标左键攻击
+                    triggerAttack();
                 }
             });
         }
         
-        // 检测是否手机设备
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || 
                    ('ontouchstart' in window && window.innerWidth < 768);
         }
         
-        // 手机触屏控件
         function setupMobileControls() {
             if (!isMobileDevice()) return;
             
-            // 显示移动端控件UI和移动端说明
             document.getElementById('mobile-controls-ui').style.display = 'block';
             document.getElementById('desktop-controls').style.display = 'none';
             document.getElementById('mobile-controls').style.display = 'grid';
@@ -531,22 +1482,34 @@
                 keyStates['KeyD'] = mx > 0.2;
             }
             
-            // 跑步按钮
             const btnRun = document.getElementById('btn-run');
             btnRun.addEventListener('touchstart', () => { isRunning = true; });
             btnRun.addEventListener('touchend', () => { isRunning = false; });
             btnRun.addEventListener('touchcancel', () => { isRunning = false; });
             
-            // 跳跃按钮
             const btnJump = document.getElementById('btn-jump');
             btnJump.addEventListener('touchstart', () => { keyStates['Space'] = true; });
             btnJump.addEventListener('touchend', () => { keyStates['Space'] = false; });
             
-            // 攻击按钮
             const btnAttack = document.getElementById('btn-attack');
             btnAttack.addEventListener('touchstart', () => { triggerAttack(); });
             
-            // 滑动屏幕旋转视角
+            const btnShop = document.getElementById('btn-shop');
+            if (btnShop) {
+                btnShop.addEventListener('touchstart', () => {
+                    const shopPanel = document.getElementById('shop-panel');
+                    if (shopPanel) {
+                        if (shopPanel.style.display === 'flex') {
+                            shopPanel.style.display = 'none';
+                        } else {
+                            if (document.pointerLockElement) document.exitPointerLock();
+                            shopPanel.style.display = 'flex';
+                            if (window._updateShopUI) window._updateShopUI();
+                        }
+                    }
+                });
+            }
+            
             let lastTouchX = 0, lastTouchY = 0;
             document.addEventListener('touchmove', (e) => {
                 if (e.target.closest('#touch-joystick') || e.target.closest('.mobile-btn')) return;
@@ -570,49 +1533,153 @@
             });
         }
 
-        // 触发一次攻击动画，动画播放完毕后自动恢复待机/移动动画
+        // ==========================================
+        // 攻击逻辑（NPC受击后延迟1秒开始追击）
+        // ==========================================
         function triggerAttack() {
             if (isGameOver) return;
             if (!animActions.attack) return;
-            // 如果已经在攻击中，则忽略本次输入（防止连击打断）
-            if (isAttacking) return;
             
-            // 清除之前的计时器（安全起见）
+            if (achievementManager) achievementManager.onAttack();
+            
+            const playerPos = character ? character.position : new THREE.Vector3(0,0,0);
+            for (let i = npcList.length - 1; i >= 0; i--) {
+                const npc = npcList[i];
+                if (npc.isDead) continue;
+                const npcPos = npc.character.position;
+                const dx = npcPos.x - playerPos.x;
+                const dz = npcPos.z - playerPos.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+                if (dist < ATTACK_RANGE) {
+                    npc.hp -= 1;
+                    if (npc.materials && npc.materials.length > 0) {
+                        npc.materials.forEach(mat => {
+                            mat.color.setHex(0xff3333);
+                        });
+                    }
+                    
+                    if (!npc.isHostile) {
+                        npc.hostileTimer = 1.0;
+                    }
+                    
+                    if (npc.hp <= 0) {
+                        npc.isDead = true;
+                        npc.hostileTimer = 0;
+                        scene.remove(npc.character);
+                        npcList.splice(i, 1);
+                        playerMoney += 50;
+                        updateMoneyUI();
+                        if (window._updateShopUI) window._updateShopUI();
+                        if (achievementManager) achievementManager.onNpcSlain();
+                        showMessage('💰 +50 金币！击败了NPC');
+                    } else {
+                        if (npc.damageTimer) clearTimeout(npc.damageTimer);
+                        npc.damageTimer = setTimeout(() => {
+                            if (npc.materials) {
+                                npc.materials.forEach(mat => {
+                                    mat.color.setHex(0xffffff);
+                                });
+                            }
+                            npc.damageTimer = null;
+                        }, 300);
+                    }
+                }
+            }
+            
+            // 播放攻击动画
+            if (currentAction && currentAction !== animActions.attack) {
+                currentAction.fadeOut(0.1);
+            }
+            animActions.attack.stop().reset().fadeIn(0.1).play();
+            currentAction = animActions.attack;
+            if (animLabelSpan) animLabelSpan.innerText = '⚔️ 攻击';
+            
             if (attackTimer) {
                 clearTimeout(attackTimer);
                 attackTimer = null;
             }
-            
-            // 标记为攻击状态
-            isAttacking = true;
-            
-            // 淡出当前动画（如果有）
-            if (currentAction && currentAction !== animActions.attack) {
-                currentAction.fadeOut(0.1);
-            }
-            // 重置攻击动画并从头播放
-            animActions.attack.stop().reset().fadeIn(0.1).play();
-            currentAction = animActions.attack;
-            // 更新UI标签
-            if (animLabelSpan) animLabelSpan.innerText = '⚔️ 攻击';
-            
-            // 获取攻击动画时长
-            const attackClip = animActions.attack.getClip();
-            const duration = attackClip.duration;
-            
-            // 设置计时器，动画结束后恢复状态
             attackTimer = setTimeout(() => {
-                isAttacking = false;
+                if (!isGameOver) {
+                    if (currentAction === animActions.attack) {
+                        updateAnimationByMovement();
+                    }
+                }
                 attackTimer = null;
-                // 根据移动状态恢复正确的动画（待机/走路/跑步）
-                updateAnimationByMovement();
-            }, duration * 1000);
+            }, 500);
         }
         
-        // 根据移动输入和跑步键决定动画状态 (idle/walk/run)
+        // ==========================================
+        // 动画相关
+        // ==========================================
+        function startPlayerTestAnimation(animIdx, keyCode) {
+            if (isGameOver) return;
+            const newAction = playerTestActions[animIdx];
+            if (!newAction) {
+                console.warn(`Player test animation ${animIdx} is unavailable.`);
+                return;
+            }
+            if (activePlayerTestAnimIdx === animIdx && activePlayerTestKey === keyCode) return;
+
+            activePlayerTestKey = keyCode;
+            activePlayerTestAnimIdx = animIdx;
+            currentAnimState = `player-test-${animIdx}`;
+
+            if (currentAction && currentAction !== newAction) {
+                currentAction.fadeOut(0.1);
+            }
+            newAction.reset().fadeIn(0.1).play();
+            currentAction = newAction;
+            if (animLabelSpan) animLabelSpan.innerText = `Player anim ${animIdx}`;
+        }
+
+        function refreshPlayerTestAnimation() {
+            for (const code of Object.keys(PLAYER_TEST_KEY_TO_INDEX)) {
+                if (keyStates[code]) {
+                    startPlayerTestAnimation(PLAYER_TEST_KEY_TO_INDEX[code], code);
+                    return;
+                }
+            }
+            stopPlayerTestAnimation();
+        }
+
+        function stopPlayerTestAnimation() {
+            if (activePlayerTestAnimIdx === null) return;
+            activePlayerTestKey = null;
+            activePlayerTestAnimIdx = null;
+            currentAnimState = '';
+            updateAnimationByMovement();
+        }
+
+        function switchNpcAnimation(npc, animIdx) {
+            if (!npc || npc.isDead || !npc.actions) return;
+            const newAction = npc.actions[animIdx];
+            if (!newAction) return;
+            if (npc.currentAction === newAction && npc.activeAnimIdx === animIdx) return;
+
+            if (npc.currentAction && npc.currentAction !== newAction) {
+                npc.currentAction.fadeOut(0.1);
+            }
+            newAction.reset().fadeIn(0.1).play();
+            npc.currentAction = newAction;
+            npc.activeAnimIdx = animIdx;
+        }
+
+        function switchNpcTestAnimation(animIdx) {
+            if (isGameOver) return;
+            activeNpcTestAnimIdx = animIdx;
+            npcList.forEach(npc => switchNpcAnimation(npc, animIdx));
+            const keyLabel = NPC_TEST_KEY_LABELS[animIdx] || '';
+            if (keyLabel) showMessage(`NPC anim ${animIdx} (${keyLabel})`);
+            console.log(`NPC test animation ${animIdx} selected.`);
+        }
+
         function updateAnimationByMovement() {
-            if (isAttacking) return;   // 攻击动画优先，不切换
-            
+            if (activePlayerTestAnimIdx !== null) {
+                return;
+            }
+            if (currentAction === animActions.attack && attackTimer !== null) {
+                return;
+            }
             const moving = keyStates['KeyW'] || keyStates['KeyS'] || keyStates['KeyA'] || keyStates['KeyD'];
             if (!moving || !playerOnFloor) {
                 if (currentAnimState !== 'idle') {
@@ -635,7 +1702,6 @@
             }
         }
         
-        // 切换动画核心 (带淡入淡出)
         function switchToAnimation(animType, force = true) {
             if (!mixer) return;
             let newAction = null;
@@ -659,7 +1725,9 @@
             if (animLabelSpan) animLabelSpan.innerText = label;
         }
         
-        // UI更新函数
+        // ==========================================
+        // UI更新
+        // ==========================================
         function updateHealthUI() {
             if (healthFillElement) {
                 const percent = (currentHealth / MAX_HEALTH) * 100;
@@ -681,8 +1749,38 @@
             if (staminaValueElement) staminaValueElement.innerText = Math.max(0, Math.floor(currentStamina));
         }
         
+        function updateMoneyUI() {
+            if (moneyValueElement) moneyValueElement.innerText = playerMoney;
+            if (window._updateShopUI) window._updateShopUI();
+        }
+        
+        // ==========================================
+        // 伤害处理（含不死图腾 + 滑翔免伤）
+        // ==========================================
         function applyDamage(amount) {
             if (isGameOver) return;
+            if (currentHealth - amount <= 0 && hasTotem) {
+                hasTotem = false;
+                currentHealth = MAX_HEALTH;
+                updateHealthUI();
+                showMessage('💀 不死图腾生效！已满血复活');
+                if (achievementManager) achievementManager.onBeyondDeath();
+                if (document.body) {
+                    const flash = document.createElement('div');
+                    flash.style.position = 'fixed';
+                    flash.style.top = 0;
+                    flash.style.left = 0;
+                    flash.style.width = '100%';
+                    flash.style.height = '100%';
+                    flash.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
+                    flash.style.pointerEvents = 'none';
+                    flash.style.zIndex = 999;
+                    document.body.appendChild(flash);
+                    setTimeout(() => { if(flash.parentNode) flash.remove(); }, 200);
+                }
+                return;
+            }
+            
             const actualDamage = Math.min(amount, MAX_HEALTH);
             currentHealth = Math.max(0, currentHealth - actualDamage);
             updateHealthUI();
@@ -722,13 +1820,21 @@
         }
         
         function processFallDamage(landingY) {
+            // 如果正在滑翔，无视跌落伤害
+            if (isGliding) {
+                resetFallTracking();
+                return;
+            }
             if (!isAirborneActive) return;
             const fallDistance = fallMaxY - landingY;
             if (fallDistance > FALL_DAMAGE_THRESHOLD) {
                 let damage = (fallDistance - FALL_DAMAGE_THRESHOLD) * DAMAGE_PER_METER;
                 damage = Math.min(damage, MAX_HEALTH);
                 damage = Math.floor(damage);
-                if (damage > 0) applyDamage(damage);
+                if (damage > 0) {
+                    applyDamage(damage);
+                    if (achievementManager) achievementManager.onFallDamage();
+                }
             }
             resetFallTracking();
         }
@@ -745,21 +1851,218 @@
             return 1.0;
         }
 
+        // ==========================================
+        // 生成NPC位置（全地图随机，用于后续刷新）
+        // ==========================================
+        function getValidSpawnPosition() {
+            if (!worldOctree || !character) return null;
+            const maxAttempts = 80;
+            const range = 150;
+            const playerPos = character.position;
+            for (let i = 0; i < maxAttempts; i++) {
+                const x = (Math.random() - 0.5) * 2 * range;
+                const z = (Math.random() - 0.5) * 2 * range;
+                const testCapsule = new Capsule(
+                    new THREE.Vector3(x, 80, z),
+                    new THREE.Vector3(x, 81, z),
+                    0.4
+                );
+                let foundGround = false;
+                let groundY = 0;
+                for (let step = 0; step < 160; step++) {
+                    const y = 80 - step * 0.5;
+                    testCapsule.start.y = y;
+                    testCapsule.end.y = y + 1;
+                    const result = worldOctree.capsuleIntersect(testCapsule);
+                    if (result && result.normal.y > 0.5) {
+                        foundGround = true;
+                        groundY = y;
+                        break;
+                    }
+                }
+                if (!foundGround) continue;
+                const checkCapsule = new Capsule(
+                    new THREE.Vector3(x, groundY + 0.4, z),
+                    new THREE.Vector3(x, groundY + 1.2, z),
+                    0.4
+                );
+                const collision = worldOctree.capsuleIntersect(checkCapsule);
+                if (collision) continue;
+                const dx = x - playerPos.x;
+                const dz = z - playerPos.z;
+                if (dx*dx + dz*dz < 100) continue;
+                if (Math.abs(x) > 190 || Math.abs(z) > 190) continue;
+                return new THREE.Vector3(x, groundY + 0.4, z);
+            }
+            return null;
+        }
+
+        // ==========================================
+        // 生成NPC位置（玩家附近，用于初始生成）
+        // ==========================================
+        function getInitialSpawnPosition() {
+            if (!worldOctree || !character) return null;
+            const maxAttempts = 50;
+            const playerPos = character.position;
+            for (let i = 0; i < maxAttempts; i++) {
+                const radius = 5 + Math.random() * 13;
+                const angle = Math.random() * Math.PI * 2;
+                const x = playerPos.x + Math.cos(angle) * radius;
+                const z = playerPos.z + Math.sin(angle) * radius;
+                
+                const testCapsule = new Capsule(
+                    new THREE.Vector3(x, 80, z),
+                    new THREE.Vector3(x, 81, z),
+                    0.4
+                );
+                let foundGround = false;
+                let groundY = 0;
+                for (let step = 0; step < 160; step++) {
+                    const y = 80 - step * 0.5;
+                    testCapsule.start.y = y;
+                    testCapsule.end.y = y + 1;
+                    const result = worldOctree.capsuleIntersect(testCapsule);
+                    if (result && result.normal.y > 0.5) {
+                        foundGround = true;
+                        groundY = y;
+                        break;
+                    }
+                }
+                if (!foundGround) continue;
+                const checkCapsule = new Capsule(
+                    new THREE.Vector3(x, groundY + 0.4, z),
+                    new THREE.Vector3(x, groundY + 1.2, z),
+                    0.4
+                );
+                const collision = worldOctree.capsuleIntersect(checkCapsule);
+                if (collision) continue;
+                const dx = x - playerPos.x;
+                const dz = z - playerPos.z;
+                if (dx*dx + dz*dz < 4) continue;
+                if (Math.abs(x) > 190 || Math.abs(z) > 190) continue;
+                return new THREE.Vector3(x, groundY + 0.4, z);
+            }
+            return null;
+        }
+
+        // ==========================================
+        // 生成单个NPC
+        // ==========================================
+        function spawnNPC(fbxLoader, textureLoader, baseMat, useInitialPos = false) {
+            if (!fbxDataCache) return;
+            if (!worldOctree) return;
+            const pos = useInitialPos ? getInitialSpawnPosition() : getValidSpawnPosition();
+            if (!pos) return;
+            
+            const npcChar = fbxLoader.parse(fbxDataCache, '');
+            npcChar.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+            
+            const npcMat = baseMat.clone();
+            const materials = [];
+            npcChar.traverse(c => {
+                if (c.isMesh) {
+                    c.material = npcMat;
+                    c.castShadow = true;
+                    c.receiveShadow = true;
+                    materials.push(npcMat);
+                }
+            });
+            
+            const npcMixer = new THREE.AnimationMixer(npcChar);
+            const clips = npcChar.animations || [];
+            const actions = {};
+            clips.forEach((clip, idx) => {
+                actions[idx] = npcMixer.clipAction(clip);
+            });
+            const walkIdx = 0;
+            let currentAction = null;
+            if (actions[walkIdx]) {
+                currentAction = actions[walkIdx];
+                currentAction.play();
+            }
+            
+            npcChar.position.copy(pos);
+            scene.add(npcChar);
+            
+            const collider = new Capsule(
+                new THREE.Vector3(0, 0.4, 0),
+                new THREE.Vector3(0, 1.2, 0),
+                0.4
+            );
+            collider.translate(pos);
+            
+            const angle = Math.random() * Math.PI * 2;
+            const direction = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle));
+            
+            const npcObj = {
+                character: npcChar,
+                mixer: npcMixer,
+                collider: collider,
+                velocity: new THREE.Vector3(),
+                direction: direction,
+                onFloor: false,
+                actions: actions,
+                currentAction: currentAction,
+                walkIdx: walkIdx,
+                activeAnimIdx: walkIdx,
+                hp: NPC_MAX_HP,
+                isDead: false,
+                materials: materials,
+                damageTimer: null,
+                isHostile: false,
+                hostileTarget: null,
+                attackCooldown: 0,
+                lastAttackTime: 0,
+                hostileTimer: 0,
+            };
+            if (activeNpcTestAnimIdx !== null) {
+                switchNpcAnimation(npcObj, activeNpcTestAnimIdx);
+            }
+            npcList.push(npcObj);
+            return npcObj;
+        }
+
+        // ==========================================
+        // 刷新NPC（每15秒刷新5个，仅当少于25个时）
+        // ==========================================
+        function checkAndSpawnNPCs(deltaTime) {
+            if (isGameOver) return;
+            npcSpawnTimer += deltaTime;
+            if (npcSpawnTimer < NPC_SPAWN_INTERVAL) return;
+            npcSpawnTimer = 0;
+            
+            const alive = npcList.filter(n => !n.isDead).length;
+            // 只有少于25个时才生成（保证不超过30）
+            if (alive >= 25) return;
+            const need = Math.min(NPC_SPAWN_COUNT_PER_BATCH, 30 - alive);
+            if (need <= 0) return;
+            for (let i = 0; i < need; i++) {
+                spawnNPCWithCache(false);
+            }
+        }
+
+        // 封装生成函数
+        let fbxLoaderGlobal, textureLoaderGlobal, baseMatGlobal;
+        function spawnNPCWithCache(useInitialPos = false) {
+            if (!fbxLoaderGlobal || !textureLoaderGlobal || !baseMatGlobal) return;
+            spawnNPC(fbxLoaderGlobal, textureLoaderGlobal, baseMatGlobal, useInitialPos);
+        }
+
+        // ==========================================
+        // 加载资源
+        // ==========================================
         async function loadGameAssets() {
-            // 使用GLTFLoader加载城市模型 (cartoon_city_free.glb)
             const gltfLoader = new GLTFLoader();
-            const fbxLoader = new FBXLoader(); // 角色仍使用FBXLoader
+            const fbxLoader = new FBXLoader();
             const textureLoader = new THREE.TextureLoader();
             
             try {
                 updateStatus("加载卡通城市模型 (GLB)...");
                 
-                // 加载GLB城市模型
                 const gltf = await gltfLoader.loadAsync('./cartoon_city_free.glb');
                 const cityModel = gltf.scene;
                 cityModel.scale.set(CITY_SCALE, CITY_SCALE, CITY_SCALE);
                 
-                // 设置阴影和材质属性，确保双面渲染和阴影投射接收
                 cityModel.traverse(child => {
                     if (child.isMesh) {
                         child.castShadow = true;
@@ -782,14 +2085,13 @@
                 scene.add(cityModel);
                 
                 updateStatus("初始化人物模型及动画...");
-                character = await fbxLoader.loadAsync('./renwu/renwu_Meshy_AI_Meshy_Merged_Animations.fbx');
+                character = await fbxLoader.loadAsync('./renwu/Meshy_AI_Blocky_Boy_in_a_Blue__biped_Meshy_AI_Meshy_Merged_Animations.fbx');
                 character.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
                 
-                // 加载角色纹理贴图
-                const charMap = await textureLoader.loadAsync('./renwu/renwu_texture_0.png');
-                const charMetalnessMap = await textureLoader.loadAsync('./renwu/renwu_texture_0_metallic.png');
-                const charNormalMap = await textureLoader.loadAsync('./renwu/renwu_texture_0_normal.png');
-                const charRoughnessMap = await textureLoader.loadAsync('./renwu/renwu_texture_0_roughness.png');
+                const charMap = await textureLoader.loadAsync('./renwu/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0.png');
+                const charMetalnessMap = await textureLoader.loadAsync('./renwu/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_metallic.png');
+                const charNormalMap = await textureLoader.loadAsync('./renwu/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_normal.png');
+                const charRoughnessMap = await textureLoader.loadAsync('./renwu/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_roughness.png');
                 
                 const charMat = new THREE.MeshStandardMaterial({
                     map: charMap,
@@ -809,14 +2111,13 @@
                 
                 mixer = new THREE.AnimationMixer(character);
                 
-                // 初始化动画Action：根据FBX版本自动选择正确的映射
                 if (character.animations && character.animations.length > 0) {
+                    playerTestActions = character.animations.map(clip => mixer.clipAction(clip));
                     console.log("=== 玩家动画列表 (" + character.animations.length + "个) ===");
                     character.animations.forEach((clip, idx) => {
                         console.log(`  玩家动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
                     });
                     
-                    // 根据动画名称签名称检测FBX版本
                     const names = character.animations.map(c => (c.name || '').toLowerCase());
                     const isLocalFbx = names.includes('punch_combo') && names.includes('idle_11');
                     const isOnlineFbx = names.some(n => n.includes('thoughtful')) || names.some(n => n.includes('character_output'));
@@ -824,21 +2125,18 @@
                     let _idle, _walk, _run, _attack;
                     
                     if (isLocalFbx) {
-                        // 本地版FBX：walking_2/attack, Punch_Combo/walk, Idle_11/run, Walking/idle
                         _idle   = names.indexOf('walking');
                         _walk   = names.indexOf('punch_combo');
                         _run    = names.indexOf('idle_11');
                         _attack = names.indexOf('walking_2');
                         console.log("  检测到本地版FBX");
                     } else if (isOnlineFbx) {
-                        // 线上版FBX（已验证视觉映射）：Walking=走路, Character_output=待机, Running=跑步
                         _idle   = names.indexOf('character_output.fbx');
                         _walk   = names.indexOf('walking');
                         _run    = names.indexOf('running');
                         _attack = names.indexOf('walking_2');
                         console.log("  检测到线上版FBX");
                     } else {
-                        // 未知版本：用关键词回退
                         _idle   = findAnimByKeyword(character.animations, ['idle', 'tpose', 'stand', 'walking']);
                         _walk   = findAnimByKeyword(character.animations, ['walk'], [_idle]);
                         _run    = findAnimByKeyword(character.animations, ['run', 'walking_2'], [_idle, _walk]);
@@ -867,21 +2165,20 @@
                 playerCollider.translate(new THREE.Vector3(0, PLAYER_START_Y, 0));
                 resetFallTracking();
                 
-                // ========== 加载NPC：fetch缓存 + 独立解析10个NPC ==========
+                // ========== 加载NPC模型并缓存 ==========
                 updateStatus("下载NPC模型数据...");
                 
-                // 1. 下载FBX文件到内存（仅一次网络请求）
                 const fbxResponse = await fetch('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_Meshy_AI_Meshy_Merged_Animations.fbx');
                 const fbxData = await fbxResponse.arrayBuffer();
+                fbxDataCache = fbxData;
                 
-                // 2. 加载贴图（所有NPC共用）
                 updateStatus("加载NPC贴图...");
                 const npcMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0.png');
                 const npcMetalnessMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_metallic.png');
                 const npcNormalMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_normal.png');
                 const npcRoughnessMap = await textureLoader.loadAsync('./npc-y/Meshy_AI_Blocky_Boy_in_a_Blue__biped_texture_0_roughness.png');
                 
-                const npcMat = new THREE.MeshStandardMaterial({
+                const baseNpcMat = new THREE.MeshStandardMaterial({
                     map: npcMap,
                     metalnessMap: npcMetalnessMap,
                     normalMap: npcNormalMap,
@@ -890,85 +2187,18 @@
                     roughness: 1.0
                 });
                 
-                // 3. 从缓存数据独立解析10个NPC实例
-                updateStatus("生成10个NPC...");
-                for (let i = 0; i < NPC_COUNT; i++) {
-                    const npcChar = fbxLoader.parse(fbxData, '');
-                    // 每个NPC独立设置缩放与玩家一致
-                    npcChar.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
-                    
-                    // 应用贴图
-                    npcChar.traverse(c => {
-                        if (c.isMesh) {
-                            c.material = npcMat;
-                            c.castShadow = true;
-                            c.receiveShadow = true;
-                        }
-                    });
-                    
-                    // 记录动画信息（用第一个NPC的）
-                    if (i === 0 && npcChar.animations && npcChar.animations.length > 0) {
-                        console.log(" === NPC动画列表 (" + npcChar.animations.length + "个) ===");
-                        npcChar.animations.forEach((clip, idx) => {
-                            console.log(`  NPC动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
-                        });
-                    }
-                    
-                    // 创建动画混合器（使用当前NPC自己的clips）
-                    const npcMixer = new THREE.AnimationMixer(npcChar);
-                    const clips = npcChar.animations || [];
-                    const actions = {};
-                    clips.forEach((clip, idx) => {
-                        actions[idx] = npcMixer.clipAction(clip);
-                    });
-                    
-                    // 默认播放走路动画 (索引0=走路, 索引1=跑步)
-                    const walkIdx = 0;
-                    let currentAction = null;
-                    if (actions[walkIdx]) {
-                        currentAction = actions[walkIdx];
-                        currentAction.play();
-                    }
-                    
-                    // 在玩家附近生成
-                    const px = character ? character.position.x : 0;
-                    const py = character ? character.position.y + 0.4 : PLAYER_START_Y;
-                    const pz = character ? character.position.z : 0;
-                    const r = 2 + Math.random() * 3;
-                    const a = Math.random() * Math.PI * 2;
-                    const sx = px + Math.sin(a) * r;
-                    const sz = pz + Math.cos(a) * r;
-                    npcChar.position.set(sx, py, sz);
-                    scene.add(npcChar);
-                    
-                    // 碰撞体
-                    const collider = new Capsule(
-                        new THREE.Vector3(0, 0.4, 0),
-                        new THREE.Vector3(0, 1.2, 0),
-                        0.4
-                    );
-                    collider.translate(new THREE.Vector3(sx, py, sz));
-                    
-                    // 随机方向
-                    const angle = Math.random() * Math.PI * 2;
-                    const direction = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle));
-                    
-                    npcList.push({
-                        character: npcChar,
-                        mixer: npcMixer,
-                        collider: collider,
-                        velocity: new THREE.Vector3(),
-                        direction: direction,
-                        onFloor: false,
-                        actions: actions,
-                        currentAction: currentAction,
-                        walkIdx: walkIdx,
-                        activeAnimIdx: walkIdx
-                    });
-                }
-                console.log(`已创建 ${NPC_COUNT} 个NPC，默认播放走路动画`);
+                fbxLoaderGlobal = fbxLoader;
+                textureLoaderGlobal = textureLoader;
+                baseMatGlobal = baseNpcMat;
                 
-                // ========================================
+                // 初始生成5个NPC在玩家附近
+                updateStatus("生成5个NPC在玩家附近...");
+                for (let i = 0; i < 5; i++) {
+                    spawnNPCWithCache(true);
+                }
+                console.log(`已生成 ${npcList.length} 个NPC (HP=${NPC_MAX_HP})`);
+                
+                npcSpawnTimer = 0;
                 
                 document.getElementById('loading-screen').style.display = 'none';
                 animate();
@@ -984,46 +2214,55 @@
             document.getElementById('status').innerText = "资源加载中...";
         }
         
-        // ========== 玩家动画调试：按数字键切换动画 ==========
-        let debugAnimIdx = -1;
-        function debugPlayAnim(index) {
-            if (!character || !character.animations || index >= character.animations.length || index < 0) return;
-            // 停止当前所有玩家动画
-            if (animActions.idle)  animActions.idle.stop();
-            if (animActions.walk)  animActions.walk.stop();
-            if (animActions.run)   animActions.run.stop();
-            if (animActions.attack)animActions.attack.stop();
-            // 播放指定索引的动画
-            const tempMixer = new THREE.AnimationMixer(character);
-            const action = tempMixer.clipAction(character.animations[index]);
-            action.play();
-            // 存储以便在animate中更新
-            window._debugMixer = tempMixer;
-            window._debugAction = action;
-            debugAnimIdx = index;
-            // 更新UI
-            const nameEl = document.getElementById('debug-anim-name');
-            const idxEl = document.getElementById('debug-anim-idx');
-            if (idxEl) idxEl.innerText = index;
-            if (nameEl) nameEl.innerText = character.animations[index].name || '未命名';
-            console.log(`🔍 播放动画[${index}]: "${character.animations[index].name}" (${character.animations[index].duration.toFixed(2)}s)`);
-        }
         // ==========================================
-        
-        // ========== NPC自动移动与碰撞系统 ==========
+        // NPC更新（含敌对延迟计时器处理）
+        // ==========================================
         function updateNpcs(deltaTime) {
             if (npcList.length === 0) return;
             
+            const playerPos = character ? character.position : new THREE.Vector3(0,0,0);
+            
             npcList.forEach(npc => {
-                // 重力
+                if (npc.isDead) return;
+                
+                if (!npc.isHostile && npc.hostileTimer > 0) {
+                    npc.hostileTimer -= deltaTime;
+                    if (npc.hostileTimer <= 0) {
+                        npc.isHostile = true;
+                        npc.hostileTarget = 'player';
+                        npc.hostileTimer = 0;
+                    }
+                }
+                
                 npc.velocity.y -= GRAVITY * deltaTime;
                 
-                // 水平移动
-                const hSpeed = NPC_MOVE_SPEED;
-                const moveX = npc.direction.x * hSpeed * deltaTime;
-                const moveZ = npc.direction.z * hSpeed * deltaTime;
+                let moveX = 0, moveZ = 0;
+                if (npc.isHostile && npc.hostileTarget === 'player') {
+                    const dx = playerPos.x - npc.character.position.x;
+                    const dz = playerPos.z - npc.character.position.z;
+                    const dist = Math.sqrt(dx*dx + dz*dz);
+                    if (dist > 0.5) {
+                        const speed = NPC_MOVE_SPEED * 1.2;
+                        const normX = dx / dist;
+                        const normZ = dz / dist;
+                        moveX = normX * speed * deltaTime;
+                        moveZ = normZ * speed * deltaTime;
+                        npc.direction.set(normX, 0, normZ);
+                        
+                        if (dist < NPC_ATTACK_RANGE) {
+                            const now = performance.now() / 1000;
+                            if (now - npc.lastAttackTime >= NPC_ATTACK_COOLDOWN) {
+                                npc.lastAttackTime = now;
+                                applyDamage(NPC_ATTACK_DAMAGE);
+                            }
+                        }
+                    }
+                } else {
+                    const hSpeed = NPC_MOVE_SPEED;
+                    moveX = npc.direction.x * hSpeed * deltaTime;
+                    moveZ = npc.direction.z * hSpeed * deltaTime;
+                }
                 
-                // 阻尼
                 const damping = Math.exp(-3 * deltaTime) - 1;
                 if (!npc.onFloor) {
                     npc.velocity.x += npc.velocity.x * damping * 0.1;
@@ -1032,11 +2271,9 @@
                 npc.velocity.x += npc.velocity.x * damping;
                 npc.velocity.z += npc.velocity.z * damping;
                 
-                // 组合位移
                 const deltaPos = new THREE.Vector3(moveX, npc.velocity.y * deltaTime, moveZ);
                 npc.collider.translate(deltaPos);
                 
-                // 碰撞检测
                 const result = worldOctree.capsuleIntersect(npc.collider);
                 npc.onFloor = false;
                 
@@ -1044,46 +2281,49 @@
                     npc.onFloor = result.normal.y > 0;
                     
                     if (!npc.onFloor) {
-                        // 碰到墙壁 → 反弹+转向
                         npc.velocity.addScaledVector(result.normal, -result.normal.dot(npc.velocity));
                     }
                     npc.collider.translate(result.normal.multiplyScalar(result.depth));
                     
-                    // 碰到非地面 → 随机转向新方向
-                    if (result.normal.y < 0.3) {
+                    if (result.normal.y < 0.3 && !npc.isHostile) {
                         const angle = Math.random() * Math.PI * 2;
                         npc.direction.set(Math.sin(angle), 0, Math.cos(angle));
                     }
                 }
                 
-                // 偶尔随机转向（即使没碰撞），让移动更自然
-                if (npc.onFloor && Math.random() < 0.002) {
+                if (npc.onFloor && Math.random() < 0.002 && !npc.isHostile) {
                     const angle = Math.random() * Math.PI * 2;
                     npc.direction.set(Math.sin(angle), 0, Math.cos(angle));
                 }
                 
-                // NPC与玩家碰撞：推开NPC，防止穿模
                 const dx = npc.collider.start.x - playerCollider.start.x;
                 const dz = npc.collider.start.z - playerCollider.start.z;
                 const hDist = Math.sqrt(dx * dx + dz * dz);
                 if (hDist < 1.2 && hDist > 0.01) {
                     npc.collider.translate(new THREE.Vector3(dx / hDist * 0.08, 0, dz / hDist * 0.08));
-                    npc.direction.set(dx / hDist, 0, dz / hDist);
+                    if (!npc.isHostile) {
+                        npc.direction.set(dx / hDist, 0, dz / hDist);
+                    }
                 }
                 
-                // 防止掉出世界：重生到玩家附近
                 if (npc.collider.start.y < DEAD_Y_LIMIT) {
-                    const px = character ? character.position.x : 0;
-                    const py = character ? character.position.y + 0.4 : PLAYER_START_Y;
-                    const pz = character ? character.position.z : 0;
-                    const r = 2 + Math.random() * 3;
-                    const a = Math.random() * Math.PI * 2;
-                    npc.collider.start.set(px + Math.sin(a) * r, py, pz + Math.cos(a) * r);
-                    npc.collider.end.set(px + Math.sin(a) * r, py + 0.8, pz + Math.cos(a) * r);
-                    npc.velocity.set(0, 0, 0);
+                    const newPos = getValidSpawnPosition();
+                    if (newPos) {
+                        npc.collider.start.copy(newPos);
+                        npc.collider.end.set(newPos.x, newPos.y + 0.8, newPos.z);
+                        npc.velocity.set(0, 0, 0);
+                    } else {
+                        const px = character ? character.position.x : 0;
+                        const py = character ? character.position.y + 0.4 : PLAYER_START_Y;
+                        const pz = character ? character.position.z : 0;
+                        const r = 2 + Math.random() * 3;
+                        const a = Math.random() * Math.PI * 2;
+                        npc.collider.start.set(px + Math.sin(a) * r, py, pz + Math.cos(a) * r);
+                        npc.collider.end.set(px + Math.sin(a) * r, py + 0.8, pz + Math.cos(a) * r);
+                        npc.velocity.set(0, 0, 0);
+                    }
                 }
                 
-                // 更新模型位置与朝向
                 npc.character.position.copy(npc.collider.start);
                 npc.character.position.y -= 0.4;
                 
@@ -1095,8 +2335,10 @@
                 }
             });
         }
-        // ==========================================
         
+        // ==========================================
+        // 物理更新（添加滑翔逻辑）
+        // ==========================================
         function getMoveDirection(isForward) {
             camera.getWorldDirection(playerDirection);
             playerDirection.y = 0;
@@ -1114,7 +2356,7 @@
         function updatePhysics(deltaTime) {
             const wasOnGround = playerOnFloor;
             
-            // 体力消耗与恢复 (地面)
+            // 体力消耗与恢复
             if (playerOnFloor && !isGameOver) {
                 let drain = 0;
                 if (isMovingInput() && currentStamina > 0) {
@@ -1136,6 +2378,8 @@
             
             const accel = deltaTime * (playerOnFloor ? effectiveAccel : effectiveAccel * 0.3);
             
+            const movingForward = keyStates['KeyW'] && playerOnFloor && effectiveAccel > 0;
+            
             if (effectiveAccel > 0) {
                 if (keyStates['KeyW']) playerVelocity.add(getMoveDirection(true).multiplyScalar(accel));
                 if (keyStates['KeyS']) playerVelocity.add(getMoveDirection(false).multiplyScalar(accel));
@@ -1143,16 +2387,48 @@
                 if (keyStates['KeyD']) playerVelocity.add(getSideDirection(true).multiplyScalar(accel));
             }
             
-            let canJump = playerOnFloor && keyStates['Space'] && !isGameOver && currentStamina >= JUMP_STAMINA_COST;
-            if (canJump) {
+            // ---- 跳跃 / 滑翔切换 ----
+            // 如果在地面，按空格跳跃（原逻辑）
+            if (playerOnFloor && keyStates['Space'] && !isGameOver && currentStamina >= JUMP_STAMINA_COST) {
                 playerVelocity.y = JUMP_FORCE;
                 modifyStamina(-JUMP_STAMINA_COST);
                 keyStates['Space'] = false;
+                if (achievementManager) achievementManager.onJump();
+            } 
+            // 如果在空中，且拥有并装备鞘翅，且未在滑翔状态，则进入滑翔
+            else if (!playerOnFloor && !isGameOver && hasElytra && isElytraEquipped && keyStates['Space'] && !isGliding) {
+                isGliding = true;
+                keyStates['Space'] = false; // 防止按住连触发
+                // 解锁成就
+                if (achievementManager) achievementManager.onGlide();
+                showMessage('🪂 进入滑翔模式');
+            }
+            // 如果在滑翔状态，再按空格取消滑翔
+            else if (isGliding && keyStates['Space'] && !isGameOver) {
+                isGliding = false;
+                keyStates['Space'] = false;
+                showMessage('🪂 退出滑翔模式');
+            }
+            
+            // 重力计算（滑翔时大幅减缓）
+            let gravityMultiplier = 1.0;
+            if (isGliding) {
+                gravityMultiplier = GLIDE_GRAVITY_MULTIPLIER;
+                // 限制最大下落速度
+                if (playerVelocity.y < GLIDE_MAX_VERTICAL_SPEED) {
+                    playerVelocity.y = GLIDE_MAX_VERTICAL_SPEED;
+                }
+            }
+            if (!playerOnFloor) {
+                playerVelocity.y -= GRAVITY * gravityMultiplier * deltaTime;
+                // 如果滑翔且速度过快，限制
+                if (isGliding && playerVelocity.y < GLIDE_MAX_VERTICAL_SPEED) {
+                    playerVelocity.y = GLIDE_MAX_VERTICAL_SPEED;
+                }
             }
             
             let damping = Math.exp(-4 * deltaTime) - 1;
             if (!playerOnFloor) {
-                playerVelocity.y -= GRAVITY * deltaTime;
                 damping *= 0.1;
             }
             playerVelocity.addScaledVector(playerVelocity, damping);
@@ -1168,8 +2444,16 @@
                 playerCollider.translate(result.normal.multiplyScalar(result.depth));
             }
             
-            // 摔伤检测
-            if (!wasOnGround && playerOnFloor) processFallDamage(playerCollider.start.y);
+            // 滑翔状态下着地，无伤害，并自动退出滑翔
+            if (!wasOnGround && playerOnFloor) {
+                if (isGliding) {
+                    // 滑翔落地无伤害，退出滑翔
+                    isGliding = false;
+                    resetFallTracking();
+                } else {
+                    processFallDamage(playerCollider.start.y);
+                }
+            }
             if (wasOnGround && !playerOnFloor) {
                 isAirborneActive = true;
                 fallMaxY = playerCollider.start.y;
@@ -1177,8 +2461,24 @@
             if (!playerOnFloor && isAirborneActive) fallMaxY = Math.max(fallMaxY, playerCollider.start.y);
             if (playerOnFloor && isAirborneActive) resetFallTracking();
             
-            // 根据攻击状态更新动画（攻击期间不切换）
-            if (!isAttacking) updateAnimationByMovement();
+            // 成就更新
+            if (achievementManager && character) {
+                const pos = character.position.clone();
+                achievementManager.update(
+                    deltaTime,
+                    pos,
+                    playerOnFloor,
+                    currentHealth,
+                    currentStamina,
+                    movingForward,
+                    isRunning && playerOnFloor && isMovingInput(),
+                    npcList
+                );
+            }
+            
+            if (currentAction !== animActions.attack || attackTimer === null) {
+                updateAnimationByMovement();
+            }
             
             if (character) {
                 character.position.copy(playerCollider.start);
@@ -1193,8 +2493,8 @@
                 if (mixer) mixer.update(deltaTime);
             }
             
-            // 更新所有NPC
             updateNpcs(deltaTime);
+            checkAndSpawnNPCs(deltaTime);
             
             if (playerCollider.start.y < DEAD_Y_LIMIT && !isGameOver) {
                 isGameOver = true;
@@ -1223,7 +2523,6 @@
             if (isGameOver) {
                 const dt = Math.min(0.05, clock.getDelta());
                 npcList.forEach(npc => { if (npc.mixer) npc.mixer.update(dt); });
-                if (window._debugMixer) window._debugMixer.update(dt);
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
                 return;
@@ -1233,8 +2532,6 @@
             const subSteps = 5;
             for (let i = 0; i < subSteps; i++) updatePhysics(dt / subSteps);
             npcList.forEach(npc => { if (npc.mixer) npc.mixer.update(dt); });
-            if (window._debugMixer) window._debugMixer.update(dt);
-            if (debugAnimIdx >= 0 && character && mixer) mixer.update(dt);
             renderer.render(scene, camera);
         }
     </script>
