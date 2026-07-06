@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>糖果王国 2D 开放世界</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #3f2456;
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-strong: #fffaf5;
+  --pink: #ff6fae;
+  --blue: #39c9ef;
+  --yellow: #ffd75d;
+  --green: #8ee071;
+  --violet: #8c65ff;
+  --coral: #ff9b72;
+  --line: rgba(95, 54, 111, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  background: #ffe4ef;
+  font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  user-select: none;
+  touch-action: none;
+}
+
+button {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#game-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(255, 251, 181, 0.7), transparent 24%),
+    linear-gradient(135deg, #ffe5ed 0%, #d6f5ff 50%, #fff0bb 100%);
+}
+
+#viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+#world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3200px;
+  height: 1800px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  background-color: #ffdff0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+#world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 226, 192, 0.1) 72%, rgba(255, 171, 168, 0.22) 100%);
+}
+
+#path-layer,
+#deco-layer,
+#entity-layer,
+#effect-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.path {
+  position: absolute;
+  height: 120px;
+  border: 7px solid rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 210, 122, 0.88) 0 48px, rgba(255, 145, 171, 0.78) 48px 96px);
+  box-shadow: inset 0 10px 0 rgba(255, 255, 255, 0.35), 0 14px 24px rgba(99, 48, 77, 0.14);
+  opacity: 0.86;
+}
+
+.path.main {
+  left: 180px;
+  top: 1200px;
+  width: 2760px;
+  transform: rotate(-5deg);
+}
+
+.path.cross {
+  left: 1180px;
+  top: 250px;
+  width: 1280px;
+  transform: rotate(75deg);
+}
+
+.deco {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.gumdrop {
+  width: 80px;
+  height: 58px;
+  background: linear-gradient(135deg, #8ee071, #50c2ff 54%, #ff77b6);
+  border: 5px solid rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 9px 0 rgba(255, 255, 255, 0.32), 0 9px 22px rgba(85, 54, 90, 0.17);
+}
+
+.hat-deco {
+  width: 86px;
+  height: 58px;
+  border-radius: 44px 44px 18px 18px;
+  background:
+    radial-gradient(circle at 50% 18%, #fff 0 9px, transparent 10px),
+    linear-gradient(135deg, #ff76b6, #ffd85b 55%, #54d7ff);
+  border: 5px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(80, 47, 93, 0.18);
+}
+
+.entity {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: center bottom;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.entity img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 9px 9px rgba(86, 49, 83, 0.24));
+}
+
+.player {
+  transition: filter 0.12s ease;
+}
+
+.player.dashing img {
+  filter: drop-shadow(0 0 14px rgba(255, 240, 96, 0.95)) drop-shadow(0 9px 9px rgba(86, 49, 83, 0.24));
+}
+
+.player .crown-on-head {
+  position: absolute;
+  left: 22px;
+  top: -34px;
+  width: 66px;
+  height: 50px;
+  display: none;
+  background: url("assets/crown.svg") center / contain no-repeat;
+  filter: drop-shadow(0 0 9px rgba(255, 229, 98, 0.82));
+}
+
+.player.has-crown .crown-on-head {
+  display: block;
+}
+
+.candy img {
+  animation: floatCandy 1.5s ease-in-out infinite;
+}
+
+.shop img {
+  filter: drop-shadow(0 14px 15px rgba(86, 49, 83, 0.22));
+}
+
+.npc img {
+  animation: idleNpc 2s ease-in-out infinite;
+}
+
+.entity.active img {
+  filter: drop-shadow(0 0 16px rgba(255, 244, 112, 0.95)) drop-shadow(0 12px 12px rgba(86, 49, 83, 0.24));
+}
+
+.name-tag {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  min-width: 80px;
+  padding: 5px 8px;
+  transform: translateX(-50%);
+  border: 2px solid rgba(255, 255, 255, 0.86);
+  border-radius: 8px;
+  color: #653255;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 16px rgba(75, 43, 83, 0.13);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.spark {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: #fff;
+  box-shadow: 0 0 14px #ffe66d, 0 0 24px #ff70b0;
+  animation: spark 520ms ease-out forwards;
+}
+
+.ring {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: 5px solid rgba(255, 245, 102, 0.9);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ring 620ms ease-out forwards;
+}
+
+.ui-panel {
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px rgba(80, 42, 83, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+#topbar {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
+  top: max(12px, env(safe-area-inset-top));
+  display: grid;
+  grid-template-columns: minmax(245px, 360px) minmax(240px, 460px) auto;
+  gap: 10px;
+  align-items: start;
+  pointer-events: none;
+}
+
+#brand,
+#quest,
+#meters {
+  pointer-events: auto;
+}
+
+#brand {
+  padding: 10px 12px;
+}
+
+#brand h1 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+#brand p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #77456c;
+}
+
+#quest {
+  padding: 10px 12px;
+}
+
+.quest-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+#questText {
+  min-height: 24px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.progress {
+  height: 12px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(128, 91, 136, 0.12);
+}
+
+#questProgress {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--pink), var(--yellow), var(--blue));
+  transition: width 0.2s ease;
+}
+
+#meters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(80px, 1fr));
+  gap: 8px;
+  min-width: 284px;
+}
+
+.meter {
+  min-height: 58px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.meter strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 20px;
+}
+
+.meter span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #7e4a75;
+}
+
+#minimap {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(122px, env(safe-area-inset-bottom));
+  width: 160px;
+  height: 92px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#minimap::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 93, 0.42), rgba(57, 201, 239, 0.42)),
+    rgba(255, 255, 255, 0.78);
+}
+
+.map-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(60, 36, 72, 0.2);
+}
+
+.map-dot.player {
+  width: 13px;
+  height: 13px;
+  background: var(--pink);
+}
+
+.map-dot.npc {
+  background: var(--blue);
+}
+
+.map-dot.shop {
+  background: var(--yellow);
+}
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(108px, env(safe-area-inset-bottom));
+  max-width: min(560px, calc(100vw - 38px));
+  padding: 10px 14px;
+  transform: translate(-50%, 20px);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(63, 36, 86, 0.86);
+  box-shadow: 0 14px 28px rgba(63, 36, 86, 0.22);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#toast.show {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+#dialogue,
+#guide {
+  position: fixed;
+  left: 50%;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  width: min(650px, calc(100vw - 34px));
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+#dialogue {
+  display: none;
+  padding: 14px;
+}
+
+#dialogue.open {
+  display: block;
+}
+
+#dialogue h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+#dialogue p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.dialogue-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pill-button {
+  min-width: 86px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--pink), var(--violet));
+  box-shadow: 0 8px 18px rgba(134, 89, 218, 0.25);
+  font-weight: 900;
+}
+
+.pill-button.secondary {
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  box-shadow: none;
+}
+
+#guide {
+  display: none;
+  top: max(68px, env(safe-area-inset-top));
+  bottom: auto;
+  max-height: calc(100vh - 92px);
+  overflow: auto;
+  padding: 14px;
+}
+
+#guide.open {
+  display: block;
+}
+
+#guide h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+#guide h3 {
+  margin: 14px 0 8px;
+  font-size: 16px;
+}
+
+#guide p {
+  margin: 6px 0;
+  line-height: 1.5;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(101, 50, 85, 0.14);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: rgba(255, 236, 143, 0.5);
+  font-weight: 900;
+}
+
+#menuButton {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  top: max(116px, env(safe-area-inset-top));
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, var(--violet), var(--pink));
+  box-shadow: 0 10px 22px rgba(80, 42, 83, 0.22);
+  font-size: 22px;
+  font-weight: 900;
+  z-index: 8;
+}
+
+#joystick {
+  position: fixed;
+  left: max(30px, env(safe-area-inset-left));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  width: 154px;
+  height: 154px;
+  border: 3px solid rgba(255, 255, 255, 0.86);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.26);
+  box-shadow: inset 0 6px 18px rgba(255, 255, 255, 0.4), 0 12px 28px rgba(80, 42, 83, 0.16);
+  touch-action: none;
+  pointer-events: auto;
+}
+
+#stick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow), var(--pink));
+  box-shadow: 0 8px 18px rgba(94, 57, 99, 0.2);
+}
+
+#skills {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 78px 78px;
+  grid-template-rows: 78px 78px;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.skill {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  color: #fff;
+  background: #ff6fae;
+  box-shadow: 0 12px 24px rgba(92, 47, 92, 0.2);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.skill small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.skill.primary {
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: 92px;
+  height: 92px;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  font-size: 17px;
+}
+
+.skill.dash {
+  background: linear-gradient(135deg, var(--blue), var(--green));
+}
+
+.skill.magic {
+  background: linear-gradient(135deg, var(--violet), var(--yellow));
+}
+
+.skill:disabled {
+  filter: grayscale(0.45);
+  opacity: 0.62;
+}
+
+#screen-warning {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  place-items: center;
+  padding: 26px;
+  color: #fff;
+  background: rgba(63, 36, 86, 0.82);
+  text-align: center;
+}
+
+#screen-warning div {
+  max-width: 320px;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+@keyframes floatCandy {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes idleNpc {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes spark {
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.1);
+    opacity: 0;
+  }
+}
+
+@keyframes ring {
+  to {
+    transform: translate(-50%, -50%) scale(4.6);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 920px) {
+  #topbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #meters {
+    grid-column: 1 / span 2;
+    justify-self: start;
+    min-width: min(390px, calc(100vw - 28px));
+  }
+
+  #brand h1 {
+    font-size: 18px;
+  }
+
+  #questText {
+    font-size: 14px;
+  }
+
+  #minimap {
+    width: 132px;
+    height: 80px;
+    bottom: max(118px, env(safe-area-inset-bottom));
+  }
+
+  #joystick {
+    width: 132px;
+    height: 132px;
+    left: max(18px, env(safe-area-inset-left));
+  }
+
+  #stick {
+    width: 62px;
+    height: 62px;
+  }
+
+  #skills {
+    right: max(16px, env(safe-area-inset-right));
+    gap: 9px;
+    grid-template-columns: 68px 68px;
+    grid-template-rows: 68px 68px;
+  }
+
+  .skill {
+    width: 68px;
+    height: 68px;
+    font-size: 13px;
+  }
+
+  .skill.primary {
+    width: 80px;
+    height: 80px;
+    font-size: 15px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 820px) {
+  #screen-warning {
+    display: grid;
+  }
+}
+</style>
+</head>
+<body>
+<main id="game-shell" aria-label="糖果王国 2D 开放世界游戏">
+  <div id="viewport">
+    <div id="world">
+      <div id="path-layer">
+        <div class="path main"></div>
+        <div class="path cross"></div>
+      </div>
+      <div id="deco-layer"></div>
+      <div id="entity-layer"></div>
+      <div id="effect-layer"></div>
+    </div>
+  </div>
+
+  <div id="topbar">
+    <section id="brand" class="ui-panel">
+      <h1>糖果王国</h1>
+      <p>作者：糖果 · 2D 糖果开放世界</p>
+    </section>
+
+    <section id="quest" class="ui-panel">
+      <div class="quest-title">
+        <span>当前任务</span>
+        <span id="questBadge">第一章</span>
+      </div>
+      <div id="questText">收集 30 颗糖果，准备开启糖果帽任务。</div>
+      <div class="progress"><div id="questProgress"></div></div>
+    </section>
+
+    <section id="meters">
+      <div class="meter ui-panel"><strong id="scoreText">0</strong><span>糖果</span></div>
+      <div class="meter ui-panel"><strong id="energyText">100</strong><span>甜心能量</span></div>
+      <div class="meter ui-panel"><strong id="hatText">未获得</strong><span>糖果帽</span></div>
+    </section>
+  </div>
+
+  <button id="menuButton" type="button" aria-label="打开菜单">?</button>
+  <aside id="minimap" class="ui-panel" aria-hidden="true"></aside>
+
+  <section id="dialogue" class="ui-panel" aria-live="polite">
+    <h2 id="dialogueName">糖糖店长</h2>
+    <p id="dialogueText"></p>
+    <div class="dialogue-actions">
+      <button id="dialogueClose" class="pill-button secondary" type="button">继续玩</button>
+      <button id="dialogueConfirm" class="pill-button" type="button">好的</button>
+    </div>
+  </section>
+
+  <section id="guide" class="ui-panel">
+    <h2>游戏菜单</h2>
+    <p>电脑端：WASD 或方向键移动，E 互动或吃糖，空格冲刺，Q 使用甜心魔法。</p>
+    <p>平板横屏：左侧摇杆移动，右侧三个按钮分别用于互动/吃糖、冲刺和甜心魔法。</p>
+    <h3>素材清单</h3>
+    <table>
+      <thead>
+        <tr><th>编号</th><th>文件</th><th>用途</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>assets/bg.png</td><td>世界背景</td><td>简洁侧视糖果舞台背景，给前景角色和道具留空间。</td></tr>
+        <tr><td>2</td><td>assets/girl.svg</td><td>主角</td><td>可爱小女孩，带糖果服装。</td></tr>
+        <tr><td>3</td><td>assets/candy.svg</td><td>可收集糖果</td><td>路上可吃的发光糖果。</td></tr>
+        <tr><td>4</td><td>assets/shop.svg</td><td>糖果店铺</td><td>靠近后可触发领取糖果帽。</td></tr>
+        <tr><td>5</td><td>assets/npc.svg</td><td>NPC</td><td>糖果店长、向导和帽子设计师共用素材。</td></tr>
+        <tr><td>6</td><td>assets/crown.svg</td><td>奖励糖果帽</td><td>完成任务后显示在主角头上。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div id="joystick" aria-label="移动摇杆">
+    <div id="stick"></div>
+  </div>
+
+  <div id="skills">
+    <button id="actionButton" class="skill primary" type="button">吃糖<small>E</small></button>
+    <button id="dashButton" class="skill dash" type="button">冲刺<small>Space</small></button>
+    <button id="magicButton" class="skill magic" type="button">魔法<small>Q</small></button>
+  </div>
+
+  <div id="toast"></div>
+  <div id="screen-warning"><div>建议横屏游玩，糖果王国会更宽、更像平板开放世界。</div></div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const ASSETS = {
+    bg: "assets/bg.png",
+    player: "assets/girl.svg",
+    candy: "assets/candy.svg",
+    shop: "assets/shop.svg",
+    npc: "assets/npc.svg",
+    crown: "assets/crown.svg"
+  };
+
+  const WORLD = { w: 3200, h: 1800 };
+  const TARGET_CANDY = 30;
+  const baseSpeed = 360;
+
+  const world = document.getElementById("world");
+  const entityLayer = document.getElementById("entity-layer");
+  const effectLayer = document.getElementById("effect-layer");
+  const decoLayer = document.getElementById("deco-layer");
+  const scoreText = document.getElementById("scoreText");
+  const energyText = document.getElementById("energyText");
+  const hatText = document.getElementById("hatText");
+  const questText = document.getElementById("questText");
+  const questBadge = document.getElementById("questBadge");
+  const questProgress = document.getElementById("questProgress");
+  const actionButton = document.getElementById("actionButton");
+  const dashButton = document.getElementById("dashButton");
+  const magicButton = document.getElementById("magicButton");
+  const toast = document.getElementById("toast");
+  const joystick = document.getElementById("joystick");
+  const stick = document.getElementById("stick");
+  const dialogue = document.getElementById("dialogue");
+  const dialogueName = document.getElementById("dialogueName");
+  const dialogueText = document.getElementById("dialogueText");
+  const dialogueClose = document.getElementById("dialogueClose");
+  const dialogueConfirm = document.getElementById("dialogueConfirm");
+  const menuButton = document.getElementById("menuButton");
+  const guide = document.getElementById("guide");
+  const minimap = document.getElementById("minimap");
+
+  world.style.backgroundImage = `url("${ASSETS.bg}")`;
+
+  const keys = new Set();
+  const joystickVector = { x: 0, y: 0 };
+  const state = {
+    score: 0,
+    energy: 100,
+    questStage: 0,
+    talkedToNpc: false,
+    crownUnlocked: false,
+    dashTime: 0,
+    magicTime: 0,
+    lastToast: 0,
+    camera: { x: 0, y: 0, scale: 1 },
+    paused: false
+  };
+
+  const player = {
+    id: "player",
+    type: "player",
+    x: 520,
+    y: 1260,
+    w: 112,
+    h: 138,
+    dir: 1,
+    el: createEntity("player", ASSETS.player, 112, 138, "player")
+  };
+
+  const crownNode = document.createElement("div");
+  crownNode.className = "crown-on-head";
+  player.el.appendChild(crownNode);
+
+  const shops = [
+    { id: "shop-a", name: "甜心商店", x: 2050, y: 1000, w: 260, h: 210 },
+    { id: "shop-b", name: "果冻帽铺", x: 2420, y: 850, w: 240, h: 194 },
+    { id: "shop-c", name: "彩虹糖屋", x: 910, y: 980, w: 230, h: 186 }
+  ].map((item) => ({
+    ...item,
+    type: "shop",
+    el: createEntity("shop", ASSETS.shop, item.w, item.h, item.name)
+  }));
+
+  const npcs = [
+    {
+      id: "npc-guide",
+      name: "糖糖店长",
+      x: 1850,
+      y: 1135,
+      line: "欢迎来到糖果王国。先收集 30 颗糖果，我会告诉你糖果帽铺在哪里。"
+    },
+    {
+      id: "npc-map",
+      name: "果冻向导",
+      x: 1180,
+      y: 1185,
+      line: "路边闪亮的糖果都可以吃，甜心魔法会把附近糖果吸过来。"
+    },
+    {
+      id: "npc-hat",
+      name: "帽子设计师",
+      x: 2510,
+      y: 1070,
+      line: "糖果帽已经准备好了。完成店长的小任务，就去商店领取吧。"
+    }
+  ].map((item) => ({
+    ...item,
+    type: "npc",
+    w: 108,
+    h: 128,
+    el: createEntity("npc", ASSETS.npc, 108, 128, item.name)
+  }));
+
+  const candies = [];
+  const mapDots = [];
+  let activeTarget = null;
+  let activeDialogueTarget = null;
+  let lastFrame = performance.now();
+
+  buildDecorations();
+  spawnCandies();
+  buildMapDots();
+  updateQuest();
+  resize();
+  render();
+
+  window.addEventListener("resize", resize);
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
+  actionButton.addEventListener("click", performAction);
+  dashButton.addEventListener("click", startDash);
+  magicButton.addEventListener("click", startMagic);
+  dialogueClose.addEventListener("click", closeDialogue);
+  dialogueConfirm.addEventListener("click", confirmDialogue);
+  menuButton.addEventListener("click", toggleGuide);
+
+  setupJoystick();
+  requestAnimationFrame(loop);
+
+  function createEntity(className, src, width, height, label) {
+    const el = document.createElement("div");
+    el.className = `entity ${className}`;
+    el.style.width = `${width}px`;
+    el.style.height = `${height}px`;
+
+    const img = document.createElement("img");
+    img.alt = label || className;
+    img.draggable = false;
+    img.src = src;
+    el.appendChild(img);
+
+    if (label && className !== "player" && className !== "candy") {
+      const tag = document.createElement("div");
+      tag.className = "name-tag";
+      tag.textContent = label;
+      el.appendChild(tag);
+    }
+
+    entityLayer.appendChild(el);
+    return el;
+  }
+
+  function buildDecorations() {
+    const items = [
+      ["gumdrop", 300, 1390], ["gumdrop", 530, 1110], ["gumdrop", 750, 1425],
+      ["gumdrop", 1450, 1280], ["gumdrop", 1720, 1425], ["gumdrop", 2810, 1160],
+      ["hat-deco", 620, 1320], ["hat-deco", 1540, 1080], ["hat-deco", 2265, 1225],
+      ["hat-deco", 2940, 1320]
+    ];
+
+    items.forEach(([className, x, y], index) => {
+      const el = document.createElement("div");
+      el.className = `deco ${className}`;
+      el.style.transform = `translate(${x}px, ${y}px) rotate(${index % 2 ? 8 : -8}deg)`;
+      decoLayer.appendChild(el);
+    });
+  }
+
+  function spawnCandies() {
+    const rng = mulberry32(20260704);
+    const zones = [
+      { x: 260, y: 1110, w: 820, h: 420 },
+      { x: 1090, y: 1040, w: 880, h: 470 },
+      { x: 1900, y: 850, w: 900, h: 530 },
+      { x: 780, y: 450, w: 760, h: 380 }
+    ];
+
+    for (let i = 0; i < 58; i += 1) {
+      const zone = zones[i % zones.length];
+      const size = 44 + Math.round(rng() * 18);
+      const candy = {
+        id: `candy-${i}`,
+        type: "candy",
+        x: zone.x + rng() * zone.w,
+        y: zone.y + rng() * zone.h,
+        w: size,
+        h: size,
+        phase: rng() * Math.PI * 2,
+        collected: false,
+        el: createEntity("candy", ASSETS.candy, size, size, "糖果")
+      };
+      candy.el.style.filter = `hue-rotate(${Math.round(rng() * 240)}deg)`;
+      candies.push(candy);
+    }
+  }
+
+  function buildMapDots() {
+    minimap.innerHTML = "";
+    mapDots.push(makeDot("player", player));
+    shops.forEach((shop) => mapDots.push(makeDot("shop", shop)));
+    npcs.forEach((npc) => mapDots.push(makeDot("npc", npc)));
+  }
+
+  function makeDot(type, target) {
+    const dot = document.createElement("div");
+    dot.className = `map-dot ${type}`;
+    minimap.appendChild(dot);
+    return { dot, target };
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.033, (now - lastFrame) / 1000);
+    lastFrame = now;
+
+    if (!state.paused) {
+      update(dt);
+      render();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt) {
+    updateMovement(dt);
+    updateTimers(dt);
+    updateNearbyTargets();
+    collectNearbyCandies(false);
+    updateQuest();
+  }
+
+  function updateMovement(dt) {
+    const move = getMoveVector();
+    const len = Math.hypot(move.x, move.y);
+    if (len > 0.01) {
+      move.x /= len;
+      move.y /= len;
+      player.dir = move.x < -0.05 ? -1 : move.x > 0.05 ? 1 : player.dir;
+      const dashBoost = state.dashTime > 0 ? 1.95 : 1;
+      const speed = baseSpeed * dashBoost;
+      player.x = clamp(player.x + move.x * speed * dt, 80, WORLD.w - player.w - 80);
+      player.y = clamp(player.y + move.y * speed * dt, 300, WORLD.h - player.h - 70);
+    }
+  }
+
+  function updateTimers(dt) {
+    if (state.dashTime > 0) {
+      state.dashTime = Math.max(0, state.dashTime - dt);
+      player.el.classList.add("dashing");
+    } else {
+      player.el.classList.remove("dashing");
+    }
+
+    if (state.magicTime > 0) {
+      state.magicTime = Math.max(0, state.magicTime - dt);
+      attractCandies(dt);
+    }
+
+    state.energy = Math.min(100, state.energy + dt * 12);
+  }
+
+  function updateNearbyTargets() {
+    const interactables = [...npcs, ...shops];
+    activeTarget = null;
+    interactables.forEach((target) => target.el.classList.remove("active"));
+
+    let bestDistance = Infinity;
+    interactables.forEach((target) => {
+      const distance = distanceTo(player, target);
+      if (distance < bestDistance && distance < (target.type === "shop" ? 190 : 145)) {
+        bestDistance = distance;
+        activeTarget = target;
+      }
+    });
+
+    if (activeTarget) {
+      actionButton.innerHTML = `互动<small>E</small>`;
+      activeTarget.el.classList.add("active");
+    } else {
+      actionButton.innerHTML = `吃糖<small>E</small>`;
+    }
+  }
+
+  function collectNearbyCandies(force) {
+    const radius = force ? 145 : 58;
+    candies.forEach((candy) => {
+      if (!candy.collected && distanceTo(player, candy) < radius) {
+        collectCandy(candy);
+      }
+    });
+  }
+
+  function collectCandy(candy) {
+    candy.collected = true;
+    candy.el.remove();
+    state.score += 1;
+    state.energy = Math.min(100, state.energy + 7);
+    burst(candy.x + candy.w / 2, candy.y + candy.h / 2);
+
+    if (state.score === 10) {
+      showToast("甜心魔法已变强，按 Q 或右侧魔法按钮可以吸糖。");
+    }
+
+    if (state.score === TARGET_CANDY) {
+      showToast("糖果收集完成，去找糖糖店长吧。");
+    }
+  }
+
+  function attractCandies(dt) {
+    candies.forEach((candy) => {
+      if (candy.collected) return;
+      const dx = centerX(player) - centerX(candy);
+      const dy = centerY(player) - centerY(candy);
+      const distance = Math.hypot(dx, dy);
+      if (distance < 350 && distance > 2) {
+        candy.x += (dx / distance) * 520 * dt;
+        candy.y += (dy / distance) * 520 * dt;
+      }
+    });
+  }
+
+  function performAction() {
+    if (dialogue.classList.contains("open")) {
+      confirmDialogue();
+      return;
+    }
+
+    if (activeTarget) {
+      interact(activeTarget);
+      return;
+    }
+
+    collectNearbyCandies(true);
+  }
+
+  function interact(target) {
+    if (target.type === "npc") {
+      openDialogue(target);
+      return;
+    }
+
+    if (target.type === "shop") {
+      if (!state.talkedToNpc) {
+        showToast("先完成糖糖店长的提示，再来领取糖果帽。");
+      } else if (state.score < TARGET_CANDY) {
+        showToast(`还差 ${TARGET_CANDY - state.score} 颗糖果。`);
+      } else {
+        unlockCrown(target.name);
+      }
+    }
+  }
+
+  function openDialogue(npc) {
+    activeDialogueTarget = npc;
+    dialogueName.textContent = npc.name;
+
+    if (npc.id === "npc-guide" && state.score >= TARGET_CANDY) {
+      dialogueText.textContent = "你已经收集够糖果了。去甜心商店领取糖果帽，它会让你成为今天的糖果小队长。";
+    } else if (npc.id === "npc-guide") {
+      dialogueText.textContent = npc.line;
+    } else if (npc.id === "npc-hat" && state.talkedToNpc) {
+      dialogueText.textContent = "甜心商店就在右边，靠近店门点击互动就能领取奖励。";
+    } else {
+      dialogueText.textContent = npc.line;
+    }
+
+    dialogue.classList.add("open");
+    state.paused = true;
+  }
+
+  function confirmDialogue() {
+    if (activeDialogueTarget && activeDialogueTarget.id === "npc-guide" && state.score >= TARGET_CANDY) {
+      state.talkedToNpc = true;
+      showToast("新任务：去甜心商店领取糖果帽。");
+    }
+    closeDialogue();
+  }
+
+  function closeDialogue() {
+    dialogue.classList.remove("open");
+    activeDialogueTarget = null;
+    state.paused = false;
+    updateQuest();
+  }
+
+  function unlockCrown(shopName) {
+    state.crownUnlocked = true;
+    player.el.classList.add("has-crown");
+    hatText.textContent = "已获得";
+    showToast(`${shopName}送给你一顶发光糖果帽。任务完成！`);
+    burst(player.x + player.w / 2, player.y);
+    updateQuest();
+  }
+
+  function startDash() {
+    if (state.energy < 18) {
+      showToast("甜心能量不足，吃几颗糖果再冲刺。");
+      return;
+    }
+
+    state.energy -= 18;
+    state.dashTime = 0.34;
+    burst(player.x + player.w / 2, player.y + player.h / 2);
+  }
+
+  function startMagic() {
+    if (state.score < 10) {
+      showToast("收集 10 颗糖果后，甜心魔法会开启。");
+      return;
+    }
+
+    if (state.energy < 30) {
+      showToast("甜心能量不足，先吃糖补充能量。");
+      return;
+    }
+
+    state.energy -= 30;
+    state.magicTime = 1.2;
+    ring(player.x + player.w / 2, player.y + player.h / 2);
+  }
+
+  function updateQuest() {
+    scoreText.textContent = state.score;
+    energyText.textContent = Math.round(state.energy);
+    magicButton.disabled = state.score < 10;
+
+    if (state.crownUnlocked) {
+      questBadge.textContent = "完成";
+      questText.textContent = "戴着糖果帽继续探索糖果王国吧。";
+      questProgress.style.width = "100%";
+      return;
+    }
+
+    if (state.score < TARGET_CANDY) {
+      questBadge.textContent = "第一章";
+      questText.textContent = `收集 ${TARGET_CANDY} 颗糖果，准备开启糖果帽任务。`;
+      questProgress.style.width = `${Math.min(100, (state.score / TARGET_CANDY) * 100)}%`;
+      return;
+    }
+
+    if (!state.talkedToNpc) {
+      questBadge.textContent = "第二章";
+      questText.textContent = "去找糖糖店长，听听糖果帽的线索。";
+      questProgress.style.width = "68%";
+      return;
+    }
+
+    questBadge.textContent = "第三章";
+    questText.textContent = "进入甜心商店，领取发光糖果帽。";
+    questProgress.style.width = "86%";
+  }
+
+  function render() {
+    const all = [...shops, ...npcs, ...candies.filter((candy) => !candy.collected), player];
+
+    all.forEach((item) => {
+      let bob = 0;
+      if (item.type === "candy") bob = Math.sin(performance.now() / 420 + item.phase) * 6;
+      const scaleX = item.type === "player" ? player.dir : 1;
+      item.el.style.zIndex = Math.round(item.y + item.h);
+      item.el.style.transform = `translate3d(${item.x}px, ${item.y + bob}px, 0) scaleX(${scaleX})`;
+    });
+
+    updateCamera();
+    updateMapDots();
+  }
+
+  function updateCamera() {
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    const scale = state.camera.scale;
+    const visibleW = viewW / scale;
+    const visibleH = viewH / scale;
+    const targetX = clamp(player.x + player.w / 2 - visibleW / 2, 0, WORLD.w - visibleW);
+    const targetY = clamp(player.y + player.h / 2 - visibleH / 2, 0, WORLD.h - visibleH);
+
+    state.camera.x += (targetX - state.camera.x) * 0.12;
+    state.camera.y += (targetY - state.camera.y) * 0.12;
+    world.style.transform = `translate3d(${-state.camera.x * scale}px, ${-state.camera.y * scale}px, 0) scale(${scale})`;
+  }
+
+  function updateMapDots() {
+    mapDots.forEach(({ dot, target }) => {
+      const x = 8 + (target.x / WORLD.w) * 144;
+      const y = 8 + (target.y / WORLD.h) * 76;
+      dot.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  }
+
+  function resize() {
+    const scale = clamp(Math.min(window.innerWidth / 1180, window.innerHeight / 720), 0.58, 1.08);
+    state.camera.scale = scale;
+  }
+
+  function getMoveVector() {
+    let x = joystickVector.x;
+    let y = joystickVector.y;
+
+    if (keys.has("arrowleft") || keys.has("a")) x -= 1;
+    if (keys.has("arrowright") || keys.has("d")) x += 1;
+    if (keys.has("arrowup") || keys.has("w")) y -= 1;
+    if (keys.has("arrowdown") || keys.has("s")) y += 1;
+
+    return { x, y };
+  }
+
+  function onKeyDown(event) {
+    const key = event.key.toLowerCase();
+    if (["arrowleft", "arrowright", "arrowup", "arrowdown", "w", "a", "s", "d", " ", "e", "q"].includes(key)) {
+      event.preventDefault();
+    }
+
+    if (key === "e") performAction();
+    else if (key === " ") startDash();
+    else if (key === "q") startMagic();
+    else if (key === "escape") {
+      if (dialogue.classList.contains("open")) closeDialogue();
+      else toggleGuide();
+    } else {
+      keys.add(key);
+    }
+  }
+
+  function setupJoystick() {
+    let pointerId = null;
+
+    joystick.addEventListener("pointerdown", (event) => {
+      pointerId = event.pointerId;
+      joystick.setPointerCapture(pointerId);
+      updateStick(event);
+    });
+
+    joystick.addEventListener("pointermove", (event) => {
+      if (event.pointerId === pointerId) updateStick(event);
+    });
+
+    joystick.addEventListener("pointerup", resetStick);
+    joystick.addEventListener("pointercancel", resetStick);
+
+    function updateStick(event) {
+      const rect = joystick.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const max = rect.width * 0.31;
+      const rawX = event.clientX - cx;
+      const rawY = event.clientY - cy;
+      const len = Math.hypot(rawX, rawY);
+      const limited = len > max ? max / len : 1;
+      const x = rawX * limited;
+      const y = rawY * limited;
+
+      joystickVector.x = clamp(rawX / max, -1, 1);
+      joystickVector.y = clamp(rawY / max, -1, 1);
+      stick.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+    }
+
+    function resetStick(event) {
+      if (event && pointerId !== null && event.pointerId !== pointerId) return;
+      pointerId = null;
+      joystickVector.x = 0;
+      joystickVector.y = 0;
+      stick.style.transform = "translate(-50%, -50%)";
+    }
+  }
+
+  function burst(x, y) {
+    for (let i = 0; i < 9; i += 1) {
+      const spark = document.createElement("div");
+      const angle = (Math.PI * 2 * i) / 9;
+      const distance = 34 + Math.random() * 44;
+      spark.className = "spark";
+      spark.style.left = `${x}px`;
+      spark.style.top = `${y}px`;
+      spark.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+      spark.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+      effectLayer.appendChild(spark);
+      spark.addEventListener("animationend", () => spark.remove(), { once: true });
+    }
+  }
+
+  function ring(x, y) {
+    const el = document.createElement("div");
+    el.className = "ring";
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    effectLayer.appendChild(el);
+    el.addEventListener("animationend", () => el.remove(), { once: true });
+  }
+
+  function showToast(message) {
+    state.lastToast += 1;
+    const token = state.lastToast;
+    toast.textContent = message;
+    toast.classList.add("show");
+    window.setTimeout(() => {
+      if (state.lastToast === token) toast.classList.remove("show");
+    }, 2200);
+  }
+
+  function toggleGuide() {
+    const open = guide.classList.toggle("open");
+    menuButton.textContent = open ? "X" : "?";
+    if (open) {
+      dialogue.classList.remove("open");
+      state.paused = true;
+    } else {
+      state.paused = false;
+    }
+  }
+
+  function centerX(item) {
+    return item.x + item.w / 2;
+  }
+
+  function centerY(item) {
+    return item.y + item.h / 2;
+  }
+
+  function distanceTo(a, b) {
+    return Math.hypot(centerX(a) - centerX(b), centerY(a) - centerY(b));
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function mulberry32(seed) {
+    return function random() {
+      seed |= 0;
+      seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+})();
+</script>
+</body>
+</html>

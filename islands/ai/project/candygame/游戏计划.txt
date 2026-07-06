@@ -1,0 +1,417 @@
+做一个有趣的html小游戏，作者：糖果，整个小游戏适合女孩游玩，是2d游戏，世界上的东西全都是糖果做的，店铺全都是糖果做的，路上也有很多糖果，也有糖果帽子等等，可以随地吃，主角是可爱的小女孩，可以随时随地走和吃，画风可爱、有趣，颜色多样，适合女孩玩。做一个**“完整版 Roblox 风格糖果开放世界 + 任务系统 + NPC”版本。要适合平板横屏游玩，像蛋仔派对一样，左侧可以控制方向，右侧有技能，电脑端可以设计相应的按键实现功能。。做成2d游戏吧，里面的重要内容比如背景图，小女孩等等都做成可以加载的图片素材，自己画图放上，你最后列一个详细的表，先写出完整的html文件，最多画6张图片。以下是之前的ai生成的内容，可以参考{可以，这次我帮你直接升级成一个**“可换皮资源型 2D 糖果开放世界游戏架构（偏 Roblox UI + 蛋仔派对体验）”**。
+
+重点已经按你要求全部改掉：
+
+* ❌ 不再用简陋3D模型
+* ✅ 全部改为「图片素材驱动（你可替换）」
+* ✅ 小女孩/背景/糖果/商店全部支持外部PNG
+* ✅ UI更完整（教程+任务+操作说明）
+* ✅ 2D 横屏平板优先（可键盘+触控）
+* ✅ 更接近“商业小游戏结构”
+
+---
+
+# 🍭《糖果王国 Candy World 2D版（素材驱动完整版）》
+
+### 作者：糖果
+
+---
+
+# 🎮【直接可运行 HTML（完整版）】
+
+👉 保存为 `candy-world-2d.html`
+
+```html
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>糖果王国 2D开放世界</title>
+<style>
+body{
+margin:0;
+overflow:hidden;
+background:#ffd6ec;
+font-family:Arial;
+}
+
+/* 游戏画布 */
+#game{
+position:absolute;
+width:100%;
+height:100%;
+background:#ffe3f3;
+overflow:hidden;
+}
+
+/* UI */
+#ui{
+position:fixed;
+top:10px;
+left:10px;
+background:rgba(255,255,255,0.85);
+padding:12px;
+border-radius:12px;
+font-size:14px;
+line-height:1.5;
+max-width:260px;
+}
+
+/* 操作说明 */
+#help{
+position:fixed;
+top:10px;
+right:10px;
+background:rgba(255,255,255,0.85);
+padding:12px;
+border-radius:12px;
+font-size:13px;
+max-width:260px;
+}
+
+/* 玩家 */
+.player{
+position:absolute;
+width:64px;
+height:64px;
+background-size:cover;
+}
+
+/* 糖果 */
+.candy{
+position:absolute;
+width:32px;
+height:32px;
+background-size:cover;
+}
+
+/* 商店 */
+.shop{
+position:absolute;
+width:160px;
+height:140px;
+background-size:cover;
+}
+
+/* NPC */
+.npc{
+position:absolute;
+width:64px;
+height:64px;
+background-size:cover;
+}
+
+/* 移动按钮（平板） */
+#pad{
+position:fixed;
+bottom:40px;
+left:40px;
+width:140px;
+height:140px;
+border-radius:50%;
+background:rgba(255,255,255,0.25);
+border:2px solid #fff;
+}
+
+#btn{
+position:fixed;
+bottom:60px;
+right:60px;
+width:90px;
+height:90px;
+border-radius:50%;
+background:#ffcc00;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game"></div>
+
+<div id="ui">
+🍬 糖果：<span id="score">0</span>/100<br>
+👑 任务：收集100糖果解锁皇冠<br>
+🏪 提示：走进商店可触发剧情
+</div>
+
+<div id="help">
+<b>🎮 操作说明</b><br>
+PC：WASD 移动<br>
+手机：左侧摇杆<br>
+靠近糖果自动吃<br>
+靠近NPC进入商店<br>
+</div>
+
+<div id="pad"></div>
+<div id="btn">跳跃</div>
+
+<script>
+/* =========================
+   可替换素材区（重点）
+========================= */
+
+const IMG = {
+bg: "assets/bg.png",              // 🌈糖果世界背景
+player: "assets/girl.png",        // 💖小女孩（你要重点精修）
+candy: "assets/candy.png",        // 🍬糖果
+shop: "assets/shop.png",          // 🏪糖果店
+npc: "assets/npc.png",            // 👩NPC
+crown: "assets/crown.png"        // 👑皇冠
+};
+
+/* ========================= */
+
+const game = document.getElementById("game");
+let score = 0;
+
+let player = create("player", IMG.player, 200, 200);
+let shop = create("shop", IMG.shop, 600, 180);
+let npc = create("npc", IMG.npc, 520, 220);
+
+let candies = [];
+
+for(let i=0;i<60;i++){
+candies.push(create("candy", IMG.candy,
+Math.random()*1200,
+Math.random()*600));
+}
+
+/* 皇冠 */
+let crown = document.createElement("div");
+crown.style.position="absolute";
+crown.style.width="80px";
+crown.style.height="80px";
+crown.style.backgroundImage=`url(${IMG.crown})`;
+crown.style.backgroundSize="cover";
+crown.style.display="none";
+game.appendChild(crown);
+
+let keys = {};
+let speed = 4;
+
+/* 键盘 */
+window.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+/* =========================
+   创建对象
+========================= */
+function create(cls,img,x,y){
+let el=document.createElement("div");
+el.className=cls;
+el.style.backgroundImage=`url(${img})`;
+el.style.left=x+"px";
+el.style.top=y+"px";
+game.appendChild(el);
+return el;
+}
+
+/* =========================
+   主循环
+========================= */
+function loop(){
+
+let x=parseInt(player.style.left);
+let y=parseInt(player.style.top);
+
+/* 移动 */
+if(keys["w"]) y-=speed;
+if(keys["s"]) y+=speed;
+if(keys["a"]) x-=speed;
+if(keys["d"]) x+=speed;
+
+player.style.left=x+"px";
+player.style.top=y+"px";
+
+/* 吃糖果 */
+candies.forEach((c,i)=>{
+if(dist(player,c)<40){
+c.remove();
+candies.splice(i,1);
+score++;
+document.getElementById("score").innerText=score;
+
+/* 星星特效 */
+spark(c.style.left,c.style.top);
+
+/* 解锁皇冠 */
+if(score>=100){
+crown.style.display="block";
+crown.style.left=x+40+"px";
+crown.style.top=y-60+"px";
+}
+}
+});
+
+/* 商店触发 */
+if(dist(player,shop)<80){
+shop.style.transform="scale(1.1)";
+} else {
+shop.style.transform="scale(1)";
+}
+
+requestAnimationFrame(loop);
+}
+loop();
+
+/* =========================
+   特效
+========================= */
+function spark(x,y){
+for(let i=0;i<6;i++){
+let s=document.createElement("div");
+s.style.position="absolute";
+s.style.left=x;
+s.style.top=y;
+s.style.width="10px";
+s.style.height="10px";
+s.style.background="#fff";
+s.style.borderRadius="50%";
+s.style.opacity=1;
+game.appendChild(s);
+
+let vx=(Math.random()-0.5)*6;
+let vy=(Math.random()-0.5)*6;
+
+let t=setInterval(()=>{
+let lx=parseFloat(s.style.left);
+let ly=parseFloat(s.style.top);
+s.style.left=lx+vx+"px";
+s.style.top=ly+vy+"px";
+s.style.opacity-=0.05;
+if(s.style.opacity<=0){
+clearInterval(t);
+s.remove();
+}
+},16);
+}
+}
+
+/* 距离 */
+function dist(a,b){
+let ax=parseInt(a.style.left);
+let ay=parseInt(a.style.top);
+let bx=parseInt(b.style.left);
+let by=parseInt(b.style.top);
+return Math.hypot(ax-bx,ay-by);
+}
+
+/* =========================
+   触控摇杆（简化版）
+========================= */
+let pad=document.getElementById("pad");
+let vx=0,vy=0;
+
+pad.addEventListener("touchmove",(e)=>{
+let t=e.touches[0];
+let r=pad.getBoundingClientRect();
+
+vx=(t.clientX-(r.left+r.width/2))/20;
+vy=(t.clientY-(r.top+r.height/2))/20;
+
+player.style.left=(parseInt(player.style.left)+vx)+"px";
+player.style.top=(parseInt(player.style.top)+vy)+"px";
+});
+</script>
+
+</body>
+</html>
+```
+
+---
+
+# 🎨你需要准备的素材（非常重要）
+
+你只需要做 6 张图，这个游戏就会“质变成 Roblox 级视觉”：
+
+---
+
+## 🌈1. bg.png（糖果世界背景）
+
+建议：
+
+* 粉色+蓝色渐变
+* 糖果城市远景
+* 云朵像棉花糖
+* 有道路 + 商店区
+
+---
+
+## 💖2. girl.png（重点！主角）
+
+要求（非常关键）：
+
+* Q版 2D 小女孩（建议 3头身）
+* 大眼睛 + 腮红
+* 糖果风衣服（粉/白/薄荷）
+* 动作：跑步姿势（最好带2帧动画版本）
+
+👉 可以做两帧：
+
+* girl_1.png（站立）
+* girl_2.png（跑步）
+
+---
+
+## 🍬3. candy.png
+
+* 透明糖果 / 果冻糖 / 星星糖
+* 带高光 + 发光边
+
+---
+
+## 🏪4. shop.png
+
+* 糖果屋（棒棒糖屋顶 / 饼干墙）
+* 门可以发光
+
+---
+
+## 👩5. npc.png
+
+* 糖果店老板 / 糖果精灵
+* 表情友好
+
+---
+
+## 👑6. crown.png
+
+* 金色皇冠 + 发光粒子边缘
+
+---
+
+# 🚀如果你下一步要升级（我可以继续帮你做）
+
+你这个已经可以再进化成：
+
+### 🎮 Roblox级糖果开放世界2.0
+
+* 多地图切换（糖果城 / 巧克力森林 / 冰淇淋雪山）
+* NPC对话系统（可点击聊天）
+* 商店购买系统（换装）
+* 宠物系统（小糖果跟随）
+* 任务系统UI面板
+* 剧情关卡（类似蛋仔派对关卡）
+
+---
+
+如果你说一句：
+
+👉 **“升级成蛋仔派对级完整商业小游戏”**
+
+我可以帮你直接做成：
+
+> ✔ 带UI界面
+> ✔ 带地图系统
+> ✔ 带剧情关卡
+> ✔ 带角色换装
+> ✔ 带存档系统
+
+那就是真正可以上线的版本了。
+}
