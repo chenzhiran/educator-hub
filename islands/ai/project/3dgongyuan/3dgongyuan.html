@@ -812,29 +812,33 @@
         let isElytraEquipped = false;
         let isGliding = false;
         
+        const PLAYER_ANIM_INDEX = {
+            gangnam: 0,
+            run: 2,
+            walk: 3,
+            glide: 4,
+            attack: 5,
+            idle: 6,
+            armDance: 7
+        };
+        const NPC_ANIM_INDEX = {
+            walk: 0,
+            run: 1,
+            attack: 2,
+            slowWalk: 3,
+            death: 4
+        };
+        
         let animActions = {};
-        let playerTestActions = [];
+        let playerActions = [];
         let currentAnimState = 'idle';
         let currentAction = null;
-        let activePlayerTestKey = null;
-        let activePlayerTestAnimIdx = null;
-        let activeNpcTestAnimIdx = null;
+        let activeDanceAnim = null;
         let isRunning = false;
+        let isAttackHeld = false;
+        let isAttackAnimating = false;
+        let attackStartedAt = 0;
         let attackTimer = null;
-        const PLAYER_TEST_KEY_TO_INDEX = {
-            Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3,
-            Digit5: 4, Digit6: 5, Digit7: 6, Digit8: 7,
-            Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3,
-            Numpad5: 4, Numpad6: 5, Numpad7: 6, Numpad8: 7
-        };
-        const NPC_TEST_KEY_TO_INDEX = {
-            KeyU: 0,
-            KeyI: 1,
-            KeyO: 2,
-            KeyJ: 3,
-            KeyK: 4
-        };
-        const NPC_TEST_KEY_LABELS = ['U', 'I', 'O', 'J', 'K'];
         
         const keyStates = {};
         const playerVelocity = new THREE.Vector3();
@@ -1346,19 +1350,19 @@
         function setupInputListeners() {
             document.addEventListener('keydown', (e) => {
                 keyStates[e.code] = true;
-                if (PLAYER_TEST_KEY_TO_INDEX[e.code] !== undefined) {
+                if ((e.code === 'Digit1' || e.code === 'Numpad1') && !e.repeat && !isGameOver) {
                     e.preventDefault();
-                    if (!e.repeat) startPlayerTestAnimation(PLAYER_TEST_KEY_TO_INDEX[e.code], e.code);
+                    togglePlayerDance('gangnam');
                     return;
                 }
-                if (NPC_TEST_KEY_TO_INDEX[e.code] !== undefined) {
+                if ((e.code === 'Digit2' || e.code === 'Numpad2') && !e.repeat && !isGameOver) {
                     e.preventDefault();
-                    if (!e.repeat) switchNpcTestAnimation(NPC_TEST_KEY_TO_INDEX[e.code]);
+                    togglePlayerDance('armDance');
                     return;
                 }
                 if (e.code === 'ShiftLeft') isRunning = true;
                 if (e.code === 'KeyP' && document.pointerLockElement === document.body && !isGameOver) {
-                    triggerAttack();
+                    if (!e.repeat) beginPlayerAttack();
                 }
                 if (e.code === 'KeyB' && !isGameOver) {
                     const shopPanel = document.getElementById('shop-panel');
@@ -1380,7 +1384,7 @@
                             isElytraEquipped = false;
                             // 如果正在滑翔，取消滑翔状态
                             if (isGliding) {
-                                isGliding = false;
+                                finishGlideToIdle();
                             }
                             updateElytraTip();
                             showMessage('🪂 已取消装备鞘翅');
@@ -1395,11 +1399,7 @@
             });
             document.addEventListener('keyup', (e) => {
                 keyStates[e.code] = false;
-                if (PLAYER_TEST_KEY_TO_INDEX[e.code] !== undefined) {
-                    e.preventDefault();
-                    refreshPlayerTestAnimation();
-                    return;
-                }
+                if (e.code === 'KeyP') endPlayerAttack();
                 if (e.code === 'ShiftLeft') isRunning = false;
             });
 
@@ -1431,7 +1431,12 @@
 
             document.addEventListener('mousedown', (event) => {
                 if (event.button === 0 && document.pointerLockElement === document.body && !isGameOver) {
-                    triggerAttack();
+                    beginPlayerAttack();
+                }
+            });
+            document.addEventListener('mouseup', (event) => {
+                if (event.button === 0) {
+                    endPlayerAttack();
                 }
             });
         }
@@ -1492,7 +1497,9 @@
             btnJump.addEventListener('touchend', () => { keyStates['Space'] = false; });
             
             const btnAttack = document.getElementById('btn-attack');
-            btnAttack.addEventListener('touchstart', () => { triggerAttack(); });
+            btnAttack.addEventListener('touchstart', () => { beginPlayerAttack(); });
+            btnAttack.addEventListener('touchend', () => { endPlayerAttack(); });
+            btnAttack.addEventListener('touchcancel', () => { endPlayerAttack(); });
             
             const btnShop = document.getElementById('btn-shop');
             if (btnShop) {
@@ -1536,9 +1543,8 @@
         // ==========================================
         // 攻击逻辑（NPC受击后延迟1秒开始追击）
         // ==========================================
-        function triggerAttack() {
+        function applyPlayerAttackHit() {
             if (isGameOver) return;
-            if (!animActions.attack) return;
             
             if (achievementManager) achievementManager.onAttack();
             
@@ -1563,10 +1569,7 @@
                     }
                     
                     if (npc.hp <= 0) {
-                        npc.isDead = true;
-                        npc.hostileTimer = 0;
-                        scene.remove(npc.character);
-                        npcList.splice(i, 1);
+                        startNpcDeath(npc);
                         playerMoney += 50;
                         updateMoneyUI();
                         if (window._updateShopUI) window._updateShopUI();
@@ -1585,144 +1588,163 @@
                     }
                 }
             }
-            
-            // 播放攻击动画
-            if (currentAction && currentAction !== animActions.attack) {
-                currentAction.fadeOut(0.1);
-            }
-            animActions.attack.stop().reset().fadeIn(0.1).play();
-            currentAction = animActions.attack;
-            if (animLabelSpan) animLabelSpan.innerText = '⚔️ 攻击';
-            
-            if (attackTimer) {
-                clearTimeout(attackTimer);
-                attackTimer = null;
-            }
-            attackTimer = setTimeout(() => {
-                if (!isGameOver) {
-                    if (currentAction === animActions.attack) {
-                        updateAnimationByMovement();
-                    }
-                }
-                attackTimer = null;
-            }, 500);
         }
         
         // ==========================================
         // 动画相关
         // ==========================================
-        function startPlayerTestAnimation(animIdx, keyCode) {
+        function getActionDurationMs(action, fallbackMs = 500) {
+            if (!action || !action.getClip) return fallbackMs;
+            const duration = action.getClip().duration;
+            return duration > 0 ? duration * 1000 : fallbackMs;
+        }
+
+        function togglePlayerDance(animType) {
+            activeDanceAnim = activeDanceAnim === animType ? null : animType;
+            if (!isAttackAnimating && !isGliding) {
+                updateAnimationByMovement();
+            }
+        }
+
+        function finishGlideToIdle() {
+            isGliding = false;
+            activeDanceAnim = null;
+            if (!isAttackAnimating) {
+                switchToAnimation('idle', { force: true });
+            }
+        }
+
+        function beginPlayerAttack() {
             if (isGameOver) return;
-            const newAction = playerTestActions[animIdx];
-            if (!newAction) {
-                console.warn(`Player test animation ${animIdx} is unavailable.`);
-                return;
+            isAttackHeld = true;
+            if (attackTimer) {
+                clearTimeout(attackTimer);
+                attackTimer = null;
             }
-            if (activePlayerTestAnimIdx === animIdx && activePlayerTestKey === keyCode) return;
-
-            activePlayerTestKey = keyCode;
-            activePlayerTestAnimIdx = animIdx;
-            currentAnimState = `player-test-${animIdx}`;
-
-            if (currentAction && currentAction !== newAction) {
-                currentAction.fadeOut(0.1);
-            }
-            newAction.reset().fadeIn(0.1).play();
-            currentAction = newAction;
-            if (animLabelSpan) animLabelSpan.innerText = `Player anim ${animIdx}`;
+            applyPlayerAttackHit();
+            isAttackAnimating = true;
+            switchToAnimation('attack', { force: true, fade: 0.08, reset: true });
+            attackTimer = setTimeout(() => {
+                attackTimer = null;
+                if (isGameOver) return;
+                isAttackAnimating = false;
+                updateAnimationByMovement();
+            }, 500);
         }
 
-        function refreshPlayerTestAnimation() {
-            for (const code of Object.keys(PLAYER_TEST_KEY_TO_INDEX)) {
-                if (keyStates[code]) {
-                    startPlayerTestAnimation(PLAYER_TEST_KEY_TO_INDEX[code], code);
-                    return;
-                }
-            }
-            stopPlayerTestAnimation();
+        function endPlayerAttack() {
+            isAttackHeld = false;
         }
 
-        function stopPlayerTestAnimation() {
-            if (activePlayerTestAnimIdx === null) return;
-            activePlayerTestKey = null;
-            activePlayerTestAnimIdx = null;
-            currentAnimState = '';
-            updateAnimationByMovement();
-        }
-
-        function switchNpcAnimation(npc, animIdx) {
-            if (!npc || npc.isDead || !npc.actions) return;
+        function switchNpcAnimation(npc, animIdx, options = {}) {
+            if (!npc || !npc.actions) return;
+            if (npc.isDead && !options.allowDead) return;
             const newAction = npc.actions[animIdx];
             if (!newAction) return;
-            if (npc.currentAction === newAction && npc.activeAnimIdx === animIdx) return;
+            if (npc.currentAction === newAction && npc.activeAnimIdx === animIdx && !options.force) return;
+
+            const fade = options.fade ?? 0.1;
+            const loop = options.loop ?? THREE.LoopRepeat;
+            const repetitions = loop === THREE.LoopOnce ? 1 : Infinity;
 
             if (npc.currentAction && npc.currentAction !== newAction) {
-                npc.currentAction.fadeOut(0.1);
+                npc.currentAction.fadeOut(fade);
             }
-            newAction.reset().fadeIn(0.1).play();
+            newAction.enabled = true;
+            newAction.setLoop(loop, repetitions);
+            newAction.clampWhenFinished = loop === THREE.LoopOnce;
+            newAction.reset().fadeIn(fade).play();
             npc.currentAction = newAction;
             npc.activeAnimIdx = animIdx;
         }
 
-        function switchNpcTestAnimation(animIdx) {
-            if (isGameOver) return;
-            activeNpcTestAnimIdx = animIdx;
-            npcList.forEach(npc => switchNpcAnimation(npc, animIdx));
-            const keyLabel = NPC_TEST_KEY_LABELS[animIdx] || '';
-            if (keyLabel) showMessage(`NPC anim ${animIdx} (${keyLabel})`);
-            console.log(`NPC test animation ${animIdx} selected.`);
+        function startNpcDeath(npc) {
+            if (!npc || npc.isDead) return;
+            npc.isDead = true;
+            npc.isHostile = false;
+            npc.hostileTimer = 0;
+            npc.velocity.set(0, 0, 0);
+            if (npc.damageTimer) {
+                clearTimeout(npc.damageTimer);
+                npc.damageTimer = null;
+            }
+
+            const deathAction = npc.actions ? npc.actions[NPC_ANIM_INDEX.death] : null;
+            if (deathAction) {
+                switchNpcAnimation(npc, NPC_ANIM_INDEX.death, {
+                    allowDead: true,
+                    force: true,
+                    loop: THREE.LoopOnce,
+                    fade: 0.05
+                });
+            }
+
+            const removeDelay = getActionDurationMs(deathAction, 800);
+            npc.deathTimer = setTimeout(() => {
+                scene.remove(npc.character);
+                npcList = npcList.filter(item => item !== npc);
+                npc.deathTimer = null;
+            }, removeDelay);
         }
 
         function updateAnimationByMovement() {
-            if (activePlayerTestAnimIdx !== null) {
+            if (isAttackAnimating) {
+                switchToAnimation('attack', { reset: false });
                 return;
             }
-            if (currentAction === animActions.attack && attackTimer !== null) {
+            if (isGliding) {
+                activeDanceAnim = null;
+                switchToAnimation('glide');
                 return;
             }
-            const moving = keyStates['KeyW'] || keyStates['KeyS'] || keyStates['KeyA'] || keyStates['KeyD'];
-            if (!moving || !playerOnFloor) {
-                if (currentAnimState !== 'idle') {
-                    currentAnimState = 'idle';
-                    switchToAnimation('idle');
-                }
-            } else {
-                let shouldRun = isRunning && currentStamina > 0 && playerOnFloor;
-                if (shouldRun && currentStamina >= 5) {
-                    if (currentAnimState !== 'run') {
-                        currentAnimState = 'run';
-                        switchToAnimation('run');
-                    }
-                } else {
-                    if (currentAnimState !== 'walk') {
-                        currentAnimState = 'walk';
-                        switchToAnimation('walk');
-                    }
-                }
+            if (activeDanceAnim) {
+                switchToAnimation(activeDanceAnim);
+                return;
             }
+
+            const moving = isMovingInput() && playerOnFloor;
+            if (!moving) {
+                switchToAnimation('idle');
+                return;
+            }
+
+            const shouldRun = isRunning && currentStamina > 0 && playerOnFloor;
+            switchToAnimation(shouldRun ? 'run' : 'walk');
         }
         
-        function switchToAnimation(animType, force = true) {
+        function switchToAnimation(animType, options = {}) {
             if (!mixer) return;
-            let newAction = null;
-            if (animType === 'idle') newAction = animActions.idle;
-            else if (animType === 'walk') newAction = animActions.walk;
-            else if (animType === 'run') newAction = animActions.run;
-            else return;
-            
+            const newAction = animActions[animType];
             if (!newAction) return;
-            if (currentAction === newAction && !force) return;
+
+            const force = options.force === true;
+            const fade = options.fade ?? 0.15;
+            const reset = options.reset !== false;
+            const loop = options.loop ?? THREE.LoopRepeat;
+            const repetitions = loop === THREE.LoopOnce ? 1 : Infinity;
+            if (currentAction === newAction && currentAnimState === animType && !force) return;
             
-            if (currentAction) {
-                currentAction.fadeOut(0.15);
+            if (currentAction && currentAction !== newAction) {
+                currentAction.fadeOut(fade);
             }
-            newAction.reset().fadeIn(0.15).play();
+            newAction.enabled = true;
+            newAction.setLoop(loop, repetitions);
+            newAction.clampWhenFinished = loop === THREE.LoopOnce;
+            if (reset || currentAction !== newAction) newAction.reset();
+            newAction.fadeIn(fade).play();
             currentAction = newAction;
+            currentAnimState = animType;
             
-            let label = '待机';
-            if (animType === 'walk') label = '🚶 走路';
-            else if (animType === 'run') label = '🏃 跑步';
-            if (animLabelSpan) animLabelSpan.innerText = label;
+            const labels = {
+                idle: 'Idle',
+                walk: 'Walk',
+                run: 'Run',
+                attack: 'Attack',
+                glide: 'Glide',
+                gangnam: 'Gangnam Style',
+                armDance: 'Arm Dance'
+            };
+            if (animLabelSpan) animLabelSpan.innerText = labels[animType] || animType;
         }
         
         // ==========================================
@@ -1974,10 +1996,11 @@
             clips.forEach((clip, idx) => {
                 actions[idx] = npcMixer.clipAction(clip);
             });
-            const walkIdx = 0;
+            const walkIdx = NPC_ANIM_INDEX.walk;
             let currentAction = null;
             if (actions[walkIdx]) {
                 currentAction = actions[walkIdx];
+                currentAction.setLoop(THREE.LoopRepeat, Infinity);
                 currentAction.play();
             }
             
@@ -2015,9 +2038,6 @@
                 lastAttackTime: 0,
                 hostileTimer: 0,
             };
-            if (activeNpcTestAnimIdx !== null) {
-                switchNpcAnimation(npcObj, activeNpcTestAnimIdx);
-            }
             npcList.push(npcObj);
             return npcObj;
         }
@@ -2112,50 +2132,23 @@
                 mixer = new THREE.AnimationMixer(character);
                 
                 if (character.animations && character.animations.length > 0) {
-                    playerTestActions = character.animations.map(clip => mixer.clipAction(clip));
+                    playerActions = character.animations.map(clip => mixer.clipAction(clip));
                     console.log("=== 玩家动画列表 (" + character.animations.length + "个) ===");
                     character.animations.forEach((clip, idx) => {
                         console.log(`  玩家动画[${idx}] 名称: "${clip.name}", 时长: ${clip.duration.toFixed(2)}s`);
                     });
                     
-                    const names = character.animations.map(c => (c.name || '').toLowerCase());
-                    const isLocalFbx = names.includes('punch_combo') && names.includes('idle_11');
-                    const isOnlineFbx = names.some(n => n.includes('thoughtful')) || names.some(n => n.includes('character_output'));
-                    
-                    let _idle, _walk, _run, _attack;
-                    
-                    if (isLocalFbx) {
-                        _idle   = names.indexOf('walking');
-                        _walk   = names.indexOf('punch_combo');
-                        _run    = names.indexOf('idle_11');
-                        _attack = names.indexOf('walking_2');
-                        console.log("  检测到本地版FBX");
-                    } else if (isOnlineFbx) {
-                        _idle   = names.indexOf('character_output.fbx');
-                        _walk   = names.indexOf('walking');
-                        _run    = names.indexOf('running');
-                        _attack = names.indexOf('walking_2');
-                        console.log("  检测到线上版FBX");
-                    } else {
-                        _idle   = findAnimByKeyword(character.animations, ['idle', 'tpose', 'stand', 'walking']);
-                        _walk   = findAnimByKeyword(character.animations, ['walk'], [_idle]);
-                        _run    = findAnimByKeyword(character.animations, ['run', 'walking_2'], [_idle, _walk]);
-                        _attack = findAnimByKeyword(character.animations, ['attack', 'punch', 'thoughtful'], [_idle, _walk, _run]);
-                        console.log("  使用通用关键词匹配");
-                    }
-                    
-                    console.log(`  最终: idle=${_idle}, walk=${_walk}, run=${_run}, attack=${_attack}`);
-                    
-                    animActions.idle  = mixer.clipAction(character.animations[_idle]);
-                    animActions.walk  = mixer.clipAction(character.animations[_walk]);
-                    animActions.run   = mixer.clipAction(character.animations[_run]);
-                    animActions.attack= mixer.clipAction(character.animations[_attack]);
+                    animActions.gangnam = playerActions[PLAYER_ANIM_INDEX.gangnam];
+                    animActions.run = playerActions[PLAYER_ANIM_INDEX.run];
+                    animActions.walk = playerActions[PLAYER_ANIM_INDEX.walk];
+                    animActions.glide = playerActions[PLAYER_ANIM_INDEX.glide];
+                    animActions.attack = playerActions[PLAYER_ANIM_INDEX.attack];
+                    animActions.idle = playerActions[PLAYER_ANIM_INDEX.idle];
+                    animActions.armDance = playerActions[PLAYER_ANIM_INDEX.armDance];
+                    console.log(`  动画映射: gangnam=${PLAYER_ANIM_INDEX.gangnam}, run=${PLAYER_ANIM_INDEX.run}, walk=${PLAYER_ANIM_INDEX.walk}, glide=${PLAYER_ANIM_INDEX.glide}, attack=${PLAYER_ANIM_INDEX.attack}, idle=${PLAYER_ANIM_INDEX.idle}, armDance=${PLAYER_ANIM_INDEX.armDance}`);
                     
                     if (animActions.idle) {
-                        currentAction = animActions.idle;
-                        currentAction.play();
-                        currentAnimState = 'idle';
-                        if (animLabelSpan) animLabelSpan.innerText = '待机';
+                        switchToAnimation('idle', { force: true });
                     }
                 } else {
                     console.warn("模型无动画");
@@ -2241,6 +2234,8 @@
                     const dx = playerPos.x - npc.character.position.x;
                     const dz = playerPos.z - npc.character.position.z;
                     const dist = Math.sqrt(dx*dx + dz*dz);
+                    const inAttackRange = dist < NPC_ATTACK_RANGE;
+                    switchNpcAnimation(npc, inAttackRange ? NPC_ANIM_INDEX.attack : NPC_ANIM_INDEX.walk);
                     if (dist > 0.5) {
                         const speed = NPC_MOVE_SPEED * 1.2;
                         const normX = dx / dist;
@@ -2248,16 +2243,16 @@
                         moveX = normX * speed * deltaTime;
                         moveZ = normZ * speed * deltaTime;
                         npc.direction.set(normX, 0, normZ);
-                        
-                        if (dist < NPC_ATTACK_RANGE) {
-                            const now = performance.now() / 1000;
-                            if (now - npc.lastAttackTime >= NPC_ATTACK_COOLDOWN) {
-                                npc.lastAttackTime = now;
-                                applyDamage(NPC_ATTACK_DAMAGE);
-                            }
+                    }
+                    if (inAttackRange) {
+                        const now = performance.now() / 1000;
+                        if (now - npc.lastAttackTime >= NPC_ATTACK_COOLDOWN) {
+                            npc.lastAttackTime = now;
+                            applyDamage(NPC_ATTACK_DAMAGE);
                         }
                     }
                 } else {
+                    switchNpcAnimation(npc, NPC_ANIM_INDEX.walk);
                     const hSpeed = NPC_MOVE_SPEED;
                     moveX = npc.direction.x * hSpeed * deltaTime;
                     moveZ = npc.direction.z * hSpeed * deltaTime;
@@ -2398,14 +2393,16 @@
             // 如果在空中，且拥有并装备鞘翅，且未在滑翔状态，则进入滑翔
             else if (!playerOnFloor && !isGameOver && hasElytra && isElytraEquipped && keyStates['Space'] && !isGliding) {
                 isGliding = true;
+                activeDanceAnim = null;
                 keyStates['Space'] = false; // 防止按住连触发
+                switchToAnimation('glide', { force: true });
                 // 解锁成就
                 if (achievementManager) achievementManager.onGlide();
                 showMessage('🪂 进入滑翔模式');
             }
             // 如果在滑翔状态，再按空格取消滑翔
             else if (isGliding && keyStates['Space'] && !isGameOver) {
-                isGliding = false;
+                finishGlideToIdle();
                 keyStates['Space'] = false;
                 showMessage('🪂 退出滑翔模式');
             }
@@ -2448,7 +2445,7 @@
             if (!wasOnGround && playerOnFloor) {
                 if (isGliding) {
                     // 滑翔落地无伤害，退出滑翔
-                    isGliding = false;
+                    finishGlideToIdle();
                     resetFallTracking();
                 } else {
                     processFallDamage(playerCollider.start.y);
@@ -2476,9 +2473,7 @@
                 );
             }
             
-            if (currentAction !== animActions.attack || attackTimer === null) {
-                updateAnimationByMovement();
-            }
+            updateAnimationByMovement();
             
             if (character) {
                 character.position.copy(playerCollider.start);
