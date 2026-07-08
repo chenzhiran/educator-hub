@@ -5,23 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>游戏开发 3：终极指南</title>
     <style>
-        /* --- 1. 基础设置 --- */
         :root {
-            --bg-matrix: #0d0221;      /* 矩阵黑紫 */
-            --editor-bg: #191b2e;      /* 编辑器深蓝 */
-            --screen-bg: #f0f3f8;      /* 屏幕白 */
-            
-            /* 颜色主题 */
-            --c-logic: #ff0055;        /* 逻辑红 */
-            --c-data: #00e5ff;         /* 数据蓝 */
-            --c-phys: #ffd300;         /* 物理黄 */
-            --c-game: #00ff9d;         /* 游戏绿 */
-            --c-code: #a562e8;         /* 代码紫 */
-            
+            --bg-matrix: #0d0221;
+            --editor-bg: #191b2e;
+            --screen-bg: #f0f3f8;
+            --c-logic: #ff0055;
+            --c-data: #00e5ff;
+            --c-phys: #ffd300;
+            --c-game: #00ff9d;
+            --c-code: #a562e8;
             --text-main: #2d3436;
             --text-light: #dfe6e9;
-            
-            /* 代码高亮 */
             --code-box-bg: #282c34;
             --tok-kw: #c678dd;
             --tok-func: #61afef;
@@ -31,554 +25,416 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             background-color: var(--bg-matrix);
-            /* 动态背景 */
             background-image: 
-                linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .03) 25%, rgba(255, 255, 255, .03) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .03) 75%, rgba(255, 255, 255, .03) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .03) 25%, rgba(255, 255, 255, .03) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .03) 75%, rgba(255, 255, 255, .03) 76%, transparent 77%, transparent);
+                linear-gradient(0deg, transparent 24%, rgba(255,255,255,.03) 25%, rgba(255,255,255,.03) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.03) 75%, rgba(255,255,255,.03) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255,255,255,.03) 25%, rgba(255,255,255,.03) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.03) 75%, rgba(255,255,255,.03) 76%, transparent 77%, transparent);
             background-size: 50px 50px;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            user-select: none;
-            color: var(--text-main);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; user-select: none; color: var(--text-main);
         }
 
-        /* 漂浮的像素块 */
-        .pixel {
-            position: absolute; width: 10px; height: 10px; background: rgba(255,255,255,0.2);
-            animation: floatUp 10s infinite linear;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-            20% { opacity: 0.5; }
-            80% { opacity: 0.5; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
-        }
+        .pixel { position: absolute; width: 10px; height: 10px; background: rgba(255,255,255,0.2); animation: floatUp 10s infinite linear; }
+        @keyframes floatUp { 0%{transform:translateY(110vh) rotate(0deg);opacity:0}20%{opacity:.5}80%{opacity:.5}100%{transform:translateY(-10vh) rotate(360deg);opacity:0} }
 
-        /* --- 2. 舞台布局 --- */
-        .stage {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 40px;
-            width: 98vw;
-            max-width: 1400px;
-            position: relative;
-            z-index: 10;
-        }
+        .stage { display:flex; align-items:center; justify-content:center; gap:40px; width:98vw; max-width:1400px; position:relative; z-index:10; }
 
-        /* --- 3. 像素箭头按钮 (外部) --- */
-        .nav-btn {
-            width: 80px;
-            height: 80px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            transition: transform 0.1s;
-            filter: drop-shadow(0 5px 0px rgba(0,0,0,0.5));
-        }
-        
-        /* 像素箭头绘制 */
-        .arrow-pixel {
-            width: 60px; height: 60px;
-            background: white;
-            clip-path: polygon(40% 0%, 40% 20%, 100% 20%, 100% 80%, 40% 80%, 40% 100%, 0% 50%);
-        }
-        .btn-prev .arrow-pixel { background: var(--c-logic); transform: rotate(0deg); }
-        .btn-next .arrow-pixel { background: var(--c-game); transform: rotate(180deg); }
+        .nav-btn { width:80px; height:80px; background:transparent; border:none; cursor:pointer; position:relative; transition:transform .1s; filter:drop-shadow(0 5px 0px rgba(0,0,0,.5)); }
+        .arrow-pixel { width:60px; height:60px; clip-path:polygon(40% 0%,40% 20%,100% 20%,100% 80%,40% 80%,40% 100%,0% 50%); }
+        .btn-prev .arrow-pixel { background:var(--c-logic); }
+        .btn-next .arrow-pixel { background:var(--c-game); transform:rotate(180deg); }
+        .nav-btn:hover { transform:scale(1.1); }
+        .nav-btn:active { transform:scale(.95) translateY(5px); filter:drop-shadow(0 0 0 rgba(0,0,0,0)); }
+        .disabled { opacity:.3; filter:grayscale(1); pointer-events:none; }
 
-        .nav-btn:hover { transform: scale(1.1); }
-        .nav-btn:active { transform: scale(0.95) translateY(5px); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
-        .disabled { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+        .editor-container { width:960px; height:640px; background:var(--editor-bg); border-radius:15px; box-shadow:0 0 0 4px #2c3e50,0 20px 50px rgba(0,0,0,.6); position:relative; overflow:hidden; display:flex; flex-direction:column; }
+        .tab-bar { height:40px; background:#21252b; display:flex; align-items:center; padding-left:10px; border-bottom:1px solid #181a1f; }
+        .tab { padding:5px 20px; color:#abb2bf; font-family:monospace; font-size:14px; background:#282c34; border-radius:5px 5px 0 0; margin-right:5px; display:flex; align-items:center; gap:8px; }
+        .dot { width:10px; height:10px; border-radius:50%; background:var(--c-game); }
+        .progress-line { height:4px; background:#333; width:100%; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--c-logic),var(--c-game)); width:5%; transition:width .3s; }
 
-        /* --- 4. 编辑器容器 --- */
-        .editor-container {
-            width: 960px;
-            height: 640px;
-            background: var(--editor-bg);
-            border-radius: 15px;
-            box-shadow: 
-                0 0 0 4px #2c3e50,
-                0 20px 50px rgba(0,0,0,0.6);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+        .slide { display:none; flex:1; padding:30px 50px; flex-direction:column; animation:fadeIn .5s ease; overflow-y:auto; background:var(--screen-bg); position:relative; }
+        .slide.active { display:flex; }
+        @keyframes fadeIn { 0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)} }
 
-        /* 顶部标签栏 */
-        .tab-bar {
-            height: 40px; background: #21252b; display: flex; align-items: center; padding-left: 10px;
-            border-bottom: 1px solid #181a1f;
-        }
-        .tab {
-            padding: 5px 20px; color: #abb2bf; font-family: monospace; font-size: 14px;
-            background: #282c34; border-radius: 5px 5px 0 0; margin-right: 5px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-game); }
-        
-        /* 进度条 */
-        .progress-line {
-            height: 4px; background: #333; width: 100%;
-        }
-        .progress-fill {
-            height: 100%; background: linear-gradient(90deg, var(--c-logic), var(--c-game)); width: 5%; transition: width 0.3s;
-        }
+        .header { display:flex; align-items:center; margin-bottom:15px; border-bottom:3px solid #ddd; padding-bottom:8px; }
+        .icon { font-size:36px; margin-right:12px; }
+        h1 { margin:0; color:#2c3e50; font-size:28px; letter-spacing:1px; font-weight:800; }
+        .page-badge { margin-left:auto; font-family:monospace; background:#2d3436; color:white; padding:2px 10px; border-radius:4px; font-size:13px; }
 
-        /* 幻灯片区域 */
-        .slide {
-            display: none;
-            flex: 1;
-            padding: 40px 60px;
-            flex-direction: column;
-            animation: fadeIn 0.5s ease;
-            overflow-y: auto;
-            background: var(--screen-bg);
-            position: relative;
-        }
-        .slide.active { display: flex; }
+        .layout { display:flex; gap:25px; flex:1; min-height:0; }
+        .col-text { flex:1.1; font-size:16px; line-height:1.5; color:#2d3436; overflow-y:auto; }
+        .col-visual { flex:0.9; background:#fff; border:2px solid #dfe6e9; border-radius:10px; display:flex; justify-content:center; align-items:center; position:relative; overflow:hidden; box-shadow:inset 0 0 20px rgba(0,0,0,.05); flex-direction:column; padding:10px; }
 
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        .code-box { background:var(--code-box-bg); color:#abb2bf; padding:12px; border-radius:6px; font-family:'Consolas',monospace; font-size:13px; margin-top:10px; border-left:4px solid var(--c-code); box-shadow:0 4px 10px rgba(0,0,0,.1); line-height:1.4; overflow-x:auto; white-space:pre; }
+        .kw { color:var(--tok-kw); font-weight:bold; }
+        .f { color:var(--tok-func); }
+        .s { color:var(--tok-str); }
+        .n { color:var(--tok-num); }
+        .c { color:var(--tok-cm); font-style:italic; }
 
-        /* 内容布局 */
-        .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #ddd;
-            padding-bottom: 10px;
-        }
-        .icon { font-size: 40px; margin-right: 15px; }
-        h1 { margin: 0; color: #2c3e50; font-size: 32px; letter-spacing: 1px; font-weight: 800; }
-        .page-badge { margin-left: auto; font-family: monospace; background: #2d3436; color: white; padding: 2px 10px; border-radius: 4px; }
+        .card { background:#fff; border-left:4px solid #aaa; padding:8px 12px; margin-bottom:8px; border-radius:0 5px 5px 0; font-size:14px; box-shadow:2px 2px 5px rgba(0,0,0,.05); }
+        .card.logic { border-color:var(--c-logic); background:#fff0f3; color:#c2185b; }
+        .card.data { border-color:var(--c-data); background:#e0f7fa; color:#006064; }
+        .card.phys { border-color:var(--c-phys); background:#fff8e1; color:#f57f17; }
+        .card.game { border-color:var(--c-game); background:#e8f5e9; color:#1b5e20; }
 
-        .layout { display: flex; gap: 30px; height: 100%; }
-        .col-text { flex: 1.1; font-size: 18px; line-height: 1.6; color: #2d3436; }
-        .col-visual { 
-            flex: 0.9; 
-            background: #fff;
-            border: 2px solid #dfe6e9; 
-            border-radius: 10px;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
-        }
+        .rps-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:13px; width:100%; }
+        .rps-cell { background:#f8f9fa; padding:6px 10px; border-radius:6px; text-align:center; border:2px solid #ddd; font-weight:bold; }
+        .rps-arrow { color:var(--c-logic); font-size:20px; text-align:center; }
 
-        /* 代码块 */
-        .code-box {
-            background: var(--code-box-bg);
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 6px;
-            font-family: 'Consolas', monospace;
-            font-size: 15px;
-            margin-top: 15px;
-            border-left: 4px solid var(--c-code);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        
-        .kw { color: var(--tok-kw); font-weight: bold; } 
-        .f { color: var(--tok-func); } 
-        .s { color: var(--tok-str); } 
-        .n { color: var(--tok-num); } 
-        .c { color: var(--tok-cm); font-style: italic; font-size: 0.9em; } 
+        .chain-box { display:flex; align-items:center; gap:4px; flex-wrap:wrap; justify-content:center; font-size:14px; font-weight:bold; margin:10px 0; }
+        .chain-item { background:#fff; border:2px solid var(--c-logic); border-radius:8px; padding:4px 10px; }
+        .chain-arrow { color:var(--c-logic); font-size:16px; }
 
-        /* 卡片 */
-        .card {
-            background: #fff;
-            border-left: 4px solid #aaa;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: 0 5px 5px 0;
-            font-size: 16px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
-        }
-        .card.logic { border-color: var(--c-logic); background: #fff0f3; color: #c2185b; }
-        .card.data { border-color: var(--c-data); background: #e0f7fa; color: #006064; }
-        .card.phys { border-color: var(--c-phys); background: #fff8e1; color: #f57f17; }
-        .card.game { border-color: var(--c-game); background: #e8f5e9; color: #1b5e20; }
+        .grid-demo { width:100%; height:100%; position:relative; background-image:linear-gradient(#eee 1px,transparent 1px),linear-gradient(90deg,#eee 1px,transparent 1px); background-size:20px 20px; cursor:crosshair; }
+        .coord-label { position:absolute; top:10px; left:10px; background:rgba(0,0,0,.8); color:white; padding:2px 5px; border-radius:4px; font-family:monospace; font-size:12px; }
 
-        /* --- 5. 视觉化组件 --- */
-        
-        /* 1. 事件驱动 - 门铃 */
-        .door-scene { display: flex; flex-direction: column; align-items: center; }
-        .door { width: 80px; height: 120px; background: #795548; border: 4px solid #3e2723; transition: transform 0.5s; transform-origin: left; }
-        .door.open { transform: perspective(500px) rotateY(-60deg); }
-        .bell-btn { margin-top: 20px; padding: 5px 15px; background: var(--c-logic); color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .ball-box { width:100%; height:100%; position:relative; background:#222; }
+        .ball { width:30px; height:30px; background:var(--c-phys); border-radius:50%; position:absolute; top:50%; left:10%; transition:left 1s cubic-bezier(.15,.82,.85,.16); }
+        .wall { width:10px; height:100px; background:#fff; position:absolute; top:50%; right:20%; transform:translateY(-50%); }
+        .collision-boom { position:absolute; font-size:40px; right:18%; top:45%; opacity:0; transform:scale(0); transition:all .2s; }
 
-        /* 7. 坐标系 - 网格 */
-        .grid-demo { width: 100%; height: 100%; position: relative; background-image: linear-gradient(#eee 1px, transparent 1px), linear-gradient(90deg, #eee 1px, transparent 1px); background-size: 20px 20px; cursor: crosshair; }
-        .coord-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
-        
-        /* 10. 碰撞检测 - 小球 */
-        .ball-box { width: 100%; height: 100%; position: relative; background: #222; }
-        .ball { width: 30px; height: 30px; background: var(--c-phys); border-radius: 50%; position: absolute; top: 50%; left: 10%; transition: left 1s cubic-bezier(.15,.82,.85,.16); }
-        .wall { width: 10px; height: 100px; background: #fff; position: absolute; top: 50%; right: 20%; transform: translateY(-50%); }
-        .collision-boom { position: absolute; font-size: 40px; right: 18%; top: 45%; opacity: 0; transform: scale(0); transition: all 0.2s; }
-        
-        /* 11. 随机数 - 骰子 */
-        .dice-box { display: flex; gap: 20px; align-items: center; }
-        .dice { width: 60px; height: 60px; background: white; border: 2px solid #333; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; }
-        
-        /* 通用动画 */
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .anim-pulse { animation: pulse 1s infinite; }
+        .dice-box { display:flex; gap:15px; align-items:center; }
+        .dice { width:50px; height:50px; background:white; border:2px solid #333; border-radius:8px; display:flex; justify-content:center; align-items:center; font-size:24px; font-weight:bold; }
 
-        /* 按钮微调 */
-        .demo-btn { padding: 5px 15px; background: #2d3436; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        .demo-btn:hover { opacity: 0.8; }
+        @keyframes pulse { 0%{transform:scale(1)}50%{transform:scale(1.1)} }
+        .anim-pulse { animation:pulse 1s infinite; }
+        @keyframes spin { 100%{transform:rotate(360deg)} }
+        @keyframes runRight { from{left:-30px}to{left:calc(100% + 30px)} }
 
+        .demo-btn { padding:4px 12px; background:#2d3436; color:white; border:none; border-radius:4px; cursor:pointer; margin-top:8px; font-size:13px; }
+        .demo-btn:hover { opacity:.8; }
+
+        .param-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px; }
+        .param-item { background:#f8f9fa; padding:6px 8px; border-radius:6px; border-left:3px solid var(--c-game); font-family:monospace; }
+
+        .wrap-demo { width:100%; height:100%; position:relative; background:#1a472a; border:3px dashed #ffd300; overflow:hidden; }
+        .wrap-dot { width:20px; height:20px; background:var(--c-logic); border-radius:50%; position:absolute; transition:all .5s; }
+
+        .parkour-layer { display:flex; align-items:center; gap:4px; padding:4px 0; }
+        .pk-block { width:30px; height:30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+
+        .level-badge { display:inline-block; background:linear-gradient(135deg,var(--c-code),#7c4dff); color:white; padding:1px 8px; border-radius:10px; font-size:11px; font-weight:bold; margin-left:8px; }
+
+        .concept-tag { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:bold; margin:2px; }
+        .tag-event { background:#fff0f3; color:var(--c-logic); border:1px solid var(--c-logic); }
+        .tag-pos { background:#fff8e1; color:#f57f17; border:1px solid var(--c-phys); }
+        .tag-score { background:#e8f5e9; color:#1b5e20; border:1px solid var(--c-game); }
+        .tag-data { background:#e0f7fa; color:#006064; border:1px solid var(--c-data); }
     </style>
 </head>
 <body>
 
-<!-- 背景像素生成 -->
 <script>
-    for(let i=0; i<20; i++) {
-        let p = document.createElement('div');
-        p.className = 'pixel';
-        p.style.left = Math.random() * 100 + 'vw';
-        p.style.animationDelay = Math.random() * 10 + 's';
-        document.body.appendChild(p);
-    }
+    for(let i=0;i<20;i++){let p=document.createElement('div');p.className='pixel';p.style.left=Math.random()*100+'vw';p.style.animationDelay=Math.random()*10+'s';document.body.appendChild(p);}
 </script>
 
 <div class="stage">
-    <!-- 左按钮 -->
-    <button class="nav-btn btn-prev" id="btnPrev" onclick="moveSlide(-1)">
-        <div class="arrow-pixel"></div>
-    </button>
+    <button class="nav-btn btn-prev" id="btnPrev" onclick="moveSlide(-1)"><div class="arrow-pixel"></div></button>
 
-    <!-- 编辑器容器 -->
     <div class="editor-container">
         <div class="tab-bar">
-            <div class="tab"><div class="dot"></div> GAME_DEV_3.py</div>
+            <div class="tab"><div class="dot"></div> GAME_DEV_3.cpp</div>
         </div>
         <div class="progress-line"><div class="progress-fill" id="progressBar"></div></div>
 
-        <!-- Slide 1: 封面 -->
-        <div class="slide active" style="justify-content: center; align-items: center; text-align: center;">
-            <div style="font-size: 100px; margin-bottom: 20px;" class="anim-pulse">🎮</div>
-            <h1 style="font-size: 48px; color: #2c3e50;">游戏开发 3：终极指南</h1>
-            <h2 style="font-size: 24px; color: var(--c-code); font-weight: normal;">Game Development 3</h2>
-            <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; width: 80%;">
-                <div class="card logic">🔴 核心逻辑 (Logic)</div>
-                <div class="card data">🔵 数据管理 (Data)</div>
-                <div class="card phys">🟡 物理与空间 (Physics)</div>
-                <div class="card game">🟢 游戏设计 (Design)</div>
+        <!-- ==================== Slide 1: 封面 ==================== -->
+        <div class="slide active" style="justify-content:center;align-items:center;text-align:center;">
+            <div style="font-size:100px;margin-bottom:20px" class="anim-pulse">🎮</div>
+            <h1 style="font-size:44px;color:#2c3e50">游戏开发 3：终极指南</h1>
+            <h2 style="font-size:22px;color:var(--c-code);font-weight:normal;margin:5px 0">Game Development 3 · C++ Edition</h2>
+            <div style="margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:15px;text-align:left;width:80%">
+                <div class="card logic">🔴 事件驱动 · 函数 · 条件 · 循环</div>
+                <div class="card data">🔵 变量 · 对象属性 · 数据持久化</div>
+                <div class="card phys">🟡 坐标系 · 运动 · 碰撞检测</div>
+                <div class="card game">🟢 游戏循环 · 随机数 · 平衡设计</div>
             </div>
+            <div style="margin-top:20px;color:#888;font-size:14px">共10个关卡 + 1个创意项目 · 按 ← → 翻页</div>
         </div>
 
-        <!-- Slide 2: 事件驱动 (Logic) -->
+        <!-- ==================== Slide 2: 关卡1 方形规则 (上) ==================== -->
         <div class="slide">
             <div class="header">
                 <div class="icon">🔔</div>
-                <h1 style="color: var(--c-logic);">1. 事件驱动编程</h1>
+                <h1 style="color:var(--c-logic)">关卡1：方形规则</h1>
+                <span class="level-badge">update事件</span>
                 <div class="page-badge">Logic</div>
             </div>
             <div class="layout">
                 <div class="col-text">
                     <div class="card logic">
-                        <b>事件 (Event)</b>：门铃响了。<br>
-                        <b>处理器 (Handler)</b>：跑去开门。
+                        <b>核心概念：</b>"update"事件 — 每帧触发一次（约30次/秒），替代 while-true 循环！
                     </div>
-                    <p>程序不是从头跑到尾，而是<b>“等待事情发生”</b>。</p>
-                    <div class="code-box">
-                        <span class="kw">def</span> <span class="f">onUpdate</span>(event):<br>
-                        &nbsp;&nbsp;<span class="c"># 每一帧都会运行的代码</span><br>
-                        &nbsp;&nbsp;<span class="f">checkEnemies</span>()
-                    </div>
+                    <p><b>石头剪刀布</b>：每种单位只攻击特定类型的敌人。</p>
+                    <div class="code-box"><span class="c">// 判断 who 是否应该攻击 target</span>
+<span class="kw">auto</span> <span class="f">shouldAttack</span>(<span class="kw">auto</span> who, <span class="kw">auto</span> target) {
+    <span class="kw">if</span> (who.type == <span class="s">"scout"</span>
+        && target.type == <span class="s">"soldier"</span>) {
+        <span class="kw">return</span> <span class="n">true</span>;
+    }
+    <span class="kw">if</span> (who.type == <span class="s">"soldier"</span>
+        && target.type == <span class="s">"thrower"</span>) {
+        <span class="kw">return</span> <span class="n">true</span>;
+    }
+    <span class="c">// ... thrower→archer, archer→scout</span>
+}</div>
                 </div>
                 <div class="col-visual">
-                    <div class="door-scene">
-                        <div class="door" id="demoDoor"></div>
-                        <button class="bell-btn" onclick="ringDoor()">🔔 按门铃 (Event)</button>
+                    <div style="font-size:14px;font-weight:bold;margin-bottom:10px;color:var(--c-logic)">克制链 🔄</div>
+                    <div class="chain-box">
+                        <div class="chain-item">🏃 scout</div>
+                        <div class="chain-arrow">→</div>
+                        <div class="chain-item">⚔️ soldier</div>
                     </div>
-                    <script>
-                        function ringDoor() {
-                            const d = document.getElementById('demoDoor');
-                            d.classList.add('open');
-                            setTimeout(() => d.classList.remove('open'), 1000);
-                        }
-                    </script>
+                    <div style="display:flex;justify-content:space-between;width:80%;font-size:20px;color:var(--c-logic)">
+                        <span>↑</span><span>↓</span>
+                    </div>
+                    <div class="chain-box">
+                        <div class="chain-item">🏹 archer</div>
+                        <div class="chain-arrow">←</div>
+                        <div class="chain-item">💣 thrower</div>
+                    </div>
+                    <div style="margin-top:15px;font-size:12px;color:#888;text-align:center">
+                        每种单位只攻击自己克制的类型<br>
+                        遇到其他敌人？→ 反方向撤退！
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 3: 函数 (Logic) -->
+        <!-- ==================== Slide 3: 关卡1 方形规则 (下) ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">📜</div>
-                <h1 style="color: var(--c-logic);">2. 函数 (Functions)</h1>
+                <div class="icon">🔔</div>
+                <h1 style="color:var(--c-logic)">关卡1：update事件处理</h1>
+                <span class="level-badge">事件绑定</span>
                 <div class="page-badge">Logic</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>函数就像厨房里的<b>食谱</b>！写好步骤，下次直接用。</p>
-                    <div class="code-box">
-                        <span class="kw">def</span> <span class="f">shouldAttack</span>(who, target):<br>
-                        &nbsp;&nbsp;<span class="kw">if</span> who.type == <span class="s">"scout"</span>:<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="tok-kw">True</span>
-                    </div>
-                    <div class="card logic">
-                        <b>Def</b>: 定义新技能。<br>
-                        <b>Return</b>: 给出答案。
+                    <p><b>单位的update处理器</b>：每帧检查并行动。</p>
+                    <div class="code-box"><span class="kw">auto</span> <span class="f">onUpdateUnit</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> unit = event.target;
+    <span class="kw">auto</span> enemy = unit.<span class="f">findNearestEnemy</span>();
+    <span class="kw">if</span> (enemy && <span class="f">shouldAttack</span>(unit, enemy)) {
+        unit.<span class="f">attack</span>(enemy);
+    } <span class="kw">else</span> {
+        <span class="c">// 没有合适目标就反向移动</span>
+        <span class="kw">if</span> (unit.team == <span class="s">"ogres"</span>) {
+            unit.<span class="f">moveXY</span>(unit.pos.x - <span class="n">3</span>, unit.pos.y);
+        } <span class="kw">else</span> {
+            unit.<span class="f">moveXY</span>(unit.pos.x + <span class="n">3</span>, unit.pos.y);
+        }
+    }
+    <span class="c">// 屏幕外的单位直接销毁</span>
+    <span class="kw">if</span> (unit.pos.x > <span class="n">80</span> || unit.pos.x < <span class="n">0</span>)
+        unit.<span class="f">destroy</span>();
+}</div>
+                    <div class="card logic" style="margin-top:8px">
+                        <b>绑定事件：</b><br>
+                        <code>game.setActionFor("scout", "update", onUpdateUnit);</code>
                     </div>
                 </div>
                 <div class="col-visual">
-                    <div style="text-align: center; font-size: 60px;">
-                        📝 ➡️ 🍳
+                    <div style="text-align:center;width:100%">
+                        <div style="font-size:14px;font-weight:bold;color:#2c3e50;margin-bottom:15px">⚡ update事件 vs while循环</div>
+                        <div style="display:flex;gap:10px;justify-content:center">
+                            <div style="background:#fff0f3;padding:10px;border-radius:8px;flex:1;font-size:12px;border:2px solid var(--c-logic)">
+                                <div style="font-weight:bold;margin-bottom:5px">❌ 旧方式</div>
+                                <code>while(true) {<br>&nbsp;&nbsp;checkEnemy();<br>}</code>
+                            </div>
+                            <div style="background:#e8f5e9;padding:10px;border-radius:8px;flex:1;font-size:12px;border:2px solid var(--c-game)">
+                                <div style="font-weight:bold;margin-bottom:5px">✅ 新方式</div>
+                                <code>game.setActionFor(<br>&nbsp;&nbsp;"scout",<br>&nbsp;&nbsp;"update",<br>&nbsp;&nbsp;onUpdateUnit);</code>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;font-size:12px;color:#666;text-align:left">
+                            <b>优势：</b><br>
+                            ✅ 可以按需添加/移除处理器<br>
+                            ✅ 更好的性能控制<br>
+                            ✅ 代码更清晰
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 4: 条件语句 (Logic) -->
+        <!-- ==================== Slide 4: 关卡2 大家伙 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">🔀</div>
-                <h1 style="color: var(--c-logic);">3. 条件语句 (If/Else)</h1>
-                <div class="page-badge">Logic</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p>程序做决定的时刻。</p>
-                    <div class="code-box">
-                        <span class="kw">if</span> rain:<br>
-                        &nbsp;&nbsp;<span class="f">takeUmbrella</span>()<br>
-                        <span class="kw">elif</span> cloudy:<br>
-                        &nbsp;&nbsp;<span class="f">takeCoat</span>()<br>
-                        <span class="kw">else</span>:<br>
-                        &nbsp;&nbsp;<span class="f">goPlay</span>()
-                    </div>
-                    <div class="card logic">
-                        <b>逻辑运算符</b>：<br>
-                        and (且), or (或), not (非)
-                    </div>
-                </div>
-                <div class="col-visual">
-                    <div style="font-size: 50px;">🤔 ➡️ 🌂 / 🧢</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 5: 循环 (Logic) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">🔄</div>
-                <h1 style="color: var(--c-logic);">4. 循环 (Loops)</h1>
-                <div class="page-badge">Logic</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p>重复做同一件事。</p>
-                    <div class="code-box">
-                        <span class="kw">while</span> <span class="n">spawnNum</span> > <span class="n">0</span>:<br>
-                        &nbsp;&nbsp;<span class="f">spawnEnemy</span>()<br>
-                        &nbsp;&nbsp;<span class="n">spawnNum</span> -= <span class="n">1</span>
-                    </div>
-                    <div class="card logic">
-                        <b>while</b>: 只要条件满足就一直做。<br>
-                        <b>for</b>: 对每个东西做一遍。
-                    </div>
-                </div>
-                <div class="col-visual">
-                    <div style="font-size: 60px; animation: spin 2s infinite linear;">🔁</div>
-                    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 6: 变量与数据 (Data) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">📦</div>
-                <h1 style="color: var(--c-data);">5. 变量与数据类型</h1>
+                <div class="icon">💪</div>
+                <h1 style="color:var(--c-data)">关卡2：大家伙</h1>
+                <span class="level-badge">状态追踪</span>
                 <div class="page-badge">Data</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>变量是贴了标签的储物箱。</p>
-                    <ul style="list-style: none; padding: 0; line-height: 1.8;">
-                        <li>🔢 <b>数字</b>: <code>5</code>, <code>3.14</code></li>
-                        <li>🔤 <b>字符串</b>: <code>"hello"</code></li>
-                        <li>🔘 <b>布尔值</b>: <code>True</code>, <code>False</code></li>
-                    </ul>
-                    <div class="code-box">
-                        <span class="n">damage</span> = <span class="n">20</span><br>
-                        <span class="n">scale</span> *= <span class="n">1.2</span>
-                    </div>
-                </div>
-                <div class="col-visual">
-                    <div style="text-align: center;">
-                        <div style="font-size: 60px;">📦 = 🍎</div>
-                        <div>box = "apple"</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 7: 对象与属性 (Data) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">🤠</div>
-                <h1 style="color: var(--c-data);">6. 对象与属性</h1>
-                <div class="page-badge">Data</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p><b>对象 (Object)</b>：游戏里的角色。</p>
-                    <div class="code-box">
-                        <span class="n">unit</span>.<span class="n">pos</span>.<span class="n">x</span> = <span class="n">40</span><br>
-                        <span class="n">player</span>.<span class="n">maxSpeed</span> = <span class="n">20</span>
-                    </div>
                     <div class="card data">
-                        <b>属性</b>：特征 (health, pos)<br>
-                        <b>方法</b>：动作 (move(), attack())<br>
-                        用点号 <code>.</code> 来访问。
+                        <b>核心：</b>用update事件追踪生命值，低血时触发"变身"！
                     </div>
+                    <div class="code-box"><span class="kw">auto</span> <span class="f">onUpdatePlayer</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> unit = event.target;
+    <span class="c">// 生命值低于1/3时触发变身</span>
+    <span class="kw">if</span> (unit.health < unit.maxHealth / <span class="n">3</span>) {
+        unit.maxHealth *= <span class="n">1.2</span>;
+        unit.health = unit.maxHealth;
+        unit.scale *= <span class="n">1.2</span>;        <span class="c">// 变大！</span>
+        unit.attackDamage *= <span class="n">1.2</span>; <span class="c">// 变强！</span>
+        unit.say(<span class="s">"粉碎！"</span>);
+    }
+}</div>
+                    <div class="code-box" style="border-color:var(--c-game);font-size:12px"><span class="c">// 主循环中检查目标完成度</span>
+<span class="kw">auto</span> <span class="f">checkGoals</span>() {
+    <span class="kw">if</span> (player.scale >= <span class="n">2</span>)
+        game.<span class="f">setGoalState</span>(scaleGoal, <span class="n">true</span>);
+    <span class="kw">if</span> (game.ogresDefeated >= <span class="n">5</span>)
+        game.<span class="f">setGoalState</span>(ogreGoal, <span class="n">true</span>);
+}</div>
                 </div>
                 <div class="col-visual">
-                    <div style="font-size: 80px;">🧙‍♂️</div>
-                    <div style="position: absolute; bottom: 10px; font-size: 12px; color: #666;">{ hp: 100, mp: 50 }</div>
+                    <div style="text-align:center">
+                        <div style="font-size:12px;color:#666;margin-bottom:8px">生命值变化过程</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span style="font-size:30px">🧑</span>
+                                <div style="width:100px;height:14px;background:#eee;border-radius:7px;overflow:hidden">
+                                    <div style="width:100%;height:100%;background:var(--c-game)"></div>
+                                </div>
+                                <span style="font-size:11px">HP 满</span>
+                            </div>
+                            <div style="font-size:16px">⬇️ 受到攻击</div>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span style="font-size:30px">🧑</span>
+                                <div style="width:100px;height:14px;background:#eee;border-radius:7px;overflow:hidden">
+                                    <div style="width:25%;height:100%;background:var(--c-logic)"></div>
+                                </div>
+                                <span style="font-size:11px;color:red">HP &lt; 1/3</span>
+                            </div>
+                            <div style="font-size:16px">⚡ 触发变身！</div>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span style="font-size:45px">🦸</span>
+                                <div style="width:120px;height:18px;background:#eee;border-radius:9px;overflow:hidden">
+                                    <div style="width:100%;height:100%;background:linear-gradient(90deg,var(--c-game),var(--c-phys))"></div>
+                                </div>
+                                <span style="font-size:11px;color:green">满血+变大!</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;font-size:11px;background:#fff8e1;padding:6px;border-radius:6px;border:1px solid #ffd300">
+                            <b>×1.2</b> 三连：maxHealth · scale · attackDamage
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 8: 坐标系 (Physics) -->
+        <!-- ==================== Slide 5: 关卡3 量子跃迁 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">🗺️</div>
-                <h1 style="color: var(--c-phys);">7. 坐标系 (Coordinates)</h1>
+                <div class="icon">⚡</div>
+                <h1 style="color:var(--c-phys)">关卡3：量子跃迁</h1>
+                <span class="level-badge">pos修改</span>
                 <div class="page-badge">Phys</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>教室里的座位表 (X, Y)。</p>
-                    <ul style="list-style: none; padding: 0;">
-                        <li>➡️ <b>X</b>: 左右</li>
-                        <li>⬆️ <b>Y</b>: 上下</li>
-                        <li>📍 <b>(0,0)</b>: 原点 (左下角)</li>
-                    </ul>
-                    <div class="code-box">
-                        <span class="n">unit</span>.<span class="n">pos</span>.<span class="n">x</span> += <span class="n">6</span>
+                    <div class="card phys">
+                        <b>核心发现：</b>直接修改 <code>pos.x</code> 和 <code>pos.y</code> 可以瞬间改变位置！
                     </div>
+                    <p><b>两种修改方式：</b></p>
+                    <div class="code-box"><span class="c">// 方式1：相对移动（加减）</span>
+unit.pos.y -= <span class="n">10</span>;  <span class="c">// 向下移动10</span>
+unit.pos.x += <span class="n">5</span>;   <span class="c">// 向右移动5</span>
+
+<span class="c">// 方式2：绝对定位（直接设值）</span>
+unit.pos.x = <span class="n">40</span>;   <span class="c">// 传送到x=40</span></div>
+                    <div class="card phys" style="margin-top:8px">
+                        <b>性能技巧：</b>不销毁+重生，而是直接传送回起点！
+                    </div>
+                    <div class="code-box" style="font-size:12px"><span class="c">// 食人魔移出屏幕后传送回来</span>
+<span class="kw">if</span> (unit.pos.x > <span class="n">80</span>) {
+    unit.pos.x = <span class="n">0</span>;  <span class="c">// 回到左边重来</span>
+}</div>
                 </div>
                 <div class="col-visual">
-                    <div class="grid-demo" onmousemove="showCoord(event)">
-                        <div class="coord-label" id="coordLabel">X:0 Y:0</div>
+                    <div class="grid-demo" id="quantumGrid" onclick="teleportDot(event)">
+                        <div class="coord-label" id="coordLabel2">点击传送！</div>
+                        <div id="quantumDot" style="width:20px;height:20px;background:var(--c-logic);border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transition:all 0.3s;box-shadow:0 0 10px var(--c-logic)"></div>
                     </div>
                     <script>
-                        function showCoord(e) {
-                            const rect = e.target.getBoundingClientRect();
-                            const x = Math.floor((e.clientX - rect.left) / 4); // Scale
-                            const y = Math.floor((rect.bottom - e.clientY) / 4);
-                            document.getElementById('coordLabel').innerText = `X:${x} Y:${y}`;
+                        function teleportDot(e) {
+                            const rect = document.getElementById('quantumGrid').getBoundingClientRect();
+                            const dot = document.getElementById('quantumDot');
+                            const x = e.clientX - rect.left;
+                            const y = e.clientY - rect.top;
+                            dot.style.left = x + 'px';
+                            dot.style.top = y + 'px';
+                            dot.style.transform = 'translate(-50%,-50%) scale(1.5)';
+                            setTimeout(() => dot.style.transform = 'translate(-50%,-50%) scale(1)', 200);
+                            document.getElementById('coordLabel2').innerText = `pos = (${Math.floor(x/3)}, ${Math.floor((rect.height-y)/3)})`;
                         }
                     </script>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 9: 运动物理 (Physics) -->
+        <!-- ==================== Slide 6: 关卡4 循环森林 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">🏃</div>
-                <h1 style="color: var(--c-phys);">8. 运动 (Movement)</h1>
+                <div class="icon">🌲</div>
+                <h1 style="color:var(--c-phys)">关卡4：循环森林</h1>
+                <span class="level-badge">折回机制</span>
                 <div class="page-badge">Phys</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>让东西动起来！</p>
-                    <div class="code-box">
-                        <span class="n">dist</span> = <span class="n">speed</span> * <span class="n">dir</span><br>
-                        <span class="n">fence</span>.<span class="n">pos</span>.<span class="n">y</span> += <span class="n">dist</span>
+                    <div class="card game">
+                        <b>Wraparound（折回）：</b>走出左边 → 出现在右边！常用游戏技巧。
                     </div>
-                    <div class="card phys">
-                        <b>速度</b>：快慢。<br>
-                        <b>方向</b>：正负号 (+/-)。<br>
-                        <b>平滑移动</b>：每帧加一点点。
-                    </div>
-                </div>
-                <div class="col-visual">
-                    <div style="width: 100%; height: 50px; background: #eee; position: relative; overflow: hidden;">
-                        <div style="position: absolute; left: 0; top: 10px; font-size: 30px; animation: runRight 2s infinite linear;">🏃</div>
-                    </div>
-                    <style>@keyframes runRight { from { left: 0; } to { left: 100%; } }</style>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 10: 游戏循环 (Core) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">💓</div>
-                <h1 style="color: var(--c-game);">9. 游戏循环 (Game Loop)</h1>
-                <div class="page-badge">Game</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p>游戏的心脏，每秒跳动几十次。</p>
-                    <div class="code-box">
-                        <span class="kw">def</span> <span class="f">onUpdateGame</span>(event):<br>
-                        &nbsp;&nbsp;<span class="f">checkPlayer</span>()<br>
-                        &nbsp;&nbsp;<span class="f">checkSpawns</span>()<br>
-                        &nbsp;&nbsp;<span class="n">game</span>.<span class="n">score</span> += <span class="n">event</span>.<span class="n">deltaTime</span>
-                    </div>
-                    <p>不断更新画面、位置和分数。</p>
-                </div>
-                <div class="col-visual">
-                    <div style="font-size: 80px;" class="anim-pulse">💗</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 11: 碰撞检测 (Physics) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">💥</div>
-                <h1 style="color: var(--c-phys);">10. 碰撞检测 (Collision)</h1>
-                <div class="page-badge">Phys</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p>判断两个物体是否撞上了。</p>
-                    <div class="code-box">
-                        <span class="kw">def</span> <span class="f">onCollide</span>(event):<br>
-                        &nbsp;&nbsp;<span class="n">other</span> = <span class="n">event</span>.<span class="n">other</span><br>
-                        &nbsp;&nbsp;<span class="kw">if</span> <span class="n">other</span>.<span class="n">type</span> == <span class="s">"fence"</span>:<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="n">unit</span>.<span class="f">defeat</span>()
+                    <div class="code-box"><span class="kw">auto</span> <span class="f">onUpdate</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> unit = event.target;
+    <span class="c">// 左边太远 → 传送到右边</span>
+    <span class="kw">if</span> (unit.pos.x < <span class="n">10</span>)
+        unit.pos.x = <span class="n">68</span>;
+    <span class="c">// 右边太远 → 传送到左边</span>
+    <span class="kw">if</span> (unit.pos.x > <span class="n">70</span>)
+        unit.pos.x = <span class="n">12</span>;
+    <span class="c">// 上下方向同理！</span>
+    <span class="kw">if</span> (unit.pos.y < <span class="n">10</span>)
+        unit.pos.y = <span class="n">56</span>;
+    <span class="kw">if</span> (unit.pos.y > <span class="n">58</span>)
+        unit.pos.y = <span class="n">12</span>;
+}</div>
+                    <div class="card data" style="font-size:12px;margin-top:8px">
+                        <b>同一处理器复用：</b>玩家和食人魔都绑定 onUpdate！<br>
+                        <code>player.on("update", onUpdate);</code><br>
+                        <code>game.setActionFor("munchkin", "update", onUpdate);</code>
                     </div>
                 </div>
                 <div class="col-visual">
-                    <div class="ball-box">
-                        <div class="ball" id="collBall"></div>
-                        <div class="wall"></div>
-                        <div class="collision-boom" id="collBoom">💥</div>
+                    <div class="wrap-demo" id="wrapDemo">
+                        <div class="wrap-dot" id="wrapDot" style="left:50%;top:50%"></div>
+                        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ffd300;font-size:11px;opacity:0.6;pointer-events:none;text-align:center">
+                            🌲 森林地图 🌲<br>走出边界→传送！
+                        </div>
                     </div>
-                    <button class="demo-btn" style="position: absolute; bottom: 10px;" onclick="runCollision()">Run</button>
+                    <button class="demo-btn" onclick="wrapAnimate()">▶ 模拟折回</button>
                     <script>
-                        function runCollision() {
-                            const b = document.getElementById('collBall');
-                            const boom = document.getElementById('collBoom');
-                            b.style.left = '10%'; b.style.opacity = 1; boom.style.opacity = 0; boom.style.transform = 'scale(0)';
-                            
-                            setTimeout(() => { b.style.left = '75%'; }, 100);
-                            setTimeout(() => { 
-                                b.style.opacity = 0; 
-                                boom.style.opacity = 1; 
-                                boom.style.transform = 'scale(1.5)';
+                        function wrapAnimate() {
+                            const dot = document.getElementById('wrapDot');
+                            dot.style.transition = 'all 1s linear';
+                            dot.style.left = '105%';
+                            setTimeout(() => {
+                                dot.style.transition = 'none';
+                                dot.style.left = '-5%';
+                                setTimeout(() => {
+                                    dot.style.transition = 'all 1s linear';
+                                    dot.style.left = '50%';
+                                }, 50);
                             }, 1000);
                         }
                     </script>
@@ -586,207 +442,471 @@
             </div>
         </div>
 
-        <!-- Slide 12: 随机数 (Game) -->
+        <!-- ==================== Slide 7: 关卡5 平稳移动 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">🎲</div>
-                <h1 style="color: var(--c-game);">11. 随机数 (Random)</h1>
-                <div class="page-badge">Game</div>
+                <div class="icon">🏃</div>
+                <h1 style="color:var(--c-phys)">关卡5：平稳移动</h1>
+                <span class="level-badge">逐帧运动</span>
+                <div class="page-badge">Phys</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>让游戏充满惊喜（抽奖！）。</p>
-                    <div class="code-box">
-                        <span class="n">x</span> = <span class="n">game</span>.<span class="f">randomInteger</span>(<span class="n">10</span>, <span class="n">70</span>)<br>
-                        <span class="n">type</span> = <span class="n">game</span>.<span class="f">randomInteger</span>(<span class="n">0</span>, <span class="n">1</span>)
+                    <div class="card phys">
+                        <b>平滑移动 = 每帧移动一点点</b><br>
+                        速度 × 方向 = 每帧位移量
                     </div>
-                    <div class="card game">
-                        <b>随机位置</b>：怪物在哪出现？<br>
-                        <b>随机掉落</b>：掉金币还是药水？
+                    <div class="code-box"><span class="c">// 移动围栏（上下弹跳）</span>
+<span class="kw">auto</span> <span class="f">onUpdateFence</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> fence = event.target;
+    <span class="c">// speed × direction = 位移</span>
+    <span class="kw">float</span> dist = fenceSpeed * fence.dir;
+    fence.pos.y += dist;
+    <span class="c">// 到达边界就反弹</span>
+    <span class="kw">if</span> (fence.pos.y > <span class="n">56</span> || fence.pos.y < <span class="n">10</span>) {
+        fence.dir *= <span class="n">-1</span>;  <span class="c">// 反转方向！</span>
+    }
+}</div>
+                    <div class="card logic" style="font-size:12px">
+                        <b>dir 方向值：</b><br>
+                        <code>dir = 1</code> → 向上/右移动<br>
+                        <code>dir = -1</code> → 向下/左移动<br>
+                        <code>dir *= -1</code> → 反转方向（弹跳！）
                     </div>
                 </div>
                 <div class="col-visual">
-                    <div class="dice-box">
-                        <div class="dice" id="diceVal">?</div>
-                        <button class="demo-btn" onclick="rollDice()">掷骰子</button>
+                    <div style="width:100%;height:80%;position:relative;background:#f8f9fa;border:2px solid #ddd;overflow:hidden">
+                        <div id="bounceFence" style="position:absolute;left:50%;width:8px;height:50px;background:#795548;transform:translateX(-50%);border-radius:3px;top:20px"></div>
+                        <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:#ddd"></div>
+                        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#ddd"></div>
                     </div>
+                    <button class="demo-btn" onclick="startBounce()">▶ 弹跳围栏</button>
                     <script>
-                        function rollDice() {
-                            document.getElementById('diceVal').innerText = Math.floor(Math.random() * 6) + 1;
+                        let bounceId = null;
+                        function startBounce() {
+                            if(bounceId) clearInterval(bounceId);
+                            let fence = document.getElementById('bounceFence');
+                            let y = 20, dir = 1;
+                            const parent = fence.parentElement;
+                            bounceId = setInterval(() => {
+                                y += dir * 2;
+                                const maxY = parent.clientHeight - 50;
+                                if(y > maxY || y < 0) dir *= -1;
+                                fence.style.top = y + 'px';
+                            }, 30);
                         }
                     </script>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 13: 游戏状态 (Game) -->
+        <!-- ==================== Slide 8: 关卡6 发狂的宝石 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">📊</div>
-                <h1 style="color: var(--c-game);">12. 状态管理</h1>
+                <div class="icon">💎</div>
+                <h1 style="color:var(--c-game)">关卡6：发狂的宝石</h1>
+                <span class="level-badge">2D运动</span>
                 <div class="page-badge">Game</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>游戏的记分板。</p>
-                    <ul style="list-style: none; padding: 0;">
-                        <li>🏆 <b>Score</b>: 得分</li>
-                        <li>⏱️ <b>Time</b>: 剩余时间</li>
-                        <li>🚩 <b>Goal</b>: 胜利目标</li>
-                    </ul>
-                    <div class="code-box">
-                        <span class="n">game</span>.<span class="n">score</span> = <span class="n">0</span><br>
-                        <span class="n">goal</span> = <span class="n">game</span>.<span class="f">addManualGoal</span>(<span class="s">"存活20秒"</span>)
+                    <div class="card game">
+                        <b>X + Y 两个方向同时移动 = 对角线！</b>像台球一样弹跳。
+                    </div>
+                    <div class="code-box"><span class="kw">auto</span> <span class="f">onUpdate</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> item = event.target;
+    <span class="c">// X轴和Y轴分别移动</span>
+    <span class="kw">auto</span> diffX = item.dirX * gemSpeed;
+    <span class="kw">auto</span> diffY = item.dirY * gemSpeed;
+    item.pos.x += diffX;
+    item.pos.y += diffY;
+    <span class="c">// X方向弹跳</span>
+    <span class="kw">if</span> (item.pos.x > <span class="n">70</span> || item.pos.x < <span class="n">10</span>)
+        item.dirX *= <span class="n">-1</span>;
+    <span class="c">// Y方向弹跳</span>
+    <span class="kw">if</span> (item.pos.y > <span class="n">58</span> || item.pos.y < <span class="n">10</span>)
+        item.dirY *= <span class="n">-1</span>;
+}</div>
+                    <div class="card data" style="font-size:12px">
+                        <b>随机方向：</b><code>dirX/dirY</code> 可取 -1、0、1<br>
+                        0 = 该方向不动 → 纯水平/垂直运动
                     </div>
                 </div>
                 <div class="col-visual">
-                    <div style="font-family: 'Courier New'; font-weight: bold; font-size: 24px;">
-                        SCORE: <span style="color:red">00950</span><br>
-                        TIME: <span style="color:blue">00:30</span>
+                    <div style="width:100%;height:85%;position:relative;background:#222;overflow:hidden;border-radius:8px" id="gemBox">
                     </div>
+                    <button class="demo-btn" onclick="startGems()">▶ 发射宝石</button>
+                    <script>
+                        let gemInterval = null;
+                        function startGems() {
+                            const box = document.getElementById('gemBox');
+                            if(gemInterval) clearInterval(gemInterval);
+                            box.innerHTML = '';
+                            const gems = [];
+                            for(let i=0;i<5;i++){
+                                const g = document.createElement('div');
+                                g.style.cssText = `position:absolute;font-size:20px;left:${30+Math.random()*40}%;top:${20+Math.random()*50}%`;
+                                g.innerText = '💎';
+                                box.appendChild(g);
+                                gems.push({el:g,x:30+Math.random()*40,y:20+Math.random()*50,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3});
+                            }
+                            gemInterval = setInterval(()=>{
+                                gems.forEach(g=>{
+                                    g.x+=g.dx; g.y+=g.dy;
+                                    if(g.x>90||g.x<5) g.dx*=-1;
+                                    if(g.y>85||g.y<5) g.dy*=-1;
+                                    g.el.style.left=g.x+'%'; g.el.style.top=g.y+'%';
+                                });
+                            },30);
+                        }
+                    </script>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 14: 数据持久化 (Data) -->
+        <!-- ==================== Slide 9: 关卡7 跑酷步骤1 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">💾</div>
-                <h1 style="color: var(--c-data);">13. 数据持久化</h1>
-                <div class="page-badge">Data</div>
+                <div class="icon">🌳</div>
+                <h1 style="color:var(--c-game)">关卡7：跑酷·环境</h1>
+                <span class="level-badge">步骤1/4</span>
+                <div class="page-badge">Game</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>像写日记一样把最高分记下来，关掉游戏也不会丢。</p>
-                    <div class="code-box">
-                        <span class="c"># 读取</span><br>
-                        <span class="n">best</span> = <span class="n">db</span>.<span class="f">get</span>(<span class="s">"topScore"</span>) <span class="kw">or</span> <span class="n">0</span><br>
-                        <br>
-                        <span class="c"># 保存</span><br>
-                        <span class="n">db</span>.<span class="f">set</span>(<span class="s">"topScore"</span>, <span class="n">game</span>.<span class="n">score</span>)
+                    <div class="card game">
+                        <b>跑酷核心技巧：</b>玩家不动，让场景向左滚动！
                     </div>
+                    <div class="code-box" style="font-size:12px"><span class="c">// 场景向左滚动</span>
+<span class="kw">auto</span> <span class="f">onUpdateStatic</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> thing = event.target;
+    thing.pos.x -= <span class="n">0.8</span>; <span class="c">// 每帧左移</span>
+    <span class="kw">if</span> (thing.pos.x < <span class="n">-4</span>) {
+        <span class="kw">if</span> (thing.type == <span class="s">"forest"</span>) {
+            thing.pos.x = <span class="n">84</span>; <span class="c">// 森林回收重用！</span>
+        } <span class="kw">else</span> {
+            thing.<span class="f">destroy</span>(); <span class="c">// 围栏直接销毁</span>
+        }
+    }
+}
+
+<span class="c">// 玩家锁定X轴</span>
+player.pos.x = <span class="n">20</span>; <span class="c">// 只能上下移动</span></div>
+                    <p style="font-size:13px"><b>围栏生成</b>：右侧随机Y位置生成，随时间增加数量。</p>
+                    <div class="code-box" style="font-size:12px"><span class="kw">auto</span> <span class="f">spawnFences</span>() {
+    <span class="kw">auto</span> n = <span class="n">1</span> + (game.time / <span class="n">10</span>);
+    <span class="kw">while</span> (n >= <span class="n">1</span>) {
+        <span class="f">spawnRandomY</span>(<span class="s">"fence"</span>);
+        n -= <span class="n">1</span>;
+    }
+}</div>
                 </div>
                 <div class="col-visual">
-                    <div style="font-size: 80px;">📔</div>
+                    <div style="width:100%;height:100%;position:relative;background:#2d5a27;overflow:hidden">
+                        <div style="position:absolute;top:0;left:0;right:0;height:20px;background:#1a3a15;display:flex;align-items:center;justify-content:space-around;font-size:12px" id="forestTop">🌲🌲🌲🌲🌲🌲🌲🌲</div>
+                        <div style="position:absolute;bottom:0;left:0;right:0;height:20px;background:#1a3a15;display:flex;align-items:center;justify-content:space-around;font-size:12px">🌲🌲🌲🌲🌲🌲🌲🌲</div>
+                        <div id="pkPlayer" style="position:absolute;left:15%;top:50%;transform:translateY(-50%);font-size:24px;z-index:2">🏃</div>
+                        <div id="pkFence1" style="position:absolute;right:-10%;top:30%;font-size:20px;animation:pkScroll 3s linear infinite">🚧</div>
+                        <div id="pkFence2" style="position:absolute;right:-30%;top:65%;font-size:20px;animation:pkScroll 3s linear infinite;animation-delay:1.5s">🚧</div>
+                    </div>
+                    <style>
+                        @keyframes pkScroll { from{right:-10%}to{right:110%} }
+                    </style>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 15: 游戏平衡 (Design) -->
+        <!-- ==================== Slide 10: 关卡8 跑酷步骤2 ==================== -->
+        <div class="slide">
+            <div class="header">
+                <div class="icon">🏆</div>
+                <h1 style="color:var(--c-game)">关卡8：跑酷·得分</h1>
+                <span class="level-badge">步骤2/4</span>
+                <div class="page-badge">Game</div>
+            </div>
+            <div class="layout">
+                <div class="col-text">
+                    <div class="card game">
+                        <b>两种得分来源：</b>①时间存活 ②收集宝石
+                    </div>
+                    <div class="code-box" style="font-size:12px"><span class="c">// 宝石得分</span>
+<span class="kw">auto</span> <span class="f">onCollect</span>(<span class="kw">auto</span> event) {
+    <span class="kw">if</span> (event.other.type == <span class="s">"gem"</span>) {
+        game.score += <span class="n">5</span>;
+    }
+}
+
+<span class="c">// 时间得分（在游戏循环中）</span>
+game.score += event.deltaTime;
+
+<span class="c">// 数据持久化 - 最高分</span>
+game.topScore = db.<span class="f">get</span>(<span class="s">"topScore"</span>) || <span class="n">0</span>;
+<span class="kw">if</span> (game.score > game.topScore) {
+    db.<span class="f">set</span>(<span class="s">"topScore"</span>, game.score);
+}</div>
+                    <div class="card data" style="font-size:12px;margin-top:6px">
+                        <b>deltaTime：</b>上次update到这次的时间间隔，用它计分更精确！
+                    </div>
+                    <div class="card logic" style="font-size:12px">
+                        <b>手动目标：</b>存活20秒即可获胜，但可以继续挑战最高分！
+                    </div>
+                </div>
+                <div class="col-visual">
+                    <div style="text-align:center;width:100%">
+                        <div style="font-family:'Courier New';font-weight:bold;font-size:20px;background:#222;color:white;padding:15px;border-radius:8px;margin-bottom:10px">
+                            SCORE: <span style="color:#00ff9d" id="demoScore">00000</span><br>
+                            TIME: <span style="color:#00e5ff" id="demoTime">00:00</span><br>
+                            TOP: <span style="color:#ffd300" id="demoTop">00950</span>
+                        </div>
+                        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0">
+                            <div style="background:#e8f5e9;padding:6px 12px;border-radius:15px;font-size:12px">⏱️ 存活 +deltaTime</div>
+                            <div style="background:#e0f7fa;padding:6px 12px;border-radius:15px;font-size:12px">💎 宝石 +5分</div>
+                            <div style="background:#fff8e1;padding:6px 12px;border-radius:15px;font-size:12px">💾 db 最高分</div>
+                        </div>
+                        <button class="demo-btn" onclick="runScoreDemo()">▶ 模拟得分</button>
+                    </div>
+                    <script>
+                        let scoreTimer=null;
+                        function runScoreDemo(){
+                            if(scoreTimer)clearInterval(scoreTimer);
+                            let s=0,t=0;
+                            scoreTimer=setInterval(()=>{
+                                t+=33; s+=0.033;
+                                if(Math.random()<0.05) s+=5;
+                                document.getElementById('demoScore').innerText=String(Math.floor(s*100)).padStart(5,'0');
+                                document.getElementById('demoTime').innerText='00:'+String(Math.floor(t/1000)).padStart(2,'0');
+                                if(t>10000)clearInterval(scoreTimer);
+                            },33);
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Slide 11: 关卡9 跑酷步骤3 ==================== -->
+        <div class="slide">
+            <div class="header">
+                <div class="icon">👹</div>
+                <h1 style="color:var(--c-logic)">关卡9：跑酷·敌人</h1>
+                <span class="level-badge">步骤3/4</span>
+                <div class="page-badge">Game</div>
+            </div>
+            <div class="layout">
+                <div class="col-text">
+                    <div class="card logic">
+                        <b>新挑战：</b>食人魔从左边慢慢逼近，引诱它们撞围栏！
+                    </div>
+                    <div class="code-box" style="font-size:12px"><span class="c">// 食人魔慢慢靠近玩家</span>
+<span class="kw">auto</span> <span class="f">onUpdateOgre</span>(<span class="kw">auto</span> event) {
+    <span class="kw">auto</span> unit = event.target;
+    <span class="kw">if</span> (unit.health > <span class="n">0</span>) {
+        unit.baseX += <span class="n">0.1</span>;  <span class="c">// 缓慢靠近</span>
+        <span class="kw">if</span> (unit.baseX > <span class="n">18</span>)
+            unit.baseX = <span class="n">18</span>; <span class="c">// 最近距离</span>
+        unit.pos.x = unit.baseX;
+    }
+}
+
+<span class="c">// 食人魔被围栏击败后变成场景物体</span>
+<span class="kw">auto</span> <span class="f">onDefeatOgre</span>(<span class="kw">auto</span> event) {
+    game.score += <span class="n">10</span>;
+    event.target.<span class="f">on</span>(<span class="s">"update"</span>, onUpdateStatic);
+}</div>
+                    <div class="card game" style="font-size:12px;margin-top:6px">
+                        <b>策略选择：</b><br>
+                        🏃 安全躲避围栏 → 时间分<br>
+                        💎 冒险收宝石 → 额外分<br>
+                        👹 引诱食人魔撞栏 → 10分/只
+                    </div>
+                </div>
+                <div class="col-visual">
+                    <div style="width:100%;text-align:center">
+                        <div style="font-size:13px;font-weight:bold;margin-bottom:10px;color:#2c3e50">食人魔追逐示意</div>
+                        <div style="position:relative;height:120px;background:#f8f9fa;border-radius:8px;border:2px solid #ddd;overflow:hidden">
+                            <div style="position:absolute;left:60%;top:50%;transform:translateY(-50%);font-size:24px">🏃</div>
+                            <div style="position:absolute;left:10%;top:50%;transform:translateY(-50%);font-size:24px;animation:ogreChase 4s linear infinite">👹</div>
+                            <div style="position:absolute;right:5%;top:30%;font-size:16px;animation:fenceDown 2s linear infinite">🚧</div>
+                        </div>
+                        <style>
+                            @keyframes ogreChase { 0%{left:5%}50%{left:45%}100%{left:5%} }
+                            @keyframes fenceDown { from{right:80%}to{right:-10%} }
+                        </style>
+                        <div style="margin-top:10px;font-size:12px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+                            <span style="background:#fff0f3;padding:4px 8px;border-radius:4px">👹 缓慢逼近</span>
+                            <span style="background:#e8f5e9;padding:4px 8px;border-radius:4px">🏃 只能上下躲</span>
+                            <span style="background:#fff8e1;padding:4px 8px;border-radius:4px">🚧 引诱撞栏！</span>
+                        </div>
+                        <div style="margin-top:8px;font-size:11px;color:#888">
+                            <b>baseX</b> 属性：独立于AI行为追踪X位置<br>
+                            <b>behavior = "AttacksNearest"</b>：AI控制Y轴追击
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Slide 12: 关卡10 跑酷步骤4 ==================== -->
         <div class="slide">
             <div class="header">
                 <div class="icon">⚖️</div>
-                <h1 style="color: var(--c-game);">14. 游戏平衡</h1>
+                <h1 style="color:var(--c-game)">关卡10：跑酷·平衡</h1>
+                <span class="level-badge">步骤4/4</span>
                 <div class="page-badge">Design</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>让游戏既有挑战性又好玩。</p>
-                    <div class="code-box">
-                        <span class="n">GAME_SPEED</span> = <span class="n">0.6</span><br>
-                        <span class="n">PLAYER_SPEED</span> = <span class="n">20</span>
-                    </div>
                     <div class="card game">
-                        <b>调参</b>：太难了？怪物慢一点。<br>
-                        太简单了？时间短一点。
+                        <b>游戏平衡：</b>把所有"魔法数字"提取成常量，方便调试！
+                    </div>
+                    <div class="code-box" style="font-size:12px"><span class="c">// 所有参数集中管理</span>
+<span class="kw">auto</span> GAME_SPEED = <span class="n">0.6</span>;
+<span class="kw">auto</span> PLAYER_SPEED = <span class="n">20</span>;
+<span class="kw">auto</span> OGRE_SPEED_INC = <span class="n">0.1</span>;
+<span class="kw">auto</span> PLAYER_BASE_X = <span class="n">20</span>;
+<span class="kw">auto</span> GEM_SCORE = <span class="n">5</span>;
+<span class="kw">auto</span> DEFEATED_OGRE_SCORE = <span class="n">10</span>;
+<span class="kw">auto</span> WIN_TIME = <span class="n">20</span>;
+<span class="kw">auto</span> FENCE_INTERVAL = <span class="n">1</span>;
+<span class="kw">auto</span> GEM_INTERVAL = <span class="n">1</span>;
+<span class="kw">auto</span> OGRE_INTERVAL = <span class="n">2</span>;</div>
+                    <div class="card phys" style="font-size:12px;margin-top:6px">
+                        <b>调参技巧：</b><br>
+                        太难？→ 降低 GAME_SPEED，增加 PLAYER_SPEED<br>
+                        太简单？→ 缩短间隔，加快食人魔
                     </div>
                 </div>
                 <div class="col-visual">
-                    <div style="font-size: 80px;">🎚️</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 16: 算法思维 (Code) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">🧠</div>
-                <h1 style="color: var(--c-code);">15. 算法思维</h1>
-                <div class="page-badge">Code</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p>解决问题的步骤：</p>
-                    <ol style="font-size: 18px; line-height: 1.8;">
-                        <li>👀 <b>Observe</b>: 找到最近敌人。</li>
-                        <li>🤔 <b>Decide</b>: 该打吗？（判断距离/类型）。</li>
-                        <li>🏃 <b>Act</b>: 攻击或逃跑。</li>
-                    </ol>
-                </div>
-                <div class="col-visual">
-                    <div style="font-size: 60px;">1️⃣ ➡️ 2️⃣ ➡️ 3️⃣</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 17: 调试 (Code) -->
-        <div class="slide">
-            <div class="header">
-                <div class="icon">🐞</div>
-                <h1 style="color: var(--c-code);">16. 调试 (Debugging)</h1>
-                <div class="page-badge">Code</div>
-            </div>
-            <div class="layout">
-                <div class="col-text">
-                    <p>找错别字，修 Bug。</p>
-                    <div class="card logic">
-                        <b>技巧：</b><br>
-                        1. 使用 <code>print()</code> 或 <code>hero.say()</code>。<br>
-                        2. 检查拼写和缩进。<br>
-                        3. 一步一步运行。
+                    <div style="width:100%;text-align:center">
+                        <div style="font-size:14px;font-weight:bold;margin-bottom:10px;color:#2c3e50">🎚️ 平衡参数面板</div>
+                        <div class="param-grid">
+                            <div class="param-item">🏃 GAME_SPEED <b>0.6</b></div>
+                            <div class="param-item">👤 PLAYER_SPEED <b>20</b></div>
+                            <div class="param-item">👹 OGRE_INC <b>0.1</b></div>
+                            <div class="param-item">📍 PLAYER_X <b>20</b></div>
+                            <div class="param-item">💎 GEM_SCORE <b>5</b></div>
+                            <div class="param-item">💀 OGRE_SCORE <b>10</b></div>
+                            <div class="param-item">⏱️ WIN_TIME <b>20</b></div>
+                            <div class="param-item">🚧 FENCE_INT <b>1</b></div>
+                            <div class="param-item">💎 GEM_INT <b>1</b></div>
+                            <div class="param-item">👹 OGRE_INT <b>2</b></div>
+                        </div>
+                        <div style="margin-top:12px;background:#fff8e1;padding:8px;border-radius:8px;font-size:12px;border:1px solid #ffd300">
+                            <b>💡 设计哲学：</b>没有"标准答案"！<br>
+                            实验不同数值，让游戏<b>有趣且有挑战</b>。<br>
+                            好游戏 = 难度曲线恰到好处
+                        </div>
                     </div>
                 </div>
-                <div class="col-visual">
-                    <div style="font-size: 80px;">🛠️</div>
-                </div>
             </div>
         </div>
 
-        <!-- Slide 18: 代码重用 (Code) -->
+        <!-- ==================== Slide 13: 关卡11 最终项目 ==================== -->
         <div class="slide">
             <div class="header">
-                <div class="icon">♻️</div>
-                <h1 style="color: var(--c-code);">17. 代码重用</h1>
-                <div class="page-badge">Code</div>
+                <div class="icon">🎨</div>
+                <h1 style="color:var(--c-code)">关卡11：创意项目</h1>
+                <span class="level-badge">自由创作</span>
+                <div class="page-badge">Project</div>
             </div>
             <div class="layout">
                 <div class="col-text">
-                    <p>不要重复造轮子！</p>
-                    <p>写好一个函数 <code>spawnRandom()</code>，在每一关里都能用。</p>
                     <div class="card game">
-                        就像乐高积木，用同样的块搭出不同的城堡。
+                        <b>🚀 是时候创建你自己的游戏了！</b>结合所有学过的技能，发挥创造力！
+                    </div>
+                    <p style="font-size:15px"><b>你已经掌握的工具箱：</b></p>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin:8px 0">
+                        <span class="concept-tag tag-event">🔔 update事件</span>
+                        <span class="concept-tag tag-event">💥 collide碰撞</span>
+                        <span class="concept-tag tag-event">📦 collect收集</span>
+                        <span class="concept-tag tag-event">💀 defeat击败</span>
+                        <span class="concept-tag tag-pos">📍 pos位置修改</span>
+                        <span class="concept-tag tag-pos">🔄 折回传送</span>
+                        <span class="concept-tag tag-pos">🏃 平滑移动</span>
+                        <span class="concept-tag tag-score">🏆 计分系统</span>
+                        <span class="concept-tag tag-score">🎯 目标设置</span>
+                        <span class="concept-tag tag-data">💾 数据持久化</span>
+                        <span class="concept-tag tag-data">🎲 随机生成</span>
+                        <span class="concept-tag tag-data">⚖️ 参数平衡</span>
+                    </div>
+                    <div class="card data" style="font-size:13px;margin-top:8px">
+                        <b>创作建议：</b><br>
+                        1. 先确定游戏类型（跑酷/射击/收集）<br>
+                        2. 添加英雄和目标<br>
+                        3. 增加挑战（敌人/障碍/时间限制）<br>
+                        4. 调整平衡，让朋友测试！<br>
+                        5. 分享你的游戏给全世界！ 🌍
                     </div>
                 </div>
                 <div class="col-visual">
-                    <div style="font-size: 80px;">🧱</div>
+                    <div style="font-size:80px;margin-bottom:10px" class="anim-pulse">🎮</div>
+                    <div style="font-size:14px;font-weight:bold;color:#2c3e50">你的游戏，你做主！</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px;font-size:24px">
+                        <div style="background:#fff0f3;padding:10px;border-radius:8px;text-align:center">🏰</div>
+                        <div style="background:#e0f7fa;padding:10px;border-radius:8px;text-align:center">🚀</div>
+                        <div style="background:#fff8e1;padding:10px;border-radius:8px;text-align:center">🐉</div>
+                        <div style="background:#e8f5e9;padding:10px;border-radius:8px;text-align:center">⚔️</div>
+                        <div style="background:#f3e5f5;padding:10px;border-radius:8px;text-align:center">🧩</div>
+                        <div style="background:#fff3e0;padding:10px;border-radius:8px;text-align:center">🏎️</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 19: 总结 -->
+        <!-- ==================== Slide 14: 总结 ==================== -->
         <div class="slide">
             <div class="header">
                 <div class="icon">🎉</div>
-                <h1 style="color: var(--c-game);">恭喜通关！</h1>
+                <h1 style="color:var(--c-game)">恭喜通关！知识地图</h1>
             </div>
-            <div class="layout">
-                <div class="col-text" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                    <h2 style="color: var(--c-logic);">你是真正的游戏开发者！</h2>
-                    <p>带着这些知识，去创造属于你的世界吧！</p>
-                    <div style="margin-top: 30px;">
-                        <span style="font-size: 60px;">🌟 🚀 🎮</span>
+            <div class="layout" style="flex-direction:column;gap:15px">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1">
+                    <div style="background:#fff0f3;padding:12px;border-radius:10px;border:2px solid var(--c-logic)">
+                        <div style="font-weight:bold;color:var(--c-logic);margin-bottom:6px">🔴 事件驱动</div>
+                        <div style="font-size:12px;line-height:1.6">
+                            <b>关卡1</b> update事件 替代while循环<br>
+                            <b>关卡1</b> setActionFor 批量绑定<br>
+                            <b>关卡2</b> 状态追踪 (health/scale)<br>
+                            <b>关卡8</b> collide/collect/defeat事件
+                        </div>
                     </div>
+                    <div style="background:#fff8e1;padding:12px;border-radius:10px;border:2px solid var(--c-phys)">
+                        <div style="font-weight:bold;color:#f57f17;margin-bottom:6px">🟡 物理与空间</div>
+                        <div style="font-size:12px;line-height:1.6">
+                            <b>关卡3</b> pos.x/pos.y 直接修改位置<br>
+                            <b>关卡4</b> 折回机制 (Wraparound)<br>
+                            <b>关卡5</b> 逐帧平滑移动 + dir方向<br>
+                            <b>关卡6</b> 2D运动 (dirX + dirY)
+                        </div>
+                    </div>
+                    <div style="background:#e8f5e9;padding:12px;border-radius:10px;border:2px solid var(--c-game)">
+                        <div style="font-weight:bold;color:#1b5e20;margin-bottom:6px">🟢 游戏设计</div>
+                        <div style="font-size:12px;line-height:1.6">
+                            <b>关卡7</b> 场景滚动 + 对象回收<br>
+                            <b>关卡8</b> 计分系统 + 数据持久化<br>
+                            <b>关卡9</b> AI敌人 + 策略玩法<br>
+                            <b>关卡10</b> 参数提取 + 平衡调试
+                        </div>
+                    </div>
+                    <div style="background:#f3e5f5;padding:12px;border-radius:10px;border:2px solid var(--c-code)">
+                        <div style="font-weight:bold;color:var(--c-code);margin-bottom:6px">🟣 C++ 代码技能</div>
+                        <div style="font-size:12px;line-height:1.6">
+                            <b>auto</b> 自动类型推断<br>
+                            <b>函数</b> 封装可复用逻辑<br>
+                            <b>条件/循环</b> if-else, while<br>
+                            <b>对象属性</b> obj.prop 读写
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align:center;padding:10px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:10px;color:white">
+                    <span style="font-size:30px">🌟 🚀 🎮</span>
+                    <div style="font-size:16px;font-weight:bold;margin-top:5px">你已经是真正的游戏开发者了！去创造属于你的世界吧！</div>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- 右按钮 -->
-    <button class="nav-btn btn-next" id="btnNext" onclick="moveSlide(1)">
-        <div class="arrow-pixel"></div>
-    </button>
-
+    <button class="nav-btn btn-next" id="btnNext" onclick="moveSlide(1)"><div class="arrow-pixel"></div></button>
 </div>
 
 <script>
@@ -798,30 +918,18 @@
     const btnNext = document.getElementById('btnNext');
 
     function updateUI() {
-        slides.forEach((slide, index) => {
-            if (index === currentSlide) {
-                slide.classList.add('active');
-            } else {
-                slide.classList.remove('active');
-            }
-        });
-
+        slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
         btnPrev.classList.toggle('disabled', currentSlide === 0);
         btnNext.classList.toggle('disabled', currentSlide === totalSlides - 1);
-
-        const percentage = ((currentSlide + 1) / totalSlides) * 100;
-        progressBar.style.width = `${percentage}%`;
+        progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
     }
 
     function moveSlide(dir) {
-        const nextIndex = currentSlide + dir;
-        if (nextIndex >= 0 && nextIndex < totalSlides) {
-            currentSlide = nextIndex;
-            updateUI();
-        }
+        const next = currentSlide + dir;
+        if (next >= 0 && next < totalSlides) { currentSlide = next; updateUI(); }
     }
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
         if (e.key === 'ArrowLeft') moveSlide(-1);
         if (e.key === 'ArrowRight') moveSlide(1);
     });
