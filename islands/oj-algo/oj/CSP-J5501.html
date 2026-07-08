@@ -235,17 +235,59 @@
             <div style="color: #636e72; font-size: 0.9em; margin-top: 10px;">👆 冰马在 C 点，它控制的 P1~P8 以及 C 点本身都是无法踏入的黑洞！</div>
         </div>
 
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #fdcb6e; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #d35400; margin-top: 0; text-align: center;">这道题怎么思考？</h3>
+            <p>我们把每个格子想象成连在一起的“小房间”。因为规定了小卒<strong>只能向右走</strong>或者<strong>向下走</strong>，这就意味着，如果小卒想进入当前的小房间，他只有<strong>两扇门</strong>可以选：</p>
+            <ol>
+                <li>从<strong>正上方的房间</strong>走下来（推开上面的门）；</li>
+                <li>从<strong>正左方的房间</strong>走过来（推开左边的门）。</li>
+            </ol>
+            
+            <p>所以，要想知道“有多少种方法可以走到当前房间”，我们只需要算一个简单的加法！看看下面的动感图解：</p>
+
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 25px 0; font-size: 1.1em; background: #fdfbf7; padding: 20px; border-radius: 10px; border: 1px solid #ffeaa7;">
+                <div style="text-align: center; margin-bottom: 10px; margin-left: 170px;">
+                    <div style="background: #f0fdf4; border: 2px dashed #00b894; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <strong>上边的房间 ⬆️</strong><br>
+                        假设小卒有 <span class="highlight">3</span> 种走法到达这里<br>
+                        <span style="font-size: 0.8em; color: #00b894;">（这就是 dp[i-1][j]）</span>
+                    </div>
+                    <div style="font-size: 2em; margin-top: 5px; color: #00b894; animation: bounce 1s infinite;">⬇️</div>
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
+                    <div style="text-align: center; margin-right: 15px;">
+                        <div style="background: #fff0f0; border: 2px dashed #ff7675; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <strong>左边的房间 ⬅️</strong><br>
+                            假设小卒有 <span class="highlight">2</span> 种走法到达这里<br>
+                            <span style="font-size: 0.8em; color: #ff7675;">（这就是 dp[i][j-1]）</span>
+                        </div>
+                    </div>
+                    <div style="font-size: 2em; margin-right: 15px; color: #ff7675;">➡️</div>
+                    <div style="background: #ffeaa7; border: 4px solid #f39c12; padding: 20px; border-radius: 15px; font-weight: bold; text-align: center; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);">
+                        <strong>当前小房间 🎯</strong><br>
+                        3 + 2 = <span style="color: #d35400; font-size: 2em;">5</span> 种走法！<br>
+                        <span style="font-size: 0.9em; color: #d35400;">（这就是我们要求的 dp[i][j]）</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; background: #e0f7fa; padding: 15px; border-radius: 10px; border-left: 5px solid #0984e3;">
+                <strong>⚠️ 如果遇到冰雪禁区怎么办？</strong><br>
+                不用慌！如果左边或者上面的房间被“冰马”冻住了，那么这条路就断了。比如左边房间被冻住了，从左边走过来的方法数就变成了 <strong>0</strong>！算加法的时候加 0 就好啦（比如 3 + 0 = 3），小卒会自动避开危险！
+            </div>
+        </div>
         <h3>✨ 递推的三个关键步骤：</h3>
         <ol>
             <li><strong>拉起警戒线 (标记障碍)：</strong> 首先，我们要把冰马所在的位置 <span class="code-inline">(hx, hy)</span> 以及它跳跃的 8 个偏移量位置，在地图（数组）上标记为不可通行 (<span class="code-inline">blocked</span>)。</li>
-            <li><strong>定义状态魔法：</strong> 使用一个二维数组 <span class="code-inline">dp[i][j]</span>，表示从起点走到坐标 <span class="code-inline">(i, j)</span> 的路径总数。如果起点没被封锁，我们就设 <span class="code-inline">dp = 1</span>。</li>
-            <li><strong>铺设安全通道 (状态转移)：</strong> 从左到右、从上到下遍历每一个格子。如果这个格子被“冻结”了，它的路线数就是 0。如果没有被冻结，它的路线数就是：</li>
+            <li><strong>定义状态魔法：</strong> 使用一个二维数组 <span class="code-inline">dp[i][j]</span>，用来记录从起点走到坐标 <span class="code-inline">(i, j)</span> 房间的路线总数。如果起点安全没被封锁，我们就设 <span class="code-inline">dp = 1</span>（因为站在原地也是一种方法哦）。</li>
+            <li><strong>铺设安全通道 (状态转移)：</strong> 按照顺序，从左到右、从上到下挨个计算每一个房间。如果房间安全没被冻结，它的总路线数就是上面房间和左边房间的路线数相加：</li>
         </ol>
         
         <div class="formula">
             dp[i][j] = dp[i-1][j] + dp[i][j-1]
         </div>
-        <div style="text-align: center; color: #636e72; font-size: 0.9em;">(当前格子的路线数 = 从左边走过来的路线数 + 从上面走过来的路线数)</div>
+        <div style="text-align: center; color: #636e72; font-size: 0.95em; font-weight: bold;">(当前房间路线数 = 从上面走下来的路线数 + 从左边走过来的路线数)</div>
     </div>
 
     <div class="cpp-only">

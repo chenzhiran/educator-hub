@@ -145,6 +145,15 @@
             font-weight: bold;
         }
 
+        /* 强调文字 */
+        .highlight {
+            background-color: #f5b041;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #fff;
+        }
+
         /* ----- 图解动画面板 CSS ----- */
         .visual-panel {
             background: #fff;
@@ -203,6 +212,11 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            flex-direction: column;
+            background: #fdfbf7;
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #9b59b6;
         }
 
         .highlight-group {
@@ -284,10 +298,16 @@
 
         <p>面对庞大的棋盘，无脑乱跳肯定会陷入死胡同！这道题的标准解法是：<strong>把大问题缩小成小问题 (分治与递推)</strong>。我们来看看如何通过固定套路的“两连跳”，把规模为 n 的问题，降级成 n-1 的问题！</p>
 
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #f5b041; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #d35400; margin-top: 0; text-align: center;">🤔 破冰思考：怎么想到这个神奇跳法的？</h3>
+            <p>如果你面对几十个棋子去想怎么跳，大脑肯定会“超载”。高级算法思维叫做<strong>“剥洋葱法”（分治思想）</strong>。</p>
+            <p>策略是这样的：既然一口气排好所有棋子太难，我们能不能想办法<strong>只搞定最右边的一组 <code>o*</code></strong>，并让剩下的棋子重新变成一个<span class="highlight">和初始状态一模一样，只是短了一截</span>的阵型呢？一旦找到了这个“固定套路”，我们就可以无限循环使用它！</p>
+        </div>
+
         <div class="visual-panel">
-            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 15px;">👇 以 n=4 为例，看看“降维打击”是如何完成的 👇</div>
+            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 15px;">👇 以 n=4 为例，看看“两步缩减法”是如何完美运行的 👇</div>
             
-            <div style="text-align: left; font-weight: bold; color: #8e44ad;">初始状态 (n=4):</div>
+            <div style="text-align: left; font-weight: bold; color: #8e44ad;">初始状态 (n=4): 巨大的洋葱</div>
             <div class="chess-row">
                 <div class="chess-piece white-piece">o</div>
                 <div class="chess-piece white-piece">o</div>
@@ -304,15 +324,19 @@
             </div>
 
             <div class="move-arrow">
-                ↓ 步骤一：把黑白交界处的 <code>o*</code> 跳到最末尾空位
+                <div style="color: #8e44ad;">↓ 步骤一：提取现成的 <code>o*</code> 放到最后</div>
+                <div style="font-size: 0.7em; color: #7f8c8d; font-weight: normal; margin-top: 5px;">
+                    💡 <strong>思考：</strong>我们要让最右边的两个空位变成排好的 <code>o*</code>。去哪里找现成连在一起的 <code>o*</code> 呢？<br>
+                    环顾四周，只有<strong>最中间黑白交界处</strong>有现成的组合！抓起它们，填入最后的空位！
+                </div>
             </div>
 
             <div class="chess-row">
                 <div class="chess-piece white-piece">o</div>
                 <div class="chess-piece white-piece">o</div>
                 <div class="chess-piece white-piece">o</div>
-                <div class="chess-piece empty-piece">-</div>
-                <div class="chess-piece empty-piece">-</div>
+                <div class="chess-piece empty-piece" style="border-color: #e74c3c; background-color: #fdedec;">-</div>
+                <div class="chess-piece empty-piece" style="border-color: #e74c3c; background-color: #fdedec;">-</div>
                 <div class="highlight-group" style="display: flex; gap: 4px;">
                     <div class="chess-piece black-piece">*</div>
                     <div class="chess-piece black-piece">*</div>
@@ -323,10 +347,15 @@
             </div>
 
             <div class="move-arrow">
-                ↓ 步骤二：把紧贴空位右侧的 <code>**</code> 补回空位
+                <div style="color: #8e44ad;">↓ 步骤二：填补中间的窟窿，制造新的尾部空位</div>
+                <div style="font-size: 0.7em; color: #7f8c8d; font-weight: normal; margin-top: 5px;">
+                    💡 <strong>思考：</strong>虽然尾巴排好了，但中间出现了一个大窟窿 <code>--</code>，阵型乱套了。<br>
+                    为了让前面伪装成一个完整的 <code>n=3</code> 初始阵型（即 <code>ooo***--</code>），我们需要把窟窿右侧相邻的 <code>**</code> 搬回左边填满窟窿。这样空位就自然移到了黑子的后面！
+                </div>
             </div>
 
-            <div class="chess-row" style="border: 2px solid #2ecc71; padding: 10px; border-radius: 15px; background: #eafaf1;">
+            <div class="chess-row" style="border: 2px solid #2ecc71; padding: 10px; border-radius: 15px; background: #eafaf1; position: relative;">
+                <div style="position: absolute; top: -12px; left: 20px; background: #2ecc71; color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.8em; font-weight: bold;">规模变为 n=3 的完整初始态！</div>
                 <div class="chess-piece white-piece">o</div>
                 <div class="chess-piece white-piece">o</div>
                 <div class="chess-piece white-piece">o</div>
@@ -336,16 +365,20 @@
                 <div class="chess-piece empty-piece">-</div>
                 <div class="chess-piece empty-piece">-</div>
                 <div style="margin-left: 15px; border-left: 3px dashed #2ecc71; padding-left: 15px; display: flex; gap: 4px; align-items: center;">
-                    <div style="color: #27ae60; font-weight: bold; font-size: 0.8em; margin-right: 5px;">已搞定后缀:</div>
+                    <div style="color: #27ae60; font-weight: bold; font-size: 0.8em; margin-right: 5px;">已排好的后缀:</div>
                     <div class="chess-piece white-piece">o</div>
                     <div class="chess-piece black-piece">*</div>
                 </div>
             </div>
+
+            <div style="margin-top: 25px; padding: 15px; background-color: #fef9e7; border-radius: 10px; border: 2px dashed #f1c40f; color: #d35400; font-weight: bold;">
+                🎉 奇迹出现！前 8 个位置变成了 <code>ooo***--</code>，这不就是 <code>n=3</code> 的初始模样吗！<br>
+                <span style="font-size: 0.9em; color: #7f8c8d; font-weight: normal;">复杂的大问题成功被我们“削掉”了一层皮，降级成了小一号的问题。接下来，只要套用同样的招式，剥到不能剥（<code>n=3</code>）为止即可！这就是递推公式的由来！</span>
+            </div>
         </div>
 
-        <h3>✨ 递推的奥秘</h3>
-        <p>你发现了吗？经过上面两步，最右边形成了一个完美的 <span class="code-inline">o*</span> 后缀！而前面的部分变成了 <span class="code-inline">ooo***--</span>，这简直和一开始的 <span class="code-inline">oooo****--</span> 结构一模一样，只是规模变成了 <strong>n=3</strong>！</p>
-        <p>只要我们不断重复这个“两连跳”，每次都能剥离出一个排好的 <span class="code-inline">o*</span> 放后面，直到问题缩小到 <strong>n=3</strong> 这个无法继续用此套路拆分的基础形态。最后我们只要为 n=3 准备好 4 步固定的“人工走法”，游戏就通关啦！</p>
+        <h3>✨ 抵达终点的 Base Case (基础情境)</h3>
+        <p>只要我们不断重复这个“两连跳”套路，每次都能剥离出一个排好的 <span class="code-inline">o*</span> 放后面，直到问题缩小到 <strong>n=3</strong>。当 <span class="code-inline">n=3</span> 时，我们无法再继续拆分（因为中间找不到足够数量用来交换的棋子了）。这时候，我们只要为 n=3 准备好 4 步固定的“人工硬编码”走法，游戏就彻底通关啦！</p>
     </div>
 
     <div class="cpp-only">

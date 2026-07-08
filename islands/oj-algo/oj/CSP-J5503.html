@@ -135,7 +135,7 @@
         .string { color: #55efc4; }
         .number { color: #fab1a0; }
 
-        /* 行内代码及变量强调 */
+        /* 行内代码及变量强调 (高亮显示) */
         .code-inline {
             background-color: #ffeaa7;
             color: #d35400;
@@ -143,6 +143,7 @@
             border-radius: 5px;
             font-family: Consolas, monospace;
             font-weight: bold;
+            box-shadow: 0 2px 0px rgba(0,0,0,0.05);
         }
 
         /* 强调文字 */
@@ -170,15 +171,47 @@
             justify-content: space-around;
             align-items: flex-end;
             margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         .brick-label {
             font-weight: bold;
             color: #00a8ff;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
         }
-        .grid-2x1 { display: grid; grid-template-rows: 40px 40px; gap: 2px; }
-        .grid-1x2 { display: grid; grid-template-columns: 40px 40px; gap: 2px; margin-bottom: 20px; }
-        .grid-L { display: grid; grid-template-columns: 40px 40px; grid-template-rows: 40px 40px; gap: 2px; }
+        
+        /* 按照红笔画法还原的直砖 */
+        .brick-v {
+            width: 40px; height: 82px;
+            border: 3px solid #e74c3c;
+            border-radius: 6px;
+            background: #fff;
+            position: relative;
+            box-sizing: border-box;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .brick-v::after {
+            content: ''; position: absolute;
+            top: 50%; left: 0; width: 100%; height: 3px;
+            background: #00cec9; transform: translateY(-50%);
+        }
+        .brick-h {
+            width: 82px; height: 40px;
+            border: 3px solid #e74c3c;
+            border-radius: 6px;
+            background: #fff;
+            position: relative;
+            box-sizing: border-box;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .brick-h::after {
+            content: ''; position: absolute;
+            top: 0; left: 50%; width: 3px; height: 100%;
+            background: #00cec9; transform: translateX(-50%);
+        }
+
+        .grid-L { display: grid; grid-template-columns: 40px 40px; grid-template-rows: 40px 40px; gap: 2px; justify-content: center; }
         
         .ice-block {
             background-color: #81ecec;
@@ -191,6 +224,43 @@
             border: none;
             box-shadow: none;
         }
+        .ice-block.l-color {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+        /* 被吞噬的横砖样式 */
+        .h-brick-red {
+            background-color: #fff;
+            border: 3px solid #e74c3c;
+            border-radius: 6px;
+            position: relative;
+        }
+        .h-brick-red::after {
+            content: ''; position: absolute;
+            top: 0; left: 50%; width: 3px; height: 100%;
+            background: #00cec9; transform: translateX(-50%);
+        }
+
+        /* 消消乐等式对齐排版 */
+        .equation-box {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            font-size: 1.1em;
+            line-height: 2;
+            overflow-x: auto;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .eq-row { display: flex; align-items: center; white-space: nowrap; }
+        .eq-left { width: 150px; text-align: right; margin-right: 15px; font-weight: bold; color: #74b9ff; }
+        .eq-sign { margin: 0 10px; color: #fdcb6e; }
+        .eq-term { display: inline-block; width: 90px; text-align: center; }
+        .eq-term.hl { color: #ff7675; font-weight: bold; }
+        .eq-line { border-bottom: 2px dashed #636e72; margin: 15px 0; }
+        .eq-result { color: #00b894; font-weight: bold; }
 
         /* 滚动变量展示 */
         .rolling-row {
@@ -199,6 +269,7 @@
             align-items: center;
             gap: 15px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
         .roll-box {
             display: flex;
@@ -210,6 +281,7 @@
             border-radius: 15px;
             font-weight: bold;
             position: relative;
+            transition: all 0.3s;
         }
         .roll-box.old { background-color: #dfe6e9; color: #636e72; border: 3px solid #b2bec3; }
         .roll-box.active { background-color: #e3f2fd; color: #0984e3; border: 3px solid #74b9ff; }
@@ -217,19 +289,10 @@
         .roll-title { font-size: 0.8em; }
         .roll-val { font-size: 1.4em; font-family: monospace; }
         
-        .arrow {
-            font-size: 2em;
-            color: #b2bec3;
-        }
+        .arrow { font-size: 2em; color: #b2bec3; }
 
         /* 底部版权 */
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #b2bec3;
-            font-size: 1em;
-            font-weight: bold;
-        }
+        .footer { text-align: center; margin-top: 40px; color: #b2bec3; font-size: 1em; font-weight: bold; }
 
         @media print {
             body { background-color: white; }
@@ -238,7 +301,6 @@
             .card { break-inside: avoid; }
         }
     </style>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
@@ -264,7 +326,7 @@
 
     <div class="card problem">
         <h2>📜 任务清单 (题目描述)</h2>
-        <p>你需要修补一堵长为 N、宽为 2 的“冰墙”（即 <span class="code-inline">2 × N</span> 的网格）。工匠给了你两种可以任意旋转的魔法砖：</p>
+        <p>你需要修补一堵长为 <span class="code-inline">N</span>、宽为 2 的“冰墙”（即 <span class="code-inline">2 × N</span> 的网格）。工匠给了你两种可以任意旋转的魔法砖：</p>
         <ul>
             <li><strong>直砖：</strong> 占 2 个小格的“长条冰”。</li>
             <li><strong>L 砖：</strong> 占 3 个小格的“拐弯冰”。</li>
@@ -288,49 +350,148 @@
     <div class="card logic">
         <h2>🧠 魔法道具箱 (核心图解：状态与滚动变量)</h2>
 
-        <p>这道题的核心是找出铺砖规律的<strong>递推公式</strong>！首先，我们来认识一下手中的魔法砖块：</p>
+        <p>这道题的核心是找出铺砖规律的<strong>递推公式</strong>！首先，我们来认识一下手中的基础魔法砖块：</p>
 
         <div class="visual-panel">
-            <div style="color: #636e72; font-size: 0.9em;">👇 我们拥有的两种魔法冰砖 👇</div>
+            <div style="color: #636e72; font-size: 0.9em; margin-bottom: 15px;">👇 我们拥有的魔法冰砖 👇</div>
             <div class="brick-container">
                 <div>
-                    <div class="grid-2x1">
-                        <div class="ice-block"></div>
-                        <div class="ice-block"></div>
-                    </div>
+                    <div class="brick-v"></div>
                     <div class="brick-label">直砖 (竖放)</div>
                 </div>
                 <div>
-                    <div class="grid-1x2">
-                        <div class="ice-block"></div>
-                        <div class="ice-block"></div>
-                    </div>
+                    <div class="brick-h" style="margin-top: 42px;"></div>
                     <div class="brick-label">直砖 (横放)</div>
                 </div>
                 <div>
-                    <div class="grid-L">
-                        <div class="ice-block"></div>
+                    <div class="grid-L" style="margin-top: 4px;">
+                        <div class="ice-block l-color"></div>
                         <div class="ice-block empty"></div>
-                        <div class="ice-block"></div>
-                        <div class="ice-block"></div>
+                        <div class="ice-block l-color"></div>
+                        <div class="ice-block l-color"></div>
                     </div>
                     <div class="brick-label">L 砖 (可旋转)</div>
                 </div>
             </div>
         </div>
 
-        <h3>✨ 超好用的黄金递推公式</h3>
-        <p>通过仔细推导直砖和L砖的拼合方式，数学向导给出了一个完美的公式。如果设铺满长度为 n 的墙有 f(n) 种方法，那么对于 n ≥ 3，它满足：</p>
-        
-        <div style="text-align: center; font-size: 1.2em; margin: 20px 0; padding: 15px; background: #e0f7fa; border-radius: 10px; border: 2px dashed #00cec9;">
-            $$f(n) = 2 \cdot f(n-1) + f(n-3)$$
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #fdcb6e; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #d35400; margin-top: 0; text-align: center;">🤔 破冰思考：奇妙的公式是怎么诞生的？</h3>
+            <p>要找出长度为 <span class="code-inline">n</span> 的冰墙有多少种拼法（记作 <span class="code-inline">f(n)</span>），我们只需要盯住<strong>冰墙最右边（最后一次放砖）</strong>是怎么收尾的。</p>
+            
+            <p><strong>第一步：老老实实的直砖收尾</strong></p>
+            
+            <div style="display: flex; gap: 20px; justify-content: center; margin-top: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="text-align: center; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9;">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 70px; height: 82px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 5px; font-weight: bold;">前 <span class="code-inline" style="margin: 0 4px;">n-1</span> 列</div>
+                        <div style="margin-left: 5px;" class="brick-v"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-weight: bold; color: #0984e3;">放 1 块竖放直砖<br>👉 继承了 <span class="code-inline">f(n-1)</span> 种</div>
+                </div>
+                <div style="text-align: center; background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9;">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 70px; height: 82px; background: #eee; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 5px; font-weight: bold;">前 <span class="code-inline" style="margin: 0 4px;">n-2</span> 列</div>
+                        <div style="margin-left: 5px; display: flex; flex-direction: column; gap: 2px;">
+                            <div class="brick-h"></div>
+                            <div class="brick-h"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-weight: bold; color: #0984e3;">叠放 2 块横直砖<br>👉 继承了 <span class="code-inline">f(n-2)</span> 种</div>
+                </div>
+            </div>
+
+            <p><strong>第二步：调皮的 L 砖“吞噬拉伸”魔法</strong></p>
+            <p>L 砖是不规则的！为了让边缘平整，它必须<strong>成对出现</strong>。两块 L 砖可以像下颌骨一样紧紧咬合，甚至可以“吞下”横直砖，向左无限拉伸延展！</p>
+            
+            <div class="brick-container" style="background: #fdfbf7; padding: 15px; border-radius: 10px; border: 1px solid #dfe6e9;">
+                <div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 30px); grid-template-rows: 30px 30px; gap: 2px;">
+                        <div class="ice-block l-color" style="grid-column: span 2;"></div>
+                        <div class="ice-block l-color"></div>
+                        <div class="ice-block l-color"></div>
+                        <div class="ice-block l-color" style="grid-column: span 2;"></div>
+                    </div>
+                    <div class="brick-label" style="text-align: center;">宽 = 3<br>(直接咬合)</div>
+                </div>
+                <div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 30px); grid-template-rows: 30px 30px; gap: 2px;">
+                        <div class="ice-block l-color"></div>
+                        <div class="h-brick-red" style="grid-column: span 2;"></div>
+                        <div class="ice-block l-color"></div>
+                        <div class="ice-block l-color" style="grid-column: span 2;"></div>
+                        <div class="ice-block l-color" style="grid-column: span 2;"></div>
+                    </div>
+                    <div class="brick-label" style="text-align: center;">宽 = 4<br>(吞入1个横向直砖)</div>
+                </div>
+                <div>
+                    <div style="display: grid; grid-template-columns: repeat(5, 30px); grid-template-rows: 30px 30px; gap: 2px;">
+                        <div class="ice-block l-color"></div>
+                        <div class="h-brick-red" style="grid-column: span 2;"></div>
+                        <div class="ice-block l-color" style="grid-column: span 2;"></div>
+                        <div class="ice-block l-color" style="grid-column: span 2;"></div>
+                        <div class="h-brick-red" style="grid-column: span 2;"></div>
+                        <div class="ice-block l-color"></div>
+                    </div>
+                    <div class="brick-label" style="text-align: center;">宽 = 5<br>(吞入2个横向直砖)</div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 15px;">你看！无论这个“怪兽嘴巴”拉伸成宽为 3、4、5 还是更长，由于它可以<strong>整体上下翻转</strong>，所以每种长度都恰好有 <strong>2 种</strong>拼法！<br>
+            这就意味着，L 砖组合会给总数不断增加：<span class="highlight">2·f(n-3) + 2·f(n-4) + 2·f(n-5) + ...</span> 直到填满前方！</p>
+
+            <p><strong>第三步：数学消消乐大变身</strong></p>
+            <p>如果把上面的发现全部加起来，我们会得到一个长到看不到尽头的等式。别怕，我们用初中数学的魔法来彻底简化它：</p>
+            
+            <div class="equation-box">
+                <div style="color: #ffeaa7; margin-bottom: 10px; border-bottom: 1px solid #636e72; padding-bottom: 5px; font-weight: bold;">【第一步】列出根据规律得出的超长原始公式</div>
+                <div class="eq-row">
+                    <div class="eq-left"><span class="code-inline">f(n)</span></div>
+                    <div class="eq-sign">=</div>
+                    <div class="eq-term"><span class="code-inline">f(n-1)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term"><span class="code-inline">f(n-2)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term">2·<span class="code-inline">f(n-3)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term hl">2·<span class="code-inline">f(n-4)</span></div><div class="eq-sign hl">+</div>
+                    <div class="eq-term hl">2·<span class="code-inline">f(n-5)</span></div><div class="eq-sign">...</div>
+                </div>
+
+                <div style="color: #ffeaa7; margin: 15px 0 10px 0; border-bottom: 1px solid #636e72; padding-bottom: 5px; font-weight: bold;">【第二步】把公式里的 n 全部替换成 n-1，得出前一项公式</div>
+                <div class="eq-row">
+                    <div class="eq-left"><span class="code-inline">f(n-1)</span></div>
+                    <div class="eq-sign">=</div>
+                    <div class="eq-term"></div><div class="eq-sign" style="visibility:hidden">+</div>
+                    <div class="eq-term"><span class="code-inline">f(n-2)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term"><span class="code-inline">f(n-3)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term hl">2·<span class="code-inline">f(n-4)</span></div><div class="eq-sign hl">+</div>
+                    <div class="eq-term hl">2·<span class="code-inline">f(n-5)</span></div><div class="eq-sign">...</div>
+                </div>
+
+                <div style="color: #ff7675; margin: 15px 0 10px 0; border-bottom: 1px solid #636e72; padding-bottom: 5px; font-weight: bold;">【第三步】上下两式对齐相减！红色的长尾巴瞬间互相抵消，归零！</div>
+                <div class="eq-line"></div>
+                <div class="eq-row">
+                    <div class="eq-left"><span class="code-inline">f(n)</span> - <span class="code-inline">f(n-1)</span></div>
+                    <div class="eq-sign">=</div>
+                    <div class="eq-term eq-result"><span class="code-inline">f(n-1)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term" style="text-decoration: line-through; color: #636e72;">0</div><div class="eq-sign">+</div>
+                    <div class="eq-term eq-result"><span class="code-inline">f(n-3)</span></div><div class="eq-sign">+</div>
+                    <div class="eq-term" style="text-decoration: line-through; color: #636e72;">0</div><div class="eq-sign">+</div>
+                    <div class="eq-term" style="text-decoration: line-through; color: #636e72;">0</div><div class="eq-sign">...</div>
+                </div>
+
+                <div style="color: #00b894; margin: 15px 0 10px 0; border-bottom: 1px solid #636e72; padding-bottom: 5px; font-weight: bold;">【第四步】整理公式，把左边的 -f(n-1) 移项到右边即可！</div>
+                <div class="eq-row" style="justify-content: center; font-size: 1.3em; margin-top: 20px;">
+                    <span style="color:#0984e3; background: #e3f2fd; padding: 5px 25px; border-radius: 8px; border: 2px dashed #74b9ff;">
+                        <span class="code-inline">f(n)</span> = 2·<span class="code-inline">f(n-1)</span> + <span class="code-inline">f(n-3)</span>
+                    </span>
+                </div>
+            </div>
         </div>
 
         <h3>✨ O(1) 空间的“滚动”秘术</h3>
-        <p>要算 f(n)，我们根本不需要把前面的所有结果都存下来，我们只需要它前面的 <strong>3 个兄弟</strong>：f(n-3), f(n-2), 和 f(n-1)。就像接力跑一样，每次算出新结果，旧的变量就往前“滚动”移交接力棒！</p>
+        <p>有了公式以后我们发现，要算 <span class="code-inline">f(n)</span>，我们根本不需要把前面的所有结果都存下来。我们只需要它前面的 <strong>3 个兄弟</strong>：<span class="code-inline">f(n-3)</span>, <span class="code-inline">f(n-2)</span>, 和 <span class="code-inline">f(n-1)</span>。就像接力跑一样，每次算出新结果，旧的变量就往前“滚动”移交接力棒！</p>
 
         <div class="visual-panel">
-            <div style="color: #636e72; font-size: 0.9em;">🏃 滚动变量大挪移 (假设算出了新的一项 cur) 🏃</div>
+            <div style="color: #636e72; font-size: 0.9em;">🏃 滚动变量大挪移 (每一次循环中发生的事) 🏃</div>
             <div class="rolling-row">
                 <div class="roll-box old">
                     <div class="roll-title">旧 a</div>
@@ -338,16 +499,18 @@
                 </div>
                 <div class="arrow">→</div>
                 <div class="roll-box active">
-                    <div class="roll-title">新 a (原b)</div>
-                    <div class="roll-val">b</div>
+                    <div class="roll-title">新 a</div>
+                    <div class="roll-val">原 b</div>
                 </div>
+                <div class="arrow">→</div>
                 <div class="roll-box active">
-                    <div class="roll-title">新 b (原c)</div>
-                    <div class="roll-val">c</div>
+                    <div class="roll-title">新 b</div>
+                    <div class="roll-val">原 c</div>
                 </div>
+                <div class="arrow">→</div>
                 <div class="roll-box new">
-                    <div class="roll-title">新 c (原cur)</div>
-                    <div class="roll-val">cur</div>
+                    <div class="roll-title">新 c</div>
+                    <div class="roll-val">新计算</div>
                 </div>
             </div>
         </div>

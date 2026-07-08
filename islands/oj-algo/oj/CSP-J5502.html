@@ -315,14 +315,64 @@
     <div class="card logic">
         <h2>🧠 魔法道具箱 (核心图解：递推与滑动窗口)</h2>
         
-        <p>这道题是经典的<strong>动态规划 (DP)</strong>。想知道到达第 <span class="code-inline">i</span> 级的方法数，只要知道它前面 <span class="code-inline">K</span> 级的方法数，然后把它们全加起来就行了！</p>
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #fdcb6e; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #d35400; margin-top: 0; text-align: center;">🤔 破冰思考：递推公式是怎么来的？</h3>
+            <p>面对未知的阶梯，我们先不要被 N 和 K 吓倒，试着把目标放小一点。假设我们现在的目标是跳到<strong>第 4 级</strong>台阶，并且每次最多只能跳 <strong>2 级</strong>（也就是 K=2）。</p>
+            
+            <p><strong>神奇的“时光倒流法”：</strong><br>
+            闭上眼睛想一想，在你稳稳落在第 4 级台阶的“前一瞬间”，你有可能站在哪里？因为规则限定了一次最多跳 2 级，所以只有以下两种情况能够直接跳到第 4 级：</p>
+            
+            <ul style="line-height: 2;">
+                <li><strong>情况 A：</strong>你当时正站在<strong>第 3 级</strong>，然后轻轻一跃（跳 1 级）到达了终点。</li>
+                <li><strong>情况 B：</strong>你当时正站在<strong>第 2 级</strong>，然后双腿发力猛地一跃（跳 2 级）跨到了终点。</li>
+            </ul>
+            
+            <p>既然所有通向第 4 级的路线，都<strong>必须且只能</strong>从第 3 级或者第 2 级经过，那么：</p>
+            
+            <div style="background: #fffcf0; border: 2px solid #ffeaa7; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0;">
+                <span style="font-size: 1.2em; font-weight: bold; color: #d35400;">到达第 4 级的总跳法 = 到达第 3 级的跳法 + 到达第 2 级的跳法</span>
+            </div>
 
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; margin: 20px 0; gap: 15px;">
+                <div style="text-align: center; flex: 1; min-width: 120px;">
+                    <div style="background: #f0fdf4; border: 2px dashed #00b894; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <strong>站在第 2 级</strong><br>
+                        <span style="font-size: 0.8em; color:#00b894;">(记录为 dp)</span>
+                    </div>
+                    <div style="color: #00b894; font-weight: bold; margin-top: 8px; font-size: 1.1em;">+2 级跳 ↗️</div>
+                </div>
+                
+                <div style="font-size: 2em; color: #b2bec3; font-weight: bold;">+</div>
+                
+                <div style="text-align: center; flex: 1; min-width: 120px;">
+                    <div style="background: #fff0f0; border: 2px dashed #ff7675; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <strong>站在第 3 级</strong><br>
+                        <span style="font-size: 0.8em; color:#ff7675;">(记录为 dp)</span>
+                    </div>
+                    <div style="color: #ff7675; font-weight: bold; margin-top: 8px; font-size: 1.1em;">+1 级跳 ↗️</div>
+                </div>
+                
+                <div style="font-size: 2em; color: #d35400; font-weight: bold; margin: 0 10px;">=</div>
+                
+                <div style="text-align: center; flex: 1.2; min-width: 140px;">
+                    <div style="background: #ffeaa7; border: 3px solid #f39c12; padding: 15px; border-radius: 15px; box-shadow: 0 6px 12px rgba(243,156,18,0.2);">
+                        <strong style="font-size: 1.2em; color: #d35400;">目标：第 4 级</strong><br>
+                        <span style="font-size: 0.9em; color:#d35400; font-weight: bold;">dp = dp + dp</span>
+                    </div>
+                </div>
+            </div>
+
+            <p style="margin-bottom: 0;"><strong>推而广之：</strong> 假如你的魔法能力变强了，每次最多可以跳 <strong>K 级</strong>。那么要跳到第 <span class="code-inline">i</span> 级，你起跳的地方就可能是前面的 <span class="code-inline">K</span> 个台阶。我们只要把这 <span class="code-inline">K</span> 个台阶各自对应的方法数全部加起来，就可以得到动态规划的终极秘密公式了！</p>
+        </div>
+        
+        <p>这就引出了经典的<strong>动态规划 (DP)</strong> 魔法阵：</p>
         <div class="formula">
             dp[i] = dp[i-1] + dp[i-2] + ... + dp[i-K]
         </div>
 
         <h3>✨ O(N) 的飞跃：滑动窗口求和法</h3>
-        <p>如果每次都用 <span class="code-inline">for</span> 循环往前找 <span class="code-inline">K</span> 个数相加，当 <span class="code-inline">N</span> 和 <span class="code-inline">K</span> 都很大时会超时。我们可以准备一个神奇的<strong>滑动窗口</strong>，它只框住最近的 <span class="code-inline">K</span> 个数。每往前走一步，就把新产生的数加进窗口，把最旧的数踢出窗口，这样加法永远只需做一步！</p>
+        <p>如果每次计算都要往前数 <span class="code-inline">K</span> 个数字然后挨个相加，当阶梯 <span class="code-inline">N</span> 很高、步数 <span class="code-inline">K</span> 很大的时候，计算量会庞大到让程序超时。我们可以准备一个神奇的<strong>滑动窗口</strong>！</p>
+        <p>就像一个用线圈套住的框，这个框永远只框住最近的 <span class="code-inline">K</span> 个台阶的数据。每当我们要往前走一步，就把新产生的数据加进窗口，同时把最末尾过时的数据踢出窗口。这样，不管 K 有多大，每次都只需要做一次加法和一次减法，瞬间提速！</p>
 
         <div class="window-visual">
             <div style="color: #636e72; font-size: 0.9em; margin-bottom: 10px;">👇 图解示例：当 N=5, K=2 时，计算 dp 的瞬间 👇</div>
@@ -353,11 +403,12 @@
             </div>
             
             <div class="window-label">
-                🏃 窗口滑动和 S = 2 + 3 = 5 (新 dp 诞生！)
+                🏃 窗口内的总和 S = 2 + 3 = 5 (第 4 级的答案诞生！)
             </div>
-            <div style="font-size: 0.9em; color: #636e72; margin-top: 10px; text-align: center;">
-                <strong>下一步：</strong>窗口会向右滑动，加入 dp，踢出 dp。<br>
-                S = (当前S + 新来的dp) - 踢走的dp = (5 + 5) - 2 = 8。那就是 dp 的值啦！
+            <div style="font-size: 0.95em; color: #636e72; margin-top: 15px; text-align: center; background: #fdfbf7; padding: 10px; border-radius: 10px; border: 1px solid #dfe6e9;">
+                <strong>窗口向右滑动的下一步：</strong><br>
+                我们要算第 5 级时，窗口要加入新的 <strong>dp</strong>(值为5)，并踢出最老的 <strong>dp</strong>(值为2)。<br>
+                <span style="color: #d35400; font-weight: bold;">新总和 S = (旧S + 新加入的) - 踢走的 = (5 + 5) - 2 = 8。</span> 这就是 dp 的值啦！
             </div>
         </div>
 
