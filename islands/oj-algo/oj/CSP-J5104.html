@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：质数秘境</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #ede7f6;
+            color: #311b92;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #4527a0;
+            background-color: #5e35b1;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(49, 27, 146, 0.15);
+            border: 5px solid #7e57c2;
+        }
+
+        h1 {
+            color: #4527a0;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #d1c4e9;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #e64a19;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #bf360c, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #bf360c, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #e64a19;
+            border-bottom: 3px dashed #b39ddb;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #4527a0;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #f3e5f5;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #ce93d8;
+        }
+        .card.problem { border-color: #7e57c2; background-color: #ede7f6; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.sieve { border-color: #7e57c2; background-color: #ede7f6; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #b39ddb; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #e8eaf6;
+            color: #283593;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 数字网格可视化 ========== */
+        .sieve-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #b39ddb;
+            overflow-x: auto;
+        }
+        .grid-row {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .grid-cell {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.95em;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        /* 状态颜色 */
+        .cell-prime {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #43a047;
+            color: #1b5e20;
+        }
+        .cell-composite {
+            background: #ffebee;
+            border-color: #ef9a9a;
+            color: #c62828;
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .cell-unknown {
+            background: #f5f5f5;
+            border-color: #e0e0e0;
+            color: #666;
+        }
+        .cell-current {
+            background: linear-gradient(135deg, #fff9c4, #fff176);
+            border-color: #fdd835;
+            color: #f57f17;
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+        }
+        .cell-marking {
+            background: #ffcdd2;
+            border-color: #e53935;
+            color: #b71c1c;
+        }
+        .cell-special {
+            background: #e0e0e0;
+            border-color: #9e9e9e;
+            color: #616161;
+        }
+
+        /* ========== 筛法步骤动画框 ========== */
+        .sieve-step {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .sieve-step-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .step-num {
+            background: #7e57c2;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .step-desc {
+            font-weight: bold;
+            font-size: 1em;
+        }
+        .strike-list {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin: 5px 0;
+        }
+        .strike-num {
+            background: #ffcdd2;
+            border: 2px solid #e53935;
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-weight: bold;
+            color: #c62828;
+            font-size: 0.9em;
+            text-decoration: line-through;
+        }
+        .keep-num {
+            background: #c8e6c9;
+            border: 2px solid #43a047;
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 0.9em;
+        }
+
+        /* ========== 质数判定对比 ========== */
+        .judge-box {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .judge-card {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .judge-yes {
+            background: #e8f5e9;
+            border: 3px solid #43a047;
+            color: #2e7d32;
+        }
+        .judge-no {
+            background: #ffebee;
+            border: 3px solid #ef5350;
+            color: #c62828;
+        }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #7e57c2;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+            min-width: 85px;
+        }
+        .step-arrow {
+            font-size: 1.5em;
+            color: #7e57c2;
+        }
+
+        /* ========== 解法选择标签 ========== */
+        .method-tab {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0 10px 0;
+            justify-content: center;
+        }
+        .method-btn {
+            padding: 10px 25px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .method-btn.active-a {
+            border-color: #7e57c2;
+            background: #7e57c2;
+            color: white;
+        }
+        .method-btn.active-b {
+            border-color: #00897b;
+            background: #00897b;
+            color: white;
+        }
+
+        /* ========== 数学演算框 ========== */
+        .math-demo {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+        .math-demo .yes { color: #2e7d32; font-weight: bold; }
+        .math-demo .no { color: #c62828; }
+        .math-demo .res { color: #4527a0; font-weight: bold; font-size: 1.1em; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 220px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #d1c4e9;
+        }
+        .example-card strong { color: #4527a0; }
+        .example-card pre {
+            background: transparent;
+            color: #311b92;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 1em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #4527a0, #7e57c2); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #00695c, #26a69a); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 复杂度对比卡 ========== */
+        .complexity-card {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .complexity-item {
+            flex: 1;
+            min-width: 180px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .complexity-item.slow {
+            background: #ffebee;
+            border: 2px solid #ef5350;
+            color: #c62828;
+        }
+        .complexity-item.fast {
+            background: #e8f5e9;
+            border: 2px solid #43a047;
+            color: #2e7d32;
+        }
+
+        /* ========== 图例 ========== */
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            border: 2px solid;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #b39ddb;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn, .method-tab { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏰 质数秘境 ⭐</h1>
+
+    <div style="text-align: center; font-size: 1.2em; color: #4527a0;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        数字王国里隐藏着"超级英雄数字"——质数！<br>
+        用古老的筛法神器，快速找出所有质数吧！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/4" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>给定整数 N，找出从 1 到 N 之间所有的<strong>质数</strong>（只能被 1 和自己整除的数），统计个数并按从小到大输出。</p>
+
+        <div style="background:#ede7f6; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #d1c4e9;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>一个整数 N（2 ≤ N ≤ 10<sup>6</sup>）<br>
+            • <strong>输出：</strong>第1行：质数的个数；第2行：所有质数（从小到大，空格分隔）
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例</strong>
+                <pre>10</pre>
+                <strong>📤 输出：</strong>
+                <pre>4
+2 3 5 7</pre>
+                <div style="font-size:0.85em; color:#888;">1~10 中有 4 个质数</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解)</h2>
+
+        <h3>⭐ 什么是质数？</h3>
+        <p><strong>质数（素数）</strong>= 大于 1 的整数中，只能被 <strong>1</strong> 和<strong>它自身</strong>整除的数。</p>
+
+        <div class="judge-box">
+            <div class="judge-card judge-yes">
+                <div style="font-size:1.5em;">✅ 质数</div>
+                <div style="margin-top:5px;">2, 3, 5, 7, 11, 13...</div>
+                <div style="font-size:0.85em; color:#558b2f; margin-top:5px;">只有两个因数：1 和自己</div>
+            </div>
+            <div class="judge-card judge-no">
+                <div style="font-size:1.5em;">❌ 合数</div>
+                <div style="margin-top:5px;">4, 6, 8, 9, 10, 12...</div>
+                <div style="font-size:0.85em; color:#b71c1c; margin-top:5px;">有三个及以上因数</div>
+            </div>
+            <div class="judge-card" style="background:#f5f5f5; border:3px solid #9e9e9e; color:#616161;">
+                <div style="font-size:1.5em;">⚠️ 特殊</div>
+                <div style="margin-top:5px;">0, 1</div>
+                <div style="font-size:0.85em; margin-top:5px;">既不是质数也不是合数</div>
+            </div>
+        </div>
+
+        <h3>🔍 1~10 的质数检查</h3>
+        <div class="math-demo">
+            1 → 特殊数，<span class="no">不是质数 ❌</span><br>
+            2 → 因数: {1, 2}，只有2个因数 → <span class="yes">质数 ✅</span><br>
+            3 → 因数: {1, 3}，只有2个因数 → <span class="yes">质数 ✅</span><br>
+            4 → 因数: {1, <span class="no">2</span>, 4}，有3个因数 → <span class="no">合数 ❌</span><br>
+            5 → 因数: {1, 5}，只有2个因数 → <span class="yes">质数 ✅</span><br>
+            6 → 因数: {1, <span class="no">2, 3</span>, 6}，有4个因数 → <span class="no">合数 ❌</span><br>
+            7 → 因数: {1, 7}，只有2个因数 → <span class="yes">质数 ✅</span><br>
+            8 → 因数: {1, <span class="no">2, 4</span>, 8}，有4个因数 → <span class="no">合数 ❌</span><br>
+            9 → 因数: {1, <span class="no">3</span>, 9}，有3个因数 → <span class="no">合数 ❌</span><br>
+            10 → 因数: {1, <span class="no">2, 5</span>, 10}，有4个因数 → <span class="no">合数 ❌</span><br>
+        </div>
+
+        <div style="text-align:center; font-weight:bold; color:#4527a0; font-size:1.1em; margin:10px 0;">
+            🏆 1~10 中的质数：<span class="highlight">2, 3, 5, 7</span>，共 4 个！
+        </div>
+    </div>
+
+    <!-- ==================== 双解法选择 ==================== -->
+    <div style="text-align: center; margin: 30px 0 10px 0;">
+        <div style="font-size: 1.3em; font-weight: bold; color: #311b92; margin-bottom: 10px;">🎯 两种解法任你选！</div>
+    </div>
+    <div class="method-tab">
+        <button class="method-btn active-a" onclick="switchMethod('a')">🐢 解法一：逐个判断（会超时）</button>
+        <button class="method-btn" onclick="switchMethod('b')">⚡ 解法二：埃氏筛法（正解）</button>
+    </div>
+
+    <!-- ==================== 解法一：逐个判断 ==================== -->
+    <div class="method-a-only">
+        <div class="card" style="border-color:#7e57c2; background:#ede7f6;">
+            <h2>🐢 解法一：逐个判断质数</h2>
+            <p>最直觉的方法：对每个数 x，检查它有没有除了 1 和自身以外的因数。</p>
+
+            <div class="step-flow">
+                <div class="step-box">
+                    <strong>遍历 x</strong><br>
+                    <span style="font-size:0.85em;">2 到 N</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#ff9800;">
+                    <strong>检查 x</strong><br>
+                    <span style="font-size:0.85em;">有无其他因数？</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#43a047;">
+                    <strong>无 → 质数！</strong><br>
+                    <span style="font-size:0.85em;">记录下来</span>
+                </div>
+            </div>
+
+            <h3>🔎 判断单个数是否为质数</h3>
+            <div style="background:#fff; padding:15px; border-radius:10px; border:2px solid #e0e0e0; margin:10px 0;">
+                <p>检查 x 是否为质数：只需尝试 2 到 √x 之间有没有能整除 x 的数。</p>
+                <p><strong>为什么只到 √x？</strong>因为如果 x 有一个大于 √x 的因数 d，那么 x/d 一定小于 √x，我们早就找到了。</p>
+
+                <div class="math-demo" style="border-color:#d1c4e9;">
+                    <strong>例：判断 7 是否为质数</strong><br>
+                    √7 ≈ 2.65，只需检查 i = 2<br>
+                    7 % 2 = 1 ≠ 0 → 没有因数 → <span class="yes">7 是质数！✅</span><br><br>
+
+                    <strong>例：判断 9 是否为质数</strong><br>
+                    √9 = 3，检查 i = 2, 3<br>
+                    9 % 2 = 1 ≠ 0<br>
+                    9 % 3 = 0 → 找到因数！→ <span class="no">9 是合数！❌</span>
+                </div>
+            </div>
+
+            <div class="thinking-box" style="border-color: #d32f2f; background: #ffebee;">
+                <div class="title" style="color: #d32f2f;">⚠️ 效率问题</div>
+                <p style="margin:5px 0;">
+                    对每个数判断需要 O(√x) 时间，判断 N 个数总共需要 O(N√N) 时间。<br>
+                    当 N = 10<sup>6</sup> 时，约需 10<sup>9</sup> 次运算 → <strong>有超时风险！</strong><br>
+                    我们需要更快的方法 —— 看看解法二的"筛法"！
+                </p>
+            </div>
+        </div>
+
+        <div class="cpp-only">
+            <div class="card code-box">
+                <h2>💻 C++ 逐个判断代码（较慢，可能超时）</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;vector&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="comment">// 🔎 判断 x 是否为质数</span>
+<span class="type">bool</span> isPrime(<span class="type">int</span> x) {
+    <span class="keyword">if</span> (x < <span class="number">2</span>) <span class="keyword">return</span> <span class="number">false</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i * i <= x; i++) {
+        <span class="keyword">if</span> (x % i == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">false</span>;
+    }
+    <span class="keyword">return</span> <span class="number">true</span>;
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> N;
+    cin >> N;
+
+    <span class="type">vector</span>&lt;<span class="type">int</span>&gt; primes;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i <= N; i++) {
+        <span class="keyword">if</span> (isPrime(i)) primes.push_back(i);
+    }
+
+    cout << primes.size() << endl;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < primes.size(); i++) {
+        <span class="keyword">if</span> (i > <span class="number">0</span>) cout << <span class="string">" "</span>;
+        cout << primes[i];
+    }
+    cout << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="py-only" style="display: none;">
+            <div class="card code-box">
+                <h2>💻 Python 逐个判断代码（较慢，可能超时）</h2>
+<pre>
+<span class="keyword">def</span> is_prime(x):
+    <span class="keyword">if</span> x < <span class="number">2</span>:
+        <span class="keyword">return</span> <span class="number">False</span>
+    i = <span class="number">2</span>
+    <span class="keyword">while</span> i * i <= x:
+        <span class="keyword">if</span> x % i == <span class="number">0</span>:
+            <span class="keyword">return</span> <span class="number">False</span>
+        i += <span class="number">1</span>
+    <span class="keyword">return</span> <span class="number">True</span>
+
+N = <span class="type">int</span>(<span class="type">input</span>())
+primes = [i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">2</span>, N + <span class="number">1</span>) <span class="keyword">if</span> is_prime(i)]
+
+<span class="type">print</span>(<span class="type">len</span>(primes))
+<span class="type">print</span>(*primes)
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 解法二：埃氏筛法 ==================== -->
+    <div class="method-b-only" style="display: none;">
+        <div class="card sieve">
+            <h2>⚡ 解法二：埃拉托斯特尼筛法（正解！）</h2>
+
+            <div class="thinking-box" style="border-color: #7e57c2; background: #ede7f6;">
+                <div class="title" style="color: #4527a0;">💡 核心思想：用质数去"筛掉"合数！</div>
+                <p style="margin:5px 0;">
+                    不是一个一个判断是不是质数，而是<strong>反过来</strong>——<br>
+                    从最小的质数 2 开始，把它的所有倍数标记为"合数"（划掉！）<br>
+                    然后找下一个没被划掉的数（它一定是质数），继续划掉它的倍数……<br>
+                    最后所有没被划掉的数就是质数！<br><br>
+                    就像用筛子筛沙子 🫧 —— 合数从筛孔漏下去，质数留在筛子上！
+                </p>
+            </div>
+
+            <h3>🎬 完整动画演示 (N = 30)</h3>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-box" style="background:#f5f5f5; border-color:#e0e0e0;"></div>待检查</div>
+                <div class="legend-item"><div class="legend-box" style="background:linear-gradient(135deg,#fff9c4,#fff176); border-color:#fdd835;"></div>当前质数</div>
+                <div class="legend-item"><div class="legend-box" style="background:#ffcdd2; border-color:#e53935;"></div>被筛掉（合数）</div>
+                <div class="legend-item"><div class="legend-box" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border-color:#43a047;"></div>确认质数</div>
+            </div>
+
+            <!-- 初始状态 -->
+            <div class="sieve-step">
+                <div class="sieve-step-header">
+                    <div class="step-num">0</div>
+                    <div class="step-desc" style="color:#616161;">初始状态：所有数都是"待检查"（假设都是质数）</div>
+                </div>
+                <div class="sieve-grid" style="padding:10px; margin:5px 0; border:none;">
+                    <div class="grid-row">
+                        <div class="grid-cell cell-special">1</div>
+                        <div class="grid-cell cell-unknown">2</div>
+                        <div class="grid-cell cell-unknown">3</div>
+                        <div class="grid-cell cell-unknown">4</div>
+                        <div class="grid-cell cell-unknown">5</div>
+                        <div class="grid-cell cell-unknown">6</div>
+                        <div class="grid-cell cell-unknown">7</div>
+                        <div class="grid-cell cell-unknown">8</div>
+                        <div class="grid-cell cell-unknown">9</div>
+                        <div class="grid-cell cell-unknown">10</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-unknown">11</div>
+                        <div class="grid-cell cell-unknown">12</div>
+                        <div class="grid-cell cell-unknown">13</div>
+                        <div class="grid-cell cell-unknown">14</div>
+                        <div class="grid-cell cell-unknown">15</div>
+                        <div class="grid-cell cell-unknown">16</div>
+                        <div class="grid-cell cell-unknown">17</div>
+                        <div class="grid-cell cell-unknown">18</div>
+                        <div class="grid-cell cell-unknown">19</div>
+                        <div class="grid-cell cell-unknown">20</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-unknown">21</div>
+                        <div class="grid-cell cell-unknown">22</div>
+                        <div class="grid-cell cell-unknown">23</div>
+                        <div class="grid-cell cell-unknown">24</div>
+                        <div class="grid-cell cell-unknown">25</div>
+                        <div class="grid-cell cell-unknown">26</div>
+                        <div class="grid-cell cell-unknown">27</div>
+                        <div class="grid-cell cell-unknown">28</div>
+                        <div class="grid-cell cell-unknown">29</div>
+                        <div class="grid-cell cell-unknown">30</div>
+                    </div>
+                </div>
+                <div style="font-size:0.85em; color:#888; text-align:center;">1 是特殊数，先标记为非质数</div>
+            </div>
+
+            <!-- 步骤1：筛 2 -->
+            <div class="sieve-step" style="border-color: #e53935;">
+                <div class="sieve-step-header">
+                    <div class="step-num" style="background:#e53935;">1</div>
+                    <div class="step-desc" style="color:#c62828;">🔴 i = 2 是质数！划掉 2 的所有倍数</div>
+                </div>
+                <div style="font-size:0.9em; color:#666; margin-bottom:5px;">从 2×2=4 开始，划掉 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30</div>
+                <div class="sieve-grid" style="padding:10px; margin:5px 0; border:none;">
+                    <div class="grid-row">
+                        <div class="grid-cell cell-special">1</div>
+                        <div class="grid-cell cell-current">2</div>
+                        <div class="grid-cell cell-unknown">3</div>
+                        <div class="grid-cell cell-composite">4</div>
+                        <div class="grid-cell cell-unknown">5</div>
+                        <div class="grid-cell cell-composite">6</div>
+                        <div class="grid-cell cell-unknown">7</div>
+                        <div class="grid-cell cell-composite">8</div>
+                        <div class="grid-cell cell-unknown">9</div>
+                        <div class="grid-cell cell-composite">10</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-unknown">11</div>
+                        <div class="grid-cell cell-composite">12</div>
+                        <div class="grid-cell cell-unknown">13</div>
+                        <div class="grid-cell cell-composite">14</div>
+                        <div class="grid-cell cell-unknown">15</div>
+                        <div class="grid-cell cell-composite">16</div>
+                        <div class="grid-cell cell-unknown">17</div>
+                        <div class="grid-cell cell-composite">18</div>
+                        <div class="grid-cell cell-unknown">19</div>
+                        <div class="grid-cell cell-composite">20</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-unknown">21</div>
+                        <div class="grid-cell cell-composite">22</div>
+                        <div class="grid-cell cell-unknown">23</div>
+                        <div class="grid-cell cell-composite">24</div>
+                        <div class="grid-cell cell-unknown">25</div>
+                        <div class="grid-cell cell-composite">26</div>
+                        <div class="grid-cell cell-unknown">27</div>
+                        <div class="grid-cell cell-composite">28</div>
+                        <div class="grid-cell cell-unknown">29</div>
+                        <div class="grid-cell cell-composite">30</div>
+                    </div>
+                </div>
+                <div style="font-size:0.85em; color:#c62828; text-align:center;">所有偶数（2除外）都被划掉了！一下子消灭了一半！💥</div>
+            </div>
+
+            <!-- 步骤2：筛 3 -->
+            <div class="sieve-step" style="border-color: #1565c0;">
+                <div class="sieve-step-header">
+                    <div class="step-num" style="background:#1565c0;">2</div>
+                    <div class="step-desc" style="color:#1565c0;">🔵 i = 3 没被划掉 → 是质数！划掉 3 的倍数</div>
+                </div>
+                <div style="font-size:0.9em; color:#666; margin-bottom:5px;">从 3×3=9 开始，划掉 9, 15, 21, 27（6,12,18,24,30 已被 2 划过了）</div>
+                <div class="sieve-grid" style="padding:10px; margin:5px 0; border:none;">
+                    <div class="grid-row">
+                        <div class="grid-cell cell-special">1</div>
+                        <div class="grid-cell cell-prime">2</div>
+                        <div class="grid-cell cell-current">3</div>
+                        <div class="grid-cell cell-composite">4</div>
+                        <div class="grid-cell cell-unknown">5</div>
+                        <div class="grid-cell cell-composite">6</div>
+                        <div class="grid-cell cell-unknown">7</div>
+                        <div class="grid-cell cell-composite">8</div>
+                        <div class="grid-cell cell-composite">9</div>
+                        <div class="grid-cell cell-composite">10</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-unknown">11</div>
+                        <div class="grid-cell cell-composite">12</div>
+                        <div class="grid-cell cell-unknown">13</div>
+                        <div class="grid-cell cell-composite">14</div>
+                        <div class="grid-cell cell-composite">15</div>
+                        <div class="grid-cell cell-composite">16</div>
+                        <div class="grid-cell cell-unknown">17</div>
+                        <div class="grid-cell cell-composite">18</div>
+                        <div class="grid-cell cell-unknown">19</div>
+                        <div class="grid-cell cell-composite">20</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-composite">21</div>
+                        <div class="grid-cell cell-composite">22</div>
+                        <div class="grid-cell cell-unknown">23</div>
+                        <div class="grid-cell cell-composite">24</div>
+                        <div class="grid-cell cell-unknown">25</div>
+                        <div class="grid-cell cell-composite">26</div>
+                        <div class="grid-cell cell-composite">27</div>
+                        <div class="grid-cell cell-composite">28</div>
+                        <div class="grid-cell cell-unknown">29</div>
+                        <div class="grid-cell cell-composite">30</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤3：筛 5 -->
+            <div class="sieve-step" style="border-color: #2e7d32;">
+                <div class="sieve-step-header">
+                    <div class="step-num" style="background:#2e7d32;">3</div>
+                    <div class="step-desc" style="color:#2e7d32;">🟢 i = 4 已被划掉(跳过) → i = 5 没被划掉 → 质数！划掉 5 的倍数</div>
+                </div>
+                <div style="font-size:0.9em; color:#666; margin-bottom:5px;">从 5×5=25 开始，划掉 25（10,15,20,30 已被划过了）</div>
+                <div class="sieve-grid" style="padding:10px; margin:5px 0; border:none;">
+                    <div class="grid-row">
+                        <div class="grid-cell cell-special">1</div>
+                        <div class="grid-cell cell-prime">2</div>
+                        <div class="grid-cell cell-prime">3</div>
+                        <div class="grid-cell cell-composite">4</div>
+                        <div class="grid-cell cell-current">5</div>
+                        <div class="grid-cell cell-composite">6</div>
+                        <div class="grid-cell cell-unknown">7</div>
+                        <div class="grid-cell cell-composite">8</div>
+                        <div class="grid-cell cell-composite">9</div>
+                        <div class="grid-cell cell-composite">10</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-unknown">11</div>
+                        <div class="grid-cell cell-composite">12</div>
+                        <div class="grid-cell cell-unknown">13</div>
+                        <div class="grid-cell cell-composite">14</div>
+                        <div class="grid-cell cell-composite">15</div>
+                        <div class="grid-cell cell-composite">16</div>
+                        <div class="grid-cell cell-unknown">17</div>
+                        <div class="grid-cell cell-composite">18</div>
+                        <div class="grid-cell cell-unknown">19</div>
+                        <div class="grid-cell cell-composite">20</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-composite">21</div>
+                        <div class="grid-cell cell-composite">22</div>
+                        <div class="grid-cell cell-unknown">23</div>
+                        <div class="grid-cell cell-composite">24</div>
+                        <div class="grid-cell cell-composite">25</div>
+                        <div class="grid-cell cell-composite">26</div>
+                        <div class="grid-cell cell-composite">27</div>
+                        <div class="grid-cell cell-composite">28</div>
+                        <div class="grid-cell cell-unknown">29</div>
+                        <div class="grid-cell cell-composite">30</div>
+                    </div>
+                </div>
+                <div style="font-size:0.85em; color:#2e7d32; text-align:center;">√30 ≈ 5.47，所以筛到 5 就结束了！剩下没划掉的全是质数！</div>
+            </div>
+
+            <!-- 最终结果 -->
+            <div class="sieve-step" style="border-color: #43a047; border-width: 3px;">
+                <div class="sieve-step-header">
+                    <div class="step-num" style="background:#43a047;">✅</div>
+                    <div class="step-desc" style="color:#2e7d32;">最终结果：所有没被划掉的就是质数！</div>
+                </div>
+                <div class="sieve-grid" style="padding:10px; margin:5px 0; border:none;">
+                    <div class="grid-row">
+                        <div class="grid-cell cell-special">1</div>
+                        <div class="grid-cell cell-prime">2</div>
+                        <div class="grid-cell cell-prime">3</div>
+                        <div class="grid-cell cell-composite">4</div>
+                        <div class="grid-cell cell-prime">5</div>
+                        <div class="grid-cell cell-composite">6</div>
+                        <div class="grid-cell cell-prime">7</div>
+                        <div class="grid-cell cell-composite">8</div>
+                        <div class="grid-cell cell-composite">9</div>
+                        <div class="grid-cell cell-composite">10</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-prime">11</div>
+                        <div class="grid-cell cell-composite">12</div>
+                        <div class="grid-cell cell-prime">13</div>
+                        <div class="grid-cell cell-composite">14</div>
+                        <div class="grid-cell cell-composite">15</div>
+                        <div class="grid-cell cell-composite">16</div>
+                        <div class="grid-cell cell-prime">17</div>
+                        <div class="grid-cell cell-composite">18</div>
+                        <div class="grid-cell cell-prime">19</div>
+                        <div class="grid-cell cell-composite">20</div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell cell-composite">21</div>
+                        <div class="grid-cell cell-composite">22</div>
+                        <div class="grid-cell cell-prime">23</div>
+                        <div class="grid-cell cell-composite">24</div>
+                        <div class="grid-cell cell-composite">25</div>
+                        <div class="grid-cell cell-composite">26</div>
+                        <div class="grid-cell cell-composite">27</div>
+                        <div class="grid-cell cell-composite">28</div>
+                        <div class="grid-cell cell-prime">29</div>
+                        <div class="grid-cell cell-composite">30</div>
+                    </div>
+                </div>
+                <div style="text-align:center; font-weight:bold; color:#2e7d32; font-size:1.1em; margin-top:5px;">
+                    🎉 1~30 中有 <span style="color:#c62828; font-size:1.3em;">10</span> 个质数：2, 3, 5, 7, 11, 13, 17, 19, 23, 29
+                </div>
+            </div>
+
+            <h3>🔑 两个关键优化细节</h3>
+
+            <div class="thinking-box" style="border-color: #7e57c2; background: #ede7f6;">
+                <div class="title" style="color: #4527a0;">💡 优化 1：外层循环只到 √N</div>
+                <p style="margin:5px 0;">
+                    如果一个合数 x ≤ N，它<strong>最小的质因数</strong>一定 ≤ √N。<br>
+                    所以筛到 √N 就足够了！之后没被标记的都是质数。<br><br>
+                    例如 N=30，√30 ≈ 5.47，只需处理 i = 2, 3, 5（三个质数）就够了。
+                </p>
+            </div>
+
+            <div class="thinking-box" style="border-color: #00897b; background: #e0f2f1;">
+                <div class="title" style="color: #00695c;">💡 优化 2：从 i×i 开始标记（不是从 2×i）</div>
+                <p style="margin:5px 0;">
+                    当筛质数 i 时，比 i² 小的倍数已经被更小的质数筛过了！<br><br>
+                    <strong>举例：</strong>筛 i=5 时——<br>
+                    • 5×2=10 → 已被 i=2 筛过 ✓<br>
+                    • 5×3=15 → 已被 i=3 筛过 ✓<br>
+                    • 5×4=20 → 已被 i=2 筛过 ✓<br>
+                    • <strong>5×5=25</strong> → 第一个需要 i=5 来筛的数！<br><br>
+                    所以从 <span class="code-inline">j = i * i</span> 开始，避免重复标记，更快！
+                </p>
+            </div>
+
+            <h3>📊 算法流程图</h3>
+            <div class="step-flow">
+                <div class="step-box" style="border-color:#1565c0;">
+                    <strong>初始化</strong><br>
+                    <span style="font-size:0.85em;">全部标记 true<br>0,1 标记 false</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#7e57c2;">
+                    <strong>循环 i</strong><br>
+                    <span style="font-size:0.85em;">2 到 √N</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#ff9800;">
+                    <strong>isPrime[i]?</strong><br>
+                    <span style="font-size:0.85em;">是 → 筛倍数<br>否 → 跳过</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#e53935;">
+                    <strong>j = i²→N</strong><br>
+                    <span style="font-size:0.85em;">标记为 false<br>步长 +i</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#43a047;">
+                    <strong>收集结果</strong><br>
+                    <span style="font-size:0.85em;">true 的就是质数</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="cpp-only">
+            <div class="card knowledge">
+                <h2>📘 C++ 埃氏筛法 · 知识点</h2>
+                <ul>
+                    <li>📦 <strong>bool 数组：</strong> <span class="code-inline">bool isPrime[N+1]</span> 用于标记每个数是否为质数。初始全为 true，然后把合数标记为 false。</li>
+                    <li>🔄 <strong>i * i <= N：</strong> 外层循环条件，等价于 i ≤ √N，但避免浮点数精度问题。</li>
+                    <li>📡 <strong>内层循环：</strong> <span class="code-inline">for (j = i*i; j <= N; j += i)</span> 从 i² 开始，步长 i，标记所有倍数为合数。</li>
+                    <li>⚡ <strong>数组大小注意：</strong> N 最大 10<sup>6</sup>，开静态数组 <span class="code-inline">bool isPrime[1000001]</span> 即可。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 C++ 埃氏筛法代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;vector&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="keyword">const</span> <span class="type">int</span> MAXN = <span class="number">1000001</span>;
+<span class="type">bool</span> isPrime[MAXN];
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> N;
+    cin >> N;
+
+    <span class="comment">// 📋 第1步：初始化，假设全是质数</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i <= N; i++)
+        isPrime[i] = <span class="number">true</span>;
+    <span class="comment">// isPrime[0] = isPrime[1] = false; (默认就是false)</span>
+
+    <span class="comment">// 🔎 第2步：埃氏筛法</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i * i <= N; i++) {
+        <span class="keyword">if</span> (isPrime[i]) {
+            <span class="comment">// i 是质数，划掉它的所有倍数</span>
+            <span class="keyword">for</span> (<span class="type">int</span> j = i * i; j <= N; j += i) {
+                isPrime[j] = <span class="number">false</span>;  <span class="comment">// 标记为合数</span>
+            }
+        }
+    }
+
+    <span class="comment">// 📊 第3步：收集所有质数</span>
+    <span class="type">vector</span>&lt;<span class="type">int</span>&gt; primes;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; i <= N; i++) {
+        <span class="keyword">if</span> (isPrime[i]) primes.push_back(i);
+    }
+
+    <span class="comment">// 📤 输出</span>
+    cout << primes.size() << endl;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < primes.size(); i++) {
+        <span class="keyword">if</span> (i > <span class="number">0</span>) cout << <span class="string">" "</span>;
+        cout << primes[i];
+    }
+    cout << endl;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="py-only" style="display: none;">
+            <div class="card knowledge">
+                <h2>🐍 Python 埃氏筛法 · 知识点</h2>
+                <ul>
+                    <li>📦 <strong>布尔列表：</strong> <span class="code-inline">[True] * (N+1)</span> 创建一个全为 True 的列表，然后把非质数标记为 False。</li>
+                    <li>🔄 <strong>range 三参数：</strong> <span class="code-inline">range(i*i, N+1, i)</span> 从 i² 开始，步长 i，完美枚举倍数。</li>
+                    <li>🐍 <strong>列表推导式：</strong> <span class="code-inline">[i for i in range(2, N+1) if is_prime[i]]</span> 一行收集所有质数，简洁优雅。</li>
+                    <li>⚡ <strong>int(N**0.5)：</strong> Python 中计算平方根用 <span class="code-inline">N**0.5</span>，转 int 截断小数。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 Python 埃氏筛法代码</h2>
+<pre>
+<span class="keyword">import</span> sys
+<span class="type">input</span> = sys.stdin.readline
+
+N = <span class="type">int</span>(<span class="type">input</span>())
+
+<span class="comment"># 📋 第1步：初始化</span>
+is_prime = [<span class="number">False</span>, <span class="number">False</span>] + [<span class="number">True</span>] * (N - <span class="number">1</span>)
+<span class="comment"># is_prime[0]=False, is_prime[1]=False, 其余=True</span>
+
+<span class="comment"># 🔎 第2步：埃氏筛法</span>
+i = <span class="number">2</span>
+<span class="keyword">while</span> i * i <= N:
+    <span class="keyword">if</span> is_prime[i]:
+        <span class="comment"># i 是质数，划掉它的所有倍数</span>
+        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(i * i, N + <span class="number">1</span>, i):
+            is_prime[j] = <span class="number">False</span>
+    i += <span class="number">1</span>
+
+<span class="comment"># 📊 第3步：收集所有质数</span>
+primes = [i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">2</span>, N + <span class="number">1</span>) <span class="keyword">if</span> is_prime[i]]
+
+<span class="comment"># 📤 输出</span>
+<span class="type">print</span>(<span class="type">len</span>(primes))
+<span class="type">print</span>(*primes)
+</pre>
+            </div>
+        </div>
+
+        <!-- 详细执行过程 -->
+        <div class="card sieve">
+            <h3>🔍 代码执行过程详解 (N = 10)</h3>
+            <div class="math-demo" style="border-color: #b39ddb;">
+                <div style="font-weight:bold; color:#4527a0; margin-bottom:8px;">📋 初始：isPrime = [F, F, T, T, T, T, T, T, T, T, T]</div>
+                <div style="font-size:0.85em; color:#888; margin-bottom:8px;">(下标 0~10，F=false, T=true)</div>
+
+                <strong style="color:#e53935;">i=2：</strong> isPrime[2]=true ✅ → 是质数！<br>
+                &nbsp;&nbsp;筛倍数：j=4,6,8,10 → 标记为 false<br>
+                &nbsp;&nbsp;isPrime = [F,F,<span class="yes">T</span>,T,<span class="no">F</span>,T,<span class="no">F</span>,T,<span class="no">F</span>,T,<span class="no">F</span>]<br><br>
+
+                <strong style="color:#1565c0;">i=3：</strong> isPrime[3]=true ✅ → 是质数！<br>
+                &nbsp;&nbsp;筛倍数：j=9 → 标记为 false<br>
+                &nbsp;&nbsp;isPrime = [F,F,<span class="yes">T</span>,<span class="yes">T</span>,F,<span class="yes">T</span>,F,<span class="yes">T</span>,F,<span class="no">F</span>,F]<br><br>
+
+                <strong style="color:#616161;">i=4：</strong> 4×4=16 > 10 → <strong>循环结束！</strong><br><br>
+
+                <strong style="color:#2e7d32;">收集结果：</strong>isPrime 为 true 的下标 = <span class="res">2, 3, 5, 7</span><br>
+                共 <span class="res">4</span> 个质数 ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 两种解法对比 ==================== -->
+    <div class="card logic">
+        <h2>⚖️ 两种解法对比</h2>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">对比项</th>
+                <th class="a-th">🐢 逐个判断</th>
+                <th class="b-th">⚡ 埃氏筛法</th>
+            </tr>
+            <tr>
+                <td><strong>思路</strong></td>
+                <td>对每个数，检查有没有因数</td>
+                <td>用质数的倍数标记合数</td>
+            </tr>
+            <tr>
+                <td><strong>时间复杂度</strong></td>
+                <td>O(N√N)</td>
+                <td>O(N log log N)</td>
+            </tr>
+            <tr>
+                <td><strong>N=10⁶ 时</strong></td>
+                <td>~10⁹ 次 😱</td>
+                <td>~4×10⁶ 次 🚀</td>
+            </tr>
+            <tr>
+                <td><strong>空间</strong></td>
+                <td>O(1)</td>
+                <td>O(N)（bool 数组）</td>
+            </tr>
+            <tr>
+                <td><strong>适用场景</strong></td>
+                <td>判断单个数</td>
+                <td>批量筛所有质数</td>
+            </tr>
+            <tr>
+                <td><strong>能否通过？</strong></td>
+                <td style="color:#c62828; font-weight:bold;">⚠️ 可能超时</td>
+                <td style="color:#2e7d32; font-weight:bold;">✅ 轻松通过！</td>
+            </tr>
+        </table>
+
+        <div class="complexity-card">
+            <div class="complexity-item slow">
+                <div style="font-size:1.5em;">🐢</div>
+                O(N√N)<br>
+                N=10⁶ → ~10⁹<br>
+                ≈ 10 秒 ⏰
+            </div>
+            <div class="complexity-item fast">
+                <div style="font-size:1.5em;">⚡</div>
+                O(N log log N)<br>
+                N=10⁶ → ~4×10⁶<br>
+                ≈ 0.05 秒 🚀
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例：N = 10</strong><br>
+                筛法过程：筛2(划掉4,6,8,10)，筛3(划掉9)，4>√10 停止<br>
+                剩余质数：2, 3, 5, 7 → 共 4 个<br>
+                输出：<strong>4</strong> 换行 <strong>2 3 5 7</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界测试：N = 2</strong><br>
+                2×2=4 > 2，外层循环不执行<br>
+                isPrime[2] = true → 质数 = {2} → 共 1 个<br>
+                输出：<strong>1</strong> 换行 <strong>2</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #7e57c2;">
+                <strong style="color:#4527a0;">稍大测试：N = 20</strong><br>
+                筛2(划4,6,8,10,12,14,16,18,20)，筛3(划9,15)，筛4→跳过，5>√20 停止<br>
+                质数：2, 3, 5, 7, 11, 13, 17, 19 → 共 8 个 ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 知识拓展 ==================== -->
+    <div class="card logic">
+        <h2>🧩 知识拓展</h2>
+
+        <h3>📈 质数有多少个？</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+            <p>根据<strong>素数定理</strong>，1 到 N 之间的质数大约有 <span class="code-inline">N / ln(N)</span> 个。</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:10px 0;">
+                <div style="background:#ede7f6; padding:10px 15px; border-radius:10px; text-align:center;">
+                    <div style="font-weight:bold; color:#4527a0;">N = 100</div>
+                    <div>质数：25 个</div>
+                </div>
+                <div style="background:#ede7f6; padding:10px 15px; border-radius:10px; text-align:center;">
+                    <div style="font-weight:bold; color:#4527a0;">N = 1000</div>
+                    <div>质数：168 个</div>
+                </div>
+                <div style="background:#ede7f6; padding:10px 15px; border-radius:10px; text-align:center;">
+                    <div style="font-weight:bold; color:#4527a0;">N = 10⁶</div>
+                    <div>质数：78,498 个</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>🔗 与上一题"拍头游戏"的联系</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:200px; background:#f3e5f5; padding:12px; border-radius:10px; border:2px solid #ce93d8;">
+                    <div style="font-weight:bold; color:#6a1b9a; margin-bottom:5px;">🎯 拍头游戏</div>
+                    <div style="font-size:0.9em;">
+                        对每个值 x，把 cnt[x] 加到<br><strong>x 的所有倍数</strong>上<br>
+                        <span class="code-inline">for y=x; y≤max; y+=x</span>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:200px; background:#ede7f6; padding:12px; border-radius:10px; border:2px solid #b39ddb;">
+                    <div style="font-weight:bold; color:#4527a0; margin-bottom:5px;">🏰 质数秘境</div>
+                    <div style="font-size:0.9em;">
+                        对每个质数 i，把<br><strong>i 的所有倍数</strong>标记为合数<br>
+                        <span class="code-inline">for j=i*i; j≤N; j+=i</span>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align:center; font-weight:bold; color:#4527a0; margin-top:10px;">
+                核心都是同一个模板：<span class="code-inline">枚举倍数！</span> 记住这个万能技巧！
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>⭐ 质数的定义：</strong> 大于 1 的正整数中，只有 1 和自身两个因数的数。<strong>1 不是质数，2 是最小的质数</strong>（也是唯一的偶质数）。</li>
+            <li><strong>🧹 筛法核心思想：</strong> 不是一个一个判断质数，而是<strong>用质数去"淘汰"合数</strong>。从 2 开始，把它的倍数全部标为合数，然后处理下一个未被标记的数（它一定是质数），重复此过程。</li>
+            <li><strong>📐 外层只到 √N：</strong> 合数的最小质因数一定 ≤ √N，所以筛到 √N（即 <span class="code-inline">i * i <= N</span>）就够了。剩下未被标记的全是质数。</li>
+            <li><strong>⚡ 从 i² 开始标记：</strong> 筛质数 i 时，从 <span class="code-inline">j = i * i</span> 开始标记（而不是 <span class="code-inline">j = 2 * i</span>），因为比 i² 小的合数已经被更小的质数筛过了。这个优化能减少大量重复操作！</li>
+            <li><strong>🧮 复杂度魔法：</strong> 埃氏筛法的时间复杂度是 O(N log log N)，几乎接近 O(N)！处理 N = 10<sup>6</sup> 仅需百万级操作，比逐个判断的 O(N√N) 快百倍！</li>
+            <li><strong>🎒 竞赛必备模板：</strong> 埃氏筛法是信息学竞赛中的<strong>基础模板</strong>，不仅用于筛质数，还能扩展到筛最小质因数、欧拉函数等。务必熟记！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🏰 质数秘境的大门已经打开！安雅成功找到了所有超级英雄数字！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+
+    function switchMethod(method) {
+        const aElements = document.querySelectorAll('.method-a-only');
+        const bElements = document.querySelectorAll('.method-b-only');
+        const buttons = document.querySelectorAll('.method-btn');
+
+        buttons.forEach(btn => {
+            btn.classList.remove('active-a', 'active-b');
+        });
+
+        if (method === 'a') {
+            aElements.forEach(el => el.style.display = 'block');
+            bElements.forEach(el => el.style.display = 'none');
+            buttons[0].classList.add('active-a');
+        } else {
+            aElements.forEach(el => el.style.display = 'none');
+            bElements.forEach(el => el.style.display = 'block');
+            buttons[1].classList.add('active-b');
+        }
+    }
+</script>
+
+</body>
+</html>

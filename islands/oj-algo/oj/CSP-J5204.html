@@ -3,375 +3,958 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSP-J5204 玩具魔法圈 - 编程魔法课堂</title>
+    <title>魔法课堂：小人迷阵</title>
     <style>
-        /* --- 全局风格设置 --- */
-        :root {
-            --bg-color: #f0f4f8; /* 浅天蓝 */
-            --card-bg: #ffffff;
-            --text-color: #2c3e50; /* 深蓝灰 */
-            --cpp-color: #3498db; /* 经典蓝 */
-            --py-color: #f1c40f; /* 能量黄 */
-            --accent-toy: #e91e63; /* 玩具粉 */
-            --border-radius: 15px;
-        }
-
         body {
             font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #f3f0ff;
+            color: #444;
             margin: 0;
             padding: 20px;
-            line-height: 1.6;
-            transition: background-color 0.3s;
-            background-image: radial-gradient(#d1d9e6 1px, transparent 1px);
-            background-size: 40px 40px;
+            line-height: 1.8;
+            letter-spacing: 1px;
         }
 
-        /* 容器 */
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: var(--card-bg);
-            padding: 40px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            border: 4px solid #d1d9e6;
-        }
-
-        /* --- 顶部切换按钮 --- */
-        .toggle-bar {
+        .lang-switch {
             text-align: center;
-            margin-bottom: 30px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(240, 244, 248, 0.9);
-            padding: 10px;
-            border-radius: 50px;
+            margin-bottom: 20px;
         }
-        
-        .toggle-btn {
-            padding: 12px 35px;
-            font-size: 1.1em;
-            border: 2px solid;
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 0 10px;
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
             font-family: inherit;
             font-weight: bold;
-            background: white;
+            cursor: pointer;
+            margin: 0 10px;
             transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0984e3;
+            background-color: #74b9ff;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #f39c12;
+            background-color: #ffeaa7;
+            color: #d35400;
         }
 
-        .btn-cpp { color: var(--cpp-color); border-color: var(--cpp-color); }
-        .btn-cpp.active { background-color: var(--cpp-color); color: white; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); }
-        
-        .btn-py { color: #d4ac0d; border-color: #d4ac0d; }
-        .btn-py.active { background-color: var(--py-color); color: white; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4); }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 5px solid #6c5ce7;
+        }
 
-        /* --- 标题样式 --- */
         h1 {
+            color: #6c5ce7;
             text-align: center;
             font-size: 2.5em;
-            margin-bottom: 10px;
-            color: var(--accent-toy);
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0px #f8bbd0;
+            text-shadow: 2px 2px 0px #ffeaa7;
+            margin-bottom: 20px;
         }
-        .header-container { text-align: center; margin-bottom: 40px; }
-        .subtitle {
-            color: #7f8c8d;
+
+        .action-btn {
+            display: inline-block;
+            background-color: #6c5ce7;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
             font-size: 1.2em;
-            margin-top: 10px;
+            box-shadow: 0 5px 0 #5a4bd1, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
         }
-        .badge {
-            background: var(--accent-toy);
-            color: #fff;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.6em;
-            vertical-align: middle;
-            margin-right: 10px;
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #5a4bd1, 0 5px 10px rgba(0,0,0,0.1);
         }
 
         h2 {
-            color: #2980b9;
-            border-left: 8px solid var(--accent-toy);
-            padding-left: 15px;
+            color: #d35400;
+            border-bottom: 3px dashed #6c5ce7;
+            padding-bottom: 10px;
             margin-top: 40px;
-            font-size: 1.7em;
         }
 
-        /* --- 卡片样式 --- */
+        h3 {
+            color: #e67e22;
+            margin-top: 25px;
+        }
+
         .card {
-            background-color: #fdfefe;
+            background-color: #fdfbf7;
             border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            border: 1px solid #ebedef;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #6c5ce7;
         }
 
-        /* 逻辑表格样式 */
-        .logic-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: #fff;
+        .card.problem { border-color: #6c5ce7; background-color: #f3f0ff; }
+        .card.logic { border-color: #fdcb6e; background-color: #fffcf0; }
+        .card.knowledge { border-color: #00b894; background-color: #f0fdf4; }
+        .card.code-box { border-color: #2d3436; background-color: #f5f6fa; }
+        .card.summary { border-color: #e17055; background-color: #fff5f0; }
+        .card.example { border-color: #00cec9; background-color: #f0ffff; }
+
+        pre {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
         }
-        .logic-table th, .logic-table td {
-            border: 2px solid #dee2e6;
+
+        .comment { color: #fdcb6e; font-style: italic; }
+        .keyword { color: #ff7675; font-weight: bold; }
+        .type { color: #74b9ff; }
+        .string { color: #55efc4; }
+        .number { color: #fab1a0; }
+
+        .code-inline {
+            background-color: #ffeaa7;
+            color: #d35400;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .formula {
+            background-color: #f3f0ff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.15em;
+            color: #6c5ce7;
+            border: 2px dashed #6c5ce7;
+            font-family: Consolas, monospace;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #ffeaa7;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .highlight-red {
+            background-color: #ff7675;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .highlight-green {
+            background-color: #00b894;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .highlight-blue {
+            background-color: #0984e3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .highlight-purple {
+            background-color: #6c5ce7;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* 圆环样式 */
+        .circle-container {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            margin: 20px auto;
+        }
+        .circle-ring {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 4px dashed #b2bec3;
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+        }
+        .circle-person {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+            text-align: center;
+            border: 3px solid;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+            line-height: 1.2;
+            z-index: 2;
+        }
+        .circle-person.face-in {
+            background: linear-gradient(135deg, #dfe6e9, #b2bec3);
+            border-color: #636e72;
+            color: #2d3436;
+        }
+        .circle-person.face-out {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border-color: #f39c12;
+            color: #d35400;
+        }
+        .circle-person.active-person {
+            border-color: #d63031;
+            box-shadow: 0 0 15px rgba(214,48,49,0.4);
+            animation: pulse 1.2s infinite;
+        }
+        .circle-person.target-person {
+            border-color: #00b894;
+            box-shadow: 0 0 15px rgba(0,184,148,0.5);
+        }
+        .circle-center-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            color: #b2bec3;
+            z-index: 1;
+        }
+        .circle-arrow {
+            position: absolute;
+            z-index: 3;
+        }
+
+        /* 规则对比表 */
+        .rule-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .rule-table th {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
             padding: 12px;
+            font-size: 1.05em;
+        }
+        .rule-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
             text-align: center;
         }
-        .logic-table th {
-            background-color: #f8f9fa;
-            color: var(--accent-toy);
-        }
-        .highlight-row { background-color: #fff9c4; font-weight: bold; }
-        
-        /* 图片样式 */
-        .img-placeholder {
-            width: 65%;
-            height: auto;
-            border-radius: 15px;
-            margin: 25px auto;
-            display: block;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border: 3px solid #fff;
+        .rule-table tr:nth-child(even) td { background-color: #f3f0ff; }
+        .rule-table tr:last-child td { border-bottom: none; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
 
-        /* --- 代码高亮样式 --- */
-        pre {
-            background-color: #1e1e1e; /* 现代暗色主题 */
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 12px;
-            font-family: Consolas, "Courier New", monospace;
-            overflow-x: auto;
-            font-size: 1.1em;
-            border-left: 8px solid var(--accent-toy);
-        }
-        .c-kw { color: #569cd6; font-weight: bold; } /* 关键字 */
-        .c-type { color: #4ec9b0; } /* 类型/类 */
-        .c-num { color: #b5cea8; } /* 数字 */
-        .c-com { color: #6a9955; font-style: italic; } /* 注释 */
-        .c-str { color: #ce9178; } /* 字符串 */
-        .c-func { color: #dcdcaa; } /* 函数 */
-
-        .inline-code {
-            font-family: Consolas, monospace;
-            color: #e91e63;
-            background-color: #fce4ec;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #b2bec3;
+            font-size: 1em;
+            font-weight: bold;
         }
 
-        /* --- 切换控制 --- */
-        .cpp-content { display: none; }
-        .py-content { display: none; }
-        body.mode-cpp .cpp-content { display: block; }
-        body.mode-py .py-content { display: block; }
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
 
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.8em; }
+            .lang-btn { padding: 8px 15px; font-size: 1em; }
+            .circle-container { width: 280px; height: 280px; }
+            .circle-ring { width: 240px; height: 240px; }
+            .circle-person { width: 58px; height: 58px; font-size: 0.6em; }
+        }
     </style>
 </head>
-<body class="mode-cpp">
+<body>
 
-    <div class="toggle-bar">
-        <button class="toggle-btn btn-cpp active" onclick="switchLang('cpp')">🛡️ C++ 逻辑破解</button>
-        <button class="toggle-btn btn-py" onclick="switchLang('py')">🐍 Python 逻辑破解</button>
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🎭 小人迷阵 🔮</h1>
+
+    <div style="text-align: center; font-size: 1.2em; color: #6c5ce7;">
+        👋 嗨，聪明的小侦探！我是你的算法向导！<br>
+        玩具小人们围成了一个神秘的魔法圈，快用你的模拟魔法，帮小南找到被藏起来的眼镜吧！
     </div>
 
-    <div class="container">
-        <div class="header-container">
-            <h1><span class="badge">CSP-J5204</span>玩具魔法圈</h1>
-            <div class="subtitle">🧸 梦幻玩具王国 · 相对方向模拟</div>
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/9" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>在梦幻<strong>玩具王国</strong>里，小南的玩具小人们围成了一个<strong>魔法圈</strong>。每个小人有自己的<strong>朝向</strong>和<strong>职业</strong>。小人们把小南的魔法眼镜藏了起来，留下了一串指令线索。</p>
+
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center; background: linear-gradient(135deg, #dfe6e9, #b2bec3); padding: 18px 22px; border-radius: 15px; color: #2d3436; box-shadow: 0 4px 10px rgba(0,0,0,0.15); min-width: 140px;">
+                <div style="font-size: 2.5em;">🧍</div>
+                <strong style="font-size: 1.1em;">朝向圈内 (0)</strong><br>
+                <span style="font-size: 0.85em;">左 = 顺时针 ↻<br>右 = 逆时针 ↺</span>
+            </div>
+            <div style="text-align: center; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); padding: 18px 22px; border-radius: 15px; color: #d35400; box-shadow: 0 4px 10px rgba(243,156,18,0.3); min-width: 140px;">
+                <div style="font-size: 2.5em;">🧍‍♂️</div>
+                <strong style="font-size: 1.1em;">朝向圈外 (1)</strong><br>
+                <span style="font-size: 0.85em;">左 = 逆时针 ↺<br>右 = 顺时针 ↻</span>
+            </div>
+            <div style="text-align: center; background: linear-gradient(135deg, #a29bfe, #6c5ce7); padding: 18px 22px; border-radius: 15px; color: white; box-shadow: 0 4px 10px rgba(108,92,231,0.3); min-width: 140px;">
+                <div style="font-size: 2.5em;">📋</div>
+                <strong style="font-size: 1.1em;">m 条指令</strong><br>
+                <span style="font-size: 0.85em;">a=0 向左数 s 个<br>a=1 向右数 s 个</span>
+            </div>
         </div>
 
-        <div class="card">
-            <h2>📜 消失的魔法眼镜 (题目描述)</h2>
-            <p>
-                小南的魔法眼镜被一群调皮的玩具小人藏起来了！这些小人围成了一个圈。
-                每个小人要么<strong>面朝圈内 (0)</strong>，要么<strong>面朝圈外 (1)</strong>。
-            </p>
-            <p>
-                小人们的方向决定了他们口中“左右”的不同含义：
-            </p>
-            <ul>
-                <li>🏠 <strong>面朝圈内：</strong> 左边是“顺时针”，右边是“逆时针”。</li>
-                <li>🌳 <strong>面朝圈外：</strong> 左边是“逆时针”，右边是“顺时针”。</li>
-            </ul>
-            
-            
-            <img src="CSP-J5204.png" alt="玩具魔法圈示意图" class="img-placeholder">
-            
-            <p>
-                👉 <strong>你的任务：</strong> 
-                从第 1 个小人出发，根据 m 条“左/右数 s 个”的指令，算出最终停在哪个小人面前。
-            </p>
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #6c5ce7; margin-top: 15px;">
+            <h3 style="margin-top: 0; color: #6c5ce7; text-align: center;">🔑 核心难点：朝向决定左右！</h3>
+            <p style="text-align: center;">同样一个"向左数"的指令，面朝圈内和面朝圈外的小人，实际移动方向<strong>完全相反</strong>！</p>
+
+            <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 15px 0;">
+                <div style="background: #f5f6fa; padding: 15px; border-radius: 12px; text-align: center; min-width: 200px;">
+                    <div style="font-size: 1.5em; margin-bottom: 5px;">🧍 朝圈内</div>
+                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 8px;">
+                        <div style="background: #74b9ff; color: white; padding: 5px 12px; border-radius: 8px;">左→顺时针 ↻</div>
+                        <div style="background: #ff7675; color: white; padding: 5px 12px; border-radius: 8px;">右→逆时针 ↺</div>
+                    </div>
+                </div>
+                <div style="background: #fffcf0; padding: 15px; border-radius: 12px; text-align: center; min-width: 200px;">
+                    <div style="font-size: 1.5em; margin-bottom: 5px;">🧍‍♂️ 朝圈外</div>
+                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 8px;">
+                        <div style="background: #ff7675; color: white; padding: 5px 12px; border-radius: 8px;">左→逆时针 ↺</div>
+                        <div style="background: #74b9ff; color: white; padding: 5px 12px; border-radius: 8px;">右→顺时针 ↻</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h2>🧠 核心魔法：方向判定逻辑</h2>
-            <p>本题最关键的地方在于理清<strong>“朝向”</strong>与<strong>“指令方向”</strong>的组合关系：</p>
-            
-            <table class="logic-table">
-                <thead>
-                    <tr>
-                        <th>小人朝向 (dir)</th>
-                        <th>指令方向 (ai)</th>
-                        <th>逻辑关系</th>
-                        <th>实际移动方向</th>
-                        <th>下标操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="highlight-row">
-                        <td>0 (朝内)</td>
-                        <td>0 (向左)</td>
-                        <td>相同</td>
-                        <td>顺时针 ↺</td>
-                        <td>减法 (-)</td>
-                    </tr>
-                    <tr>
-                        <td>0 (朝内)</td>
-                        <td>1 (向右)</td>
-                        <td>不同</td>
-                        <td>逆时针 ↻</td>
-                        <td>加法 (+)</td>
-                    </tr>
-                    <tr>
-                        <td>1 (朝外)</td>
-                        <td>0 (向左)</td>
-                        <td>不同</td>
-                        <td>逆时针 ↻</td>
-                        <td>加法 (+)</td>
-                    </tr>
-                    <tr class="highlight-row">
-                        <td>1 (朝外)</td>
-                        <td>1 (向右)</td>
-                        <td>相同</td>
-                        <td>顺时针 ↺</td>
-                        <td>减法 (-)</td>
-                    </tr>
-                </tbody>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px; border: 2px solid #b2bec3;">
+                <strong>📥 魔法输入阵：</strong><br>
+                <span style="color: #636e72; font-size: 0.9em;">(小人信息 + 指令)</span><br>
+                <span class="highlight">7 3</span><br>
+                <span class="highlight">0 singer</span><br>
+                <span class="highlight">... (共7个小人)</span><br>
+                <span class="highlight">0 3</span> ← 向左数3<br>
+                <span class="highlight">1 1</span> ← 向右数1<br>
+                <span class="highlight">0 2</span> ← 向左数2
+            </div>
+            <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px; border: 2px solid #00cec9;">
+                <strong>📤 奇迹输出阵：</strong><br>
+                <span style="color: #636e72; font-size: 0.9em;">(最终到达的小人的职业)</span><br><br>
+                <span class="highlight" style="font-size: 1.3em;">writer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心思路图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：环形模拟)</h2>
+
+        <p>这道题的核心是两个关键概念：<strong>环形数组</strong>（用取模实现圈圈） + <strong>朝向决定方向</strong>（朝内朝外左右相反）。</p>
+
+        <!-- 环形排列图解 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #6c5ce7; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #6c5ce7; margin-top: 0; text-align: center;">🔵 小人们的魔法圈（逆时针编号）</h3>
+            <p style="text-align: center; color: #636e72;">输入是按<strong>逆时针顺序</strong>给出的，所以编号也是逆时针排列的！</p>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <!-- 简化的圆形图 -->
+                <div style="position: relative; width: 320px; height: 320px; margin: 0 auto;">
+                    <!-- 圆环 -->
+                    <div style="position: absolute; width: 260px; height: 260px; border: 4px dashed #b2bec3; border-radius: 50%; top: 30px; left: 30px;"></div>
+                    <!-- 中心标签 -->
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2em; color: #b2bec3;">圈内 ⭕</div>
+
+                    <!-- 逆时针箭头提示 -->
+                    <div style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); font-size: 0.8em; color: #0984e3; font-weight: bold;">↺ 逆时针 = 编号增大方向</div>
+
+                    <!-- 小人0 - 顶部 -->
+                    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 68px; height: 52px; background: linear-gradient(135deg, #dfe6e9, #b2bec3); border: 3px solid #d63031; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; box-shadow: 0 0 12px rgba(214,48,49,0.3);">
+                        <div>🧍 朝内</div>
+                        <div style="color: #d63031;">0:singer</div>
+                    </div>
+
+                    <!-- 小人1 - 左上 -->
+                    <div style="position: absolute; top: 55px; left: 5px; width: 68px; height: 52px; background: linear-gradient(135deg, #dfe6e9, #b2bec3); border: 3px solid #636e72; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold;">
+                        <div>🧍 朝内</div>
+                        <div>1:reader</div>
+                    </div>
+
+                    <!-- 小人2 - 左 -->
+                    <div style="position: absolute; top: 140px; left: -18px; width: 72px; height: 52px; background: linear-gradient(135deg, #dfe6e9, #b2bec3); border: 3px solid #636e72; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold;">
+                        <div>🧍 朝内</div>
+                        <div>2:mengbier</div>
+                    </div>
+
+                    <!-- 小人3 - 左下 -->
+                    <div style="position: absolute; bottom: 50px; left: 5px; width: 68px; height: 52px; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border: 3px solid #f39c12; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; color: #d35400;">
+                        <div>🧍‍♂️ 朝外</div>
+                        <div>3:thinker</div>
+                    </div>
+
+                    <!-- 小人4 - 底部 -->
+                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 68px; height: 52px; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border: 3px solid #f39c12; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; color: #d35400;">
+                        <div>🧍‍♂️ 朝外</div>
+                        <div>4:archer</div>
+                    </div>
+
+                    <!-- 小人5 - 右下 -->
+                    <div style="position: absolute; bottom: 50px; right: 5px; width: 68px; height: 52px; background: linear-gradient(135deg, #dfe6e9, #b2bec3); border: 3px solid #636e72; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold;">
+                        <div>🧍 朝内</div>
+                        <div>5:writer</div>
+                    </div>
+
+                    <!-- 小人6 - 右 -->
+                    <div style="position: absolute; top: 105px; right: -10px; width: 68px; height: 52px; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border: 3px solid #f39c12; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; color: #d35400;">
+                        <div>🧍‍♂️ 朝外</div>
+                        <div>6:mogician</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 10px;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #dfe6e9, #b2bec3); border: 2px solid #636e72; border-radius: 4px;"></div>
+                    <span style="font-size: 0.9em;">= 朝向圈内 (dir=0)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border: 2px solid #f39c12; border-radius: 4px;"></div>
+                    <span style="font-size: 0.9em;">= 朝向圈外 (dir=1)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 方向规则总结表 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #e17055;">
+            <h3 style="color: #e17055; margin-top: 0; text-align: center;">📋 方向规则大对照表</h3>
+
+            <p style="text-align: center; margin-bottom: 15px;">关键发现：<strong>朝向和指令方向"同"则顺时针（索引减），"异"则逆时针（索引加）</strong></p>
+
+            <table class="rule-table">
+                <tr>
+                    <th>🧍 当前朝向 (dir)</th>
+                    <th>📋 指令方向 (a)</th>
+                    <th>🔄 实际移动</th>
+                    <th>📐 索引变化 (delta)</th>
+                </tr>
+                <tr>
+                    <td><span class="highlight">朝内 (0)</span></td>
+                    <td><span class="highlight-blue">左 (0)</span></td>
+                    <td>顺时针 ↻</td>
+                    <td style="color: #d63031; font-weight: bold;">−s（索引减小）</td>
+                </tr>
+                <tr>
+                    <td><span class="highlight">朝内 (0)</span></td>
+                    <td><span class="highlight-red">右 (1)</span></td>
+                    <td>逆时针 ↺</td>
+                    <td style="color: #00b894; font-weight: bold;">+s（索引增大）</td>
+                </tr>
+                <tr>
+                    <td><span class="highlight" style="background: #fdcb6e;">朝外 (1)</span></td>
+                    <td><span class="highlight-blue">左 (0)</span></td>
+                    <td>逆时针 ↺</td>
+                    <td style="color: #00b894; font-weight: bold;">+s（索引增大）</td>
+                </tr>
+                <tr>
+                    <td><span class="highlight" style="background: #fdcb6e;">朝外 (1)</span></td>
+                    <td><span class="highlight-red">右 (1)</span></td>
+                    <td>顺时针 ↻</td>
+                    <td style="color: #d63031; font-weight: bold;">−s（索引减小）</td>
+                </tr>
             </table>
-            
-            <p>✨ <strong>魔法口诀：</strong> 只要小人朝向和指令方向<strong>相同</strong>，就做<strong>减法</strong>；如果<strong>不同</strong>，就做<strong>加法</strong>！</p>
+
+            <div style="background: #fff5f0; padding: 12px; border-radius: 8px; border-left: 4px solid #e17055; margin-top: 15px;">
+                <strong>💡 规律总结：</strong> 当 <span class="code-inline">dir == a</span>（朝向和指令方向相同）→ 顺时针 → <span class="code-inline">delta = -s</span>；当 <span class="code-inline">dir ≠ a</span>（不同）→ 逆时针 → <span class="code-inline">delta = +s</span>。
+            </div>
         </div>
 
-        <div class="cpp-content card">
-            <h2>🛡️ C++ 破解代码</h2>
-            <p>利用结构体存储小人信息，注意处理下标减法产生的负数情况。</p>
+        <!-- 环形取模图解 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #00b894;">
+            <h3 style="color: #00b894; margin-top: 0; text-align: center;">🔁 环形取模：圆圈上的数学魔法</h3>
+
+            <p>小人围成一圈，编号 0 ~ n-1。当我们走过头时（走出了 0 或 n-1），就要<strong>"绕回来"</strong>！这就是取模运算的用武之地。</p>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <div style="display: inline-block; background: #f0fdf4; padding: 20px 30px; border-radius: 15px; border: 2px solid #00b894;">
+                    <div style="display: flex; align-items: center; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                        <div style="background: #e0e0e0; padding: 8px 12px; border-radius: 8px; font-family: Consolas; font-size: 0.95em;">... 5</div>
+                        <div style="background: #e0e0e0; padding: 8px 12px; border-radius: 8px; font-family: Consolas; font-size: 0.95em;">6</div>
+                        <div style="background: #ff7675; padding: 8px 12px; border-radius: 8px; font-family: Consolas; color: white; font-size: 0.95em;">0</div>
+                        <div style="background: #e0e0e0; padding: 8px 12px; border-radius: 8px; font-family: Consolas; font-size: 0.95em;">1</div>
+                        <div style="background: #e0e0e0; padding: 8px 12px; border-radius: 8px; font-family: Consolas; font-size: 0.95em;">2 ...</div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9em; color: #636e72;">
+                        ← 从编号 6 再往后走一步，就回到了编号 0 →
+                    </div>
+                </div>
+            </div>
+
+            <div class="formula">
+                新位置 = (cur + delta + n) % n
+            </div>
+            <div style="text-align: center; color: #636e72; font-size: 0.95em;">
+                <strong>为什么要 +n？</strong> 因为 delta 可能是负数（顺时针），加上 n 保证取模前是正数！
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
+                <div style="background: #f0fdf4; padding: 12px 18px; border-radius: 10px; border: 1px solid #00b894; text-align: center;">
+                    <strong>例子（n=7）：</strong><br>
+                    <span class="code-inline">(0 + (-3) + 7) % 7</span><br>
+                    = <span class="code-inline">(4) % 7 = 4</span> ✅
+                </div>
+                <div style="background: #f0fdf4; padding: 12px 18px; border-radius: 10px; border: 1px solid #00b894; text-align: center;">
+                    <strong>例子（n=7）：</strong><br>
+                    <span class="code-inline">(5 + 3 + 7) % 7</span><br>
+                    = <span class="code-inline">(15) % 7 = 1</span> ✅
+                </div>
+            </div>
+        </div>
+
+        <h3>✨ 解题三步法：</h3>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;">
+            <div style="flex: 1; min-width: 180px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #6c5ce7; text-align: center;">
+                <div style="font-size: 2.5em;">📥</div>
+                <strong style="color: #6c5ce7;">步骤一</strong><br>
+                <strong>读入数据</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">存储每个小人的朝向和职业，当前位置 cur = 0</span>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #e17055; text-align: center;">
+                <div style="font-size: 2.5em;">🧭</div>
+                <strong style="color: #e17055;">步骤二</strong><br>
+                <strong>执行指令</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">根据朝向和指令算出 delta，更新 cur</span>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #00b894; text-align: center;">
+                <div style="font-size: 2.5em;">🎯</div>
+                <strong style="color: #00b894;">步骤三</strong><br>
+                <strong>输出答案</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">所有指令执行完后，输出 cur 处的职业</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例详解 ==================== -->
+    <div class="card example">
+        <h2>🔍 谜题破解 (样例详解)</h2>
+
+        <h3>🌈 样例 1：帮小南找眼镜</h3>
+
+        <div style="background: white; padding: 15px; border-radius: 12px; margin: 10px 0; border: 2px solid #eee;">
+            <strong>📿 小人名单（逆时针顺序）：</strong>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                <div style="background: #dfe6e9; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #636e72;"><strong>0</strong> 🧍朝内 singer</div>
+                <div style="background: #dfe6e9; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #636e72;"><strong>1</strong> 🧍朝内 reader</div>
+                <div style="background: #dfe6e9; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #636e72;"><strong>2</strong> 🧍朝内 mengbier</div>
+                <div style="background: #ffeaa7; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #f39c12; color: #d35400;"><strong>3</strong> 🧍‍♂️朝外 thinker</div>
+                <div style="background: #ffeaa7; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #f39c12; color: #d35400;"><strong>4</strong> 🧍‍♂️朝外 archer</div>
+                <div style="background: #dfe6e9; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #636e72;"><strong>5</strong> 🧍朝内 writer</div>
+                <div style="background: #ffeaa7; padding: 5px 12px; border-radius: 8px; font-size: 0.9em; border: 2px solid #f39c12; color: #d35400;"><strong>6</strong> 🧍‍♂️朝外 mogician</div>
+            </div>
+        </div>
+
+        <!-- 指令1详解 -->
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #6c5ce7; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #6c5ce7;">📋 指令 1：<span class="code-inline">0 3</span>（向左数 3 个）</h3>
+
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin: 15px 0;">
+                <div style="background: #f3f0ff; padding: 12px 18px; border-radius: 10px; flex: 1; min-width: 200px;">
+                    <strong>当前位置：</strong> <span class="highlight-red">0 (singer)</span><br>
+                    <strong>singer 的朝向：</strong> <span class="highlight">朝内 (dir=0)</span><br>
+                    <strong>指令方向：</strong> <span class="highlight-blue">向左 (a=0)</span><br>
+                    <strong>判断：</strong> dir == a → <span class="highlight-red">顺时针</span> → delta = -3
+                </div>
+                <div style="font-size: 2em; color: #6c5ce7;">→</div>
+                <div style="background: #f0fdf4; padding: 12px 18px; border-radius: 10px;">
+                    <strong>计算：</strong><br>
+                    <span class="code-inline">(0 + (-3) + 7) % 7</span><br>
+                    = <span class="code-inline">4 % 7 = 4</span><br>
+                    到达 <span class="highlight-green">4 (archer)</span> ✅
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 10px 0;">
+                <div style="display: inline-flex; gap: 5px; align-items: center; background: #f5f6fa; padding: 10px 15px; border-radius: 10px;">
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #ff7675; color: white; font-weight: bold; font-size: 0.85em;">0<br>singer<br>🔴起点</div>
+                    <div style="font-size: 1.2em; color: #636e72;">←</div>
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #dfe6e9; font-size: 0.85em;">6<br>mogician<br>数1</div>
+                    <div style="font-size: 1.2em; color: #636e72;">←</div>
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #dfe6e9; font-size: 0.85em;">5<br>writer<br>数2</div>
+                    <div style="font-size: 1.2em; color: #636e72;">←</div>
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #00b894; color: white; font-weight: bold; font-size: 0.85em;">4<br>archer<br>🟢数3!</div>
+                </div>
+                <div style="font-size: 0.85em; color: #636e72; margin-top: 5px;">↻ 顺时针方向（编号减小，绕回到 6、5、4）</div>
+            </div>
+        </div>
+
+        <!-- 指令2详解 -->
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #e17055; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #e17055;">📋 指令 2：<span class="code-inline">1 1</span>（向右数 1 个）</h3>
+
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin: 15px 0;">
+                <div style="background: #fff5f0; padding: 12px 18px; border-radius: 10px; flex: 1; min-width: 200px;">
+                    <strong>当前位置：</strong> <span class="highlight-red">4 (archer)</span><br>
+                    <strong>archer 的朝向：</strong> <span class="highlight" style="background: #fdcb6e;">朝外 (dir=1)</span><br>
+                    <strong>指令方向：</strong> <span class="highlight-red">向右 (a=1)</span><br>
+                    <strong>判断：</strong> dir == a → <span class="highlight-red">顺时针</span> → delta = -1
+                </div>
+                <div style="font-size: 2em; color: #e17055;">→</div>
+                <div style="background: #f0fdf4; padding: 12px 18px; border-radius: 10px;">
+                    <strong>计算：</strong><br>
+                    <span class="code-inline">(4 + (-1) + 7) % 7</span><br>
+                    = <span class="code-inline">10 % 7 = 3</span><br>
+                    到达 <span class="highlight-green">3 (thinker)</span> ✅
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 10px 0;">
+                <div style="display: inline-flex; gap: 5px; align-items: center; background: #f5f6fa; padding: 10px 15px; border-radius: 10px;">
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #00b894; color: white; font-weight: bold; font-size: 0.85em;">3<br>thinker<br>🟢数1!</div>
+                    <div style="font-size: 1.2em; color: #636e72;">←</div>
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #ff7675; color: white; font-weight: bold; font-size: 0.85em;">4<br>archer<br>🔴起点</div>
+                </div>
+                <div style="font-size: 0.85em; color: #636e72; margin-top: 5px;">↻ 顺时针方向（编号减小）</div>
+            </div>
+        </div>
+
+        <!-- 指令3详解 -->
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #00b894; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #00b894;">📋 指令 3：<span class="code-inline">0 2</span>（向左数 2 个）</h3>
+
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin: 15px 0;">
+                <div style="background: #f0fdf4; padding: 12px 18px; border-radius: 10px; flex: 1; min-width: 200px;">
+                    <strong>当前位置：</strong> <span class="highlight-red">3 (thinker)</span><br>
+                    <strong>thinker 的朝向：</strong> <span class="highlight" style="background: #fdcb6e;">朝外 (dir=1)</span><br>
+                    <strong>指令方向：</strong> <span class="highlight-blue">向左 (a=0)</span><br>
+                    <strong>判断：</strong> dir ≠ a → <span class="highlight-green">逆时针</span> → delta = +2
+                </div>
+                <div style="font-size: 2em; color: #00b894;">→</div>
+                <div style="background: #f0fdf4; padding: 12px 18px; border-radius: 10px;">
+                    <strong>计算：</strong><br>
+                    <span class="code-inline">(3 + 2 + 7) % 7</span><br>
+                    = <span class="code-inline">12 % 7 = 5</span><br>
+                    到达 <span class="highlight-green">5 (writer)</span> 🎉
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 10px 0;">
+                <div style="display: inline-flex; gap: 5px; align-items: center; background: #f5f6fa; padding: 10px 15px; border-radius: 10px;">
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #ff7675; color: white; font-weight: bold; font-size: 0.85em;">3<br>thinker<br>🔴起点</div>
+                    <div style="font-size: 1.2em; color: #636e72;">→</div>
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #dfe6e9; font-size: 0.85em;">4<br>archer<br>数1</div>
+                    <div style="font-size: 1.2em; color: #636e72;">→</div>
+                    <div style="padding: 5px 10px; border-radius: 6px; background: #00b894; color: white; font-weight: bold; font-size: 0.85em;">5<br>writer<br>🟢数2!</div>
+                </div>
+                <div style="font-size: 0.85em; color: #636e72; margin-top: 5px;">↺ 逆时针方向（编号增大）</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; background: #f3f0ff; padding: 20px; border-radius: 15px; border: 3px solid #6c5ce7;">
+            <div style="font-size: 1.5em; margin-bottom: 10px;">🎉 最终答案</div>
+            <div style="font-size: 2.5em; color: #6c5ce7; font-weight: bold; font-family: Consolas;">writer</div>
+            <div style="color: #636e72; margin-top: 5px;">眼镜就藏在作家那里！安雅找到了！</div>
+        </div>
+
+        <!-- 完整路径追踪 -->
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 2px solid #fdcb6e; margin-top: 20px;">
+            <h3 style="margin-top: 0; color: #d35400; text-align: center;">🗺️ 完整路径追踪图</h3>
+            <div style="text-align: center;">
+                <div style="display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <div style="background: #ff7675; color: white; padding: 10px 15px; border-radius: 10px; text-align: center; font-weight: bold;">
+                        起点<br>0:singer<br>🧍朝内
+                    </div>
+                    <div style="text-align: center; color: #636e72;">
+                        <div style="font-size: 0.8em;">左数3</div>
+                        <div style="font-size: 1.5em;">→</div>
+                        <div style="font-size: 0.7em;">顺时针-3</div>
+                    </div>
+                    <div style="background: #fdcb6e; color: #d35400; padding: 10px 15px; border-radius: 10px; text-align: center; font-weight: bold;">
+                        4:archer<br>🧍‍♂️朝外
+                    </div>
+                    <div style="text-align: center; color: #636e72;">
+                        <div style="font-size: 0.8em;">右数1</div>
+                        <div style="font-size: 1.5em;">→</div>
+                        <div style="font-size: 0.7em;">顺时针-1</div>
+                    </div>
+                    <div style="background: #fdcb6e; color: #d35400; padding: 10px 15px; border-radius: 10px; text-align: center; font-weight: bold;">
+                        3:thinker<br>🧍‍♂️朝外
+                    </div>
+                    <div style="text-align: center; color: #636e72;">
+                        <div style="font-size: 0.8em;">左数2</div>
+                        <div style="font-size: 1.5em;">→</div>
+                        <div style="font-size: 0.7em;">逆时针+2</div>
+                    </div>
+                    <div style="background: #00b894; color: white; padding: 10px 15px; border-radius: 10px; text-align: center; font-weight: bold;">
+                        🎯 5:writer<br>🧍朝内
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 2px dashed #eee; margin: 30px 0;">
+
+        <h3>🌈 样例 2 简析：10个小人，10条指令</h3>
+        <p>样例2有10个小人和10条指令，计算过程完全相同，只是步数更多。按照同样的规则一步步执行即可，最终到达编号7的小人 <span class="highlight">y</span>。</p>
+
+        <div style="background: #e0f7fa; padding: 12px; border-radius: 8px; border-left: 4px solid #0984e3;">
+            <strong>💡 提示：</strong> 不管有多少个小人、多少条指令，我们的算法都是一样的——每条指令只需要做一次判断和一次取模运算，时间复杂度 O(m)，非常高效！
+        </div>
+    </div>
+
+    <!-- ==================== 容易踩的坑 ==================== -->
+    <div class="card logic">
+        <h2>⚠️ 容易踩的坑</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: #fff5f0; padding: 15px; border-radius: 12px; border-left: 5px solid #d63031;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🕳️</div>
+                <div>
+                    <strong style="color: #d63031;">坑1：负数取模</strong><br>
+                    当 delta 为负数时，直接取模在 C++ 中可能得到负数！比如 <span class="code-inline">(-3) % 7</span> 在 C++ 中可能是 <span class="code-inline">-3</span> 而不是 <span class="code-inline">4</span>。<br>
+                    <strong>解决：</strong>用 <span class="code-inline">(cur + delta + n) % n</span>，先加一个 n 保证是正数。Python 中负数取模结果自动是正数，不需要额外处理。
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: #fffcf0; padding: 15px; border-radius: 12px; border-left: 5px solid #f39c12;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🕳️</div>
+                <div>
+                    <strong style="color: #f39c12;">坑2：搞混朝向方向规则</strong><br>
+                    朝内向左 = 顺时针（索引减），朝外向左 = 逆时针（索引加）。最容易出错的地方！<br>
+                    <strong>解决：</strong>记住规律 —— <span class="code-inline">dir == a</span> 时顺时针（delta = -s），<span class="code-inline">dir ≠ a</span> 时逆时针（delta = +s）。
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: #f3f0ff; padding: 15px; border-radius: 12px; border-left: 5px solid #6c5ce7;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🕳️</div>
+                <div>
+                    <strong style="color: #6c5ce7;">坑3：搞混 "当前小人" 和 "指令小人"</strong><br>
+                    每条指令中判断方向要看的是<strong>当前所在位置小人的朝向</strong>，不是别的小人。<br>
+                    <strong>解决：</strong>每次都用 <span class="code-inline">persons[cur]</span> 的朝向来判断。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== C++ 代码 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>📦 <strong>结构化存储 <span class="code-inline">pair&lt;int, string&gt;</span>：</strong> 用 <span class="code-inline">vector&lt;pair&lt;int, string&gt;&gt;</span> 存储每个小人的朝向和职业，方便同时访问两个属性。</li>
+                <li>🔁 <strong>环形取模：</strong> <span class="code-inline">(cur + delta + n) % n</span> 是处理环形数组的标准写法，加 n 避免负数取模的问题。</li>
+                <li>📖 <strong>输入技巧：</strong> <span class="code-inline">cin >> dir >> name</span> 可以同时读取一个整数和一个字符串（用空格分隔）。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (代码详解)</h2>
 <pre>
-<span class="c-kw">#include</span> &lt;iostream&gt;
-<span class="c-kw">#include</span> &lt;string&gt;
-<span class="c-kw">#include</span> &lt;vector&gt;
-<span class="c-kw">using namespace</span> <span class="c-kw">std</span>;
+<span class="keyword">#include</span> &lt;bits/stdc++.h&gt;
+<span class="keyword">using namespace std;</span>
 
-<span class="c-com">// 定义小人结构体：朝向 + 职业名字</span>
-<span class="c-kw">struct</span> <span class="c-type">Toy</span> {
-    <span class="c-type">int</span> dir;    <span class="c-com">// 0:内, 1:外</span>
-    <span class="c-type">string</span> job; <span class="c-com">// 职业名字</span>
-};
+<span class="type">int</span> main() {
+    <span class="type">int</span> n, m;
+    <span class="type">cin</span> >> n >> m;  <span class="comment">// 📥 小人个数 和 指令条数</span>
 
-<span class="c-type">int</span> <span class="c-kw">main</span>() {
-    <span class="c-type">int</span> n, m;
-    <span class="c-kw">cin</span> >> n >> m;
-
-    <span class="c-com">// 1. 读入所有小人的信息</span>
-    <span class="c-kw">vector</span>&lt;<span class="c-type">Toy</span>&gt; toys(n);
-    <span class="c-kw">for</span> (<span class="c-type">int</span> i = <span class="c-num">0</span>; i < n; i++) {
-        <span class="c-kw">cin</span> >> toys[i].dir >> toys[i].job;
+    <span class="comment">// 📥 存储每个小人的信息</span>
+    <span class="type">vector</span>&lt;pair&lt;<span class="type">int</span>, <span class="type">string</span>&gt;&gt; persons(n);
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        <span class="type">cin</span> >> persons[i].first >> persons[i].second;
+        <span class="comment">// first = 朝向(0朝内/1朝外)</span>
+        <span class="comment">// second = 职业名</span>
     }
 
-    <span class="c-type">int</span> now = <span class="c-num">0</span>; <span class="c-com">// 当前位置下标</span>
+    <span class="type">int</span> cur = <span class="number">0</span>;  <span class="comment">// 🧭 当前位置，从第 0 个小人开始</span>
 
-    <span class="c-com">// 2. 执行 m 条指令</span>
-    <span class="c-kw">for</span> (<span class="c-type">int</span> i = <span class="c-num">0</span>; i < m; i++) {
-        <span class="c-type">int</span> op_dir, steps;
-        <span class="c-kw">cin</span> >> op_dir >> steps;
+    <span class="comment">// 🔄 逐条执行指令</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < m; i++) {
+        <span class="type">int</span> a, s;
+        <span class="type">cin</span> >> a >> s;  <span class="comment">// a=方向(0左/1右), s=步数</span>
 
-        <span class="c-com">// 核心逻辑：朝向 == 指令方向 -> 顺时针(减法)</span>
-        <span class="c-kw">if</span> (toys[now].dir == op_dir) {
-            <span class="c-com">// 为防止负数，先减去步数再加n，最后取模</span>
-            now = (now - steps % n + n) % n;
-        } <span class="c-kw">else</span> {
-            <span class="c-com">// 朝向 != 指令方向 -> 逆时针(加法)</span>
-            now = (now + steps) % n;
+        <span class="type">int</span> dir = persons[cur].first;  <span class="comment">// 当前小人的朝向</span>
+        <span class="type">int</span> delta;
+
+        <span class="comment">// 🎯 根据朝向和指令判断实际移动方向</span>
+        <span class="keyword">if</span> (dir == a) {
+            <span class="comment">// 朝向和指令方向相同 → 顺时针 → 索引减</span>
+            delta = -s;
+        } <span class="keyword">else</span> {
+            <span class="comment">// 朝向和指令方向不同 → 逆时针 → 索引加</span>
+            delta = s;
         }
+
+        <span class="comment">// 🔁 环形取模，+n 防止负数</span>
+        cur = (cur + delta + n) % n;
     }
 
-    <span class="c-com">// 3. 输出最后停下的职业名字</span>
-    <span class="c-kw">cout</span> << toys[now].job << <span class="c-kw">endl</span>;
+    <span class="comment">// 📣 输出最终到达的小人的职业</span>
+    <span class="type">cout</span> << persons[cur].second << <span class="type">endl</span>;
 
-    <span class="c-kw">return</span> <span class="c-num">0</span>;
+    <span class="keyword">return</span> <span class="number">0</span>;
 }
 </pre>
         </div>
+    </div>
 
-        <div class="py-content card">
-            <h2>🐍 Python 破解代码</h2>
-            <p>利用 Python 自带的负数取模特性，代码非常简洁。</p>
-<pre>
-<span class="c-com"># 1. 读入人数和指令数</span>
-n, m = <span class="c-kw">map</span>(<span class="c-kw">int</span>, <span class="c-kw">input</span>().<span class="c-func">split</span>())
-
-<span class="c-com"># 2. 读入小人信息 (朝向, 职业)</span>
-toys = []
-<span class="c-kw">for</span> _ <span class="c-kw">in</span> <span class="c-kw">range</span>(n):
-    line = <span class="c-kw">input</span>().<span class="c-func">split</span>()
-    <span class="c-com"># 存为元组，提高效率</span>
-    toys.<span class="c-func">append</span>((<span class="c-kw">int</span>(line[<span class="c-num">0</span>]), line[<span class="c-num">1</span>]))
-
-now = <span class="c-num">0</span> <span class="c-com"># 从第0个小人开始</span>
-
-<span class="c-com"># 3. 处理 m 条指令</span>
-<span class="c-kw">for</span> _ <span class="c-kw">in</span> <span class="c-kw">range</span>(m):
-    op_dir, steps = <span class="c-kw">map</span>(<span class="c-kw">int</span>, <span class="c-kw">input</span>().<span class="c-func">split</span>())
-    
-    <span class="c-com"># 获取当前小人的朝向</span>
-    current_facing = toys[now][<span class="c-num">0</span>]
-    
-    <span class="c-com"># 核心逻辑判断</span>
-    <span class="c-kw">if</span> current_facing == op_dir:
-        <span class="c-com"># 朝向与指令相同：减法</span>
-        <span class="c-com"># Python的 % 运算符会自动处理负数，非常省心</span>
-        now = (now - steps) % n
-    <span class="c-kw">else</span>:
-        <span class="c-com"># 朝向与指令不同：加法</span>
-        now = (now + steps) % n
-
-<span class="c-com"># 4. 输出最后小人的职业 (在元组下标1的位置)</span>
-<span class="c-kw">print</span>(toys[now][<span class="c-num">1</span>])
-</pre>
-        </div>
-
-        <div class="card" style="border-left: 8px solid #7f8c8d;">
-            <h2>🌟 魔法笔记 (重点复习)</h2>
+    <!-- ==================== Python 代码 ==================== -->
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
             <ul>
-                <li>🔄 <strong>下标循环：</strong> 这里的玩具是围成一个圈，所以一定要用 <span class="inline-code">% n</span> 来保证下标永远在有效范围内。</li>
-                <li>📉 <strong>负数处理：</strong> 在 C++ 中，<span class="inline-code">-1 % 7</span> 的结果是 <span class="inline-code">-1</span>，这不是我们要的。必须写成 <span class="inline-code">(now - steps + n) % n</span>。</li>
-                <li>🎯 <strong>模拟意识：</strong> 这种题不需要高级算法（如搜索或动态规划），只要按部就班地模拟现实中的移动过程即可。</li>
+                <li>📦 <strong>元组列表存储：</strong> 用 <span class="code-inline">persons = [(dir, name), ...]</span> 存储每个小人的信息，Python 的元组解包让访问数据非常优雅。</li>
+                <li>🔁 <strong>负数取模的福利：</strong> Python 中 <span class="code-inline">(-3) % 7 = 4</span>，自动得到正数结果！不需要额外加 n。但写 <span class="code-inline">(cur + delta) % n</span> 就够了。</li>
+                <li>📖 <strong>输入分割：</strong> <span class="code-inline">input().split()</span> 可以把一行按空格分成列表，然后分别取出整数和字符串部分。</li>
             </ul>
         </div>
 
-        <div style="text-align: center; margin-top: 50px; color: #95a5a6; font-size: 0.9em; border-top: 2px dashed #d1d9e6; padding-top: 20px;">
-            🎉 谜题解开！欢迎来到玩具魔法圈的中心！ <br>
-            —— 扣哒世界教研团队 💖
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">def</span> <span class="type">main</span>():
+    n, m = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+
+    <span class="comment"># 📥 存储每个小人的信息 (朝向, 职业)</span>
+    persons = []
+    <span class="keyword">for</span> _ <span class="keyword">in range</span>(n):
+        parts = <span class="type">input</span>().split()
+        d = <span class="type">int</span>(parts[<span class="number">0</span>])     <span class="comment"># 朝向: 0朝内, 1朝外</span>
+        name = parts[<span class="number">1</span>]       <span class="comment"># 职业名</span>
+        persons.append((d, name))
+
+    cur = <span class="number">0</span>  <span class="comment"># 🧭 当前位置，从第 0 个小人开始</span>
+
+    <span class="comment"># 🔄 逐条执行指令</span>
+    <span class="keyword">for</span> _ <span class="keyword">in range</span>(m):
+        a, s = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+        <span class="comment"># a = 方向(0左/1右), s = 步数</span>
+
+        d = persons[cur][<span class="number">0</span>]  <span class="comment"># 当前小人的朝向</span>
+
+        <span class="comment"># 🎯 根据朝向和指令判断实际移动方向</span>
+        <span class="keyword">if</span> d == a:
+            <span class="comment"># 朝向和指令方向相同 → 顺时针 → 索引减</span>
+            delta = -s
+        <span class="keyword">else</span>:
+            <span class="comment"># 朝向和指令方向不同 → 逆时针 → 索引加</span>
+            delta = s
+
+        <span class="comment"># 🔁 环形取模（Python 负数取模自动正确）</span>
+        cur = (cur + delta) % n
+
+    <span class="comment"># 📣 输出最终到达的小人的职业</span>
+    <span class="type">print</span>(persons[cur][<span class="number">1</span>])
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
         </div>
     </div>
 
-    <script>
-        function switchLang(lang) {
-            document.body.className = 'mode-' + lang;
-            document.querySelectorAll('.toggle-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector('.btn-' + lang).classList.add('active');
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #e17055;">环形数组用取模：</strong> 当小人围成一圈时，用 <span class="code-inline">(cur + delta + n) % n</span> 来实现"走到头就绕回来"的效果。这是处理环形结构的标准公式，背下来！
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #e17055;">朝向规律一句话记忆：</strong> <span class="highlight-purple">dir == a → 顺时针(delta=-s)；dir ≠ a → 逆时针(delta=+s)</span>。记住这个规律比死记四种情况简单多了！
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #e17055;">注意"逆时针编号"：</strong> 题目说小人按<strong>逆时针顺序</strong>输入。逆时针 = 编号增大方向，顺时针 = 编号减小方向。这是理解 delta 正负号的基础。
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #e17055;">C++ 负数取模要当心：</strong> C++ 中 <span class="code-inline">(-3) % 7</span> 可能得到 <span class="code-inline">-3</span>。一定要用 <span class="code-inline">+ n</span> 来保证结果是正数。Python 没有这个问题。
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; background: #fff5f0; padding: 15px; border-radius: 10px; border: 2px dashed #e17055; text-align: center;">
+            <strong style="font-size: 1.2em; color: #e17055;">🎭 恭喜你破解了小人迷阵！</strong><br>
+            <span style="color: #636e72;">环形取模 + 朝向判断，这个"魔法圈推理"套路在 CSP-J 真题中出现过。掌握了它，你就是玩具王国最聪明的侦探！</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>

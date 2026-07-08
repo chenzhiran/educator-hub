@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：串串本源</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fff8e1;
+            color: #4e342e;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #bf360c;
+            background-color: #e64a19;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #f57f17;
+            background-color: #ffb300;
+            color: white;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(191, 54, 12, 0.15);
+            border: 5px solid #e64a19;
+        }
+
+        h1 {
+            color: #bf360c;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #ffe0b2;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #6a1b9a;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #4a148c, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #4a148c, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #e64a19;
+            border-bottom: 3px dashed #ffcc80;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #bf360c;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #fff8e1;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #ffcc80;
+        }
+        .card.problem { border-color: #e64a19; background-color: #fbe9e7; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.method-a { border-color: #e64a19; background-color: #fbe9e7; }
+        .card.method-b { border-color: #6a1b9a; background-color: #f3e5f5; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #ffcc80; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #ffe0b2;
+            color: #bf360c;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 字符串可视化 ========== */
+        .str-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #ffcc80;
+            overflow-x: auto;
+        }
+
+        .char-row {
+            display: flex;
+            gap: 0;
+            flex-wrap: nowrap;
+        }
+        .char-cell {
+            width: 32px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            font-family: Consolas, monospace;
+            border: 2px solid #e0e0e0;
+            margin: 0 -1px;
+            transition: all 0.3s;
+        }
+        .char-cell:first-child { border-radius: 8px 0 0 8px; }
+        .char-cell:last-child { border-radius: 0 8px 8px 0; }
+
+        /* 颜色方案 - 用于标记不同的循环节 */
+        .cycle-1 { background: #ffcdd2; border-color: #e57373; color: #c62828; }
+        .cycle-2 { background: #bbdefb; border-color: #64b5f6; color: #1565c0; }
+        .cycle-3 { background: #c8e6c9; border-color: #81c784; color: #2e7d32; }
+        .cycle-4 { background: #fff9c4; border-color: #fff176; color: #f57f17; }
+        .cycle-5 { background: #e1bee7; border-color: #ba68c8; color: #6a1b9a; }
+        .cycle-6 { background: #ffe0b2; border-color: #ffb74d; color: #e65100; }
+
+        .cycle-fail { background: #ffebee; border-color: #ef9a9a; color: #c62828; opacity: 0.6; }
+        .cycle-ok { background: #e8f5e9; border-color: #66bb6a; color: #2e7d32; }
+
+        /* 循环节标记括号 */
+        .bracket-row {
+            display: flex;
+            gap: 0;
+            align-items: flex-start;
+        }
+        .bracket-segment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bracket-top {
+            height: 12px;
+            border: 2px solid;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 2px;
+        }
+        .bracket-label {
+            font-size: 0.7em;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 索引行 */
+        .index-row {
+            display: flex;
+            gap: 0;
+        }
+        .index-cell {
+            width: 32px;
+            text-align: center;
+            font-size: 0.7em;
+            color: #999;
+            margin: 0 -1px;
+        }
+
+        /* ========== 试错过程可视化 ========== */
+        .try-box {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .try-label {
+            font-weight: bold;
+            min-width: 65px;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+        .try-ok {
+            border: 2px solid #43a047;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .try-fail {
+            border: 2px solid #ef5350;
+            background: #ffebee;
+            color: #c62828;
+        }
+        .try-content {
+            flex: 1;
+            font-size: 0.95em;
+        }
+        .try-result {
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #e64a19;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+            min-width: 90px;
+        }
+        .step-arrow {
+            font-size: 1.5em;
+            color: #e64a19;
+        }
+
+        /* ========== 解法选择标签 ========== */
+        .method-tab {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0 10px 0;
+            justify-content: center;
+        }
+        .method-btn {
+            padding: 10px 25px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .method-btn.active-a {
+            border-color: #e64a19;
+            background: #e64a19;
+            color: white;
+        }
+        .method-btn.active-b {
+            border-color: #6a1b9a;
+            background: #ab47bc;
+            color: white;
+        }
+
+        /* ========== 数学演算框 ========== */
+        .math-demo {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+        .math-demo .op { color: #c62828; font-weight: bold; }
+        .math-demo .res { color: #2e7d32; font-weight: bold; font-size: 1.1em; }
+        .math-demo .yes { color: #2e7d32; font-weight: bold; }
+        .math-demo .no { color: #c62828; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #ffe0b2;
+        }
+        .example-card strong { color: #bf360c; }
+        .example-card pre {
+            background: transparent;
+            color: #4e342e;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 1em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #bf360c, #e64a19); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #6a1b9a, #ab47bc); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 逐字符比较动画框 ========== */
+        .compare-box {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .compare-label {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .compare-row {
+            display: flex;
+            gap: 0;
+            margin: 3px 0;
+        }
+        .cmp-cell {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            font-family: Consolas, monospace;
+            border: 1px solid #e0e0e0;
+        }
+        .cmp-match { background: #c8e6c9; color: #2e7d32; }
+        .cmp-mismatch { background: #ffcdd2; color: #c62828; }
+        .cmp-arrow { color: #43a047; font-size: 0.7em; }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #bcaaa4;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn, .method-tab { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏛️ 串串本源 🔮</h1>
+
+    <div style="text-align: center; font-size: 1.2em; color: #bf360c;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        沙漠遗迹的符文墙上刻着一串神秘字母——<br>
+        它是由某个最短的"基础符文"反复刻写而成的！找到它，就能解开封印！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/2" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>符文墙上刻着字符串 <span class="code-inline">s</span>，它可能是由某个更短的子串<strong>重复多次</strong>拼接而成。</p>
+        <p>你的任务：找出这个<strong>最短重复子串</strong>（最小循环节）的长度！</p>
+        <p>如果整个字符串不能由更短的子串重复构成，那答案就是字符串本身的长度。</p>
+
+        <div style="background:#fff3e0; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #ffe0b2;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>一行字符串 <span class="code-inline">s</span>（1 ≤ |s| ≤ 10<sup>5</sup>，仅含小写字母）<br>
+            • <strong>输出：</strong>一个整数，最小循环节的长度
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例 1</strong>
+                <pre>abbaabbaabba</pre>
+                <strong>📤 输出：</strong><span class="highlight">4</span>
+                <div style="font-size:0.85em; color:#888; margin-top:5px;">
+                    "abba" 重复 3 次 = "abbaabbaabba"
+                </div>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 2</strong>
+                <pre>aaaaaa</pre>
+                <strong>📤 输出：</strong><span class="highlight">1</span>
+                <div style="font-size:0.85em; color:#888; margin-top:5px;">
+                    "a" 重复 6 次 = "aaaaaa"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解)</h2>
+
+        <h3>🔗 什么是"循环节"？</h3>
+        <p>如果一个字符串可以由某个短串<strong>复制粘贴</strong>若干次得到，那个短串就叫做<strong>"循环节"</strong>。我们要找的是<strong>最短</strong>的那个！</p>
+
+        <div class="str-visual">
+            <div style="color: #bf360c; font-weight: bold; font-size: 1.1em;">👇 样例 1："abbaabbaabba"（长度 12）👇</div>
+
+            <!-- 分组标记 -->
+            <div style="display:flex; gap:0; align-items:flex-end;">
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div style="font-size:0.75em; font-weight:bold; color:#c62828;">第1组</div>
+                    <div style="width:128px; height:8px; border:2px solid #e57373; border-bottom:none; border-radius:8px 8px 0 0;"></div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div style="font-size:0.75em; font-weight:bold; color:#1565c0;">第2组</div>
+                    <div style="width:128px; height:8px; border:2px solid #64b5f6; border-bottom:none; border-radius:8px 8px 0 0;"></div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div style="font-size:0.75em; font-weight:bold; color:#2e7d32;">第3组</div>
+                    <div style="width:128px; height:8px; border:2px solid #81c784; border-bottom:none; border-radius:8px 8px 0 0;"></div>
+                </div>
+            </div>
+
+            <div class="char-row">
+                <div class="char-cell cycle-1">a</div>
+                <div class="char-cell cycle-1">b</div>
+                <div class="char-cell cycle-1">b</div>
+                <div class="char-cell cycle-1">a</div>
+                <div class="char-cell cycle-2">a</div>
+                <div class="char-cell cycle-2">b</div>
+                <div class="char-cell cycle-2">b</div>
+                <div class="char-cell cycle-2">a</div>
+                <div class="char-cell cycle-3">a</div>
+                <div class="char-cell cycle-3">b</div>
+                <div class="char-cell cycle-3">b</div>
+                <div class="char-cell cycle-3">a</div>
+            </div>
+
+            <div class="index-row">
+                <div class="index-cell">0</div>
+                <div class="index-cell">1</div>
+                <div class="index-cell">2</div>
+                <div class="index-cell">3</div>
+                <div class="index-cell">4</div>
+                <div class="index-cell">5</div>
+                <div class="index-cell">6</div>
+                <div class="index-cell">7</div>
+                <div class="index-cell">8</div>
+                <div class="index-cell">9</div>
+                <div class="index-cell">10</div>
+                <div class="index-cell">11</div>
+            </div>
+
+            <div style="background:#fbe9e7; padding:10px 15px; border-radius:8px; border:1px solid #ffab91; text-align:center; width:90%;">
+                🔑 循环节 = <strong style="color:#c62828;">"abba"</strong>（长度 4），重复 <strong>3</strong> 次 = 整个字符串！<br>
+                验证：12 ÷ 4 = 3 ✅ 整除！
+            </div>
+        </div>
+
+        <div class="str-visual">
+            <div style="color: #bf360c; font-weight: bold; font-size: 1.1em;">👇 样例 2："aaaaaa"（长度 6）👇</div>
+
+            <div class="char-row">
+                <div class="char-cell cycle-1">a</div>
+                <div class="char-cell cycle-2">a</div>
+                <div class="char-cell cycle-3">a</div>
+                <div class="char-cell cycle-4">a</div>
+                <div class="char-cell cycle-5">a</div>
+                <div class="char-cell cycle-6">a</div>
+            </div>
+
+            <div style="background:#fbe9e7; padding:10px 15px; border-radius:8px; border:1px solid #ffab91; text-align:center; width:90%;">
+                🔑 最短循环节 = <strong style="color:#c62828;">"a"</strong>（长度 1），重复 <strong>6</strong> 次 = 整个字符串！
+            </div>
+        </div>
+
+        <h3>🔍 怎么找最短循环节？——逐个试！</h3>
+        <p>核心思路：从最短的长度 L=1 开始尝试，逐步增大，第一个能整除并成功匹配的 L 就是答案！</p>
+
+        <div class="thinking-box">
+            <div class="title">两个必要条件</div>
+            <p style="margin:5px 0;">
+                <strong>条件 1：长度能整除</strong> → <span class="code-inline">n % L == 0</span><br>
+                如果总长度 n 不能被 L 整除，那 L 个字符重复若干次绝对凑不出长度为 n 的字符串。<br><br>
+                <strong>条件 2：内容全部匹配</strong> → 每个字符 <span class="code-inline">s[i] == s[i % L]</span><br>
+                前 L 个字符是"模板"，后面每个字符都必须和模板里对应位置的字符一模一样。
+            </p>
+        </div>
+
+        <h3>🎯 样例 1 的试错过程</h3>
+        <div style="font-size:0.9em; color:#888; margin-bottom:10px;">字符串 "abbaabbaabba"，长度 n = 12</div>
+
+        <!-- L=1 -->
+        <div class="try-box">
+            <div class="try-label try-fail">L = 1</div>
+            <div class="try-content">
+                12 % 1 = 0 ✅ 能整除<br>
+                模板 "a"，但 s[1]='b' ≠ 'a'
+            </div>
+            <div class="try-result" style="background:#ffebee; color:#c62828;">❌ 不匹配</div>
+        </div>
+
+        <!-- L=2 -->
+        <div class="try-box">
+            <div class="try-label try-fail">L = 2</div>
+            <div class="try-content">
+                12 % 2 = 0 ✅ 能整除<br>
+                模板 "ab"，但 s[2]='b' ≠ s[0]='a'
+            </div>
+            <div class="try-result" style="background:#ffebee; color:#c62828;">❌ 不匹配</div>
+        </div>
+
+        <!-- L=3 -->
+        <div class="try-box">
+            <div class="try-label try-fail">L = 3</div>
+            <div class="try-content">
+                12 % 3 = 0 ✅ 能整除<br>
+                模板 "abb"，但 s[3]='a' ≠ s[0]='a'... s[4]='a' ≠ s[1]='b'
+            </div>
+            <div class="try-result" style="background:#ffebee; color:#c62828;">❌ 不匹配</div>
+        </div>
+
+        <!-- L=4 -->
+        <div class="try-box" style="border-color: #43a047; border-width: 3px;">
+            <div class="try-label try-ok">L = 4 🎉</div>
+            <div class="try-content">
+                12 % 4 = 0 ✅ 能整除<br>
+                模板 "abba" → "abba" + "abba" + "abba" = "abbaabbaabba" ✅ 全部匹配！
+            </div>
+            <div class="try-result" style="background:#e8f5e9; color:#2e7d32;">✅ 找到了！</div>
+        </div>
+
+        <div style="text-align:center; font-weight:bold; color:#2e7d32; font-size:1.1em; margin-top:10px;">
+            🏆 第一个成功的 L = 4，所以答案是 <span style="color:#c62828; font-size:1.3em;">4</span>！
+        </div>
+
+        <h3>🧩 逐字符匹配的秘密武器：取余 (%) </h3>
+
+        <div class="str-visual" style="border-color: #ce93d8;">
+            <div style="color: #6a1b9a; font-weight: bold;">当 L=4 时，用 s[i] == s[i % L] 来验证</div>
+
+            <div class="compare-box">
+                <div class="compare-label">位置 i：</div>
+                <div class="compare-row">
+                    <div class="cmp-cell" style="background:#f5f5f5; font-size:0.7em;">0</div>
+                    <div class="cmp-cell" style="background:#f5f5f5; font-size:0.7em;">1</div>
+                    <div class="cmp-cell" style="background:#f5f5f5; font-size:0.7em;">2</div>
+                    <div class="cmp-cell" style="background:#f5f5f5; font-size:0.7em;">3</div>
+                    <div class="cmp-cell" style="background:#fff3e0; font-size:0.7em;">4</div>
+                    <div class="cmp-cell" style="background:#fff3e0; font-size:0.7em;">5</div>
+                    <div class="cmp-cell" style="background:#fff3e0; font-size:0.7em;">6</div>
+                    <div class="cmp-cell" style="background:#fff3e0; font-size:0.7em;">7</div>
+                    <div class="cmp-cell" style="background:#fce4ec; font-size:0.7em;">8</div>
+                    <div class="cmp-cell" style="background:#fce4ec; font-size:0.7em;">9</div>
+                    <div class="cmp-cell" style="background:#fce4ec; font-size:0.7em;">10</div>
+                    <div class="cmp-cell" style="background:#fce4ec; font-size:0.7em;">11</div>
+                </div>
+
+                <div class="compare-label" style="margin-top:5px;">s[i]：</div>
+                <div class="compare-row">
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                </div>
+
+                <div class="compare-label" style="margin-top:3px;">i%4：</div>
+                <div class="compare-row">
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">0</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">1</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">2</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">3</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">0</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">1</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">2</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">3</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">0</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">1</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">2</div>
+                    <div class="cmp-cell" style="background:#e8eaf6; font-size:0.8em;">3</div>
+                </div>
+
+                <div class="compare-label" style="margin-top:3px;">s[i%4]：</div>
+                <div class="compare-row">
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">b</div>
+                    <div class="cmp-cell cmp-match">a</div>
+                </div>
+            </div>
+
+            <div style="background:#f3e5f5; padding:10px 15px; border-radius:8px; border:1px solid #ce93d8; text-align:center; width:90%; font-size:0.95em;">
+                ✨ <strong>取余的魔法：</strong> <span class="code-inline">i % L</span> 会让索引 <strong>循环回到 0~L-1</strong> 的范围内！<br>
+                这样就不需要真的把模板复制多份，一次遍历就能验证！
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 双解法选择 ==================== -->
+    <div style="text-align: center; margin: 30px 0 10px 0;">
+        <div style="font-size: 1.3em; font-weight: bold; color: #4e342e; margin-bottom: 10px;">🎯 两种写法任你选！</div>
+    </div>
+    <div class="method-tab">
+        <button class="method-btn active-a" onclick="switchMethod('a')">🔎 写法一：逐字符比较</button>
+        <button class="method-btn" onclick="switchMethod('b')">✂️ 写法二：子串拼接比较</button>
+    </div>
+
+    <!-- ==================== 写法一：逐字符比较 ==================== -->
+    <div class="method-a-only">
+        <div class="card method-a">
+            <h2>🔎 写法一：逐字符比较（推荐，效率高）</h2>
+            <p>对于每个候选长度 L，用取余逐字符验证是否全部匹配。不需要构造新字符串，<strong>省空间、更快</strong>！</p>
+
+            <div class="step-flow">
+                <div class="step-box">
+                    <strong>枚举 L</strong><br>
+                    <span style="font-size:0.85em;">从 1 到 n</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#ff9800;">
+                    <strong>n % L == 0?</strong><br>
+                    <span style="font-size:0.85em;">长度能整除？</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#6a1b9a;">
+                    <strong>逐字符验证</strong><br>
+                    <span style="font-size:0.85em;">s[i] == s[i%L]?</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#43a047;">
+                    <strong>全部匹配？</strong><br>
+                    <span style="font-size:0.85em;">✅ 输出 L！</span>
+                </div>
+            </div>
+
+            <div class="thinking-box" style="border-color: #e64a19;">
+                <div class="title" style="color: #e64a19;">💡 为什么第一个匹配的 L 就是答案？</div>
+                <p style="margin:5px 0;">
+                    因为我们从 L=1 开始<strong>从小到大</strong>枚举！第一个成功的 L 就是<strong>最短</strong>的循环节。<br>
+                    找到后立刻输出并结束，不需要继续尝试更大的 L。
+                </p>
+            </div>
+
+            <div class="thinking-box" style="border-color: #1565c0; background: #e3f2fd;">
+                <div class="title" style="color: #1565c0;">💡 为什么只枚举到 n/2？</div>
+                <p style="margin:5px 0;">
+                    循环节至少要重复 <strong>2 次</strong>才叫"重复"，所以循环节长度最大为 <span class="code-inline">n/2</span>。<br>
+                    如果在 1 ~ n/2 范围内都没找到，说明整个字符串就是"独一无二"的，答案就是 n 本身。
+                </p>
+            </div>
+        </div>
+
+        <div class="cpp-only">
+            <div class="card knowledge">
+                <h2>📘 C++ 写法一 · 知识点</h2>
+                <ul>
+                    <li>📏 <strong>string 的长度：</strong> <span class="code-inline">s.length()</span> 或 <span class="code-inline">s.size()</span> 返回字符串长度。</li>
+                    <li>🔄 <strong>取余索引技巧：</strong> <span class="code-inline">s[i] == s[i % L]</span>，利用取余让索引在 0~L-1 之间"循环"。这是处理周期性问题的经典手法。</li>
+                    <li>🚩 <strong>bool 标志变量：</strong> 用 <span class="code-inline">ok</span> 变量记录"是否全部匹配"，一旦发现不匹配就 break 跳出内层循环。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 C++ 逐字符比较代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;string&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> main() {
+    <span class="type">string</span> s;
+    cin >> s;
+    <span class="type">int</span> n = s.length();
+
+    <span class="comment">// 🔎 从小到大枚举循环节长度 L</span>
+    <span class="keyword">for</span> (<span class="type">int</span> L = <span class="number">1</span>; L <= n / <span class="number">2</span>; L++) {
+        <span class="comment">// 条件1：总长度必须能被 L 整除</span>
+        <span class="keyword">if</span> (n % L != <span class="number">0</span>) <span class="keyword">continue</span>;
+
+        <span class="comment">// 条件2：逐字符检查是否全部匹配</span>
+        <span class="type">bool</span> ok = <span class="number">true</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> i = L; i < n; i++) {
+            <span class="keyword">if</span> (s[i] != s[i % L]) {
+                ok = <span class="number">false</span>;
+                <span class="keyword">break</span>;  <span class="comment">// 发现不匹配，立刻放弃这个 L</span>
+            }
+        }
+
+        <span class="keyword">if</span> (ok) {
+            cout << L << endl;  <span class="comment">// 🎉 找到最短循环节！</span>
+            <span class="keyword">return</span> <span class="number">0</span>;
+        }
+    }
+
+    <span class="comment">// 没找到任何循环节，答案就是自身长度</span>
+    cout << n << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="py-only" style="display: none;">
+            <div class="card knowledge">
+                <h2>🐍 Python 写法一 · 知识点</h2>
+                <ul>
+                    <li>📏 <strong>len() 求长度：</strong> <span class="code-inline">len(s)</span> 返回字符串长度。</li>
+                    <li>🔄 <strong>取余索引：</strong> <span class="code-inline">s[i] == s[i % L]</span> 让索引在 0~L-1 之间循环，完美匹配周期性。</li>
+                    <li>🐍 <strong>for-else 语法：</strong> Python 独有的 <span class="code-inline">for...else</span>——如果循环正常结束（没被 break），就执行 else 块。用来判断"全部匹配"非常优雅！</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 Python 逐字符比较代码</h2>
+<pre>
+s = <span class="type">input</span>()
+n = <span class="type">len</span>(s)
+
+<span class="comment"># 🔎 从小到大枚举循环节长度 L</span>
+<span class="keyword">for</span> L <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, n // <span class="number">2</span> + <span class="number">1</span>):
+    <span class="comment"># 条件1：总长度必须能被 L 整除</span>
+    <span class="keyword">if</span> n % L != <span class="number">0</span>:
+        <span class="keyword">continue</span>
+
+    <span class="comment"># 条件2：逐字符检查</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(L, n):
+        <span class="keyword">if</span> s[i] != s[i % L]:
+            <span class="keyword">break</span>  <span class="comment"># 不匹配，放弃这个 L</span>
+    <span class="keyword">else</span>:
+        <span class="comment"># 🎉 for 循环正常结束 = 全部匹配！</span>
+        <span class="type">print</span>(L)
+        exit()
+
+<span class="comment"># 没找到，答案是自身长度</span>
+<span class="type">print</span>(n)
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 写法二：子串拼接比较 ==================== -->
+    <div class="method-b-only" style="display: none;">
+        <div class="card method-b">
+            <h2>✂️ 写法二：子串拼接比较（直观好理解）</h2>
+            <p>对于每个候选长度 L，直接把前 L 个字符<strong>复制 n/L 次</strong>，看拼出来的字符串是否和原串一模一样。</p>
+
+            <div class="step-flow">
+                <div class="step-box" style="border-color:#6a1b9a;">
+                    <strong>枚举 L</strong><br>
+                    <span style="font-size:0.85em;">从 1 到 n/2</span>
+                </div>
+                <div class="step-arrow" style="color:#6a1b9a;">→</div>
+                <div class="step-box" style="border-color:#6a1b9a;">
+                    <strong>n % L == 0?</strong><br>
+                    <span style="font-size:0.85em;">能整除？</span>
+                </div>
+                <div class="step-arrow" style="color:#6a1b9a;">→</div>
+                <div class="step-box" style="border-color:#6a1b9a;">
+                    <strong>拼接比较</strong><br>
+                    <span style="font-size:0.85em;">s[:L] × k == s ?</span>
+                </div>
+                <div class="step-arrow" style="color:#6a1b9a;">→</div>
+                <div class="step-box" style="border-color:#43a047;">
+                    <strong>匹配？</strong><br>
+                    <span style="font-size:0.85em;">✅ 输出 L！</span>
+                </div>
+            </div>
+
+            <h3>🔧 拼接过程图示 (n=12)</h3>
+            <div class="str-visual" style="border-color: #ce93d8;">
+                <div style="color: #6a1b9a; font-weight: bold;">尝试 L=4：取前4个字符 "abba"，复制 12÷4=3 次</div>
+
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    <div style="background:#f3e5f5; padding:8px 12px; border-radius:8px; border:2px solid #ab47bc; font-family:Consolas,monospace; font-weight:bold; color:#6a1b9a;">
+                        "abba"
+                    </div>
+                    <div style="font-size:1.3em; color:#6a1b9a;">×</div>
+                    <div style="font-size:1.3em; font-weight:bold; color:#6a1b9a;">3</div>
+                    <div style="font-size:1.3em; color:#6a1b9a;">=</div>
+                    <div style="background:#e8f5e9; padding:8px 12px; border-radius:8px; border:2px solid #43a047; font-family:Consolas,monospace; font-weight:bold; color:#2e7d32;">
+                        "abbaabbaabba"
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                    <div style="font-weight:bold; color:#6a1b9a;">和原串比较：</div>
+                    <div style="font-family:Consolas,monospace; font-weight:bold;">"abbaabbaabba"</div>
+                    <div style="font-size:1.5em; color:#43a047;">==</div>
+                    <div style="font-family:Consolas,monospace; font-weight:bold;">"abbaabbaabba"</div>
+                    <div style="font-size:1.3em;">✅</div>
+                </div>
+            </div>
+
+            <div class="thinking-box" style="border-color: #d32f2f; background: #fff3e0;">
+                <div class="title" style="color: #d32f2f;">⚠️ 这个方法的效率问题</div>
+                <p style="margin:5px 0;">
+                    每次拼接和比较字符串，都会创建一个长度为 n 的新字符串。<br>
+                    当 n = 10<sup>5</sup> 时，如果有很多候选的 L，反复创建和比较可能较慢。<br>
+                    <strong>Python</strong> 中字符串乘法 <span class="code-inline">s[:L] * k</span> 写起来很方便；<br>
+                    <strong>C++</strong> 中需要手动拼接，建议优先用写法一的逐字符比较。
+                </p>
+            </div>
+        </div>
+
+        <div class="cpp-only">
+            <div class="card knowledge">
+                <h2>📘 C++ 写法二 · 知识点</h2>
+                <ul>
+                    <li>✂️ <strong>substr 截取子串：</strong> <span class="code-inline">s.substr(0, L)</span> 截取从位置 0 开始、长度为 L 的子串。</li>
+                    <li>🔗 <strong>字符串拼接：</strong> C++ 中用 <span class="code-inline">+=</span> 反复拼接来构造重复字符串。注意每次拼接都会创建新对象，效率不如逐字符比较。</li>
+                    <li>⚖️ <strong>字符串比较：</strong> <span class="code-inline">t == s</span> 可以直接比较两个 string 是否内容完全相同。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 C++ 子串拼接代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;string&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> main() {
+    <span class="type">string</span> s;
+    cin >> s;
+    <span class="type">int</span> n = s.length();
+
+    <span class="keyword">for</span> (<span class="type">int</span> L = <span class="number">1</span>; L <= n / <span class="number">2</span>; L++) {
+        <span class="keyword">if</span> (n % L != <span class="number">0</span>) <span class="keyword">continue</span>;
+
+        <span class="comment">// ✂️ 取出前 L 个字符作为模板</span>
+        <span class="type">string</span> pattern = s.substr(<span class="number">0</span>, L);
+
+        <span class="comment">// 🔗 把模板重复 n/L 次</span>
+        <span class="type">string</span> t = <span class="string">""</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j < n / L; j++) {
+            t += pattern;
+        }
+
+        <span class="comment">// ⚖️ 拼出来的和原串一样吗？</span>
+        <span class="keyword">if</span> (t == s) {
+            cout << L << endl;
+            <span class="keyword">return</span> <span class="number">0</span>;
+        }
+    }
+
+    cout << n << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="py-only" style="display: none;">
+            <div class="card knowledge">
+                <h2>🐍 Python 写法二 · 知识点</h2>
+                <ul>
+                    <li>✂️ <strong>切片截取：</strong> <span class="code-inline">s[:L]</span> 取前 L 个字符。Python 切片简洁优雅！</li>
+                    <li>✖️ <strong>字符串乘法：</strong> <span class="code-inline">s[:L] * k</span> 直接把子串重复 k 次！这是 Python 的超级语法糖。</li>
+                    <li>⚖️ <strong>直接比较：</strong> <span class="code-inline">==</span> 可以直接判断两个字符串是否完全相同。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 Python 子串拼接代码</h2>
+<pre>
+s = <span class="type">input</span>()
+n = <span class="type">len</span>(s)
+
+<span class="keyword">for</span> L <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, n // <span class="number">2</span> + <span class="number">1</span>):
+    <span class="keyword">if</span> n % L != <span class="number">0</span>:
+        <span class="keyword">continue</span>
+
+    <span class="comment"># ✂️ 取前 L 个字符，重复 n//L 次</span>
+    <span class="keyword">if</span> s[:L] * (n // L) == s:
+        <span class="type">print</span>(L)    <span class="comment"># 🎉 找到了！</span>
+        exit()
+
+<span class="type">print</span>(n)
+</pre>
+            </div>
+        </div>
+
+        <!-- 写法二执行过程 -->
+        <div class="card method-b">
+            <h3>🔍 写法二执行过程 (s = "abbaabbaabba")</h3>
+            <div class="math-demo" style="border-color: #ce93d8;">
+                <div style="font-weight:bold; color:#6a1b9a; margin-bottom:8px;">n = 12，从 L=1 开始尝试：</div>
+
+                <strong style="color:#c62828;">L=1：</strong> 12%1=0 ✅ → "a"×12 = "aaaaaaaaaaaa" ≠ 原串 → <span class="no">❌</span><br><br>
+                <strong style="color:#c62828;">L=2：</strong> 12%2=0 ✅ → "ab"×6 = "abababababab" ≠ 原串 → <span class="no">❌</span><br><br>
+                <strong style="color:#c62828;">L=3：</strong> 12%3=0 ✅ → "abb"×4 = "abbabbabbabb" ≠ 原串 → <span class="no">❌</span><br><br>
+                <strong style="color:#2e7d32;">L=4：</strong> 12%4=0 ✅ → "abba"×3 = "abbaabbaabba" == 原串 → <span class="yes">✅ 找到了！</span><br><br>
+                <span class="res">答案 = 4 🎉</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 更多示例图解 ==================== -->
+    <div class="card logic">
+        <h2>🎨 更多示例图解</h2>
+
+        <!-- 示例：质数长度 -->
+        <h3>📌 示例：不可分解的符文 (s = "abcde")</h3>
+        <div class="str-visual">
+            <div class="char-row">
+                <div class="char-cell" style="background:#e3f2fd; border-color:#90caf9;">a</div>
+                <div class="char-cell" style="background:#e3f2fd; border-color:#90caf9;">b</div>
+                <div class="char-cell" style="background:#e3f2fd; border-color:#90caf9;">c</div>
+                <div class="char-cell" style="background:#e3f2fd; border-color:#90caf9;">d</div>
+                <div class="char-cell" style="background:#e3f2fd; border-color:#90caf9;">e</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px; width:90%;">
+                <div class="try-box" style="padding:8px 12px;">
+                    <div class="try-label try-fail" style="min-width:50px; font-size:0.85em;">L=1</div>
+                    <div class="try-content" style="font-size:0.85em;">5%1=0 ✅ 但 "a"×5 = "aaaaa" ≠ 原串</div>
+                    <div class="try-result" style="background:#ffebee; color:#c62828; font-size:0.8em;">❌</div>
+                </div>
+                <div class="try-box" style="padding:8px 12px;">
+                    <div class="try-label try-fail" style="min-width:50px; font-size:0.85em;">L=2</div>
+                    <div class="try-content" style="font-size:0.85em;">5%2=1 ❌ 不能整除，直接跳过</div>
+                    <div class="try-result" style="background:#f5f5f5; color:#999; font-size:0.8em;">跳过</div>
+                </div>
+            </div>
+            <div style="background:#ffebee; padding:10px 15px; border-radius:8px; border:1px solid #ef9a9a; text-align:center; width:90%;">
+                1~2 都不行 → 没有循环节 → <strong style="color:#c62828;">答案 = 5（字符串本身的长度）</strong>
+            </div>
+        </div>
+
+        <!-- 示例：全相同 -->
+        <h3>📌 示例：全部相同 (s = "aaaa")</h3>
+        <div class="str-visual">
+            <div class="char-row">
+                <div class="char-cell cycle-1">a</div>
+                <div class="char-cell cycle-2">a</div>
+                <div class="char-cell cycle-3">a</div>
+                <div class="char-cell cycle-4">a</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px; width:90%;">
+                <div class="try-box" style="padding:8px 12px; border-color:#43a047; border-width:3px;">
+                    <div class="try-label try-ok" style="min-width:50px; font-size:0.85em;">L=1 🎉</div>
+                    <div class="try-content" style="font-size:0.85em;">4%1=0 ✅ 且 "a"×4 = "aaaa" == 原串</div>
+                    <div class="try-result" style="background:#e8f5e9; color:#2e7d32; font-size:0.8em;">✅ 找到！</div>
+                </div>
+            </div>
+            <div style="background:#e8f5e9; padding:10px 15px; border-radius:8px; border:1px solid #a5d6a7; text-align:center; width:90%;">
+                第一个就成功了！ → <strong style="color:#2e7d32;">答案 = 1</strong>
+            </div>
+        </div>
+
+        <!-- 示例：长度 1 -->
+        <h3>📌 示例：只有一个字符 (s = "x")</h3>
+        <div class="str-visual">
+            <div class="char-row">
+                <div class="char-cell" style="background:#fff9c4; border-color:#fdd835; border-radius:8px;">x</div>
+            </div>
+            <div style="background:#fff9c4; padding:10px 15px; border-radius:8px; border:1px solid #fdd835; text-align:center; width:90%;">
+                n=1，n/2=0，循环体一次都不执行 → <strong style="color:#e65100;">答案 = 1</strong>（字符串本身长度）
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 两种写法对比 ==================== -->
+    <div class="card logic">
+        <h2>⚖️ 两种写法对比</h2>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">对比项</th>
+                <th class="a-th">🔎 写法一：逐字符比较</th>
+                <th class="b-th">✂️ 写法二：子串拼接</th>
+            </tr>
+            <tr>
+                <td><strong>验证方式</strong></td>
+                <td>s[i] == s[i % L]</td>
+                <td>s[:L] × k == s</td>
+            </tr>
+            <tr>
+                <td><strong>额外空间</strong></td>
+                <td>O(1)（不创建新串）</td>
+                <td>O(n)（创建拼接串）</td>
+            </tr>
+            <tr>
+                <td><strong>代码简洁度</strong></td>
+                <td>⭐⭐ 需要内层循环</td>
+                <td>⭐⭐⭐ 一行搞定验证</td>
+            </tr>
+            <tr>
+                <td><strong>运行效率</strong></td>
+                <td>⭐⭐⭐ 更快（提前break）</td>
+                <td>⭐⭐ 每次需构造新串</td>
+            </tr>
+            <tr>
+                <td><strong>推荐语言</strong></td>
+                <td>✅ C++ 首选</td>
+                <td>✅ Python 很方便</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 1：s = "abbaabbaabba"</strong><br>
+                n = 12，尝试 L=1(❌), 2(❌), 3(❌), <strong>4(✅)</strong><br>
+                "abba" × 3 = "abbaabbaabba" == 原串 ✅<br>
+                输出：<strong>4</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 2：s = "aaaaaa"</strong><br>
+                n = 6，尝试 <strong>L=1(✅)</strong><br>
+                "a" × 6 = "aaaaaa" == 原串 ✅<br>
+                输出：<strong>1</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界测试：s = "ab"</strong><br>
+                n = 2，尝试 L=1：2%1=0 ✅ 但 s[1]='b' ≠ s[0]='a' → ❌<br>
+                没有循环节 → 输出：<strong>2</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #6a1b9a;">
+                <strong style="color:#6a1b9a;">另一个测试：s = "abcabcabc"</strong><br>
+                n = 9，尝试 L=1(❌)，2→9%2≠0(跳)，<strong>L=3(✅)</strong><br>
+                "abc" × 3 = "abcabcabc" == 原串 ✅<br>
+                输出：<strong>3</strong> ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🔑 整除是前提：</strong> 循环节长度 L 必须能整除总长度 n（<span class="code-inline">n % L == 0</span>）。不满足这个条件的 L 直接跳过，大大减少无效计算！</li>
+            <li><strong>🔄 取余是核心：</strong> <span class="code-inline">s[i] == s[i % L]</span> 利用取余让索引"循环回绕"到 0~L-1 的范围。这是处理周期性问题的经典技巧，记住它！</li>
+            <li><strong>🏃 从小到大找，找到就停：</strong> 由于我们要找的是<strong>最短</strong>的循环节，从 L=1 开始枚举，第一个成功的就是答案。千万别忘了找到后就 return / exit！</li>
+            <li><strong>📏 枚举范围是 1 到 n/2：</strong> 循环节至少要重复2次，所以最大长度不超过 n/2。如果都没找到，答案就是 n（整个字符串本身就是"循环节"，只出现 1 次）。</li>
+            <li><strong>🐍 Python 独家彩蛋：</strong> <span class="code-inline">s[:L] * k == s</span> 一行就能验证，<span class="code-inline">for...else</span> 语法让代码更优雅。这些是 Python 的特色武器！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🏛️ 封印已解开！安雅成功进入了古老遗迹，发现了传说中的宝藏！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+
+    function switchMethod(method) {
+        const aElements = document.querySelectorAll('.method-a-only');
+        const bElements = document.querySelectorAll('.method-b-only');
+        const buttons = document.querySelectorAll('.method-btn');
+
+        buttons.forEach(btn => {
+            btn.classList.remove('active-a', 'active-b');
+        });
+
+        if (method === 'a') {
+            aElements.forEach(el => el.style.display = 'block');
+            bElements.forEach(el => el.style.display = 'none');
+            buttons[0].classList.add('active-a');
+        } else {
+            aElements.forEach(el => el.style.display = 'none');
+            bElements.forEach(el => el.style.display = 'block');
+            buttons[1].classList.add('active-b');
+        }
+    }
+</script>
+
+</body>
+</html>

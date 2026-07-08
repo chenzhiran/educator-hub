@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：拍头游戏</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #1565c0;
+            background-color: #1e88e5;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(27, 94, 32, 0.15);
+            border: 5px solid #43a047;
+        }
+
+        h1 {
+            color: #2e7d32;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #c8e6c9;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #e64a19;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #bf360c, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #bf360c, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #e64a19;
+            border-bottom: 3px dashed #a5d6a7;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #2e7d32;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #f1f8e9;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #aed581;
+        }
+        .card.problem { border-color: #43a047; background-color: #e8f5e9; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.method-a { border-color: #43a047; background-color: #e8f5e9; }
+        .card.method-b { border-color: #6a1b9a; background-color: #f3e5f5; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #a5d6a7; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #dcedc8;
+            color: #33691e;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 圆圈小人可视化 ========== */
+        .circle-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #aed581;
+        }
+        .circle-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .person {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            min-width: 65px;
+        }
+        .person-head {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: white;
+            position: relative;
+        }
+        .person-num {
+            position: absolute;
+            top: -12px;
+            right: -8px;
+            background: #fff9c4;
+            color: #e65100;
+            border: 2px solid #fdd835;
+            border-radius: 8px;
+            padding: 1px 6px;
+            font-size: 0.6em;
+            font-weight: bold;
+        }
+        .person-body {
+            font-size: 1.5em;
+        }
+        .person-name {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #555;
+        }
+        .person-answer {
+            background: #e8f5e9;
+            border: 2px solid #43a047;
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        /* ========== 整除关系连线 ========== */
+        .relation-box {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .relation-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+            font-size: 0.95em;
+            flex-wrap: wrap;
+        }
+        .rel-target {
+            background: #e3f2fd;
+            border: 2px solid #42a5f5;
+            border-radius: 10px;
+            padding: 4px 12px;
+            font-weight: bold;
+            color: #1565c0;
+            min-width: 40px;
+            text-align: center;
+        }
+        .rel-divisor {
+            background: #c8e6c9;
+            border: 2px solid #66bb6a;
+            border-radius: 10px;
+            padding: 3px 8px;
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 0.9em;
+        }
+        .rel-self {
+            background: #ffcdd2;
+            border: 2px solid #ef5350;
+            border-radius: 10px;
+            padding: 3px 8px;
+            font-weight: bold;
+            color: #c62828;
+            font-size: 0.9em;
+            text-decoration: line-through;
+        }
+        .rel-arrow {
+            color: #888;
+            font-size: 1.2em;
+        }
+        .rel-count {
+            background: #fff9c4;
+            border: 2px solid #fdd835;
+            border-radius: 10px;
+            padding: 3px 10px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 计数表格可视化 ========== */
+        .cnt-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #90caf9;
+        }
+        .cnt-row {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .cnt-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 42px;
+        }
+        .cnt-val {
+            width: 36px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        .cnt-label {
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 2px;
+        }
+        .cnt-has { background: #c8e6c9; border-color: #66bb6a; color: #2e7d32; }
+        .cnt-zero { background: #f5f5f5; border-color: #e0e0e0; color: #bbb; }
+
+        /* ========== 倍数传播可视化 ========== */
+        .spread-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #ce93d8;
+            margin: 15px 0;
+        }
+        .spread-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+        .spread-source {
+            background: #e8f5e9;
+            border: 2px solid #43a047;
+            border-radius: 10px;
+            padding: 5px 12px;
+            font-weight: bold;
+            color: #2e7d32;
+            min-width: 60px;
+            text-align: center;
+        }
+        .spread-arrow {
+            color: #ab47bc;
+            font-size: 1.2em;
+        }
+        .spread-target {
+            background: #f3e5f5;
+            border: 2px solid #ce93d8;
+            border-radius: 8px;
+            padding: 3px 8px;
+            font-weight: bold;
+            color: #6a1b9a;
+            font-size: 0.85em;
+        }
+        .spread-target.in-array {
+            background: #e8f5e9;
+            border-color: #43a047;
+            color: #2e7d32;
+        }
+
+        /* ========== w数组变化过程 ========== */
+        .w-step {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin: 8px 0;
+        }
+        .w-row {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .w-cell {
+            width: 32px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            background: #f5f5f5;
+            color: #bbb;
+        }
+        .w-cell.changed {
+            background: #fff9c4;
+            border-color: #fdd835;
+            color: #e65100;
+            animation: pulse 0.5s;
+        }
+        .w-cell.active {
+            background: #c8e6c9;
+            border-color: #43a047;
+            color: #2e7d32;
+        }
+        .w-label {
+            font-size: 0.7em;
+            color: #888;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #43a047;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+            min-width: 80px;
+        }
+        .step-arrow {
+            font-size: 1.5em;
+            color: #43a047;
+        }
+
+        /* ========== 解法选择标签 ========== */
+        .method-tab {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0 10px 0;
+            justify-content: center;
+        }
+        .method-btn {
+            padding: 10px 25px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .method-btn.active-a {
+            border-color: #43a047;
+            background: #43a047;
+            color: white;
+        }
+        .method-btn.active-b {
+            border-color: #6a1b9a;
+            background: #ab47bc;
+            color: white;
+        }
+
+        /* ========== 数学演算框 ========== */
+        .math-demo {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+        .math-demo .op { color: #c62828; font-weight: bold; }
+        .math-demo .res { color: #2e7d32; font-weight: bold; font-size: 1.1em; }
+        .math-demo .yes { color: #2e7d32; font-weight: bold; }
+        .math-demo .no { color: #c62828; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #c8e6c9;
+        }
+        .example-card strong { color: #2e7d32; }
+        .example-card pre {
+            background: transparent;
+            color: #1b5e20;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 1em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #6a1b9a, #ab47bc); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 复杂度对比卡 ========== */
+        .complexity-card {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .complexity-item {
+            flex: 1;
+            min-width: 180px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .complexity-item.slow {
+            background: #ffebee;
+            border: 2px solid #ef5350;
+            color: #c62828;
+        }
+        .complexity-item.fast {
+            background: #e8f5e9;
+            border: 2px solid #43a047;
+            color: #2e7d32;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #a5d6a7;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn, .method-tab { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🎯 拍头游戏 👋</h1>
+
+    <div style="text-align: center; font-size: 1.2em; color: #2e7d32;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        大家围成一圈，额头上贴着数字——<br>
+        数一数谁是你的"倍数朋友"！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/3" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>n 个小朋友围成一圈，每个人额头上贴着一个数字 <span class="code-inline">a[i]</span>。</p>
+        <p>对于每个小朋友，数一数有多少个<strong>其他</strong>小朋友的数字能<strong>整除</strong>自己的数字。</p>
+        <p>即：对于 <span class="code-inline">a[i]</span>，统计所有 <span class="code-inline">j ≠ i</span> 中满足 <span class="code-inline">a[i] % a[j] == 0</span> 的个数。</p>
+
+        <div style="background:#fff3e0; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #ffe0b2;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>第1行 n（≤10<sup>5</sup>），第2行 n 个整数（≤10<sup>6</sup>）<br>
+            • <strong>输出：</strong>n 个整数，第 i 个数表示第 i 个人的"倍数朋友"数量
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例 1</strong>
+                <pre>5
+2 1 2 3 4</pre>
+                <strong>📤 输出：</strong><span class="highlight">2 0 2 1 3</span>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 2</strong>
+                <pre>4
+1 1 1 1</pre>
+                <strong>📤 输出：</strong><span class="highlight">3 3 3 3</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解)</h2>
+
+        <h3>🎪 围成一圈的小朋友</h3>
+        <div class="circle-visual">
+            <div style="color: #2e7d32; font-weight: bold; font-size: 1.1em;">👇 样例 1：额头上的数字 = [2, 1, 2, 3, 4] 👇</div>
+
+            <div class="circle-row">
+                <div class="person">
+                    <div class="person-head" style="background:#e53935;">
+                        2
+                        <div class="person-num">①</div>
+                    </div>
+                    <div class="person-body">🧒</div>
+                    <div class="person-name">小红</div>
+                    <div class="person-answer">答案: 2</div>
+                </div>
+                <div class="person">
+                    <div class="person-head" style="background:#1e88e5;">
+                        1
+                        <div class="person-num">②</div>
+                    </div>
+                    <div class="person-body">👧</div>
+                    <div class="person-name">小蓝</div>
+                    <div class="person-answer">答案: 0</div>
+                </div>
+                <div class="person">
+                    <div class="person-head" style="background:#43a047;">
+                        2
+                        <div class="person-num">③</div>
+                    </div>
+                    <div class="person-body">🧒</div>
+                    <div class="person-name">小绿</div>
+                    <div class="person-answer">答案: 2</div>
+                </div>
+                <div class="person">
+                    <div class="person-head" style="background:#ff9800;">
+                        3
+                        <div class="person-num">④</div>
+                    </div>
+                    <div class="person-body">👦</div>
+                    <div class="person-name">小橙</div>
+                    <div class="person-answer">答案: 1</div>
+                </div>
+                <div class="person">
+                    <div class="person-head" style="background:#8e24aa;">
+                        4
+                        <div class="person-num">⑤</div>
+                    </div>
+                    <div class="person-body">👧</div>
+                    <div class="person-name">小紫</div>
+                    <div class="person-answer">答案: 3</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>🔍 逐个分析每个人的"倍数朋友"</h3>
+
+        <div class="relation-box">
+            <!-- 小红: 2 -->
+            <div class="relation-row">
+                <div class="rel-target">🧒 小红=2</div>
+                <div class="rel-arrow">←</div>
+                <div>谁能整除 2？</div>
+                <div class="rel-divisor">1 ✅</div>
+                <div class="rel-divisor">2 ✅</div>
+                <div style="font-size:0.85em; color:#888;">(数组中的 1 和另一个 2)</div>
+                <div class="rel-arrow">→</div>
+                <div class="rel-count">答案=2</div>
+            </div>
+
+            <!-- 小蓝: 1 -->
+            <div class="relation-row">
+                <div class="rel-target">👧 小蓝=1</div>
+                <div class="rel-arrow">←</div>
+                <div>谁能整除 1？</div>
+                <div style="font-size:0.85em; color:#c62828;">只有 1 本身，但不算自己！</div>
+                <div class="rel-arrow">→</div>
+                <div class="rel-count">答案=0</div>
+            </div>
+
+            <!-- 小绿: 2 -->
+            <div class="relation-row">
+                <div class="rel-target">🧒 小绿=2</div>
+                <div class="rel-arrow">←</div>
+                <div>谁能整除 2？</div>
+                <div class="rel-divisor">1 ✅</div>
+                <div class="rel-divisor">2 ✅</div>
+                <div style="font-size:0.85em; color:#888;">(和小红一样)</div>
+                <div class="rel-arrow">→</div>
+                <div class="rel-count">答案=2</div>
+            </div>
+
+            <!-- 小橙: 3 -->
+            <div class="relation-row">
+                <div class="rel-target">👦 小橙=3</div>
+                <div class="rel-arrow">←</div>
+                <div>谁能整除 3？</div>
+                <div class="rel-divisor">1 ✅</div>
+                <div class="rel-self">3 ← 自己</div>
+                <div style="font-size:0.85em; color:#888;">(只有 1)</div>
+                <div class="rel-arrow">→</div>
+                <div class="rel-count">答案=1</div>
+            </div>
+
+            <!-- 小紫: 4 -->
+            <div class="relation-row">
+                <div class="rel-target">👧 小紫=4</div>
+                <div class="rel-arrow">←</div>
+                <div>谁能整除 4？</div>
+                <div class="rel-divisor">1 ✅</div>
+                <div class="rel-divisor">2 ✅</div>
+                <div class="rel-divisor">2 ✅</div>
+                <div style="font-size:0.85em; color:#888;">(1出现1次, 2出现2次)</div>
+                <div class="rel-arrow">→</div>
+                <div class="rel-count">答案=3</div>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-weight:bold; color:#2e7d32; font-size:1.1em; margin:15px 0;">
+            输出：<span class="highlight">2 0 2 1 3</span> ✅
+        </div>
+
+        <div class="thinking-box">
+            <div class="title">关键概念："能整除"的方向</div>
+            <p style="margin:5px 0;">
+                <strong>题目问的是：</strong>有多少个<strong>别人</strong>的数字 能整除 <strong>我</strong>的数字？<br>
+                即：别人的数是我的<strong>因数</strong>。<br><br>
+                例如小紫的数字是 4：<br>
+                • 1 能整除 4？ 4 % 1 = 0 ✅（1 是 4 的因数）<br>
+                • 2 能整除 4？ 4 % 2 = 0 ✅（2 是 4 的因数）<br>
+                • 3 能整除 4？ 4 % 3 = 1 ❌（3 不是 4 的因数）<br>
+                • <strong>注意：</strong>不数自己！只数<strong>其他人</strong>。
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 双解法选择 ==================== -->
+    <div style="text-align: center; margin: 30px 0 10px 0;">
+        <div style="font-size: 1.3em; font-weight: bold; color: #1b5e20; margin-bottom: 10px;">🎯 两种解法任你选！</div>
+    </div>
+    <div class="method-tab">
+        <button class="method-btn active-a" onclick="switchMethod('a')">🐢 解法一：暴力枚举（会超时）</button>
+        <button class="method-btn" onclick="switchMethod('b')">⚡ 解法二：倍数传播（正解）</button>
+    </div>
+
+    <!-- ==================== 解法一：暴力枚举 ==================== -->
+    <div class="method-a-only">
+        <div class="card method-a">
+            <h2>🐢 解法一：暴力双重循环（直觉但超时）</h2>
+            <p>最直接的想法：对于每个人，遍历所有其他人，检查是否能整除。</p>
+
+            <div class="step-flow">
+                <div class="step-box">
+                    <strong>外层 i</strong><br>
+                    <span style="font-size:0.85em;">每个人</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#ff9800;">
+                    <strong>内层 j</strong><br>
+                    <span style="font-size:0.85em;">检查其他人</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#1565c0;">
+                    <strong>a[i]%a[j]==0?</strong><br>
+                    <span style="font-size:0.85em;">能整除？计数+1</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#43a047;">
+                    <strong>输出计数</strong>
+                </div>
+            </div>
+
+            <div class="math-demo">
+                <div style="font-weight:bold; color:#e65100; margin-bottom:8px;">📋 模拟过程（样例1：[2, 1, 2, 3, 4]）</div>
+
+                <strong>i=0 (a[i]=2):</strong> 检查 j=1(1✅), j=2(2✅), j=3(3❌), j=4(4❌) → 计数=<span class="res">2</span><br>
+                <strong>i=1 (a[i]=1):</strong> 检查 j=0(2❌), j=2(2❌), j=3(3❌), j=4(4❌) → 计数=<span class="res">0</span><br>
+                <strong>i=2 (a[i]=2):</strong> 检查 j=0(2✅), j=1(1✅), j=3(3❌), j=4(4❌) → 计数=<span class="res">2</span><br>
+                <strong>i=3 (a[i]=3):</strong> 检查 j=0(2❌), j=1(1✅), j=2(2❌), j=4(4❌) → 计数=<span class="res">1</span><br>
+                <strong>i=4 (a[i]=4):</strong> 检查 j=0(2✅), j=1(1✅), j=2(2✅), j=3(3❌) → 计数=<span class="res">3</span><br>
+            </div>
+
+            <div class="thinking-box" style="border-color: #d32f2f; background: #ffebee;">
+                <div class="title" style="color: #d32f2f;">⚠️ 超时警报！</div>
+                <p style="margin:5px 0;">
+                    双重循环的时间复杂度是 <span class="code-inline">O(n²)</span>。<br>
+                    当 n = 10<sup>5</sup> 时，需要 10<sup>10</sup> 次操作 → <strong>严重超时</strong>！🐌<br>
+                    我们需要更聪明的方法……
+                </p>
+            </div>
+        </div>
+
+        <div class="cpp-only">
+            <div class="card code-box">
+                <h2>💻 C++ 暴力代码（仅用于理解思路，会超时）</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n;
+    cin >> n;
+    <span class="type">int</span> a[<span class="number">100005</span>];
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) cin >> a[i];
+
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        <span class="type">int</span> cnt = <span class="number">0</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j < n; j++) {
+            <span class="keyword">if</span> (i != j && a[i] % a[j] == <span class="number">0</span>)
+                cnt++;  <span class="comment">// 别人能整除我</span>
+        }
+        <span class="keyword">if</span> (i > <span class="number">0</span>) cout << <span class="string">" "</span>;
+        cout << cnt;
+    }
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+                <div style="background:#ffebee; padding:10px; border-radius:8px; margin-top:10px; text-align:center; color:#c62828; font-weight:bold;">
+                    ⚠️ 时间复杂度 O(n²)，n=10⁵ 时会超时！仅供理解思路！
+                </div>
+            </div>
+        </div>
+
+        <div class="py-only" style="display: none;">
+            <div class="card code-box">
+                <h2>💻 Python 暴力代码（仅用于理解思路，会超时）</h2>
+<pre>
+n = <span class="type">int</span>(<span class="type">input</span>())
+a = <span class="type">list</span>(<span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split()))
+
+result = []
+<span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(n):
+    cnt = <span class="number">0</span>
+    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(n):
+        <span class="keyword">if</span> i != j <span class="keyword">and</span> a[i] % a[j] == <span class="number">0</span>:
+            cnt += <span class="number">1</span>
+    result.append(cnt)
+
+<span class="type">print</span>(*result)
+</pre>
+                <div style="background:#ffebee; padding:10px; border-radius:8px; margin-top:10px; text-align:center; color:#c62828; font-weight:bold;">
+                    ⚠️ 时间复杂度 O(n²)，n=10⁵ 时会超时！仅供理解思路！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 解法二：倍数传播 ==================== -->
+    <div class="method-b-only" style="display: none;">
+        <div class="card method-b">
+            <h2>⚡ 解法二：倍数传播法（正解！）</h2>
+
+            <div class="thinking-box" style="border-color: #6a1b9a; background: #f3e5f5;">
+                <div class="title" style="color: #6a1b9a;">💡 核心思想：换个角度思考！</div>
+                <p style="margin:5px 0;">
+                    暴力法是"对每个人，找他的因数"——太慢了。<br>
+                    换个角度：<strong>"对每个值 x，它能整除谁？——它能整除所有 x 的倍数！"</strong><br><br>
+                    如果值 x 出现了 cnt[x] 次，那么所有 x 的倍数（2x, 3x, 4x, ...）<br>
+                    都能被 x 整除，所以它们的答案都要加上 cnt[x]！<br><br>
+                    这就像<strong>传播</strong>：每个值 x 把自己的出现次数"广播"给所有倍数。
+                </p>
+            </div>
+
+            <h3>📊 三步走流程</h3>
+            <div class="step-flow">
+                <div class="step-box" style="border-color:#1565c0;">
+                    <strong>第1步</strong><br>
+                    <span style="font-size:0.85em;">📊 统计 cnt[]<br>每个值出现几次</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#6a1b9a;">
+                    <strong>第2步</strong><br>
+                    <span style="font-size:0.85em;">📡 倍数传播<br>x→2x,3x,4x...</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#ff9800;">
+                    <strong>第3步</strong><br>
+                    <span style="font-size:0.85em;">➖ 减去自己<br>w[a[i]] − 1</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-box" style="border-color:#43a047;">
+                    <strong>输出</strong><br>
+                    <span style="font-size:0.85em;">📤 答案</span>
+                </div>
+            </div>
+
+            <h3>📋 完整图解 (样例1: [2, 1, 2, 3, 4])</h3>
+
+            <!-- 第1步：统计 cnt -->
+            <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin:15px 0; border:2px solid #90caf9;">
+                <h3 style="color:#1565c0; margin-top:0;">第1步：统计每个值出现几次 → cnt[]</h3>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0;">
+                    <div style="font-weight:bold;">数组 =</div>
+                    <div style="display:flex; gap:3px;">
+                        <div style="background:#e8f5e9; border:2px solid #66bb6a; border-radius:8px; padding:4px 10px; font-weight:bold;">2</div>
+                        <div style="background:#e8f5e9; border:2px solid #66bb6a; border-radius:8px; padding:4px 10px; font-weight:bold;">1</div>
+                        <div style="background:#e8f5e9; border:2px solid #66bb6a; border-radius:8px; padding:4px 10px; font-weight:bold;">2</div>
+                        <div style="background:#e8f5e9; border:2px solid #66bb6a; border-radius:8px; padding:4px 10px; font-weight:bold;">3</div>
+                        <div style="background:#e8f5e9; border:2px solid #66bb6a; border-radius:8px; padding:4px 10px; font-weight:bold;">4</div>
+                    </div>
+                </div>
+                <div class="cnt-visual" style="border-color:#90caf9;">
+                    <div style="font-weight:bold; color:#1565c0;">cnt[] 数组（值 → 出现次数）</div>
+                    <div class="cnt-row">
+                        <div class="cnt-cell"><div class="cnt-val cnt-has">1</div><div class="cnt-label">值=1</div></div>
+                        <div class="cnt-cell"><div class="cnt-val cnt-has">2</div><div class="cnt-label">值=2</div></div>
+                        <div class="cnt-cell"><div class="cnt-val cnt-has">1</div><div class="cnt-label">值=3</div></div>
+                        <div class="cnt-cell"><div class="cnt-val cnt-has">1</div><div class="cnt-label">值=4</div></div>
+                    </div>
+                    <div style="font-size:0.85em; color:#666;">1出现1次，2出现2次，3出现1次，4出现1次</div>
+                </div>
+            </div>
+
+            <!-- 第2步：倍数传播 -->
+            <div style="background:#f3e5f5; padding:15px; border-radius:12px; margin:15px 0; border:2px solid #ce93d8;">
+                <h3 style="color:#6a1b9a; margin-top:0;">第2步：倍数传播 → w[]</h3>
+                <p style="font-size:0.95em;">对每个存在的值 x，把 cnt[x] 加到 x 的所有倍数上！</p>
+
+                <div class="spread-visual">
+                    <!-- x=1 -->
+                    <div style="font-weight:bold; color:#6a1b9a; margin-bottom:5px;">x = 1（出现1次），传播给 1 的所有倍数：</div>
+                    <div class="spread-row">
+                        <div class="spread-source">x=1, cnt=1</div>
+                        <div class="spread-arrow">📡→</div>
+                        <div class="spread-target in-array">w[1]+1</div>
+                        <div class="spread-target in-array">w[2]+1</div>
+                        <div class="spread-target in-array">w[3]+1</div>
+                        <div class="spread-target in-array">w[4]+1</div>
+                    </div>
+
+                    <div style="margin-top:12px; font-weight:bold; color:#6a1b9a;">x = 2（出现2次），传播给 2 的所有倍数：</div>
+                    <div class="spread-row">
+                        <div class="spread-source">x=2, cnt=2</div>
+                        <div class="spread-arrow">📡→</div>
+                        <div class="spread-target in-array">w[2]+2</div>
+                        <div class="spread-target in-array">w[4]+2</div>
+                    </div>
+
+                    <div style="margin-top:12px; font-weight:bold; color:#6a1b9a;">x = 3（出现1次），传播给 3 的所有倍数：</div>
+                    <div class="spread-row">
+                        <div class="spread-source">x=3, cnt=1</div>
+                        <div class="spread-arrow">📡→</div>
+                        <div class="spread-target in-array">w[3]+1</div>
+                    </div>
+
+                    <div style="margin-top:12px; font-weight:bold; color:#6a1b9a;">x = 4（出现1次），传播给 4 的所有倍数：</div>
+                    <div class="spread-row">
+                        <div class="spread-source">x=4, cnt=1</div>
+                        <div class="spread-arrow">📡→</div>
+                        <div class="spread-target in-array">w[4]+1</div>
+                    </div>
+                </div>
+
+                <!-- w数组最终结果 -->
+                <div class="cnt-visual" style="border-color:#ce93d8;">
+                    <div style="font-weight:bold; color:#6a1b9a;">w[] 的最终累加结果</div>
+                    <div class="cnt-row">
+                        <div class="cnt-cell">
+                            <div class="cnt-val cnt-has">1</div>
+                            <div class="cnt-label">w[1]</div>
+                        </div>
+                        <div class="cnt-cell">
+                            <div class="cnt-val" style="background:#fff9c4; border-color:#fdd835; color:#e65100;">3</div>
+                            <div class="cnt-label">w[2]</div>
+                        </div>
+                        <div class="cnt-cell">
+                            <div class="cnt-val" style="background:#fff9c4; border-color:#fdd835; color:#e65100;">2</div>
+                            <div class="cnt-label">w[3]</div>
+                        </div>
+                        <div class="cnt-cell">
+                            <div class="cnt-val" style="background:#fff9c4; border-color:#fdd835; color:#e65100;">4</div>
+                            <div class="cnt-label">w[4]</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.85em; color:#666;">
+                        w[1]=1(来自x=1)&nbsp;&nbsp;
+                        w[2]=1+2=3(来自x=1,2)&nbsp;&nbsp;
+                        w[3]=1+1=2(来自x=1,3)&nbsp;&nbsp;
+                        w[4]=1+2+1=4(来自x=1,2,4)
+                    </div>
+                </div>
+
+                <div style="background:#fff; padding:10px 15px; border-radius:8px; border:2px solid #ce93d8; margin-top:10px;">
+                    <strong style="color:#6a1b9a;">w[v] 的含义是什么？</strong><br>
+                    <span class="code-inline">w[v]</span> = 数组中有多少个数是 v 的因数（<strong>包括 v 自己</strong>！）
+                </div>
+            </div>
+
+            <!-- 第3步：减去自己 -->
+            <div style="background:#fff3e0; padding:15px; border-radius:12px; margin:15px 0; border:2px solid #ffcc80;">
+                <h3 style="color:#e65100; margin-top:0;">第3步：减去自己 → 最终答案</h3>
+                <p>题目说"不算自己"，所以每个人的答案 = <span class="code-inline">w[a[i]] − 1</span></p>
+
+                <div class="math-demo" style="border-color:#ffcc80;">
+                    a = [<span style="color:#e53935">2</span>, <span style="color:#1565c0">1</span>, <span style="color:#43a047">2</span>, <span style="color:#ff9800">3</span>, <span style="color:#8e24aa">4</span>]<br><br>
+                    第1个人 (a=2): w[2] − 1 = 3 − 1 = <span class="res">2</span><br>
+                    第2个人 (a=1): w[1] − 1 = 1 − 1 = <span class="res">0</span><br>
+                    第3个人 (a=2): w[2] − 1 = 3 − 1 = <span class="res">2</span><br>
+                    第4个人 (a=3): w[3] − 1 = 2 − 1 = <span class="res">1</span><br>
+                    第5个人 (a=4): w[4] − 1 = 4 − 1 = <span class="res">3</span><br><br>
+                    输出：<span class="res">2 0 2 1 3</span> ✅
+                </div>
+            </div>
+
+            <div class="thinking-box" style="border-color: #43a047; background: #e8f5e9;">
+                <div class="title" style="color: #2e7d32;">💡 为什么减 1 就对了？</div>
+                <p style="margin:5px 0;">
+                    <span class="code-inline">w[v]</span> 统计了数组中所有能整除 v 的数的个数。<br>
+                    但 v 本身也是自己的因数（v % v = 0），也被统计进去了！<br>
+                    题目说"不算自己"，所以减去 1 就是只算<strong>其他人</strong>的个数。<br><br>
+                    ⚠️ 注意：这里减的 1 指的是"自己这个数值整除自己"，对每个人都恰好减 1 次。
+                </p>
+            </div>
+        </div>
+
+        <div class="cpp-only">
+            <div class="card knowledge">
+                <h2>📘 C++ 解法二 · 知识点</h2>
+                <ul>
+                    <li>📊 <strong>计数数组 cnt[]：</strong> 用 <span class="code-inline">cnt[x]++</span> 统计每个值出现的次数。数组大小开到最大值+1。</li>
+                    <li>📡 <strong>倍数枚举：</strong> <span class="code-inline">for (y = x; y <= maxV; y += x)</span> 是枚举 x 的所有倍数的经典写法！步长为 x，依次访问 x, 2x, 3x, ...</li>
+                    <li>🧮 <strong>调和级数复杂度：</strong> 这个双重循环的总操作次数是 maxV/1 + maxV/2 + ... + maxV/maxV ≈ O(maxV × ln(maxV))，约为 O(maxV × log(maxV))。当 maxV = 10<sup>6</sup> 时大约是 2000 万次，完全可行！</li>
+                    <li>➖ <strong>减自己的技巧：</strong> 最后对每个 a[i]，输出 <span class="code-inline">w[a[i]] - 1</span>，巧妙地排除自身。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 C++ 倍数传播代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="keyword">const</span> <span class="type">int</span> MAXV = <span class="number">1000001</span>;
+<span class="type">int</span> cnt[MAXV], w[MAXV];  <span class="comment">// cnt: 计数, w: 因数个数</span>
+<span class="type">int</span> a[<span class="number">100005</span>];
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n, maxV = <span class="number">0</span>;
+    cin >> n;
+
+    <span class="comment">// 📊 第1步：读入并统计每个值出现几次</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        cin >> a[i];
+        cnt[a[i]]++;
+        <span class="keyword">if</span> (a[i] > maxV) maxV = a[i];
+    }
+
+    <span class="comment">// 📡 第2步：倍数传播</span>
+    <span class="keyword">for</span> (<span class="type">int</span> x = <span class="number">1</span>; x <= maxV; x++) {
+        <span class="keyword">if</span> (cnt[x] == <span class="number">0</span>) <span class="keyword">continue</span>;  <span class="comment">// 没出现过，跳过</span>
+        <span class="comment">// 把 cnt[x] 传播给 x 的所有倍数</span>
+        <span class="keyword">for</span> (<span class="type">int</span> y = x; y <= maxV; y += x) {
+            w[y] += cnt[x];
+        }
+    }
+
+    <span class="comment">// ➖ 第3步：输出每个人的答案（减去自己）</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        <span class="keyword">if</span> (i > <span class="number">0</span>) cout << <span class="string">" "</span>;
+        cout << w[a[i]] - <span class="number">1</span>;  <span class="comment">// 不算自己！</span>
+    }
+    cout << endl;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="py-only" style="display: none;">
+            <div class="card knowledge">
+                <h2>🐍 Python 解法二 · 知识点</h2>
+                <ul>
+                    <li>📊 <strong>列表计数：</strong> 用 <span class="code-inline">cnt = [0] * (maxV + 1)</span> 创建计数数组。也可以用 <span class="code-inline">collections.Counter</span>，但数组更快。</li>
+                    <li>📡 <strong>range 步长枚举倍数：</strong> <span class="code-inline">range(x, maxV+1, x)</span> 用步长 x 枚举所有倍数：x, 2x, 3x, ...</li>
+                    <li>⚡ <strong>避免构造：</strong> 直接在数组上操作，不构造额外的列表，保持效率。</li>
+                    <li>➖ <strong>减自己：</strong> 最后对每个 a[i]，答案是 <span class="code-inline">w[a[i]] - 1</span>。</li>
+                </ul>
+            </div>
+            <div class="card code-box">
+                <h2>💻 Python 倍数传播代码</h2>
+<pre>
+<span class="keyword">import</span> sys
+<span class="type">input</span> = sys.stdin.readline  <span class="comment"># 加速读入</span>
+
+n = <span class="type">int</span>(<span class="type">input</span>())
+a = <span class="type">list</span>(<span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split()))
+
+maxV = <span class="type">max</span>(a)
+
+<span class="comment"># 📊 第1步：统计每个值出现几次</span>
+cnt = [<span class="number">0</span>] * (maxV + <span class="number">1</span>)
+<span class="keyword">for</span> x <span class="keyword">in</span> a:
+    cnt[x] += <span class="number">1</span>
+
+<span class="comment"># 📡 第2步：倍数传播</span>
+w = [<span class="number">0</span>] * (maxV + <span class="number">1</span>)
+<span class="keyword">for</span> x <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, maxV + <span class="number">1</span>):
+    <span class="keyword">if</span> cnt[x] == <span class="number">0</span>:
+        <span class="keyword">continue</span>  <span class="comment"># 没出现过，跳过</span>
+    <span class="comment"># 把 cnt[x] 传播给 x 的所有倍数</span>
+    <span class="keyword">for</span> y <span class="keyword">in</span> <span class="type">range</span>(x, maxV + <span class="number">1</span>, x):
+        w[y] += cnt[x]
+
+<span class="comment"># ➖ 第3步：输出（减去自己）</span>
+result = []
+<span class="keyword">for</span> x <span class="keyword">in</span> a:
+    result.append(w[x] - <span class="number">1</span>)
+<span class="type">print</span>(*result)
+</pre>
+            </div>
+        </div>
+
+        <!-- 为什么这样做是对的？ -->
+        <div class="card method-b">
+            <h3>🤔 为什么倍数传播是正确的？</h3>
+
+            <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0; margin:10px 0;">
+                <p><strong>思考本质：</strong></p>
+                <p>对于数字 v，它的因数有哪些？就是所有能整除 v 的数。</p>
+                <p>换句话说：x 能整除 v ⟺ v 是 x 的倍数。</p>
+                <p>所以当我们处理值 x 时，<strong>x 的所有倍数</strong>都会被 x 整除！</p>
+                <p>把 cnt[x] 加到 w[倍数] 上，就是在说：<br>
+                "有 cnt[x] 个值为 x 的数，它们都是这些倍数的因数。"</p>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin:15px 0;">
+                <div style="flex:1; min-width:200px; background:#e8f5e9; padding:12px; border-radius:10px; border:2px solid #43a047;">
+                    <div style="text-align:center; font-weight:bold; color:#2e7d32; margin-bottom:5px;">暴力思维 🐢</div>
+                    <div style="font-size:0.9em;">对每个人 → 扫描所有人<br>找谁能整除我<br><span style="color:#c62828;">O(n²)</span></div>
+                </div>
+                <div style="display:flex; align-items:center; font-size:2em; color:#43a047;">⇄</div>
+                <div style="flex:1; min-width:200px; background:#f3e5f5; padding:12px; border-radius:10px; border:2px solid #ab47bc;">
+                    <div style="text-align:center; font-weight:bold; color:#6a1b9a; margin-bottom:5px;">传播思维 ⚡</div>
+                    <div style="font-size:0.9em;">对每个值 → 广播给倍数<br>告诉它们"我是你因数"<br><span style="color:#2e7d32;">O(maxV log maxV)</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 两种解法对比 ==================== -->
+    <div class="card logic">
+        <h2>⚖️ 两种解法对比</h2>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">对比项</th>
+                <th class="a-th">🐢 暴力双重循环</th>
+                <th class="b-th">⚡ 倍数传播法</th>
+            </tr>
+            <tr>
+                <td><strong>思路</strong></td>
+                <td>对每个人，检查所有其他人</td>
+                <td>对每个值，传播给所有倍数</td>
+            </tr>
+            <tr>
+                <td><strong>时间复杂度</strong></td>
+                <td>O(n²)</td>
+                <td>O(maxV × log(maxV))</td>
+            </tr>
+            <tr>
+                <td><strong>n=10⁵ 时</strong></td>
+                <td>~10¹⁰ 次 😱 超时！</td>
+                <td>~2×10⁷ 次 ✅ 轻松！</td>
+            </tr>
+            <tr>
+                <td><strong>额外空间</strong></td>
+                <td>O(1)</td>
+                <td>O(maxV)</td>
+            </tr>
+            <tr>
+                <td><strong>难度</strong></td>
+                <td>⭐ 简单直观</td>
+                <td>⭐⭐⭐ 需要转换思维</td>
+            </tr>
+            <tr>
+                <td><strong>能否通过？</strong></td>
+                <td style="color:#c62828; font-weight:bold;">❌ 超时</td>
+                <td style="color:#2e7d32; font-weight:bold;">✅ 通过！</td>
+            </tr>
+        </table>
+
+        <div class="complexity-card">
+            <div class="complexity-item slow">
+                <div style="font-size:1.5em;">🐢</div>
+                O(n²)<br>
+                n=10⁵ → 10¹⁰<br>
+                ≈ 100秒 ⏰
+            </div>
+            <div class="complexity-item fast">
+                <div style="font-size:1.5em;">⚡</div>
+                O(maxV × log maxV)<br>
+                maxV=10⁶ → ~2×10⁷<br>
+                ≈ 0.2秒 🚀
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 1：[2, 1, 2, 3, 4]</strong><br>
+                cnt: {1:1, 2:2, 3:1, 4:1}<br>
+                传播后 w: {1:1, 2:3, 3:2, 4:4}<br>
+                减1后：w[2]-1=2, w[1]-1=0, w[2]-1=2, w[3]-1=1, w[4]-1=3<br>
+                输出：<strong>2 0 2 1 3</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 2：[1, 1, 1, 1]</strong><br>
+                cnt: {1:4}<br>
+                传播后 w: {1:4}（1的倍数就是1自己）<br>
+                减1后：w[1]-1=3, w[1]-1=3, w[1]-1=3, w[1]-1=3<br>
+                输出：<strong>3 3 3 3</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界测试：[6]（只有一个人）</strong><br>
+                cnt: {6:1}<br>
+                传播后 w: {6:1}<br>
+                减1后：w[6]-1=0（没有其他人能整除自己）<br>
+                输出：<strong>0</strong> ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 相关知识拓展 ==================== -->
+    <div class="card logic">
+        <h2>🧩 知识拓展：埃氏筛法的亲戚</h2>
+
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+            <p>这种"从 x 跳到 2x, 3x, 4x..."的枚举倍数技巧，和著名的<strong>埃拉托斯特尼筛法</strong>（筛质数）是一个套路！</p>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin:10px 0;">
+                <div style="flex:1; min-width:200px; background:#e1f5fe; padding:12px; border-radius:10px; border:2px solid #4fc3f7;">
+                    <div style="font-weight:bold; color:#0277bd; margin-bottom:5px;">🔢 埃氏筛法</div>
+                    <div style="font-size:0.9em;">
+                        从 x 开始，标记 2x, 3x, 4x... 为"非质数"<br>
+                        用途：筛选质数
+                    </div>
+                </div>
+                <div style="flex:1; min-width:200px; background:#f3e5f5; padding:12px; border-radius:10px; border:2px solid #ce93d8;">
+                    <div style="font-weight:bold; color:#6a1b9a; margin-bottom:5px;">🎯 本题方法</div>
+                    <div style="font-size:0.9em;">
+                        从 x 开始，给 x, 2x, 3x, 4x... 的 w 加上 cnt[x]<br>
+                        用途：统计因数个数
+                    </div>
+                </div>
+            </div>
+
+            <p style="text-align:center; font-weight:bold; color:#2e7d32;">
+                核心都是：<span class="code-inline">for (y = x; y <= max; y += x)</span> —— 枚举倍数的经典模板！
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🔄 反向思考是关键：</strong> 不要想"我的因数有哪些"，而是想"我能成为谁的因数"。从"找因数"转换为"传播倍数"，巧妙地利用了枚举倍数的高效性。</li>
+            <li><strong>📊 计数数组预处理：</strong> 先用 <span class="code-inline">cnt[]</span> 统计每个值出现的次数。这样在传播时，不需要关心具体有几个人，只需知道值和出现次数。</li>
+            <li><strong>📡 倍数枚举模板：</strong> <span class="code-inline">for (y = x; y <= maxV; y += x)</span> 是枚举 x 的所有倍数的核心代码。总复杂度约为 O(maxV × log(maxV))，比 O(n²) 高效得多！</li>
+            <li><strong>➖ 减 1 去掉自己：</strong> <span class="code-inline">w[v]</span> 包含了值 v 本身对自己的贡献。题目要求"不算自己"，所以答案是 <span class="code-inline">w[a[i]] - 1</span>。</li>
+            <li><strong>🧠 埃氏筛思想：</strong> 这道题的核心思想和埃拉托斯特尼筛法一脉相承——都是"从因数出发，标记/更新倍数"。掌握这个模板，可以解决很多类似的"因数/倍数关系"问题！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🎯 拍头游戏结束！所有小朋友都找到了自己的倍数朋友！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+
+    function switchMethod(method) {
+        const aElements = document.querySelectorAll('.method-a-only');
+        const bElements = document.querySelectorAll('.method-b-only');
+        const buttons = document.querySelectorAll('.method-btn');
+
+        buttons.forEach(btn => {
+            btn.classList.remove('active-a', 'active-b');
+        });
+
+        if (method === 'a') {
+            aElements.forEach(el => el.style.display = 'block');
+            bElements.forEach(el => el.style.display = 'none');
+            buttons[0].classList.add('active-a');
+        } else {
+            aElements.forEach(el => el.style.display = 'none');
+            bElements.forEach(el => el.style.display = 'block');
+            buttons[1].classList.add('active-b');
+        }
+    }
+</script>
+
+</body>
+</html>

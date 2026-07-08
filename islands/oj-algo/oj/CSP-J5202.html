@@ -3,352 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💣 变身扫雷小能手！| 趣味算法挑战</title>
+    <title>魔法课堂：数字雷区</title>
     <style>
-        :root {
-            --primary-primary: #FF6B6B;
-            --primary-secondary: #4ECDC4;
-            --bg-color: #F7FFF7;
-            --card-bg: #FFFFFF;
-            --text-main: #2F2F2F;
-            --accent-yellow: #FFE66D;
-            --code-bg: #282C34;
-        }
-
+        /* 全局可爱风格设置 */
         body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fff8e1;
+            color: #444;
             margin: 0;
             padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
         }
 
+        /* 顶部语言切换按钮 */
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0984e3;
+            background-color: #74b9ff;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #f39c12;
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        /* A4纸张打印优化容器 */
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 5px solid #fdcb6e;
         }
 
         /* 标题样式 */
-        header {
+        h1 {
+            color: #e17055;
             text-align: center;
-            padding: 40px 0;
-            background: linear-gradient(135deg, var(--primary-primary), var(--primary-secondary));
-            border-radius: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #ffeaa7;
+            margin-bottom: 20px;
+        }
+
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #e17055;
             color: white;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #d63031, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #d63031, 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
         }
 
-        h1 { margin: 0; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-        .subtitle { font-size: 1.2em; opacity: 0.9; }
+        h2 {
+            color: #d35400;
+            border-bottom: 3px dashed #fdcb6e;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
 
-        /* 卡片样式 */
+        h3 {
+            color: #e67e22;
+            margin-top: 25px;
+        }
+
+        /* 可爱的内容卡片 */
         .card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
-            border: 2px solid transparent;
-            transition: transform 0.3s;
+            background-color: #fdfbf7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #fdcb6e;
         }
 
-        .card:hover { transform: translateY(-5px); }
-        .card-title {
+        .card.problem { border-color: #e17055; background-color: #fff5f0; }
+        .card.logic { border-color: #fdcb6e; background-color: #fffcf0; }
+        .card.knowledge { border-color: #00b894; background-color: #f0fdf4; }
+        .card.code-box { border-color: #2d3436; background-color: #f5f6fa; }
+        .card.summary { border-color: #6c5ce7; background-color: #f3f0ff; }
+        .card.example { border-color: #00cec9; background-color: #f0ffff; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        /* 代码中的高亮颜色 */
+        .comment { color: #fdcb6e; font-style: italic; }
+        .keyword { color: #ff7675; font-weight: bold; }
+        .type { color: #74b9ff; }
+        .string { color: #55efc4; }
+        .number { color: #fab1a0; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #ffeaa7;
+            color: #d35400;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .formula {
+            background-color: #fff5f0;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #e17055;
+            border: 2px dashed #fdcb6e;
+            font-family: Consolas, monospace;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        /* 强调文字 */
+        .highlight {
+            background-color: #ffeaa7;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .highlight-red {
+            background-color: #ff7675;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .highlight-green {
+            background-color: #00b894;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* 网格样式 */
+        .mine-grid {
+            display: inline-grid;
+            gap: 3px;
+            margin: 10px auto;
+            padding: 8px;
+            background: #636e72;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .mine-cell {
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .mine-cell.mine {
+            background: linear-gradient(135deg, #ff7675, #d63031);
+            color: white;
             font-size: 1.5em;
-            color: var(--primary-primary);
-            margin-bottom: 15px;
-            font-weight: bold;
+        }
+        .mine-cell.unknown {
+            background: linear-gradient(135deg, #b2bec3, #636e72);
+            color: white;
+            font-size: 1.2em;
+        }
+        .mine-cell.num-0 { background: #dfe6e9; color: #b2bec3; }
+        .mine-cell.num-1 { background: #dfe6e9; color: #0984e3; }
+        .mine-cell.num-2 { background: #dfe6e9; color: #00b894; }
+        .mine-cell.num-3 { background: #dfe6e9; color: #d63031; }
+        .mine-cell.highlight-cell {
+            background: #ffeaa7;
+            color: #d35400;
+            border: 3px solid #f39c12;
+            box-shadow: 0 0 10px rgba(243,156,18,0.4);
+        }
+        .mine-cell.neighbor {
+            border: 3px dashed #0984e3;
+        }
+        .mine-cell.target {
+            border: 3px solid #e17055;
+            box-shadow: 0 0 12px rgba(225,112,85,0.5);
+            animation: pulse 1.5s infinite;
         }
 
-        .card-title::before {
-            content: '🌟';
-            margin-right: 10px;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
 
-        /* 步骤盒子 */
-        .step-container {
+        /* 方向指示器 */
+        .direction-grid {
+            display: inline-grid;
+            grid-template-columns: repeat(3, 55px);
+            gap: 4px;
+            margin: 10px auto;
+        }
+        .dir-cell {
+            width: 55px;
+            height: 55px;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .step-item {
-            background: #f0f4f8;
-            padding: 15px;
-            border-radius: 12px;
-            border-left: 5px solid var(--primary-secondary);
-        }
-
-        /* 样例展示 */
-        .example-box {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            background: #fff9db;
-            padding: 15px;
-            border-radius: 12px;
-        }
-
-        pre.code-text {
-            background: #333;
-            color: #fff;
-            padding: 10px;
+            align-items: center;
+            justify-content: center;
             border-radius: 8px;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-        }
-
-        /* 标签页切换 */
-        .tab-wrapper {
-            margin-top: 20px;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: -2px;
-        }
-
-        .tab-btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 12px 12px 0 0;
-            cursor: pointer;
+            font-size: 0.75em;
             font-weight: bold;
-            font-size: 1em;
-            background: #ddd;
-            transition: 0.3s;
-        }
-
-        .tab-btn.active {
-            background: var(--code-bg);
-            color: #61dafb;
-        }
-
-        .code-container {
-            background: var(--code-bg);
-            border-radius: 0 15px 15px 15px;
-            padding: 20px;
-            overflow-x: auto;
-        }
-
-        /* 语法高亮（适合小朋友的鲜艳色） */
-        .code-content { color: #abb2bf; font-family: 'Consolas', monospace; }
-        .c-keyword { color: #c678dd; } /* 紫色 */
-        .c-func { color: #61afef; }    /* 蓝色 */
-        .c-string { color: #98c379; }  /* 绿色 */
-        .c-comment { color: #5c6370; font-style: italic; } /* 灰色 */
-        .c-num { color: #d19a66; }     /* 橙色 */
-        .c-op { color: #56b6c2; }      /* 青色 */
-
-        /* 解释文字 */
-        .explanation {
-            margin-top: 15px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 10px;
-            font-size: 0.95em;
-        }
-
-        /* 页脚 */
-        footer {
             text-align: center;
-            padding: 40px;
-            color: #888;
-            font-size: 1.1em;
+            line-height: 1.2;
+        }
+        .dir-cell.arrow { background: #74b9ff; color: white; }
+        .dir-cell.center { background: #fdcb6e; color: #d35400; font-size: 1.1em; }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #b2bec3;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
         }
 
         @media (max-width: 600px) {
-            .example-box { grid-template-columns: 1fr; }
+            .container { padding: 15px; }
             h1 { font-size: 1.8em; }
+            .lang-btn { padding: 8px 15px; font-size: 1em; }
+            .mine-cell { width: 36px; height: 36px; font-size: 1em; }
+            .dir-cell { width: 42px; height: 42px; font-size: 0.65em; }
         }
     </style>
 </head>
 <body>
 
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
 <div class="container">
-    <header>
-        <h1>💣 变身扫雷小能手！</h1>
-        <p class="subtitle">学会用计算机的眼睛观察地雷图</p>
-    </header>
+    <h1>💣 数字雷区 🗺️</h1>
 
-    <div class="card" style="border-color: var(--accent-yellow);">
-        <div class="card-title">我们要完成什么任务？</div>
-        <p>嘿！小伙伴们，你们玩过扫雷吗？我们要写一个小程序，把一个满是 <code>?</code>（神秘区域）和 <code>*</code>（危险地雷）的地图，变成一张标满数字的安全地图！</p>
-        <p><strong>规则很简单：</strong> 每一个 <code>?</code> 都要变成它周围 <strong>8个格子</strong> 里地雷的总数。如果是地雷本身，就保持 <code>*</code> 不变。</p>
+    <div style="text-align: center; font-size: 1.2em; color: #e17055;">
+        👋 嗨，勇敢的小冒险家！我是你的算法向导！<br>
+        安雅在沙漠深处发现了一片神秘雷区，快用你的编程魔法帮她标出每个安全格子周围的雷数，安全穿越这片危险区域吧！
     </div>
 
-    <div class="card">
-        <div class="card-title">侦探破解思路</div>
-        <div class="step-container">
-            <div class="step-item">
-                <strong>第一步：看清地图 (读取)</strong><br>
-                先把整个地图存进电脑的“小方格阵”（二维数组）里。
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/7" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>在炙热的沙漠深处，勇敢的小冒险家<strong>安雅</strong>发现了一张古老的藏宝图。图上标记着一片 <span class="code-inline">n × m</span> 的神秘雷区。</p>
+
+        <div style="display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center; background: linear-gradient(135deg, #ff7675, #d63031); padding: 18px 25px; border-radius: 15px; color: white; box-shadow: 0 4px 10px rgba(214,48,49,0.3);">
+                <div style="font-size: 2.5em;">💣</div>
+                <strong style="font-size: 1.1em;">* = 地雷</strong><br>
+                <span style="font-size: 0.9em;">危险！保持原样</span>
             </div>
-            <div class="step-item">
-                <strong>第二步：挨个检查 (遍历)</strong><br>
-                像巡逻兵一样，从左到右、从上到下检查每一个格子。
+            <div style="text-align: center; background: linear-gradient(135deg, #b2bec3, #636e72); padding: 18px 25px; border-radius: 15px; color: white; box-shadow: 0 4px 10px rgba(99,110,114,0.3);">
+                <div style="font-size: 2.5em;">❓</div>
+                <strong style="font-size: 1.1em;">? = 安全区域</strong><br>
+                <span style="font-size: 0.9em;">替换为周围雷数</span>
             </div>
-            <div class="step-item">
-                <strong>第三步：数数小能手 (统计)</strong><br>
-                如果你站在一个 <code>?</code> 格子上，就看看你周围的 8 个邻居。数一数邻居里有几个 <code>*</code>。
+            <div style="text-align: center; background: linear-gradient(135deg, #fdcb6e, #f39c12); padding: 18px 25px; border-radius: 15px; color: white; box-shadow: 0 4px 10px rgba(243,156,18,0.3);">
+                <div style="font-size: 2.5em;">🔢</div>
+                <strong style="font-size: 1.1em;">0~8 = 数字</strong><br>
+                <span style="font-size: 0.9em;">周围雷的个数</span>
             </div>
-            <div class="step-item">
-                <strong>第四步：安全防线 (边界)</strong><br>
-                注意哦！如果你在地图边缘，邻居可能会少一些，千万别数到地图外面去啦！
+        </div>
+
+        <p><strong>安雅的任务：</strong>对于每个安全格子 <span class="code-inline">?</span>，数一数它周围<strong>上、下、左、右、左上、左下、右上、右下</strong>共 8 个方向有多少颗地雷 <span class="code-inline">*</span>，然后把 <span class="code-inline">?</span> 替换为这个数字。地雷格子保持 <span class="code-inline">*</span> 不变。</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px; border: 2px solid #b2bec3;">
+                <strong>📥 魔法输入阵：</strong><br>
+                <span style="color: #636e72; font-size: 0.9em;">(3×3 的雷区地图)</span><br>
+                <span class="highlight">3 3</span><br>
+                <span class="highlight">*??</span><br>
+                <span class="highlight">???</span><br>
+                <span class="highlight">?*?</span>
+            </div>
+            <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px; border: 2px solid #00cec9;">
+                <strong>📤 奇迹输出阵：</strong><br>
+                <span style="color: #636e72; font-size: 0.9em;">(标好数字的安全地图)</span><br>
+                <span class="highlight">*10</span><br>
+                <span class="highlight">221</span><br>
+                <span class="highlight">1*1</span>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-title">实战演练（样例拆解）</div>
-        
-        <h3>🌈 样例 1：3x3 小试牛刀</h3>
-        <div class="example-box">
-            <div><strong>输入图：</strong><pre class="code-text">*??<br>???<br>?*?</pre></div>
-            <div><strong>生成图：</strong><pre class="code-text">*10<br>221<br>1*1</pre></div>
-        </div>
-        <p>💡 <strong>详解：</strong> 中心位置 (1,1) 的周围有左上角 (0,0) 和正下方 (2,1) 两个雷，所以它变成了 <strong>2</strong>！</p>
+    <!-- ==================== 核心思路图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：模拟 + 方向数组)</h2>
 
-        <hr style="border: 1px dashed #ddd; margin: 20px 0;">
+        <p>这道题的核心就是：<strong>站在每个安全格子上，环顾四周，数一数周围有几颗雷</strong>！就像安雅拿着一个"雷达探测仪"，360° 扫描周围。</p>
 
-        <h3>🌈 样例 2：4x4 进阶挑战</h3>
-        <div class="example-box">
-            <div><strong>输入图：</strong><pre class="code-text">?*??<br>*???<br>??*?<br>????</pre></div>
-            <div><strong>生成图：</strong><pre class="code-text">2*10<br>*321<br>12*1<br>0111</pre></div>
-        </div>
-        <p>💡 <strong>详解：</strong> 第一行第一个格子周围只有一个地雷（在它下面），所以显示 <strong>2</strong>（其实是程序检查了周围所有有效格子后的结果）。</p>
+        <!-- 8方向图解 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #fdcb6e; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #d35400; margin-top: 0; text-align: center;">🔍 安雅的雷达探测仪（8个方向）</h3>
+            <p style="text-align: center;">当安雅站在一个格子上，她的雷达会扫描周围 8 个方向：</p>
 
-        <hr style="border: 1px dashed #ddd; margin: 20px 0;">
-
-        <h3>🌈 样例 3：全员安全</h3>
-        <div class="example-box">
-            <div><strong>输入图：</strong><pre class="code-text">??<br>??</pre></div>
-            <div><strong>生成图：</strong><pre class="code-text">00<br>00</pre></div>
-        </div>
-        <p>💡 <strong>详解：</strong> 地图里一个雷都没有，大家都标上 <strong>0</strong>，真是太安全啦！</p>
-    </div>
-
-    <div class="card">
-        <div class="card-title">魔法咒语（程序代码）</div>
-        <div class="tab-wrapper">
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('cpp')">C++ 咒语</button>
-                <button class="tab-btn" onclick="switchTab('py')">Python 咒语</button>
+            <div style="text-align: center; margin: 20px 0;">
+                <div class="direction-grid">
+                    <div class="dir-cell arrow">↖️<br><span style="font-size: 0.8em;">(-1,-1)</span></div>
+                    <div class="dir-cell arrow">⬆️<br><span style="font-size: 0.8em;">(-1, 0)</span></div>
+                    <div class="dir-cell arrow">↗️<br><span style="font-size: 0.8em;">(-1,+1)</span></div>
+                    <div class="dir-cell arrow">⬅️<br><span style="font-size: 0.8em;">(0, -1)</span></div>
+                    <div class="dir-cell center">🧍<br>安雅</div>
+                    <div class="dir-cell arrow">➡️<br><span style="font-size: 0.8em;">(0, +1)</span></div>
+                    <div class="dir-cell arrow">↙️<br><span style="font-size: 0.8em;">(+1,-1)</span></div>
+                    <div class="dir-cell arrow">⬇️<br><span style="font-size: 0.8em;">(+1, 0)</span></div>
+                    <div class="dir-cell arrow">↘️<br><span style="font-size: 0.8em;">(+1,+1)</span></div>
+                </div>
             </div>
 
-            <div id="cpp-tab" class="code-container">
-                <pre class="code-content">
-<span class="c-keyword">#include</span> <span class="c-string">&lt;iostream&gt;</span>
-<span class="c-keyword">using namespace</span> std;
+            <div style="text-align: center; color: #636e72; font-size: 0.95em;">
+                👆 每个箭头上的数字就是<strong>偏移量 (dx, dy)</strong>，用来计算邻居的坐标！
+            </div>
+        </div>
 
-<span class="c-keyword">char</span> mp[<span class="c-num">105</span>][<span class="c-num">105</span>]; <span class="c-comment">// 地图口袋</span>
-<span class="c-keyword">int</span> dx[] = {<span class="c-num">-1</span>, <span class="c-num">-1</span>, <span class="c-num">-1</span>, <span class="c-num">0</span>, <span class="c-num">0</span>, <span class="c-num">1</span>, <span class="c-num">1</span>, <span class="c-num">1</span>}; <span class="c-comment">// 8个方向的小雷达</span>
-<span class="c-keyword">int</span> dy[] = {<span class="c-num">-1</span>, <span class="c-num">0</span>, <span class="c-num">1</span>, <span class="c-num">-1</span>, <span class="c-num">1</span>, <span class="c-num">-1</span>, <span class="c-num">0</span>, <span class="c-num">1</span>};
+        <!-- 核心逻辑图解 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #00b894; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #00b894; margin-top: 0; text-align: center;">💡 核心计算方法</h3>
 
-<span class="c-keyword">int</span> <span class="c-func">main</span>() {
-    <span class="c-keyword">int</span> n, m;
-    cin >> n >> m; <span class="c-comment">// 告诉电脑地图有多大</span>
+            <p>对于位置 <span class="code-inline">(i, j)</span> 的安全格子，我们要依次检查它的 8 个邻居：</p>
 
-    <span class="c-keyword">for</span> (<span class="c-keyword">int</span> i = <span class="c-num">1</span>; i <= n; i++)
-        <span class="c-keyword">for</span> (<span class="c-keyword">int</span> j = <span class="c-num">1</span>; j <= m; j++)
-            cin >> mp[i][j]; <span class="c-comment">// 把地图画进数组里</span>
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 20px 0; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                    <div style="background: #f1f8ff; border: 2px dashed #0984e3; padding: 12px 18px; border-radius: 10px; text-align: center;">
+                        <strong>邻居坐标公式</strong><br>
+                        <span class="code-inline">ni = i + dx[k]</span><br>
+                        <span class="code-inline">nj = j + dy[k]</span>
+                    </div>
+                    <div style="font-size: 2em; color: #636e72;">→</div>
+                    <div style="background: #fff0f0; border: 2px dashed #ff7675; padding: 12px 18px; border-radius: 10px; text-align: center;">
+                        <strong>边界检查</strong><br>
+                        <span class="code-inline">0 ≤ ni < n</span><br>
+                        <span class="code-inline">0 ≤ nj < m</span>
+                    </div>
+                    <div style="font-size: 2em; color: #636e72;">→</div>
+                    <div style="background: #f0fdf4; border: 2px dashed #00b894; padding: 12px 18px; border-radius: 10px; text-align: center;">
+                        <strong>是雷吗？</strong><br>
+                        如果是 <span class="code-inline">*</span><br>
+                        <span class="highlight">cnt++</span>
+                    </div>
+                </div>
+            </div>
 
-    <span class="c-keyword">for</span> (<span class="c-keyword">int</span> i = <span class="c-num">1</span>; i <= n; i++) {
-        <span class="c-keyword">for</span> (<span class="c-keyword">int</span> j = <span class="c-num">1</span>; j <= m; j++) {
-            <span class="c-keyword">if</span> (mp[i][j] == <span class="c-string">'*'</span>) cout << <span class="c-string">'*'</span>; <span class="c-comment">// 看到雷直接输出</span>
-            <span class="c-keyword">else</span> {
-                <span class="c-keyword">int</span> cnt = <span class="c-num">0</span>;
-                <span class="c-keyword">for</span> (<span class="c-keyword">int</span> k = <span class="c-num">0</span>; k < <span class="c-num">8</span>; k++) {
-                    <span class="c-keyword">int</span> ni = i + dx[k], nj = j + dy[k];
-                    <span class="c-comment">// 检查这个邻居是不是在地图里，而且是不是地雷</span>
-                    <span class="c-keyword">if</span> (ni >= <span class="c-num">1</span> && ni <= n && nj >= <span class="c-num">1</span> && nj <= m) {
-                        <span class="c-keyword">if</span> (mp[ni][nj] == <span class="c-string">'*'</span>) cnt++;
+            <div class="formula">
+                对每个 ? 格子：cnt = 周围8个有效邻居中 * 的个数
+            </div>
+        </div>
+
+        <h3>✨ 解题四步法：</h3>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;">
+            <div style="flex: 1; min-width: 170px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #e17055; text-align: center;">
+                <div style="font-size: 2.5em;">📥</div>
+                <strong style="color: #d63031;">步骤一</strong><br>
+                <strong>看清地图</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">读取 n×m 的雷区地图，存进二维数组</span>
+            </div>
+            <div style="flex: 1; min-width: 170px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #fdcb6e; text-align: center;">
+                <div style="font-size: 2.5em;">🚶</div>
+                <strong style="color: #e67e22;">步骤二</strong><br>
+                <strong>挨个检查</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">从左到右、从上到下遍历每一个格子</span>
+            </div>
+            <div style="flex: 1; min-width: 170px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #00b894; text-align: center;">
+                <div style="font-size: 2.5em;">🔢</div>
+                <strong style="color: #00b894;">步骤三</strong><br>
+                <strong>数雷计分</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">遇到 ? 就扫描周围 8 个方向，数雷</span>
+            </div>
+            <div style="flex: 1; min-width: 170px; background: white; padding: 15px; border-radius: 15px; border-bottom: 5px solid #6c5ce7; text-align: center;">
+                <div style="font-size: 2.5em;">🛡️</div>
+                <strong style="color: #6c5ce7;">步骤四</strong><br>
+                <strong>边界防线</strong><br>
+                <span style="font-size: 0.9em; color: #636e72;">别数到地图外面！检查坐标是否合法</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例图解 ==================== -->
+    <div class="card example">
+        <h2>🔍 实战演练 (样例详解)</h2>
+
+        <h3>🌈 样例 1：3×3 小试牛刀</h3>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #636e72;">📥 输入地图</div>
+                <div class="mine-grid" style="grid-template-columns: repeat(3, 50px);">
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell unknown">?</div>
+                </div>
+            </div>
+            <div style="font-size: 3em; color: #e17055; animation: pulse 1.5s infinite;">➡️</div>
+            <div style="text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #636e72;">📤 输出结果</div>
+                <div class="mine-grid" style="grid-template-columns: repeat(3, 50px);">
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-0">0</div>
+                    <div class="mine-cell num-2">2</div>
+                    <div class="mine-cell num-2">2</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell num-1">1</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细拆解一个格子 -->
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #fdcb6e; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #d35400; text-align: center;">🔬 放大镜：中心格子 (1,1) 是怎么算出 "2" 的？</h3>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <div class="mine-grid" style="grid-template-columns: repeat(3, 60px);">
+                    <div class="mine-cell mine neighbor" style="position: relative;">💣<div style="position: absolute; bottom: -2px; right: 2px; font-size: 0.5em; color: #ffd700;">✓雷!</div></div>
+                    <div class="mine-cell unknown neighbor">?<div style="position: absolute; bottom: -2px; right: 2px; font-size: 0.5em; color: white;">安全</div></div>
+                    <div class="mine-cell unknown neighbor">?</div>
+                    <div class="mine-cell unknown neighbor">?</div>
+                    <div class="mine-cell target" style="background: #ffeaa7; font-size: 1em;">🧍<br><span style="font-size: 0.7em;">安雅</span></div>
+                    <div class="mine-cell unknown neighbor">?</div>
+                    <div class="mine-cell unknown neighbor">?</div>
+                    <div class="mine-cell mine neighbor" style="position: relative;">💣<div style="position: absolute; bottom: -2px; right: 2px; font-size: 0.5em; color: #ffd700;">✓雷!</div></div>
+                    <div class="mine-cell unknown neighbor">?</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <p>安雅站在 <span class="code-inline">(1,1)</span>，雷达扫描 8 个方向：</p>
+                <div style="display: inline-block; text-align: left; background: #fffcf0; padding: 15px; border-radius: 10px; border: 1px solid #fdcb6e;">
+                    ↖️ (0,0) = <span class="highlight-red">💣 雷！cnt=1</span><br>
+                    ⬆️ (0,1) = ? 安全 ✅<br>
+                    ↗️ (0,2) = ? 安全 ✅<br>
+                    ⬅️ (1,0) = ? 安全 ✅<br>
+                    ➡️ (1,2) = ? 安全 ✅<br>
+                    ↙️ (2,0) = ? 安全 ✅<br>
+                    ⬇️ (2,1) = <span class="highlight-red">💣 雷！cnt=2</span><br>
+                    ↘️ (2,2) = ? 安全 ✅
+                </div>
+                <p style="margin-top: 10px;">发现了 <strong style="color: #d63031; font-size: 1.3em;">2</strong> 颗雷！所以 (1,1) 标记为 <span class="highlight">2</span></p>
+            </div>
+        </div>
+
+        <!-- 边界格子图解 -->
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #0984e3; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #0984e3; text-align: center;">🛡️ 边界防线：角落格子 (0,2) 只有 3 个邻居</h3>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <div style="display: inline-grid; grid-template-columns: repeat(5, 48px); gap: 3px;">
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div class="mine-cell mine" style="font-size: 1em;">💣</div>
+                    <div class="mine-cell unknown" style="border: 2px dashed #0984e3;">?</div>
+                    <div class="mine-cell target" style="background: #ffeaa7;">🧍</div>
+
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div style="width: 48px; height: 48px; background: #ffcccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #d63031;">越界!</div>
+                    <div class="mine-cell unknown" style="border: 2px dashed #0984e3;">?</div>
+                    <div class="mine-cell unknown" style="border: 2px dashed #0984e3;">?</div>
+                    <div class="mine-cell unknown" style="border: 2px dashed #0984e3;">?</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <p>安雅站在右上角 <span class="code-inline">(0,2)</span>，8 个方向中有 <strong style="color: #d63031;">5 个越界</strong>！</p>
+                <p>只有 3 个有效邻居：⬅️(0,1)、↙️(1,1)、⬇️(1,2)，都不是雷 → 标记为 <span class="highlight">0</span></p>
+                <div style="background: #e0f7fa; padding: 10px; border-radius: 8px; border-left: 4px solid #0984e3; margin-top: 10px;">
+                    <strong>🛡️ 边界检查是关键！</strong> 在检查邻居前，一定要确保坐标 <span class="code-inline">ni</span> 和 <span class="code-inline">nj</span> 没有超出地图范围，否则程序会崩溃！
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 2px dashed #eee; margin: 30px 0;">
+
+        <h3>🌈 样例 2：4×4 进阶挑战</h3>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #636e72;">📥 输入地图</div>
+                <div class="mine-grid" style="grid-template-columns: repeat(4, 50px);">
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                </div>
+            </div>
+            <div style="font-size: 3em; color: #e17055; animation: pulse 1.5s infinite;">➡️</div>
+            <div style="text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #636e72;">📤 输出结果</div>
+                <div class="mine-grid" style="grid-template-columns: repeat(4, 50px);">
+                    <div class="mine-cell num-2">2</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-0">0</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell num-3">3</div>
+                    <div class="mine-cell num-2">2</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-2">2</div>
+                    <div class="mine-cell mine">💣</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-0">0</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-1">1</div>
+                    <div class="mine-cell num-1">1</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: white; padding: 15px; border-radius: 12px; border: 2px solid #fdcb6e;">
+            <strong>💡 你能找到数字最大的格子吗？</strong><br>
+            (1,1) 位置标记为 <strong style="color: #d63031; font-size: 1.3em;">3</strong>！它被三颗雷包围：左上(0,0附近没有)... 让我们算算：↖️无雷，⬆️(0,1)=💣，↗️无雷，⬅️(1,0)=💣，➡️无雷，↙️无雷，⬇️无雷，↘️(2,2)=💣。果然是 3 颗！
+        </div>
+
+        <hr style="border: 2px dashed #eee; margin: 30px 0;">
+
+        <h3>🌈 样例 3：世界和平（全员安全）</h3>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #636e72;">📥 输入地图</div>
+                <div class="mine-grid" style="grid-template-columns: repeat(2, 50px);">
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                    <div class="mine-cell unknown">?</div>
+                </div>
+            </div>
+            <div style="font-size: 3em; color: #00b894;">➡️</div>
+            <div style="text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #636e72;">📤 输出结果</div>
+                <div class="mine-grid" style="grid-template-columns: repeat(2, 50px);">
+                    <div class="mine-cell num-0">0</div>
+                    <div class="mine-cell num-0">0</div>
+                    <div class="mine-cell num-0">0</div>
+                    <div class="mine-cell num-0">0</div>
+                </div>
+            </div>
+        </div>
+        <p style="text-align: center; color: #00b894; font-weight: bold; font-size: 1.1em;">🕊️ 没有一颗雷，所有格子都是 0，真是太安全啦！</p>
+    </div>
+
+    <!-- ==================== 方向数组详解 ==================== -->
+    <div class="card logic">
+        <h2>🗺️ 方向数组：程序员的雷达</h2>
+
+        <p>在代码中，我们用两个数组 <span class="code-inline">dx[]</span> 和 <span class="code-inline">dy[]</span> 来表示 8 个方向的偏移量。这就像给安雅的雷达编程，让它自动扫描所有方向！</p>
+
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 2px solid #74b9ff; margin: 15px 0;">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <tr style="background: linear-gradient(135deg, #0984e3, #74b9ff); color: white;">
+                        <th style="padding: 10px;">方向</th>
+                        <th style="padding: 10px;">emoji</th>
+                        <th style="padding: 10px;">dx (行偏移)</th>
+                        <th style="padding: 10px;">dy (列偏移)</th>
+                        <th style="padding: 10px;">含义</th>
+                    </tr>
+                    <tr style="background: #f1f8ff;"><td style="padding: 8px; text-align: center;">左上</td><td style="padding: 8px; text-align: center;">↖️</td><td style="padding: 8px; text-align: center;">-1</td><td style="padding: 8px; text-align: center;">-1</td><td style="padding: 8px; text-align: center;">上一行，左一列</td></tr>
+                    <tr><td style="padding: 8px; text-align: center;">上</td><td style="padding: 8px; text-align: center;">⬆️</td><td style="padding: 8px; text-align: center;">-1</td><td style="padding: 8px; text-align: center;">0</td><td style="padding: 8px; text-align: center;">上一行，同列</td></tr>
+                    <tr style="background: #f1f8ff;"><td style="padding: 8px; text-align: center;">右上</td><td style="padding: 8px; text-align: center;">↗️</td><td style="padding: 8px; text-align: center;">-1</td><td style="padding: 8px; text-align: center;">+1</td><td style="padding: 8px; text-align: center;">上一行，右一列</td></tr>
+                    <tr><td style="padding: 8px; text-align: center;">左</td><td style="padding: 8px; text-align: center;">⬅️</td><td style="padding: 8px; text-align: center;">0</td><td style="padding: 8px; text-align: center;">-1</td><td style="padding: 8px; text-align: center;">同行，左一列</td></tr>
+                    <tr style="background: #f1f8ff;"><td style="padding: 8px; text-align: center;">右</td><td style="padding: 8px; text-align: center;">➡️</td><td style="padding: 8px; text-align: center;">0</td><td style="padding: 8px; text-align: center;">+1</td><td style="padding: 8px; text-align: center;">同行，右一列</td></tr>
+                    <tr><td style="padding: 8px; text-align: center;">左下</td><td style="padding: 8px; text-align: center;">↙️</td><td style="padding: 8px; text-align: center;">+1</td><td style="padding: 8px; text-align: center;">-1</td><td style="padding: 8px; text-align: center;">下一行，左一列</td></tr>
+                    <tr style="background: #f1f8ff;"><td style="padding: 8px; text-align: center;">下</td><td style="padding: 8px; text-align: center;">⬇️</td><td style="padding: 8px; text-align: center;">+1</td><td style="padding: 8px; text-align: center;">0</td><td style="padding: 8px; text-align: center;">下一行，同列</td></tr>
+                    <tr><td style="padding: 8px; text-align: center;">右下</td><td style="padding: 8px; text-align: center;">↘️</td><td style="padding: 8px; text-align: center;">+1</td><td style="padding: 8px; text-align: center;">+1</td><td style="padding: 8px; text-align: center;">下一行，右一列</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div style="background: #e0f7fa; padding: 15px; border-radius: 10px; border-left: 5px solid #0984e3;">
+            <strong>💡 为什么要用方向数组？</strong><br>
+            如果不用方向数组，我们需要写 8 个 <span class="code-inline">if</span> 判断来检查每个方向，代码又长又容易出错。用了方向数组后，只需要一个 <span class="code-inline">for</span> 循环就搞定了，代码又短又优雅！
+        </div>
+    </div>
+
+    <!-- ==================== C++ 代码 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>🗺️ <strong>方向数组 <span class="code-inline">dx[]</span> 和 <span class="code-inline">dy[]</span>：</strong> 存储 8 个方向的行列偏移量，配合 <span class="code-inline">for</span> 循环遍历所有邻居，代码简洁不易出错。</li>
+                <li>🚧 <strong>边界守卫：</strong> 检查邻居坐标 <span class="code-inline">ni >= 0 && ni < n && nj >= 0 && nj < m</span>，防止数组越界导致崩溃（Segmentation Fault）。</li>
+                <li>🔤 <strong>字符数组 <span class="code-inline">char mp[][]</span>：</strong> 用二维字符数组存储地图，方便按行按列访问每个格子。</li>
+                <li>🔢 <strong>数字转字符：</strong> 输出时直接用 <span class="code-inline">cout << cnt</span>，C++ 会自动把整数转换为字符输出。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="comment">// 🗺️ 地图口袋（最大 105×105）</span>
+<span class="type">char</span> mp[<span class="number">105</span>][<span class="number">105</span>];
+
+<span class="comment">// 🔍 8 个方向的雷达偏移量</span>
+<span class="type">int</span> dx[] = {<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>};
+<span class="type">int</span> dy[] = {<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">-1</span>, <span class="number">1</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>};
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> n, m;
+    <span class="type">cin</span> >> n >> m;  <span class="comment">// 📥 读取地图大小</span>
+
+    <span class="comment">// 📥 把地图画进数组里</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++)
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j < m; j++)
+            <span class="type">cin</span> >> mp[i][j];
+
+    <span class="comment">// 🚶 挨个检查每一个格子</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j < m; j++) {
+            <span class="keyword">if</span> (mp[i][j] == <span class="string">'*'</span>) {
+                <span class="type">cout</span> << <span class="string">'*'</span>;  <span class="comment">// 💣 是雷就直接输出</span>
+            } <span class="keyword">else</span> {
+                <span class="type">int</span> cnt = <span class="number">0</span>;  <span class="comment">// 🔢 雷计数器归零</span>
+                
+                <span class="comment">// 🔍 启动雷达！扫描 8 个方向</span>
+                <span class="keyword">for</span> (<span class="type">int</span> k = <span class="number">0</span>; k < <span class="number">8</span>; k++) {
+                    <span class="type">int</span> ni = i + dx[k];  <span class="comment">// 邻居的行号</span>
+                    <span class="type">int</span> nj = j + dy[k];  <span class="comment">// 邻居的列号</span>
+                    
+                    <span class="comment">// 🛡️ 边界检查：别跑到地图外面！</span>
+                    <span class="keyword">if</span> (ni >= <span class="number">0</span> && ni < n && nj >= <span class="number">0</span> && nj < m) {
+                        <span class="keyword">if</span> (mp[ni][nj] == <span class="string">'*'</span>) {
+                            cnt++;  <span class="comment">// 发现一颗雷！</span>
+                        }
                     }
                 }
-                cout << cnt; <span class="c-comment">// 输出数出来的雷数</span>
+                <span class="type">cout</span> << cnt;  <span class="comment">// 输出雷的数量</span>
             }
         }
-        cout << endl; <span class="c-comment">// 换一行继续</span>
+        <span class="type">cout</span> << <span class="type">endl</span>;  <span class="comment">// 每行结束换行</span>
     }
-    <span class="c-keyword">return</span> <span class="c-num">0</span>;
-}</pre>
-                <div class="explanation">
-                    <strong>💡 C++ 代码秘籍：</strong>
-                    我们用了 <code>dx</code> 和 <code>dy</code> 这两个“方向数组”，它们就像雷达一样，能帮我们快速定位周围 8 个小伙伴的坐标，既省时又不容易出错！
-                </div>
-            </div>
-
-            <div id="py-tab" class="code-container" style="display:none;">
-                <pre class="code-content">
-<span class="c-comment"># 1. 读取地图大小</span>
-n, m = <span class="c-func">map</span>(<span class="c-func">int</span>, <span class="c-func">input</span>().split())
-
-<span class="c-comment"># 2. 把地图存进列表里</span>
-grid = []
-<span class="c-keyword">for</span> _ <span class="c-keyword">in</span> <span class="c-func">range</span>(n):
-    grid.<span class="c-func">append</span>(<span class="c-func">list</span>(<span class="c-func">input</span>().strip()))
-
-<span class="c-comment"># 3. 准备好8个探测方向</span>
-directions = [
-    (<span class="c-num">-1</span>, <span class="c-num">-1</span>), (<span class="c-num">-1</span>, <span class="c-num">0</span>), (<span class="c-num">-1</span>, <span class="c-num">1</span>),
-    (<span class="c-num">0</span>, <span class="c-num">-1</span>),           (<span class="c-num">0</span>, <span class="c-num">1</span>),
-    (<span class="c-num">1</span>, <span class="c-num">-1</span>),  (<span class="c-num">1</span>, <span class="c-num">0</span>),  (<span class="c-num">1</span>, <span class="c-num">1</span>)
-]
-
-<span class="c-comment"># 4. 开启巡逻模式</span>
-<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-func">range</span>(n):
-    <span class="c-keyword">for</span> j <span class="c-keyword">in</span> <span class="c-func">range</span>(m):
-        <span class="c-keyword">if</span> grid[i][j] == <span class="c-string">'*'</span>:
-            <span class="c-func">print</span>(<span class="c-string">'*'</span>, end=<span class="c-string">''</span>)
-        <span class="c-keyword">else</span>:
-            cnt = <span class="c-num">0</span>
-            <span class="c-keyword">for</span> dx, dy <span class="c-keyword">in</span> directions:
-                ni, nj = i + dx, j + dy
-                <span class="c-comment"># 确保探测的地方没出界</span>
-                <span class="c-keyword">if</span> <span class="c-num">0</span> <= ni < n <span class="c-keyword">and</span> <span class="c-num">0</span> <= nj < m:
-                    <span class="c-keyword">if</span> grid[ni][nj] == <span class="c-string">'*'</span>:
-                        cnt += <span class="c-num">1</span>
-            <span class="c-func">print</span>(cnt, end=<span class="c-string">''</span>)
-    <span class="c-func">print</span>() <span class="c-comment"># 每一行画完记得深呼吸（换行）</span></pre>
-                <div class="explanation">
-                    <strong>💡 Python 代码秘籍：</strong>
-                    Python 的 <code>if 0 <= ni < n</code> 这种写法超级酷，就像说英语一样自然。我们用 <code>print(..., end='')</code> 保证数字能排成整齐的一行。
-                </div>
-            </div>
+    
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
         </div>
     </div>
 
-    <div class="card" style="background: var(--primary-secondary); color: white; text-align: center;">
-        <h2 style="margin: 0;">🎉 太棒了！你已经掌握了扫雷地图的秘密！</h2>
-        <p>编程就像搭积木，只要逻辑通顺，你就能创造出属于自己的奇妙世界！加油，未来的工程师！</p>
+    <!-- ==================== Python 代码 ==================== -->
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>📐 <strong>列表推导式创建网格：</strong> 使用 <span class="code-inline">grid = [list(input().strip()) for _ in range(n)]</span> 一行代码就能把输入转换为二维列表，又快又优雅！</li>
+                <li>🐎 <strong>元组列表存方向：</strong> 用 <span class="code-inline">directions = [(-1,-1), (-1,0), ...]</span> 存储 8 个方向偏移，遍历时用 <span class="code-inline">for dx, dy in directions:</span> 解包，超级自然。</li>
+                <li>📝 <strong>链式比较：</strong> Python 支持 <span class="code-inline">0 <= ni < n</span> 这样的写法，像读英语一样直观，比 C++ 的 <span class="code-inline">ni >= 0 && ni < n</span> 更简洁。</li>
+                <li>🖨️ <strong>同行输出：</strong> <span class="code-inline">print(x, end='')</span> 可以不换行输出，每行结束后再用 <span class="code-inline">print()</span> 换行。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (代码详解)</h2>
+<pre>
+<span class="comment"># 📥 步骤一：读取地图大小</span>
+n, m = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+
+<span class="comment"># 📥 把地图存进列表里</span>
+grid = []
+<span class="keyword">for</span> _ <span class="keyword">in range</span>(n):
+    grid.append(<span class="type">list</span>(<span class="type">input</span>().strip()))
+
+<span class="comment"># 🔍 准备好 8 个探测方向（雷达偏移量）</span>
+directions = [
+    (<span class="number">-1</span>, <span class="number">-1</span>), (<span class="number">-1</span>, <span class="number">0</span>), (<span class="number">-1</span>, <span class="number">1</span>),   <span class="comment"># ↖️ ⬆️ ↗️</span>
+    (<span class="number">0</span>,  <span class="number">-1</span>),            (<span class="number">0</span>,  <span class="number">1</span>),   <span class="comment"># ⬅️    ➡️</span>
+    (<span class="number">1</span>,  <span class="number">-1</span>), (<span class="number">1</span>,  <span class="number">0</span>), (<span class="number">1</span>,  <span class="number">1</span>)    <span class="comment"># ↙️ ⬇️ ↘️</span>
+]
+
+<span class="comment"># 🚶 步骤二：开启巡逻模式，逐格检查</span>
+<span class="keyword">for</span> i <span class="keyword">in range</span>(n):
+    <span class="keyword">for</span> j <span class="keyword">in range</span>(m):
+        <span class="keyword">if</span> grid[i][j] == <span class="string">'*'</span>:
+            <span class="type">print</span>(<span class="string">'*'</span>, end=<span class="string">''</span>)  <span class="comment"># 💣 是雷就直接输出</span>
+        <span class="keyword">else</span>:
+            cnt = <span class="number">0</span>  <span class="comment"># 🔢 雷计数器归零</span>
+            
+            <span class="comment"># 🔍 启动雷达！扫描 8 个方向</span>
+            <span class="keyword">for</span> dx, dy <span class="keyword">in</span> directions:
+                ni, nj = i + dx, j + dy
+                
+                <span class="comment"># 🛡️ 确保邻居没有出界</span>
+                <span class="keyword">if</span> <span class="number">0</span> <= ni < n <span class="keyword">and</span> <span class="number">0</span> <= nj < m:
+                    <span class="keyword">if</span> grid[ni][nj] == <span class="string">'*'</span>:
+                        cnt += <span class="number">1</span>  <span class="comment"># 发现一颗雷！</span>
+            
+            <span class="type">print</span>(cnt, end=<span class="string">''</span>)  <span class="comment"># 输出雷的数量</span>
+    
+    <span class="type">print</span>()  <span class="comment"># 每行结束换行</span>
+</pre>
+        </div>
     </div>
 
-    <footer>
-        添加来自扣哒世界教研团队
-    </footer>
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">方向数组是神器：</strong> 用 <span class="code-inline">dx[]</span> 和 <span class="code-inline">dy[]</span> 存储 8 个方向偏移量，配合 <span class="code-inline">for</span> 循环遍历所有邻居。以后遇到类似的"检查周围格子"问题（如走迷宫、BFS 搜索），都能用这个技巧！
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">边界检查不能丢：</strong> 每次计算邻居坐标后，第一件事就是检查它有没有超出地图范围！<span class="code-inline">0 ≤ ni < n</span> 和 <span class="code-inline">0 ≤ nj < m</span> 就是我们的安全防线。
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">分清"是雷"和"不是雷"：</strong> 遇到 <span class="code-inline">*</span> 直接输出原样；遇到 <span class="code-inline">?</span> 才需要计算。这个 <span class="code-inline">if-else</span> 分支很关键，漏掉就全错了！
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">在纸上模拟一遍：</strong> 写代码前，先在纸上画一个小地图，手动算几个格子的结果，确保理解了规则再开写。对于这种模拟题，动手画图永远比空想高效！
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; background: #f3f0ff; padding: 15px; border-radius: 10px; border: 2px dashed #6c5ce7; text-align: center;">
+            <strong style="font-size: 1.2em; color: #6c5ce7;">💣 恭喜你掌握了扫雷地图的秘密！</strong><br>
+            <span style="color: #636e72;">方向数组 + 边界检查，这个"雷达巡逻"套路是网格题的通用法宝。掌握了它，你就是编程界的排雷大师！</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
 </div>
 
 <script>
-    function switchTab(lang) {
-        const cppTab = document.getElementById('cpp-tab');
-        const pyTab = document.getElementById('py-tab');
-        const btns = document.querySelectorAll('.tab-btn');
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
 
         if (lang === 'cpp') {
-            cppTab.style.display = 'block';
-            pyTab.style.display = 'none';
-            btns[0].classList.add('active');
-            btns[1].classList.remove('active');
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
         } else {
-            cppTab.style.display = 'none';
-            pyTab.style.display = 'block';
-            btns[0].classList.remove('active');
-            btns[1].classList.add('active');
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
         }
     }
 </script>

@@ -3,333 +3,1027 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超级数字工厂：大数加法大挑战！</title>
+    <title>魔法课堂：巨人求和</title>
     <style>
-        :root {
-            --primary-color: #4A90E2;
-            --secondary-color: #F5A623;
-            --success-color: #7ED321;
-            --accent-color: #FF5E5E;
-            --bg-color: #F0F7FF;
-            --card-bg: #FFFFFF;
-        }
-
+        /* 全局可爱风格设置 */
         body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background-color: var(--bg-color);
-            color: #333;
-            line-height: 1.6;
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #f0fff0;
+            color: #444;
             margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
             padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
         }
 
-        header {
+        /* 顶部语言切换按钮 */
+        .lang-switch {
             text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #6FB1FC 0%, #4364F7 100%);
-            color: white;
-            border-radius: 0 0 50px 50px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
-
-        h1 { margin: 0; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .welcome-msg { font-size: 1.2em; margin-top: 10px; opacity: 0.9; }
-
-        .card {
-            background: var(--card-bg);
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
             border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
-            border-bottom: 5px solid #ddd;
-            transition: transform 0.2s;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0984e3;
+            background-color: #74b9ff;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #f39c12;
+            background-color: #ffeaa7;
+            color: #d35400;
         }
 
-        .card:hover { transform: translateY(-5px); }
-        .card-title {
+        /* A4纸张打印优化容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 5px solid #00b894;
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #00b894;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #ffeaa7;
+            margin-bottom: 20px;
+        }
+
+        /* 魔法传送门做题按钮 */
+        .action-btn {
+            display: inline-block;
+            background-color: #00b894;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #00816a, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #00816a, 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #d35400;
+            border-bottom: 3px dashed #00b894;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h3 {
+            color: #e67e22;
+            margin-top: 25px;
+        }
+
+        /* 可爱的内容卡片 */
+        .card {
+            background-color: #fdfbf7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #00b894;
+        }
+
+        .card.problem { border-color: #00b894; background-color: #f0fdf4; }
+        .card.logic { border-color: #fdcb6e; background-color: #fffcf0; }
+        .card.knowledge { border-color: #0984e3; background-color: #f1f8ff; }
+        .card.code-box { border-color: #2d3436; background-color: #f5f6fa; }
+        .card.summary { border-color: #6c5ce7; background-color: #f3f0ff; }
+        .card.example { border-color: #e17055; background-color: #fff5f0; }
+
+        /* 代码块样式 */
+        pre {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        /* 代码中的高亮颜色 */
+        .comment { color: #fdcb6e; font-style: italic; }
+        .keyword { color: #ff7675; font-weight: bold; }
+        .type { color: #74b9ff; }
+        .string { color: #55efc4; }
+        .number { color: #fab1a0; }
+
+        /* 行内代码及变量强调 */
+        .code-inline {
+            background-color: #ffeaa7;
+            color: #d35400;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .formula {
+            background-color: #f0fdf4;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            color: #00b894;
+            border: 2px dashed #00b894;
+            font-family: Consolas, monospace;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        /* 强调文字 */
+        .highlight {
+            background-color: #ffeaa7;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .highlight-red {
+            background-color: #ff7675;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .highlight-green {
+            background-color: #00b894;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .highlight-blue {
+            background-color: #0984e3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* 竖式计算样式 */
+        .vertical-calc {
+            display: inline-block;
+            font-family: Consolas, monospace;
+            font-size: 1.3em;
+            background: #fdfbf7;
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 3px solid #00b894;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: right;
+            line-height: 1.8;
+        }
+        .vertical-calc .line {
+            border-bottom: 3px solid #2d3436;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        .vertical-calc .carry-row {
+            font-size: 0.7em;
+            color: #d63031;
+            letter-spacing: 6px;
+        }
+        .vertical-calc .plus {
+            float: left;
+            margin-right: 10px;
+        }
+
+        /* 数字卷轴样式 */
+        .scroll-num {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+            color: #d35400;
+            border: 2px solid #f39c12;
+            box-shadow: 0 3px 8px rgba(243,156,18,0.2);
+            word-break: break-all;
+            font-size: 0.95em;
+        }
+
+        /* 数字格子样式 */
+        .digit-grid {
+            display: inline-flex;
+            gap: 3px;
+            margin: 5px 0;
+        }
+        .digit-cell {
+            width: 36px;
+            height: 42px;
             display: flex;
             align-items: center;
-            font-size: 1.5em;
-            color: var(--primary-color);
-            margin-bottom: 15px;
+            justify-content: center;
             font-weight: bold;
+            font-size: 1.2em;
+            border-radius: 6px;
+            font-family: Consolas, monospace;
         }
+        .digit-cell.num { background: #dfe6e9; color: #2d3436; }
+        .digit-cell.carry { background: #ff7675; color: white; font-size: 0.9em; }
+        .digit-cell.result { background: #00b894; color: white; }
+        .digit-cell.empty { background: transparent; }
+        .digit-cell.plus { background: transparent; color: #d35400; font-size: 1.3em; }
+        .digit-cell.line-cell { background: transparent; border-bottom: 3px solid #2d3436; }
+        .digit-cell.highlight-digit { background: #ffeaa7; color: #d35400; border: 2px solid #f39c12; }
+        .digit-cell.active { animation: pulse 1s infinite; border: 2px solid #d63031; }
 
-        .card-title i { margin-right: 10px; font-style: normal; }
-
-        .step-box {
-            background: #FFF9EB;
-            border-left: 5px solid var(--secondary-color);
+        /* 流程步骤 */
+        .step-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-item {
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+            background: white;
             padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .highlight { color: var(--accent-color); font-weight: bold; }
-
-        /* 模拟竖式样式 */
-        .math-column {
-            font-family: 'Courier New', monospace;
-            display: inline-block;
-            background: #333;
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            letter-spacing: 2px;
-        }
-
-        /* 标签页样式 */
-        .tabs { display: flex; gap: 10px; margin-bottom: 0; }
-        .tab-btn {
-            padding: 12px 25px;
-            cursor: pointer;
-            background: #E0E0E0;
-            border: none;
-            border-radius: 15px 15px 0 0;
-            font-weight: bold;
-            font-size: 1em;
-            transition: 0.3s;
-        }
-        .tab-btn.active { background: var(--primary-color); color: white; }
-        .tab-content {
-            display: none;
-            background: #282C34;
-            color: #ABB2BF;
-            padding: 20px;
-            border-radius: 0 15px 15px 15px;
-            overflow-x: auto;
-        }
-        .tab-content.active { display: block; }
-
-        /* 语法高亮简易版 */
-        .code-comment { color: #5C6370; font-style: italic; }
-        .code-keyword { color: #C678DD; }
-        .code-func { color: #61AFEF; }
-        .code-str { color: #98C379; }
-        .code-num { color: #D19A66; }
-
-        .explanation-box {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px dashed var(--primary-color);
-        }
-
-        footer {
+            border-radius: 15px;
             text-align: center;
-            padding: 40px;
-            color: #777;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        }
+
+        /* 对比表格 */
+        .compare-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+        .compare-table th {
+            background: linear-gradient(135deg, #00b894, #00816a);
+            color: white;
+            padding: 12px;
+            font-size: 1.05em;
+        }
+        .compare-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .compare-table tr:nth-child(even) td { background-color: #f0fdf4; }
+        .compare-table tr:last-child td { border-bottom: none; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #b2bec3;
+            font-size: 1em;
             font-weight: bold;
         }
 
-        /* 响应式适配 */
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+
         @media (max-width: 600px) {
+            .container { padding: 15px; }
             h1 { font-size: 1.8em; }
-            .card { padding: 15px; }
-            .tab-btn { padding: 10px 15px; font-size: 0.9em; }
+            .lang-btn { padding: 8px 15px; font-size: 1em; }
+            .digit-cell { width: 28px; height: 34px; font-size: 1em; }
+            .vertical-calc { font-size: 1em; padding: 15px; }
         }
     </style>
 </head>
 <body>
 
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
 <div class="container">
-    <header>
-        <h1>🔢 超级数字工厂</h1>
-        <div class="welcome-msg">大数加法挑战：当数字大到装不下时，该怎么办？</div>
-    </header>
+    <h1>🏔️ 巨人求和 ➕</h1>
 
-    <div class="card">
-        <div class="card-title"><i>💡</i> 为什么普通加法会“罢工”？</div>
-        <p>在计算机里，普通的整数口袋（比如 <code>int</code>）只能装下大约 10 位数字。如果我们要算 500 位数字相加，电脑的小口袋就会<strong>溢出</strong>（装不下啦！）。</p>
-        <div class="step-box">
-            🌟 <strong>秘密武器：高精度算法！</strong><br>
-            我们要像在纸上做加法竖式一样，用“字符串”把大数字存起来，然后一位一位地去算。
+    <div style="text-align: center; font-size: 1.2em; color: #00b894;">
+        👋 嗨，勇敢的小冒险家！我是你的算法向导！<br>
+        巨人兄弟的数字大到计算器都装不下，快用你的高精度加法魔法，帮他们算出超级大数的和吧！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/8" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>在遥远的<strong>巨人王国</strong>里，大巨人<strong>格鲁特</strong>和小巨人<strong>米米</strong>在宝库中发现了两张<strong>数字卷轴</strong>，每张卷轴上都写着一个<strong>超级长</strong>的数字（最长 500 位！）。</p>
+
+        <div style="display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); padding: 18px 25px; border-radius: 15px; color: #d35400; box-shadow: 0 4px 10px rgba(243,156,18,0.3);">
+                <div style="font-size: 2.5em;">📜</div>
+                <strong style="font-size: 1.1em;">卷轴 A</strong><br>
+                <span style="font-size: 0.9em;">最多 500 位数字</span>
+            </div>
+            <div style="font-size: 3em; display: flex; align-items: center; color: #00b894;">➕</div>
+            <div style="text-align: center; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); padding: 18px 25px; border-radius: 15px; color: #d35400; box-shadow: 0 4px 10px rgba(243,156,18,0.3);">
+                <div style="font-size: 2.5em;">📜</div>
+                <strong style="font-size: 1.1em;">卷轴 B</strong><br>
+                <span style="font-size: 0.9em;">最多 500 位数字</span>
+            </div>
+            <div style="font-size: 3em; display: flex; align-items: center; color: #00b894;">=</div>
+            <div style="text-align: center; background: linear-gradient(135deg, #55efc4, #00b894); padding: 18px 25px; border-radius: 15px; color: white; box-shadow: 0 4px 10px rgba(0,184,148,0.3);">
+                <div style="font-size: 2.5em;">🏆</div>
+                <strong style="font-size: 1.1em;">精确的和</strong><br>
+                <span style="font-size: 0.9em;">一位都不能错！</span>
+            </div>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 3px solid #d63031; margin-top: 15px;">
+            <h3 style="margin-top: 0; color: #d63031; text-align: center;">⚠️ 为什么普通加法不够用？</h3>
+            <table class="compare-table">
+                <tr>
+                    <th>📋 数据类型</th>
+                    <th>💪 最大能表示</th>
+                    <th>📏 位数</th>
+                </tr>
+                <tr>
+                    <td><span class="code-inline">int</span></td>
+                    <td>约 ±21 亿</td>
+                    <td>约 10 位</td>
+                </tr>
+                <tr>
+                    <td><span class="code-inline">long long</span></td>
+                    <td>约 ±9.2×10¹⁸</td>
+                    <td>约 19 位</td>
+                </tr>
+                <tr>
+                    <td><span class="highlight-red">题目要求</span></td>
+                    <td>最多 500 位！</td>
+                    <td><strong style="color: #d63031; font-size: 1.2em;">500 位</strong></td>
+                </tr>
+            </table>
+            <p style="text-align: center; color: #d63031; font-weight: bold;">500 位远远超出任何整数类型的范围！所以必须用<span class="highlight">高精度加法</span>来手动模拟！</p>
+        </div>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px; border: 2px solid #b2bec3;">
+                <strong>📥 魔法输入阵：</strong><br>
+                <span style="color: #636e72; font-size: 0.9em;">(两个超级大数)</span><br>
+                <span class="highlight">123456789</span><br>
+                <span class="highlight">987654321</span>
+            </div>
+            <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px; border: 2px solid #00cec9;">
+                <strong>📤 奇迹输出阵：</strong><br>
+                <span style="color: #636e72; font-size: 0.9em;">(它们的精确和)</span><br>
+                <span class="highlight">1111111110</span>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-title"><i>⚙️</i> 任务拆解：三步走</div>
-        <p>要把两个“巨人数字”加起来，我们要教电脑学会这三招：</p>
-        <ol>
-            <li><strong>倒着排队：</strong> 把数字反转，让个位对齐个位。</li>
-            <li><strong>满十进一：</strong> 每一位相加，如果有进位，就送给左边的小伙伴。</li>
-            <li><strong>最后变身：</strong> 算完后，再把数字转回来。</li>
-        </ol>
-        
+    <!-- ==================== 核心思路图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解：高精度加法)</h2>
+
+        <p>高精度加法的本质就是：<strong>用程序模拟小学学过的"列竖式加法"</strong>！从最低位（个位）开始，一位一位地加，满十进一。</p>
+
+        <!-- 竖式加法回忆 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #fdcb6e; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #d35400; margin-top: 0; text-align: center;">📝 回忆小学数学：列竖式加法</h3>
+            <p style="text-align: center;">还记得小时候怎么做加法吗？从个位开始往左加，满十就进一！</p>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <div class="vertical-calc">
+                    <div class="carry-row">&nbsp;&nbsp;1 1 1 1 1 1 1 1 1&nbsp;&nbsp;</div>
+                    <div>&nbsp;&nbsp;1 2 3 4 5 6 7 8 9</div>
+                    <div class="line"><span class="plus">+</span> 9 8 7 6 5 4 3 2 1</div>
+                    <div style="color: #00b894; font-weight: bold;">1 1 1 1 1 1 1 1 1 0</div>
+                </div>
+            </div>
+            <div style="text-align: center; color: #636e72; font-size: 0.95em;">
+                👆 红色小数字是进位，绿色数字是最终结果
+            </div>
+        </div>
+
+        <!-- 程序模拟步骤 -->
+        <div style="background-color: #fff; padding: 25px; border-radius: 15px; margin: 25px 0; border: 3px dashed #00b894; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="color: #00b894; margin-top: 0; text-align: center;">🔧 程序怎么模拟这个过程？</h3>
+
+            <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                <!-- 步骤1 -->
+                <div style="display: flex; align-items: center; gap: 15px; background: #f0fdf4; padding: 15px; border-radius: 12px; border-left: 5px solid #00b894;">
+                    <div style="font-size: 2.5em; min-width: 50px; text-align: center;">1️⃣</div>
+                    <div>
+                        <strong style="color: #00b894; font-size: 1.1em;">用字符串存数字</strong><br>
+                        数字太大，<span class="code-inline">int</span>/<span class="code-inline">long long</span> 装不下！我们把数字当作<strong>字符串</strong>来读入，每一位都是一个字符。
+                    </div>
+                </div>
+
+                <!-- 步骤2 -->
+                <div style="display: flex; align-items: center; gap: 15px; background: #fff5f0; padding: 15px; border-radius: 12px; border-left: 5px solid #e17055;">
+                    <div style="font-size: 2.5em; min-width: 50px; text-align: center;">2️⃣</div>
+                    <div>
+                        <strong style="color: #e17055; font-size: 1.1em;">翻转字符串</strong><br>
+                        字符串是从高位到低位存的（比如 "123" 中 '1' 是最高位），但加法要从<strong>个位（最低位）</strong>开始。所以先<strong>翻转</strong>，让个位排到前面来！
+                    </div>
+                </div>
+
+                <!-- 步骤3 -->
+                <div style="display: flex; align-items: center; gap: 15px; background: #f1f8ff; padding: 15px; border-radius: 12px; border-left: 5px solid #0984e3;">
+                    <div style="font-size: 2.5em; min-width: 50px; text-align: center;">3️⃣</div>
+                    <div>
+                        <strong style="color: #0984e3; font-size: 1.1em;">逐位相加 + 处理进位</strong><br>
+                        从第 0 位开始，把两个数的对应位和进位加起来：<br>
+                        <span class="code-inline">sum = a[i] + b[i] + carry</span><br>
+                        当前位的结果 = <span class="code-inline">sum % 10</span>，新进位 = <span class="code-inline">sum / 10</span>
+                    </div>
+                </div>
+
+                <!-- 步骤4 -->
+                <div style="display: flex; align-items: center; gap: 15px; background: #f3f0ff; padding: 15px; border-radius: 12px; border-left: 5px solid #6c5ce7;">
+                    <div style="font-size: 2.5em; min-width: 50px; text-align: center;">4️⃣</div>
+                    <div>
+                        <strong style="color: #6c5ce7; font-size: 1.1em;">翻转结果输出</strong><br>
+                        计算完成后，结果也是低位在前的，需要再<strong>翻转回来</strong>，高位在前输出。别忘了如果最后还有进位，要多加一位 '1'！
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3>✨ 核心公式（每一位的计算）：</h3>
+
+        <div class="formula">
+            sum = a的第i位 + b的第i位 + carry(进位)
+        </div>
+        <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 15px 0;">
+            <div class="formula" style="flex: 1; min-width: 200px;">
+                当前位结果 = sum % 10
+            </div>
+            <div class="formula" style="flex: 1; min-width: 200px;">
+                新进位 carry = sum / 10
+            </div>
+        </div>
+        <div style="text-align: center; color: #636e72; font-size: 0.95em; font-weight: bold;">
+            (如果某个数位数不够？没关系，当作 0 来处理！)
+        </div>
     </div>
 
-    <div class="card">
-        <div class="card-title"><i>📝</i> 样例大拆解</div>
-        
-        <h3>🌈 样例 1：热身挑战</h3>
-        <p>输入：<code>123456789</code> 和 <code>987654321</code></p>
-        <div class="math-column">
-            &nbsp;123456789<br>
-            + 987654321<br>
-            -----------<br>
-            1111111110
+    <!-- ==================== 翻转图解 ==================== -->
+    <div class="card logic">
+        <h2>🔄 关键操作：翻转字符串</h2>
+
+        <p>为什么要翻转？因为加法从<strong>个位</strong>开始算，但字符串的第 0 个字符是<strong>最高位</strong>！翻转之后，下标 0 就变成了个位，方便从前往后逐位相加。</p>
+
+        <div style="background: white; padding: 25px; border-radius: 15px; border: 3px solid #0984e3; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #0984e3; text-align: center;">📌 翻转前 vs 翻转后</h3>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #636e72;">翻转前（原始字符串）：</strong>
+                    <div class="digit-grid" style="justify-content: center; margin-top: 5px;">
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标0</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标1</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标2</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标3</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标4</div>
+                    </div>
+                    <div class="digit-grid" style="justify-content: center;">
+                        <div class="digit-cell num" style="background: #ffcccc;">1</div>
+                        <div class="digit-cell num">2</div>
+                        <div class="digit-cell num">3</div>
+                        <div class="digit-cell num">4</div>
+                        <div class="digit-cell num" style="background: #ccffcc;">5</div>
+                    </div>
+                    <div style="font-size: 0.85em; color: #636e72;">
+                        <span style="color: #d63031;">← 最高位（万位）</span>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span style="color: #00b894;">个位 →</span>
+                    </div>
+                </div>
+
+                <div style="font-size: 2.5em; color: #0984e3; margin: 10px 0;">🔄</div>
+
+                <div>
+                    <strong style="color: #636e72;">翻转后（个位在前）：</strong>
+                    <div class="digit-grid" style="justify-content: center; margin-top: 5px;">
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标0</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标1</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标2</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标3</div>
+                        <div style="text-align: center; font-size: 0.7em; color: #b2bec3; width: 36px;">下标4</div>
+                    </div>
+                    <div class="digit-grid" style="justify-content: center;">
+                        <div class="digit-cell num" style="background: #ccffcc;">5</div>
+                        <div class="digit-cell num">4</div>
+                        <div class="digit-cell num">3</div>
+                        <div class="digit-cell num">2</div>
+                        <div class="digit-cell num" style="background: #ffcccc;">1</div>
+                    </div>
+                    <div style="font-size: 0.85em; color: #636e72;">
+                        <span style="color: #00b894;">← 个位</span>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span style="color: #d63031;">最高位 →</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #e0f7fa; padding: 12px; border-radius: 8px; border-left: 4px solid #0984e3; margin-top: 15px;">
+                <strong>💡 翻转后好处：</strong> 从下标 0 开始遍历，自然就是从个位开始加。两个数位数不同时，短的那个超出部分当 0 处理就行！
+            </div>
         </div>
-        <p><strong>计算小贴士：</strong> 从个位开始，9+1=10，写0进1；十位8+2+进位1=11，写1进1... 就像我们在课堂上学的一样！</p>
-
-        <hr>
-
-        <h3>🚀 样例 2：巨人挑战</h3>
-        <p>输入：50个9 和 34位的大数</p>
-        <p><strong>神奇现象：</strong> 当最高位 9 加上进位 1 时，会产生一个新的百亿亿位！结果可能会变成 51 位哦。</p>
-        <div class="explanation-box">
-            结果显示：<span class="highlight">1000...998</span><br>
-            在这个超级大数里，我们不仅要算中间的 9+9，还要处理那些前面没有小伙伴对齐的位！
-        </div>
-
-        <hr>
-
-        <h3>🎈 样例 3：最小挑战</h3>
-        <p>输入：<code>0</code> 和 <code>0</code></p>
-        <p><strong>别忘了：</strong> 虽然 0 看起来很小，但结果必须输出 <code>0</code>，不能什么都不给哦！</p>
     </div>
 
-    <div class="card">
-        <div class="card-title"><i>💻</i> 魔法咒语（代码实现）</div>
-        
-        <div class="tabs">
-            <button class="tab-btn active" onclick="openTab(event, 'cpp')">C++ 咒语</button>
-            <button class="tab-btn" onclick="openTab(event, 'py_manual')">Python 手动挡</button>
-            <button class="tab-btn" onclick="openTab(event, 'py_auto')">Python 自动挡</button>
+    <!-- ==================== 样例详解 ==================== -->
+    <div class="card example">
+        <h2>🔍 卷轴解密 (样例详解)</h2>
+
+        <h3>🌈 样例 1：经典竖式加法</h3>
+        <p><strong>输入：</strong> <span class="scroll-num">123456789</span> + <span class="scroll-num">987654321</span></p>
+
+        <div style="background: white; padding: 25px; border-radius: 15px; border: 3px solid #fdcb6e; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #d35400; text-align: center;">📐 逐位计算过程</h3>
+
+            <div style="overflow-x: auto;">
+                <table class="compare-table" style="font-family: Consolas, monospace;">
+                    <tr>
+                        <th>位次</th>
+                        <th>a 的数字</th>
+                        <th>b 的数字</th>
+                        <th>进位</th>
+                        <th>sum</th>
+                        <th>当前位结果</th>
+                        <th>新进位</th>
+                    </tr>
+                    <tr><td>个位</td><td>9</td><td>1</td><td>0</td><td>10</td><td><span class="highlight">0</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>十位</td><td>8</td><td>2</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>百位</td><td>7</td><td>3</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>千位</td><td>6</td><td>4</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>万位</td><td>5</td><td>5</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>十万位</td><td>4</td><td>6</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>百万位</td><td>3</td><td>7</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>千万位</td><td>2</td><td>8</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr><td>亿位</td><td>1</td><td>9</td><td>1</td><td>11</td><td><span class="highlight">1</span></td><td><span class="highlight-red">1</span></td></tr>
+                    <tr style="background: #f0fdf4;"><td><strong>溢出位</strong></td><td>—</td><td>—</td><td>1</td><td>1</td><td><span class="highlight-green">1</span></td><td>0</td></tr>
+                </table>
+            </div>
+
+            <p style="text-align: center; margin-top: 15px;">
+                <strong>最终结果（从高位到低位）：</strong>
+                <span style="font-size: 1.5em; color: #00b894; font-weight: bold; font-family: Consolas;">1111111110</span>
+            </p>
         </div>
 
-        <div id="cpp" class="tab-content active">
-            <pre>
-<span class="code-keyword">#include</span> <span class="code-str">&lt;bits/stdc++.h&gt;</span>
-<span class="code-keyword">using namespace</span> std;
+        <!-- 图形化竖式 -->
+        <div style="text-align: center; margin: 20px 0;">
+            <div style="display: inline-block; background: #fdfbf7; padding: 20px 30px; border-radius: 15px; border: 3px solid #00b894; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <div style="text-align: right; font-family: Consolas; font-size: 1.2em; line-height: 2;">
+                    <div style="color: #d63031; font-size: 0.8em; letter-spacing: 3px;">&nbsp;&nbsp;¹ ¹ ¹ ¹ ¹ ¹ ¹ ¹ ¹ &nbsp;</div>
+                    <div>&nbsp;&nbsp; 1 2 3 4 5 6 7 8 9</div>
+                    <div style="border-bottom: 3px solid #2d3436; padding-bottom: 5px;"><span style="float: left;">+</span> 9 8 7 6 5 4 3 2 1</div>
+                    <div style="color: #00b894; font-weight: bold; font-size: 1.1em;">1 1 1 1 1 1 1 1 1 0</div>
+                </div>
+            </div>
+        </div>
 
-<span class="code-comment">// 准备足够大的数组，像一排整齐的小抽屉</span>
-<span class="code-keyword">const int</span> MAXN = <span class="code-num">510</span>;
-<span class="code-keyword">int</span> a[MAXN], b[MAXN], c[MAXN];
+        <hr style="border: 2px dashed #eee; margin: 30px 0;">
 
-<span class="code-keyword">int</span> <span class="code-func">main</span>() {
-    string s1, s2;
-    <span class="code-keyword">if</span> (!(cin >> s1 >> s2)) <span class="code-keyword">return</span> <span class="code-num">0</span>;
+        <h3>🌈 样例 2：位数不同的超大数</h3>
+        <p><strong>输入：</strong></p>
+        <div style="margin: 10px 0;">
+            <div>数 A（50位）：<span class="scroll-num" style="font-size: 0.85em;">99999999999999999999999999999999999999999999999999</span></div>
+            <div style="margin-top: 8px;">数 B（34位）：<span class="scroll-num" style="font-size: 0.85em;">19999999999999999999999999999999999</span></div>
+        </div>
 
-    <span class="code-keyword">int</span> lenA = s1.length();
-    <span class="code-keyword">int</span> lenB = s2.length();
+        <div style="background: white; padding: 20px; border-radius: 15px; border: 2px solid #fdcb6e; margin: 15px 0;">
+            <h3 style="margin-top: 0; color: #e67e22; text-align: center;">🔑 位数不同怎么办？</h3>
 
-    <span class="code-comment">// 1. 反转存入数组：个位住在 a[1]</span>
-    <span class="code-keyword">for</span> (<span class="code-keyword">int</span> i = <span class="code-num">0</span>; i < lenA; i++) a[lenA - i] = s1[i] - <span class="code-str">'0'</span>;
-    <span class="code-keyword">for</span> (<span class="code-keyword">int</span> i = <span class="code-num">0</span>; i < lenB; i++) b[lenB - i] = s2[i] - <span class="code-str">'0'</span>;
+            <div style="text-align: center; margin: 15px 0;">
+                <div style="display: inline-block; text-align: left; background: #fffcf0; padding: 20px; border-radius: 12px; font-family: Consolas;">
+                    <div style="color: #636e72; font-size: 0.85em; margin-bottom: 5px;">← 50位 →</div>
+                    <div style="font-size: 1.05em;">99999999999999999999999999999999999999999999999999</div>
+                    <div style="color: #636e72; font-size: 0.85em; margin: 5px 0;">← 34位 →&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（前面补零对齐）</div>
+                    <div style="font-size: 1.05em;"><span style="color: #b2bec3;">0000000000000000</span>19999999999999999999999999999999999</div>
+                </div>
+            </div>
 
-    <span class="code-comment">// 2. 模拟竖式加法</span>
-    <span class="code-keyword">int</span> len = max(lenA, lenB);
-    <span class="code-keyword">for</span> (<span class="code-keyword">int</span> i = <span class="code-num">1</span>; i <= len; i++) {
-        c[i] += a[i] + b[i];    <span class="code-comment">// 相加</span>
-        c[i + <span class="code-num">1</span>] = c[i] / <span class="code-num">10</span>;   <span class="code-comment">// 进位给左边邻居</span>
-        c[i] %= <span class="code-num">10</span>;             <span class="code-comment">// 自己留下个位数</span>
+            <div style="background: #e0f7fa; padding: 12px; border-radius: 8px; border-left: 4px solid #0984e3;">
+                <strong>💡 短数补零！</strong> 当两个数位数不同时，短的那个前面相当于补上了 0。在代码中，我们用 <span class="code-inline">i < a.size() ? a[i]-'0' : 0</span> 来处理：如果已经超出该数的长度，就当作 0。
+            </div>
+        </div>
+
+        <p><strong>输出：</strong> <span class="scroll-num" style="font-size: 0.85em;">100000000000000000019999999999999999999999999999998</span></p>
+
+        <hr style="border: 2px dashed #eee; margin: 30px 0;">
+
+        <h3>🌈 样例 3：边界情况 —— 0 + 0</h3>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 20px 0;">
+            <div style="text-align: center; background: #f5f6fa; padding: 20px 30px; border-radius: 15px;">
+                <div style="font-size: 3em;">0</div>
+                <div style="font-size: 0.9em; color: #636e72;">卷轴 A</div>
+            </div>
+            <div style="font-size: 2em; color: #00b894;">➕</div>
+            <div style="text-align: center; background: #f5f6fa; padding: 20px 30px; border-radius: 15px;">
+                <div style="font-size: 3em;">0</div>
+                <div style="font-size: 0.9em; color: #636e72;">卷轴 B</div>
+            </div>
+            <div style="font-size: 2em; color: #00b894;">=</div>
+            <div style="text-align: center; background: #f0fdf4; padding: 20px 30px; border-radius: 15px; border: 3px solid #00b894;">
+                <div style="font-size: 3em; color: #00b894;">0</div>
+                <div style="font-size: 0.9em; color: #636e72;">结果</div>
+            </div>
+        </div>
+
+        <div style="background: #fff5f0; padding: 12px; border-radius: 8px; border-left: 4px solid #e17055;">
+            <strong>⚠️ 边界注意：</strong> 0 + 0 = 0，程序不能输出空字符串！这个看似简单的情况其实是很多同学容易出错的地方。
+        </div>
+    </div>
+
+    <!-- ==================== 动画演示 ==================== -->
+    <div class="card logic">
+        <h2>🎬 动态图解：逐位相加过程</h2>
+
+        <p>让我们用 <span class="code-inline">385 + 47</span> 这个小例子，完整走一遍程序的执行过程：</p>
+
+        <div style="background: white; padding: 25px; border-radius: 15px; border: 3px solid #6c5ce7; margin: 20px 0;">
+
+            <!-- Step 1: 翻转 -->
+            <div style="margin-bottom: 25px;">
+                <h3 style="margin-top: 0; color: #6c5ce7;">Step 1：翻转字符串</h3>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85em; color: #636e72; margin-bottom: 5px;">a = "385"</div>
+                        <div class="digit-grid"><div class="digit-cell num">3</div><div class="digit-cell num">8</div><div class="digit-cell num">5</div></div>
+                    </div>
+                    <div style="font-size: 2em; color: #6c5ce7;">🔄</div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85em; color: #636e72; margin-bottom: 5px;">a = "583"</div>
+                        <div class="digit-grid"><div class="digit-cell highlight-digit">5</div><div class="digit-cell highlight-digit">8</div><div class="digit-cell highlight-digit">3</div></div>
+                        <div style="font-size: 0.75em; color: #00b894;">个位 十位 百位</div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 10px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85em; color: #636e72; margin-bottom: 5px;">b = "47"</div>
+                        <div class="digit-grid"><div class="digit-cell num">4</div><div class="digit-cell num">7</div></div>
+                    </div>
+                    <div style="font-size: 2em; color: #6c5ce7;">🔄</div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85em; color: #636e72; margin-bottom: 5px;">b = "74"</div>
+                        <div class="digit-grid"><div class="digit-cell highlight-digit">7</div><div class="digit-cell highlight-digit">4</div></div>
+                        <div style="font-size: 0.75em; color: #00b894;">个位 十位</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: 逐位相加 -->
+            <div>
+                <h3 style="color: #6c5ce7;">Step 2：逐位相加</h3>
+
+                <!-- i=0 -->
+                <div style="background: #f3f0ff; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                    <strong>i = 0（个位）：</strong>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 5px;">
+                        <div class="digit-cell active" style="width: auto; padding: 0 8px;">5</div>
+                        <span>+</span>
+                        <div class="digit-cell active" style="width: auto; padding: 0 8px;">7</div>
+                        <span>+ 进位</span>
+                        <div class="digit-cell carry" style="width: auto; padding: 0 8px;">0</div>
+                        <span>=</span>
+                        <strong>12</strong>
+                        <span>&nbsp;→&nbsp;</span>
+                        <span>当前位 = 12%10 = </span>
+                        <div class="digit-cell result" style="width: auto; padding: 0 8px;">2</div>
+                        <span>，新进位 = 12/10 = </span>
+                        <div class="digit-cell carry" style="width: auto; padding: 0 8px;">1</div>
+                    </div>
+                </div>
+
+                <!-- i=1 -->
+                <div style="background: #f3f0ff; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                    <strong>i = 1（十位）：</strong>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 5px;">
+                        <div class="digit-cell active" style="width: auto; padding: 0 8px;">8</div>
+                        <span>+</span>
+                        <div class="digit-cell active" style="width: auto; padding: 0 8px;">4</div>
+                        <span>+ 进位</span>
+                        <div class="digit-cell carry" style="width: auto; padding: 0 8px;">1</div>
+                        <span>=</span>
+                        <strong>13</strong>
+                        <span>&nbsp;→&nbsp;</span>
+                        <span>当前位 = 13%10 = </span>
+                        <div class="digit-cell result" style="width: auto; padding: 0 8px;">3</div>
+                        <span>，新进位 = 13/10 = </span>
+                        <div class="digit-cell carry" style="width: auto; padding: 0 8px;">1</div>
+                    </div>
+                </div>
+
+                <!-- i=2 -->
+                <div style="background: #f3f0ff; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                    <strong>i = 2（百位）：</strong>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 5px;">
+                        <div class="digit-cell active" style="width: auto; padding: 0 8px;">3</div>
+                        <span>+</span>
+                        <div class="digit-cell num" style="width: auto; padding: 0 8px; background: #b2bec3; color: white;">0</div>
+                        <span>+ 进位</span>
+                        <div class="digit-cell carry" style="width: auto; padding: 0 8px;">1</div>
+                        <span>=</span>
+                        <strong>4</strong>
+                        <span>&nbsp;→&nbsp;</span>
+                        <span>当前位 = 4%10 = </span>
+                        <div class="digit-cell result" style="width: auto; padding: 0 8px;">4</div>
+                        <span>，新进位 = 4/10 = </span>
+                        <div class="digit-cell carry" style="width: auto; padding: 0 8px;">0</div>
+                    </div>
+                    <div style="font-size: 0.85em; color: #636e72; margin-top: 5px;">👆 b 只有 2 位，第 2 位超出范围了，当作 <strong>0</strong> 处理</div>
+                </div>
+
+                <!-- 最终进位 -->
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 2px solid #00b894;">
+                    <strong>✅ 循环结束：</strong> 进位 carry = 0，不需要额外添加位
+                </div>
+            </div>
+
+            <!-- Step 3: 翻转结果 -->
+            <div style="margin-top: 20px;">
+                <h3 style="color: #6c5ce7;">Step 3：翻转结果</h3>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85em; color: #636e72; margin-bottom: 5px;">res = "234"</div>
+                        <div class="digit-grid"><div class="digit-cell result">2</div><div class="digit-cell result">3</div><div class="digit-cell result">4</div></div>
+                        <div style="font-size: 0.75em; color: #636e72;">个位 十位 百位</div>
+                    </div>
+                    <div style="font-size: 2em; color: #6c5ce7;">🔄</div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.85em; color: #636e72; margin-bottom: 5px;">res = "432"</div>
+                        <div class="digit-grid"><div class="digit-cell result" style="font-size: 1.5em;">4</div><div class="digit-cell result" style="font-size: 1.5em;">3</div><div class="digit-cell result" style="font-size: 1.5em;">2</div></div>
+                        <div style="font-size: 0.85em; color: #00b894; font-weight: bold;">✨ 最终答案！</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 15px;">
+            <div style="display: inline-block; background: #fdfbf7; padding: 15px 30px; border-radius: 15px; border: 3px solid #00b894;">
+                <span style="font-size: 1.3em; font-family: Consolas;">385 + 47 = </span>
+                <span style="font-size: 1.8em; font-family: Consolas; color: #00b894; font-weight: bold;">432</span>
+                <span style="font-size: 1.3em;"> ✅</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 进位详解 ==================== -->
+    <div class="card logic">
+        <h2>🔥 重点攻关：最后的进位别忘了！</h2>
+
+        <p>当所有位都加完了，如果还剩一个进位没处理，结果就会<strong>多出一位</strong>！比如：</p>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap; margin: 20px 0;">
+            <div style="text-align: center;">
+                <div style="font-family: Consolas; font-size: 1.3em; background: #fdfbf7; padding: 15px 25px; border-radius: 12px; border: 2px solid #fdcb6e; line-height: 2; text-align: right;">
+                    <div style="color: #d63031; font-size: 0.75em;">&nbsp;&nbsp;¹ &nbsp;</div>
+                    <div>&nbsp; 9 9</div>
+                    <div style="border-bottom: 3px solid #2d3436; padding-bottom: 3px;"><span style="float: left;">+</span> &nbsp; 1</div>
+                    <div style="color: #00b894; font-weight: bold;">1 0 0</div>
+                </div>
+            </div>
+            <div style="max-width: 300px;">
+                <div style="background: #fff0f0; padding: 15px; border-radius: 10px; border-left: 4px solid #d63031;">
+                    <strong>⚠️ 99 + 1 = 100</strong><br>
+                    两位数相加变成了三位数！<br>
+                    如果不处理最后的进位，<br>
+                    就会错误地输出 "00" 😱
+                </div>
+            </div>
+        </div>
+
+        <div class="formula">
+            循环结束后：if (carry > 0) → 在结果末尾再加一个 '1'！
+        </div>
+    </div>
+
+    <!-- ==================== C++ 代码 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>📜 <strong>字符串存大数 <span class="code-inline">string</span>：</strong> 数字太大，<span class="code-inline">int</span>/<span class="code-inline">long long</span> 装不下！用字符串逐字符存储，每个字符代表一个数位。</li>
+                <li>🔄 <strong>翻转函数 <span class="code-inline">reverse()</span>：</strong> <span class="code-inline">reverse(s.begin(), s.end())</span> 可以原地翻转字符串，让个位排到最前面。</li>
+                <li>🔢 <strong>字符转数字：</strong> <span class="code-inline">s[i] - '0'</span> 把字符 '5' 变成数字 5。反过来 <span class="code-inline">digit + '0'</span> 把数字变回字符。</li>
+                <li>📏 <strong>三元运算符：</strong> <span class="code-inline">i < a.size() ? a[i]-'0' : 0</span> 意思是：如果 i 还在 a 的范围内就取该位数字，否则当作 0。</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 终极法术 (代码详解)</h2>
+<pre>
+<span class="keyword">#include</span> &lt;bits/stdc++.h&gt;
+<span class="keyword">using namespace std;</span>
+
+<span class="type">int</span> main() {
+    <span class="type">string</span> a, b;
+    <span class="type">cin</span> >> a >> b;  <span class="comment">// 📥 用字符串读入两个超大数</span>
+
+    <span class="comment">// 🔄 步骤一：翻转字符串，让个位排到最前面</span>
+    reverse(a.begin(), a.end());
+    reverse(b.begin(), b.end());
+
+    <span class="type">string</span> res = <span class="string">""</span>;    <span class="comment">// 存放结果</span>
+    <span class="type">int</span> carry = <span class="number">0</span>;       <span class="comment">// 进位，初始为 0</span>
+    <span class="type">int</span> maxLen = max(a.size(), b.size());
+
+    <span class="comment">// ✍️ 步骤二：逐位相加（从个位到最高位）</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < maxLen; i++) {
+        <span class="comment">// 取出当前位的数字（超出范围的当作 0）</span>
+        <span class="type">int</span> da = (i < a.size()) ? (a[i] - <span class="string">'0'</span>) : <span class="number">0</span>;
+        <span class="type">int</span> db = (i < b.size()) ? (b[i] - <span class="string">'0'</span>) : <span class="number">0</span>;
+
+        <span class="type">int</span> sum = da + db + carry;  <span class="comment">// 两位数字 + 进位</span>
+
+        res.push_back(sum % <span class="number">10</span> + <span class="string">'0'</span>);  <span class="comment">// 当前位结果</span>
+        carry = sum / <span class="number">10</span>;               <span class="comment">// 新的进位</span>
     }
 
-    <span class="code-comment">// 3. 处理最后多出来的进位</span>
-    <span class="code-keyword">if</span> (c[len + <span class="code-num">1</span>] > <span class="code-num">0</span>) len++;
+    <span class="comment">// ⚠️ 步骤三：别忘了最后可能还有进位！</span>
+    <span class="keyword">if</span> (carry > <span class="number">0</span>) {
+        res.push_back(carry + <span class="string">'0'</span>);
+    }
 
-    <span class="code-comment">// 4. 倒着打印出来</span>
-    <span class="code-keyword">for</span> (<span class="code-keyword">int</span> i = len; i >= <span class="code-num">1</span>; i--) cout << c[i];
-    cout << endl;
+    <span class="comment">// 🔄 步骤四：翻转结果，高位在前输出</span>
+    reverse(res.begin(), res.end());
+    <span class="type">cout</span> << res << <span class="type">endl</span>;
 
-    <span class="code-keyword">return</span> <span class="code-num">0</span>;
+    <span class="keyword">return</span> <span class="number">0</span>;
 }
-            </pre>
-            <div class="explanation-box">
-                <strong>📝 C++ 笔记：</strong><br>
-                我们用 <code>s1[i] - '0'</code> 把字符变成了真正的数字。数组 <code>a</code> 和 <code>b</code> 让数字们整齐对齐，最后从高位向低位输出。
-            </div>
-        </div>
-
-        <div id="py_manual" class="tab-content">
-            <pre>
-<span class="code-keyword">def</span> <span class="code-func">big_number_add</span>(s1, s2):
-    <span class="code-comment"># 1. 反转并变数字列表，个位跑到了索引 0</span>
-    a = [int(x) <span class="code-keyword">for</span> x <span class="code-keyword">in</span> s1[::-<span class="code-num">1</span>]]
-    b = [int(x) <span class="code-keyword">for</span> x <span class="code-keyword">in</span> s2[::-<span class="code-num">1</span>]]
-    
-    <span class="code-comment"># 让 a 永远是那个比较长的数字</span>
-    <span class="code-keyword">if</span> len(a) < len(b): a, b = b, a
-    
-    result = []
-    carry = <span class="code-num">0</span>  <span class="code-comment"># 这是我们的“进位小管家”</span>
-    
-    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(len(a)):
-        val_b = b[i] <span class="code-keyword">if</span> i < len(b) <span class="code-keyword">else</span> <span class="code-num">0</span>
-        total = a[i] + val_b + carry
-        
-        result.append(total % <span class="code-num">10</span>) <span class="code-comment"># 存下个位</span>
-        carry = total // <span class="code-num">10</span>      <span class="code-comment"># 更新进位</span>
-    
-    <span class="code-keyword">if</span> carry:
-        result.append(carry) <span class="code-comment"># 最后还有进位？加上它！</span>
-    
-    <span class="code-comment"># 拼回字符串并转正顺序</span>
-    <span class="code-keyword">return</span> <span class="code-str">""</span>.join(map(str, result[::-<span class="code-num">1</span>]))
-
-s1 = input().strip()
-s2 = input().strip()
-print(big_number_add(s1, s2))
-            </pre>
-            <div class="explanation-box">
-                <strong>📝 Python 手动版笔记：</strong><br>
-                虽然 Python 很聪明，但手动模拟一遍算法能让我们更理解进位的奥秘！我们使用了列表 <code>append</code> 来收集每一位的结果。
-            </div>
-        </div>
-
-        <div id="py_auto" class="tab-content">
-            <pre>
-<span class="code-comment"># Python 拥有“大数超能力”！</span>
-<span class="code-comment"># 它会自动处理无限长的数字，不用担心溢出。</span>
-
-s1 = input().strip()
-s2 = input().strip()
-
-<span class="code-comment"># 直接相加，就是这么简单！</span>
-result = int(s1) + int(s2)
-
-print(result)
-            </pre>
-            <div class="explanation-box">
-                <strong>📝 Python 自动版笔记：</strong><br>
-                这就是 Python 的魅力！通过 <code>int()</code> 转换，它在后台帮我们做好了所有辛苦的位运算。在比赛中如果你赶时间，这招最管用！
-            </div>
+</pre>
         </div>
     </div>
 
-    <div class="card" style="border-bottom: 5px solid var(--success-color);">
-        <div class="card-title"><i>🌈</i> 总结一下</div>
-        <p>高精度加法就像在做一个<strong>“数字接力赛”</strong>。每一个数位都是一名选手，个位跑完（加完）传给十位（进位），十位传给百位。只要我们处理好进位，再大的数字也难不倒我们！加油，小小程序员！</p>
+    <!-- ==================== Python 代码 ==================== -->
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 魔法秘籍 (知识点)</h2>
+            <ul>
+                <li>♾️ <strong>Python 大整数黑科技：</strong> Python 的整数可以<strong>无限大</strong>！直接 <span class="code-inline">int(a) + int(b)</span> 就能算出正确结果，根本不用担心溢出。但为了学习高精度思想，我们也展示手动模拟版本！</li>
+                <li>🔄 <strong>字符串翻转：</strong> Python 的切片黑魔法 <span class="code-inline">s[::-1]</span> 一行搞定翻转，不需要调用函数。</li>
+                <li>📝 <strong>列表拼接：</strong> 用列表 <span class="code-inline">res = []</span> 存储每一位的结果，最后用 <span class="code-inline">''.join(res)</span> 拼接成字符串。</li>
+                <li>🔢 <strong>整除和取余：</strong> <span class="code-inline">//</span> 是整除，<span class="code-inline">%</span> 是取余，正是我们处理进位所需要的！</li>
+            </ul>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 终极法术 (代码详解)</h2>
+
+            <h3 style="color: #55efc4; margin-top: 10px;">✨ 方法一：Python 黑科技（直接算！）</h3>
+<pre>
+<span class="comment"># Python 的整数可以无限大，直接转换相加即可！</span>
+a = <span class="type">input</span>()
+b = <span class="type">input</span>()
+<span class="type">print</span>(<span class="type">int</span>(a) + <span class="type">int</span>(b))
+</pre>
+            <div style="background: #fffcf0; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #fdcb6e;">
+                <strong>😲 就这三行？</strong> 是的！Python 原生支持大整数运算，这是 Python 的隐藏福利。但为了理解高精度算法的思想，我们来看手动模拟版本 👇
+            </div>
+
+            <h3 style="color: #55efc4; margin-top: 20px;">📝 方法二：手动模拟（学习算法思想）</h3>
+<pre>
+<span class="keyword">def</span> <span class="type">main</span>():
+    a = <span class="type">input</span>().strip()
+    b = <span class="type">input</span>().strip()
+
+    <span class="comment"># 🔄 步骤一：翻转字符串，个位排到前面</span>
+    a = a[::<span class="number">-1</span>]
+    b = b[::<span class="number">-1</span>]
+
+    carry = <span class="number">0</span>       <span class="comment"># 进位</span>
+    res = []        <span class="comment"># 存放每一位的结果</span>
+    max_len = <span class="type">max</span>(<span class="type">len</span>(a), <span class="type">len</span>(b))
+
+    <span class="comment"># ✍️ 步骤二：逐位相加</span>
+    <span class="keyword">for</span> i <span class="keyword">in range</span>(max_len):
+        <span class="comment"># 取出当前位数字（超出范围当 0）</span>
+        da = <span class="type">int</span>(a[i]) <span class="keyword">if</span> i < <span class="type">len</span>(a) <span class="keyword">else</span> <span class="number">0</span>
+        db = <span class="type">int</span>(b[i]) <span class="keyword">if</span> i < <span class="type">len</span>(b) <span class="keyword">else</span> <span class="number">0</span>
+
+        total = da + db + carry  <span class="comment"># 两位 + 进位</span>
+        res.append(<span class="type">str</span>(total % <span class="number">10</span>))  <span class="comment"># 当前位结果</span>
+        carry = total // <span class="number">10</span>          <span class="comment"># 新进位</span>
+
+    <span class="comment"># ⚠️ 步骤三：最后的进位别忘了！</span>
+    <span class="keyword">if</span> carry > <span class="number">0</span>:
+        res.append(<span class="type">str</span>(carry))
+
+    <span class="comment"># 🔄 步骤四：翻转结果并输出</span>
+    res.reverse()
+    <span class="type">print</span>(<span class="string">''</span>.join(res))
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    main()
+</pre>
+        </div>
     </div>
 
-    <footer>
-        🌟 保持好奇，每天进步一点点！<br>
-        来自扣哒世界教研团队
-    </footer>
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">高精度 = 模拟竖式：</strong> 高精度加法的本质就是小学学的列竖式，用字符串存储每一位，从个位开始逐位相加，满十进一。掌握了这个思想，以后遇到高精度乘法、减法也不怕！
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">翻转是关键操作：</strong> 字符串默认高位在前，但加法从低位开始。翻转后下标从 0 开始就是个位，逐位遍历非常方便。计算完再翻转回来输出！
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">最后进位不能丢：</strong> 循环结束后 <span class="code-inline">carry</span> 可能还是 1（比如 99+1=100），如果不处理，答案就少了最高位！这是最常见的 bug。
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: white; padding: 15px; border-radius: 12px;">
+                <div style="font-size: 2em; min-width: 50px; text-align: center;">🌟</div>
+                <div>
+                    <strong style="color: #6c5ce7;">位数不同要补零：</strong> 当一个数比另一个短时，超出部分当作 0 处理。用三元运算符 <span class="code-inline">i < len ? digit : 0</span> 优雅解决。
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; background: #f3f0ff; padding: 15px; border-radius: 10px; border: 2px dashed #6c5ce7; text-align: center;">
+            <strong style="font-size: 1.2em; color: #6c5ce7;">🏔️ 恭喜你学会了高精度加法！</strong><br>
+            <span style="color: #636e72;">用字符串模拟竖式计算，再大的数字也不怕！这是算法竞赛中的基础功夫，掌握了它，你就是巨人王国的数学英雄！</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        扣哒世界教研团队
+    </div>
 </div>
 
 <script>
-    function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
         }
-        tablinks = document.getElementsByClassName("tab-btn");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
-        }
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
     }
 </script>
 

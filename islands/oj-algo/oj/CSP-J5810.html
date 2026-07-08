@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：雪宫借室</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #e3f2fd;
+            color: #263238;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #1565c0;
+            background-color: #1976d2;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(21, 101, 192, 0.2);
+            border: 5px solid #42a5f5;
+        }
+
+        h1 {
+            color: #1565c0;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #bbdefb;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #1976d2;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #0d47a1, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #0d47a1, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #1565c0;
+            border-bottom: 3px dashed #90caf9;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #0d47a1;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #e3f2fd;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #90caf9;
+        }
+        .card.problem { border-color: #42a5f5; background-color: #e3f2fd; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.binary { border-color: #7e57c2; background-color: #ede7f6; }
+        .card.greedy { border-color: #43a047; background-color: #e8f5e9; }
+        .card.diff-card { border-color: #26a69a; background-color: #e0f2f1; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #78909c; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #bbdefb;
+            color: #0d47a1;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 日历/教室表格 ========== */
+        .room-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 3px;
+            margin: 12px 0;
+        }
+        .room-table th {
+            padding: 6px 8px;
+            font-size: 0.85em;
+            color: white;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .room-table td {
+            padding: 8px 6px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        .day-header { background: #1976d2; }
+        .room-avail { background: #e3f2fd; color: #1565c0; }
+        .room-need { background: #fff3e0; color: #e65100; }
+        .room-ok { background: #e8f5e9; color: #2e7d32; }
+        .room-fail { background: #ffcdd2; color: #c62828; font-weight: bold; }
+        .room-zero { background: #f5f5f5; color: #bdbdbd; }
+        .req-row { background: #fce4ec; }
+        .app-label { background: #e8eaf6; color: #283593; font-size: 0.8em; }
+
+        /* ========== 申请卡片 ========== */
+        .app-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin: 6px 0;
+            font-size: 0.95em;
+        }
+        .app-num {
+            min-width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9em;
+        }
+        .app-detail { flex: 1; }
+        .app-status {
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        /* ========== 差分数组可视化 ========== */
+        .diff-visual {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #80cbc4;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .diff-row {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            margin: 5px 0;
+            flex-wrap: nowrap;
+        }
+        .diff-label {
+            min-width: 70px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-align: right;
+            padding-right: 8px;
+        }
+        .diff-cell {
+            min-width: 42px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85em;
+            font-family: Consolas, monospace;
+        }
+
+        /* ========== 二分可视化 ========== */
+        .binary-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #b39ddb;
+            margin: 15px 0;
+        }
+        .binary-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            flex-wrap: wrap;
+        }
+        .binary-step.pass { background: #e8f5e9; border: 2px solid #66bb6a; }
+        .binary-step.fail { background: #ffebee; border: 2px solid #ef5350; }
+        .binary-step.done { background: #fff9c4; border: 2px solid #fdd835; }
+        .bs-label { min-width: 45px; font-weight: bold; color: #888; }
+        .bs-val {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+        .bs-lo { background: #c8e6c9; color: #2e7d32; }
+        .bs-hi { background: #ffcdd2; color: #c62828; }
+        .bs-mid { background: #e1bee7; color: #4a148c; }
+        .bs-result {
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+        }
+        .bs-ok { background: #c8e6c9; color: #2e7d32; }
+        .bs-no { background: #ffcdd2; color: #c62828; }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #42a5f5;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.9em;
+            min-width: 80px;
+        }
+        .step-arrow { font-size: 1.5em; color: #42a5f5; }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 公式框 ========== */
+        .formula-box {
+            background: linear-gradient(135deg, #ede7f6, #e8eaf6);
+            border: 3px solid #7e57c2;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.05em;
+        }
+        .formula-big {
+            font-family: Consolas, monospace;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4527a0;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        /* ========== 单调性条 ========== */
+        .mono-bar {
+            display: flex;
+            height: 38px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+        }
+        .mono-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+            flex: 1;
+            border-right: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 0.95em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #0d47a1, #42a5f5); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #4527a0, #7e57c2); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 180px;
+            background: white;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 2px solid #bbdefb;
+        }
+        .example-card strong { color: #1565c0; }
+        .example-card pre {
+            background: transparent;
+            color: #263238;
+            padding: 3px 0;
+            margin: 3px 0;
+            font-weight: bold;
+            font-size: 0.82em;
+        }
+
+        /* ========== 柱状图 ========== */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            justify-content: center;
+            padding: 10px;
+            min-height: 120px;
+        }
+        .bar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .bar-block {
+            width: 45px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 3px;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: white;
+            position: relative;
+        }
+        .bar-label {
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        .bar-avail { background: #42a5f5; }
+        .bar-need { background: #ff9800; }
+        .bar-over { background: #ef5350; }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #90caf9;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏔️ 雪宫借室 🏫</h1>
+
+    <div style="text-align: center; font-size: 1.15em; color: #1565c0;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        m 份借教室申请，按顺序处理——哪份申请会第一个失败？<br>
+        用二分答案 + 差分数组，高效破解这道经典题！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/70" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>n 天，每天有 r<sub>i</sub> 间教室。m 份申请按顺序处理（先到先得）。</p>
+        <p>第 j 份申请：从第 s<sub>j</sub> 天到第 t<sub>j</sub> 天，每天需要 d<sub>j</sub> 间教室。</p>
+        <p>目标：判断所有申请能否满足；若不能，找出<strong>第一个失败的申请编号</strong>。</p>
+
+        <div style="background:#e3f2fd; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #90caf9;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>第1行 n, m；第2行 n 个整数 r<sub>i</sub>；接下来 m 行每行 d<sub>j</sub>, s<sub>j</sub>, t<sub>j</sub><br>
+            • <strong>输出：</strong>若全部满足输出 0；否则先输出 -1，再输出第一个失败的编号<br>
+            • <strong>数据范围：</strong>n, m ≤ 10<sup>6</sup>，r<sub>i</sub>, d<sub>j</sub> ≤ 10<sup>9</sup>
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例 1</strong>
+<pre>4 3
+2 5 4 3
+2 1 3
+3 2 4
+4 2 4</pre>
+                <strong>📤 输出：</strong>
+<pre style="color:#c62828;">-1
+2</pre>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 2</strong>
+<pre>5 4
+4 4 4 4 4
+1 1 3
+2 2 5
+1 4 4
+1 1 5</pre>
+                <strong>📤 输出：</strong><span class="highlight">0</span>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 3</strong>
+<pre>6 5
+4 5 6 4 5 6
+2 1 3
+1 2 6
+2 4 5
+1 1 6
+2 3 4</pre>
+                <strong>📤 输出：</strong>
+<pre style="color:#c62828;">-1
+5</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例1 详细图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱：看懂样例 1</h2>
+
+        <h3>🏫 初始状态：4天，每天可用教室数</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #90caf9; margin:10px 0;">
+            <div class="bar-chart" style="min-height:100px;">
+                <div class="bar-col">
+                    <div class="bar-block bar-avail" style="height:40px; width:55px;">2</div>
+                    <div class="bar-label" style="color:#1565c0;">第1天</div>
+                </div>
+                <div class="bar-col">
+                    <div class="bar-block bar-avail" style="height:100px; width:55px;">5</div>
+                    <div class="bar-label" style="color:#1565c0;">第2天</div>
+                </div>
+                <div class="bar-col">
+                    <div class="bar-block bar-avail" style="height:80px; width:55px;">4</div>
+                    <div class="bar-label" style="color:#1565c0;">第3天</div>
+                </div>
+                <div class="bar-col">
+                    <div class="bar-block bar-avail" style="height:60px; width:55px;">3</div>
+                    <div class="bar-label" style="color:#1565c0;">第4天</div>
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.85em; color:#666;">
+                蓝色柱 = 每天可用教室数：r = [2, 5, 4, 3]
+            </div>
+        </div>
+
+        <h3>📋 三份申请（按顺序处理）</h3>
+        <div class="app-card" style="background:#e8f5e9; border:2px solid #66bb6a;">
+            <div class="app-num" style="background:#43a047;">1</div>
+            <div class="app-detail">第1~3天，每天借 <strong>2</strong> 间教室</div>
+            <div class="app-status" style="background:#c8e6c9; color:#2e7d32;">✅ 成功</div>
+        </div>
+        <div class="app-card" style="background:#ffebee; border:2px solid #ef5350;">
+            <div class="app-num" style="background:#c62828;">2</div>
+            <div class="app-detail">第2~4天，每天借 <strong>3</strong> 间教室</div>
+            <div class="app-status" style="background:#ffcdd2; color:#c62828;">❌ 失败！</div>
+        </div>
+        <div class="app-card" style="background:#f5f5f5; border:2px solid #e0e0e0;">
+            <div class="app-num" style="background:#bdbdbd;">3</div>
+            <div class="app-detail">第2~4天，每天借 <strong>4</strong> 间教室</div>
+            <div class="app-status" style="background:#eeeeee; color:#888;">— 未处理</div>
+        </div>
+
+        <h3>🎬 逐步模拟处理过程</h3>
+
+        <!-- 处理申请1 -->
+        <div style="background:#e8f5e9; padding:12px 15px; border-radius:10px; border:2px solid #66bb6a; margin:10px 0;">
+            <strong style="color:#2e7d32;">📌 处理申请1：d=2, 第1~3天</strong>
+            <table class="room-table" style="margin-top:8px;">
+                <tr>
+                    <th class="day-header" style="background:#546e7a;">项目</th>
+                    <th class="day-header">第1天</th>
+                    <th class="day-header">第2天</th>
+                    <th class="day-header">第3天</th>
+                    <th class="day-header">第4天</th>
+                </tr>
+                <tr>
+                    <td class="app-label">原有教室</td>
+                    <td class="room-avail">2</td>
+                    <td class="room-avail">5</td>
+                    <td class="room-avail">4</td>
+                    <td class="room-avail">3</td>
+                </tr>
+                <tr>
+                    <td class="app-label">申请1需要</td>
+                    <td class="room-need">-2</td>
+                    <td class="room-need">-2</td>
+                    <td class="room-need">-2</td>
+                    <td class="room-zero">0</td>
+                </tr>
+                <tr>
+                    <td class="app-label"><strong>剩余</strong></td>
+                    <td class="room-ok">0</td>
+                    <td class="room-ok">3</td>
+                    <td class="room-ok">2</td>
+                    <td class="room-ok">3</td>
+                </tr>
+            </table>
+            <div style="text-align:center; font-size:0.9em; color:#2e7d32; font-weight:bold;">
+                每天剩余 ≥ 0 → ✅ 申请1 成功！
+            </div>
+        </div>
+
+        <!-- 处理申请2 -->
+        <div style="background:#ffebee; padding:12px 15px; border-radius:10px; border:2px solid #ef5350; margin:10px 0;">
+            <strong style="color:#c62828;">📌 处理申请2：d=3, 第2~4天</strong>
+            <table class="room-table" style="margin-top:8px;">
+                <tr>
+                    <th class="day-header" style="background:#546e7a;">项目</th>
+                    <th class="day-header">第1天</th>
+                    <th class="day-header">第2天</th>
+                    <th class="day-header">第3天</th>
+                    <th class="day-header">第4天</th>
+                </tr>
+                <tr>
+                    <td class="app-label">当前剩余</td>
+                    <td class="room-ok">0</td>
+                    <td class="room-ok">3</td>
+                    <td class="room-ok">2</td>
+                    <td class="room-ok">3</td>
+                </tr>
+                <tr>
+                    <td class="app-label">申请2需要</td>
+                    <td class="room-zero">0</td>
+                    <td class="room-need">-3</td>
+                    <td class="room-need">-3</td>
+                    <td class="room-need">-3</td>
+                </tr>
+                <tr>
+                    <td class="app-label"><strong>剩余</strong></td>
+                    <td class="room-ok">0</td>
+                    <td class="room-ok">0</td>
+                    <td class="room-fail">-1 💥</td>
+                    <td class="room-ok">0</td>
+                </tr>
+            </table>
+            <div style="text-align:center; font-size:0.9em; color:#c62828; font-weight:bold;">
+                第3天剩余 = -1 < 0 → 💥 申请2 失败！教室不够！
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:15px;">
+            <div style="background:#ffebee; display:inline-block; padding:12px 25px; border-radius:10px; border:3px solid #ef5350;">
+                <strong style="color:#c62828; font-size:1.3em;">答案：-1，第 2 份申请失败 🎯</strong>
+            </div>
+        </div>
+
+        <div class="thinking-box">
+            <div class="title">逐个模拟太慢了！</div>
+            <p style="margin:5px 0;">
+                每份申请影响一段区间，暴力模拟每天扣减 → O(n × m)。<br>
+                当 n, m ≤ 10<sup>6</sup> 时，10<sup>12</sup> 次运算 → <strong>肯定超时！</strong>😱<br>
+                需要更快的方法 → <strong>二分答案 + 差分数组</strong>。
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 差分数组知识 ==================== -->
+    <div class="card diff-card">
+        <h2>📚 前置知识：差分数组</h2>
+
+        <div class="thinking-box" style="border-color:#26a69a; background:#e0f2f1;">
+            <div class="title" style="color:#00695c;">💡 差分数组是什么？</div>
+            <p style="margin:5px 0;">
+                对一个区间 [s, t] 上的所有元素加上 d，暴力需要 O(t-s+1)。<br>
+                用差分数组只需 <strong>O(1)</strong>：<br>
+                <span class="code-inline">diff[s] += d</span>，<span class="code-inline">diff[t+1] -= d</span><br><br>
+                之后做一次<strong>前缀和</strong>就能还原出每个位置的实际值！
+            </p>
+        </div>
+
+        <h3>🎬 差分数组示例</h3>
+        <div style="background:#fff; padding:12px; border-radius:10px; margin:10px 0; font-size:0.9em;">
+            <strong>操作：在 [2, 4] 上加 3</strong>
+        </div>
+        <div class="diff-visual">
+            <div style="font-size:0.8em; color:#888; margin-bottom:5px;">下标：</div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#26a69a;">位置</div>
+                <div class="diff-cell" style="background:#e0f2f1; color:#00695c;">1</div>
+                <div class="diff-cell" style="background:#e0f2f1; color:#00695c;">2</div>
+                <div class="diff-cell" style="background:#e0f2f1; color:#00695c;">3</div>
+                <div class="diff-cell" style="background:#e0f2f1; color:#00695c;">4</div>
+                <div class="diff-cell" style="background:#e0f2f1; color:#00695c;">5</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#ff9800;">差分 diff</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#bdbdbd;">0</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;"><strong>+3</strong></div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#bdbdbd;">0</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#bdbdbd;">0</div>
+                <div class="diff-cell" style="background:#ffcdd2; color:#c62828;"><strong>-3</strong></div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#1565c0;">前缀和还原</div>
+                <div class="diff-cell" style="background:#e3f2fd; color:#1565c0;">0</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;"><strong>3</strong></div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;"><strong>3</strong></div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;"><strong>3</strong></div>
+                <div class="diff-cell" style="background:#e3f2fd; color:#1565c0;">0</div>
+            </div>
+        </div>
+        <div style="text-align:center; font-size:0.85em; color:#666;">
+            diff[2]+=3, diff[5]-=3 → 前缀和后得到 [0, 3, 3, 3, 0] → 区间 [2,4] 上确实加了 3！✅
+        </div>
+    </div>
+
+    <!-- ==================== 二分答案核心思路 ==================== -->
+    <div class="card binary">
+        <h2>⚡ 核心算法：二分答案 + 差分检查</h2>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6;">
+            <div class="title" style="color:#4527a0;">💡 关键思想：二分"前 x 份申请"！</div>
+            <p style="margin:5px 0;">
+                <strong>观察单调性：</strong><br>
+                • 如果前 x 份申请能满足 → 前 x-1 份也一定能满足 ✅<br>
+                • 如果前 x 份申请不能满足 → 前 x+1 份也一定不能满足 ❌<br><br>
+                这是完美的单调性！可以<strong>二分</strong>找到"分界点"：<br>
+                <span style="color:#2e7d32;">✅✅✅ ... ✅</span> <span style="color:#c62828;">❌❌❌ ... ❌</span><br>
+                第一个 ❌ 就是答案！
+            </p>
+        </div>
+
+        <h3>📊 单调性图示（以样例1为例）</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0; margin:15px 0;">
+            <div class="mono-bar">
+                <div class="mono-cell" style="background:#c8e6c9; color:#2e7d32;">前1份<br>✅</div>
+                <div class="mono-cell" style="background:#ffcdd2; color:#c62828;">前2份<br>❌</div>
+                <div class="mono-cell" style="background:#ffcdd2; color:#c62828;">前3份<br>❌</div>
+            </div>
+            <div style="text-align:center; font-size:0.9em; margin-top:8px;">
+                第一个 ❌ 出现在<strong>第2份</strong> → 答案 = 2 🎯
+            </div>
+        </div>
+
+        <h3>🔍 check(mid) 怎么实现？</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #66bb6a; margin:10px 0;">
+            <p style="font-weight:bold; color:#2e7d32;">用差分数组快速计算前 mid 份申请的总需求！</p>
+            <ol style="margin:5px 0; line-height:2;">
+                <li>初始化差分数组 <span class="code-inline">diff[1..n+1] = 0</span></li>
+                <li>对前 mid 份申请，执行差分操作：<br>
+                    <span class="code-inline">diff[s_j] += d_j</span>，<span class="code-inline">diff[t_j+1] -= d_j</span></li>
+                <li>计算前缀和 → 得到每天的总需求 need[i]</li>
+                <li>检查：是否每天都有 <span class="code-inline">need[i] ≤ r[i]</span>？</li>
+            </ol>
+            <p>时间复杂度：O(mid + n) ≈ O(n + m)</p>
+        </div>
+
+        <div class="formula-box">
+            <div style="font-size:0.95em; color:#4e342e;">✨ 完整算法流程 ✨</div>
+            <div class="formula-big">
+                先 check(m)：全部可行 → 输出 0<br>
+                否则：二分找第一个失败的申请<br>
+                lo = 1, hi = m<br>
+                while lo < hi:<br>
+                &nbsp;&nbsp;mid = (lo + hi) / 2<br>
+                &nbsp;&nbsp;if check(mid): lo = mid + 1<br>
+                &nbsp;&nbsp;else: hi = mid<br>
+                输出 -1 和 lo
+            </div>
+            <div style="font-size:0.85em; color:#795548;">
+                check(mid) = true 表示前 mid 份可行 → 失败在后面 → lo = mid+1<br>
+                check(mid) = false 表示前 mid 份不可行 → 失败在 ≤ mid → hi = mid
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例1 check 过程 ==================== -->
+    <div class="card greedy">
+        <h2>🎬 样例 1：check 过程详解</h2>
+        <div style="font-weight:bold; color:#1565c0; margin-bottom:10px;">
+            n=4, m=3, r=[2,5,4,3]<br>
+            申请：(2,1,3), (3,2,4), (4,2,4)
+        </div>
+
+        <!-- check(1) -->
+        <h3>📌 check(1)：只处理前1份申请</h3>
+        <div class="diff-visual">
+            <div style="font-size:0.85em; color:#26a69a; font-weight:bold; margin-bottom:5px;">
+                申请1：d=2, s=1, t=3 → diff[1]+=2, diff[4]-=2
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#888;">位置</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">1</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">2</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">3</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">4</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#ff9800;">差分</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">+2</div>
+                <div class="diff-cell" style="background:#f5f5f5;">0</div>
+                <div class="diff-cell" style="background:#f5f5f5;">0</div>
+                <div class="diff-cell" style="background:#ffcdd2; color:#c62828;">-2</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#1565c0;">需求 need</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">2</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">2</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">2</div>
+                <div class="diff-cell" style="background:#e3f2fd; color:#1565c0;">0</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#43a047;">可用 r</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">2</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">5</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">3</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#7e57c2;">need≤r?</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">2≤2 ✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">2≤5 ✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">2≤4 ✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">0≤3 ✅</div>
+            </div>
+        </div>
+        <div style="text-align:center; font-size:0.9em; color:#2e7d32; font-weight:bold;">
+            check(1) = ✅ 全部满足！
+        </div>
+
+        <!-- check(2) -->
+        <h3>📌 check(2)：处理前2份申请</h3>
+        <div class="diff-visual">
+            <div style="font-size:0.85em; color:#26a69a; font-weight:bold; margin-bottom:5px;">
+                申请1：diff[1]+=2, diff[4]-=2<br>
+                申请2：diff[2]+=3, diff[5]-=3
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#888;">位置</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">1</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">2</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">3</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">4</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#ff9800;">差分叠加</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">+2</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">+3</div>
+                <div class="diff-cell" style="background:#f5f5f5;">0</div>
+                <div class="diff-cell" style="background:#ffcdd2; color:#c62828;">-2</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#1565c0;">需求 need</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">2</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">5</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;"><strong>5</strong></div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">3</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#43a047;">可用 r</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">2</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">5</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">3</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#7e57c2;">need≤r?</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">2≤2 ✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">5≤5 ✅</div>
+                <div class="diff-cell" style="background:#ffcdd2; color:#c62828;"><strong>5>4 💥</strong></div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">3≤3 ✅</div>
+            </div>
+        </div>
+        <div style="text-align:center; font-size:0.9em; color:#c62828; font-weight:bold;">
+            check(2) = ❌ 第3天教室不够！need=5 > r=4
+        </div>
+    </div>
+
+    <!-- ==================== 样例1 二分过程 ==================== -->
+    <div class="card binary">
+        <h2>🎬 样例 1 完整二分过程</h2>
+        <div style="font-weight:bold; color:#1565c0; margin-bottom:10px;">先检查 check(3)=❌ → 不是全部可行，开始二分</div>
+
+        <div class="binary-visual">
+            <div class="binary-step pass">
+                <div class="bs-label">第1轮</div>
+                <div class="bs-val bs-lo">lo=1</div>
+                <div class="bs-val bs-hi">hi=3</div>
+                <div class="bs-val bs-mid">mid=2</div>
+                <div style="font-size:0.85em;">check(2): 第3天超了</div>
+                <div class="bs-result bs-no">❌ hi=2</div>
+            </div>
+            <div class="binary-step pass">
+                <div class="bs-label">第2轮</div>
+                <div class="bs-val bs-lo">lo=1</div>
+                <div class="bs-val bs-hi">hi=2</div>
+                <div class="bs-val bs-mid">mid=1</div>
+                <div style="font-size:0.85em;">check(1): 全部OK</div>
+                <div class="bs-result bs-ok">✅ lo=2</div>
+            </div>
+            <div class="binary-step done">
+                <div class="bs-label">结束！</div>
+                <div class="bs-val bs-lo">lo=2</div>
+                <div class="bs-val bs-hi">hi=2</div>
+                <div style="font-weight:bold;">lo == hi →</div>
+                <div class="bs-result" style="background:#fff9c4; color:#e65100; font-size:1em;">🎯 第一个失败 = 第2份</div>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-size:0.85em; color:#888;">
+            只需 2 轮二分 + 每轮 O(n) 的差分检查！飞速解决！🚀
+        </div>
+    </div>
+
+    <!-- ==================== 样例2 图解 ==================== -->
+    <div class="card logic">
+        <h2>🎨 样例 2 图解：全部满足的情况</h2>
+
+        <div style="font-weight:bold; color:#1565c0; margin-bottom:5px;">
+            n=5, m=4, r=[4,4,4,4,4]<br>
+            申请：(1,1,3), (2,2,5), (1,4,4), (1,1,5)
+        </div>
+
+        <h3>📌 check(4)：处理全部4份申请</h3>
+        <div class="diff-visual">
+            <div style="font-size:0.8em; color:#26a69a; margin-bottom:5px;">
+                diff[1]+=1,diff[4]-=1 | diff[2]+=2,diff[6]-=2 | diff[4]+=1,diff[5]-=1 | diff[1]+=1,diff[6]-=1
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#888;">位置</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">1</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">2</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">3</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">4</div>
+                <div class="diff-cell" style="background:#f5f5f5; color:#666;">5</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#1565c0;">需求 need</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">2</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">4</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">4</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">4</div>
+                <div class="diff-cell" style="background:#bbdefb; color:#0d47a1;">3</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#43a047;">可用 r</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+                <div class="diff-cell" style="background:#e8f5e9; color:#2e7d32;">4</div>
+            </div>
+            <div class="diff-row">
+                <div class="diff-label" style="color:#7e57c2;">need≤r?</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">✅</div>
+                <div class="diff-cell" style="background:#c8e6c9; color:#2e7d32;">✅</div>
+            </div>
+        </div>
+        <div style="text-align:center; font-weight:bold; color:#2e7d32; font-size:1.1em;">
+            check(m=4) = ✅ → 全部可行 → 直接输出 <strong>0</strong> 🎉
+        </div>
+    </div>
+
+    <!-- ==================== 样例3 简要 ==================== -->
+    <div class="card logic">
+        <h2>🎨 样例 3 简要：N=6, M=5</h2>
+
+        <div style="font-weight:bold; color:#1565c0; margin-bottom:5px;">
+            r=[4,5,6,4,5,6]，申请：(2,1,3), (1,2,6), (2,4,5), (1,1,6), (2,3,4)
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px; margin:10px 0;">
+            <div class="app-card" style="background:#e8f5e9; border:1px solid #66bb6a;">
+                <div class="app-num" style="background:#43a047; width:28px; height:28px; font-size:0.8em;">1</div>
+                <div class="app-detail" style="font-size:0.85em;">d=2, 第1~3天</div>
+                <div class="app-status bs-ok" style="font-size:0.8em;">✅</div>
+            </div>
+            <div class="app-card" style="background:#e8f5e9; border:1px solid #66bb6a;">
+                <div class="app-num" style="background:#43a047; width:28px; height:28px; font-size:0.8em;">2</div>
+                <div class="app-detail" style="font-size:0.85em;">d=1, 第2~6天</div>
+                <div class="app-status bs-ok" style="font-size:0.8em;">✅</div>
+            </div>
+            <div class="app-card" style="background:#e8f5e9; border:1px solid #66bb6a;">
+                <div class="app-num" style="background:#43a047; width:28px; height:28px; font-size:0.8em;">3</div>
+                <div class="app-detail" style="font-size:0.85em;">d=2, 第4~5天</div>
+                <div class="app-status bs-ok" style="font-size:0.8em;">✅</div>
+            </div>
+            <div class="app-card" style="background:#e8f5e9; border:1px solid #66bb6a;">
+                <div class="app-num" style="background:#43a047; width:28px; height:28px; font-size:0.8em;">4</div>
+                <div class="app-detail" style="font-size:0.85em;">d=1, 第1~6天</div>
+                <div class="app-status bs-ok" style="font-size:0.8em;">✅</div>
+            </div>
+            <div class="app-card" style="background:#ffebee; border:1px solid #ef5350;">
+                <div class="app-num" style="background:#c62828; width:28px; height:28px; font-size:0.8em;">5</div>
+                <div class="app-detail" style="font-size:0.85em;">d=2, 第3~4天</div>
+                <div class="app-status bs-no" style="font-size:0.8em;">❌ 失败</div>
+            </div>
+        </div>
+
+        <div style="background:#fff; padding:10px; border-radius:8px; border:2px solid #e0e0e0; margin:10px 0; font-size:0.9em;">
+            check(4)=✅（前4份可行），check(5)=❌（前5份不可行）<br>
+            → 第一个失败 = <strong style="color:#c62828;">第5份</strong> 🎯
+        </div>
+    </div>
+
+    <!-- ==================== 算法流程总结 ==================== -->
+    <div class="card logic">
+        <h2>📋 算法流程总结</h2>
+
+        <div class="step-flow">
+            <div class="step-box" style="border-color:#c62828;">
+                <strong>读入</strong><br>
+                <span style="font-size:0.8em;">n, m, r[], 申请</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#43a047;">
+                <strong>特判</strong><br>
+                <span style="font-size:0.8em;">check(m)?<br>全可行→0</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#7e57c2;">
+                <strong>二分</strong><br>
+                <span style="font-size:0.8em;">lo=1, hi=m</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#26a69a;">
+                <strong>check(mid)</strong><br>
+                <span style="font-size:0.8em;">差分+前缀和<br>判断可行性</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#1565c0;">
+                <strong>输出</strong><br>
+                <span style="font-size:0.8em;">-1 和 lo</span>
+            </div>
+        </div>
+
+        <h3>⏱️ 复杂度分析</h3>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">步骤</th>
+                <th class="a-th">操作</th>
+                <th class="b-th">复杂度</th>
+            </tr>
+            <tr>
+                <td>二分轮数</td>
+                <td>在 [1, m] 中二分</td>
+                <td>O(log m) ≈ 20 轮</td>
+            </tr>
+            <tr>
+                <td>每轮 check</td>
+                <td>差分 O(mid) + 前缀和 O(n)</td>
+                <td>O(n + m)</td>
+            </tr>
+            <tr>
+                <td><strong>总计</strong></td>
+                <td><strong>20 × (n + m)</strong></td>
+                <td><strong>O((n+m) log m) ≈ 4千万</strong> ⚡</td>
+            </tr>
+        </table>
+        <div style="text-align:center; font-size:0.9em; color:#888;">
+            n, m ≤ 10⁶，log₂(10⁶) ≈ 20。远快于暴力的 O(nm) = 10¹²！
+        </div>
+    </div>
+
+    <!-- ==================== 注意事项 ==================== -->
+    <div class="card logic">
+        <h2>⚠️ 细节与注意事项</h2>
+
+        <div class="thinking-box" style="border-color:#d32f2f; background:#ffebee;">
+            <div class="title" style="color:#d32f2f;">🚨 细节1：先特判全部可行的情况！</div>
+            <p style="margin:5px 0;">
+                先调用 <span class="code-inline">check(m)</span>，如果返回 true → 直接输出 0，不用二分。<br>
+                否则才进行二分查找第一个失败的申请编号。
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#ff9800; background:#fff3e0;">
+            <div class="title" style="color:#e65100;">🚨 细节2：使用 long long 避免溢出！</div>
+            <p style="margin:5px 0;">
+                d<sub>j</sub> 和 r<sub>i</sub> 最大可达 10⁹。多份申请的区间可能重叠，<br>
+                前缀和累加后可能超过 int 范围 → <strong>差分数组和前缀和必须用 long long</strong>。<br>
+                Python 自动支持大整数，不用担心。
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#26a69a; background:#e0f2f1;">
+            <div class="title" style="color:#00695c;">🚨 细节3：差分数组大小要开 n+2！</div>
+            <p style="margin:5px 0;">
+                操作 <span class="code-inline">diff[t_j+1] -= d_j</span> 中，t_j 最大为 n，<br>
+                所以 t_j+1 最大为 n+1 → 数组大小至少 <span class="code-inline">n+2</span>。
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6;">
+            <div class="title" style="color:#4527a0;">🚨 细节4：每次 check 需要清空差分数组！</div>
+            <p style="margin:5px 0;">
+                每次 check(mid) 都是独立判断"前 mid 份能否满足"。<br>
+                所以每次需要从零开始构建差分数组，不能复用上次的。<br>
+                C++ 中可在函数内新建 <span class="code-inline">vector&lt;long long&gt;</span>，约 20 次 × O(n) = 2千万，可以接受。
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 代码部分 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 知识点</h2>
+            <ul>
+                <li>🔍 <strong>二分答案：</strong> 找第一个使 check 失败的位置，即"找最小不可行值"模板。</li>
+                <li>📊 <strong>差分数组：</strong> <span class="code-inline">diff[s]+=d, diff[t+1]-=d</span>，前缀和还原每个位置的实际值。区间加 O(1)，整体还原 O(n)。</li>
+                <li>📦 <strong>long long：</strong> 多个申请重叠累加可能溢出 int，必须用 <span class="code-inline">long long</span>。</li>
+                <li>⚡ <strong>IO 加速：</strong> n, m ≤ 10⁶，务必用 <span class="code-inline">ios::sync_with_stdio(false)</span>。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 C++ 代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;vector&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> n, m;
+<span class="type">long long</span> r[<span class="number">1000005</span>];       <span class="comment">// 每天可用教室数</span>
+<span class="type">int</span> d[<span class="number">1000005</span>], s[<span class="number">1000005</span>], t[<span class="number">1000005</span>]; <span class="comment">// 申请信息</span>
+
+<span class="comment">// 🟢 check：前 mid 份申请是否全部可行？</span>
+<span class="type">bool</span> check(<span class="type">int</span> mid) {
+    <span class="comment">// 📊 构建差分数组</span>
+    vector&lt;<span class="type">long long</span>&gt; diff(n + <span class="number">2</span>, <span class="number">0</span>);
+
+    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j <= mid; j++) {
+        diff[s[j]] += d[j];       <span class="comment">// 区间起点 +d</span>
+        diff[t[j] + <span class="number">1</span>] -= d[j];   <span class="comment">// 区间终点+1 -d</span>
+    }
+
+    <span class="comment">// 📈 前缀和还原每天需求，并与 r[i] 比较</span>
+    <span class="type">long long</span> need = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i <= n; i++) {
+        need += diff[i];
+        <span class="keyword">if</span> (need > r[i]) {
+            <span class="keyword">return</span> <span class="keyword">false</span>;  <span class="comment">// 💥 第 i 天教室不够！</span>
+        }
+    }
+    <span class="keyword">return</span> <span class="keyword">true</span>;  <span class="comment">// ✅ 全部满足</span>
+}
+
+<span class="type">int</span> main() {
+    ios::sync_with_stdio(<span class="keyword">false</span>);
+    cin.tie(<span class="keyword">nullptr</span>);
+
+    cin >> n >> m;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i <= n; i++) cin >> r[i];
+    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j <= m; j++) cin >> d[j] >> s[j] >> t[j];
+
+    <span class="comment">// 🎯 特判：全部可行？</span>
+    <span class="keyword">if</span> (check(m)) {
+        cout << <span class="number">0</span> << endl;
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    <span class="comment">// 🔍 二分查找第一个失败的申请编号</span>
+    <span class="type">int</span> lo = <span class="number">1</span>, hi = m;
+    <span class="keyword">while</span> (lo < hi) {
+        <span class="type">int</span> mid = (lo + hi) / <span class="number">2</span>;
+        <span class="keyword">if</span> (check(mid)) {
+            lo = mid + <span class="number">1</span>;   <span class="comment">// ✅ 前 mid 份可行，失败在后面</span>
+        } <span class="keyword">else</span> {
+            hi = mid;       <span class="comment">// ❌ 前 mid 份不可行，失败在 ≤mid</span>
+        }
+    }
+
+    cout << -<span class="number">1</span> << endl;
+    cout << lo << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 知识点</h2>
+            <ul>
+                <li>🔍 <strong>二分答案：</strong> 和 C++ 逻辑完全相同。找第一个使 check 失败的位置。</li>
+                <li>📊 <strong>差分数组：</strong> 用列表 <span class="code-inline">[0]*(n+2)</span> 实现。</li>
+                <li>⚡ <strong>快速 IO：</strong> n, m ≤ 10⁶ 数据量巨大，必须用 <span class="code-inline">sys.stdin.buffer.read()</span> 一次性读入！</li>
+                <li>🐍 <strong>大整数无忧：</strong> Python 整数没有上限，不用担心溢出。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 Python 代码</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="keyword">def</span> main():
+    data = sys.stdin.buffer.read().split()
+    idx = <span class="number">0</span>
+
+    <span class="keyword">def</span> rd():
+        <span class="keyword">nonlocal</span> idx
+        idx += <span class="number">1</span>
+        <span class="keyword">return</span> <span class="type">int</span>(data[idx - <span class="number">1</span>])
+
+    n, m = rd(), rd()
+    r = [<span class="number">0</span>] + [rd() <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="type">range</span>(n)]  <span class="comment"># r[1..n]</span>
+
+    d_arr = [<span class="number">0</span>] * (m + <span class="number">1</span>)
+    s_arr = [<span class="number">0</span>] * (m + <span class="number">1</span>)
+    t_arr = [<span class="number">0</span>] * (m + <span class="number">1</span>)
+    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, m + <span class="number">1</span>):
+        d_arr[j], s_arr[j], t_arr[j] = rd(), rd(), rd()
+
+    <span class="keyword">def</span> check(mid):
+        <span class="string">"""前 mid 份申请是否全部可行？"""</span>
+        diff = [<span class="number">0</span>] * (n + <span class="number">2</span>)
+
+        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, mid + <span class="number">1</span>):
+            diff[s_arr[j]] += d_arr[j]
+            diff[t_arr[j] + <span class="number">1</span>] -= d_arr[j]
+
+        <span class="comment"># 📈 前缀和还原</span>
+        need = <span class="number">0</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">1</span>, n + <span class="number">1</span>):
+            need += diff[i]
+            <span class="keyword">if</span> need > r[i]:
+                <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="comment"># 🎯 特判</span>
+    <span class="keyword">if</span> check(m):
+        <span class="type">print</span>(<span class="number">0</span>)
+        <span class="keyword">return</span>
+
+    <span class="comment"># 🔍 二分查找第一个失败编号</span>
+    lo, hi = <span class="number">1</span>, m
+    <span class="keyword">while</span> lo < hi:
+        mid = (lo + hi) // <span class="number">2</span>
+        <span class="keyword">if</span> check(mid):
+            lo = mid + <span class="number">1</span>
+        <span class="keyword">else</span>:
+            hi = mid
+
+    <span class="type">print</span>(-<span class="number">1</span>)
+    <span class="type">print</span>(lo)
+
+main()
+</pre>
+        </div>
+    </div>
+
+    <!-- ==================== 差分数组 vs 暴力 ==================== -->
+    <div class="card logic">
+        <h2>⚖️ 为什么用差分数组？</h2>
+
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">对比项</th>
+                <th class="a-th">暴力模拟</th>
+                <th class="b-th">差分数组</th>
+            </tr>
+            <tr>
+                <td>处理一份申请</td>
+                <td>遍历 [s,t]，逐天扣减 → O(n)</td>
+                <td>两个端点操作 → <strong>O(1)</strong></td>
+            </tr>
+            <tr>
+                <td>处理 mid 份申请</td>
+                <td>O(n × mid)</td>
+                <td>O(mid) + O(n) 前缀和</td>
+            </tr>
+            <tr>
+                <td>总复杂度</td>
+                <td>O(nm) ≈ 10¹² 😱</td>
+                <td><strong>O((n+m) log m) ≈ 4×10⁷</strong> ⚡</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== 二分模板回顾 ==================== -->
+    <div class="card logic">
+        <h2>🧩 二分模板：这道题用哪个？</h2>
+
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:250px; background:#ede7f6; padding:15px; border-radius:12px; border:3px solid #7e57c2;">
+                <div style="font-weight:bold; color:#4527a0; margin-bottom:8px;">🏫 本题：找第一个失败的编号</div>
+                <div style="font-size:0.85em; color:#333;">
+                    前 x 份可行 → 失败在 x+1 或更后面<br>
+                    前 x 份不可行 → 失败在 x 或更前面<br><br>
+                    → 找<strong>最小的不可行 x</strong><br><br>
+                    <span style="font-family:Consolas,monospace;">
+                    mid = (lo+hi) / 2<br>
+                    if check(mid): <strong>lo = mid + 1</strong><br>
+                    else: <strong>hi = mid</strong>
+                    </span>
+                </div>
+            </div>
+            <div style="flex:1; min-width:250px; background:#f5f5f5; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+                <div style="font-weight:bold; color:#616161; margin-bottom:8px;">📝 记忆口诀</div>
+                <div style="font-size:0.85em; color:#333;">
+                    ✅✅✅ ... ✅ <span style="color:#c62828;">❌</span>❌❌ ... ❌<br><br>
+                    check(mid) = ✅ → 答案在右边 → <strong>lo = mid + 1</strong><br>
+                    check(mid) = ❌ → 答案可能就是 mid → <strong>hi = mid</strong><br><br>
+                    最终 lo == hi 就是第一个 ❌ 的位置
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 1：n=4, m=3</strong><br>
+                check(3)=❌ → 开始二分<br>
+                check(2)=❌ → hi=2，check(1)=✅ → lo=2<br>
+                输出：<strong>-1 \n 2</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 2：n=5, m=4</strong><br>
+                check(4)=✅ → 全部可行<br>
+                输出：<strong>0</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 3：n=6, m=5</strong><br>
+                check(5)=❌ → 开始二分<br>
+                check(4)=✅ → lo=5，lo==hi=5<br>
+                输出：<strong>-1 \n 5</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界：m=1，且第1份就失败</strong><br>
+                check(1)=❌，check(0) 不需要调用（lo=hi=1）<br>
+                输出：<strong>-1 \n 1</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #7e57c2;">
+                <strong style="color:#4527a0;">边界：所有申请 d=0</strong><br>
+                不需要任何教室 → check(m)=✅ → 输出 <strong>0</strong> ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 知识拓展 ==================== -->
+    <div class="card logic">
+        <h2>🧩 知识拓展</h2>
+
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:250px; background:#e0f2f1; padding:15px; border-radius:12px; border:2px solid #26a69a;">
+                <div style="font-weight:bold; color:#00695c; margin-bottom:8px;">📊 差分数组的常见应用</div>
+                <ul style="font-size:0.9em; margin:5px 0;">
+                    <li>区间加减操作（本题）</li>
+                    <li>航班预订统计</li>
+                    <li>公交上下车统计</li>
+                    <li>拼车问题</li>
+                </ul>
+            </div>
+            <div style="flex:1; min-width:250px; background:#ede7f6; padding:15px; border-radius:12px; border:2px solid #7e57c2;">
+                <div style="font-weight:bold; color:#4527a0; margin-bottom:8px;">🔍 "二分 + 差分"组合拳</div>
+                <ul style="font-size:0.9em; margin:5px 0;">
+                    <li>本题（NOIP2012 提高组）</li>
+                    <li>最大化/最小化区间操作</li>
+                    <li>资源分配可行性判定</li>
+                    <li>前缀和 + 二分组合</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🎯 二分答案核心：</strong> "前 x 份申请能否满足"具有<strong>单调性</strong>——一旦某份失败，之后的也一定失败。二分找到第一个失败的位置，就是答案。</li>
+            <li><strong>📊 差分数组加速：</strong> 每份申请是"区间 [s,t] 上每天需要 d 间教室"。用差分数组，一次区间加只需 O(1)，再通过前缀和还原每天的总需求。这是处理<strong>大量区间操作</strong>的核心技巧！</li>
+            <li><strong>⚡ 总体复杂度：</strong> 二分 O(log m) 轮 × 每轮差分 O(n+m) = O((n+m) log m)。当 n=m=10⁶ 时约 4 千万次操作，轻松通过！</li>
+            <li><strong>🛡️ 先特判再二分：</strong> 先 check(m)，全可行直接输出 0。否则再二分找答案。别忘了这个特判！</li>
+            <li><strong>🔢 注意 long long：</strong> 多个申请的需求叠加可能极大（最多 10⁶ 个 10⁹ 重叠），C++ 中差分数组和前缀和<strong>必须用 long long</strong>。Python 不受影响。</li>
+            <li><strong>🎒 竞赛经典：</strong> 本题是 NOIP2012 提高组原题。"二分答案 + 差分数组"是竞赛中的黄金组合，掌握后能解决大量区间操作 + 可行性判定类问题！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🏔️ 雪宫教室分配完毕，所有勇士都有了训练场地！<br>
+        二分 + 差分，高效又优雅！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>

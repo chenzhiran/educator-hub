@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：关押罪犯</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #eceff1;
+            color: #263238;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #37474f;
+            background-color: #455a64;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(38, 50, 56, 0.2);
+            border: 5px solid #546e7a;
+        }
+
+        h1 {
+            color: #37474f;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #cfd8dc;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #d32f2f;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #b71c1c, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #b71c1c, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #d32f2f;
+            border-bottom: 3px dashed #90a4ae;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #37474f;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #eceff1;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #90a4ae;
+        }
+        .card.problem { border-color: #546e7a; background-color: #eceff1; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.greedy { border-color: #43a047; background-color: #e8f5e9; }
+        .card.uf-card { border-color: #7e57c2; background-color: #ede7f6; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #78909c; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #cfd8dc;
+            color: #263238;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 监狱图可视化 ========== */
+        .prison-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #90a4ae;
+        }
+
+        /* ========== 图形：节点+边 ========== */
+        .graph-container {
+            position: relative;
+            width: 360px;
+            height: 300px;
+            margin: 10px auto;
+        }
+        .graph-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: white;
+            z-index: 2;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+        .graph-edge-label {
+            position: absolute;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            z-index: 3;
+        }
+
+        /* SVG for edges */
+        .graph-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* ========== 监狱分配框 ========== */
+        .prison-box {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .prison {
+            min-width: 150px;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .prison-a {
+            background: #e3f2fd;
+            border: 3px solid #1565c0;
+        }
+        .prison-b {
+            background: #fce4ec;
+            border: 3px solid #c62828;
+        }
+        .prison-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .prison-inmates {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .inmate {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.1em;
+        }
+
+        /* ========== 排序列表可视化 ========== */
+        .sorted-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin: 10px 0;
+        }
+        .sorted-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            border: 2px solid;
+        }
+        .sorted-rank {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.85em;
+        }
+        .sorted-pair {
+            font-weight: bold;
+            min-width: 50px;
+        }
+        .sorted-weight {
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-family: Consolas, monospace;
+        }
+        .sorted-action {
+            font-size: 0.85em;
+            flex: 1;
+        }
+        .sorted-result {
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        .item-ok { background: #e8f5e9; border-color: #66bb6a; }
+        .item-fail { background: #ffebee; border-color: #ef5350; }
+        .item-skip { background: #f5f5f5; border-color: #e0e0e0; opacity: 0.6; }
+
+        /* ========== 并查集可视化 ========== */
+        .uf-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #b39ddb;
+            margin: 15px 0;
+        }
+        .uf-state {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .uf-group {
+            padding: 10px 15px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 80px;
+        }
+        .uf-group-title {
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .uf-members {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        .uf-node {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9em;
+        }
+        .uf-real { background: #42a5f5; }
+        .uf-enemy { background: #ef5350; }
+        .uf-label {
+            font-size: 0.65em;
+            display: block;
+        }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #546e7a;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+            min-width: 85px;
+        }
+        .step-arrow {
+            font-size: 1.5em;
+            color: #546e7a;
+        }
+
+        /* ========== 解法选择标签 ========== */
+        .method-tab {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0 10px 0;
+            justify-content: center;
+        }
+        .method-btn {
+            padding: 10px 20px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.05em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .method-btn.active-a {
+            border-color: #43a047;
+            background: #43a047;
+            color: white;
+        }
+        .method-btn.active-b {
+            border-color: #7e57c2;
+            background: #7e57c2;
+            color: white;
+        }
+
+        /* ========== 数学演算框 ========== */
+        .math-demo {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            font-size: 1.0em;
+            line-height: 1.8;
+        }
+        .math-demo .yes { color: #2e7d32; font-weight: bold; }
+        .math-demo .no { color: #c62828; font-weight: bold; }
+        .math-demo .res { color: #37474f; font-weight: bold; font-size: 1.1em; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #cfd8dc;
+        }
+        .example-card strong { color: #37474f; }
+        .example-card pre {
+            background: transparent;
+            color: #263238;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 1em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #4527a0, #7e57c2); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #90a4ae;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn, .method-tab { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🔒 关押罪犯 ⚔️</h1>
+
+    <div style="text-align: center; font-size: 1.15em; color: #37474f;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        两座监狱，N 名罪犯——怎么分配才能让最大冲突最小？<br>
+        用贪心 + 并查集，巧妙解决这道经典图论题！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/67" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>N 名罪犯要分到<strong>两座监狱</strong>中。某些罪犯之间有仇恨（怨气值 c），如果他们在<strong>同一监狱</strong>就会发生冲突。</p>
+        <p>市长只看<strong>最大冲突的影响力</strong>。请你安排分配方案，使得这个<strong>最大冲突值最小</strong>。</p>
+
+        <div style="background:#eceff1; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #b0bec5;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>第1行 N, M（罪犯数、仇恨对数），接下来 M 行每行 a, b, c（a 和 b 之间怨气值 c）<br>
+            • <strong>输出：</strong>一个整数——最大冲突影响力的最小值（若无冲突输出 0）<br>
+            • <strong>数据范围：</strong>N ≤ 20000，M ≤ 100000，c ≤ 10<sup>9</sup>
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例输入</strong>
+<pre>4 6
+1 4 2534
+2 3 3512
+1 2 28351
+1 3 6618
+2 4 1805
+3 4 12884</pre>
+                <strong>📤 输出：</strong><span class="highlight">3512</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱 (核心图解)</h2>
+
+        <h3>🔗 罪犯之间的仇恨关系图</h3>
+        <div class="prison-visual">
+            <div style="color: #37474f; font-weight: bold; font-size: 1.1em;">👇 样例：4 名罪犯，6 对仇恨关系 👇</div>
+
+            <div class="graph-container">
+                <svg class="graph-svg" viewBox="0 0 360 300">
+                    <!-- 1-2: 28351 -->
+                    <line x1="80" y1="55" x2="280" y2="55" stroke="#d32f2f" stroke-width="4" opacity="0.8"/>
+                    <!-- 1-3: 6618 -->
+                    <line x1="80" y1="55" x2="280" y2="245" stroke="#ff9800" stroke-width="3" opacity="0.7"/>
+                    <!-- 1-4: 2534 -->
+                    <line x1="80" y1="55" x2="80" y2="245" stroke="#bdbdbd" stroke-width="2" opacity="0.6"/>
+                    <!-- 2-3: 3512 -->
+                    <line x1="280" y1="55" x2="280" y2="245" stroke="#ff9800" stroke-width="2.5" opacity="0.7"/>
+                    <!-- 2-4: 1805 -->
+                    <line x1="280" y1="55" x2="80" y2="245" stroke="#bdbdbd" stroke-width="2" opacity="0.5"/>
+                    <!-- 3-4: 12884 -->
+                    <line x1="280" y1="245" x2="80" y2="245" stroke="#e64a19" stroke-width="3.5" opacity="0.8"/>
+                </svg>
+
+                <!-- 边标签 -->
+                <div class="graph-edge-label" style="top:28px; left:155px; background:#ffcdd2; color:#c62828;">28351</div>
+                <div class="graph-edge-label" style="top:130px; left:195px; background:#fff3e0; color:#e65100;">6618</div>
+                <div class="graph-edge-label" style="top:140px; left:30px; background:#f5f5f5; color:#888;">2534</div>
+                <div class="graph-edge-label" style="top:140px; left:290px; background:#fff3e0; color:#e65100;">3512</div>
+                <div class="graph-edge-label" style="top:130px; left:120px; background:#f5f5f5; color:#888;">1805</div>
+                <div class="graph-edge-label" style="top:268px; left:155px; background:#fbe9e7; color:#bf360c;">12884</div>
+
+                <!-- 节点 -->
+                <div class="graph-node" style="top:30px; left:55px; background:#1565c0;">1</div>
+                <div class="graph-node" style="top:30px; left:255px; background:#c62828;">2</div>
+                <div class="graph-node" style="top:220px; left:255px; background:#2e7d32;">3</div>
+                <div class="graph-node" style="top:220px; left:55px; background:#ff8f00;">4</div>
+            </div>
+
+            <div style="font-size:0.85em; color:#888; text-align:center;">
+                线越粗、颜色越深 = 怨气值越大。目标：让同一监狱内的最大怨气值尽量小。
+            </div>
+        </div>
+
+        <h3>🏛️ 最优分配方案</h3>
+        <div class="prison-box">
+            <div class="prison prison-a">
+                <div class="prison-title" style="color:#1565c0;">🏛️ 监狱 A</div>
+                <div class="prison-inmates">
+                    <div class="inmate" style="background:#1565c0;">1</div>
+                    <div class="inmate" style="background:#2e7d32;">3</div>
+                </div>
+                <div style="font-size:0.85em; color:#1565c0; margin-top:8px;">
+                    1 和 3 的怨气值 = 6618
+                </div>
+            </div>
+            <div class="prison prison-b">
+                <div class="prison-title" style="color:#c62828;">🏛️ 监狱 B</div>
+                <div class="prison-inmates">
+                    <div class="inmate" style="background:#c62828;">2</div>
+                    <div class="inmate" style="background:#ff8f00;">4</div>
+                </div>
+                <div style="font-size:0.85em; color:#c62828; margin-top:8px;">
+                    2 和 4 的怨气值 = 1805
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center;">
+            <div style="background:#e8f5e9; display:inline-block; padding:10px 20px; border-radius:10px; border:2px solid #43a047;">
+                <strong style="color:#2e7d32;">同一监狱内的冲突：</strong><br>
+                监狱 A：1↔3 = 6618<br>
+                监狱 B：2↔4 = 1805<br>
+                <strong>最大冲突 = max(6618, 1805) = 6618？</strong>
+            </div>
+        </div>
+
+        <div class="thinking-box">
+            <div class="title">等等，样例答案不是 6618 而是 3512？让我想想…</div>
+            <p style="margin:5px 0;">
+                换一种分法！把 {1, 2} 分开、{3, 4} 分开、同时 {1, 3} 也分开…<br><br>
+                <strong>最优分法：监狱 A = {1, 4}，监狱 B = {2, 3}</strong><br>
+                • 监狱 A 内部：1↔4 = 2534<br>
+                • 监狱 B 内部：2↔3 = <strong style="color:#c62828;">3512</strong><br>
+                • 最大冲突 = max(2534, 3512) = <strong>3512</strong> ← 这个更小！✅<br><br>
+                其他所有分法的最大冲突都 ≥ 3512，所以 <strong>3512 就是答案</strong>。
+            </p>
+        </div>
+
+        <h3>🏛️ 真正的最优分配</h3>
+        <div class="prison-box">
+            <div class="prison prison-a">
+                <div class="prison-title" style="color:#1565c0;">🏛️ 监狱 A</div>
+                <div class="prison-inmates">
+                    <div class="inmate" style="background:#1565c0;">1</div>
+                    <div class="inmate" style="background:#ff8f00;">4</div>
+                </div>
+                <div style="font-size:0.85em; color:#1565c0; margin-top:8px;">
+                    1↔4 = 2534
+                </div>
+            </div>
+            <div class="prison prison-b">
+                <div class="prison-title" style="color:#c62828;">🏛️ 监狱 B</div>
+                <div class="prison-inmates">
+                    <div class="inmate" style="background:#c62828;">2</div>
+                    <div class="inmate" style="background:#2e7d32;">3</div>
+                </div>
+                <div style="font-size:0.85em; color:#c62828; margin-top:8px;">
+                    2↔3 = 3512
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center; font-weight:bold; color:#2e7d32; font-size:1.2em;">
+            ✅ 最大冲突 = 3512，其他分法都不可能更小！
+        </div>
+
+        <h3>💡 关键洞察：贪心思路</h3>
+        <div class="thinking-box" style="border-color:#43a047; background:#e8f5e9;">
+            <div class="title" style="color:#2e7d32;">核心思想：优先处理最大的仇恨！</div>
+            <p style="margin:5px 0;">
+                <strong>把所有仇恨按怨气值从大到小排序</strong>，然后逐个处理：<br><br>
+                对于每对仇恨 (a, b)，我们<strong>尽量把 a 和 b 分到不同监狱</strong>。<br>
+                如果之前的分配让 a 和 b <strong>不得不</strong>在同一监狱（产生矛盾），<br>
+                那当前的怨气值 c 就是答案！<br><br>
+                <strong>为什么？</strong> 因为我们是从大到小处理的，之前所有更大的仇恨都已经成功分开。<br>
+                第一个无法分开的仇恨，就是最终的"最大冲突的最小值"。
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 解法详解 ==================== -->
+    <div class="card greedy">
+        <h2>⚡ 贪心 + 扩展域并查集</h2>
+
+        <h3>📊 第1步：按怨气值从大到小排序</h3>
+        <div class="sorted-list">
+            <div class="sorted-item" style="background:#ffebee; border-color:#e53935;">
+                <div class="sorted-rank" style="background:#c62828;">1</div>
+                <div class="sorted-pair">1 ↔ 2</div>
+                <div class="sorted-weight" style="background:#ffcdd2; color:#c62828;">28351</div>
+                <div style="font-size:0.85em; color:#c62828;">← 最大！必须分开！</div>
+            </div>
+            <div class="sorted-item" style="background:#fff3e0; border-color:#ff9800;">
+                <div class="sorted-rank" style="background:#e65100;">2</div>
+                <div class="sorted-pair">3 ↔ 4</div>
+                <div class="sorted-weight" style="background:#ffe0b2; color:#e65100;">12884</div>
+            </div>
+            <div class="sorted-item" style="background:#fff8e1; border-color:#fdd835;">
+                <div class="sorted-rank" style="background:#f9a825;">3</div>
+                <div class="sorted-pair">1 ↔ 3</div>
+                <div class="sorted-weight" style="background:#fff9c4; color:#f57f17;">6618</div>
+            </div>
+            <div class="sorted-item" style="background:#f1f8e9; border-color:#8bc34a;">
+                <div class="sorted-rank" style="background:#558b2f;">4</div>
+                <div class="sorted-pair">2 ↔ 3</div>
+                <div class="sorted-weight" style="background:#dcedc8; color:#33691e;">3512</div>
+            </div>
+            <div class="sorted-item" style="background:#f5f5f5; border-color:#bdbdbd;">
+                <div class="sorted-rank" style="background:#757575;">5</div>
+                <div class="sorted-pair">1 ↔ 4</div>
+                <div class="sorted-weight" style="background:#eeeeee; color:#616161;">2534</div>
+            </div>
+            <div class="sorted-item" style="background:#f5f5f5; border-color:#bdbdbd;">
+                <div class="sorted-rank" style="background:#757575;">6</div>
+                <div class="sorted-pair">2 ↔ 4</div>
+                <div class="sorted-weight" style="background:#eeeeee; color:#616161;">1805</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card uf-card">
+        <h3>🔮 什么是"扩展域并查集"？</h3>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6;">
+            <div class="title" style="color:#4527a0;">💡 核心思想：给每个人一个"敌人分身"！</div>
+            <p style="margin:5px 0;">
+                普通并查集只能表示"谁和谁是一伙的"，但这道题需要表示<strong>"谁和谁是敌人"</strong>。<br><br>
+                解决办法：<strong>开 2 倍大小的并查集！</strong><br>
+                • 节点 <span class="code-inline">i</span>（1~N）= 罪犯 i 本身<br>
+                • 节点 <span class="code-inline">i+N</span>（N+1~2N）= 罪犯 i 的"敌人域"（代表"和 i 在不同监狱的人"）<br><br>
+                <strong>操作"把 a 和 b 分到不同监狱"：</strong><br>
+                → <span class="code-inline">union(a, b+N)</span>：a 和 b 的敌人域合并（a 和 b 的敌人是一伙的）<br>
+                → <span class="code-inline">union(b, a+N)</span>：b 和 a 的敌人域合并<br><br>
+                <strong>检查"a 和 b 是否被迫同一监狱"：</strong><br>
+                → <span class="code-inline">find(a) == find(b)</span>：如果 a 和 b 已经在同一集合 → 矛盾！
+            </p>
+        </div>
+
+        <h3>🎬 第2步：逐个处理，完整模拟</h3>
+
+        <!-- 处理 1↔2 (28351) -->
+        <div class="sorted-item item-ok" style="margin:10px 0;">
+            <div class="sorted-rank" style="background:#43a047;">①</div>
+            <div class="sorted-pair">1 ↔ 2</div>
+            <div class="sorted-weight" style="background:#ffcdd2; color:#c62828;">28351</div>
+            <div class="sorted-action">find(1)≠find(2) → 可以分开！</div>
+            <div class="sorted-result" style="background:#c8e6c9; color:#2e7d32;">✅ 分开</div>
+        </div>
+        <div class="uf-visual">
+            <div style="font-size:0.9em; color:#7e57c2; font-weight:bold;">操作：union(1, 2+4=6) 和 union(2, 1+4=5)</div>
+            <div style="font-size:0.85em; color:#888; margin:5px 0;">含义：1 和 2的敌人是一伙 → 1 和 2 必须在不同监狱</div>
+            <div class="uf-state">
+                <div class="uf-group" style="background:#e3f2fd; border:2px solid #42a5f5;">
+                    <div class="uf-group-title" style="color:#1565c0;">集合 A</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">1</div><div class="uf-label">本人</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">2'</div><div class="uf-label">2的敌人域</div></div>
+                    </div>
+                </div>
+                <div class="uf-group" style="background:#fce4ec; border:2px solid #ef5350;">
+                    <div class="uf-group-title" style="color:#c62828;">集合 B</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">2</div><div class="uf-label">本人</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">1'</div><div class="uf-label">1的敌人域</div></div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size:0.85em; color:#555; text-align:center;">
+                1 和 2' 在同一集合 → 1 和 2 必须在<strong>不同</strong>监狱 ✅
+            </div>
+        </div>
+
+        <!-- 处理 3↔4 (12884) -->
+        <div class="sorted-item item-ok" style="margin:10px 0;">
+            <div class="sorted-rank" style="background:#43a047;">②</div>
+            <div class="sorted-pair">3 ↔ 4</div>
+            <div class="sorted-weight" style="background:#ffe0b2; color:#e65100;">12884</div>
+            <div class="sorted-action">find(3)≠find(4) → 可以分开！</div>
+            <div class="sorted-result" style="background:#c8e6c9; color:#2e7d32;">✅ 分开</div>
+        </div>
+        <div class="uf-visual">
+            <div style="font-size:0.9em; color:#7e57c2; font-weight:bold;">操作：union(3, 4+4=8) 和 union(4, 3+4=7)</div>
+            <div class="uf-state">
+                <div class="uf-group" style="background:#e3f2fd; border:2px solid #42a5f5;">
+                    <div class="uf-group-title" style="color:#1565c0;">集合 A</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">1</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">2'</div></div>
+                    </div>
+                </div>
+                <div class="uf-group" style="background:#fce4ec; border:2px solid #ef5350;">
+                    <div class="uf-group-title" style="color:#c62828;">集合 B</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">2</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">1'</div></div>
+                    </div>
+                </div>
+                <div class="uf-group" style="background:#e8f5e9; border:2px solid #43a047;">
+                    <div class="uf-group-title" style="color:#2e7d32;">集合 C</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">3</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">4'</div></div>
+                    </div>
+                </div>
+                <div class="uf-group" style="background:#fff8e1; border:2px solid #fdd835;">
+                    <div class="uf-group-title" style="color:#f57f17;">集合 D</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">4</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">3'</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 处理 1↔3 (6618) -->
+        <div class="sorted-item item-ok" style="margin:10px 0;">
+            <div class="sorted-rank" style="background:#43a047;">③</div>
+            <div class="sorted-pair">1 ↔ 3</div>
+            <div class="sorted-weight" style="background:#fff9c4; color:#f57f17;">6618</div>
+            <div class="sorted-action">find(1)≠find(3) → 可以分开！</div>
+            <div class="sorted-result" style="background:#c8e6c9; color:#2e7d32;">✅ 分开</div>
+        </div>
+        <div class="uf-visual">
+            <div style="font-size:0.9em; color:#7e57c2; font-weight:bold;">操作：union(1, 3+4=7) 和 union(3, 1+4=5)</div>
+            <div style="font-size:0.85em; color:#888; margin:5px 0;">结果：{1, 2', 4, 3'} 合并了！{2, 1', 3, 4'} 合并了！</div>
+            <div class="uf-state">
+                <div class="uf-group" style="background:#e3f2fd; border:2px solid #1565c0;">
+                    <div class="uf-group-title" style="color:#1565c0;">集合 X（同一监狱）</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">1</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">2'</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-real">4</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">3'</div></div>
+                    </div>
+                </div>
+                <div class="uf-group" style="background:#fce4ec; border:2px solid #c62828;">
+                    <div class="uf-group-title" style="color:#c62828;">集合 Y（另一监狱）</div>
+                    <div class="uf-members">
+                        <div style="text-align:center;"><div class="uf-node uf-real">2</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">1'</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-real">3</div></div>
+                        <div style="text-align:center;"><div class="uf-node uf-enemy">4'</div></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#e8f5e9; padding:10px; border-radius:8px; text-align:center; margin-top:8px; font-size:0.9em;">
+                🎯 现在确定了：<strong>{1, 4}</strong> 在同一监狱，<strong>{2, 3}</strong> 在同一监狱！<br>
+                （因为 1和2' 在一起 → 1和2分开；1和4在一起 → 1和4同监狱）
+            </div>
+        </div>
+
+        <!-- 处理 2↔3 (3512) ——关键步骤！ -->
+        <div class="sorted-item item-fail" style="margin:10px 0; border-width:3px;">
+            <div class="sorted-rank" style="background:#c62828;">④</div>
+            <div class="sorted-pair">2 ↔ 3</div>
+            <div class="sorted-weight" style="background:#ffcdd2; color:#c62828;">3512</div>
+            <div class="sorted-action"><strong>find(2)==find(3) → 被迫同监狱！💥</strong></div>
+            <div class="sorted-result" style="background:#ffcdd2; color:#c62828;">❌ 矛盾！</div>
+        </div>
+        <div style="background:#ffebee; padding:15px; border-radius:12px; border:2px solid #ef5350; margin:10px 0;">
+            <div style="font-weight:bold; color:#c62828; font-size:1.1em; text-align:center;">
+                💥 2 和 3 已经在同一集合 Y 中！无法分开！
+            </div>
+            <div style="text-align:center; margin-top:8px; font-size:0.95em;">
+                这是我们从大到小处理遇到的<strong>第一个矛盾</strong>！<br>
+                所有比 3512 更大的仇恨都已经成功分到不同监狱了。<br>
+                但 2↔3 的怨气值 3512 <strong>无法避免</strong>。<br><br>
+                <strong style="color:#c62828; font-size:1.3em;">答案 = 3512</strong> 🎯
+            </div>
+        </div>
+
+        <!-- 后面的不需要处理了 -->
+        <div class="sorted-item item-skip" style="margin:5px 0;">
+            <div class="sorted-rank" style="background:#bdbdbd;">⑤</div>
+            <div class="sorted-pair">1 ↔ 4</div>
+            <div class="sorted-weight" style="background:#eee; color:#999;">2534</div>
+            <div class="sorted-action">（已找到答案，不需处理）</div>
+        </div>
+        <div class="sorted-item item-skip" style="margin:5px 0;">
+            <div class="sorted-rank" style="background:#bdbdbd;">⑥</div>
+            <div class="sorted-pair">2 ↔ 4</div>
+            <div class="sorted-weight" style="background:#eee; color:#999;">1805</div>
+            <div class="sorted-action">（已找到答案，不需处理）</div>
+        </div>
+    </div>
+
+    <!-- ==================== 算法流程总结 ==================== -->
+    <div class="card logic">
+        <h2>📋 算法流程总结</h2>
+
+        <div class="step-flow">
+            <div class="step-box" style="border-color:#c62828;">
+                <strong>读入</strong><br>
+                <span style="font-size:0.85em;">N, M 和边</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#ff9800;">
+                <strong>按 c 排序</strong><br>
+                <span style="font-size:0.85em;">从大到小</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#7e57c2;">
+                <strong>初始化</strong><br>
+                <span style="font-size:0.85em;">2N 并查集</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#43a047;">
+                <strong>逐边处理</strong><br>
+                <span style="font-size:0.85em;">能分就分<br>不能分=答案</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#1565c0;">
+                <strong>输出</strong><br>
+                <span style="font-size:0.85em;">答案或 0</span>
+            </div>
+        </div>
+
+        <div class="thinking-box" style="border-color:#43a047; background:#e8f5e9;">
+            <div class="title" style="color:#2e7d32;">💡 为什么贪心是正确的？</div>
+            <p style="margin:5px 0;">
+                我们<strong>优先满足怨气值最大的</strong>仇恨对（让它们分到不同监狱）。<br><br>
+                如果处理到怨气值为 c 的边时发现 a 和 b <strong>必须同监狱</strong>：<br>
+                • 所有怨气值 > c 的边都已经成功分开了 ✅<br>
+                • 这条边的 c 就是"不可避免的最大冲突" → 答案！<br><br>
+                如果所有边都成功分开 → 答案 = 0（没有冲突）。
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6;">
+            <div class="title" style="color:#4527a0;">💡 并查集操作详解</div>
+            <p style="margin:5px 0;">
+                <strong>要分开 a 和 b（放不同监狱）：</strong><br>
+                <span class="code-inline">union(a, b+N)</span> — a 和"b 的敌人"同伙<br>
+                <span class="code-inline">union(b, a+N)</span> — b 和"a 的敌人"同伙<br><br>
+                <strong>检查 a 和 b 是否已在同一监狱：</strong><br>
+                <span class="code-inline">find(a) == find(b)</span> → 矛盾！→ 输出当前 c<br><br>
+                <strong>为什么这样能传递约束？</strong><br>
+                如果 1↔2 分开且 1↔3 分开，那么 2 和 3 的敌人域都和 1 合并了，<br>
+                所以 2 和 3 自动在同一集合里 → 同一监狱！
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 代码部分 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 知识点</h2>
+            <ul>
+                <li>🌲 <strong>并查集模板：</strong> <span class="code-inline">find(x)</span> 路径压缩 + <span class="code-inline">unite(x,y)</span> 按秩合并，是高效处理连通性问题的标准数据结构。</li>
+                <li>📡 <strong>扩展域：</strong> 开 2N 大小的并查集，节点 <span class="code-inline">i+N</span> 代表 i 的"敌人域"。这是处理"对立关系"的经典技巧。</li>
+                <li>📊 <strong>sort + 自定义比较：</strong> 按结构体的某个字段降序排序。</li>
+                <li>⚡ <strong>复杂度：</strong> 排序 O(M log M) + 并查集 O(M α(N)) ≈ O(M log M)。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 C++ 代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;algorithm&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="keyword">const</span> <span class="type">int</span> MAXN = <span class="number">40005</span>;  <span class="comment">// 2 * 20000 + 5</span>
+<span class="type">int</span> fa[MAXN];  <span class="comment">// 并查集父节点</span>
+
+<span class="comment">// 🌲 路径压缩的 find</span>
+<span class="type">int</span> find(<span class="type">int</span> x) {
+    <span class="keyword">if</span> (fa[x] != x) fa[x] = find(fa[x]);
+    <span class="keyword">return</span> fa[x];
+}
+
+<span class="comment">// 🔗 合并</span>
+<span class="type">void</span> unite(<span class="type">int</span> x, <span class="type">int</span> y) {
+    fa[find(x)] = find(y);
+}
+
+<span class="keyword">struct</span> Edge {
+    <span class="type">int</span> a, b, c;
+} edges[<span class="number">100005</span>];
+
+<span class="comment">// 📊 按怨气值从大到小排序</span>
+<span class="type">bool</span> cmp(Edge &x, Edge &y) {
+    <span class="keyword">return</span> x.c > y.c;
+}
+
+<span class="type">int</span> main() {
+    <span class="type">int</span> N, M;
+    cin >> N >> M;
+
+    <span class="comment">// 📋 初始化并查集（2N 个节点）</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i <= <span class="number">2</span> * N; i++)
+        fa[i] = i;
+
+    <span class="comment">// 📥 读入所有边</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < M; i++)
+        cin >> edges[i].a >> edges[i].b >> edges[i].c;
+
+    <span class="comment">// 📊 按怨气值从大到小排序</span>
+    sort(edges, edges + M, cmp);
+
+    <span class="comment">// ⚡ 贪心处理每条边</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < M; i++) {
+        <span class="type">int</span> a = edges[i].a, b = edges[i].b, c = edges[i].c;
+
+        <span class="comment">// 💥 检查 a 和 b 是否已在同一集合（同监狱）</span>
+        <span class="keyword">if</span> (find(a) == find(b)) {
+            cout << c << endl;  <span class="comment">// 无法分开！这就是答案</span>
+            <span class="keyword">return</span> <span class="number">0</span>;
+        }
+
+        <span class="comment">// ✅ 可以分开：a 和 b的敌人 合并，b 和 a的敌人 合并</span>
+        unite(a, b + N);  <span class="comment">// a 和 b 的敌人域是一伙的</span>
+        unite(b, a + N);  <span class="comment">// b 和 a 的敌人域是一伙的</span>
+    }
+
+    <span class="comment">// 🎉 所有仇恨都成功分开，无冲突！</span>
+    cout << <span class="number">0</span> << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 知识点</h2>
+            <ul>
+                <li>🌲 <strong>并查集实现：</strong> Python 中用列表模拟并查集。<span class="code-inline">find</span> 函数用<strong>迭代</strong>而非递归（避免 Python 递归深度限制）。</li>
+                <li>📡 <strong>扩展域：</strong> 同样开 2N 大小的列表，<span class="code-inline">i+N</span> 表示 i 的敌人域。</li>
+                <li>📊 <strong>排序：</strong> <span class="code-inline">sort(key=lambda x: -x[2])</span> 按第三个元素降序。</li>
+                <li>⚡ <strong>sys.stdin 加速：</strong> 大量输入时用 <span class="code-inline">sys.stdin</span> 避免超时。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 Python 代码</h2>
+<pre>
+<span class="keyword">import</span> sys
+<span class="type">input</span> = sys.stdin.readline
+
+<span class="comment"># 🌲 并查集（迭代版 find，避免递归深度问题）</span>
+<span class="keyword">def</span> find(x):
+    <span class="keyword">while</span> fa[x] != x:
+        fa[x] = fa[fa[x]]  <span class="comment"># 路径压缩（两步跳跃）</span>
+        x = fa[x]
+    <span class="keyword">return</span> x
+
+<span class="keyword">def</span> unite(x, y):
+    fa[find(x)] = find(y)
+
+N, M = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+
+<span class="comment"># 📋 初始化并查集（2N 个节点，1-indexed）</span>
+fa = <span class="type">list</span>(<span class="type">range</span>(<span class="number">2</span> * N + <span class="number">1</span>))
+
+<span class="comment"># 📥 读入所有边</span>
+edges = []
+<span class="keyword">for</span> _ <span class="keyword">in</span> <span class="type">range</span>(M):
+    a, b, c = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+    edges.append((a, b, c))
+
+<span class="comment"># 📊 按怨气值从大到小排序</span>
+edges.sort(key=<span class="keyword">lambda</span> x: -x[<span class="number">2</span>])
+
+<span class="comment"># ⚡ 贪心处理每条边</span>
+ans = <span class="number">0</span>
+<span class="keyword">for</span> a, b, c <span class="keyword">in</span> edges:
+    <span class="comment"># 💥 检查是否已在同一集合</span>
+    <span class="keyword">if</span> find(a) == find(b):
+        ans = c  <span class="comment"># 无法分开！</span>
+        <span class="keyword">break</span>
+
+    <span class="comment"># ✅ 分开：建立敌对关系</span>
+    unite(a, b + N)
+    unite(b, a + N)
+
+<span class="type">print</span>(ans)
+</pre>
+        </div>
+    </div>
+
+    <!-- ==================== 更多图解理解 ==================== -->
+    <div class="card logic">
+        <h2>🎨 更多理解：为什么约束能自动传递？</h2>
+
+        <h3>📌 约束传递的魔法</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0; margin:10px 0;">
+            <p>假设有三个人 A, B, C：</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;">
+                <div style="background:#ffebee; padding:10px; border-radius:8px; border:2px solid #ef5350; flex:1; min-width:200px;">
+                    <strong>第1步：</strong>A 和 B 是敌人（分开）<br>
+                    → union(A, B') 和 union(B, A')<br>
+                    集合：{A, B'} 和 {B, A'}
+                </div>
+                <div style="background:#e3f2fd; padding:10px; border-radius:8px; border:2px solid #42a5f5; flex:1; min-width:200px;">
+                    <strong>第2步：</strong>A 和 C 是敌人（分开）<br>
+                    → union(A, C') 和 union(C, A')<br>
+                    集合：{A, B', C'} 和 {B, A', C}
+                </div>
+            </div>
+            <div style="background:#e8f5e9; padding:12px; border-radius:8px; border:2px solid #43a047; text-align:center;">
+                🎯 现在 B 和 C 在同一集合 {B, A', C} 中！<br>
+                <strong>A 的两个敌人 B 和 C，自动变成了同伙（同监狱）！</strong><br>
+                <span style="font-size:0.85em; color:#888;">这就是扩展域并查集的魔法——"敌人的敌人是朋友"自动实现！</span>
+            </div>
+        </div>
+
+        <h3>📌 如果所有仇恨都能分开</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0; margin:10px 0;">
+            <p>例如只有 2 对仇恨：A↔B 和 C↔D（互不相关）</p>
+            <p>处理完所有边后，从未出现 <span class="code-inline">find(a) == find(b)</span> 的情况。</p>
+            <p>→ 答案 = <strong>0</strong>（所有仇恨对都在不同监狱，完全无冲突！）</p>
+        </div>
+    </div>
+
+    <!-- ==================== 两种解法对比 ==================== -->
+    <div class="card logic">
+        <h2>⚖️ 解法对比（拓展知识）</h2>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">对比项</th>
+                <th class="a-th">贪心 + 扩展域并查集</th>
+                <th class="b-th">二分答案 + 二分图判定</th>
+            </tr>
+            <tr>
+                <td><strong>核心思想</strong></td>
+                <td>从大到小处理，第一个矛盾即答案</td>
+                <td>二分答案 mid，检查能否分配</td>
+            </tr>
+            <tr>
+                <td><strong>时间复杂度</strong></td>
+                <td>O(M log M)</td>
+                <td>O((N+M) log C)</td>
+            </tr>
+            <tr>
+                <td><strong>关键数据结构</strong></td>
+                <td>扩展域并查集</td>
+                <td>BFS/DFS 二分图染色</td>
+            </tr>
+            <tr>
+                <td><strong>代码难度</strong></td>
+                <td>⭐⭐ 模板化</td>
+                <td>⭐⭐⭐ 较复杂</td>
+            </tr>
+            <tr>
+                <td><strong>推荐度</strong></td>
+                <td style="color:#2e7d32; font-weight:bold;">⭐⭐⭐ 推荐！</td>
+                <td>⭐⭐ 也可以</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例：N=4, M=6</strong><br>
+                排序后：28351, 12884, 6618, 3512, 2534, 1805<br>
+                处理 28351(1↔2)：分开 ✅<br>
+                处理 12884(3↔4)：分开 ✅<br>
+                处理 6618(1↔3)：分开 ✅ → 1和4同组，2和3同组<br>
+                处理 3512(2↔3)：find(2)==find(3) → 💥 矛盾！<br>
+                输出：<strong>3512</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界测试：没有仇恨关系</strong><br>
+                N=5, M=0 → 不进入循环 → 输出 <strong>0</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #7e57c2;">
+                <strong style="color:#4527a0;">简单测试：只有一对仇恨</strong><br>
+                N=2, M=1, 边(1,2,100)<br>
+                处理：find(1)≠find(2) → 分开 ✅<br>
+                循环结束 → 输出 <strong>0</strong> ✅（成功分到两个监狱）
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #c62828;">
+                <strong style="color:#c62828;">三角冲突：必有冲突</strong><br>
+                N=3, M=3, 边(1,2,10), (2,3,20), (1,3,30)<br>
+                排序：30, 20, 10<br>
+                处理 30(1↔3)：分开 ✅<br>
+                处理 20(2↔3)：分开 ✅ → 1和2同组<br>
+                处理 10(1↔2)：find(1)==find(2) → 💥<br>
+                输出：<strong>10</strong> ✅（三个人两个监狱，必有一对在一起）
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 并查集模板 ==================== -->
+    <div class="card logic">
+        <h2>🧩 并查集模板速记</h2>
+
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:250px; background:#e3f2fd; padding:15px; border-radius:12px; border:2px solid #42a5f5;">
+                <div style="font-weight:bold; color:#1565c0; margin-bottom:8px;">🌲 普通并查集</div>
+                <div style="font-size:0.9em;">
+                    • <strong>find(x)</strong>：找 x 的根（路径压缩）<br>
+                    • <strong>unite(x,y)</strong>：合并 x 和 y 的集合<br>
+                    • 只能表示"同一组"关系
+                </div>
+            </div>
+            <div style="flex:1; min-width:250px; background:#ede7f6; padding:15px; border-radius:12px; border:2px solid #7e57c2;">
+                <div style="font-weight:bold; color:#4527a0; margin-bottom:8px;">🔮 扩展域并查集</div>
+                <div style="font-size:0.9em;">
+                    • 开 <strong>2N</strong> 大小<br>
+                    • i+N = i 的"敌人域"<br>
+                    • 能表示"对立"关系<br>
+                    • <strong>敌人的敌人是朋友</strong>自动传递！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🎯 问题转化：</strong> "最大冲突的最小值" → 经典的<strong>最小化最大值</strong>问题。贪心策略：优先处理最大的威胁，无法化解的就是答案。</li>
+            <li><strong>📊 排序是关键：</strong> 按怨气值<strong>从大到小</strong>排序后处理。这样第一个产生矛盾的边，就是答案。因为更大的仇恨已经全部避开了。</li>
+            <li><strong>🔮 扩展域并查集：</strong> 节点 <span class="code-inline">i</span> 是本人，<span class="code-inline">i+N</span> 是敌人域。<span class="code-inline">union(a, b+N)</span> 表示"a 和 b 分到不同监狱"。检查 <span class="code-inline">find(a)==find(b)</span> 判断是否矛盾。</li>
+            <li><strong>⚡ 复杂度优秀：</strong> 排序 O(M log M) + 并查集操作近似 O(M)。总体 O(M log M)，对 M=10⁵ 完全不是问题！</li>
+            <li><strong>🛡️ 别忘了输出 0：</strong> 如果所有仇恨对都成功分开了（循环结束没有矛盾），答案是 0——完全不会发生冲突。</li>
+            <li><strong>🎒 竞赛经典：</strong> 本题是 NOIP2010 提高组原题，是学习并查集、贪心、图论的绝佳练习。扩展域并查集还能用在食物链、染色等问题中，务必掌握！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🔒 任务完成！警察局长成功保住了乌纱帽！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+
+    function switchMethod(method) {
+        const aElements = document.querySelectorAll('.method-a-only');
+        const bElements = document.querySelectorAll('.method-b-only');
+        const buttons = document.querySelectorAll('.method-btn');
+
+        buttons.forEach(btn => {
+            btn.classList.remove('active-a', 'active-b');
+        });
+
+        if (method === 'a') {
+            aElements.forEach(el => el.style.display = 'block');
+            bElements.forEach(el => el.style.display = 'none');
+            buttons[0].classList.add('active-a');
+        } else {
+            aElements.forEach(el => el.style.display = 'none');
+            bElements.forEach(el => el.style.display = 'block');
+            buttons[1].classList.add('active-b');
+        }
+    }
+</script>
+
+</body>
+</html>

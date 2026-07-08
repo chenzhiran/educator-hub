@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：雪谷烘衣</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fce4ec;
+            color: #263238;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #c62828;
+            background-color: #e53935;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(198, 40, 40, 0.15);
+            border: 5px solid #ef9a9a;
+        }
+
+        h1 {
+            color: #c62828;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #ffcdd2;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #e53935;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #b71c1c, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #b71c1c, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #c62828;
+            border-bottom: 3px dashed #ef9a9a;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #b71c1c;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #fce4ec;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #ef9a9a;
+        }
+        .card.problem { border-color: #ef5350; background-color: #ffebee; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.binary { border-color: #7e57c2; background-color: #ede7f6; }
+        .card.greedy { border-color: #43a047; background-color: #e8f5e9; }
+        .card.warm { border-color: #ff7043; background-color: #fbe9e7; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #78909c; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #ffcdd2;
+            color: #b71c1c;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 衣服可视化 ========== */
+        .clothes-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 12px 0;
+            padding: 10px;
+        }
+        .cloth-item {
+            min-width: 70px;
+            border-radius: 12px;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+            position: relative;
+        }
+        .cloth-wet { background: linear-gradient(135deg, #42a5f5, #90caf9); color: white; }
+        .cloth-dry { background: linear-gradient(135deg, #66bb6a, #a5d6a7); color: white; }
+        .cloth-need { background: linear-gradient(135deg, #ff7043, #ffab91); color: white; }
+        .cloth-label {
+            font-size: 0.7em;
+            color: rgba(255,255,255,0.8);
+            display: block;
+        }
+
+        /* ========== 时间线可视化 ========== */
+        .timeline {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin: 12px 0;
+            overflow-x: auto;
+        }
+        .timeline-row {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin: 5px 0;
+        }
+        .timeline-label {
+            min-width: 75px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-align: right;
+            padding-right: 8px;
+        }
+        .timeline-cell {
+            min-width: 50px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.82em;
+            font-family: Consolas, monospace;
+        }
+        .tc-header { background: #e53935; color: white; font-size: 0.75em; }
+        .tc-wind { background: #e3f2fd; color: #1565c0; }
+        .tc-dryer { background: #fff3e0; color: #e65100; }
+        .tc-dry { background: #e8f5e9; color: #2e7d32; }
+        .tc-fail { background: #ffcdd2; color: #c62828; }
+        .tc-idle { background: #f5f5f5; color: #bdbdbd; }
+
+        /* ========== 二分可视化 ========== */
+        .binary-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #b39ddb;
+            margin: 15px 0;
+        }
+        .binary-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            flex-wrap: wrap;
+        }
+        .binary-step.pass { background: #e8f5e9; border: 2px solid #66bb6a; }
+        .binary-step.fail { background: #ffebee; border: 2px solid #ef5350; }
+        .binary-step.done { background: #fff9c4; border: 2px solid #fdd835; }
+        .bs-label { min-width: 45px; font-weight: bold; color: #888; }
+        .bs-val {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+        .bs-lo { background: #c8e6c9; color: #2e7d32; }
+        .bs-hi { background: #ffcdd2; color: #c62828; }
+        .bs-mid { background: #e1bee7; color: #4a148c; }
+        .bs-result {
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+        }
+        .bs-ok { background: #c8e6c9; color: #2e7d32; }
+        .bs-no { background: #ffcdd2; color: #c62828; }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #ef5350;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.9em;
+            min-width: 80px;
+        }
+        .step-arrow { font-size: 1.5em; color: #ef5350; }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 公式框 ========== */
+        .formula-box {
+            background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+            border: 3px solid #e91e63;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.05em;
+        }
+        .formula-big {
+            font-family: Consolas, monospace;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #880e4f;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        /* ========== 单调性条 ========== */
+        .mono-bar {
+            display: flex;
+            height: 38px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+        }
+        .mono-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72em;
+            font-weight: bold;
+            flex: 1;
+            border-right: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 0.95em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #c62828, #ef5350); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #4527a0, #7e57c2); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 170px;
+            background: white;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 2px solid #ef9a9a;
+        }
+        .example-card strong { color: #c62828; }
+        .example-card pre {
+            background: transparent;
+            color: #263238;
+            padding: 3px 0;
+            margin: 3px 0;
+            font-weight: bold;
+            font-size: 0.82em;
+        }
+
+        /* ========== 柱状图 ========== */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+            min-height: 130px;
+        }
+        .bar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .bar-stack {
+            width: 55px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bar-block {
+            width: 55px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75em;
+            color: white;
+        }
+        .bar-label {
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        .bar-wind { background: #42a5f5; }
+        .bar-dryer { background: #ff9800; }
+        .bar-remain { background: #ef5350; }
+        .bar-dried { background: #66bb6a; }
+
+        /* ========== 水滴动画 ========== */
+        .water-meter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 4px 0;
+        }
+        .water-bar-bg {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .water-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: white;
+            transition: width 0.5s;
+        }
+        .water-blue { background: linear-gradient(90deg, #42a5f5, #1e88e5); }
+        .water-green { background: linear-gradient(90deg, #66bb6a, #43a047); }
+        .water-red { background: linear-gradient(90deg, #ef5350, #c62828); }
+
+        /* ========== 烘衣机图示 ========== */
+        .dryer-scene {
+            background: linear-gradient(180deg, #fff3e0 0%, #ffe0b2 100%);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ffb74d;
+            margin: 15px 0;
+        }
+
+        .check-visual {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin: 10px 0;
+        }
+        .check-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .check-step.calc-step { background: #e3f2fd; }
+        .check-step.dry-step { background: #e8f5e9; }
+        .check-step.need-step { background: #fff3e0; }
+        .check-step.total-step { background: #f3e5f5; }
+        .check-icon { font-size: 1.2em; min-width: 24px; text-align: center; }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #ef9a9a;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏔️ 雪谷烘衣 👕</h1>
+
+    <div style="text-align: center; font-size: 1.15em; color: #c62828;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        n 件湿衣服，自然风干 + 一台烘衣机——最快几秒全干？<br>
+        用二分答案 + 贪心验证，温暖搞定这道题！🔥
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/71" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>n 件衣服，第 i 件湿度为 w<sub>i</sub>。每秒<strong>所有衣服</strong>自然风干 a 点湿度。</p>
+        <p>另有一台<strong>魔法烘衣机</strong>：每秒只能对准<strong>一件</strong>衣服，让它额外减少 b 点湿度（总共减少 a+b）。</p>
+        <p>目标：所有衣服湿度 ≤ 0 的<strong>最少时间</strong>。</p>
+
+        <div style="background:#ffebee; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #ef9a9a;">
+            <strong>📐 关键规则：</strong><br>
+            • 🌬️ 自然风干：<strong>每秒每件</strong>衣服减少 a 点（同时进行！）<br>
+            • 🔥 烘衣机：<strong>每秒只能选一件</strong>，额外减少 b 点（该件总共减 a+b）<br>
+            • 📏 数据范围：n, a, b, w<sub>i</sub> ≤ 5×10<sup>5</sup>
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例 1</strong>
+<pre>3 2 1
+1
+2
+3</pre>
+                <strong>📤 输出：</strong><span class="highlight">1</span>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 2</strong>
+<pre>4 1 2
+4
+7
+2
+5</pre>
+                <strong>📤 输出：</strong><span class="highlight">4</span>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 3</strong>
+<pre>7 2 3
+3
+6
+9
+12
+15
+18
+21</pre>
+                <strong>📤 输出：</strong><span class="highlight">6</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例1 详细图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱：看懂样例 1</h2>
+
+        <h3>👕 初始状态：3件衣服，a=2, b=1</h3>
+        <div class="dryer-scene">
+            <div style="text-align:center; font-weight:bold; color:#e65100; margin-bottom:8px;">
+                w = [1, 2, 3]，自然风干速度 a=2/秒，烘衣机额外 b=1/秒
+            </div>
+            <div class="clothes-row">
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服①</span>
+                    💧 w=1
+                </div>
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服②</span>
+                    💧 w=2
+                </div>
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服③</span>
+                    💧 w=3
+                </div>
+            </div>
+        </div>
+
+        <h3>⏱️ T=1 秒后会发生什么？</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0; margin:10px 0;">
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:200px;">
+                    <div style="font-weight:bold; color:#1565c0; margin-bottom:8px;">🌬️ 仅自然风干 1 秒</div>
+                    <div style="font-size:0.9em;">
+                        每件衣服减 a=2：<br>
+                        • 衣服① ：1 - 2 = <strong>-1</strong> → 干了 ✅<br>
+                        • 衣服② ：2 - 2 = <strong>0</strong> → 干了 ✅<br>
+                        • 衣服③ ：3 - 2 = <strong>1</strong> → 还湿！💧
+                    </div>
+                </div>
+                <div style="flex:1; min-width:200px;">
+                    <div style="font-weight:bold; color:#e65100; margin-bottom:8px;">🔥 + 烘衣机对准衣服③</div>
+                    <div style="font-size:0.9em;">
+                        衣服③ 额外减 b=1：<br>
+                        • 衣服③ ：1 - 1 = <strong>0</strong> → 干了 ✅<br><br>
+                        烘衣机用了 1 秒 ≤ T=1 秒 → <strong>够用！</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="clothes-row">
+            <div class="cloth-item cloth-dry">
+                <span class="cloth-label">衣服①</span>
+                ☀️ 干了！
+            </div>
+            <div class="cloth-item cloth-dry">
+                <span class="cloth-label">衣服②</span>
+                ☀️ 干了！
+            </div>
+            <div class="cloth-item cloth-dry">
+                <span class="cloth-label">衣服③</span>
+                ☀️ 干了！
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:10px;">
+            <div style="background:#e8f5e9; display:inline-block; padding:10px 25px; border-radius:10px; border:2px solid #66bb6a;">
+                <strong style="color:#2e7d32; font-size:1.2em;">答案 = 1 秒！🎉</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例2 详细图解 ==================== -->
+    <div class="card logic">
+        <h2>🎨 样例 2 详细图解：n=4, a=1, b=2</h2>
+
+        <h3>👕 初始：w = [4, 7, 2, 5]</h3>
+        <div class="dryer-scene">
+            <div class="clothes-row">
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服①</span>
+                    💧 w=4
+                </div>
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服②</span>
+                    💧 w=7
+                </div>
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服③</span>
+                    💧 w=2
+                </div>
+                <div class="cloth-item cloth-wet">
+                    <span class="cloth-label">衣服④</span>
+                    💧 w=5
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.85em; color:#666;">
+                自然风干 a=1/秒，烘衣机额外 b=2/秒
+            </div>
+        </div>
+
+        <h3>🔍 猜 T=4 秒，看看够不够</h3>
+
+        <div class="check-visual">
+            <div style="font-weight:bold; color:#7e57c2; margin-bottom:8px;">
+                📌 check(T=4)：自然风干 4 秒后，各衣服剩余湿度？
+            </div>
+            <div class="check-step calc-step">
+                <div class="check-icon">👕</div>
+                <div>衣服①：w=4, rest = 4 - 1×4 = <strong>0</strong> ≤ 0 → ☀️ 已干！need=0</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">👕</div>
+                <div>衣服②：w=7, rest = 7 - 1×4 = <strong>3</strong> > 0 → 💧 还湿！need=⌈3/2⌉=<strong>2</strong>秒</div>
+            </div>
+            <div class="check-step dry-step">
+                <div class="check-icon">👕</div>
+                <div>衣服③：w=2, rest = 2 - 1×4 = <strong>-2</strong> ≤ 0 → ☀️ 已干！need=0</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">👕</div>
+                <div>衣服④：w=5, rest = 5 - 1×4 = <strong>1</strong> > 0 → 💧 还湿！need=⌈1/2⌉=<strong>1</strong>秒</div>
+            </div>
+            <div class="check-step total-step">
+                <div class="check-icon">📊</div>
+                <div>总共需要烘衣机：2 + 1 = <strong>3</strong> 秒。T=4 秒内有 4 秒可用。3 ≤ 4 → <strong style="color:#2e7d32;">✅ 可行！</strong></div>
+            </div>
+        </div>
+
+        <h3>📊 T=4 时的柱状图</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+            <div class="bar-chart" style="min-height:110px;">
+                <div class="bar-col">
+                    <div class="bar-stack">
+                        <div class="bar-block bar-wind" style="height:80px;">自然减4</div>
+                    </div>
+                    <div class="bar-label">衣服①<br><span style="color:#2e7d32;">w=4 → 干</span></div>
+                </div>
+                <div class="bar-col">
+                    <div class="bar-stack">
+                        <div class="bar-block bar-dryer" style="height:30px;">烘2秒</div>
+                        <div class="bar-block bar-wind" style="height:80px;">自然减4</div>
+                    </div>
+                    <div class="bar-label">衣服②<br><span style="color:#e65100;">w=7 → 需烘2</span></div>
+                </div>
+                <div class="bar-col">
+                    <div class="bar-stack">
+                        <div class="bar-block bar-wind" style="height:40px;">自然减4</div>
+                    </div>
+                    <div class="bar-label">衣服③<br><span style="color:#2e7d32;">w=2 → 干</span></div>
+                </div>
+                <div class="bar-col">
+                    <div class="bar-stack">
+                        <div class="bar-block bar-dryer" style="height:15px;">烘1秒</div>
+                        <div class="bar-block bar-wind" style="height:80px;">自然减4</div>
+                    </div>
+                    <div class="bar-label">衣服④<br><span style="color:#e65100;">w=5 → 需烘1</span></div>
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.85em;">
+                <span style="color:#42a5f5;">■ 自然风干</span> &nbsp;
+                <span style="color:#ff9800;">■ 烘衣机额外</span> &nbsp;
+                总烘 = 2+1 = 3秒 ≤ T=4秒 ✅
+            </div>
+        </div>
+
+        <h3>🔍 T=3 秒够吗？</h3>
+        <div class="check-visual">
+            <div style="font-weight:bold; color:#7e57c2; margin-bottom:8px;">📌 check(T=3)：</div>
+            <div class="check-step calc-step">
+                <div class="check-icon">👕</div>
+                <div>衣服①：rest = 4-3 = 1 > 0 → need=⌈1/2⌉=<strong>1</strong>秒</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">👕</div>
+                <div>衣服②：rest = 7-3 = 4 > 0 → need=⌈4/2⌉=<strong>2</strong>秒</div>
+            </div>
+            <div class="check-step dry-step">
+                <div class="check-icon">👕</div>
+                <div>衣服③：rest = 2-3 = -1 ≤ 0 → ☀️ 干了！need=0</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">👕</div>
+                <div>衣服④：rest = 5-3 = 2 > 0 → need=⌈2/2⌉=<strong>1</strong>秒</div>
+            </div>
+            <div class="check-step" style="background:#ffcdd2; border-radius:8px;">
+                <div class="check-icon">💥</div>
+                <div>总共需要烘衣机：1+2+1 = <strong>4</strong> 秒 > T=3 秒 → <strong style="color:#c62828;">❌ 不可行！</strong></div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:10px; font-weight:bold; color:#c62828;">
+            check(3)=❌，check(4)=✅ → 答案 = <strong style="font-size:1.3em;">4</strong> 🎯
+        </div>
+    </div>
+
+    <!-- ==================== 核心算法 ==================== -->
+    <div class="card binary">
+        <h2>⚡ 核心算法：二分答案 + 贪心检查</h2>
+
+        <div class="thinking-box" style="border-color:#e91e63; background:#fce4ec;">
+            <div class="title" style="color:#c2185b;">💡 关键思想：猜时间 T！</div>
+            <p style="margin:5px 0;">
+                <strong>猜一个时间 T → 检验 T 秒内能否烘干所有衣服</strong><br><br>
+                对每件衣服：<br>
+                ① 自然风干 T 秒后，剩余湿度 rest = w<sub>i</sub> - a × T<br>
+                ② 如果 rest ≤ 0 → 已经干了，不需要烘衣机 ☀️<br>
+                ③ 如果 rest > 0 → 需要烘衣机 ⌈rest / b⌉ 秒 🔥<br><br>
+                所有衣服需要的烘衣机总时间 ≤ T → T 秒可行 ✅
+            </p>
+        </div>
+
+        <h3>📊 答案的单调性</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0; margin:15px 0;">
+            <div style="font-size:0.85em; color:#888; text-align:center; margin-bottom:5px;">
+                以样例2为例（a=1, b=2）：猜不同的 T，烘衣机需要几秒？
+            </div>
+            <div class="mono-bar">
+                <div class="mono-cell" style="background:#ffcdd2; color:#c62828;">T=1<br>需9>1❌</div>
+                <div class="mono-cell" style="background:#ffcdd2; color:#c62828;">T=2<br>需6>2❌</div>
+                <div class="mono-cell" style="background:#ffcdd2; color:#c62828;">T=3<br>需4>3❌</div>
+                <div class="mono-cell" style="background:#c8e6c9; color:#2e7d32;">T=4<br>需3≤4✅</div>
+                <div class="mono-cell" style="background:#c8e6c9; color:#2e7d32;">T=5<br>需1≤5✅</div>
+                <div class="mono-cell" style="background:#c8e6c9; color:#2e7d32;">T=7<br>需0≤7✅</div>
+            </div>
+            <div style="text-align:center; font-size:0.9em; margin-top:8px;">
+                T 越大 → 自然风干越多 → 烘衣机需要越少 → 越容易满足<br>
+                <strong>完美单调性！找最小的 ✅ 即可！</strong>
+            </div>
+        </div>
+
+        <h3>🔍 二分范围</h3>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin:10px 0;">
+            <div style="flex:1; min-width:240px; background:#e8f5e9; padding:15px; border-radius:12px; border:2px solid #66bb6a;">
+                <div style="font-weight:bold; color:#2e7d32; margin-bottom:5px;">📉 下界 lo = 0</div>
+                <p style="font-size:0.9em; margin:5px 0;">
+                    最好情况：0 秒就全干了？<br>
+                    不太可能，但从 0 开始二分没问题。
+                </p>
+            </div>
+            <div style="flex:1; min-width:240px; background:#ffebee; padding:15px; border-radius:12px; border:2px solid #ef5350;">
+                <div style="font-weight:bold; color:#c62828; margin-bottom:5px;">📈 上界 hi = max(w<sub>i</sub>)</div>
+                <p style="font-size:0.9em; margin:5px 0;">
+                    因为 a ≥ 1，所以 max(w<sub>i</sub>) 秒后<br>
+                    自然风干就能把最湿的衣服弄干。<br>
+                    不需要更多时间。
+                </p>
+            </div>
+        </div>
+
+        <div class="formula-box">
+            <div style="font-size:0.95em; color:#880e4f;">✨ check(T) 的核心公式 ✨</div>
+            <div class="formula-big">
+                对每件衣服 i：<br>
+                rest<sub>i</sub> = w<sub>i</sub> - a × T<br>
+                若 rest<sub>i</sub> > 0 → need += ⌈rest<sub>i</sub> / b⌉<br><br>
+                判断：need ≤ T ?
+            </div>
+            <div style="font-size:0.85em; color:#795548;">
+                ⌈rest / b⌉ = (rest + b - 1) / b（上取整公式）<br>
+                含义：烘衣机每秒额外减 b，需要 ⌈rest/b⌉ 秒才能把 rest 点湿度烘干
+            </div>
+        </div>
+
+        <div class="thinking-box" style="border-color:#43a047; background:#e8f5e9;">
+            <div class="title" style="color:#2e7d32;">💡 上取整怎么理解？</div>
+            <p style="margin:5px 0;">
+                rest = 5，b = 2：需要 ⌈5/2⌉ = <strong>3</strong> 秒（减2,2,1）<br>
+                rest = 4，b = 2：需要 ⌈4/2⌉ = <strong>2</strong> 秒（减2,2）<br>
+                rest = 1，b = 3：需要 ⌈1/3⌉ = <strong>1</strong> 秒（减3足够）<br><br>
+                公式：<span class="code-inline">(rest + b - 1) / b</span>（整数除法自动下取整，加 b-1 变上取整）
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 样例2 完整二分过程 ==================== -->
+    <div class="card binary">
+        <h2>🎬 样例 2 完整二分过程</h2>
+        <div style="font-weight:bold; color:#c62828; margin-bottom:10px;">
+            n=4, a=1, b=2, w=[4,7,2,5]，lo=0, hi=7
+        </div>
+
+        <div class="binary-visual">
+            <div class="binary-step pass">
+                <div class="bs-label">第1轮</div>
+                <div class="bs-val bs-lo">lo=0</div>
+                <div class="bs-val bs-hi">hi=7</div>
+                <div class="bs-val bs-mid">mid=3</div>
+                <div style="font-size:0.85em;">check(3): need=4 > 3</div>
+                <div class="bs-result bs-no">❌ lo=4</div>
+            </div>
+            <div class="binary-step pass">
+                <div class="bs-label">第2轮</div>
+                <div class="bs-val bs-lo">lo=4</div>
+                <div class="bs-val bs-hi">hi=7</div>
+                <div class="bs-val bs-mid">mid=5</div>
+                <div style="font-size:0.85em;">check(5): need=1 ≤ 5</div>
+                <div class="bs-result bs-ok">✅ hi=5</div>
+            </div>
+            <div class="binary-step pass">
+                <div class="bs-label">第3轮</div>
+                <div class="bs-val bs-lo">lo=4</div>
+                <div class="bs-val bs-hi">hi=5</div>
+                <div class="bs-val bs-mid">mid=4</div>
+                <div style="font-size:0.85em;">check(4): need=3 ≤ 4</div>
+                <div class="bs-result bs-ok">✅ hi=4</div>
+            </div>
+            <div class="binary-step done">
+                <div class="bs-label">结束！</div>
+                <div class="bs-val bs-lo">lo=4</div>
+                <div class="bs-val bs-hi">hi=4</div>
+                <div style="font-weight:bold;">lo == hi →</div>
+                <div class="bs-result" style="background:#fff9c4; color:#e65100; font-size:1em;">🎯 答案 = 4 秒</div>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-size:0.85em; color:#888;">
+            仅 3 轮二分就锁定答案！🚀
+        </div>
+    </div>
+
+    <!-- ==================== 样例3 图解 ==================== -->
+    <div class="card logic">
+        <h2>🎨 样例 3 图解：n=7, a=2, b=3</h2>
+
+        <h3>👕 初始：w = [3, 6, 9, 12, 15, 18, 21]</h3>
+        <div class="dryer-scene">
+            <div class="clothes-row">
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">①</span>💧3
+                </div>
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">②</span>💧6
+                </div>
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">③</span>💧9
+                </div>
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">④</span>💧12
+                </div>
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">⑤</span>💧15
+                </div>
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">⑥</span>💧18
+                </div>
+                <div class="cloth-item cloth-wet" style="min-width:50px; font-size:0.8em;">
+                    <span class="cloth-label">⑦</span>💧21
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.85em; color:#666;">
+                自然风干 a=2/秒，烘衣机额外 b=3/秒，max(w)=21 → 二分范围 [0, 21]
+            </div>
+        </div>
+
+        <h3>📌 check(T=6)：自然风干 6 秒 → 减 2×6=12</h3>
+        <div class="check-visual">
+            <div class="check-step dry-step">
+                <div class="check-icon">☀️</div>
+                <div>衣服①：3-12=-9 → 干了！</div>
+            </div>
+            <div class="check-step dry-step">
+                <div class="check-icon">☀️</div>
+                <div>衣服②：6-12=-6 → 干了！</div>
+            </div>
+            <div class="check-step dry-step">
+                <div class="check-icon">☀️</div>
+                <div>衣服③：9-12=-3 → 干了！</div>
+            </div>
+            <div class="check-step dry-step">
+                <div class="check-icon">☀️</div>
+                <div>衣服④：12-12=0 → 刚好干！</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">🔥</div>
+                <div>衣服⑤：15-12=<strong>3</strong> → need=⌈3/3⌉=<strong>1</strong>秒</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">🔥</div>
+                <div>衣服⑥：18-12=<strong>6</strong> → need=⌈6/3⌉=<strong>2</strong>秒</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">🔥</div>
+                <div>衣服⑦：21-12=<strong>9</strong> → need=⌈9/3⌉=<strong>3</strong>秒</div>
+            </div>
+            <div class="check-step total-step">
+                <div class="check-icon">📊</div>
+                <div>total = 1+2+3 = <strong>6</strong> ≤ T=6 → <strong style="color:#2e7d32;">✅ 可行！</strong></div>
+            </div>
+        </div>
+
+        <h3>📌 check(T=5)：自然风干 5 秒 → 减 10</h3>
+        <div class="check-visual">
+            <div class="check-step dry-step">
+                <div class="check-icon">☀️</div>
+                <div>①②③ 都干了 | ④：12-10=2 → need=⌈2/3⌉=1</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">🔥</div>
+                <div>⑤：15-10=5 → need=⌈5/3⌉=2 | ⑥：18-10=8 → need=⌈8/3⌉=3</div>
+            </div>
+            <div class="check-step need-step">
+                <div class="check-icon">🔥</div>
+                <div>⑦：21-10=11 → need=⌈11/3⌉=4</div>
+            </div>
+            <div class="check-step" style="background:#ffcdd2; border-radius:8px;">
+                <div class="check-icon">💥</div>
+                <div>total = 1+2+3+4 = <strong>10</strong> > T=5 → <strong style="color:#c62828;">❌ 不可行！</strong></div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:10px; font-weight:bold;">
+            check(5)=❌，check(6)=✅ → 答案 = <strong style="color:#c62828; font-size:1.3em;">6</strong> 🎯
+        </div>
+
+        <h3>📊 T=6 时的烘衣机时间分配</h3>
+        <div class="timeline">
+            <div class="timeline-row">
+                <div class="timeline-label" style="color:#e65100;">时间</div>
+                <div class="timeline-cell tc-header">第1秒</div>
+                <div class="timeline-cell tc-header">第2秒</div>
+                <div class="timeline-cell tc-header">第3秒</div>
+                <div class="timeline-cell tc-header">第4秒</div>
+                <div class="timeline-cell tc-header">第5秒</div>
+                <div class="timeline-cell tc-header">第6秒</div>
+            </div>
+            <div class="timeline-row">
+                <div class="timeline-label" style="color:#1565c0;">🌬️ 风干</div>
+                <div class="timeline-cell tc-wind">全部-2</div>
+                <div class="timeline-cell tc-wind">全部-2</div>
+                <div class="timeline-cell tc-wind">全部-2</div>
+                <div class="timeline-cell tc-wind">全部-2</div>
+                <div class="timeline-cell tc-wind">全部-2</div>
+                <div class="timeline-cell tc-wind">全部-2</div>
+            </div>
+            <div class="timeline-row">
+                <div class="timeline-label" style="color:#e65100;">🔥 烘衣机</div>
+                <div class="timeline-cell tc-dryer">⑦额外-3</div>
+                <div class="timeline-cell tc-dryer">⑦额外-3</div>
+                <div class="timeline-cell tc-dryer">⑦额外-3</div>
+                <div class="timeline-cell tc-dryer">⑥额外-3</div>
+                <div class="timeline-cell tc-dryer">⑥额外-3</div>
+                <div class="timeline-cell tc-dryer">⑤额外-3</div>
+            </div>
+        </div>
+        <div style="text-align:center; font-size:0.85em; color:#888;">
+            烘衣机：3秒给⑦、2秒给⑥、1秒给⑤，共6秒 = T=6秒，刚好用完！
+        </div>
+    </div>
+
+    <!-- ==================== 为什么贪心正确 ==================== -->
+    <div class="card greedy">
+        <h2>🔍 为什么这个检查方法是对的？</h2>
+
+        <div class="thinking-box" style="border-color:#43a047; background:#e8f5e9;">
+            <div class="title" style="color:#2e7d32;">💡 核心洞察：烘衣机的分配可以任意！</div>
+            <p style="margin:5px 0;">
+                T 秒内，烘衣机共有 T 秒可用。<br>
+                每秒选哪件衣服都行，顺序无所谓。<br><br>
+                所以关键问题是：<strong>总共需要多少秒的烘衣机时间？</strong><br>
+                • 衣服 i 自然风干后还剩 rest<sub>i</sub> = w<sub>i</sub> - a×T<br>
+                • 每用 1 秒烘衣机，可以额外减 b 点<br>
+                • 需要 ⌈rest<sub>i</sub>/b⌉ 秒才能烘干衣服 i<br><br>
+                <strong>只要所有衣服的烘衣机需求总和 ≤ T，就一定能安排好！</strong>
+            </p>
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin:15px 0;">
+            <div style="flex:1; min-width:220px; background:#fff; padding:12px; border-radius:10px; border:2px solid #66bb6a;">
+                <div style="font-weight:bold; color:#2e7d32;">✅ T 大 → 容易满足</div>
+                <div style="font-size:0.85em;">
+                    自然风干更多 → rest 更小<br>
+                    需要的烘衣机时间更少<br>
+                    同时可用的烘衣机时间更多<br>
+                    <strong>双重利好！</strong>
+                </div>
+            </div>
+            <div style="flex:1; min-width:220px; background:#fff; padding:12px; border-radius:10px; border:2px solid #ef5350;">
+                <div style="font-weight:bold; color:#c62828;">❌ T 小 → 难以满足</div>
+                <div style="font-size:0.85em;">
+                    自然风干不够 → rest 更大<br>
+                    需要更多的烘衣机时间<br>
+                    可用的烘衣机时间更少<br>
+                    <strong>双重不利！</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 上取整深度理解 ==================== -->
+    <div class="card warm">
+        <h2>📐 重要公式：上取整 ⌈a/b⌉</h2>
+
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #ff7043; margin:10px 0;">
+            <p style="font-weight:bold; color:#d84315;">
+                场景：剩余湿度 rest 点，烘衣机每秒减 b 点，需要几秒？
+            </p>
+            <table class="vs-table">
+                <tr>
+                    <th class="a-th">rest</th>
+                    <th class="a-th">b</th>
+                    <th class="b-th">rest ÷ b</th>
+                    <th class="b-th">⌈rest/b⌉ 实际需要</th>
+                    <th class="label-th">公式 (rest+b-1)/b</th>
+                </tr>
+                <tr><td>6</td><td>3</td><td>2.0</td><td><strong>2</strong></td><td>(6+2)/3=2 ✅</td></tr>
+                <tr><td>7</td><td>3</td><td>2.33</td><td><strong>3</strong></td><td>(7+2)/3=3 ✅</td></tr>
+                <tr><td>1</td><td>3</td><td>0.33</td><td><strong>1</strong></td><td>(1+2)/3=1 ✅</td></tr>
+                <tr><td>5</td><td>2</td><td>2.5</td><td><strong>3</strong></td><td>(5+1)/2=3 ✅</td></tr>
+                <tr><td>4</td><td>2</td><td>2.0</td><td><strong>2</strong></td><td>(4+1)/2=2 ✅</td></tr>
+            </table>
+            <div style="text-align:center; margin-top:10px;">
+                <span class="code-inline">(rest + b - 1) / b</span>（整数除法）= 正确的上取整！<br>
+                <span style="font-size:0.85em; color:#888;">这个技巧在竞赛中非常常用，必须牢记！</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 算法流程 ==================== -->
+    <div class="card logic">
+        <h2>📋 算法流程总结</h2>
+
+        <div class="step-flow">
+            <div class="step-box" style="border-color:#c62828;">
+                <strong>读入</strong><br>
+                <span style="font-size:0.8em;">n, a, b, w[]</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#ff9800;">
+                <strong>设范围</strong><br>
+                <span style="font-size:0.8em;">lo=0<br>hi=max(w)</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#7e57c2;">
+                <strong>二分 T</strong><br>
+                <span style="font-size:0.8em;">while lo&lt;hi</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#43a047;">
+                <strong>check(T)</strong><br>
+                <span style="font-size:0.8em;">算总烘时间<br>≤ T ?</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#1565c0;">
+                <strong>输出 lo</strong><br>
+                <span style="font-size:0.8em;">最少时间！</span>
+            </div>
+        </div>
+
+        <div class="formula-box" style="border-color:#7e57c2;">
+            <div style="font-size:0.95em; color:#4e342e;">✨ 二分答案模板（找最小可行时间）✨</div>
+            <div class="formula-big">
+                lo = 0, hi = max(w)<br>
+                while lo < hi:<br>
+                &nbsp;&nbsp;mid = (lo + hi) / 2<br>
+                &nbsp;&nbsp;if check(mid): hi = mid<br>
+                &nbsp;&nbsp;else: lo = mid + 1<br>
+                答案 = lo
+            </div>
+        </div>
+
+        <h3>⏱️ 复杂度分析</h3>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">步骤</th>
+                <th class="a-th">操作</th>
+                <th class="b-th">复杂度</th>
+            </tr>
+            <tr>
+                <td>二分轮数</td>
+                <td>在 [0, max(w)] 中二分</td>
+                <td>O(log W) ≈ 19 轮</td>
+            </tr>
+            <tr>
+                <td>每轮 check</td>
+                <td>遍历 n 件衣服</td>
+                <td>O(n)</td>
+            </tr>
+            <tr>
+                <td><strong>总计</strong></td>
+                <td><strong>19 × 5×10⁵</strong></td>
+                <td><strong>O(n log W) ≈ 1 千万</strong> ⚡</td>
+            </tr>
+        </table>
+        <div style="text-align:center; font-size:0.9em; color:#888;">
+            W = max(w) ≤ 5×10⁵，log₂(5×10⁵) ≈ 19。非常快！💪
+        </div>
+    </div>
+
+    <!-- ==================== 注意事项 ==================== -->
+    <div class="card logic">
+        <h2>⚠️ 细节与注意事项</h2>
+
+        <div class="thinking-box" style="border-color:#d32f2f; background:#ffebee;">
+            <div class="title" style="color:#d32f2f;">🚨 细节1：使用 long long 避免溢出！</div>
+            <p style="margin:5px 0;">
+                a × T 中，a 和 T 都可能达到 5×10⁵，乘积约 2.5×10¹¹ → 超过 int 范围！<br>
+                <strong>C++ 中 rest 和 need 必须用 long long。</strong><br>
+                Python 自动支持大整数，不用担心。
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#ff9800; background:#fff3e0;">
+            <div class="title" style="color:#e65100;">🚨 细节2：上取整用整数公式！</div>
+            <p style="margin:5px 0;">
+                <span class="code-inline">⌈rest / b⌉ = (rest + b - 1) / b</span>（整数除法）<br>
+                千万不要用浮点数除法再 ceil，会有精度问题！<br>
+                竞赛中整数上取整<strong>永远用这个公式</strong>。
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#43a047; background:#e8f5e9;">
+            <div class="title" style="color:#2e7d32;">🚨 细节3：rest ≤ 0 时不需要烘衣机！</div>
+            <p style="margin:5px 0;">
+                w<sub>i</sub> - a × T 可能是负数（已经超量风干）。<br>
+                此时 rest ≤ 0，说明自然风干就够了。<br>
+                <strong>只有 rest > 0 的衣服才需要计入烘衣机需求。</strong>
+            </p>
+        </div>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6;">
+            <div class="title" style="color:#4527a0;">🚨 细节4：need 累加时也要防溢出！</div>
+            <p style="margin:5px 0;">
+                多件衣服的 ⌈rest/b⌉ 累加可能很大。<br>
+                C++ 中 need 也要用 <span class="code-inline">long long</span>。<br>
+                另外一旦 need > T 就可以提前返回 false（剪枝优化）。
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 代码部分 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 知识点</h2>
+            <ul>
+                <li>🔍 <strong>二分答案模板：</strong> 找最小可行时间 T，<span class="code-inline">hi=mid</span> 模板。</li>
+                <li>📐 <strong>上取整公式：</strong> <span class="code-inline">(rest + b - 1) / b</span>，整数除法实现上取整。</li>
+                <li>📦 <strong>long long：</strong> a×T 可达 2.5×10¹¹，必须用 64 位整数。</li>
+                <li>⚡ <strong>IO 加速：</strong> <span class="code-inline">ios::sync_with_stdio(false)</span>。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 C++ 代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;algorithm&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> n;
+<span class="type">long long</span> a, b;
+<span class="type">long long</span> w[<span class="number">500005</span>];
+
+<span class="comment">// 🟢 check：T 秒内能否烘干所有衣服？</span>
+<span class="type">bool</span> check(<span class="type">long long</span> T) {
+    <span class="type">long long</span> need = <span class="number">0</span>;  <span class="comment">// 烘衣机总共需要的时间</span>
+
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        <span class="type">long long</span> rest = w[i] - a * T;  <span class="comment">// 自然风干后剩余湿度</span>
+        <span class="keyword">if</span> (rest > <span class="number">0</span>) {
+            <span class="comment">// 🔥 还没干，需要烘衣机 ⌈rest/b⌉ 秒</span>
+            need += (rest + b - <span class="number">1</span>) / b;
+            <span class="keyword">if</span> (need > T) <span class="keyword">return</span> <span class="keyword">false</span>;  <span class="comment">// ⚡ 提前剪枝</span>
+        }
+    }
+    <span class="keyword">return</span> need <= T;  <span class="comment">// ✅ 烘衣机时间够用吗？</span>
+}
+
+<span class="type">int</span> main() {
+    ios::sync_with_stdio(<span class="keyword">false</span>);
+    cin.tie(<span class="keyword">nullptr</span>);
+
+    cin >> n >> a >> b;
+
+    <span class="type">long long</span> maxW = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < n; i++) {
+        cin >> w[i];
+        maxW = max(maxW, w[i]);
+    }
+
+    <span class="comment">// 🔍 二分答案：找最小的可行时间 T</span>
+    <span class="type">long long</span> lo = <span class="number">0</span>, hi = maxW;
+    <span class="keyword">while</span> (lo < hi) {
+        <span class="type">long long</span> mid = (lo + hi) / <span class="number">2</span>;
+        <span class="keyword">if</span> (check(mid)) {
+            hi = mid;       <span class="comment">// ✅ 可行，尝试更短时间</span>
+        } <span class="keyword">else</span> {
+            lo = mid + <span class="number">1</span>;   <span class="comment">// ❌ 不可行，增大时间</span>
+        }
+    }
+
+    cout << lo << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 知识点</h2>
+            <ul>
+                <li>🔍 <strong>二分答案：</strong> 找最小可行时间 T，<span class="code-inline">hi=mid</span> 模板。</li>
+                <li>📐 <strong>上取整：</strong> <span class="code-inline">(rest + b - 1) // b</span>，Python 整除用 <span class="code-inline">//</span>。</li>
+                <li>⚡ <strong>快速 IO：</strong> 用 <span class="code-inline">sys.stdin.buffer.read()</span> 一次性读入。</li>
+                <li>🐍 <strong>大整数无忧：</strong> Python 自动处理大整数。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 Python 代码</h2>
+<pre>
+<span class="keyword">import</span> sys
+
+<span class="keyword">def</span> main():
+    data = sys.stdin.buffer.read().split()
+    idx = <span class="number">0</span>
+
+    <span class="keyword">def</span> rd():
+        <span class="keyword">nonlocal</span> idx
+        idx += <span class="number">1</span>
+        <span class="keyword">return</span> <span class="type">int</span>(data[idx - <span class="number">1</span>])
+
+    n, a, b = rd(), rd(), rd()
+    w = [rd() <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="type">range</span>(n)]
+
+    <span class="keyword">def</span> check(T):
+        <span class="string">"""T 秒内能否烘干所有衣服？"""</span>
+        need = <span class="number">0</span>
+        <span class="keyword">for</span> x <span class="keyword">in</span> w:
+            rest = x - a * T
+            <span class="keyword">if</span> rest > <span class="number">0</span>:
+                need += (rest + b - <span class="number">1</span>) // b
+                <span class="keyword">if</span> need > T:       <span class="comment"># ⚡ 提前剪枝</span>
+                    <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">return</span> need <= T
+
+    <span class="comment"># 🔍 二分答案</span>
+    lo, hi = <span class="number">0</span>, <span class="type">max</span>(w)
+    <span class="keyword">while</span> lo < hi:
+        mid = (lo + hi) // <span class="number">2</span>
+        <span class="keyword">if</span> check(mid):
+            hi = mid
+        <span class="keyword">else</span>:
+            lo = mid + <span class="number">1</span>
+
+    <span class="type">print</span>(lo)
+
+main()
+</pre>
+        </div>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 1：n=3, a=2, b=1, w=[1,2,3]</strong><br>
+                lo=0, hi=3<br>
+                check(1)：rest=[0,0,1]，need=⌈1/1⌉=1 ≤ 1 → ✅ hi=1<br>
+                check(0)：rest=[1,2,3]，need=1+2+3=6 > 0 → ❌ lo=1<br>
+                答案 = <strong>1</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 2：n=4, a=1, b=2, w=[4,7,2,5]</strong><br>
+                check(4)：need=0+2+0+1=3 ≤ 4 → ✅<br>
+                check(3)：need=1+2+0+1=4 > 3 → ❌<br>
+                答案 = <strong>4</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 3：n=7, a=2, b=3, w=[3..21]</strong><br>
+                check(6)：need=0+0+0+0+1+2+3=6 ≤ 6 → ✅<br>
+                check(5)：need=0+0+0+1+2+3+4=10 > 5 → ❌<br>
+                答案 = <strong>6</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界：所有 w=0（衣服已经干了）</strong><br>
+                check(0)：所有 rest ≤ 0 → need=0 ≤ 0 → ✅<br>
+                答案 = <strong>0</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #7e57c2;">
+                <strong style="color:#4527a0;">边界：n=1，只有一件衣服</strong><br>
+                不用二分也行，但二分照样正确！<br>
+                check(T)：只需 max(0, ⌈(w-aT)/b⌉) ≤ T
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 直观理解 ==================== -->
+    <div class="card warm">
+        <h2>🎯 直观理解：两种"力量"的合作</h2>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin:15px 0;">
+            <div style="flex:1; min-width:220px; background:#e3f2fd; padding:15px; border-radius:12px; border:2px solid #42a5f5;">
+                <div style="text-align:center; font-size:2em;">🌬️</div>
+                <div style="font-weight:bold; color:#1565c0; text-align:center;">自然风干</div>
+                <ul style="font-size:0.85em; margin:5px 0;">
+                    <li>同时作用于<strong>所有</strong>衣服</li>
+                    <li>每秒每件减 a 点</li>
+                    <li>总减量 = n × a × T</li>
+                    <li>威力大但<strong>均匀分配</strong></li>
+                </ul>
+            </div>
+            <div style="flex:1; min-width:220px; background:#fff3e0; padding:15px; border-radius:12px; border:2px solid #ff9800;">
+                <div style="text-align:center; font-size:2em;">🔥</div>
+                <div style="font-weight:bold; color:#e65100; text-align:center;">烘衣机</div>
+                <ul style="font-size:0.85em; margin:5px 0;">
+                    <li>每秒只能选<strong>一件</strong></li>
+                    <li>该件额外减 b 点</li>
+                    <li>总减量 = b × T（最多）</li>
+                    <li>威力集中，<strong>定点攻破</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#fff; padding:12px; border-radius:10px; border:2px solid #e0e0e0; text-align:center;">
+            <strong>策略：</strong>自然风干搞定大部分 → 烘衣机补刀剩余最难搞的衣服 🎯<br>
+            <span style="font-size:0.85em; color:#888;">正因如此，只要总烘衣机需求 ≤ T 就一定可行——无论怎么安排每秒给谁</span>
+        </div>
+    </div>
+
+    <!-- ==================== 二分模板回顾 ==================== -->
+    <div class="card logic">
+        <h2>🧩 三题对比：同一个模板</h2>
+
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">题目</th>
+                <th class="a-th">优化目标</th>
+                <th class="b-th">二分方向</th>
+            </tr>
+            <tr>
+                <td>🪨 冰川踏石</td>
+                <td>最大化最小距离</td>
+                <td>找最大可行值（lo=mid）</td>
+            </tr>
+            <tr>
+                <td>📦 雪岭分卷</td>
+                <td>最小化最大段和</td>
+                <td>找最小可行值（hi=mid）</td>
+            </tr>
+            <tr>
+                <td>🏫 雪宫借室</td>
+                <td>找第一个失败的申请</td>
+                <td>找最小不可行值（hi=mid）</td>
+            </tr>
+            <tr style="background:#fff3e0;">
+                <td><strong>👕 雪谷烘衣（本题）</strong></td>
+                <td><strong>最小化总时间</strong></td>
+                <td><strong>找最小可行值（hi=mid）</strong></td>
+            </tr>
+        </table>
+
+        <div style="background:#ede7f6; padding:12px; border-radius:10px; margin-top:10px; text-align:center;">
+            <strong>套路总结：</strong><br>
+            猜答案 → 写 check 函数验证 → 利用单调性二分 → 找到最优答案 🎯<br>
+            <span style="font-size:0.85em; color:#888;">本题和"雪岭分卷"都是"找最小可行值"，用同一个模板！</span>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🎯 二分答案思想：</strong> 猜时间 T → 检验"T 秒内烘衣机时间是否够用"。时间越长越容易满足 → 完美单调性 → 二分找最小可行 T！</li>
+            <li><strong>🔥 check 函数：</strong> 每件衣服自然风干后剩余 rest = w<sub>i</sub> - a×T。若 rest > 0，需要烘衣机 ⌈rest/b⌉ 秒。累加所有需求 ≤ T 就可行。整个 check 只需 O(n)！</li>
+            <li><strong>📐 上取整公式：</strong> <span class="code-inline">⌈x/y⌉ = (x + y - 1) / y</span>（整数除法）。竞赛中超级常用，千万不要用浮点 ceil！</li>
+            <li><strong>🔢 long long 注意：</strong> a × T 最大约 (5×10⁵)² = 2.5×10¹¹，超过 int 范围。C++ 中 rest、need 必须用 long long。</li>
+            <li><strong>⚡ 提前剪枝：</strong> check 中一旦 need > T，立即返回 false，避免无效累加。</li>
+            <li><strong>🏔️ 二分范围：</strong> lo=0（最好 0 秒就干了），hi=max(w)（自然风干最湿的衣服，因为 a≥1 所以 max(w)/a ≤ max(w)）。约 19 轮二分 × n 次遍历 = 1 千万次操作，轻松通过！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🏔️ 雪谷营地的衣服全部烘干啦！牛宝宝们又暖又开心！🐄<br>
+        二分答案，温暖所有算法难题！🔥<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>

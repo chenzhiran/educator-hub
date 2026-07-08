@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：等分神技</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #fff3e0;
+            color: #4e342e;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #bf360c;
+            background-color: #e64a19;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(191, 54, 12, 0.15);
+            border: 5px solid #e64a19;
+        }
+
+        h1 {
+            color: #bf360c;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #ffe0b2;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #2e7d32;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #1b5e20, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #1b5e20, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #e64a19;
+            border-bottom: 3px dashed #ffcc80;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #bf360c;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #fff8e1;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #ffcc80;
+        }
+        .card.problem { border-color: #e64a19; background-color: #fbe9e7; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.gcd-card { border-color: #43a047; background-color: #e8f5e9; }
+        .card.lcm-card { border-color: #1565c0; background-color: #e3f2fd; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #ffcc80; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #ffe0b2;
+            color: #bf360c;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 木棍可视化 ========== */
+        .stick-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed #ffcc80;
+        }
+        .stick-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .stick-label {
+            min-width: 60px;
+            font-weight: bold;
+            font-size: 0.95em;
+            text-align: right;
+        }
+        .stick-bar {
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .stick-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: white;
+            border-right: 2px dashed rgba(255,255,255,0.7);
+        }
+        .stick-segment:last-child {
+            border-right: none;
+        }
+
+        /* ========== 辗转相除过程可视化 ========== */
+        .euclid-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #a5d6a7;
+            margin: 15px 0;
+        }
+        .euclid-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            font-size: 1em;
+            flex-wrap: wrap;
+        }
+        .euclid-step.active {
+            background: #e8f5e9;
+            border: 2px solid #43a047;
+        }
+        .euclid-step.done {
+            background: #fff9c4;
+            border: 2px solid #fdd835;
+        }
+        .euclid-a {
+            background: #e3f2fd;
+            border: 2px solid #42a5f5;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-weight: bold;
+            color: #1565c0;
+            min-width: 40px;
+            text-align: center;
+        }
+        .euclid-b {
+            background: #fce4ec;
+            border: 2px solid #ef5350;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-weight: bold;
+            color: #c62828;
+            min-width: 40px;
+            text-align: center;
+        }
+        .euclid-op {
+            color: #888;
+            font-weight: bold;
+        }
+        .euclid-result {
+            background: #c8e6c9;
+            border: 2px solid #43a047;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .euclid-arrow {
+            color: #43a047;
+            font-size: 1.3em;
+        }
+
+        /* ========== 矩形铺砖可视化 ========== */
+        .rect-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #90caf9;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .rect-container {
+            display: inline-block;
+            border: 3px solid #37474f;
+            position: relative;
+            margin: 10px;
+        }
+        .rect-grid {
+            display: grid;
+            gap: 1px;
+            background: #37474f;
+        }
+        .rect-tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75em;
+        }
+
+        /* ========== 数轴可视化 ========== */
+        .numberline {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #ce93d8;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .nl-track {
+            display: flex;
+            align-items: flex-end;
+            gap: 0;
+            min-width: 500px;
+            padding-bottom: 10px;
+        }
+        .nl-tick {
+            width: 25px;
+            text-align: center;
+            font-size: 0.7em;
+            position: relative;
+        }
+        .nl-tick::before {
+            content: '';
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            width: 1px;
+            height: 8px;
+            background: #bbb;
+        }
+        .nl-mark-a {
+            color: #1565c0;
+            font-weight: bold;
+        }
+        .nl-mark-b {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .nl-mark-both {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 0.85em !important;
+        }
+        .nl-dot {
+            position: absolute;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #e64a19;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+            min-width: 85px;
+        }
+        .step-arrow {
+            font-size: 1.5em;
+            color: #e64a19;
+        }
+
+        /* ========== 解法标签 ========== */
+        .method-tab {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0 10px 0;
+            justify-content: center;
+        }
+        .method-btn {
+            padding: 10px 25px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .method-btn.active-a {
+            border-color: #43a047;
+            background: #43a047;
+            color: white;
+        }
+        .method-btn.active-b {
+            border-color: #e64a19;
+            background: #e64a19;
+            color: white;
+        }
+
+        /* ========== 数学演算框 ========== */
+        .math-demo {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+        .math-demo .yes { color: #2e7d32; font-weight: bold; }
+        .math-demo .no { color: #c62828; }
+        .math-demo .res { color: #bf360c; font-weight: bold; font-size: 1.1em; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #ffe0b2;
+        }
+        .example-card strong { color: #bf360c; }
+        .example-card pre {
+            background: transparent;
+            color: #4e342e;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 1em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #bf360c, #e64a19); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 因数可视化 ========== */
+        .factor-visual {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin: 10px 0;
+        }
+        .factor-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 6px 0;
+            flex-wrap: wrap;
+        }
+        .factor-num {
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+            border: 2px solid;
+        }
+        .factor-common {
+            background: #c8e6c9;
+            border-color: #43a047;
+            color: #2e7d32;
+        }
+        .factor-only-a {
+            background: #bbdefb;
+            border-color: #42a5f5;
+            color: #1565c0;
+        }
+        .factor-only-b {
+            background: #ffcdd2;
+            border-color: #ef5350;
+            color: #c62828;
+        }
+
+        /* ========== 公式框 ========== */
+        .formula-box {
+            background: linear-gradient(135deg, #fff8e1, #fff3e0);
+            border: 3px solid #ff9800;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        .formula-big {
+            font-family: Consolas, monospace;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #bf360c;
+            margin: 10px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #bcaaa4;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn, .method-tab { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>⚒️ 等分神技 🪵</h1>
+
+    <div style="text-align: center; font-size: 1.2em; color: #bf360c;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        铁匠大师要把两根木棍切成同样长度的小棍——<br>
+        找出最大公约数和最小公倍数，解锁锻造秘技！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/5" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>给两根木棍，长度分别为 <span class="code-inline">a</span> 和 <span class="code-inline">b</span>：</p>
+        <ul>
+            <li>🔪 <strong>任务一：</strong>把它们全部切成<strong>同样长</strong>的小木棍，不能有剩余。求小木棍的<strong>最大</strong>长度。 → <strong>最大公约数 GCD</strong></li>
+            <li>📏 <strong>任务二：</strong>找一根最短的大木棍，它既能被 a 整切，也能被 b 整切。 → <strong>最小公倍数 LCM</strong></li>
+        </ul>
+
+        <div style="background:#fff3e0; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #ffe0b2;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>两个正整数 a, b（1 ≤ a, b ≤ 10<sup>9</sup>）<br>
+            • <strong>输出：</strong>第1行 gcd(a,b)，第2行 lcm(a,b)
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例 1</strong>
+                <pre>10 16</pre>
+                <strong>📤 输出：</strong>
+                <pre>2
+80</pre>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 2</strong>
+                <pre>6 9</pre>
+                <strong>📤 输出：</strong>
+                <pre>3
+18</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心图解：GCD ==================== -->
+    <div class="card gcd-card">
+        <h2>🧠 魔法道具箱：最大公约数 (GCD)</h2>
+
+        <h3>🪵 什么是"最大公约数"？</h3>
+        <p><strong>公约数</strong> = 同时能整除 a 和 b 的数。<strong>最大公约数 (GCD)</strong> = 其中最大的那个！</p>
+
+        <h3>🔍 样例 1：a = 10, b = 16</h3>
+
+        <div class="factor-visual">
+            <div class="factor-row">
+                <strong style="min-width:80px;">10 的因数：</strong>
+                <div class="factor-num factor-common">1</div>
+                <div class="factor-num factor-common">2</div>
+                <div class="factor-num factor-only-a">5</div>
+                <div class="factor-num factor-only-a">10</div>
+            </div>
+            <div class="factor-row">
+                <strong style="min-width:80px;">16 的因数：</strong>
+                <div class="factor-num factor-common">1</div>
+                <div class="factor-num factor-common">2</div>
+                <div class="factor-num factor-only-b">4</div>
+                <div class="factor-num factor-only-b">8</div>
+                <div class="factor-num factor-only-b">16</div>
+            </div>
+            <div class="factor-row" style="margin-top:8px;">
+                <strong style="min-width:80px;">公约数：</strong>
+                <div class="factor-num factor-common">1</div>
+                <div class="factor-num factor-common" style="font-size:1.1em; padding:5px 12px;">2 ← 最大！</div>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-weight:bold; color:#2e7d32; font-size:1.1em;">
+            GCD(10, 16) = <span style="color:#c62828; font-size:1.3em;">2</span>
+        </div>
+
+        <h3>🪵 切木棍图示</h3>
+        <div class="stick-visual">
+            <div style="color: #bf360c; font-weight: bold;">每根小木棍长度 = GCD(10, 16) = 2</div>
+
+            <div class="stick-row">
+                <div class="stick-label" style="color:#1565c0;">a=10:</div>
+                <div class="stick-bar" style="width:250px; border:2px solid #1565c0;">
+                    <div class="stick-segment" style="width:20%; background:#42a5f5;">2</div>
+                    <div class="stick-segment" style="width:20%; background:#1e88e5;">2</div>
+                    <div class="stick-segment" style="width:20%; background:#42a5f5;">2</div>
+                    <div class="stick-segment" style="width:20%; background:#1e88e5;">2</div>
+                    <div class="stick-segment" style="width:20%; background:#42a5f5;">2</div>
+                </div>
+                <div style="font-size:0.85em; color:#888;">= 5 段</div>
+            </div>
+
+            <div class="stick-row">
+                <div class="stick-label" style="color:#c62828;">b=16:</div>
+                <div class="stick-bar" style="width:400px; border:2px solid #c62828;">
+                    <div class="stick-segment" style="width:12.5%; background:#ef5350;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#e53935;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#ef5350;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#e53935;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#ef5350;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#e53935;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#ef5350;">2</div>
+                    <div class="stick-segment" style="width:12.5%; background:#e53935;">2</div>
+                </div>
+                <div style="font-size:0.85em; color:#888;">= 8 段</div>
+            </div>
+
+            <div style="background:#e8f5e9; padding:10px 15px; border-radius:8px; border:1px solid #a5d6a7; text-align:center; width:90%;">
+                ✅ 两根木棍都能被 2 整除，切成等长小段，没有任何浪费！<br>
+                而且 2 是能做到这一点的<strong>最大</strong>长度。
+            </div>
+        </div>
+
+        <h3>🔍 样例 2：a = 6, b = 9</h3>
+        <div class="factor-visual">
+            <div class="factor-row">
+                <strong style="min-width:80px;">6 的因数：</strong>
+                <div class="factor-num factor-common">1</div>
+                <div class="factor-num factor-only-a">2</div>
+                <div class="factor-num factor-common">3</div>
+                <div class="factor-num factor-only-a">6</div>
+            </div>
+            <div class="factor-row">
+                <strong style="min-width:80px;">9 的因数：</strong>
+                <div class="factor-num factor-common">1</div>
+                <div class="factor-num factor-common">3</div>
+                <div class="factor-num factor-only-b">9</div>
+            </div>
+            <div class="factor-row" style="margin-top:8px;">
+                <strong style="min-width:80px;">公约数：</strong>
+                <div class="factor-num factor-common">1</div>
+                <div class="factor-num factor-common" style="font-size:1.1em; padding:5px 12px;">3 ← 最大！</div>
+            </div>
+        </div>
+
+        <div class="stick-visual">
+            <div style="color: #bf360c; font-weight: bold;">每根小木棍长度 = GCD(6, 9) = 3</div>
+            <div class="stick-row">
+                <div class="stick-label" style="color:#1565c0;">a=6:</div>
+                <div class="stick-bar" style="width:180px; border:2px solid #1565c0;">
+                    <div class="stick-segment" style="width:50%; background:#42a5f5;">3</div>
+                    <div class="stick-segment" style="width:50%; background:#1e88e5;">3</div>
+                </div>
+                <div style="font-size:0.85em; color:#888;">= 2 段</div>
+            </div>
+            <div class="stick-row">
+                <div class="stick-label" style="color:#c62828;">b=9:</div>
+                <div class="stick-bar" style="width:270px; border:2px solid #c62828;">
+                    <div class="stick-segment" style="width:33.3%; background:#ef5350;">3</div>
+                    <div class="stick-segment" style="width:33.3%; background:#e53935;">3</div>
+                    <div class="stick-segment" style="width:33.4%; background:#ef5350;">3</div>
+                </div>
+                <div style="font-size:0.85em; color:#888;">= 3 段</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 核心图解：LCM ==================== -->
+    <div class="card lcm-card">
+        <h2>🧠 魔法道具箱：最小公倍数 (LCM)</h2>
+
+        <h3>📏 什么是"最小公倍数"？</h3>
+        <p><strong>公倍数</strong> = 同时是 a 和 b 的倍数的数。<strong>最小公倍数 (LCM)</strong> = 其中最小的那个！</p>
+
+        <h3>🔍 样例 2：a = 6, b = 9 → 数轴上的倍数</h3>
+        <div class="numberline">
+            <div style="display:flex; margin-bottom:8px; gap:15px; justify-content:center; font-size:0.85em;">
+                <span style="color:#1565c0; font-weight:bold;">🔵 = 6的倍数</span>
+                <span style="color:#c62828; font-weight:bold;">🔴 = 9的倍数</span>
+                <span style="color:#2e7d32; font-weight:bold;">🟢 = 公倍数</span>
+            </div>
+            <div style="overflow-x:auto;">
+                <div class="nl-track">
+                    <div class="nl-tick">0</div>
+                    <div class="nl-tick">1</div>
+                    <div class="nl-tick">2</div>
+                    <div class="nl-tick">3</div>
+                    <div class="nl-tick">4</div>
+                    <div class="nl-tick">5</div>
+                    <div class="nl-tick nl-mark-a" style="position:relative;">6<div class="nl-dot" style="background:#1565c0;"></div></div>
+                    <div class="nl-tick">7</div>
+                    <div class="nl-tick">8</div>
+                    <div class="nl-tick nl-mark-b" style="position:relative;">9<div class="nl-dot" style="background:#c62828;"></div></div>
+                    <div class="nl-tick">10</div>
+                    <div class="nl-tick">11</div>
+                    <div class="nl-tick nl-mark-a" style="position:relative;">12<div class="nl-dot" style="background:#1565c0;"></div></div>
+                    <div class="nl-tick">13</div>
+                    <div class="nl-tick">14</div>
+                    <div class="nl-tick">15</div>
+                    <div class="nl-tick">16</div>
+                    <div class="nl-tick">17</div>
+                    <div class="nl-tick nl-mark-both" style="position:relative;">18<div class="nl-dot" style="background:#2e7d32; width:12px; height:12px;"></div></div>
+                    <div class="nl-tick">19</div>
+                    <div class="nl-tick">20</div>
+                </div>
+            </div>
+            <div style="background:#e3f2fd; padding:10px; border-radius:8px; text-align:center; margin-top:10px;">
+                6 的倍数：6, 12, <strong style="color:#2e7d32;">18</strong>, 24, 30, <strong style="color:#2e7d32;">36</strong>...<br>
+                9 的倍数：9, <strong style="color:#2e7d32;">18</strong>, 27, <strong style="color:#2e7d32;">36</strong>...<br>
+                第一个交汇点 = <strong style="color:#2e7d32; font-size:1.2em;">18</strong> = LCM(6, 9)
+            </div>
+        </div>
+
+        <h3>🔗 GCD 和 LCM 的神奇关系</h3>
+
+        <div class="formula-box">
+            <div style="font-size:0.95em; color:#4e342e;">✨ 核心公式 ✨</div>
+            <div class="formula-big">
+                LCM(a, b) = a × b ÷ GCD(a, b)
+            </div>
+            <div style="font-size:0.9em; color:#795548;">
+                即：<span class="code-inline">lcm = a * b / gcd</span><br>
+                或更安全：<span class="code-inline">lcm = a / gcd * b</span>（先除后乘，防溢出）
+            </div>
+        </div>
+
+        <div class="math-demo" style="border-color:#90caf9;">
+            <strong>验证样例 1：</strong> a=10, b=16, GCD=2<br>
+            LCM = 10 × 16 ÷ 2 = 160 ÷ 2 = <span class="res">80</span> ✅<br><br>
+            <strong>验证样例 2：</strong> a=6, b=9, GCD=3<br>
+            LCM = 6 × 9 ÷ 3 = 54 ÷ 3 = <span class="res">18</span> ✅
+        </div>
+
+        <div class="thinking-box">
+            <div class="title">为什么这个公式成立？</div>
+            <p style="margin:5px 0;">
+                a 和 b 的乘积 = GCD × LCM × 1（但更准确地说）：<br>
+                a = GCD × m，b = GCD × n，其中 m 和 n 互质（没有公因数）<br>
+                LCM = GCD × m × n = a × n = b × m<br>
+                a × b = GCD × m × GCD × n = GCD × (GCD × m × n) = GCD × LCM<br>
+                所以 <strong>LCM = a × b ÷ GCD</strong> 🎯
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 双解法选择 ==================== -->
+    <div style="text-align: center; margin: 30px 0 10px 0;">
+        <div style="font-size: 1.3em; font-weight: bold; color: #4e342e; margin-bottom: 10px;">🎯 两种求 GCD 的方法！</div>
+    </div>
+    <div class="method-tab">
+        <button class="method-btn active-a" onclick="switchMethod('a')">🐢 方法一：枚举法（较慢）</button>
+        <button class="method-btn" onclick="switchMethod('b')">⚡ 方法二：辗转相除法（正解）</button>
+    </div>
+
+    <!-- ==================== 方法一：枚举法 ==================== -->
+    <div class="method-a-only">
+        <div class="card gcd-card">
+            <h2>🐢 方法一：从大到小枚举</h2>
+            <p>最直觉的想法：从 min(a,b) 开始往下试，找到第一个同时整除 a 和 b 的数就是 GCD。</p>
+
+            <div class="math-demo">
+                <strong>例：GCD(10, 16)</strong><br>
+                min(10,16) = 10<br>
+                试 10: 16%10=6 ❌<br>
+                试 9: 10%9=1 ❌<br>
+                试 8: 10%8=2 ❌<br>
+                试 7: 10%7=3 ❌<br>
+                试 6: 10%6=4 ❌<br>
+                试 5: 16%5=1 ❌<br>
+                试 4: 10%4=2 ❌<br>
+                试 3: 10%3=1 ❌<br>
+                试 <span class="yes">2</span>: 10%2=0 ✅ 且 16%2=0 ✅ → <span class="res">GCD = 2！</span>
+            </div>
+
+            <div class="thinking-box" style="border-color: #d32f2f; background: #ffebee;">
+                <div class="title" style="color: #d32f2f;">⚠️ 效率问题</div>
+                <p style="margin:5px 0;">
+                    最坏情况下要从 min(a,b) 一路试到 1，时间复杂度 O(min(a,b))。<br>
+                    当 a, b 达到 10<sup>9</sup> 时，需要 10<sup>9</sup> 次运算 → <strong>超时！</strong>🐌<br>
+                    我们需要更快的算法……
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 方法二：辗转相除法 ==================== -->
+    <div class="method-b-only" style="display: none;">
+        <div class="card" style="border-color:#e64a19; background:#fbe9e7;">
+            <h2>⚡ 方法二：辗转相除法（欧几里得算法）</h2>
+
+            <div class="thinking-box" style="border-color: #e64a19; background: #fbe9e7;">
+                <div class="title" style="color: #bf360c;">💡 核心原理</div>
+                <p style="margin:5px 0;">
+                    <strong>GCD(a, b) = GCD(b, a % b)</strong><br><br>
+                    这个等式说：a 和 b 的最大公约数 = b 和 (a除以b的余数) 的最大公约数！<br>
+                    不断重复这个过程，直到余数变成 0，此时的 b 就是答案。<br><br>
+                    <strong>终止条件：</strong>当 b = 0 时，GCD(a, 0) = a。
+                </p>
+            </div>
+
+            <h3>🎬 样例 1 的辗转相除过程：GCD(10, 16)</h3>
+
+            <div class="euclid-visual">
+                <div class="euclid-step active">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">第1步</div>
+                    <div class="euclid-op">GCD(</div>
+                    <div class="euclid-a">16</div>
+                    <div class="euclid-op">,</div>
+                    <div class="euclid-b">10</div>
+                    <div class="euclid-op">)</div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">16 % 10 = <strong>6</strong></div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">GCD(10, 6)</div>
+                </div>
+
+                <div class="euclid-step active">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">第2步</div>
+                    <div class="euclid-op">GCD(</div>
+                    <div class="euclid-a">10</div>
+                    <div class="euclid-op">,</div>
+                    <div class="euclid-b">6</div>
+                    <div class="euclid-op">)</div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">10 % 6 = <strong>4</strong></div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">GCD(6, 4)</div>
+                </div>
+
+                <div class="euclid-step active">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">第3步</div>
+                    <div class="euclid-op">GCD(</div>
+                    <div class="euclid-a">6</div>
+                    <div class="euclid-op">,</div>
+                    <div class="euclid-b">4</div>
+                    <div class="euclid-op">)</div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">6 % 4 = <strong>2</strong></div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">GCD(4, 2)</div>
+                </div>
+
+                <div class="euclid-step active">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">第4步</div>
+                    <div class="euclid-op">GCD(</div>
+                    <div class="euclid-a">4</div>
+                    <div class="euclid-op">,</div>
+                    <div class="euclid-b">2</div>
+                    <div class="euclid-op">)</div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">4 % 2 = <strong>0</strong></div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">GCD(2, 0)</div>
+                </div>
+
+                <div class="euclid-step done">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">结束！</div>
+                    <div style="font-size:0.9em;">b = 0，返回 a =</div>
+                    <div class="euclid-result">GCD = 2 🎉</div>
+                </div>
+            </div>
+
+            <h3>🎬 样例 2 的辗转相除过程：GCD(6, 9)</h3>
+
+            <div class="euclid-visual">
+                <div class="euclid-step active">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">第1步</div>
+                    <div class="euclid-op">GCD(</div>
+                    <div class="euclid-a">9</div>
+                    <div class="euclid-op">,</div>
+                    <div class="euclid-b">6</div>
+                    <div class="euclid-op">)</div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">9 % 6 = <strong>3</strong></div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">GCD(6, 3)</div>
+                </div>
+
+                <div class="euclid-step active">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">第2步</div>
+                    <div class="euclid-op">GCD(</div>
+                    <div class="euclid-a">6</div>
+                    <div class="euclid-op">,</div>
+                    <div class="euclid-b">3</div>
+                    <div class="euclid-op">)</div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">6 % 3 = <strong>0</strong></div>
+                    <div class="euclid-arrow">→</div>
+                    <div style="font-size:0.9em;">GCD(3, 0)</div>
+                </div>
+
+                <div class="euclid-step done">
+                    <div style="font-weight:bold; color:#888; min-width:50px;">结束！</div>
+                    <div style="font-size:0.9em;">b = 0，返回 a =</div>
+                    <div class="euclid-result">GCD = 3 🎉</div>
+                </div>
+            </div>
+
+            <h3>🧱 用矩形铺砖来理解</h3>
+            <p style="font-size:0.95em;">GCD(a,b) 就是能<strong>正好铺满</strong> a×b 矩形的<strong>最大正方形</strong>的边长！</p>
+
+            <div class="rect-visual">
+                <div style="font-weight:bold; color:#bf360c; margin-bottom:10px;">用 2×2 的正方形铺满 10×16 的矩形</div>
+                <div class="rect-container">
+                    <div class="rect-grid" style="grid-template-columns: repeat(8, 30px); grid-template-rows: repeat(5, 30px);">
+                        <div class="rect-tile" style="background:#ffcdd2;">2</div>
+                        <div class="rect-tile" style="background:#ffcdd2;"></div>
+                        <div class="rect-tile" style="background:#bbdefb;">2</div>
+                        <div class="rect-tile" style="background:#bbdefb;"></div>
+                        <div class="rect-tile" style="background:#ffcdd2;">2</div>
+                        <div class="rect-tile" style="background:#ffcdd2;"></div>
+                        <div class="rect-tile" style="background:#bbdefb;">2</div>
+                        <div class="rect-tile" style="background:#bbdefb;"></div>
+
+                        <div class="rect-tile" style="background:#ffcdd2;"></div>
+                        <div class="rect-tile" style="background:#ffcdd2;"></div>
+                        <div class="rect-tile" style="background:#bbdefb;"></div>
+                        <div class="rect-tile" style="background:#bbdefb;"></div>
+                        <div class="rect-tile" style="background:#ffcdd2;"></div>
+                        <div class="rect-tile" style="background:#ffcdd2;"></div>
+                        <div class="rect-tile" style="background:#bbdefb;"></div>
+                        <div class="rect-tile" style="background:#bbdefb;"></div>
+
+                        <div class="rect-tile" style="background:#c8e6c9;">2</div>
+                        <div class="rect-tile" style="background:#c8e6c9;"></div>
+                        <div class="rect-tile" style="background:#fff9c4;">2</div>
+                        <div class="rect-tile" style="background:#fff9c4;"></div>
+                        <div class="rect-tile" style="background:#c8e6c9;">2</div>
+                        <div class="rect-tile" style="background:#c8e6c9;"></div>
+                        <div class="rect-tile" style="background:#fff9c4;">2</div>
+                        <div class="rect-tile" style="background:#fff9c4;"></div>
+
+                        <div class="rect-tile" style="background:#c8e6c9;"></div>
+                        <div class="rect-tile" style="background:#c8e6c9;"></div>
+                        <div class="rect-tile" style="background:#fff9c4;"></div>
+                        <div class="rect-tile" style="background:#fff9c4;"></div>
+                        <div class="rect-tile" style="background:#c8e6c9;"></div>
+                        <div class="rect-tile" style="background:#c8e6c9;"></div>
+                        <div class="rect-tile" style="background:#fff9c4;"></div>
+                        <div class="rect-tile" style="background:#fff9c4;"></div>
+
+                        <div class="rect-tile" style="background:#e1bee7;">2</div>
+                        <div class="rect-tile" style="background:#e1bee7;"></div>
+                        <div class="rect-tile" style="background:#ffe0b2;">2</div>
+                        <div class="rect-tile" style="background:#ffe0b2;"></div>
+                        <div class="rect-tile" style="background:#e1bee7;">2</div>
+                        <div class="rect-tile" style="background:#e1bee7;"></div>
+                        <div class="rect-tile" style="background:#ffe0b2;">2</div>
+                        <div class="rect-tile" style="background:#ffe0b2;"></div>
+                    </div>
+                </div>
+                <div style="font-size:0.85em; color:#888; margin-top:5px;">
+                    8列 × 5行 = 正好铺满！边长 2 = GCD(10, 16) ✅
+                </div>
+            </div>
+
+            <h3>⚡ 为什么这么快？</h3>
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin:15px 0;">
+                <div style="flex:1; min-width:200px; background:#ffebee; padding:12px; border-radius:10px; border:2px solid #ef5350; text-align:center;">
+                    <div style="font-size:1.3em;">🐢 枚举法</div>
+                    <div style="font-weight:bold; color:#c62828; margin:5px 0;">O(min(a,b))</div>
+                    <div style="font-size:0.85em;">a=10⁹ → 10⁹ 次</div>
+                </div>
+                <div style="flex:1; min-width:200px; background:#e8f5e9; padding:12px; border-radius:10px; border:2px solid #43a047; text-align:center;">
+                    <div style="font-size:1.3em;">⚡ 辗转相除</div>
+                    <div style="font-weight:bold; color:#2e7d32; margin:5px 0;">O(log(min(a,b)))</div>
+                    <div style="font-size:0.85em;">a=10⁹ → 约 30 次！🚀</div>
+                </div>
+            </div>
+
+            <div class="thinking-box" style="border-color: #2e7d32; background: #e8f5e9;">
+                <div class="title" style="color: #2e7d32;">💡 为什么只需要 ~30 步？</div>
+                <p style="margin:5px 0;">
+                    每一步取余后，数字至少减小一半！（可以证明 a % b ≤ a/2）<br>
+                    所以步数 ≤ 2 × log₂(max(a,b))。<br>
+                    当 a = 10⁹ 时，log₂(10⁹) ≈ 30，最多约 60 步。<br>
+                    <strong>比枚举法快了 3000 万倍！</strong> 这就是算法的力量！💪
+                </p>
+            </div>
+        </div>
+
+        <div class="card" style="border-color:#e64a19; background:#fbe9e7;">
+            <h3>⚠️ LCM 计算的溢出陷阱</h3>
+
+            <div class="thinking-box" style="border-color: #d32f2f; background: #ffebee;">
+                <div class="title" style="color: #d32f2f;">🚨 先除后乘，避免溢出！</div>
+                <p style="margin:5px 0;">
+                    公式：<span class="code-inline">LCM = a * b / gcd</span><br><br>
+                    <strong>危险写法：</strong> <span class="code-inline">a * b / gcd</span><br>
+                    当 a = b = 10<sup>9</sup> 时，a × b = 10<sup>18</sup>，超过 int 范围（2×10⁹），甚至可能超过 long long（9.2×10<sup>18</sup>）！<br><br>
+                    <strong>安全写法：</strong> <span class="code-inline">a / gcd * b</span><br>
+                    先除后乘！因为 a 一定能被 gcd 整除，所以 a/gcd 不会有精度问题，<br>
+                    且 a/gcd × b 的结果范围更小、更安全。<br><br>
+                    <strong>C++ 注意：</strong>必须用 <span class="code-inline">long long</span>！<br>
+                    <strong>Python 注意：</strong>Python 大整数不会溢出，但也建议先除后乘。
+                </p>
+            </div>
+
+            <div class="math-demo" style="border-color:#ef9a9a;">
+                <strong>例：a = 10⁹, b = 10⁹, gcd = 10⁹</strong><br><br>
+                <span class="no">❌ 危险：</span> a * b = 10<sup>18</sup>（可能溢出）/ 10⁹ = 10⁹<br>
+                <span class="yes">✅ 安全：</span> a / gcd = 10⁹ / 10⁹ = 1, 然后 1 * 10⁹ = 10⁹ → 结果正确！
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 代码部分 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 知识点</h2>
+            <ul>
+                <li>🔄 <strong>递归函数：</strong> <span class="code-inline">gcd(a, b)</span> 调用自己 <span class="code-inline">gcd(b, a%b)</span>，直到 b=0 返回 a。这是递归的经典应用！</li>
+                <li>📦 <strong>long long 类型：</strong> a, b 最大 10⁹，乘积可达 10¹⁸，必须用 <span class="code-inline">long long</span>（64位整数）。</li>
+                <li>⚡ <strong>三目运算符：</strong> <span class="code-inline">b == 0 ? a : gcd(b, a%b)</span> 一行搞定！等价于 if-else。</li>
+                <li>🛡️ <strong>先除后乘：</strong> <span class="code-inline">a / g * b</span> 而不是 <span class="code-inline">a * b / g</span>，防止中间结果溢出。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 C++ 代码（辗转相除法）</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="comment">// ⚡ 辗转相除法求最大公约数</span>
+<span class="type">long long</span> gcd(<span class="type">long long</span> a, <span class="type">long long</span> b) {
+    <span class="keyword">if</span> (b == <span class="number">0</span>) <span class="keyword">return</span> a;  <span class="comment">// 终止条件：余数为0</span>
+    <span class="keyword">return</span> gcd(b, a % b);   <span class="comment">// 递归：GCD(a,b) = GCD(b, a%b)</span>
+}
+
+<span class="type">int</span> main() {
+    <span class="type">long long</span> a, b;
+    cin >> a >> b;
+
+    <span class="type">long long</span> g = gcd(a, b);           <span class="comment">// 最大公约数</span>
+    <span class="type">long long</span> l = a / g * b;            <span class="comment">// 最小公倍数（先除后乘！）</span>
+
+    cout << g << endl;
+    cout << l << endl;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 C++ 代码（非递归写法）</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> main() {
+    <span class="type">long long</span> a, b;
+    cin >> a >> b;
+
+    <span class="comment">// ⚡ 非递归版辗转相除法</span>
+    <span class="type">long long</span> x = a, y = b;
+    <span class="keyword">while</span> (y != <span class="number">0</span>) {
+        <span class="type">long long</span> temp = y;
+        y = x % y;     <span class="comment">// 余数</span>
+        x = temp;       <span class="comment">// 原来的 b 变成新的 a</span>
+    }
+    <span class="comment">// 循环结束后，x 就是 GCD</span>
+
+    <span class="type">long long</span> g = x;
+    <span class="type">long long</span> l = a / g * b;   <span class="comment">// 先除后乘，防溢出</span>
+
+    cout << g << endl;
+    cout << l << endl;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 知识点</h2>
+            <ul>
+                <li>📦 <strong>内置 gcd：</strong> <span class="code-inline">math.gcd(a, b)</span> 直接计算最大公约数（Python 3.5+）。比自己写更快更安全。</li>
+                <li>🐍 <strong>Python 大整数：</strong> Python 的整数没有大小限制，不用担心溢出！但良好习惯仍建议先除后乘。</li>
+                <li>➗ <strong>整除运算：</strong> <span class="code-inline">//</span> 是整除运算符，结果为整数。<span class="code-inline">/</span> 会得到浮点数，千万别搞混！</li>
+                <li>🔄 <strong>手写递归：</strong> 也可以自己实现辗转相除法，理解算法原理。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 Python 代码（用内置 math.gcd）</h2>
+<pre>
+<span class="keyword">import</span> math
+
+a, b = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+
+g = math.gcd(a, b)         <span class="comment"># 🎯 内置函数，直接求GCD</span>
+l = a // g * b              <span class="comment"># 📏 先除后乘求LCM</span>
+
+<span class="type">print</span>(g)
+<span class="type">print</span>(l)
+</pre>
+        </div>
+
+        <div class="card code-box">
+            <h2>💻 Python 代码（手写辗转相除法）</h2>
+<pre>
+<span class="comment"># ⚡ 手写辗转相除法（理解原理）</span>
+<span class="keyword">def</span> gcd(a, b):
+    <span class="keyword">while</span> b != <span class="number">0</span>:
+        a, b = b, a % b   <span class="comment"># Python 的交换赋值，一行搞定！</span>
+    <span class="keyword">return</span> a
+
+a, b = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+
+g = gcd(a, b)
+l = a // g * b
+
+<span class="type">print</span>(g)
+<span class="type">print</span>(l)
+</pre>
+        </div>
+    </div>
+
+    <!-- ==================== 更多示例 ==================== -->
+    <div class="card logic">
+        <h2>🎨 更多示例图解</h2>
+
+        <h3>📌 示例：互质的两个数 (a=7, b=12)</h3>
+        <div class="euclid-visual">
+            <div style="font-weight:bold; color:#bf360c; margin-bottom:8px;">GCD(12, 7)</div>
+            <div class="euclid-step active">
+                <span>GCD(12, 7)</span>
+                <div class="euclid-arrow">→</div>
+                <span>12%7=5</span>
+                <div class="euclid-arrow">→</div>
+                <span>GCD(7, 5)</span>
+            </div>
+            <div class="euclid-step active">
+                <span>GCD(7, 5)</span>
+                <div class="euclid-arrow">→</div>
+                <span>7%5=2</span>
+                <div class="euclid-arrow">→</div>
+                <span>GCD(5, 2)</span>
+            </div>
+            <div class="euclid-step active">
+                <span>GCD(5, 2)</span>
+                <div class="euclid-arrow">→</div>
+                <span>5%2=1</span>
+                <div class="euclid-arrow">→</div>
+                <span>GCD(2, 1)</span>
+            </div>
+            <div class="euclid-step active">
+                <span>GCD(2, 1)</span>
+                <div class="euclid-arrow">→</div>
+                <span>2%1=0</span>
+                <div class="euclid-arrow">→</div>
+                <span>GCD(1, 0)</span>
+            </div>
+            <div class="euclid-step done">
+                <span>b=0!</span>
+                <div class="euclid-result">GCD = 1</div>
+                <span style="color:#888;">（互质！）</span>
+            </div>
+            <div style="background:#fff9c4; padding:8px 12px; border-radius:8px; margin-top:8px; text-align:center;">
+                GCD = 1，说明 7 和 12 <strong>互质</strong>（没有公因数）<br>
+                LCM = 7 / 1 × 12 = <strong>84</strong>（就是 a × b）
+            </div>
+        </div>
+
+        <h3>📌 示例：一个是另一个的倍数 (a=5, b=15)</h3>
+        <div class="euclid-visual">
+            <div style="font-weight:bold; color:#bf360c; margin-bottom:8px;">GCD(15, 5)</div>
+            <div class="euclid-step active">
+                <span>GCD(15, 5)</span>
+                <div class="euclid-arrow">→</div>
+                <span>15%5=0</span>
+                <div class="euclid-arrow">→</div>
+                <span>GCD(5, 0)</span>
+            </div>
+            <div class="euclid-step done">
+                <span>b=0!</span>
+                <div class="euclid-result">GCD = 5</div>
+                <span style="color:#888;">（一步就完成！）</span>
+            </div>
+            <div style="background:#fff9c4; padding:8px 12px; border-radius:8px; margin-top:8px; text-align:center;">
+                GCD = 5，LCM = 5 / 5 × 15 = <strong>15</strong>（就是较大的那个数）
+            </div>
+        </div>
+
+        <h3>📌 示例：相等的两个数 (a=8, b=8)</h3>
+        <div class="euclid-visual">
+            <div style="font-weight:bold; color:#bf360c; margin-bottom:8px;">GCD(8, 8)</div>
+            <div class="euclid-step active">
+                <span>GCD(8, 8)</span>
+                <div class="euclid-arrow">→</div>
+                <span>8%8=0</span>
+                <div class="euclid-arrow">→</div>
+                <span>GCD(8, 0)</span>
+            </div>
+            <div class="euclid-step done">
+                <span>b=0!</span>
+                <div class="euclid-result">GCD = 8, LCM = 8</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GCD/LCM 性质速查 ==================== -->
+    <div class="card logic">
+        <h2>📋 GCD / LCM 性质速查表</h2>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">性质</th>
+                <th class="a-th">GCD（最大公约数）</th>
+                <th class="b-th">LCM（最小公倍数）</th>
+            </tr>
+            <tr>
+                <td><strong>含义</strong></td>
+                <td>能同时整除 a, b 的最大数</td>
+                <td>同时是 a, b 倍数的最小数</td>
+            </tr>
+            <tr>
+                <td><strong>范围</strong></td>
+                <td>1 ≤ GCD ≤ min(a,b)</td>
+                <td>max(a,b) ≤ LCM ≤ a×b</td>
+            </tr>
+            <tr>
+                <td><strong>互质时</strong></td>
+                <td>GCD = 1</td>
+                <td>LCM = a × b</td>
+            </tr>
+            <tr>
+                <td><strong>a=b 时</strong></td>
+                <td>GCD = a</td>
+                <td>LCM = a</td>
+            </tr>
+            <tr>
+                <td><strong>a|b 时</strong></td>
+                <td>GCD = a（较小的那个）</td>
+                <td>LCM = b（较大的那个）</td>
+            </tr>
+            <tr>
+                <td><strong>关系</strong></td>
+                <td colspan="2" style="color:#bf360c; font-weight:bold;">GCD × LCM = a × b</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 1：a=10, b=16</strong><br>
+                GCD: gcd(16,10)→gcd(10,6)→gcd(6,4)→gcd(4,2)→gcd(2,0) = <strong>2</strong> ✅<br>
+                LCM: 10 / 2 × 16 = 5 × 16 = <strong>80</strong> ✅<br>
+                验证：2 × 80 = 160 = 10 × 16 ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 2：a=6, b=9</strong><br>
+                GCD: gcd(9,6)→gcd(6,3)→gcd(3,0) = <strong>3</strong> ✅<br>
+                LCM: 6 / 3 × 9 = 2 × 9 = <strong>18</strong> ✅<br>
+                验证：3 × 18 = 54 = 6 × 9 ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界测试：a=1, b=1000000000</strong><br>
+                GCD: gcd(10⁹, 1)→gcd(1, 0) = <strong>1</strong> ✅<br>
+                LCM: 1 / 1 × 10⁹ = <strong>1000000000</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #7e57c2;">
+                <strong style="color:#4527a0;">相等测试：a=42, b=42</strong><br>
+                GCD: gcd(42, 42)→gcd(42, 0) = <strong>42</strong> ✅<br>
+                LCM: 42 / 42 × 42 = <strong>42</strong> ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 知识拓展 ==================== -->
+    <div class="card logic">
+        <h2>🧩 知识拓展</h2>
+
+        <h3>📜 欧几里得——2300年前的智慧</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+            <p>辗转相除法由古希腊数学家<strong>欧几里得</strong>在约公元前300年提出，记载在他的名著《几何原本》中。</p>
+            <p>这是人类历史上<strong>最古老的算法之一</strong>，至今仍在计算机科学中广泛使用！</p>
+            <p style="text-align:center; font-size:1.1em; font-weight:bold; color:#bf360c;">
+                2300 年前的算法，至今仍是最优解！这就是数学之美。✨
+            </p>
+        </div>
+
+        <h3>🔗 C++ 内置 GCD（C++17）</h3>
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #e0e0e0;">
+            <p>C++17 标准提供了内置的 <span class="code-inline">__gcd(a, b)</span>（更早可用）和 <span class="code-inline">std::gcd(a, b)</span>（需要 <span class="code-inline">#include &lt;numeric&gt;</span>）。</p>
+            <p>但在竞赛中，<strong>手写 GCD 更安全</strong>（不依赖编译器版本），而且代码只有两三行，何乐而不为？</p>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🔑 辗转相除法（欧几里得算法）：</strong> <span class="code-inline">GCD(a, b) = GCD(b, a % b)</span>，当 b = 0 时返回 a。这是求 GCD 的标准方法，只需 O(log n) 步，即使 a, b 高达 10⁹ 也秒出结果！</li>
+            <li><strong>🔗 GCD 与 LCM 的关系：</strong> <span class="code-inline">LCM = a / GCD * b</span>。记住这个公式，用 GCD 一步推出 LCM！千万不要两个都暴力算。</li>
+            <li><strong>🛡️ 先除后乘防溢出：</strong> C++ 中 a × b 可能超过 long long 范围。写 <span class="code-inline">a / g * b</span> 而不是 <span class="code-inline">a * b / g</span>，先除再乘，确保中间结果不溢出！</li>
+            <li><strong>📦 类型要用 long long：</strong> a, b 最大 10⁹，LCM 最大可达 10¹⁸，int（2×10⁹）装不下，必须用 long long！Python 无此顾虑。</li>
+            <li><strong>🎒 竞赛必备模板：</strong> GCD 是信息学竞赛中出现频率最高的数论工具之一。辗转相除法的三行代码务必烂熟于心，闭着眼都能写出来！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        ⚒️ 锻造完成！安雅完美掌握了等分神技，成为铁匠大师的得意弟子！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+
+    function switchMethod(method) {
+        const aElements = document.querySelectorAll('.method-a-only');
+        const bElements = document.querySelectorAll('.method-b-only');
+        const buttons = document.querySelectorAll('.method-btn');
+
+        buttons.forEach(btn => {
+            btn.classList.remove('active-a', 'active-b');
+        });
+
+        if (method === 'a') {
+            aElements.forEach(el => el.style.display = 'block');
+            bElements.forEach(el => el.style.display = 'none');
+            buttons[0].classList.add('active-a');
+        } else {
+            aElements.forEach(el => el.style.display = 'none');
+            bElements.forEach(el => el.style.display = 'block');
+            buttons[1].classList.add('active-b');
+        }
+    }
+</script>
+
+</body>
+</html>

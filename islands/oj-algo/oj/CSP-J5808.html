@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课堂：冰川踏石</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+            background-color: #e0f7fa;
+            color: #263238;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background-color: #fff;
+            border: 3px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 30px;
+            font-size: 1.2em;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-btn.active.cpp-btn {
+            border-color: #0277bd;
+            background-color: #0288d1;
+            color: white;
+        }
+        .lang-btn.active.py-btn {
+            border-color: #e65100;
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 96, 100, 0.2);
+            border: 5px solid #00acc1;
+        }
+
+        h1 {
+            color: #006064;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px #b2ebf2;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #00838f;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 5px 0 #006064, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 20px 0;
+            border: 2px solid #fff;
+        }
+        .action-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #006064, 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #00838f;
+            border-bottom: 3px dashed #80deea;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #006064;
+            margin-top: 25px;
+        }
+
+        .card {
+            background-color: #e0f7fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 8px solid #80deea;
+        }
+        .card.problem { border-color: #00acc1; background-color: #e0f7fa; }
+        .card.logic { border-color: #ffb74d; background-color: #fff8e1; }
+        .card.knowledge { border-color: #4fc3f7; background-color: #e1f5fe; }
+        .card.code-box { border-color: #37474f; background-color: #eceff1; }
+        .card.summary { border-color: #ef5350; background-color: #ffebee; }
+        .card.binary { border-color: #7e57c2; background-color: #ede7f6; }
+        .card.greedy { border-color: #43a047; background-color: #e8f5e9; }
+
+        pre {
+            background-color: #263238;
+            color: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+
+        .comment { color: #78909c; font-style: italic; }
+        .keyword { color: #ef9a9a; font-weight: bold; }
+        .type { color: #80deea; }
+        .string { color: #c5e1a5; }
+        .number { color: #ffcc80; }
+
+        .code-inline {
+            background-color: #b2ebf2;
+            color: #006064;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #fff9c4;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        /* ========== 冰河可视化 ========== */
+        .river-visual {
+            background: linear-gradient(180deg, #e1f5fe 0%, #b3e5fc 50%, #e1f5fe 100%);
+            padding: 20px 15px;
+            border-radius: 15px;
+            border: 2px solid #4fc3f7;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .river-track {
+            position: relative;
+            min-height: 100px;
+            margin: 10px 0;
+        }
+        .river-line {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #0288d1;
+            border-radius: 2px;
+        }
+        .river-stones {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            min-height: 100px;
+            padding: 0 5px;
+        }
+        .stone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .stone-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: white;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin-bottom: 4px;
+        }
+        .stone-pos {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #37474f;
+        }
+        .stone-label {
+            font-size: 0.65em;
+            color: #78909c;
+        }
+        .stone-start { background: #2e7d32; }
+        .stone-end { background: #c62828; }
+        .stone-keep { background: #1565c0; }
+        .stone-remove { background: #bdbdbd; text-decoration: line-through; }
+        .stone-removed-x {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: #ef5350;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.65em;
+            font-weight: bold;
+        }
+
+        /* 跳跃距离标注 */
+        .jump-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            margin-top: 5px;
+        }
+        .jump-dist {
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            text-align: center;
+            flex: 1;
+            margin: 0 1px;
+        }
+        .jump-ok { background: #c8e6c9; color: #2e7d32; }
+        .jump-bad { background: #ffcdd2; color: #c62828; }
+        .jump-min { background: #fff9c4; color: #f57f17; border: 2px solid #fdd835; }
+
+        /* ========== 二分过程可视化 ========== */
+        .binary-visual {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #b39ddb;
+            margin: 15px 0;
+        }
+        .binary-bar {
+            position: relative;
+            height: 40px;
+            background: linear-gradient(90deg, #e8f5e9, #fff9c4, #ffebee);
+            border-radius: 10px;
+            margin: 15px 0 5px 0;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+        .binary-marker {
+            position: absolute;
+            top: -22px;
+            font-size: 0.75em;
+            font-weight: bold;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .binary-marker::after {
+            content: '▼';
+            display: block;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .binary-lo { color: #2e7d32; }
+        .binary-hi { color: #c62828; }
+        .binary-mid { color: #7e57c2; }
+
+        .binary-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            flex-wrap: wrap;
+        }
+        .binary-step.pass { background: #e8f5e9; border: 2px solid #66bb6a; }
+        .binary-step.fail { background: #ffebee; border: 2px solid #ef5350; }
+        .binary-step.done { background: #fff9c4; border: 2px solid #fdd835; }
+        .bs-label {
+            min-width: 40px;
+            font-weight: bold;
+            color: #888;
+        }
+        .bs-val {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: Consolas, monospace;
+        }
+        .bs-lo { background: #c8e6c9; color: #2e7d32; }
+        .bs-hi { background: #ffcdd2; color: #c62828; }
+        .bs-mid { background: #e1bee7; color: #4a148c; }
+        .bs-result {
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+        }
+        .bs-ok { background: #c8e6c9; color: #2e7d32; }
+        .bs-no { background: #ffcdd2; color: #c62828; }
+
+        /* ========== 贪心检查可视化 ========== */
+        .check-visual {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin: 10px 0;
+        }
+        .check-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .check-step.keep-step { background: #e8f5e9; }
+        .check-step.remove-step { background: #ffebee; }
+        .check-icon { font-size: 1.2em; min-width: 24px; text-align: center; }
+
+        /* ========== 流程步骤 ========== */
+        .step-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-box {
+            background: white;
+            border: 3px solid #00acc1;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+            min-width: 85px;
+        }
+        .step-arrow {
+            font-size: 1.5em;
+            color: #00acc1;
+        }
+
+        /* ========== 思考框 ========== */
+        .thinking-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        .thinking-box::before {
+            content: '🤔';
+            font-size: 1.5em;
+            position: absolute;
+            top: -15px;
+            left: 15px;
+        }
+        .thinking-box .title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 5px;
+        }
+
+        /* ========== 数学演算框 ========== */
+        .math-demo {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            font-size: 1.0em;
+            line-height: 1.8;
+        }
+        .math-demo .yes { color: #2e7d32; font-weight: bold; }
+        .math-demo .no { color: #c62828; font-weight: bold; }
+        .math-demo .res { color: #006064; font-weight: bold; font-size: 1.1em; }
+
+        /* ========== 样例卡 ========== */
+        .example-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .example-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #b2ebf2;
+        }
+        .example-card strong { color: #006064; }
+        .example-card pre {
+            background: transparent;
+            color: #263238;
+            padding: 5px 0;
+            margin: 5px 0;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* ========== 对比表格 ========== */
+        .vs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .vs-table th {
+            padding: 10px 12px;
+            font-size: 1em;
+            color: white;
+        }
+        .vs-table th.a-th { background: linear-gradient(135deg, #006064, #00acc1); }
+        .vs-table th.b-th { background: linear-gradient(135deg, #4527a0, #7e57c2); }
+        .vs-table th.label-th { background: #616161; }
+        .vs-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .vs-table tr:last-child td { border-bottom: none; }
+
+        /* ========== 公式框 ========== */
+        .formula-box {
+            background: linear-gradient(135deg, #ede7f6, #e8eaf6);
+            border: 3px solid #7e57c2;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        .formula-big {
+            font-family: Consolas, monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4527a0;
+            margin: 10px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #80cbc4;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .lang-switch, .action-btn { display: none; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn cpp-btn active" onclick="switchLang('cpp')">🖥️ C++ 魔法</button>
+    <button class="lang-btn py-btn" onclick="switchLang('python')">🐍 Python 魔法</button>
+</div>
+
+<div class="container">
+    <h1>🏔️ 冰川踏石 🪨</h1>
+
+    <div style="text-align: center; font-size: 1.15em; color: #006064;">
+        👋 嗨，小冒险家！我是你的算法向导！<br>
+        冰河上的石头该移走哪些？让最短的一跳尽量远——<br>
+        用二分答案 + 贪心检查，解锁这道经典题！
+    </div>
+
+    <div style="text-align: center;">
+        <a href="https://oj.koudashijie.com/collection/33/type/course/problem/68" target="_blank" class="action-btn">
+            🚀 点击这里，开启魔法传送门（前往做题）！
+        </a>
+    </div>
+
+    <!-- ==================== 题目描述 ==================== -->
+    <div class="card problem">
+        <h2>📜 任务清单 (题目描述)</h2>
+        <p>起点（位置 0）和终点（位置 L）之间有 N 块石头。最多移走 M 块石头。</p>
+        <p>目标：让勇士跳跃路径上的<strong>最短跳跃距离</strong>尽可能<strong>大</strong>！</p>
+
+        <div style="background:#e0f7fa; padding:15px; border-radius:10px; margin:15px 0; border:2px solid #80deea;">
+            <strong>📐 输入输出格式：</strong><br>
+            • <strong>输入：</strong>第1行 L, N, M；接下来 N 行每行一个整数 D<sub>i</sub>（石头位置）<br>
+            • <strong>输出：</strong>一个整数——最短跳跃距离的最大值<br>
+            • <strong>数据范围：</strong>N ≤ 50000，L ≤ 10<sup>9</sup>，0 ≤ M ≤ N
+        </div>
+
+        <div class="example-grid">
+            <div class="example-card">
+                <strong>📥 样例 1</strong>
+<pre>10 3 1
+2
+6
+7</pre>
+                <strong>📤 输出：</strong><span class="highlight">2</span>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 2</strong>
+<pre>25 5 2
+2
+11
+14
+17
+21</pre>
+                <strong>📤 输出：</strong><span class="highlight">4</span>
+            </div>
+            <div class="example-card">
+                <strong>📥 样例 3</strong>
+<pre>50 8 3
+4
+10
+17
+24
+28
+33
+40
+45</pre>
+                <strong>📤 输出：</strong><span class="highlight">7</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例1 图解 ==================== -->
+    <div class="card logic">
+        <h2>🧠 魔法道具箱：看懂样例 1</h2>
+
+        <h3>🪨 初始状态：L=10, N=3, M=1（最多移1块）</h3>
+        <div class="river-visual">
+            <div style="text-align:center; color:#006064; font-weight:bold; margin-bottom:8px;">
+                冰河全长 = 10，石头位置：2, 6, 7
+            </div>
+            <div style="display:flex; align-items:center; gap:0; padding:0 10px;">
+                <div class="stone">
+                    <div class="stone-icon stone-start">起</div>
+                    <div class="stone-pos">0</div>
+                </div>
+                <div style="flex:2; text-align:center;">
+                    <div style="height:3px; background:#0288d1; margin:18px 0;"></div>
+                    <div class="jump-dist" style="background:#e1f5fe; color:#0277bd;">2</div>
+                </div>
+                <div class="stone">
+                    <div class="stone-icon stone-keep">A</div>
+                    <div class="stone-pos">2</div>
+                </div>
+                <div style="flex:4; text-align:center;">
+                    <div style="height:3px; background:#0288d1; margin:18px 0;"></div>
+                    <div class="jump-dist" style="background:#e1f5fe; color:#0277bd;">4</div>
+                </div>
+                <div class="stone">
+                    <div class="stone-icon stone-keep">B</div>
+                    <div class="stone-pos">6</div>
+                </div>
+                <div style="flex:1; text-align:center;">
+                    <div style="height:3px; background:#0288d1; margin:18px 0;"></div>
+                    <div class="jump-dist" style="background:#ffcdd2; color:#c62828;">1</div>
+                </div>
+                <div class="stone">
+                    <div class="stone-icon stone-keep">C</div>
+                    <div class="stone-pos">7</div>
+                </div>
+                <div style="flex:3; text-align:center;">
+                    <div style="height:3px; background:#0288d1; margin:18px 0;"></div>
+                    <div class="jump-dist" style="background:#e1f5fe; color:#0277bd;">3</div>
+                </div>
+                <div class="stone">
+                    <div class="stone-icon stone-end">终</div>
+                    <div class="stone-pos">10</div>
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.85em; color:#c62828; margin-top:5px;">
+                跳跃距离：2, 4, <strong>1</strong>, 3 → 最短 = <strong>1</strong> 😢 太短了！
+            </div>
+        </div>
+
+        <h3>🔍 尝试不同的移走方案</h3>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <!-- 方案1：移走A -->
+            <div style="background:#fff; padding:12px 15px; border-radius:10px; border:2px solid #e0e0e0;">
+                <strong>方案①：移走石头 A（位置2）</strong>
+                <div style="display:flex; align-items:center; gap:0; padding:5px 10px; margin-top:8px;">
+                    <div class="stone"><div class="stone-icon stone-start" style="width:28px;height:28px;font-size:0.7em;">起</div><div class="stone-pos">0</div></div>
+                    <div style="flex:6; text-align:center;"><div class="jump-dist jump-ok">6</div></div>
+                    <div class="stone"><div class="stone-icon stone-keep" style="width:28px;height:28px;font-size:0.7em;">B</div><div class="stone-pos">6</div></div>
+                    <div style="flex:1; text-align:center;"><div class="jump-dist jump-bad">1</div></div>
+                    <div class="stone"><div class="stone-icon stone-keep" style="width:28px;height:28px;font-size:0.7em;">C</div><div class="stone-pos">7</div></div>
+                    <div style="flex:3; text-align:center;"><div class="jump-dist jump-ok">3</div></div>
+                    <div class="stone"><div class="stone-icon stone-end" style="width:28px;height:28px;font-size:0.7em;">终</div><div class="stone-pos">10</div></div>
+                </div>
+                <div style="font-size:0.85em;">距离：6, <strong style="color:#c62828;">1</strong>, 3 → 最短 = <strong>1</strong> 😢 没改善</div>
+            </div>
+
+            <!-- 方案2：移走B -->
+            <div style="background:#e8f5e9; padding:12px 15px; border-radius:10px; border:2px solid #66bb6a;">
+                <strong style="color:#2e7d32;">方案②：移走石头 B（位置6）⭐</strong>
+                <div style="display:flex; align-items:center; gap:0; padding:5px 10px; margin-top:8px;">
+                    <div class="stone"><div class="stone-icon stone-start" style="width:28px;height:28px;font-size:0.7em;">起</div><div class="stone-pos">0</div></div>
+                    <div style="flex:2; text-align:center;"><div class="jump-dist jump-min">2</div></div>
+                    <div class="stone"><div class="stone-icon stone-keep" style="width:28px;height:28px;font-size:0.7em;">A</div><div class="stone-pos">2</div></div>
+                    <div style="flex:5; text-align:center;"><div class="jump-dist jump-ok">5</div></div>
+                    <div class="stone"><div class="stone-icon stone-keep" style="width:28px;height:28px;font-size:0.7em;">C</div><div class="stone-pos">7</div></div>
+                    <div style="flex:3; text-align:center;"><div class="jump-dist jump-ok">3</div></div>
+                    <div class="stone"><div class="stone-icon stone-end" style="width:28px;height:28px;font-size:0.7em;">终</div><div class="stone-pos">10</div></div>
+                </div>
+                <div style="font-size:0.85em; color:#2e7d32;">距离：<strong>2</strong>, 5, 3 → 最短 = <strong>2</strong> ✅ 更好了！</div>
+            </div>
+
+            <!-- 方案3：移走C -->
+            <div style="background:#fff; padding:12px 15px; border-radius:10px; border:2px solid #e0e0e0;">
+                <strong>方案③：移走石头 C（位置7）</strong>
+                <div style="display:flex; align-items:center; gap:0; padding:5px 10px; margin-top:8px;">
+                    <div class="stone"><div class="stone-icon stone-start" style="width:28px;height:28px;font-size:0.7em;">起</div><div class="stone-pos">0</div></div>
+                    <div style="flex:2; text-align:center;"><div class="jump-dist jump-min">2</div></div>
+                    <div class="stone"><div class="stone-icon stone-keep" style="width:28px;height:28px;font-size:0.7em;">A</div><div class="stone-pos">2</div></div>
+                    <div style="flex:4; text-align:center;"><div class="jump-dist jump-ok">4</div></div>
+                    <div class="stone"><div class="stone-icon stone-keep" style="width:28px;height:28px;font-size:0.7em;">B</div><div class="stone-pos">6</div></div>
+                    <div style="flex:4; text-align:center;"><div class="jump-dist jump-ok">4</div></div>
+                    <div class="stone"><div class="stone-icon stone-end" style="width:28px;height:28px;font-size:0.7em;">终</div><div class="stone-pos">10</div></div>
+                </div>
+                <div style="font-size:0.85em;">距离：<strong>2</strong>, 4, 4 → 最短 = <strong>2</strong> ✅ 也是2！</div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:15px; font-weight:bold; color:#006064; font-size:1.2em;">
+            🎯 最优答案 = <span style="color:#c62828; font-size:1.4em;">2</span>（最短跳跃距离的最大值）
+        </div>
+
+        <div class="thinking-box">
+            <div class="title">暴力枚举所有方案可行吗？</div>
+            <p style="margin:5px 0;">
+                N 块石头选 M 块移走，方案数 = C(N, M)。当 N=50000 时，这个数大到不可想象！😱<br>
+                我们需要更聪明的方法……
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 二分答案核心思路 ==================== -->
+    <div class="card binary">
+        <h2>⚡ 核心算法：二分答案 + 贪心检查</h2>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6;">
+            <div class="title" style="color:#4527a0;">💡 关键思想：反转问题！</div>
+            <p style="margin:5px 0;">
+                原问题：移走 ≤ M 块石头后，最短跳跃距离最大是多少？<br><br>
+                <strong>反转成：</strong><br>
+                <span class="code-inline">猜一个答案 x</span> → 问：如果要让每一跳都 ≥ x，最少需要移走几块石头？<br>
+                • 如果需要移走的 ≤ M → x 可行，可以尝试更大的 x<br>
+                • 如果需要移走的 > M → x 不可行，必须减小 x<br><br>
+                <strong>这就是"二分答案"的套路！答案具有单调性：</strong><br>
+                x 越小 → 越容易满足（移走更少石头）<br>
+                x 越大 → 越难满足（需移走更多石头）
+            </p>
+        </div>
+
+        <h3>📊 答案的单调性图示</h3>
+        <div style="background:#fff; padding:20px; border-radius:12px; border:2px solid #e0e0e0; margin:15px 0;">
+            <div style="display:flex; align-items:center; gap:0; margin-bottom:10px;">
+                <div style="width:40px; font-size:0.75em; font-weight:bold; color:#888;">猜 x</div>
+                <div style="flex:1;">
+                    <div style="display:flex; height:35px;">
+                        <div style="flex:1; background:#c8e6c9; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#2e7d32; border-radius:8px 0 0 8px;">x=1 ✅</div>
+                        <div style="flex:1; background:#c8e6c9; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#2e7d32;">x=2 ✅</div>
+                        <div style="flex:1; background:#ffcdd2; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#c62828;">x=3 ❌</div>
+                        <div style="flex:1; background:#ffcdd2; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#c62828;">x=4 ❌</div>
+                        <div style="flex:1; background:#ffcdd2; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#c62828; border-radius:0 8px 8px 0;">... ❌</div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.9em;">
+                <span style="color:#2e7d32; font-weight:bold;">✅ 可行区域</span> 和
+                <span style="color:#c62828; font-weight:bold;">❌ 不可行区域</span> 之间有一条分界线<br>
+                <strong>我们要找的就是最右边的 ✅ → 用二分搜索！</strong>
+            </div>
+        </div>
+
+        <div class="formula-box">
+            <div style="font-size:0.95em; color:#4e342e;">✨ 二分答案模板 ✨</div>
+            <div class="formula-big">
+                lo = 0, hi = L<br>
+                while lo < hi:<br>
+                &nbsp;&nbsp;mid = (lo + hi + 1) / 2<br>
+                &nbsp;&nbsp;if check(mid): lo = mid<br>
+                &nbsp;&nbsp;else: hi = mid - 1<br>
+                答案 = lo
+            </div>
+            <div style="font-size:0.85em; color:#795548;">
+                注意：因为我们要找最大的可行值，用的是"左闭右闭、取上中位数"的模板
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 贪心检查详解 ==================== -->
+    <div class="card greedy">
+        <h2>🔍 check(x) 贪心检查怎么做？</h2>
+
+        <div style="background:#fff; padding:15px; border-radius:12px; border:2px solid #66bb6a; margin:10px 0;">
+            <p style="font-weight:bold; color:#2e7d32;">思路：从起点出发，贪心地保留/移走石头</p>
+            <p>维护一个变量 <span class="code-inline">last</span> = 上一个保留的位置（初始为 0 = 起点）</p>
+            <p>遍历每块石头的位置 <span class="code-inline">d[i]</span>：</p>
+            <ul>
+                <li>如果 <span class="code-inline">d[i] - last < x</span>（距离上一个保留点太近）→ <strong>移走它！</strong>removed++</li>
+                <li>如果 <span class="code-inline">d[i] - last ≥ x</span>（够远）→ <strong>保留它！</strong>更新 last = d[i]</li>
+            </ul>
+            <p>遍历完后检查终点：如果 <span class="code-inline">L - last < x</span>，最后一段也不够 → removed++</p>
+            <p>最终：<span class="code-inline">removed ≤ M</span> → 可行！</p>
+        </div>
+
+        <h3>🎬 样例 1 的 check 过程演示</h3>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <!-- check(2) -->
+            <div style="flex:1; min-width:280px;">
+                <div style="font-weight:bold; color:#7e57c2; margin-bottom:8px;">📌 check(x=2)：每跳 ≥ 2？</div>
+                <div class="check-visual">
+                    <div class="check-step keep-step">
+                        <div class="check-icon">🟢</div>
+                        <div>last=0, 石头A(2): 2-0=<strong>2</strong> ≥ 2 → <strong>保留</strong>，last=2</div>
+                    </div>
+                    <div class="check-step remove-step">
+                        <div class="check-icon">🔴</div>
+                        <div>last=2, 石头B(6): 6-2=<strong>4</strong> ≥ 2 → <strong>保留</strong>，last=6</div>
+                    </div>
+                    <div class="check-step remove-step" style="background:#fff3e0;">
+                        <div class="check-icon">⚠️</div>
+                        <div>last=6, 石头C(7): 7-6=<strong>1</strong> < 2 → <strong>移走！</strong> removed=1</div>
+                    </div>
+                    <div class="check-step keep-step">
+                        <div class="check-icon">🏁</div>
+                        <div>last=6, 终点(10): 10-6=<strong>4</strong> ≥ 2 → OK</div>
+                    </div>
+                    <div style="background:#c8e6c9; padding:8px; border-radius:8px; text-align:center; margin-top:8px;">
+                        removed = 1 ≤ M=1 → <strong style="color:#2e7d32;">✅ 可行！</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- check(3) -->
+            <div style="flex:1; min-width:280px;">
+                <div style="font-weight:bold; color:#7e57c2; margin-bottom:8px;">📌 check(x=3)：每跳 ≥ 3？</div>
+                <div class="check-visual">
+                    <div class="check-step remove-step" style="background:#fff3e0;">
+                        <div class="check-icon">⚠️</div>
+                        <div>last=0, 石头A(2): 2-0=<strong>2</strong> < 3 → <strong>移走！</strong> removed=1</div>
+                    </div>
+                    <div class="check-step keep-step">
+                        <div class="check-icon">🟢</div>
+                        <div>last=0, 石头B(6): 6-0=<strong>6</strong> ≥ 3 → <strong>保留</strong>，last=6</div>
+                    </div>
+                    <div class="check-step remove-step" style="background:#fff3e0;">
+                        <div class="check-icon">⚠️</div>
+                        <div>last=6, 石头C(7): 7-6=<strong>1</strong> < 3 → <strong>移走！</strong> removed=2</div>
+                    </div>
+                    <div class="check-step keep-step">
+                        <div class="check-icon">🏁</div>
+                        <div>last=6, 终点(10): 10-6=<strong>4</strong> ≥ 3 → OK</div>
+                    </div>
+                    <div style="background:#ffcdd2; padding:8px; border-radius:8px; text-align:center; margin-top:8px;">
+                        removed = 2 > M=1 → <strong style="color:#c62828;">❌ 不可行！</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:15px;">
+            <div style="background:#fff9c4; display:inline-block; padding:10px 20px; border-radius:10px; border:2px solid #fdd835; font-weight:bold;">
+                check(2) = ✅，check(3) = ❌ → 答案 = <strong style="color:#c62828; font-size:1.3em;">2</strong> 🎯
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 样例1 二分过程 ==================== -->
+    <div class="card binary">
+        <h2>🎬 样例 1 完整二分过程</h2>
+        <div style="font-weight:bold; color:#006064; margin-bottom:10px;">L=10, N=3, M=1, 石头=[2, 6, 7]</div>
+
+        <div class="binary-visual">
+            <div class="binary-step pass">
+                <div class="bs-label">第1轮</div>
+                <div class="bs-val bs-lo">lo=0</div>
+                <div class="bs-val bs-hi">hi=10</div>
+                <div class="bs-val bs-mid">mid=5</div>
+                <div style="font-size:0.85em;">check(5): 移走A+C=2块 > 1</div>
+                <div class="bs-result bs-no">❌ hi=4</div>
+            </div>
+            <div class="binary-step pass">
+                <div class="bs-label">第2轮</div>
+                <div class="bs-val bs-lo">lo=0</div>
+                <div class="bs-val bs-hi">hi=4</div>
+                <div class="bs-val bs-mid">mid=2</div>
+                <div style="font-size:0.85em;">check(2): 移走C=1块 ≤ 1</div>
+                <div class="bs-result bs-ok">✅ lo=2</div>
+            </div>
+            <div class="binary-step pass">
+                <div class="bs-label">第3轮</div>
+                <div class="bs-val bs-lo">lo=2</div>
+                <div class="bs-val bs-hi">hi=4</div>
+                <div class="bs-val bs-mid">mid=3</div>
+                <div style="font-size:0.85em;">check(3): 移走A+C=2块 > 1</div>
+                <div class="bs-result bs-no">❌ hi=2</div>
+            </div>
+            <div class="binary-step done">
+                <div class="bs-label">结束！</div>
+                <div class="bs-val bs-lo">lo=2</div>
+                <div class="bs-val bs-hi">hi=2</div>
+                <div style="font-size:0.95em; font-weight:bold;">lo == hi →</div>
+                <div class="bs-result" style="background:#fff9c4; color:#e65100; font-size:1em;">🎯 答案 = 2</div>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-size:0.85em; color:#888;">
+            只用了 3 轮就找到答案！比暴力枚举快多了！🚀
+        </div>
+    </div>
+
+    <!-- ==================== 样例2 详细图解 ==================== -->
+    <div class="card logic">
+        <h2>🎨 样例 2 图解：L=25, N=5, M=2</h2>
+
+        <h3>🪨 初始状态</h3>
+        <div class="river-visual">
+            <div style="text-align:center; font-weight:bold; color:#006064; font-size:0.95em;">
+                石头位置：2, 11, 14, 17, 21 | 全长 25 | 最多移走 2 块
+            </div>
+            <div style="display:flex; align-items:center; gap:0; padding:5px 8px; font-size:0.85em;">
+                <div class="stone"><div class="stone-icon stone-start" style="width:30px;height:30px;font-size:0.65em;">起</div><div class="stone-pos">0</div></div>
+                <div style="flex:2; text-align:center;"><div class="jump-dist" style="background:#ffcdd2;color:#c62828;font-size:0.75em;">2</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">A</div><div class="stone-pos">2</div></div>
+                <div style="flex:9; text-align:center;"><div class="jump-dist" style="background:#c8e6c9;color:#2e7d32;font-size:0.75em;">9</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">B</div><div class="stone-pos">11</div></div>
+                <div style="flex:3; text-align:center;"><div class="jump-dist" style="background:#ffcdd2;color:#c62828;font-size:0.75em;">3</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">C</div><div class="stone-pos">14</div></div>
+                <div style="flex:3; text-align:center;"><div class="jump-dist" style="background:#ffcdd2;color:#c62828;font-size:0.75em;">3</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">D</div><div class="stone-pos">17</div></div>
+                <div style="flex:4; text-align:center;"><div class="jump-dist" style="background:#c8e6c9;color:#2e7d32;font-size:0.75em;">4</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">E</div><div class="stone-pos">21</div></div>
+                <div style="flex:4; text-align:center;"><div class="jump-dist" style="background:#c8e6c9;color:#2e7d32;font-size:0.75em;">4</div></div>
+                <div class="stone"><div class="stone-icon stone-end" style="width:30px;height:30px;font-size:0.65em;">终</div><div class="stone-pos">25</div></div>
+            </div>
+        </div>
+
+        <h3>📌 check(x=4) 贪心过程</h3>
+        <div class="check-visual">
+            <div class="check-step remove-step" style="background:#fff3e0;">
+                <div class="check-icon">⚠️</div>
+                <div>last=0, A(2): 2-0=<strong>2</strong> < 4 → <strong>移走！</strong> removed=1</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🟢</div>
+                <div>last=0, B(11): 11-0=<strong>11</strong> ≥ 4 → <strong>保留</strong>，last=11</div>
+            </div>
+            <div class="check-step remove-step" style="background:#fff3e0;">
+                <div class="check-icon">⚠️</div>
+                <div>last=11, C(14): 14-11=<strong>3</strong> < 4 → <strong>移走！</strong> removed=2</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🟢</div>
+                <div>last=11, D(17): 17-11=<strong>6</strong> ≥ 4 → <strong>保留</strong>，last=17</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🟢</div>
+                <div>last=17, E(21): 21-17=<strong>4</strong> ≥ 4 → <strong>保留</strong>，last=21</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🏁</div>
+                <div>last=21, 终点(25): 25-21=<strong>4</strong> ≥ 4 → OK</div>
+            </div>
+            <div style="background:#c8e6c9; padding:8px; border-radius:8px; text-align:center; margin-top:8px;">
+                removed = 2 ≤ M=2 → <strong style="color:#2e7d32;">✅ 可行！</strong>
+            </div>
+        </div>
+
+        <h3>🪨 最优方案图示（移走 A 和 C）</h3>
+        <div class="river-visual">
+            <div style="display:flex; align-items:center; gap:0; padding:5px 8px; font-size:0.85em;">
+                <div class="stone"><div class="stone-icon stone-start" style="width:30px;height:30px;font-size:0.65em;">起</div><div class="stone-pos">0</div></div>
+                <div style="flex:11; text-align:center;"><div class="jump-dist jump-ok">11</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">B</div><div class="stone-pos">11</div></div>
+                <div style="flex:6; text-align:center;"><div class="jump-dist jump-ok">6</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">D</div><div class="stone-pos">17</div></div>
+                <div style="flex:4; text-align:center;"><div class="jump-dist jump-min">4</div></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:30px;height:30px;font-size:0.65em;">E</div><div class="stone-pos">21</div></div>
+                <div style="flex:4; text-align:center;"><div class="jump-dist jump-min">4</div></div>
+                <div class="stone"><div class="stone-icon stone-end" style="width:30px;height:30px;font-size:0.65em;">终</div><div class="stone-pos">25</div></div>
+            </div>
+            <div style="text-align:center; font-size:0.9em; color:#2e7d32; font-weight:bold; margin-top:5px;">
+                跳跃距离：11, 6, <strong style="color:#f57f17;">4</strong>, <strong style="color:#f57f17;">4</strong> → 最短 = <strong>4</strong> ✅
+            </div>
+        </div>
+
+        <h3>📌 check(x=5) 贪心过程</h3>
+        <div class="check-visual">
+            <div class="check-step remove-step" style="background:#fff3e0;">
+                <div class="check-icon">⚠️</div>
+                <div>last=0, A(2): 2 < 5 → <strong>移走！</strong> removed=1</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🟢</div>
+                <div>last=0, B(11): 11 ≥ 5 → <strong>保留</strong>，last=11</div>
+            </div>
+            <div class="check-step remove-step" style="background:#fff3e0;">
+                <div class="check-icon">⚠️</div>
+                <div>last=11, C(14): 3 < 5 → <strong>移走！</strong> removed=2</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🟢</div>
+                <div>last=11, D(17): 6 ≥ 5 → <strong>保留</strong>，last=17</div>
+            </div>
+            <div class="check-step remove-step" style="background:#fff3e0;">
+                <div class="check-icon">⚠️</div>
+                <div>last=17, E(21): 4 < 5 → <strong>移走！</strong> removed=3</div>
+            </div>
+            <div class="check-step keep-step">
+                <div class="check-icon">🏁</div>
+                <div>last=17, 终点(25): 8 ≥ 5 → OK</div>
+            </div>
+            <div style="background:#ffcdd2; padding:8px; border-radius:8px; text-align:center; margin-top:8px;">
+                removed = 3 > M=2 → <strong style="color:#c62828;">❌ 不可行！</strong>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:10px; font-weight:bold;">
+            check(4)=✅，check(5)=❌ → 答案 = <strong style="color:#c62828; font-size:1.3em;">4</strong> 🎯
+        </div>
+    </div>
+
+    <!-- ==================== 样例3 简要 ==================== -->
+    <div class="card logic">
+        <h2>🎨 样例 3 简要图解：L=50, N=8, M=3</h2>
+
+        <div class="river-visual">
+            <div style="text-align:center; font-weight:bold; color:#006064; font-size:0.9em;">
+                石头：4, 10, 17, 24, 28, 33, 40, 45 | 全长 50 | 最多移走 3 块
+            </div>
+            <div style="display:flex; align-items:center; gap:0; padding:5px 5px; font-size:0.8em;">
+                <div class="stone"><div class="stone-icon stone-start" style="width:25px;height:25px;font-size:0.6em;">起</div><div class="stone-pos" style="font-size:0.7em;">0</div></div>
+                <div style="flex:4; text-align:center;"><span style="font-size:0.7em;">4</span></div>
+                <div class="stone"><div class="stone-icon" style="width:25px;height:25px;font-size:0.6em;background:#bdbdbd;">×</div><div class="stone-pos" style="font-size:0.7em;">4</div></div>
+                <div style="flex:6; text-align:center;"><span style="font-size:0.7em;">6</span></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:25px;height:25px;font-size:0.6em;">✓</div><div class="stone-pos" style="font-size:0.7em;">10</div></div>
+                <div style="flex:7; text-align:center;"><span style="font-size:0.7em;">7</span></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:25px;height:25px;font-size:0.6em;">✓</div><div class="stone-pos" style="font-size:0.7em;">17</div></div>
+                <div style="flex:7; text-align:center;"><span style="font-size:0.7em;">7</span></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:25px;height:25px;font-size:0.6em;">✓</div><div class="stone-pos" style="font-size:0.7em;">24</div></div>
+                <div style="flex:4; text-align:center;"><span style="font-size:0.7em;">4</span></div>
+                <div class="stone"><div class="stone-icon" style="width:25px;height:25px;font-size:0.6em;background:#bdbdbd;">×</div><div class="stone-pos" style="font-size:0.7em;">28</div></div>
+                <div style="flex:5; text-align:center;"><span style="font-size:0.7em;">5</span></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:25px;height:25px;font-size:0.6em;">✓</div><div class="stone-pos" style="font-size:0.7em;">33</div></div>
+                <div style="flex:7; text-align:center;"><span style="font-size:0.7em;">7</span></div>
+                <div class="stone"><div class="stone-icon stone-keep" style="width:25px;height:25px;font-size:0.6em;">✓</div><div class="stone-pos" style="font-size:0.7em;">40</div></div>
+                <div style="flex:5; text-align:center;"><span style="font-size:0.7em;">5</span></div>
+                <div class="stone"><div class="stone-icon" style="width:25px;height:25px;font-size:0.6em;background:#bdbdbd;">×</div><div class="stone-pos" style="font-size:0.7em;">45</div></div>
+                <div style="flex:5; text-align:center;"><span style="font-size:0.7em;">5</span></div>
+                <div class="stone"><div class="stone-icon stone-end" style="width:25px;height:25px;font-size:0.6em;">终</div><div class="stone-pos" style="font-size:0.7em;">50</div></div>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-size:0.9em; margin:10px 0;">
+            移走 4, 28, 45（× 标记），保留后跳跃距离：10, 7, 7, 9, 7, 10<br>
+            最短 = <strong style="color:#c62828; font-size:1.2em;">7</strong> 🎯
+        </div>
+    </div>
+
+    <!-- ==================== 算法流程总结 ==================== -->
+    <div class="card logic">
+        <h2>📋 算法流程总结</h2>
+
+        <div class="step-flow">
+            <div class="step-box" style="border-color:#c62828;">
+                <strong>读入</strong><br>
+                <span style="font-size:0.85em;">L, N, M, 石头</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#7e57c2;">
+                <strong>二分答案</strong><br>
+                <span style="font-size:0.85em;">lo=0, hi=L</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#43a047;">
+                <strong>check(mid)</strong><br>
+                <span style="font-size:0.85em;">贪心数移走数</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#ff9800;">
+                <strong>缩小范围</strong><br>
+                <span style="font-size:0.85em;">✅→lo=mid<br>❌→hi=mid-1</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-box" style="border-color:#1565c0;">
+                <strong>输出 lo</strong><br>
+                <span style="font-size:0.85em;">就是答案！</span>
+            </div>
+        </div>
+
+        <h3>⏱️ 复杂度分析</h3>
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">步骤</th>
+                <th class="a-th">操作</th>
+                <th class="b-th">复杂度</th>
+            </tr>
+            <tr>
+                <td>二分轮数</td>
+                <td>在 [0, L] 中二分</td>
+                <td>O(log L) ≈ 30 轮</td>
+            </tr>
+            <tr>
+                <td>每轮 check</td>
+                <td>遍历 N 块石头</td>
+                <td>O(N)</td>
+            </tr>
+            <tr>
+                <td><strong>总计</strong></td>
+                <td><strong>30 × 50000</strong></td>
+                <td><strong>O(N log L) ≈ 150 万次</strong> ⚡</td>
+            </tr>
+        </table>
+        <div style="text-align:center; font-size:0.9em; color:#888;">
+            比暴力枚举（指数级）快了不知道多少倍！💪
+        </div>
+    </div>
+
+    <!-- ==================== 贪心检查的终点处理 ==================== -->
+    <div class="card logic">
+        <h2>⚠️ 细节：终点的处理</h2>
+
+        <div class="thinking-box" style="border-color:#d32f2f; background:#ffebee;">
+            <div class="title" style="color:#d32f2f;">🚨 别忘了检查最后一段！</div>
+            <p style="margin:5px 0;">
+                遍历完所有石头后，还要检查<strong>最后一个保留的石头到终点 L</strong> 的距离。<br><br>
+                如果 <span class="code-inline">L - last < x</span>，说明最后一跳太短了！<br>
+                解决方法：把 last 位置的石头也移走（removed++），让更前面的石头直接跳到终点。<br><br>
+                <strong>举例：</strong>x=5, 石头=[2, 8], L=10, M=1<br>
+                • last=0, 石头(2): 2 < 5 → 移走，removed=1<br>
+                • last=0, 石头(8): 8 ≥ 5 → 保留，last=8<br>
+                • 检查终点：10-8=2 < 5 → removed++ = 2<br>
+                • 2 > M=1 → ❌ 不可行
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 代码部分 ==================== -->
+    <div class="cpp-only">
+        <div class="card knowledge">
+            <h2>📘 C++ 知识点</h2>
+            <ul>
+                <li>🔍 <strong>二分答案模板：</strong> <span class="code-inline">while(lo < hi)</span> + 取上中位数 <span class="code-inline">mid = (lo+hi+1)/2</span>，寻找最大的可行值。</li>
+                <li>🟢 <strong>贪心 check 函数：</strong> 从左到右扫描，太近就移走，够远就保留。O(N) 搞定。</li>
+                <li>📦 <strong>数据类型：</strong> L ≤ 10⁹ 用 int 即可（不会溢出），但用 long long 也无妨。</li>
+                <li>⚡ <strong>快读：</strong> 数据量不大（N ≤ 5×10⁴），cin 足够。更大数据可用 scanf。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 C++ 代码</h2>
+<pre>
+<span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">using namespace</span> <span class="keyword">std</span>;
+
+<span class="type">int</span> L, N, M;
+<span class="type">int</span> d[<span class="number">50005</span>];  <span class="comment">// 石头位置</span>
+
+<span class="comment">// 🟢 贪心检查：最短跳跃距离至少为 x，需要移走多少块？</span>
+<span class="type">bool</span> check(<span class="type">int</span> x) {
+    <span class="type">int</span> removed = <span class="number">0</span>;   <span class="comment">// 移走的石头数</span>
+    <span class="type">int</span> last = <span class="number">0</span>;      <span class="comment">// 上一个保留点的位置（起点=0）</span>
+
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < N; i++) {
+        <span class="keyword">if</span> (d[i] - last < x) {
+            <span class="comment">// 📏 太近了，移走这块石头</span>
+            removed++;
+        } <span class="keyword">else</span> {
+            <span class="comment">// ✅ 够远，保留它</span>
+            last = d[i];
+        }
+    }
+
+    <span class="comment">// 🏁 检查最后一段（last 到终点 L）</span>
+    <span class="keyword">if</span> (L - last < x) removed++;
+
+    <span class="keyword">return</span> removed <= M;
+}
+
+<span class="type">int</span> main() {
+    cin >> L >> N >> M;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i < N; i++)
+        cin >> d[i];
+
+    <span class="comment">// 🔍 二分答案：在 [0, L] 中找最大的可行 x</span>
+    <span class="type">int</span> lo = <span class="number">0</span>, hi = L;
+    <span class="keyword">while</span> (lo < hi) {
+        <span class="type">int</span> mid = (lo + hi + <span class="number">1</span>) / <span class="number">2</span>;  <span class="comment">// 取上中位数</span>
+        <span class="keyword">if</span> (check(mid)) {
+            lo = mid;       <span class="comment">// ✅ 可行，尝试更大</span>
+        } <span class="keyword">else</span> {
+            hi = mid - <span class="number">1</span>;   <span class="comment">// ❌ 不可行，缩小上界</span>
+        }
+    }
+
+    cout << lo << endl;
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</pre>
+        </div>
+    </div>
+
+    <div class="py-only" style="display: none;">
+        <div class="card knowledge">
+            <h2>🐍 Python 知识点</h2>
+            <ul>
+                <li>🔍 <strong>二分答案模板：</strong> 和 C++ 逻辑完全相同。<span class="code-inline">while lo < hi</span> + 上中位数。</li>
+                <li>🟢 <strong>贪心 check 函数：</strong> 一次遍历，O(N)。</li>
+                <li>⚡ <strong>sys.stdin 加速：</strong> N 最大 5万，建议用 <span class="code-inline">sys.stdin</span> 读入。</li>
+                <li>🐍 <strong>整数除法：</strong> <span class="code-inline">//</span> 是整除。Python 不用担心整数溢出。</li>
+            </ul>
+        </div>
+        <div class="card code-box">
+            <h2>💻 Python 代码</h2>
+<pre>
+<span class="keyword">import</span> sys
+<span class="type">input</span> = sys.stdin.readline
+
+<span class="keyword">def</span> check(x):
+    <span class="string">"""贪心检查：最短跳跃距离 >= x，需移走多少块？"""</span>
+    removed = <span class="number">0</span>
+    last = <span class="number">0</span>  <span class="comment"># 上一个保留点</span>
+
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(N):
+        <span class="keyword">if</span> d[i] - last < x:
+            removed += <span class="number">1</span>   <span class="comment"># 太近，移走</span>
+        <span class="keyword">else</span>:
+            last = d[i]     <span class="comment"># 够远，保留</span>
+
+    <span class="comment"># 🏁 检查最后一段</span>
+    <span class="keyword">if</span> L - last < x:
+        removed += <span class="number">1</span>
+
+    <span class="keyword">return</span> removed <= M
+
+<span class="comment"># 📥 读入</span>
+L, N, M = <span class="type">map</span>(<span class="type">int</span>, <span class="type">input</span>().split())
+d = [<span class="type">int</span>(<span class="type">input</span>()) <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="type">range</span>(N)]
+
+<span class="comment"># 🔍 二分答案</span>
+lo, hi = <span class="number">0</span>, L
+<span class="keyword">while</span> lo < hi:
+    mid = (lo + hi + <span class="number">1</span>) // <span class="number">2</span>
+    <span class="keyword">if</span> check(mid):
+        lo = mid        <span class="comment"># ✅ 可行，尝试更大</span>
+    <span class="keyword">else</span>:
+        hi = mid - <span class="number">1</span>    <span class="comment"># ❌ 不可行</span>
+
+<span class="type">print</span>(lo)
+</pre>
+        </div>
+    </div>
+
+    <!-- ==================== 二分模板对比 ==================== -->
+    <div class="card logic">
+        <h2>🧩 二分答案模板速记</h2>
+
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:250px; background:#e8f5e9; padding:15px; border-radius:12px; border:2px solid #66bb6a;">
+                <div style="font-weight:bold; color:#2e7d32; margin-bottom:8px;">📈 找最大可行值（本题）</div>
+                <div style="font-size:0.85em; font-family:Consolas,monospace; line-height:1.6;">
+                    lo = 下界, hi = 上界<br>
+                    while lo < hi:<br>
+                    &nbsp;&nbsp;mid = <strong>(lo+hi+1)/2</strong><br>
+                    &nbsp;&nbsp;if check(mid): <strong>lo=mid</strong><br>
+                    &nbsp;&nbsp;else: <strong>hi=mid-1</strong><br>
+                    答案 = lo
+                </div>
+                <div style="font-size:0.8em; color:#888; margin-top:5px;">关键：上中位数 + lo=mid</div>
+            </div>
+            <div style="flex:1; min-width:250px; background:#e3f2fd; padding:15px; border-radius:12px; border:2px solid #42a5f5;">
+                <div style="font-weight:bold; color:#1565c0; margin-bottom:8px;">📉 找最小可行值</div>
+                <div style="font-size:0.85em; font-family:Consolas,monospace; line-height:1.6;">
+                    lo = 下界, hi = 上界<br>
+                    while lo < hi:<br>
+                    &nbsp;&nbsp;mid = <strong>(lo+hi)/2</strong><br>
+                    &nbsp;&nbsp;if check(mid): <strong>hi=mid</strong><br>
+                    &nbsp;&nbsp;else: <strong>lo=mid+1</strong><br>
+                    答案 = lo
+                </div>
+                <div style="font-size:0.8em; color:#888; margin-top:5px;">关键：下中位数 + hi=mid</div>
+            </div>
+        </div>
+
+        <div class="thinking-box" style="border-color:#7e57c2; background:#ede7f6; margin-top:15px;">
+            <div class="title" style="color:#4527a0;">💡 什么时候用"二分答案"？</div>
+            <p style="margin:5px 0;">
+                当你发现：<br>
+                1️⃣ 直接求答案很难，但<strong>验证一个答案是否可行</strong>很容易（贪心/模拟）<br>
+                2️⃣ 答案有<strong>单调性</strong>：越小越容易可行（或越大越容易）<br><br>
+                经典题型：最大化最小值、最小化最大值 → 都可以二分答案！
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== 样例验证 ==================== -->
+    <div class="card logic">
+        <h2>✅ 样例验证</h2>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 1：L=10, N=3, M=1, d=[2,6,7]</strong><br>
+                check(2)：移走 7（1块）≤ 1 → ✅<br>
+                check(3)：移走 2,7（2块）> 1 → ❌<br>
+                答案 = <strong>2</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 2：L=25, N=5, M=2, d=[2,11,14,17,21]</strong><br>
+                check(4)：移走 2,14（2块）≤ 2 → ✅<br>
+                check(5)：移走 2,14,21（3块）> 2 → ❌<br>
+                答案 = <strong>4</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #43a047;">
+                <strong style="color:#43a047;">样例 3：L=50, N=8, M=3, d=[4,10,17,24,28,33,40,45]</strong><br>
+                check(7)：移走 4,28,45（3块）≤ 3 → ✅<br>
+                check(8)：移走 4,28,33,45（4块）> 3 → ❌<br>
+                答案 = <strong>7</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #ff9800;">
+                <strong style="color:#e65100;">边界：N=0（没有石头）</strong><br>
+                没有中间石头，只能跳 L → 答案 = <strong>L</strong> ✅<br>
+                （check 函数不进入循环，removed=0 ≤ M → lo 会一直上升到 L）
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #7e57c2;">
+                <strong style="color:#4527a0;">边界：M=N（全部移走）</strong><br>
+                所有石头都可以移走 → 只需从 0 跳到 L → 答案 = <strong>L</strong> ✅
+            </div>
+            <div style="background:white; padding:15px; border-radius:10px; border-left:4px solid #c62828;">
+                <strong style="color:#c62828;">边界：M=0（不能移走）</strong><br>
+                必须保留所有石头 → 答案 = 相邻石头间的最短距离 ✅
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 类似题目拓展 ==================== -->
+    <div class="card logic">
+        <h2>🧩 知识拓展：同类题型</h2>
+
+        <table class="vs-table">
+            <tr>
+                <th class="label-th">题目特征</th>
+                <th class="a-th">解题方法</th>
+                <th class="b-th">二分什么？</th>
+            </tr>
+            <tr>
+                <td>最大化最小值</td>
+                <td>二分答案 + 贪心检查</td>
+                <td>最小值的候选值</td>
+            </tr>
+            <tr>
+                <td>最小化最大值</td>
+                <td>二分答案 + 贪心检查</td>
+                <td>最大值的候选值</td>
+            </tr>
+            <tr>
+                <td>能否完成 / 够不够</td>
+                <td>二分答案 + 可行性检查</td>
+                <td>资源量 / 时间</td>
+            </tr>
+        </table>
+
+        <div style="background:#fff; padding:12px; border-radius:10px; border:2px solid #e0e0e0; margin-top:10px;">
+            <strong>经典同类题：</strong>
+            <ul style="margin:5px 0;">
+                <li>🐄 <strong>Aggressive Cows：</strong>N 个牛棚放 C 头牛，最大化最近两头牛的距离</li>
+                <li>🍰 <strong>分蛋糕：</strong>切 N 段绳子为 K 段等长，最大化每段长度</li>
+                <li>📦 <strong>关押罪犯：</strong>最小化最大冲突（上一题！也可二分答案解）</li>
+            </ul>
+            <p style="font-size:0.9em; color:#888;">这些题的核心套路都是一样的：<strong>猜答案 → 验证 → 二分缩小范围</strong>。</p>
+        </div>
+    </div>
+
+    <!-- ==================== 总结 ==================== -->
+    <div class="card summary">
+        <h2>💡 技巧和重点总结 (划重点啦)</h2>
+        <ul>
+            <li><strong>🎯 二分答案思想：</strong> 不直接求"最优解是多少"，而是猜一个答案 x，检查"x 是否可行"。利用答案的<strong>单调性</strong>，用二分搜索找到最优的 x。这是解决"最大化最小值"类问题的神器！</li>
+            <li><strong>🟢 贪心 check 函数：</strong> 从左到右扫描石头，太近（< x）就移走，够远（≥ x）就保留。最后别忘了检查终点！时间复杂度 O(N)，简单高效。</li>
+            <li><strong>📏 二分范围：</strong> lo = 0（最短跳跃可以是 0），hi = L（最远就是一步到终点）。二分轮数 = log₂(L) ≈ 30 次。</li>
+            <li><strong>⚡ 总体复杂度：</strong> O(N × log L)。当 N = 50000, L = 10⁹ 时，约 50000 × 30 = 150 万次运算，毫秒级搞定！</li>
+            <li><strong>🛡️ 上中位数防死循环：</strong> 找最大可行值时，mid 要取 <span class="code-inline">(lo+hi+1)/2</span>（上中位数），否则当 lo+1==hi 时会死循环。这是二分答案的经典坑！</li>
+            <li><strong>🎒 竞赛核心模板：</strong> 本题是 NOIP2015 提高组 D2T1 改编，是学习二分答案的经典入门题。掌握后，同类题型一通百通！</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        🏔️ 勇士踏破冰川，征服了踏石挑战！二分之力，势不可挡！<br>
+        —— 扣哒世界教研团队 💖
+    </div>
+</div>
+
+<script>
+    function switchLang(lang) {
+        const cppElements = document.querySelectorAll('.cpp-only');
+        const pyElements = document.querySelectorAll('.py-only');
+        const cppBtn = document.querySelector('.cpp-btn');
+        const pyBtn = document.querySelector('.py-btn');
+
+        if (lang === 'cpp') {
+            cppElements.forEach(el => el.style.display = 'block');
+            pyElements.forEach(el => el.style.display = 'none');
+            cppBtn.classList.add('active');
+            pyBtn.classList.remove('active');
+        } else {
+            cppElements.forEach(el => el.style.display = 'none');
+            pyElements.forEach(el => el.style.display = 'block');
+            pyBtn.classList.add('active');
+            cppBtn.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>
