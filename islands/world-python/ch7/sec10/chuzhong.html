@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC10-11A4A66AC077">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十单元：认识字典 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC10-11A4A66AC077 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS4-第十单元</div>
+
+    <a href="#section-10-1" class="nav-section">10.1 字典基础</a>
+    <a href="#sec-10-1-1" class="nav-sub">10.1.1 什么是字典</a>
+    <a href="#sec-10-1-2" class="nav-sub">10.1.2 键值对结构</a>
+    <a href="#sec-10-1-3" class="nav-sub">10.1.3 两种取值方式</a>
+
+    <a href="#section-10-2" class="nav-section">10.2 位置就是字典</a>
+    <a href="#sec-10-2-1" class="nav-sub">10.2.1 pos 的真面目</a>
+    <a href="#sec-10-2-2" class="nav-sub">10.2.2 手写坐标字典</a>
+
+    <a href="#section-10-3" class="nav-section">10.3 move vs moveXY</a>
+    <a href="#sec-10-3-1" class="nav-sub">10.3.1 参数的区别</a>
+    <a href="#sec-10-3-2" class="nav-sub">10.3.2 阻塞 vs 继续</a>
+    <a href="#sec-10-3-3" class="nav-sub">10.3.3 一小步的追踪</a>
+
+    <a href="#section-10-4" class="nav-section">10.4 实战关卡精讲</a>
+    <a href="#sec-10-4-1" class="nav-sub">10.4.1 峭壁追逐</a>
+    <a href="#sec-10-4-2" class="nav-sub">10.4.2 激流回旋</a>
+    <a href="#sec-10-4-3" class="nav-sub">10.4.3 兽人山谷挖宝</a>
+
+    <a href="#section-10-5" class="nav-section">10.5 常见错误</a>
+    <a href="#sec-10-5-1" class="nav-sub">10.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十单元：认识字典</h1>
+    <div class="subtitle">Unit 10: Understanding Dictionaries</div>
+    <div class="badge">计算机科学 4 · 安息云峰 Cloudrip Mountain · 峭壁追逐 → 兽人山谷挖宝</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 10.1 ==================== -->
+<div class="section-header" id="section-10-1">
+    <h2>10.1 字典基础</h2>
+    <div class="en-title">The Basics of Dictionaries</div>
+</div>
+
+<p>寒风凛冽的<strong>安息云峰</strong>到了！雪山之巅，路径崎岖，稍有不慎就会踩进陷阱。要在这里灵活穿行、精准移动，你需要掌握一种全新的数据结构——<span class="keyword">字典（dictionary）</span>。它在 扣哒世界 里也被称作<strong>对象字面量（object literal）</strong>，是用"名字"来存取数据的强大工具。本单元你会发现：原来你早就在用它了，只是从未认真端详过它的模样。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>之前你用数组（array）按<strong>位置编号</strong>存取数据（<code>coins[0]</code>）；而字典换了个思路——用<strong>有意义的名字</strong>存取数据（<code>pos["x"]</code>）。当你写 <code>hero.move(coin.pos)</code> 时，那个 <code>pos</code> 其实就是一个装着 <code>x</code> 和 <code>y</code> 的小字典。看懂这一点，移动、寻路、构造坐标都会豁然开朗。
+</div>
+
+<h3 id="sec-10-1-1">10.1.1 什么是字典（What Is a Dictionary）</h3>
+
+<h4>10.1.1.1 用"名字"而不是"编号"存取数据
+    <span class="en">Look up by name, not by number</span>
+</h4>
+
+<p>数组像一排储物柜，靠"第几号"取东西；字典则像一本通讯录，靠"名字"查电话。字典把数据组织成一组 <span class="keyword">键值对（key-value pair）</span>：每个<strong>键（key）</strong>是一个名字，对应一个<strong>值（value）</strong>。关卡里的说法是："对象字面量是由与之相关联的键组成的。"比如坐标字典 <code>{"x": 20, "y": 35}</code>，键 <code>"x"</code> 对应值 <code>20</code>，键 <code>"y"</code> 对应值 <code>35</code>。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-1-1-1_dict_intro.png" alt="扣哒世界 字典概念示意图 - koudashijie.com">
+    <div class="caption">图1：字典像一本通讯录——用键（名字）查找对应的值，而不用记住位置编号</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-10-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<h3 id="sec-10-1-2">10.1.2 键值对结构（Key-Value Pairs）</h3>
+
+<h4>10.1.2.1 花括号、冒号、逗号的分工
+    <span class="en">Braces, colons, and commas</span>
+</h4>
+
+<p>写一个字典有固定的格式：用<strong>花括号 <code>{ }</code></strong> 把整个字典包起来，每一对里用<strong>冒号 <code>:</code></strong> 把键和值连起来，多对之间用<strong>逗号 <code>,</code></strong> 隔开。键通常是加引号的字符串，值可以是数字、字符串等。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 540 150" width="540" role="img" aria-label="字典结构解剖">
+        <text x="270" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">字典的组成部件</text>
+        <text x="40" y="78" font-size="20" font-family="monospace" fill="#cdddea">pos = {</text>
+        <text x="150" y="78" font-size="20" font-family="monospace" fill="#9fd4a8">"x"</text>
+        <text x="185" y="78" font-size="20" font-family="monospace" fill="#e8a15a">:</text>
+        <text x="205" y="78" font-size="20" font-family="monospace" fill="#e8a15a">20</text>
+        <text x="240" y="78" font-size="20" font-family="monospace" fill="#e8a15a">,</text>
+        <text x="265" y="78" font-size="20" font-family="monospace" fill="#9fd4a8">"y"</text>
+        <text x="300" y="78" font-size="20" font-family="monospace" fill="#e8a15a">:</text>
+        <text x="320" y="78" font-size="20" font-family="monospace" fill="#e8a15a">35</text>
+        <text x="355" y="78" font-size="20" font-family="monospace" fill="#cdddea">}</text>
+        <text x="163" y="105" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">键</text>
+        <text x="212" y="105" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">值</text>
+        <text x="185" y="122" font-size="11" fill="#7cc7e8" text-anchor="middle" font-family="sans-serif">冒号连接</text>
+        <text x="240" y="122" font-size="11" fill="#7cc7e8" text-anchor="middle" font-family="sans-serif">逗号分隔</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一个表示位置的字典</span>
+pos = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">20</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">35</span><span class="punc">}</span>
+<span class="cmt"># 键 "x" 对应值 20，键 "y" 对应值 35</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-10-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<h3 id="sec-10-1-3">10.1.3 两种取值方式（Two Ways to Read）</h3>
+
+<h4>10.1.3.1 方括号取键 与 点号取属性
+    <span class="en">Bracket access and dot access</span>
+</h4>
+
+<p>从字典里取出某个值，有两种写法。关卡里两种都出现过：一种是<strong>方括号加键名</strong> <code>pos["x"]</code>——正如关卡所说"<code>pos.x</code> 将返回 20，<code>pos.y</code> 将返回 35"；另一种是<strong>点号加属性名</strong> <code>pos.x</code>。在 扣哒世界 里这两种写法效果相同，都能取到键 <code>"x"</code> 对应的值。</p>
+
+<table class="styled-table">
+    <thead><tr><th>写法</th><th>示例</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td>方括号 + 键名</td><td><code>pos["x"]</code></td><td>取键 <code>"x"</code> 对应的值</td></tr>
+        <tr><td>点号 + 属性名</td><td><code>pos.x</code></td><td>取属性 <code>x</code> 的值（同上）</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">数组 vs 字典：</span>数组用<strong>数字下标</strong>取值（<code>gems[0]</code>，第 0 个宝石），字典用<strong>键名</strong>取值（<code>pos["x"]</code>，x 坐标）。一个靠"排第几"，一个靠"叫什么"。理解这个区别，你就能根据场景选对工具：有序的一串用数组，带名字的属性用字典。
+</div>
+
+<!-- ==================== 10.2 ==================== -->
+<div class="section-header" id="section-10-2">
+    <h2>10.2 位置就是字典</h2>
+    <div class="en-title">A Position Is a Dictionary</div>
+</div>
+
+<h3 id="sec-10-2-1">10.2.1 pos 的真面目（What pos Really Is）</h3>
+
+<h4>10.2.1.1 你早就在用字典了
+    <span class="en">You've been using dictionaries all along</span>
+</h4>
+
+<p>这是本单元最重要的"顿悟时刻"：你之前写的每一个 <code>coin.pos</code>、<code>enemy.pos</code>、<code>hero.pos</code>，那个 <code>pos</code> <strong>本身就是一个字典</strong>！关卡说得很清楚："'位置'是一种拥有一个 x 属性和一个 y 属性的对象。"所以 <code>coin.pos.x</code> 的完整含义是：先取硬币的 <code>pos</code> 字典，再从这个字典里取出 <code>x</code> 键的值。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>coin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">())</span>
+<span class="cmt"># coin.pos 是一个字典，形如 {"x": 34, "y": 20}</span>
+x = coin<span class="punc">.</span>pos<span class="punc">.</span>x     <span class="cmt"># 从 pos 字典里取 x 键 → 34</span>
+y = coin<span class="punc">.</span>pos<span class="punc">.</span>y     <span class="cmt"># 从 pos 字典里取 y 键 → 20</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8e73525d56:START anchor=sec-10-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8e73525d56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，有用户说它真的很适合打基础，触类旁通下 C 语言也学得很快。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8e73525d56:END -->
+<!-- CC-PROTECTION:HIDDEN:a72d22d7ba:START anchor=sec-10-2-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a72d22d7ba">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:a72d22d7ba:END -->
+
+<h3 id="sec-10-2-2">10.2.2 手写坐标字典（Building a pos by Hand）</h3>
+
+<h4>10.2.2.1 自己造一个位置去指挥英雄
+    <span class="en">Construct your own position</span>
+</h4>
+
+<p>既然 <code>pos</code> 是字典，那我们完全可以<strong>自己手写一个</strong>坐标字典，让英雄移动到任意指定的地方——哪怕那里没有任何物体。这正是"激流回旋"和"兽人山谷挖宝"两关的核心技巧：想去 (20, 35)，就直接传 <code>{"x": 20, "y": 35}</code>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 手写一个坐标字典，移动到 (20, 35)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span><span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">20</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">35</span><span class="punc">})</span>
+
+<span class="cmt"># 移动到围栏后面的安全点 (15, 38)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span><span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">15</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">38</span><span class="punc">})</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">两种参数来源：</span>给 <code>move</code> 传位置时，可以用<strong>现成的字典</strong>（如 <code>coin.pos</code>，某个物体的位置），也可以<strong>临时手写一个字典</strong>（如 <code>{"x": 20, "y": 35}</code>，一个具体坐标）。前者用来追物体，后者用来去固定地点。
+</div>
+
+<!-- ==================== 10.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-10-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<div class="section-header" id="section-10-3">
+    <h2>10.3 move 与 moveXY 的区别</h2>
+    <div class="en-title">move versus moveXY</div>
+</div>
+
+<h3 id="sec-10-3-1">10.3.1 参数的区别（Different Arguments）</h3>
+
+<h4>10.3.1.1 一个参数 vs 两个参数
+    <span class="en">One argument versus two</span>
+</h4>
+
+<p>本单元登场的新动作 <code>move</code> 和你熟悉的 <code>moveXY</code> 长得像，用法却不同。最直观的差别在参数：关卡说"<strong><code>move(pos)</code> 有一个参数，而不是 <code>moveXY(x, y)</code> 的两个参数</strong>"。<code>moveXY</code> 要你拆开写 x 和 y 两个数字，<code>move</code> 只要一个装着坐标的<strong>字典</strong>。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>moveXY —— 两个数字</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> coin<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+<span class="cmt"># 拆成 x、y 两个参数</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>move —— 一个位置</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">)</span>
+<span class="cmt"># 直接传整个 pos 字典</span></pre>
+        </div>
+    </div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-10-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+
+<h3 id="sec-10-3-2">10.3.2 阻塞 vs 继续（Blocking versus Continuing）</h3>
+
+<h4>10.3.2.1 这是二者最本质的差别
+    <span class="en">The deepest difference</span>
+</h4>
+
+<p>比参数更关键的，是它们的<strong>运行行为</strong>。关卡把这点讲得很透彻：使用 <code>moveXY</code>，程序会<strong>停下来等待</strong>，直到英雄走到指定坐标才继续；而使用 <code>move</code>，英雄只朝目标<strong>迈出一小步</strong>，程序<strong>立刻继续往下运行</strong>。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 200" width="600" role="img" aria-label="move与moveXY行为对比">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">阻塞 moveXY vs 非阻塞 move</text>
+        <text x="150" y="52" text-anchor="middle" font-size="13" fill="#2A5A85" font-family="sans-serif" font-weight="bold">moveXY：走到才继续</text>
+        <rect x="60" y="65" width="180" height="34" rx="8" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+        <text x="150" y="87" text-anchor="middle" font-size="12" fill="#2A5A85" font-family="sans-serif">一次性走完整段路</text>
+        <line x1="150" y1="99" x2="150" y2="120" stroke="#4d6373" stroke-width="2" marker-end="url(#m-arr)"/>
+        <rect x="60" y="122" width="180" height="34" rx="8" fill="#eaf2f8" stroke="#4A7A9B" stroke-width="2"/>
+        <text x="150" y="144" text-anchor="middle" font-size="12" fill="#3a6480" font-family="sans-serif">期间程序被"冻住"</text>
+
+        <text x="450" y="52" text-anchor="middle" font-size="13" fill="#bd7415" font-family="sans-serif" font-weight="bold">move：一步即返回</text>
+        <rect x="360" y="65" width="180" height="34" rx="8" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+        <text x="450" y="87" text-anchor="middle" font-size="12" fill="#bd7415" font-family="sans-serif">只迈一小步</text>
+        <line x1="450" y1="99" x2="450" y2="120" stroke="#4d6373" stroke-width="2" marker-end="url(#m-arr)"/>
+        <rect x="360" y="122" width="180" height="34" rx="8" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+        <text x="450" y="144" text-anchor="middle" font-size="12" fill="#2f7a45" font-family="sans-serif">程序立刻往下跑</text>
+        <path d="M450,156 L450,178 L560,178 L560,82 L543,82" fill="none" stroke="#2f7a45" stroke-width="2" marker-end="url(#m-arr)"/>
+        <text x="505" y="195" text-anchor="middle" font-size="10" fill="#2f7a45" font-family="sans-serif">下轮循环再迈一步</text>
+        <defs>
+            <marker id="m-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+    </svg>
+</div>
+
+<h3 id="sec-10-3-3">10.3.3 一小步的追踪（Tracking Step by Step）</h3>
+
+<h4>10.3.3.1 为什么"一小步"反而更强大
+    <span class="en">Why small steps win</span>
+</h4>
+
+<p>"只走一小步"听起来像缺点，其实是 <code>move</code> 最大的优势。因为程序不会被冻住，你可以把 <code>move</code> 放进循环里，<strong>每一轮都重新计算目标、再迈一步</strong>。这样英雄就能实时追踪一个移动中的目标——目标跑到哪，下一步就朝哪。这正是"峭壁追逐"能追上会逃跑的 Pender 的秘诀。</p>
+
+<div class="remember-box">
+    <span class="remember-label">一句话记牢：</span><code>moveXY</code> 适合去<strong>固定不动</strong>的地方（走到为止）；<code>move</code> 适合追<strong>移动中</strong>的目标或需要<strong>随时中断调整</strong>的场合（走一步、看一步）。选错了，追人会追丢、走路会撞墙。
+</div>
+
+<!-- ==================== 10.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-10-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+<!-- CC-PROTECTION:HIDDEN:bb62e785e5:START anchor=sec-10-3-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="bb62e785e5">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:bb62e785e5:END -->
+
+<div class="section-header" id="section-10-4">
+    <h2>10.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 峭壁追逐 -->
+<div class="level-card" id="sec-10-4-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 峭壁追逐</span>
+        <h3>🏃 峭壁追逐 —— 用 move 追上逃跑的目标</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-4-1-1_cliff_chase.png" alt="扣哒世界 峭壁追逐关卡 - koudashijie.com">
+            <div class="caption">图2：峭壁追逐——用 move 一步步紧追不断逃跑的 Pender Spellbane</div>
+        </div>
+
+        <h4>策略：把 move 放进循环持续追踪</h4>
+        <p>Pender Spellbane 会不停地逃跑。如果用 <code>moveXY</code> 冲向她当前的位置，等你千辛万苦跑到，她早就走开了——你永远追的是"她刚才在的地方"。策略是改用 <code>move</code>：因为它只迈一小步就返回，把它放进 <code>while True</code> 循环，<strong>每一轮都重新找到 Pender、朝她的最新位置迈一步</strong>，就能像猎豹咬住猎物一样死死跟住。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是：开启 <code>while True</code> 永久循环；每轮用 <code>hero.findNearest(hero.findFriends())</code> 找到 Pender（她是唯一的朋友，所以总是最近的那个）；确认找到后（<code>if pender:</code>），用 <code>hero.move(pender.pos)</code> 朝她当前位置迈一步。因为循环飞快地反复执行，无数个"一小步"连起来就成了紧咬不放的追逐。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：循环内用 move 追踪</span>
+pender = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">())</span>
+<span class="kw">if</span> pender<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>pender<span class="punc">.</span>pos<span class="punc">)</span>   <span class="cmt"># 只迈一步，下轮再更新</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别用 moveXY 追人：</span>这一关如果用 <code>moveXY(pender.pos.x, pender.pos.y)</code>，程序会卡在那里等你跑到旧坐标，等你到了 Pender 早跑远了。<strong>追移动目标，必须用会"走一步看一步"的 move。</strong>
+        </div>
+    </div>
+</div>
+
+<!-- 激流回旋 -->
+<div class="level-card" id="sec-10-4-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 激流回旋</span>
+        
+<!-- CC-PROTECTION:AD:12766675f6:START anchor=h3-9 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="12766675f6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，你不是走进一间教室，而是一片等待被拯救的大陆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:12766675f6:END -->
+
+<h3>⛷️ 激流回旋 —— 手写坐标字典走安全路</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-4-2-1_slalom.png" alt="扣哒世界 激流回旋关卡 - koudashijie.com">
+            <div class="caption">图3：激流回旋——在陷阱之间以坐标字典与宝石位置交替前进，蜿蜒收集宝石</div>
+        </div>
+
+        <h4>策略：用 while 条件分段推进</h4>
+        <p>这一关像滑雪的回旋赛道：陷阱密布，必须沿着"之"字形安全路径走，途中还要捡起宝石。核心技巧是<strong>用 <code>hero.pos.x</code> 作为循环条件分段前进</strong>。因为 <code>move</code> 只迈一小步，就用 <code>while hero.pos.x &lt; 20:</code> 这样的循环"反复迈步，直到走过某个 x 坐标"，把整条路切成一段段来走。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是"安全点与宝石交替"：先用 <code>while hero.pos.x &lt; 20:</code> 反复 <code>move({"x": 20, "y": 35})</code> 走到第一个安全点；再用 <code>while hero.pos.x &lt; 25:</code> 反复 <code>move(gems[0].pos)</code> 拐去捡第一颗宝石；如此这般，安全坐标（手写字典）和宝石坐标（现成 <code>pos</code>）交替出现，一段一段地把英雄安全送到终点。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：用 x 坐标分段，交替走安全点和宝石</span>
+<span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x &lt; <span class="num">20</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span><span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">20</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">35</span><span class="punc">})</span>   <span class="cmt"># 手写字典：去安全点</span>
+<span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x &lt; <span class="num">25</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>gems<span class="punc">[</span><span class="num">0</span><span class="punc">]</span><span class="punc">.</span>pos<span class="punc">)</span>          <span class="cmt"># 现成 pos：去捡宝石</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么用 while 而不是一句 move？</span>因为 <code>move</code> 只走一小步。想真正"走到"某个 x 坐标，就得用 <code>while hero.pos.x &lt; 目标:</code> 反复迈步，直到条件不再成立。这也是本关把 <code>move</code> 的"非阻塞"特性用足的地方——每迈一步循环都重新检查位置，走到了就自动进入下一段。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">本关禁用 moveXY：</span>关卡特意规定不能用 <code>moveXY()</code>，逼你熟练掌握 <code>move</code> + 坐标字典的组合。这是刻意的训练——先在受限环境里练熟新工具，才能在实战中信手拈来。
+        </div>
+    </div>
+</div>
+
+<!-- 兽人山谷挖宝 -->
+<div class="level-card" id="sec-10-4-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 兽人山谷挖宝</span>
+        
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3>⛏️ 兽人山谷挖宝 —— 限时收集与撤退建墙</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-4-3-1_gold_rush.png" alt="扣哒世界 兽人山谷挖宝关卡 - koudashijie.com">
+            <div class="caption">图4：兽人山谷挖宝——20 秒内狂捡金币，随后撤到围栏后并筑墙挡住兽人</div>
+        </div>
+
+        <h4>策略：三阶段——抢收、撤退、封锁</h4>
+        <p>兽人来袭前只有 20 秒！策略是清晰的三阶段：第一阶段<strong>限时抢金币</strong>，用 <code>while hero.time &lt; 20:</code> 在时间窗口内不停捡最近的硬币；第二阶段<strong>撤退</strong>，用 <code>while hero.pos.x &gt; 16:</code> 一路 <code>move</code> 到围栏后的安全坐标；第三阶段<strong>封锁</strong>，用 <code>buildXY</code> 造一道围栏挡住兽人。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是：抢收阶段每轮 <code>coin = hero.findNearest(hero.findItems())</code> 找最近硬币、<code>hero.move(coin.pos)</code> 走过去，靠 <code>hero.time</code> 这个时间条件自动收尾；撤退阶段用手写字典 <code>move({"x": 15, "y": 38})</code> 反复迈步退到围栏后；最后 <code>hero.buildXY("fence", 20, 37)</code> 在关键位置建墙。三段用不同的循环条件（时间、x 坐标）无缝衔接。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：限时抢金币 → 撤退 → 建墙</span>
+<span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>time &lt; <span class="num">20</span><span class="punc">:</span>
+    coin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">())</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">)</span>
+<span class="cmt"># ... 撤退到围栏后 ...</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> <span class="num">20</span><span class="punc">,</span> <span class="num">37</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">用时间做循环条件：</span>这一关的巧思是用 <code>hero.time</code>（游戏内已过去的秒数）当循环条件。<code>while hero.time &lt; 20</code> 意味着"只在前 20 秒抢金币"，时间一到自动停止——不用自己数数，环境属性帮你计时。这和第七、八单元"用属性做条件"是同一思路。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">优化路径才能达标：</span>关卡挑战是"兽人出现前收集超过 60 枚硬币"。因为 <code>move</code> 一步步走较慢，要动脑优化路线——优先捡成堆、顺路的硬币，别为一枚远处的硬币折返，才能在 20 秒内攒够。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 10.5 ==================== -->
+<div class="section-header" id="section-10-5">
+    <h2>10.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-10-5-1">10.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>10.5.1.1 字典与 move 的典型问题
+    <span class="en">Typical issues with dictionaries and move</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-1-1_common_errors.png" alt="扣哒世界 字典与move常见错误速查 - koudashijie.com">
+    <div class="caption">图5：参数用错、忘记花括号、move 不放循环里，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>给 move 传两个数字——写成 <code>move(20, 35)</code>。<code>move</code> 只收<strong>一个</strong>位置参数，要写成 <code>move({"x": 20, "y": 35})</code> 或 <code>move(coin.pos)</code>。</li>
+        <li>字典忘了花括号——写成 <code>move("x": 20, "y": 35)</code>，缺了 <code>{ }</code> 就不是字典，会报错。</li>
+        <li>键没加引号或用错符号——键值之间要用冒号 <code>:</code>，多对之间用逗号 <code>,</code>，别写成分号或等号。</li>
+        <li>用 move 追人却不放循环里——只写一句 <code>move</code> 只会迈一步就停。追踪必须放进循环反复执行。</li>
+        <li>用 moveXY 追移动目标——会一直追"旧位置"，永远追不上。追人用 <code>move</code>。</li>
+        <li>while 条件方向写反——想向右走却写 <code>while hero.pos.x &gt; 20</code>，一开始就不进循环。</li>
+        <li>忘了本关禁用 moveXY——"激流回旋"里用了 <code>moveXY</code> 会不通过，必须用 <code>move</code>。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-10-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:b6954611bf:START anchor=sec-10-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b6954611bf">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC10-11A4A66AC077。</span>
+<!-- CC-PROTECTION:HIDDEN:b6954611bf:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在安息云峰的冰雪峭壁间站稳了脚跟！这一单元你认识了一种全新的数据结构——<strong>字典</strong>：用有意义的<strong>键</strong>来存取<strong>值</strong>，而不是像数组那样靠数字下标。你恍然发现，一直在用的 <code>coin.pos</code> 原来就是个装着 <code>x</code>、<code>y</code> 的小字典，并学会了<strong>手写坐标字典</strong> <code>{"x": 20, "y": 35}</code> 去指挥英雄。你还彻底分清了 <code>move</code> 与 <code>moveXY</code>：一个走一步就返回、适合追踪与调整，一个走到才继续、适合去固定点。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>字典 / 对象字面量</td><td>用键值对存取数据</td><td>激流回旋</td></tr>
+            <tr><td>键值对结构</td><td>花括号、冒号、逗号</td><td>激流回旋、兽人山谷</td></tr>
+            <tr><td>两种取值</td><td><code>pos["x"]</code> 与 <code>pos.x</code></td><td>全部关卡</td></tr>
+            <tr><td>pos 是字典</td><td><code>coin.pos</code> 装着 x、y</td><td>峭壁追逐</td></tr>
+            <tr><td>手写坐标字典</td><td><code>{"x":20,"y":35}</code> 传给 move</td><td>激流回旋、兽人山谷</td></tr>
+            <tr><td>move 参数</td><td>只收一个位置字典</td><td>峭壁追逐</td></tr>
+            <tr><td>阻塞 vs 非阻塞</td><td>moveXY 走到才继续，move 一步即返回</td><td>峭壁追逐</td></tr>
+            <tr><td>循环内 move</td><td>反复迈步实现追踪/分段</td><td>峭壁追逐、激流回旋</td></tr>
+            <tr><td>属性做条件</td><td><code>hero.pos.x</code>、<code>hero.time</code></td><td>激流回旋、兽人山谷</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用键取值、用 move 走一步看一步的英雄，才能在云峰之上进退如风。<br>
+        继续向雪山深处攀登吧，勇敢的程序员！🏔️🗝️❄️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（安息云峰）：第十单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
