@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC3-4CB9DF7BFAB5">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第三单元：一维数组（列表）| 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC3-4CB9DF7BFAB5 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS4-第三单元</div>
+
+    <a href="#section-3-1" class="nav-section">3.1 数组（列表）基础</a>
+    <a href="#sec-3-1-1" class="nav-sub">3.1.1 什么是数组</a>
+    <a href="#sec-3-1-2" class="nav-sub">3.1.2 索引与方括号</a>
+    <a href="#sec-3-1-3" class="nav-sub">3.1.3 越界的危险</a>
+
+    <a href="#section-3-2" class="nav-section">3.2 返回数组的方法</a>
+    <a href="#sec-3-2-1" class="nav-sub">3.2.1 findItems / findEnemies</a>
+    <a href="#sec-3-2-2" class="nav-sub">3.2.2 用变量接住数组</a>
+    <a href="#sec-3-2-3" class="nav-sub">3.2.3 数组会过时</a>
+
+    <a href="#section-3-3" class="nav-section">3.3 数组的长度</a>
+    <a href="#sec-3-3-1" class="nav-sub">3.3.1 len() 与空数组</a>
+    <a href="#sec-3-3-2" class="nav-sub">3.3.2 读取前先检查</a>
+
+    <a href="#section-3-4" class="nav-section">3.4 遍历数组</a>
+    <a href="#sec-3-4-1" class="nav-sub">3.4.1 索引变量遍历法</a>
+    <a href="#sec-3-4-2" class="nav-sub">3.4.2 遍历三部曲</a>
+
+    <a href="#section-3-5" class="nav-section">3.5 实战关卡精讲</a>
+    <a href="#sec-3-5-1" class="nav-sub">3.5.1 团队合作</a>
+    <a href="#sec-3-5-2" class="nav-sub">3.5.2 协助防御</a>
+    <a href="#sec-3-5-3" class="nav-sub">3.5.3 招募队伍</a>
+    <a href="#sec-3-5-4" class="nav-sub">3.5.4 第二宝石</a>
+    <a href="#sec-3-5-5" class="nav-sub">3.5.5 Sarven 救世主</a>
+
+    <a href="#section-3-6" class="nav-section">3.6 常见错误</a>
+    <a href="#sec-3-6-1" class="nav-sub">3.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第三单元：一维数组（列表）</h1>
+    <div class="subtitle">Unit 3: One-Dimensional Arrays (Lists)</div>
+    <div class="badge">计算机科学 4 · 流金沙漠 Sarven Desert · 团队合作 → Sarven 救世主</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 3.1 ==================== -->
+<div class="section-header" id="section-3-1">
+    <h2>3.1 数组（列表）基础</h2>
+    <div class="en-title">The Basics of Arrays (Lists)</div>
+</div>
+
+<h3 id="sec-3-1-1">3.1.1 什么是数组（What Is an Array）</h3>
+
+<h4>3.1.1.1 "数组是一个事物的列表"
+    <span class="en">An array is a list of things</span>
+</h4>
+
+<p>欢迎来到流金沙漠的新篇章！之前你面对的往往是单独一个敌人、一件物品。但真实的战场上，往往同时出现<strong>一群</strong>宝石、<strong>一队</strong>兽人、<strong>一批</strong>农民。这时候我们需要一种能把"很多个东西装在一起"的工具——这就是<span class="keyword">数组（array）</span>，在 Python 里它有一个更亲切的名字叫<span class="keyword">列表（list）</span>。</p>
+
+<p>"Sarven 救世主"关卡一语点破本质：<strong>"数组是一个事物的列表，是有序的数据列表。"</strong> 关键词是"有序"——数组里的每个东西都有自己固定的排队位置，第一个永远是第一个，第二个永远是第二个，绝不会乱。你可以把它想象成沙漠里的一支驼队：驼队里的每头骆驼都有确定的先后次序。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一个装着四个朋友名字的数组（列表）</span>
+friendNames = <span class="punc">[</span><span class="str">'Joan'</span><span class="punc">,</span> <span class="str">'Ronan'</span><span class="punc">,</span> <span class="str">'Nikita'</span><span class="punc">,</span> <span class="str">'Augustus'</span><span class="punc">]</span></pre>
+</div>
+
+<p>用方括号 <code>[ ]</code> 把若干元素括起来、用逗号隔开，就创建了一个数组。数组里可以装字符串（名字）、数字，也可以装游戏里的物品对象、敌人对象。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-1-1-1_array_intro.png" alt="扣哒世界 数组示意图 - koudashijie.com">
+    <div class="caption">图1：数组就像一支有序的驼队——每个元素都有固定的排队位置</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-3-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-3-1-2">3.1.2 索引与方括号（Index and Square Brackets）</h3>
+
+<h4>3.1.2.1 从 0 开始数，用 array[n] 取元素
+    <span class="en">Count from zero, access with array[n]</span>
+</h4>
+
+<p>数组里每个元素都有一个编号，叫做<span class="keyword">索引（index）</span>。这里有一条几乎所有初学者都会踩坑的黄金规则：<strong>索引从 0 开始数，而不是从 1！</strong> 所以第一个元素的索引是 <code>0</code>，第二个是 <code>1</code>，第三个是 <code>2</code>，以此类推。</p>
+
+<p>要取出数组里某个位置的元素，使用 <code>array[n]</code> 这样的写法，其中 <code>n</code> 就是你想要的元素的索引。这正是"团队合作"和"第二宝石"两关的核心操作。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 180" width="560" role="img" aria-label="数组索引解剖图">
+        <!-- 数组格子 -->
+        <rect x="40" y="40" width="110" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="150" y="40" width="110" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="260" y="40" width="110" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="370" y="40" width="130" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="95" y="70" font-size="15" font-family="monospace" fill="#d4b14a" text-anchor="middle">'Joan'</text>
+        <text x="205" y="70" font-size="15" font-family="monospace" fill="#d4b14a" text-anchor="middle">'Ronan'</text>
+        <text x="315" y="70" font-size="15" font-family="monospace" fill="#d4b14a" text-anchor="middle">'Nikita'</text>
+        <text x="435" y="70" font-size="14" font-family="monospace" fill="#d4b14a" text-anchor="middle">'Augustus'</text>
+        <!-- 索引 -->
+        <text x="95" y="112" font-size="16" font-family="monospace" fill="#e8845a" text-anchor="middle">[0]</text>
+        <text x="205" y="112" font-size="16" font-family="monospace" fill="#e8845a" text-anchor="middle">[1]</text>
+        <text x="315" y="112" font-size="16" font-family="monospace" fill="#e8845a" text-anchor="middle">[2]</text>
+        <text x="435" y="112" font-size="16" font-family="monospace" fill="#e8845a" text-anchor="middle">[3]</text>
+        <text x="95" y="140" font-size="12" font-family="sans-serif" fill="#a08a5e" text-anchor="middle">第 1 个</text>
+        <text x="205" y="140" font-size="12" font-family="sans-serif" fill="#a08a5e" text-anchor="middle">第 2 个</text>
+        <text x="315" y="140" font-size="12" font-family="sans-serif" fill="#a08a5e" text-anchor="middle">第 3 个</text>
+        <text x="435" y="140" font-size="12" font-family="sans-serif" fill="#a08a5e" text-anchor="middle">第 4 个</text>
+        <text x="270" y="26" font-size="14" font-family="monospace" fill="#f0c674" text-anchor="middle">friendNames</text>
+        <text x="270" y="170" font-size="12" font-family="sans-serif" fill="#E0A23F" text-anchor="middle">索引从 0 开始 —— 第 n 个元素的索引是 n − 1</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>items = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>   <span class="cmt"># 得到一个物品数组</span>
+gem0 = items<span class="punc">[</span><span class="num">0</span><span class="punc">]</span>            <span class="cmt"># 第一颗宝石（索引 0）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Bruno "</span> + gem0<span class="punc">)</span>   <span class="cmt"># 用变量引用它</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Matilda "</span> + items<span class="punc">[</span><span class="num">1</span><span class="punc">]</span><span class="punc">)</span>  <span class="cmt"># 也可以不用变量，直接用 items[1]</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">两种用法都对：</span>你既可以把元素<strong>先存进变量</strong>再用（<code>gem0 = items[0]</code>），也可以<strong>不用额外变量、直接使用</strong>数组元素（<code>items[1]</code>）。存进变量的写法更清晰、便于反复引用；直接使用则更简洁。两种方式在"团队合作"关卡里都出现了。
+</div>
+
+<h3 id="sec-3-1-3">3.1.3 越界的危险（Index Out of Range）</h3>
+
+<h4>3.1.3.1 索引不能大于等于数组长度
+    <span class="en">Index must be smaller than the length</span>
+</h4>
+
+<p>关卡特别提醒：<strong>"如果你用大于或等于数组长度的索引读取元素，你会得到一个错误或 undefined（未定义的）值。"</strong> 换句话说，一个长度为 3 的数组，合法索引只有 <code>0、1、2</code>；如果你写 <code>items[3]</code>，就"越界"了——沙漠里根本没有那第四个位置。</p>
+
+<div class="warn-box">
+    <span class="warn-label">越界即出错：</span>数组长度为 <code>N</code> 时，合法索引范围是 <code>0</code> 到 <code>N-1</code>。访问 <code>array[N]</code> 或更大的索引，Python 会抛出 <code>IndexError</code>（列表索引越界）错误，程序当场崩溃。这也是为什么在读取元素之前，我们常常需要<strong>先检查数组长度</strong>——这正是下一节的主题。
+</div>
+
+<!-- ==================== 3.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-3-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<div class="section-header" id="section-3-2">
+    <h2>3.2 返回数组的方法</h2>
+    <div class="en-title">Methods That Return Arrays</div>
+</div>
+
+<h3 id="sec-3-2-1">3.2.1 findItems / findEnemies / findFriends（The find-Methods）</h3>
+
+<h4>3.2.1.1 一次找回"一群"目标
+    <span class="en">Find all visible targets at once</span>
+</h4>
+
+<p>之前你熟悉的 <code>findNearestItem()</code>、<code>findNearestEnemy()</code> 每次只返回"最近的那一个"。本单元登场的一批新方法则更强大——它们一次返回<strong>所有</strong>能看见的目标，打包成一个数组：</p>
+
+<table class="styled-table">
+    <thead><tr><th>方法</th><th>返回内容</th><th>典型用途</th></tr></thead>
+    <tbody>
+        <tr><td><code>hero.findItems()</code></td><td>所有可见物品组成的数组</td><td>收集宝石、金币</td></tr>
+        <tr><td><code>hero.findEnemies()</code></td><td>所有可见敌人组成的数组</td><td>攻击敌军、点名中立单位</td></tr>
+        <tr><td><code>hero.findFriends()</code></td><td>所有可见友军组成的数组</td><td>指挥、增益队友</td></tr>
+    </tbody>
+</table>
+
+<p>关卡概览指出：<strong>"像 findItems、findEnemies 以及 findFriends 这些方法返回含有物品、敌人或者朋友的数组。"</strong> 拿到数组后，你就能用索引挑出其中任意一个，或者遍历它们全部。</p>
+
+<div class="tip-box">
+    <span class="tip-label">中立单位的小陷阱：</span>"招募队伍"关卡里有个有趣的细节——想招募的<strong>中立农民会被 <code>findEnemies()</code> 检测到</strong>，而不是 <code>findFriends()</code>。因为在他们参军之前，系统并不把他们算作你的友军。这提醒我们：要根据关卡实际情况判断该用哪个 find 方法。
+</div>
+
+<h3 id="sec-3-2-2">3.2.2 用变量接住数组（Storing an Array in a Variable）</h3>
+
+<h4>3.2.2.1 让数组有个名字
+    <span class="en">Give the array a name</span>
+</h4>
+
+<p>find 方法返回的数组，通常我们会立刻用一个变量接住它，给它起个有意义的名字，之后就能反复引用、用索引取元素、用 <code>len()</code> 量长度。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>items = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>      <span class="cmt"># 物品数组叫 items</span>
+enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>  <span class="cmt"># 敌人数组叫 enemies</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-3-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<h3 id="sec-3-2-3">3.2.3 数组会过时（Arrays Can Go Stale）</h3>
+
+<h4>3.2.3.1 战况在变，数组也要及时刷新
+    <span class="en">Refresh the array every loop</span>
+</h4>
+
+<p>这是本单元最容易被忽略、也最关键的一点。"招募队伍"关卡明确警告：<strong>"物品会出现或被收集。单位会死亡或被召唤。因此，来自 findItems()、findEnemies() 和 findFriends() 等方法的数组可能包含旧的数据。为了避免这个问题，您应该在每次循环中更新这些数组。"</strong></p>
+
+<p>想象你在沙漠里拍了一张"敌人分布快照"，把它存进 <code>enemies</code>。可是战斗瞬息万变——有的敌人倒下了，新的敌人又冒出来。如果你一直盯着那张旧快照打，就会攻击已经消失的目标、或漏掉新出现的威胁。<strong>解决办法：把 find 方法放进循环里，每一圈都重新调用一次，拿到最新的数组。</strong></p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>neutrals = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>   <span class="cmt"># 循环外先取一次</span>
+<span class="kw">while</span> <span class="obj">True</span><span class="punc">:</span>
+    <span class="kw">if</span> <span class="fn">len</span><span class="punc">(</span>neutrals<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>neutrals<span class="punc">[</span><span class="num">0</span><span class="punc">]</span><span class="punc">)</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"没有人在这儿"</span><span class="punc">)</span>
+    neutrals = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>  <span class="hl"># 关键：每轮重新赋值，刷新数组</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">呼应第一单元：</span>这和你在"峡谷风暴"里学到的"变量做条件必须在循环里更新"是同一个思想。数组也是一种变量，只要它会随时间变化，就必须在循环内定期刷新，否则你操作的永远是那张过时的旧快照。
+</div>
+
+<!-- ==================== 3.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c1d65681b7:START anchor=sec-3-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="c1d65681b7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，编程小白都在偷偷玩的闯关游戏，写一行代码角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c1d65681b7:END -->
+<!-- CC-PROTECTION:HIDDEN:b15a097089:START anchor=sec-3-2-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b15a097089">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:b15a097089:END -->
+
+<div class="section-header" id="section-3-3">
+    <h2>3.3 数组的长度</h2>
+    <div class="en-title">The Length of an Array</div>
+</div>
+
+<h3 id="sec-3-3-1">3.3.1 len() 与空数组（len() and the Empty Array）</h3>
+
+<h4>3.3.1.1 长度就是元素的个数
+    <span class="en">Length is the number of elements</span>
+</h4>
+
+<p>关卡概览定义得很清楚：<strong>"数组的长度是数组中包含元素的个数。一个空数组的长度为 0。"</strong> 在 Python 里，用内置函数 <code>len()</code> 来量一个数组有多长：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>friendNames = <span class="punc">[</span><span class="str">'Joan'</span><span class="punc">,</span> <span class="str">'Ronan'</span><span class="punc">,</span> <span class="str">'Nikita'</span><span class="punc">,</span> <span class="str">'Augustus'</span><span class="punc">]</span>
+<span class="fn">len</span><span class="punc">(</span>friendNames<span class="punc">)</span>   <span class="cmt"># → 4，数组里有 4 个名字</span>
+
+empty = <span class="punc">[]</span>
+<span class="fn">len</span><span class="punc">(</span>empty<span class="punc">)</span>         <span class="cmt"># → 0，空数组长度为 0</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">长度与最大索引的关系：</span>如果 <code>len(items)</code> 是 4，那么合法索引是 <code>0、1、2、3</code>——<strong>最大合法索引永远比长度小 1</strong>。牢记这条，能帮你避开绝大多数越界错误。
+</div>
+
+<h3 id="sec-3-3-2">3.3.2 读取前先检查（Check Before You Read）</h3>
+
+<h4>3.3.2.1 根据要读第几个，选对检查方式
+    <span class="en">Match the check to the index you need</span>
+</h4>
+
+<p>为什么要检查长度？因为 find 方法很可能返回一个<strong>空数组</strong>（视野里暂时没有敌人/物品）。如果不检查就直接 <code>enemies[0]</code>，程序会因越界而崩溃。关卡给出了两条实用规则：</p>
+
+<div class="text-illustration">
+    <div class="illus-title">📏 两种检查方式，看你要读第几个</div>
+    <strong>① 只读第一个元素（索引 0）</strong>：只需确认数组<strong>非空</strong>即可——<code>if len(enemies) > 0</code>，或简写成 <code>if len(enemies)</code>（0 视为假、正数视为真）。<br>
+    <strong>② 要读更靠后的元素（如第 3 个，索引 2）</strong>：就得检查得更精确——<code>if len(items) >= 2</code> 才能安全读取 <code>items[1]</code>（第二个）；要读 <code>items[2]</code> 则需 <code>len(items) >= 3</code>。
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+<span class="kw">if</span> <span class="fn">len</span><span class="punc">(</span>enemies<span class="punc">)</span> &gt; <span class="num">0</span><span class="punc">:</span>        <span class="cmt"># 只读第一个，检查非空就够</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemies<span class="punc">[</span><span class="num">0</span><span class="punc">]</span><span class="punc">)</span>
+
+items = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>
+<span class="kw">if</span> <span class="fn">len</span><span class="punc">(</span>items<span class="punc">)</span> &gt;= <span class="num">2</span><span class="punc">:</span>          <span class="cmt"># 要读第二个 items[1]，需长度≥2</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>items<span class="punc">[</span><span class="num">1</span><span class="punc">]</span><span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> items<span class="punc">[</span><span class="num">1</span><span class="punc">]</span><span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-3-2-1_length_check.png" alt="扣哒世界 读取前检查长度示意图 - koudashijie.com">
+    <div class="caption">图2：读取前先量长度——空数组直接读取会越界崩溃</div>
+</div>
+
+<!-- ==================== 3.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-3-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+<!-- CC-PROTECTION:HIDDEN:f6db175c9a:START anchor=sec-3-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="f6db175c9a">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:f6db175c9a:END -->
+
+<div class="section-header" id="section-3-4">
+    <h2>3.4 遍历数组</h2>
+    <div class="en-title">Iterating Over an Array</div>
+</div>
+
+<h3 id="sec-3-4-1">3.4.1 索引变量遍历法（The Index Variable Pattern）</h3>
+
+<h4>3.4.1.1 用一个变量当"游标"，逐个走过
+    <span class="en">Use an index variable as a cursor</span>
+</h4>
+
+<p>只取一个元素还不够——很多时候我们要<strong>把数组里每个元素都处理一遍</strong>，这叫<span class="keyword">遍历（iterate）</span>。"Sarven 救世主"关卡教给我们最经典的方法：<strong>用一个"索引变量"当游标，配合 while 循环，让它从 0 一路走到数组末尾</strong>。</p>
+
+<p>这里巧妙地把第一单元的 while 循环和本单元的数组结合了起来。索引变量（如 <code>friendIndex</code>）扮演的正是"计数器"的角色，只不过这次它的意义是"当前走到了第几个元素"。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 210" width="520" role="img" aria-label="遍历数组流程图">
+        <text x="260" y="24" font-size="13" font-family="monospace" fill="#f0c674" text-anchor="middle">friendIndex = 0（起点）</text>
+        <!-- 判断菱形 -->
+        <polygon points="260,45 400,80 260,115 120,80" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="260" y="78" font-size="12" font-family="monospace" fill="#d4b14a" text-anchor="middle">friendIndex &lt; len(数组)?</text>
+        <text x="260" y="96" font-size="10" font-family="sans-serif" fill="#a08a5e" text-anchor="middle">还没走完吗？</text>
+        <!-- 真分支 -->
+        <text x="105" y="130" font-size="12" font-family="sans-serif" fill="#e0a23f">真</text>
+        <line x1="120" y1="80" x2="60" y2="80" stroke="#E0A23F" stroke-width="2"/>
+        <line x1="60" y1="80" x2="60" y2="150" stroke="#E0A23F" stroke-width="2"/>
+        <polygon points="60,156 55,146 65,146" fill="#E0A23F"/>
+        <rect x="20" y="157" width="290" height="34" rx="8" fill="#2b2014" stroke="#E8A33D" stroke-width="2"/>
+        <text x="165" y="179" font-size="12" font-family="monospace" fill="#d8c8a8" text-anchor="middle">取 数组[friendIndex] → 处理 → friendIndex += 1</text>
+        <!-- 回到判断 -->
+        <line x1="310" y1="174" x2="450" y2="174" stroke="#E0A23F" stroke-width="2"/>
+        <line x1="450" y1="174" x2="450" y2="80" stroke="#E0A23F" stroke-width="2"/>
+        <line x1="450" y1="80" x2="402" y2="80" stroke="#E0A23F" stroke-width="2"/>
+        <polygon points="400,80 410,75 410,85" fill="#E0A23F"/>
+        <!-- 假分支 -->
+        <text x="270" y="135" font-size="12" font-family="sans-serif" fill="#C0392B">假</text>
+        <line x1="260" y1="115" x2="260" y2="150" stroke="#C0392B" stroke-width="2"/>
+        <polygon points="260,150 255,140 265,140" fill="#C0392B"/>
+        <text x="260" y="205" font-size="12" font-family="sans-serif" fill="#a5331f" text-anchor="middle">走完了，退出循环</text>
+    </svg>
+</div>
+
+<h3 id="sec-3-4-2">3.4.2 遍历三部曲（The Iteration Recipe）</h3>
+
+<h4>3.4.2.1 起点 0 → 条件用 len() → 每轮 +1
+    <span class="en">Start at 0, test with len(), increment each pass</span>
+</h4>
+
+<p>关卡指导说得很到位：<strong>"你可以使用索引变量而不是数字来访问数组的元素。要遍历数组中的所有值，请使用 while 循环在每次循环中递增索引变量！在每次循环中，你要取出该数组索引处的朋友姓名，然后处理它。"</strong> 归纳成三步：</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔁 遍历三部曲</div>
+    <strong>①初始化索引</strong>：循环前 <code>friendIndex = 0</code>，从第一个元素开始。<br>
+    <strong>②以 len() 为条件</strong>：<code>while friendIndex < len(friendNames)</code>——只要索引还没到达长度，就说明还有元素没处理。<br>
+    <strong>③循环体内递增</strong>：处理完当前元素后 <code>friendIndex += 1</code>，让游标前进一格。<br>
+    <strong>漏掉③就是死循环；条件写成 <= 就会越界。</strong>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>friendNames = <span class="punc">[</span><span class="str">'Joan'</span><span class="punc">,</span> <span class="str">'Ronan'</span><span class="punc">,</span> <span class="str">'Nikita'</span><span class="punc">,</span> <span class="str">'Augustus'</span><span class="punc">]</span>
+friendIndex = <span class="num">0</span>                          <span class="cmt"># ① 索引从 0 开始</span>
+<span class="kw">while</span> friendIndex &lt; <span class="fn">len</span><span class="punc">(</span>friendNames<span class="punc">):</span>    <span class="cmt"># ② 用 len() 作为终止条件</span>
+    friendName = friendNames<span class="punc">[</span>friendIndex<span class="punc">]</span>  <span class="cmt"># 用索引变量取当前元素</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>friendName + <span class="str">', go home!'</span><span class="punc">)</span>
+    friendIndex <span class="hl">+= 1</span>                     <span class="cmt"># ③ 每轮 +1，游标前进</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么条件用 &lt; 而不是 &lt;=？</span>因为长度为 4 的数组，合法索引是 0、1、2、3。当 <code>friendIndex</code> 递增到 4 时，<code>4 < 4</code> 为假，循环恰好停止——刚好处理完最后一个 <code>[3]</code>，不多不少。如果写成 <code>friendIndex <= len(...)</code>，就会尝试访问越界的 <code>[4]</code>，导致报错。
+</div>
+
+<!-- ==================== 3.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-3-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<div class="section-header" id="section-3-5">
+    <h2>3.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"该用哪个 find 方法、用什么索引、要不要遍历、如何检查长度"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-3-5-1">3.5.1 团队合作（Team Work）</h3>
+
+<h4>3.5.1.1 策略：用索引精确分派每颗宝石
+    <span class="en">Strategy: assign each gem by index</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-5-1-1_team_work.png" alt="扣哒世界 团队合作关卡 - koudashijie.com">
+    <div class="caption">图3：团队合作——三颗宝石限时消失，用索引把每颗分派给不同伙伴</div>
+</div>
+
+<p>这是数组的启蒙关：三颗宝石限时消失，你要指挥农民 Bruno、Matilda 和英雄自己分头去取。算法思路是<strong>先 <code>findItems()</code> 拿到宝石数组，再用不同索引取出各颗宝石</strong>——<code>items[0]</code> 交给 Bruno、<code>items[1]</code> 交给 Matilda、<code>items[2]</code> 由英雄亲自 <code>moveXY</code> 前往。</p>
+
+<p><strong>要点在于牢记索引从 0 开始</strong>：三颗宝石对应的索引是 0、1、2，而不是 1、2、3。这一关还示范了两种引用方式——既可以先 <code>gem0 = items[0]</code> 存进变量，也可以直接写 <code>items[1]</code>，两者可以混用。因为宝石固定是三颗、不会变动，这一关<strong>不需要循环</strong>，直接按索引点名即可。</p>
+
+<h3 id="sec-3-5-2">3.5.2 协助防御（Backwoods Standoff）</h3>
+
+<h4>3.5.2.1 策略：检查非空后攻击首个敌人
+    <span class="en">Strategy: attack the first enemy after a length check</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-5-2-1_backwoods.png" alt="扣哒世界 协助防御关卡 - koudashijie.com">
+    <div class="caption">图4：协助防御——每轮刷新敌人数组，非空时攻击索引 0，再返回原位</div>
+</div>
+
+<p>这一关保护农民免受兽人侵害。算法思路是一个 <code>while True</code> 循环，每轮先 <code>enemies = hero.findEnemies()</code> 拿到<strong>最新</strong>的敌人数组，然后<strong>用 <code>if len(enemies) > 0</code> 检查数组是否为空</strong>；只有非空时才 <code>hero.attack(enemies[0])</code> 攻击第一个敌人，其余交给队友；攻击后再 <code>moveXY</code> 返回起始防守位置。</p>
+
+<p><strong>关键领悟有二</strong>：一是<strong>读取 <code>enemies[0]</code> 前必须先检查长度</strong>，否则视野无敌人时直接越界崩溃；二是敌人数组要<strong>在循环内每轮刷新</strong>，因为敌人会不断被消灭、又不断涌来。这一关只读第一个元素，所以检查"非空"就足够了。</p>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-3-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<h3 id="sec-3-5-3">3.5.3 招募队伍（Sarven Sentry / 点名招募）</h3>
+
+<h4>3.5.3.1 策略：循环点名并持续刷新名单
+    <span class="en">Strategy: call names while refreshing the list</span>
+</h4>
+
+<p>一群中立农民想参军，你要一个接一个喊出他们的名字招募入伍。算法思路是：先 <code>neutrals = hero.findEnemies()</code>（注意——<strong>中立单位被当作"敌人"检测</strong>），进入 <code>while True</code> 循环；每轮用 <code>if len(neutrals)</code> 判断名单是否还有人，有就 <code>hero.say(neutrals[0])</code> 喊出队首那位的名字，没人就说"没有人在这儿"。</p>
+
+<p><strong>本关的灵魂在于最后那句 <code>neutrals = hero.findEnemies()</code></strong>——因为每喊一个农民、他就参军离开了名单，名单在不断缩短、变化。必须<strong>在循环末尾重新调用 <code>findEnemies()</code> 刷新名单</strong>，否则你会一直对着旧快照喊同一个已经入伍的人。这一关把"数组会过时、必须每轮刷新"这个概念演绎得淋漓尽致。</p>
+
+<div class="info-box">
+    <span class="info-label">len(neutrals) 的简写：</span>本关条件写成了 <code>if len(neutrals)</code> 而非 <code>if len(neutrals) > 0</code>。在 Python 里，数字 <code>0</code> 会被当作"假"，任何正数会被当作"真"，所以两种写法效果相同。前者更简洁，是老手常用的技巧。
+</div>
+
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-3-5-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<h3 id="sec-3-5-4">3.5.4 第二宝石（The Second Gem）</h3>
+
+<h4>3.5.4.1 策略：永远只取索引 1 的物品
+    <span class="en">Strategy: always take index 1</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-5-4-1_second_gem.png" alt="扣哒世界 第二宝石关卡 - koudashijie.com">
+    <div class="caption">图5：第二宝石——第一颗是炸弹，永远收集数组中的第二个（索引 1）</div>
+</div>
+
+<p>这一关设了个陷阱：每批物品里第一颗（最显眼的那颗）是炸弹，第二颗才安全。算法思路是 <code>while True</code> 循环，每轮 <code>items = hero.findItems()</code>，然后<strong>用 <code>if len(items) >= 2</code> 确认至少有两个物品</strong>后，前往 <code>items[1]</code>（第二颗，索引 1）；若不足两个，就先 <code>moveXY</code> 回中心标记等待新一批物品刷新。</p>
+
+<p><strong>关键领悟是长度检查的精确性</strong>：因为这次要读的是索引 1（第二个元素），只检查"非空"（长度≥1）不够——万一数组里只有 1 个物品，<code>items[1]</code> 照样越界。所以条件必须是 <code>len(items) >= 2</code>。这一关生动说明了 3.3.2 讲的"要读第几个，就检查到第几个"。</p>
+
+<h3 id="sec-3-5-5">3.5.5 Sarven 救世主（Sarven Savior）</h3>
+
+<h4>3.5.5.1 策略：用索引变量遍历整支名单
+    <span class="en">Strategy: iterate the whole roster with an index</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-5-5-1_sarven_savior.png" alt="扣哒世界 Sarven 救世主关卡 - koudashijie.com">
+    <div class="caption">图6：Sarven 救世主——遍历朋友名单逐个唤其回家，最后建栅栏封锁</div>
+</div>
+
+<p>这是本单元的综合关卡，第一次要求你<strong>把数组里的每个元素都处理一遍</strong>。算法思路是标准的遍历三部曲：给定朋友名单 <code>friendNames</code>，先 <code>friendIndex = 0</code>，用 <code>while friendIndex < len(friendNames)</code> 作条件，循环体内 <code>friendName = friendNames[friendIndex]</code> 取出当前朋友、<code>hero.say(friendName + ', go home!')</code> 唤其回家，然后 <code>friendIndex += 1</code> 前进到下一个。全部喊完后，循环外再 <code>moveXY</code> 回绿洲、<code>buildXY("fence", ...)</code> 建栅栏封锁。</p>
+
+<p><strong>三个关键领悟</strong>：其一，索引变量 <code>friendIndex</code> 就是驱动遍历的引擎，本质上是个计数器；其二，条件用 <code>len()</code> 而非写死的数字 4，这样名单增减时代码依然正确——这叫<strong>让代码适应数据</strong>；其三，<code>friendIndex += 1</code> 绝不能漏，漏了就是死循环。此外还复习了字符串用 <code>+</code> 拼接、以及善后代码（建栅栏）放在循环外的道理。</p>
+
+<!-- ==================== 3.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:bf385e5ba1:START anchor=sec-3-5-5 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="bf385e5ba1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>学习编程需要动手写大量代码，来 <a href="https://koudashijie.com/">koudashijie.com</a>，让你带着微笑学习。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bf385e5ba1:END -->
+
+<div class="section-header" id="section-3-6">
+    <h2>3.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-3-6-1">3.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>3.6.1.1 数组操作的典型问题
+    <span class="en">Typical issues with arrays</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-6-1-1_common_errors.png" alt="扣哒世界 数组常见错误示意 - koudashijie.com">
+    <div class="caption">图7：索引从 1 开始、忘记检查长度、忘记刷新数组，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>索引从 1 开始数——把第一个元素当成 <code>items[1]</code>，其实应该是 <code>items[0]</code>。这是最普遍的错误。</li>
+        <li>索引越界——数组长度为 3 却访问 <code>items[3]</code>，超出合法范围 0~2，抛出 <code>IndexError</code>。</li>
+        <li>读取前忘记检查长度——视野里没有目标时 find 返回空数组，直接 <code>enemies[0]</code> 立刻崩溃。</li>
+        <li>检查不够精确——要读 <code>items[1]</code> 却只检查了"非空"，数组恰好只有 1 个元素时依然越界，应检查 <code>len >= 2</code>。</li>
+        <li>忘记刷新数组——只在循环外取一次 <code>findEnemies()</code>，操作的始终是过时的旧快照，应在循环内每轮重新调用。</li>
+        <li>遍历时忘记递增索引——写了 <code>while friendIndex < len(...)</code> 却漏掉 <code>friendIndex += 1</code>，索引永远为 0，直接死循环。</li>
+        <li>遍历条件用 <code>&lt;=</code>——应为 <code>friendIndex < len(...)</code>，用 <code>&lt;=</code> 会多走一格造成越界。</li>
+        <li>把善后代码写进循环——如"救世主"的建栅栏应放在遍历循环外，放进去会反复触发。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在流金沙漠掌握了程序设计中最重要的数据结构之一——<strong>一维数组（列表）</strong>！你学会了用方括号创建数组、用从 0 开始的索引取出任意元素、用 <code>len()</code> 测量长度并在读取前做安全检查，还掌握了 <code>findItems / findEnemies / findFriends</code> 这些返回数组的方法、以及"数组会过时、必须每轮刷新"的重要意识。最后，你把 while 循环和索引变量结合，学会了遍历整个数组。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>数组是有序列表</td><td>用 <code>[ ]</code> 装多个元素</td><td>Sarven 救世主</td></tr>
+            <tr><td>索引从 0 开始</td><td>第 n 个的索引是 n−1</td><td>团队合作、第二宝石</td></tr>
+            <tr><td>方括号取元素</td><td><code>array[n]</code> 取索引 n 的元素</td><td>团队合作</td></tr>
+            <tr><td>返回数组的方法</td><td>findItems/Enemies/Friends</td><td>协助防御、招募队伍</td></tr>
+            <tr><td>len() 长度</td><td>元素个数，空数组为 0</td><td>协助防御、第二宝石</td></tr>
+            <tr><td>读取前检查</td><td>要读第几个就检查到第几个</td><td>第二宝石</td></tr>
+            <tr><td>数组会过时</td><td>循环内每轮重新调用 find</td><td>招募队伍</td></tr>
+            <tr><td>遍历三部曲</td><td>索引=0 → &lt;len() → +=1</td><td>Sarven 救世主</td></tr>
+            <tr><td>越界防范</td><td>索引须在 0~len−1 之间</td><td>全部关卡</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把众多目标装进数组、按索引调度、逐个遍历的英雄，才能统率沙漠里的千军万马。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️📚🔢
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=h3-17 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+<!-- CC-PROTECTION:HIDDEN:ef6f9152c1:START anchor=h3-17 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ef6f9152c1">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC3-4CB9DF7BFAB5。</span>
+<!-- CC-PROTECTION:HIDDEN:ef6f9152c1:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（流金沙漠）：第三单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
