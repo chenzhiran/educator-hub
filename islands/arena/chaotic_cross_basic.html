@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>竞技场：AI世界杯 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量 ===== */
+        :root {
+            --primary: #1B9C4F;          /* 草地绿主色 */
+            --primary-light: #38C172;
+            --primary-lighter: #E7F7EE;
+            --primary-dark: #147A3D;
+            --accent: #FFC93C;           /* 黄牌/奖杯金 */
+            --accent-dark: #E0A800;
+            --dark: #0F2E1C;
+            --dark-code: #16261d;
+            --dark-code-border: #274233;
+            --text: #23302a;
+            --text-light: #4a5a52;
+            --text-lighter: #869089;
+            --bg: #ffffff;
+            --bg-alt: #f6faf7;
+            --bg-card: #ffffff;
+            --border: #e2ece6;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #E63946;
+            --info: #2196F3;
+            --red-team: #E63946;
+            --blue-team: #2A6FDB;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c6370;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #abb2bf;
+            --code-punctuation: #abb2bf;
+            --code-object: #e5c07b;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--dark);
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1a3a26; }
+
+        /* ===== logo 头部 ===== */
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 16px 14px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #1f3d2a;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-logo img {
+            height: 30px;
+            width: auto;
+            flex-shrink: 0;
+        }
+        .nav-logo .nav-logo-text {
+            color: var(--accent);
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cfe0d6;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(56, 193, 114, 0.14);
+            border-left-color: var(--primary-light);
+        }
+
+        .sidebar-nav a.nav-logo:hover {
+            background: transparent;
+            border-left-color: transparent;
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #1f3d2a;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7bdb0;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        /* 球场中线装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: rgba(255,255,255,0.15);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner .subtitle {
+            font-size: 1.2em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 {
+            color: var(--primary-dark);
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .section-header .en-title {
+            color: var(--text-light);
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p {
+            margin: 12px 0;
+            text-align: justify;
+        }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1565c0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-gold {
+            background: #fff6dc;
+            color: var(--accent-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef3f0;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        /* ===== 代码块 + 语言切换标签 ===== */
+        .code-tabs {
+            display: flex;
+            gap: 4px;
+            margin: 16px 0 0;
+        }
+        .code-tab {
+            background: #22362a;
+            color: #9fb3a6;
+            border: 1px solid var(--dark-code-border);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            transition: all 0.15s ease;
+        }
+        .code-tab.active {
+            background: var(--dark-code);
+            color: var(--accent);
+            border-color: var(--dark-code-border);
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 0 10px 10px 10px;
+            padding: 20px 24px;
+            margin: 0 0 16px;
+            overflow-x: auto;
+            position: relative;
+        }
+        /* 单独出现（无 tab）的代码块保留全圆角 */
+        .code-block.standalone {
+            border-radius: 10px;
+            margin: 16px 0;
+        }
+
+        .code-block .dots {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .code-block .dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+            white-space: pre;
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+
+        .code-pane { display: none; }
+        .code-pane.active { display: block; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .tip-box .tip-label {
+            font-weight: 700;
+            color: #b8860b;
+            margin-right: 6px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .info-box .info-label {
+            font-weight: 700;
+            color: #1565c0;
+            margin-right: 6px;
+        }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .remember-box .remember-label {
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-right: 6px;
+        }
+
+        .warn-box {
+            background: #fdecea;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+
+        .warn-box .warn-label {
+            font-weight: 700;
+            color: #c62828;
+            margin-right: 6px;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .styled-table thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        .styled-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .styled-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4faf6 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 智能体卡片 ===== */
+        .agent-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 22px 26px;
+            margin: 20px 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .agent-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .agent-card .agent-name {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .agent-card .agent-tag {
+            display: inline-block;
+            font-size: 0.78em;
+            color: var(--text-lighter);
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        /* 球场示意图 */
+        .pitch {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 24px auto;
+            aspect-ratio: 100 / 64;
+            background: repeating-linear-gradient(90deg, #2fa85c 0 10%, #2aa055 10% 20%);
+            border: 3px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .pitch .center-line {
+            position: absolute; left: 50%; top: 0; bottom: 0;
+            width: 2px; background: rgba(255,255,255,0.8);
+        }
+        .pitch .center-circle {
+            position: absolute; left: 50%; top: 50%;
+            width: 22%; aspect-ratio: 1; transform: translate(-50%, -50%);
+            border: 2px solid rgba(255,255,255,0.8); border-radius: 50%;
+        }
+        .pitch .gate {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 4%; height: 25%;
+        }
+        .pitch .gate.left { left: 0; background: rgba(230,57,70,0.55); border-right: 2px solid #fff; }
+        .pitch .gate.right { right: 0; background: rgba(42,111,219,0.55); border-left: 2px solid #fff; }
+        .pitch .pitch-label {
+            position: absolute; font-size: 0.7em; color: #fff; font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .pitch-caption {
+            font-size: 0.85em;
+            color: var(--text-lighter);
+            margin-top: 8px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .summary-card h3 {
+            color: var(--primary-dark);
+            border: none;
+            margin-top: 0;
+        }
+
+        ul.clean, ol.clean {
+            margin: 10px 0 10px 24px;
+            list-style: none;
+        }
+
+        .team-red { color: var(--red-team); font-weight: 700; }
+        .team-blue { color: var(--blue-team); font-weight: 700; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<!-- ===== 左侧导航栏 ===== -->
+<nav class="sidebar-nav">
+
+    <a href="https://koudashijie.com" class="nav-logo" target="_blank" rel="noopener">
+        <img src="https://koudashijie.com/images/pages/base/logo-cn.png" alt="扣哒世界 logo">
+        <span class="nav-logo-text">竞技场 · AI世界杯</span>
+    </a>
+
+    <a href="#section-1" class="nav-section">1. 竞技场简介</a>
+    <a href="#sec-1-1" class="nav-sub">1.1 三类AI Agent</a>
+    <a href="#sec-1-2" class="nav-sub">1.2 编程语言</a>
+
+    <a href="#section-2" class="nav-section">2. 游戏目标与胜负</a>
+    <a href="#sec-2-1" class="nav-sub">2.1 比赛流程</a>
+    <a href="#sec-2-2" class="nav-sub">2.2 判定规则</a>
+    <a href="#sec-2-3" class="nav-sub">2.3 粉丝支持度</a>
+
+    <a href="#section-3" class="nav-section">3. 球员 AI Agent 控制</a>
+    <a href="#sec-3-1" class="nav-sub">3.1 启动线程</a>
+    <a href="#sec-3-2" class="nav-sub">3.2 基础指令</a>
+    <a href="#sec-3-3" class="nav-sub">3.3 抢断 clash</a>
+    <a href="#sec-3-4" class="nav-sub">3.4 出球 roll</a>
+    <a href="#sec-3-5" class="nav-sub">3.5 宏指令</a>
+    <a href="#sec-3-6" class="nav-sub">3.6 球员属性</a>
+
+    <a href="#section-4" class="nav-section">4. 球与控球机制</a>
+    <a href="#sec-4-1" class="nav-sub">4.1 粘球与免疫</a>
+    <a href="#sec-4-2" class="nav-sub">4.2 释放气泡与拦截</a>
+
+    <a href="#section-5" class="nav-section">5. 进球与开球</a>
+
+    <a href="#section-6" class="nav-section">6. 自动守门员</a>
+
+    <a href="#section-7" class="nav-section">7. 教练 AI Agent</a>
+    <a href="#sec-7-1" class="nav-sub">7.1 教练方法</a>
+    <a href="#sec-7-2" class="nav-sub">7.2 四大技能</a>
+    <a href="#sec-7-3" class="nav-sub">7.3 全场感知</a>
+    <a href="#sec-7-4" class="nav-sub">7.4 示例代码</a>
+
+    <a href="#section-8" class="nav-section">8. 实战策略</a>
+    <a href="#section-9" class="nav-section">9. 游戏参数速查</a>
+
+    <a href="#section-summary" class="nav-section">🏆 核心速查表</a>
+</nav>
+
+<!-- ===== 页面主体 ===== -->
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>竞技场：AI世界杯 ⚽🏆</h1>
+    <div class="subtitle">Chaotic Crossing Clash —— 用代码指挥 AI Agent，进球比对手更多！</div>
+    <div class="badge">扣哒世界 多人竞技场 | 2v2 足球 · 球员 + 教练 + 守门员</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 1 ==================== -->
+<div class="section-header" id="section-1">
+    <h2>1. 竞技场简介</h2>
+    <div class="en-title">Intro to the AI World Cup Arena</div>
+</div>
+
+<p>欢迎来到绿茵赛场！<span class="keyword">AI世界杯</span>是一款 <strong>2 对 2 的竞技足球编程游戏</strong>。它最特别的地方在于：场上奔跑的球员、场边指挥的教练，全都不是普通角色，而是一个个由你的代码"注入灵魂"的 <span class="keyword-gold">AI Agent（智能体）</span>。</p>
+
+<p>你可以把 AI Agent 理解为一个"会自己思考、自己行动"的程序小人。你不需要用鼠标一步步操控它，而是<strong>提前写好一套决策逻辑</strong>（例如"如果我有球就射门，否则就去追球"），然后 AI Agent 就会在比赛中不停地按照这套逻辑自动做出判断和动作。你的代码写得越聪明，你的 AI Agent 踢得就越好——这正是"AI世界杯"这个名字的由来。</p>
+
+<h3 id="sec-1-1">1.1 你要指挥的三类 AI Agent（Three Agents）</h3>
+
+<p>在这场比赛里，你的代码将同时操控<strong>三个 AI Agent</strong>。它们分工不同，请先记住它们各自的角色：</p>
+
+<ul class="clean">
+    <li>⚽ <strong>两名球员 AI Agent（Mates，球场单位）</strong>：这是真正在场上跑动、争球的两名球员。特别之处在于，<strong>每名球员都在自己独立的"线程"里运行你的代码</strong>——你可以简单理解为：两名球员像两个同时开工的小机器人，各想各的、各跑各的，互不等待。它们围绕场上<strong>唯一的一颗球</strong>进行追逐、抢断、传球和射门。</li>
+    <li>🎽 <strong>一名教练 AI Agent（Coach，即英雄 hero，运行在主线程）</strong>：教练不下场踢球，而是站在场边<strong>纵观全场</strong>。它运行在"主线程"上，可以随时读取全场信息，并使用各种<strong>即时技能</strong>去帮助自家球员、或干扰对手。教练是你的"大脑指挥中枢"。</li>
+    <li>🧤 <strong>一名自动守门员（Auto-keeper）</strong>：双方各有一名把守球门的守门员。<strong>它不是 AI Agent，没有人给它写代码</strong>——它的行为是系统固定的。你需要做的不是控制它，而是想办法"智胜"它，把球从它手里送进门。</li>
+</ul>
+
+<div class="info-box">
+    <span class="info-label">一句话理解：</span>你既是<strong>球队的程序员</strong>，也是场边的<strong>教练</strong>。两名球员 AI Agent 各自为战（多线程并行），教练 AI Agent 统筹全局（主线程），而守门员是一个需要你去攻破的固定 NPC。
+</div>
+
+<h3 id="sec-1-2">1.2 编程语言（Languages）</h3>
+
+<p>本竞技场支持用 <strong>Python</strong> 和 <strong>C++</strong> 两种语言来编写 AI Agent 的逻辑。两种语言的<strong>游戏思路完全一致</strong>——都是"为球员写线程处理函数，为教练写主循环"，只是语法写法不同。</p>
+
+<p>本篇文档中的每一段示例代码，都会<strong>同时给出 Python 和 C++ 两个版本</strong>，你可以点击代码框上方的语言标签来切换查看。初学者建议先从 Python 入手，它的写法更接近自然语言、更容易读懂；熟悉之后再尝试 C++ 也会很轻松。</p>
+
+<div class="pitch">
+    <div class="center-line"></div>
+    <div class="center-circle"></div>
+    <div class="gate left"></div>
+    <div class="gate right"></div>
+    <div class="pitch-label" style="left:1%; top:6%;">红队球门</div>
+    <div class="pitch-label" style="right:1%; top:6%;">蓝队球门</div>
+    <div class="pitch-label" style="left:45%; bottom:4%;">中线开球点</div>
+</div>
+<div class="pitch-caption">图1：球场示意图——<span class="team-red">红队</span>防守左门，<span class="team-blue">蓝队</span>防守右门，中央为开球点</div>
+
+<!-- ==================== 2 ==================== -->
+<div class="section-header" id="section-2">
+    <h2>2. 游戏目标与胜负</h2>
+    <div class="en-title">Game Objective — Score to Win</div>
+</div>
+
+<p>目标非常简单，和真实足球一样：<strong>把球打进对方球门，让自己的进球数比对手多。</strong>下面我们把"比赛怎么进行""怎么算赢"一条条讲清楚。</p>
+
+<h3 id="sec-2-1">2.1 比赛流程（Two Rounds）</h3>
+
+<p>一场比赛分为<strong>两个回合</strong>（就像足球的上下半场），每个回合时长为 <code>params.halfTime</code> 秒。两个回合分别编号为第 <code>0</code> 回合和第 <code>1</code> 回合（程序里习惯从 0 开始数）：</p>
+
+<ul class="clean">
+    <li>🔴 <span class="team-red">红队</span>在第 <code>0</code> 回合（上半场）开球。</li>
+    <li>🔵 <span class="team-blue">蓝队</span>在第 <code>1</code> 回合（下半场）开球。</li>
+</ul>
+
+<p>之所以让两队轮流开球，是为了公平——开球方会先碰到球，稍占一点便宜，两回合各开一次就抵消了。</p>
+
+<h3 id="sec-2-2">2.2 胜负判定规则（Win Conditions）</h3>
+
+<p>当第二回合结束的那一刻，系统会<strong>立即</strong>按下面的顺序判定谁赢：</p>
+
+<table class="styled-table">
+    <thead><tr><th>优先级</th><th>判定标准</th></tr></thead>
+    <tbody>
+        <tr><td>① 首先看</td><td><strong>进球数高者获胜。</strong>这是最直接的胜负标准。</td></tr>
+        <tr><td>② 若进球数相同</td><td><strong>粉丝支持度更高的队伍获胜</strong>（支持度是什么，见下一节）。</td></tr>
+        <tr><td>③ 若支持度也相同</td><td><strong>掷硬币决定</strong>——但这个"硬币"是基于种子（seed）的，同一场比赛无论重播多少次，结果都完全一样。</td></tr>
+    </tbody>
+</table>
+
+<div class="remember-box">
+    <span class="remember-label">确定性设计（重要观念）：</span>这个游戏<strong>没有任何真正的随机性</strong>——连"掷硬币"都是固定结果。这意味着：相同的代码对阵相同的对手，比赛过程和结果永远一模一样。所以你可以放心地反复测试、优化你的 AI Agent，不用担心"这次是运气好"。
+</div>
+
+<h3 id="sec-2-3">2.3 粉丝支持度（Fan Support）</h3>
+
+<p>观众来看球，最爱看的是<strong>积极进攻的足球</strong>。所以游戏设计了一个"粉丝支持度"机制来奖励主动进攻的一方。比赛过程中，双方都会不断积累<span class="keyword-gold">粉丝支持度</span>，它会直接显示为你<strong>教练 AI Agent（英雄）的生命值数字</strong>——数字越高，说明你的球队踢得越受欢迎。</p>
+
+<p>以下行为会为你积累支持度：</p>
+
+<table class="styled-table">
+    <thead><tr><th>行为</th><th>支持度奖励</th></tr></thead>
+    <tbody>
+        <tr><td>成功把球传给自己的队友</td><td><code>params.activity.pass</code></td></tr>
+        <tr><td>赢得一次抢断对抗（clash）</td><td><code>params.activity.clash</code></td></tr>
+        <tr><td>射向对方球门（无论被扑出还是进球）</td><td><code>params.activity.shot</code></td></tr>
+        <tr><td>把球留在对方半场里</td><td>每秒 <code>params.activity.ballInOpponentHalfPerSecond</code></td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">攻势至上：</span><strong>僵局（deadlock）和消极打法，永远会输给积极、有建设性的代码。</strong>哪怕两队进球数打平，主动传球、频繁射门、把球压在对方半场的一方，也会靠支持度笑到最后。所以写代码时，要鼓励你的 AI Agent 大胆进攻，而不是缩在自家门前干等。
+</div>
+
+<!-- ==================== 3 ==================== -->
+<div class="section-header" id="section-3">
+    <h2>3. 球员 AI Agent 控制</h2>
+    <div class="en-title">Mate Control — Your Two Field Agents</div>
+</div>
+
+<p>你控制<strong>两名球员 AI Agent</strong>。前面说过，每名球员都在<strong>自己独立的线程</strong>里运行你的处理函数。比赛开始时，这个处理函数会为每名球员<strong>各自调用一次</strong>；一旦调用，函数里的循环就会一直跑到比赛结束（球员<strong>永远不会死亡，也不会重生</strong>），所以你通常会在函数里写一个 <code>while</code> 无限循环，让球员不停地思考和行动。</p>
+
+<h3 id="sec-3-1">3.1 启动球员线程（Spawn Handler）</h3>
+
+<p>要让球员 AI Agent 动起来，你必须先"注册"一个处理函数，告诉系统："每当一名球员登场，就用这个函数来控制它。"注册的方式是调用 <code>hero.on("spawn-mate", 函数名)</code>。</p>
+
+<div class="warn-box">
+    <span class="warn-label">新手最常犯的错：</span>忘记写 <code>hero.on("spawn-mate", ...)</code>！如果没有这一行，球员线程根本不会启动，你会看到两名球员站在原地一动不动。请务必记得加上它。
+</div>
+
+<p>下面是一段最基础的球员逻辑："有球就射门，没球就追球。"</p>
+
+<div class="code-tabs">
+    <button class="code-tab active" onclick="switchLang(this,'py')">Python</button>
+    <button class="code-tab" onclick="switchLang(this,'cpp')">C++</button>
+</div>
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<div class="code-pane py active"><pre><span class="kw">def</span> <span class="fn">onSpawnMate</span><span class="punc">(</span>mate<span class="punc">):</span>
+    <span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+        <span class="kw">if</span> mate<span class="punc">.</span>hasBall<span class="punc">:</span>
+            mate<span class="punc">.</span><span class="fn">shoot</span><span class="punc">()</span>        <span class="cmt"># 有球就射门</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            mate<span class="punc">.</span><span class="fn">chaseBall</span><span class="punc">()</span>    <span class="cmt"># 没球就追球</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"spawn-mate"</span><span class="punc">,</span> onSpawnMate<span class="punc">)</span></pre></div>
+<div class="code-pane cpp"><pre><span class="kw">void</span> <span class="fn">onSpawnMate</span><span class="punc">(</span><span class="obj">Mate</span><span class="punc">*</span> mate<span class="punc">)</span> <span class="punc">{</span>
+    <span class="kw">while</span> <span class="punc">(</span><span class="kw">true</span><span class="punc">)</span> <span class="punc">{</span>
+        <span class="kw">if</span> <span class="punc">(</span>mate<span class="punc">-></span>hasBall<span class="punc">)</span> <span class="punc">{</span>
+            mate<span class="punc">-></span><span class="fn">shoot</span><span class="punc">();</span>       <span class="cmt">// 有球就射门</span>
+        <span class="punc">}</span> <span class="kw">else</span> <span class="punc">{</span>
+            mate<span class="punc">-></span><span class="fn">chaseBall</span><span class="punc">();</span>   <span class="cmt">// 没球就追球</span>
+        <span class="punc">}</span>
+    <span class="punc">}</span>
+<span class="punc">}</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"spawn-mate"</span><span class="punc">,</span> onSpawnMate<span class="punc">);</span></pre></div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">分工小技巧：</span>两名球员会共用同一个处理函数，但你可以用 <code>mate.mateId</code>（值为 <code>0</code> 或 <code>1</code>）来区分它们，从而分配不同角色。例如：让 0 号一直往前压当"前锋"，让 1 号留在后场当"后卫"，这样球队才有层次，不会两个人挤在一起抢同一个球。
+</div>
+
+<h3 id="sec-3-2">3.2 基础指令（Move Commands）</h3>
+
+<p>球员 AI Agent 的移动和测距，靠下面两个基础指令：</p>
+
+<table class="styled-table">
+    <thead><tr><th>指令</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>mate.moveTo(x, y)</code></td><td>朝目标点 (x, y) 移动<strong>一步</strong>（步长为 <code>params.stepDistance</code>）后就返回。注意：它一次只走一小步！这一步期间线程会被<strong>阻塞</strong>（暂停），走完这步之后你的代码会重新执行、重新做决策。所以要走到远处，通常要放在循环里反复调用。</td></tr>
+        <tr><td><code>mate.distanceTo(target)</code></td><td>返回本球员到任意带有 <code>x</code>、<code>y</code> 坐标的对象（比如球、对手、球门）之间的距离。常用来判断"够不够得着"。</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">速度要点（很关键）：</span>持球的球员<strong>会变慢</strong>——速度会乘以 <code>params.carrierSpeedFactor</code>（默认 0.75，即降到 75%）。这带来一个重要结论：<strong>空手的追赶者总能追上带球的盘带者</strong>。所以别指望一个人一路带球过全场，那一定会被抢断——正确做法是靠<strong>传球</strong>把球快速推进。另外，<strong>被眩晕的球员无法移动</strong>，此时调用 <code>moveTo</code> 会一直卡住，直到眩晕结束才返回。
+</div>
+
+<h3 id="sec-3-3">3.3 抢断能力 clash（The One Mate Ability）</h3>
+
+<p><code>mate.clash()</code> 是球员 AI Agent <strong>唯一的主动技能</strong>：从敌方持球者脚下把球抢过来。它的冷却时间是 <code>params.clashCooldown</code> 秒，而且<strong>每次尝试都会消耗冷却</strong>——也就是说，无论你抢成功还是失败，都得等冷却结束才能再抢一次。</p>
+
+<table class="styled-table">
+    <thead><tr><th>结果</th><th>触发条件与效果</th></tr></thead>
+    <tbody>
+        <tr><td><strong>✅ 成功</strong></td><td>当敌方持球者在 <code>params.clashRange</code> 范围内、且<strong>不处于免疫状态</strong>时：球立刻转移到你脚下，对手被眩晕 <code>params.clashStunTarget</code> 秒，同时<strong>你还获得一小段控球免疫</strong>（这段时间对手抢不回去）。</td></tr>
+        <tr><td><strong>❌ 失败</strong></td><td>如果目标超出了抢断范围、或者对手正处于免疫状态：抢断落空，<strong>反而是你自己被眩晕</strong> <code>params.clashStunSelf</code> 秒——白白暴露一个大破绽。</td></tr>
+    </tbody>
+</table>
+
+<div class="warn-box">
+    <span class="warn-label">务必先检查：</span>抢断前一定要先判断对方的 <code>isImmune</code>（是否免疫）！对一个正在免疫中的持球者抢断，必定失败并让自己眩晕，等于主动送给对手一次机会。养成"先看 isImmune，再决定要不要 clash"的习惯。
+</div>
+
+<h3 id="sec-3-4">3.4 出球 roll（传球和射门是同一个动作！）</h3>
+
+<p><code>mate.roll(x, y, power)</code> 是<strong>把球踢出去的唯一方式</strong>。这里有一个非常重要的设定：<strong>在本游戏里，"传球"和"射门"其实是同一个动作</strong>——都是把球朝某个点滚出去，区别只在于你瞄准的是队友、还是球门。</p>
+
+<p>其中 <code>power</code>（力量）决定球滚多远：</p>
+
+<div class="code-tabs">
+    <button class="code-tab active" onclick="switchLang(this,'py')">Python</button>
+    <button class="code-tab" onclick="switchLang(this,'cpp')">C++</button>
+</div>
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<div class="code-pane py active"><pre><span class="cmt"># 最大射程 = power × params.rollRangeFactor</span>
+<span class="cmt"># 如果 power 超过 params.maxPower，会被自动限制到上限</span>
+mate<span class="punc">.</span><span class="fn">roll</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> power<span class="punc">)</span></pre></div>
+<div class="code-pane cpp"><pre><span class="cmt">// 最大射程 = power × params.rollRangeFactor</span>
+<span class="cmt">// 如果 power 超过 params.maxPower，会被自动限制到上限</span>
+mate<span class="punc">-></span><span class="fn">roll</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> power<span class="punc">);</span></pre></div>
+</div>
+
+<ul class="clean">
+    <li>🧱 球会在<strong>上下墙壁反弹</strong>——所以"撞墙传球"（bank pass，像台球擦库一样）是合法且免费的战术，可以用来绕过对手。</li>
+    <li>⚡ 出球<strong>成功时永远不会被阻塞</strong>：哪怕你正被一群人围住（混战 scrum），持球者也总有一次瞬间把球踢出去的机会，不会被卡死。</li>
+    <li>⏳ 你<strong>无法在 <code>params.selfRecaptureDelay</code> 秒内接回自己刚踢出的球</strong>。过了这段短暂时间后，"踢一脚给自己"的直塞式自传球（把球往前捅一下再追上去）是允许的。</li>
+</ul>
+
+<h3 id="sec-3-5">3.5 宏指令（Convenience Macros）</h3>
+
+<p>为了让你少写代码，游戏内置了一批常用的"宏指令"——它们其实是把常见操作打包好的快捷方法，直接调用即可：</p>
+
+<table class="styled-table">
+    <thead><tr><th>宏指令</th><th>效果</th></tr></thead>
+    <tbody>
+        <tr><td><code>mate.chaseBall()</code></td><td>朝球的方向移动一步（追球）。</td></tr>
+        <tr><td><code>mate.shoot()</code></td><td>以最大力量把球射向对方球门中心（射门）。</td></tr>
+        <tr><td><code>mate.passTo()</code></td><td>把球传给你的搭档（你只有一名搭档，所以不用指定传给谁）。</td></tr>
+        <tr><td><code>mate.cross()</code></td><td>朝远门柱区域横传（cross，即"传中"）——这是本竞技场的<strong>招牌打法</strong>，非常好用。</td></tr>
+        <tr><td><code>mate.defendGoal()</code></td><td>朝"球—本方球门"的连线上退守一步（回防站位）。</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-3-6">3.6 球员属性（Read-Only Properties）</h3>
+
+<p>下面这些属性是<strong>只读的</strong>（你只能读取、不能修改），用来了解球员当前的状态，方便你的代码做判断：</p>
+
+<table class="styled-table">
+    <thead><tr><th>属性</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>x</code> / <code>y</code></td><td>数值</td><td>球员当前所在位置的横 / 纵坐标。</td></tr>
+        <tr><td><code>mateId</code></td><td>数值</td><td>0 或 1，用来区分两名球员、分配角色。</td></tr>
+        <tr><td><code>color</code></td><td>字符串</td><td>本队颜色，"red" 或 "blue"。</td></tr>
+        <tr><td><code>hasBall</code></td><td>布尔值</td><td>当前是否持球（true / false）。</td></tr>
+        <tr><td><code>isStunned</code></td><td>布尔值</td><td>是否被眩晕（眩晕时无法移动、抢断或接球）。</td></tr>
+        <tr><td><code>isImmune</code></td><td>布尔值</td><td>是否拥有控球免疫（免疫时无法被对手抢断）。</td></tr>
+        <tr><td><code>clashReady</code></td><td>布尔值</td><td>抢断技能是否已经冷却好、可以使用。</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 4 ==================== -->
+<div class="section-header" id="section-4">
+    <h2>4. 球与控球机制</h2>
+    <div class="en-title">Ball & Possession</div>
+</div>
+
+<p>要踢好球，得先搞懂"球是怎么被抢到、被守住、被拦截的"。这一节的规则决定了控球权的归属，非常值得细读。</p>
+
+<h3 id="sec-4-1">4.1 粘球与控球免疫（Sticky & Immunity）</h3>
+
+<p><strong>球是"粘"的：</strong>一颗无人控制的自由球，只要进入了某名球员的 <code>params.captureRadius</code> 范围，就会自动"吸附"到那名球员脚下，变成他控球。之后，持球者会一直控着球，直到发生下面三种情况之一：他主动出球（roll）、被敌方成功抢断（clash）、或者被守门员扑住。</p>
+
+<div class="remember-box">
+    <span class="remember-label">控球免疫（Possession Immunity）：</span>在<strong>任何一种方式拿到球之后</strong>（无论是捡到自由球、抢断得手、还是接到队友传球），新的持球者都会获得 <code>params.possessionImmunity</code> 秒的<strong>免疫时间</strong>，这段时间里<strong>他不会被抢断</strong>。换句话说，每一次拿到球，你都保证有一次"从容不被打扰"的行动机会。正因如此，对一个免疫中的持球者抢断必定失败（还会自晕），所以出手前一定要先看 <code>isImmune</code>。
+</div>
+
+<h3 id="sec-4-2">4.2 释放气泡与拦截（Release Bubble & Interception）</h3>
+
+<p><strong>释放气泡（Release Bubble）：</strong>一颗刚被踢出、正在滚动的球，在它离开释放点、飞行距离还没达到 <code>params.rollReleaseRadius</code> 之前，<strong>任何人都无法接住它</strong>（连守门员也不行）。这就好比球刚出脚时外面罩着一层保护泡泡。因此，即使对手就贴在你身边，你也能安全地把球踢出去。而与之相对，<strong>一颗完全静止的球，任何时候都可以被捡走。</strong></p>
+
+<p><strong>拦截（Interception）：</strong>只要你的球员站在滚球的路径上、并且位于释放气泡之外的位置，球飞过来就归你了。由于球的运动轨迹是<strong>直线</strong>，你完全可以通过 <code>hero.ball</code> 提供的位置和速度信息 <code>(x, y, vx, vy)</code>，用数学算出球接下来会经过哪里，从而提前跑位去拦截。</p>
+
+<div class="tip-box">
+    <span class="tip-label">拦截漏洞：</span><strong>被眩晕的球员既不能接球、也不能拦截</strong>——所以一名被眩晕的防守者，就等于对方传球路线上凭空出现的一个大漏洞。反过来利用这一点：先抢断对方的防守者制造眩晕，再从他身边穿过去传球或射门，是非常高效的进攻套路。
+</div>
+
+<div class="info-box">
+    <span class="info-label">同一时刻争球是"确定"的：</span>当双方在同一帧同时争抢一颗球时，<strong>离球更近的球员获胜</strong>；如果距离完全相等，就由两队<strong>轮流</strong>获得球权。整个判定过程<strong>没有任何随机成分</strong>——一切都可以计算、可以预测，这也是编写精确策略的基础。
+</div>
+
+<!-- ==================== 5 ==================== -->
+<div class="section-header" id="section-5">
+    <h2>5. 进球与开球</h2>
+    <div class="en-title">Goals & Kickoffs</div>
+</div>
+
+<p><span class="team-red">红队</span>始终防守左侧球门，<span class="team-blue">蓝队</span>始终防守右侧球门。当球进入某个球门区域（<code>params.gates</code>）时就算进球——<strong>而且不管球是谁踢进去的！</strong></p>
+
+<div class="warn-box">
+    <span class="warn-label">当心乌龙球：</span><strong>乌龙球（own goal，把球打进自家门）会算作对手得分</strong>，包括自己不小心带球退进了本方球门。所以在<strong>任何角色下（哪怕是纯防守的后卫）</strong>，你的代码都要处理好 <code>mate.hasBall</code> 的情况，别让防守球员糊里糊涂地把球送进自家大门。
+</div>
+
+<p><strong>每次进球之后（以及每个回合刚开始时）</strong>，所有球员的位置和技能冷却都会重置回初始阵型，球会被重新放到球场中央，并朝<strong>开球方</strong>偏移一小段距离 <code>params.kickoffOffset</code>——这样开球方就会确定性地<strong>先碰到球</strong>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">开球权的价值：</span>进球之后，是由<strong>刚刚丢球的一方开球</strong>（这也符合真实足球规则）。因此开球阶段拿到的控球权，<strong>最多只值一次进攻机会</strong>，别把所有希望都押在开球上——真正的较量在整个回合的攻防之中。
+</div>
+
+<!-- ==================== 6 ==================== -->
+<div class="section-header" id="section-6">
+    <h2>6. 自动守门员</h2>
+    <div class="en-title">Auto-Keeper — The Fixed NPC</div>
+</div>
+
+<p>每个球门都由一名 NPC 守门员把守。<strong>它不是 AI Agent，没有人给它写代码</strong>——它的行为是系统固定的、<strong>完全可预测的</strong>。而"可预测"恰恰是你的机会：只要摸清它的规律，就能设计出稳定的破门方法。</p>
+
+<table class="styled-table">
+    <thead><tr><th>特性</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td>移动受限</td><td>守门员只在自己的专属区域（<code>params.keeperZones</code>）内移动，速度为 <code>params.keeperSpeed</code>，并且<strong>始终朝"区域内离球最近的那个点"移动</strong>。它移动得不快，<strong>它的反应滞后，就是你的得分窗口。</strong></td></tr>
+        <tr><td>物理扑救</td><td>它的扑救是<strong>物理性</strong>的、而非"守住整个球门"：只有当它的身体真的靠近到 <code>params.keeperCatchRadius</code> 范围内时，才能接住滚来的球。所以<strong>快速射向它够不到的远角</strong>，就能攻破一个被引偏了位置的守门员。</td></tr>
+        <tr><td>不可撼动</td><td>守门员<strong>无法被抢断（clash）</strong>，它手里握着的球也<strong>无法被抢走</strong>。不过你可以自由进入它的区域，无需顾忌。</td></tr>
+    </tbody>
+</table>
+
+<h4>解围超级长传（Clearance）<span class="en">Super Kick</span></h4>
+
+<p>守门员拿到球并持球 <code>params.keeperHoldTime</code> 秒之后，会以 <code>params.superKickSpeed</code> 的极快速度，朝<strong>离它最近的、且没被眩晕的自家球员</strong>射出一道超级长传——直线飞行、中途不减速。关于这道解围球，有几点要知道：</p>
+
+<ul class="clean">
+    <li>🚫 敌方<strong>无法拦截飞行途中的解围球</strong>（它太快了，还带着"不可拦截"的特性）。</li>
+    <li>🐢 当球飞到接应球员所在的距离时，会<strong>降速为普通滚球</strong>；如果它<strong>撞到墙壁反弹</strong>，之后就变回一颗普通的自由球，此时又可以被争抢了。</li>
+    <li>🤝 如果接应的球员本来就已经在守门员的 <code>params.captureRadius</code> 范围内，球会被<strong>直接交到他脚下</strong>，省去飞行过程。</li>
+</ul>
+
+<div class="tip-box">
+    <span class="tip-label">得分要领（记住这一条基本就会破门了）：</span>守门员<strong>永远追着球移动</strong>。所以套路是：先通过带球或向边路传球，把守门员<strong>从球门中心引开</strong>，等它跑偏之后，再把球射向<strong>空出来的远门柱</strong>。归根结底，整场比赛拼的就是一场博弈——"球飞到球门需要的时间" vs "守门员挪回位置的反应滞后"。这也是 <code>cross</code>（横传/传中）成为招牌打法的原因：它能把守门员往一侧拽，再打空档。
+</div>
+
+<!-- ==================== 7 ==================== -->
+<div class="section-header" id="section-7">
+    <h2>7. 教练 AI Agent（英雄）</h2>
+    <div class="en-title">Coach (Hero) — The Main Thread Agent</div>
+</div>
+
+<p><strong>主线程运行的就是你的教练 AI Agent。</strong>和场上跑动的球员不同，教练不亲自碰球，而是像一位真正的主教练那样站在场边：它能<strong>看见场上发生的一切</strong>，并适时使用各种<strong>即时技能</strong>（每个技能都有自己独立的冷却时间），从战术层面影响比赛走向。教练是你统筹全局、临场调度的"指挥中枢"。</p>
+
+<h3 id="sec-7-1">7.1 教练方法（Methods）</h3>
+
+<table class="styled-table">
+    <thead><tr><th>方法</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>hero.wait(duration)</code></td><td>让教练的主线程暂停 <code>duration</code> 秒。常用来控制主循环的节奏，避免每一帧都做重复判断。</td></tr>
+        <tr><td><code>hero.random()</code></td><td>返回一个 [0, 1) 之间的伪随机数。它基于种子生成，每场比赛结果确定（不会真的随机乱变）。</td></tr>
+        <tr><td><code>hero.abilityReady(name)</code></td><td>检查某个技能是否已冷却好，好了返回 <code>true</code>。技能名有四个："inspire"、"press"、"whistle"、"distract"。</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-7-2">7.2 四大教练技能（Abilities）</h3>
+
+<p>教练 AI Agent 有四个技能，两个用来"增益自己人"，两个用来"干扰对手"：</p>
+
+<table class="styled-table">
+    <thead><tr><th>技能</th><th>效果</th></tr></thead>
+    <tbody>
+        <tr><td><code>hero.inspire(mate)</code> 激励</td><td>让指定的自家球员<strong>提速</strong>（速度 × <code>inspire.factor</code>），持续 <code>inspire.duration</code> 秒。冷却 <code>inspire.cooldown</code> 秒。适合在反击、追球时使用。</td></tr>
+        <tr><td><code>hero.press(enemyMate)</code> 压迫</td><td>让指定的敌方球员<strong>减速</strong>（速度 × <code>press.factor</code>），持续 <code>press.duration</code> 秒。冷却 <code>press.cooldown</code> 秒。适合拖慢对方持球者。</td></tr>
+        <tr><td><code>hero.whistle(mate)</code> 哨声</td><td><strong>立刻解除</strong>自家球员身上的眩晕。冷却 <code>whistle.cooldown</code> 秒。这是专门克制"抢断流"对手的利器——被抢断眩晕后一声哨响就能立刻恢复。</td></tr>
+        <tr><td><code>hero.distract()</code> 干扰</td><td>让<strong>敌方守门员</strong>减速（速度 × <code>distract.factor</code>），持续 <code>distract.duration</code> 秒。冷却 <code>distract.cooldown</code> 秒。射门前用它，能让守门员更难扑救。</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">关于返回值：</span>这些技能在成功施放时返回 <code>true</code>；如果技能还没冷却好、或者游戏当前未激活，则返回 <code>false</code>。所以稳妥的做法是：调用前先用 <code>abilityReady(...)</code> 判断一下，避免浪费。
+</div>
+
+<h3 id="sec-7-3">7.3 全场感知（Sensing, 只读）</h3>
+
+<p>教练能读取全场信息，这些都是只读属性，是你做决策的"眼睛"：</p>
+
+<table class="styled-table">
+    <thead><tr><th>属性</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td><code>hero.ball</code></td><td>球的信息 {x, y, vx, vy, owner, heldByKeeper}；其中 <code>owner</code> 是当前持球球员的视图，若没人持球则为空（Python 中为 <code>None</code>，C++ 中为 <code>nullptr</code>）。</td></tr>
+        <tr><td><code>hero.myMates</code> / <code>hero.theirMates</code></td><td>我方 / 对方球员的视图数组，每个含 {x, y, id, color, hasBall, isStunned, isImmune, clashReady}。</td></tr>
+        <tr><td><code>hero.myKeeper</code> / <code>hero.theirKeeper</code></td><td>我方 / 对方守门员的信息 {x, y, hasBall}。</td></tr>
+        <tr><td><code>hero.myGoal</code> / <code>hero.theirGoal</code></td><td>我方 / 对方球门的信息 {x, y, width}，即球门线上的中心点。</td></tr>
+        <tr><td><code>hero.score</code> / <code>hero.opponentScore</code></td><td>当前我方 / 对方的进球数。</td></tr>
+        <tr><td><code>hero.color</code></td><td>你所在队伍的颜色，"red" 或 "blue"。</td></tr>
+        <tr><td><code>hero.gameTime</code></td><td>整场比赛已经进行的秒数。</td></tr>
+        <tr><td><code>hero.roundTime</code></td><td>当前回合已经进行的秒数。</td></tr>
+        <tr><td><code>hero.round</code></td><td>当前回合编号，0（第一回合）或 1（第二回合）；本回合剩余时间 = <code>params.halfTime - hero.roundTime</code>。</td></tr>
+        <tr><td><code>hero.gameActive</code></td><td>游戏是否处于进行状态；暂停时为 <code>false</code>（此时所有动作和技能都无效）。</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-7-4">7.4 教练示例代码（Example）</h3>
+
+<p>下面这段教练逻辑做了两件聪明事：帮被眩晕的队友吹哨解控，以及在对方持球时压迫拖慢对手。</p>
+
+<div class="code-tabs">
+    <button class="code-tab active" onclick="switchLang(this,'py')">Python</button>
+    <button class="code-tab" onclick="switchLang(this,'cpp')">C++</button>
+</div>
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<div class="code-pane py active"><pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="cmt"># 谁被眩晕了，就吹哨帮他解除</span>
+    <span class="kw">for</span> m <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span>myMates<span class="punc">:</span>
+        <span class="kw">if</span> m<span class="punc">.</span>isStunned <span class="kw">and</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">abilityReady</span><span class="punc">(</span><span class="str">"whistle"</span><span class="punc">):</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">whistle</span><span class="punc">(</span>m<span class="punc">)</span>
+
+    <span class="cmt"># 敌方持球时，用压迫拖慢对手</span>
+    carrier <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span>ball<span class="punc">.</span>owner
+    <span class="kw">if</span> carrier <span class="kw">and</span> carrier<span class="punc">.</span>color <span class="punc">!=</span> <span class="obj">hero</span><span class="punc">.</span>color <span class="kw">and</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">abilityReady</span><span class="punc">(</span><span class="str">"press"</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">press</span><span class="punc">(</span>carrier<span class="punc">)</span>
+
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">wait</span><span class="punc">(</span><span class="num">0.3</span><span class="punc">)</span></pre></div>
+<div class="code-pane cpp"><pre><span class="kw">while</span> <span class="punc">(</span><span class="kw">true</span><span class="punc">)</span> <span class="punc">{</span>
+    <span class="cmt">// 谁被眩晕了，就吹哨帮他解除</span>
+    <span class="kw">for</span> <span class="punc">(</span><span class="kw">auto</span> m <span class="punc">:</span> <span class="obj">hero</span><span class="punc">.</span>myMates<span class="punc">)</span> <span class="punc">{</span>
+        <span class="kw">if</span> <span class="punc">(</span>m<span class="punc">.</span>isStunned <span class="punc">&&</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">abilityReady</span><span class="punc">(</span><span class="str">"whistle"</span><span class="punc">))</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">whistle</span><span class="punc">(</span>m<span class="punc">);</span>
+    <span class="punc">}</span>
+    <span class="cmt">// 敌方持球时，用压迫拖慢对手</span>
+    <span class="kw">auto</span> carrier <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span>ball<span class="punc">.</span>owner<span class="punc">;</span>
+    <span class="kw">if</span> <span class="punc">(</span>carrier <span class="punc">&&</span> carrier<span class="punc">-></span>color <span class="punc">!=</span> <span class="obj">hero</span><span class="punc">.</span>color <span class="punc">&&</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">abilityReady</span><span class="punc">(</span><span class="str">"press"</span><span class="punc">))</span> <span class="punc">{</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">press</span><span class="punc">(</span>carrier<span class="punc">);</span>
+    <span class="punc">}</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">wait</span><span class="punc">(</span><span class="num">0.3</span><span class="punc">);</span>
+<span class="punc">}</span></pre></div>
+</div>
+
+<!-- ==================== 8 ==================== -->
+<div class="section-header" id="section-8">
+    <h2>8. 实战策略</h2>
+    <div class="en-title">Putting It All Together</div>
+</div>
+
+<p>把球员 AI Agent、教练 AI Agent、守门员这三套系统串起来，一套稳健、适合新手起步的 AI世界杯思路大致如下：</p>
+
+<ol class="clean" style="list-style: decimal;">
+    <li><strong>先启动线程</strong>：代码里务必写上 <code>hero.on("spawn-mate", ...)</code>，否则球员 AI Agent 根本不会动——这是最容易忘、也最致命的一步。</li>
+    <li><strong>球员分工</strong>：用 <code>mateId</code> 区分角色——比如一人主攻、抢球射门，一人拉边接应或回防。每个角色都要处理 <code>hasBall</code>，防止后卫乌龙。</li>
+    <li><strong>靠传球推进</strong>：记住持球会变慢、追赶者总能追上，所以别硬带球——多用 <code>passTo</code> / <code>cross</code>，甚至撞墙传球来撕开防线。</li>
+    <li><strong>抢断先看免疫</strong>：调用 <code>clash</code> 前先查对手的 <code>isImmune</code>，避免对免疫者抢断而害自己眩晕。</li>
+    <li><strong>攻破守门员</strong>：守门员追球移动，先把它引离球门中心，再射向<strong>远门柱</strong>空档；进攻时可以配合 <code>hero.distract()</code> 拖慢它。</li>
+    <li><strong>教练辅助时机</strong>：进攻反击时用 <code>inspire</code> 给自家球员提速；防守时用 <code>press</code> 拖慢敌方持球者；自家球员被抢断眩晕时，立刻 <code>whistle</code> 解控。</li>
+    <li><strong>追求攻势</strong>：多传球、多射门、尽量把球压在对方半场——这些都在积累粉丝支持度，会在打平时救你一命。</li>
+</ol>
+
+<div class="remember-box">
+    <span class="remember-label">终极目标提醒：</span>整套游戏毫无随机性，胜负完全取决于你的<strong>计算与策略</strong>。进球第一，其次拼支持度——让你写出的 AI Agent 踢得比对手<strong>更主动、更聪明</strong>！
+</div>
+
+<!-- ==================== 9 ==================== -->
+<div class="section-header" id="section-9">
+    <h2>9. 游戏参数速查</h2>
+    <div class="en-title">Game Parameters</div>
+</div>
+
+<p>你可以通过 <code>params</code> 对象访问下面所有参数。以下均为默认值——如果文档过时，实际比赛可能采用不同数值，请以游戏内实时的 <code>params</code> 为准。</p>
+
+<h4>场地与球门<span class="en">Field & Gates</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.field</code></td><td>{ minX:4, minY:0, maxX:96, maxY:64 }</td><td>场地边界</td></tr>
+        <tr><td><code>params.gates.red</code></td><td>{ x0:0, y0:24, x1:4, y1:40 }</td><td>红队球门区</td></tr>
+        <tr><td><code>params.gates.blue</code></td><td>{ x0:96, y0:24, x1:100, y1:40 }</td><td>蓝队球门区</td></tr>
+        <tr><td><code>params.kickoffOffset</code></td><td>4</td><td>开球偏移量</td></tr>
+        <tr><td><code>params.halfTime</code></td><td>60</td><td>每回合时长（秒）</td></tr>
+    </tbody>
+</table>
+
+<h4>球员与移动<span class="en">Mates & Movement</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.stepDistance</code></td><td>8</td><td>移动步长</td></tr>
+        <tr><td><code>params.mateSpeed</code></td><td>20</td><td>球员基础速度</td></tr>
+        <tr><td><code>params.carrierSpeedFactor</code></td><td>0.75</td><td>持球速度系数</td></tr>
+        <tr><td><code>params.captureRadius</code></td><td>4</td><td>接球范围</td></tr>
+    </tbody>
+</table>
+
+<h4>抢断与控球<span class="en">Clash & Possession</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.clashRange</code></td><td>4</td><td>抢断距离</td></tr>
+        <tr><td><code>params.clashStunTarget</code></td><td>1.2</td><td>抢断成功眩晕对手时间</td></tr>
+        <tr><td><code>params.clashStunSelf</code></td><td>0.8</td><td>抢断失败自晕时间</td></tr>
+        <tr><td><code>params.clashCooldown</code></td><td>3</td><td>抢断冷却时间</td></tr>
+        <tr><td><code>params.possessionImmunity</code></td><td>0.5</td><td>控球免疫时间</td></tr>
+        <tr><td><code>params.selfRecaptureDelay</code></td><td>0.3</td><td>自传球接球延迟</td></tr>
+    </tbody>
+</table>
+
+<h4>出球（滚球）<span class="en">Roll</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.rollReleaseRadius</code></td><td>8</td><td>球释放安全半径</td></tr>
+        <tr><td><code>params.maxPower</code></td><td>100</td><td>最大踢球力量</td></tr>
+        <tr><td><code>params.rollRangeFactor</code></td><td>0.45</td><td>踢球射程系数</td></tr>
+        <tr><td><code>params.rollFriction</code></td><td>55</td><td>滚动摩擦系数</td></tr>
+    </tbody>
+</table>
+
+<h4>守门员<span class="en">Keeper</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.keeperSpeed</code></td><td>4</td><td>守门员移动速度</td></tr>
+        <tr><td><code>params.keeperCatchRadius</code></td><td>3</td><td>守门员扑救范围</td></tr>
+        <tr><td><code>params.keeperHoldTime</code></td><td>1</td><td>守门员持球时间</td></tr>
+        <tr><td><code>params.keeperZones.red</code></td><td>{ x0:4, y0:20, x1:12, y1:44 }</td><td>红队守门员区域</td></tr>
+        <tr><td><code>params.keeperZones.blue</code></td><td>{ x0:88, y0:20, x1:96, y1:44 }</td><td>蓝队守门员区域</td></tr>
+        <tr><td><code>params.superKickSpeed</code></td><td>60</td><td>守门员解围速度</td></tr>
+    </tbody>
+</table>
+
+<h4>教练技能<span class="en">Coach Abilities</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.coach.inspire</code></td><td>{ cooldown:6, duration:2, factor:1.5 }</td><td>激励（提速）</td></tr>
+        <tr><td><code>params.coach.press</code></td><td>{ cooldown:6, duration:2, factor:0.6 }</td><td>压迫（减速）</td></tr>
+        <tr><td><code>params.coach.whistle</code></td><td>{ cooldown:8 }</td><td>哨声（解眩晕）</td></tr>
+        <tr><td><code>params.coach.distract</code></td><td>{ cooldown:10, duration:2, factor:0.5 }</td><td>干扰（拖慢守门员）</td></tr>
+    </tbody>
+</table>
+
+<h4>粉丝支持度<span class="en">Fan Activity</span></h4>
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>默认值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>params.activity.pass</code></td><td>1</td><td>成功传球加分</td></tr>
+        <tr><td><code>params.activity.clash</code></td><td>2</td><td>赢得抢断加分</td></tr>
+        <tr><td><code>params.activity.shot</code></td><td>2</td><td>射门加分</td></tr>
+        <tr><td><code>params.activity.ballInOpponentHalfPerSecond</code></td><td>0.1</td><td>控球于对方半场每秒加分</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>核心速查表 🏆</h3>
+
+    <table class="styled-table">
+        <thead><tr><th>系统</th><th>关键命令 / 概念</th><th>要点</th></tr></thead>
+        <tbody>
+            <tr><td>目标</td><td>进球数 &gt; 对手</td><td>平局比支持度，仍平则种子掷币</td></tr>
+            <tr><td>比赛</td><td>两回合 × <code>halfTime</code> 秒</td><td>红队先开第 0 回合，蓝队开第 1 回合</td></tr>
+            <tr><td>支持度</td><td>传球/抢断/射门/压对方半场</td><td>显示为教练血量；攻势球胜消极球</td></tr>
+            <tr><td>球员启动</td><td><code>hero.on("spawn-mate", fn)</code></td><td>必须写，否则球员不动；用 mateId 分工</td></tr>
+            <tr><td>移动</td><td><code>mate.moveTo</code> / <code>chaseBall</code></td><td>一步一决策；持球变慢，会被追上</td></tr>
+            <tr><td>抢断</td><td><code>mate.clash()</code></td><td>先查 <code>isImmune</code>，失败会自晕</td></tr>
+            <tr><td>出球</td><td><code>mate.roll(x, y, power)</code></td><td>传球=射门；可撞墙反弹；出球不阻塞</td></tr>
+            <tr><td>宏</td><td><code>shoot</code>/<code>passTo</code>/<code>cross</code>/<code>defendGoal</code></td><td>cross 横传远门柱是招牌打法</td></tr>
+            <tr><td>控球</td><td><code>captureRadius</code> / <code>possessionImmunity</code></td><td>粘球；接球后有一次免疫窗口</td></tr>
+            <tr><td>守门员</td><td>固定 NPC，追球移动</td><td>引开后射远角；<code>distract</code> 拖慢它</td></tr>
+            <tr><td>教练</td><td><code>inspire</code>/<code>press</code>/<code>whistle</code>/<code>distract</code></td><td>即时技能，各自冷却，主线程运行</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        球员追风，教练运筹，智取门将 ⚽🧠<br>
+        现在，去 AI世界杯的赛场上，让你的 AI Agent 踢出制胜一球吧！🏆
+    </p>
+</div>
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #9fb3a6; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 多人竞技场：AI世界杯（Chaotic Crossing Clash）</p>
+    <p style="margin-top:8px; color:#5f7568;">扣哒世界（CodeCombat）教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// 侧边栏点击后在小屏收起
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024 && !link.classList.contains('nav-logo')) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+
+// 代码语言切换（Python / C++）——全局联动
+function switchLang(btn, lang) {
+    // 切换所有语言标签的高亮
+    document.querySelectorAll('.code-tab').forEach(tab => {
+        var t = tab.textContent.trim().toLowerCase() === 'python' ? 'py' : 'cpp';
+        tab.classList.toggle('active', t === lang);
+    });
+    // 切换所有代码窗格
+    document.querySelectorAll('.code-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.classList.contains(lang));
+    });
+}
+</script>
+
+</body>
+</html>
