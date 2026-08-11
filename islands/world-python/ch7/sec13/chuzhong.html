@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC13-137F2544271A">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十三单元：练习 for 循环 · 狩猎与阵型 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC13-137F2544271A | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS4-第十三单元</div>
+
+    <a href="#section-13-1" class="nav-section">13.1 for 循环再登场</a>
+    <a href="#sec-13-1-1" class="nav-sub">13.1.1 从"配对"到"自主"</a>
+    <a href="#sec-13-1-2" class="nav-sub">13.1.2 循环内重新感知</a>
+
+    <a href="#section-13-2" class="nav-section">13.2 让士兵各自决策</a>
+    <a href="#sec-13-2-1" class="nav-sub">13.2.1 friend.findNearestEnemy</a>
+    <a href="#sec-13-2-2" class="nav-sub">13.2.2 攻击或移动的分支</a>
+
+    <a href="#section-13-3" class="nav-section">13.3 相对坐标移动</a>
+    <a href="#sec-13-3-1" class="nav-sub">13.3.1 读取 friend.pos</a>
+    <a href="#sec-13-3-2" class="nav-sub">13.3.2 pos.x + 0.35 一小步</a>
+    <a href="#sec-13-3-3" class="nav-sub">13.3.3 用步长控速保阵型</a>
+
+    <a href="#section-13-4" class="nav-section">13.4 实战关卡精讲</a>
+    <a href="#sec-13-4-1" class="nav-sub">13.4.1 狩猎派对</a>
+
+    <a href="#section-13-5" class="nav-section">13.5 常见错误</a>
+    <a href="#sec-13-5-1" class="nav-sub">13.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十三单元：练习 for 循环 · 狩猎与阵型</h1>
+    <div class="subtitle">Unit 13: Practicing For Loops — The Hunt &amp; Formation</div>
+    <div class="badge">计算机科学 4 · 安息云峰 Cloudrip Mountain · 狩猎派对 Hunting Party</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 13.1 ==================== -->
+<div class="section-header" id="section-13-1">
+    <h2>13.1 for 循环再登场</h2>
+    <div class="en-title">The For Loop Returns</div>
+</div>
+
+<p>上一单元你第一次认识了 <code>for</code> 循环，学会了用 <code>for friend in findFriends()</code> 遍历盟友、用 <code>range()</code> 计数和配对两个数组。本单元的主题是"<strong>练习</strong>"——把 for 循环真正用到一场需要边行军、边搜索、边战斗的猎杀行动里。你将带领一支队伍<strong>搜遍山峰去寻找兽人营地</strong>，而指挥这支队伍的每一个动作，都在一个 for 循环里完成。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>这一单元你要练熟三件事——用 <code>for</code> 遍历盟友并逐个下令、让每个士兵调用<strong>自己的</strong> <code>findNearestEnemy()</code> 独立判断威胁、以及读取 <code>friend.pos</code> 用<strong>相对坐标</strong>让士兵"向右挪一小步"从而控制行军速度、保持阵型。for 循环 + 对象属性 + 相对移动，就是本单元的三样组合拳。
+</div>
+
+<h3 id="sec-13-1-1">13.1.1 从"配对"到"自主"（From Pairing to Autonomy）</h3>
+
+<h4>13.1.1.1 这次没有预设坐标数组
+    <span class="en">No preset points this time</span>
+</h4>
+
+<p>上一单元的"动物园管理员""壮烈牺牲"里，你手写了一个 <code>points</code> 坐标数组，让士兵和固定点位一一配对。本单元不一样：没有事先规划的点位，士兵要一边前进一边自己找敌人。因此这次的 for 循环里，每个士兵的行动<strong>取决于它自己当下的处境</strong>——看到敌人就打，没看到就往前走。这就是从"被安排"到"自主决策"的升级。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>上单元：配对固定点位</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    friend = friends<span class="punc">[</span>j<span class="punc">]</span>
+    point = points<span class="punc">[</span>j<span class="punc">]</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> point<span class="punc">)</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>本单元：各自随机应变</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+    enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        <span class="cmt"># 打</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="cmt"># 走</span></pre>
+        </div>
+    </div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-13-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<h3 id="sec-13-1-2">13.1.2 循环内重新感知（Re-sense Inside the Loop）</h3>
+
+<h4>13.1.2.1 每轮重新 findFriends
+    <span class="en">Refresh the army every tick</span>
+</h4>
+
+<p>本关的整体结构是一个 <code>while True</code> 主循环，里面套着一个 <code>for</code> 循环。要注意：<code>friends = hero.findFriends()</code> 写在 <code>while True</code> 内部的每一轮开头，这样部队名单每帧都会刷新——阵亡的士兵会被移除，若有新增援也会被纳入。感知放进循环、每轮更新，是游戏 AI"感知→决策→行动"节拍的又一次体现。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>   <span class="cmt"># 每轮重新获取最新部队名单</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+        <span class="cmt"># ...对每个士兵下令...</span>
+        <span class="kw">pass</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么不能在循环外只取一次？</span>如果把 <code>findFriends()</code> 写在 <code>while True</code> 外面只取一次，之后阵亡的士兵仍留在数组里（对着"已消失的对象"下令可能出错），新召唤的士兵也进不来。把它放进循环里每轮刷新，才能始终指挥"当前还活着的这批人"。
+</div>
+
+<!-- ==================== 13.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-13-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<div class="section-header" id="section-13-2">
+    <h2>13.2 让士兵各自决策</h2>
+    <div class="en-title">Let Each Soldier Decide</div>
+</div>
+
+<h3 id="sec-13-2-1">13.2.1 friend.findNearestEnemy（Each Unit's Own Nearest Enemy）</h3>
+
+<h4>13.2.1.1 谁的视角，谁来找敌人
+    <span class="en">The enemy is found from the soldier's viewpoint</span>
+</h4>
+
+<p>本单元最关键的一个新意识是：<strong>敌人要从士兵自己的角度去找</strong>。之前你常用 <code>hero.findNearestEnemy()</code>——那是离"英雄"最近的敌人。但在猎杀行动中，士兵们分散在山道各处，英雄躲在后方，用英雄视角找敌人毫无意义。正确做法是 <code>enemy = friend.findNearestEnemy()</code>，让每个士兵找离<strong>它自己</strong>最近的敌人。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 170" width="600" role="img" aria-label="士兵各自找最近敌人">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">friend.findNearestEnemy()：各找各的</text>
+        <g font-family="sans-serif" font-size="11">
+            <!-- soldiers -->
+            <circle cx="90" cy="80" r="18" fill="#182633" stroke="#9fd4a8" stroke-width="2"/>
+            <text x="90" y="84" text-anchor="middle" fill="#9fd4a8">兵A</text>
+            <circle cx="90" cy="135" r="18" fill="#182633" stroke="#9fd4a8" stroke-width="2"/>
+            <text x="90" y="139" text-anchor="middle" fill="#9fd4a8">兵B</text>
+            <!-- enemies -->
+            <circle cx="470" cy="70" r="18" fill="#182633" stroke="#C0453B" stroke-width="2"/>
+            <text x="470" y="74" text-anchor="middle" fill="#C0453B">敌1</text>
+            <circle cx="470" cy="140" r="18" fill="#182633" stroke="#C0453B" stroke-width="2"/>
+            <text x="470" y="144" text-anchor="middle" fill="#C0453B">敌2</text>
+            <!-- lines: each soldier to its own nearest -->
+            <line x1="108" y1="80" x2="452" y2="70" stroke="#9fd4a8" stroke-width="2" stroke-dasharray="5"/>
+            <line x1="108" y1="135" x2="452" y2="140" stroke="#9fd4a8" stroke-width="2" stroke-dasharray="5"/>
+            <text x="300" y="66" text-anchor="middle" fill="#6a8294" font-style="italic">兵A → 找到敌1</text>
+            <text x="300" y="160" text-anchor="middle" fill="#6a8294" font-style="italic">兵B → 找到敌2</text>
+        </g>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 让每个士兵找离"它自己"最近的敌人</span>
+<span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+    enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>   <span class="cmt"># 注意：friend. 而不是 hero.</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">friend. 和 hero. 的一字之差：</span>写成 <code>hero.findNearestEnemy()</code>，所有士兵都会去追同一个"离英雄最近"的敌人，队伍容易挤成一团、顾此失彼。写成 <code>friend.findNearestEnemy()</code>，每个士兵独立应对身边威胁，队伍才能沿整条战线均匀推进。这一字之差，就是"群体智能"的精髓。
+</div>
+
+
+<!-- CC-PROTECTION:AD:4e7be9e733:START anchor=sec-13-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="4e7be9e733">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，在知识树中系统学习对象、方法、字符串、变量、循环、条件分支、函数、参数、事件和地图设计。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4e7be9e733:END -->
+
+<h3 id="sec-13-2-2">13.2.2 攻击或移动的分支（Attack or Advance）</h3>
+
+<h4>13.2.2.1 一个 if/else 决定进退
+    <span class="en">One if/else drives the whole tactic</span>
+</h4>
+
+<p>每个士兵在循环体里只做一次简单判断：<code>if enemy:</code> 就 <code>command(friend, "attack", enemy)</code>；<code>else:</code> 就命令它向前移动一小步。"看到敌人就打，没敌人就往前搜索"——整支狩猎队的行为，全靠这一个 if/else 驱动。这也呼应了本关目标：一边推进搜山、一边清剿沿途兽人，直到找到并端掉营地。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 220" width="560" role="img" aria-label="士兵决策分支">
+        <text x="280" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">每个士兵的决策：打 or 走</text>
+        <defs>
+            <marker id="d-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="200" y="45" width="160" height="42" rx="8" fill="#eaf2f8" stroke="#4A7A9B" stroke-width="2"/>
+            <text x="280" y="71" text-anchor="middle" fill="#3a6480" font-family="monospace">enemy = 找最近敌人</text>
+
+            <polygon points="280,100 360,130 280,160 200,130" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="280" y="134" text-anchor="middle" fill="#bd7415">有敌人?</text>
+
+            <rect x="30" y="180" width="180" height="34" rx="8" fill="#fbeae7" stroke="#C0453B" stroke-width="2"/>
+            <text x="120" y="203" text-anchor="middle" fill="#9e352c" font-family="monospace">command(攻击 enemy)</text>
+
+            <rect x="350" y="180" width="190" height="34" rx="8" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="445" y="203" text-anchor="middle" fill="#2f7a45" font-family="monospace">command(向右挪一步)</text>
+
+            <line x1="280" y1="87" x2="280" y2="100" stroke="#4d6373" stroke-width="2" marker-end="url(#d-arr)"/>
+            <path d="M240,150 L120,150 L120,178" fill="none" stroke="#4d6373" stroke-width="2" marker-end="url(#d-arr)"/>
+            <path d="M320,150 L445,150 L445,178" fill="none" stroke="#4d6373" stroke-width="2" marker-end="url(#d-arr)"/>
+            <text x="150" y="145" fill="#9e352c" font-size="11">是</text>
+            <text x="400" y="145" fill="#2f7a45" font-size="11">否</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 13.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:8b8a886441:START anchor=sec-13-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8b8a886441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想解锁全部 11 张地图、2300+ 关卡？立即访问 <a href="https://koudashijie.com/">koudashijie.com</a>，开启你的编程冒险。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8b8a886441:END -->
+<!-- CC-PROTECTION:HIDDEN:3bb4dcac56:START anchor=sec-13-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="3bb4dcac56">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:3bb4dcac56:END -->
+
+<div class="section-header" id="section-13-3">
+    <h2>13.3 相对坐标移动</h2>
+    <div class="en-title">Relative Movement</div>
+</div>
+
+<h3 id="sec-13-3-1">13.3.1 读取 friend.pos（Reading a Unit's Position）</h3>
+
+<h4>13.3.1.1 每个单位都带着自己的坐标
+    <span class="en">Every unit carries its own position</span>
+</h4>
+
+<p>要让士兵"从当前位置往前挪一点"，先得知道它当前在哪儿。游戏里每个单位都有一个 <code>pos</code> 属性，记录它此刻的位置；<code>pos</code> 本身又是个带 <code>x</code> 和 <code>y</code> 的对象，用点号一层层取：<code>friend.pos.x</code> 是横坐标，<code>friend.pos.y</code> 是纵坐标。这和字典 <code>{"x":.., "y":..}</code> 表达的信息一样，只不过这里是从对象上"读出来"的。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="friend.pos.x 属性链">
+        <text x="280" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">一层层取到坐标：friend . pos . x</text>
+        <text x="80" y="80" font-size="20" font-family="monospace" fill="#9fd4a8">friend</text>
+        <text x="185" y="80" font-size="20" font-family="monospace" fill="#cdddea">.</text>
+        <text x="205" y="80" font-size="20" font-family="monospace" fill="#a5c8e8">pos</text>
+        <text x="255" y="80" font-size="20" font-family="monospace" fill="#cdddea">.</text>
+        <text x="275" y="80" font-size="20" font-family="monospace" fill="#e8a15a">x</text>
+        <text x="120" y="108" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">哪个单位</text>
+        <text x="220" y="108" font-size="11" fill="#a5c8e8" text-anchor="middle" font-family="sans-serif">它的位置</text>
+        <text x="282" y="108" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">横坐标</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-13-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-13-3-2">13.3.2 pos.x + 0.35 一小步（A Tiny Step Right）</h3>
+
+<h4>13.3.2.1 在当前坐标上加一个小增量
+    <span class="en">Add a small delta to the current x</span>
+</h4>
+
+<p>知道了当前位置，"向右挪一小步"就是：新目标的 x 用<strong>当前 x 加一个小数</strong>，y 保持不变。于是目标坐标写成 <code>{"x": friend.pos.x + 0.35, "y": friend.pos.y}</code>，再 <code>command(friend, "move", moveTo)</code>。因为 x 增大对应地图上向右，这就让士兵朝右侧（营地方向）稳步搜索前进。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 以当前位置为基准，向右挪一小步</span>
+moveTo = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> friend<span class="punc">.</span>pos<span class="punc">.</span>x + <span class="num">0.35</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> friend<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">}</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> moveTo<span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">相对坐标 vs 绝对坐标：</span>上一单元用的 <code>{"x": 50, "y": 40}</code> 是<strong>绝对坐标</strong>——不管士兵在哪，都去那个固定点。本单元的 <code>{"x": friend.pos.x + 0.35, ...}</code> 是<strong>相对坐标</strong>——以士兵"当前所在"为起点算出目标，所以每个士兵各自往前走，而不是都挤向同一点。这是本单元最重要的新技巧。
+</div>
+
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-13-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+<!-- CC-PROTECTION:HIDDEN:018864d0bf:START anchor=sec-13-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="018864d0bf">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:018864d0bf:END -->
+
+<h3 id="sec-13-3-3">13.3.3 用步长控速保阵型（Step Size Controls Speed）</h3>
+
+<h4>13.3.3.1 为什么偏偏加 0.35 这么小
+    <span class="en">Why such a small increment</span>
+</h4>
+
+<p>关卡有一条关键提示："给单位的 x 坐标增加一个较小的值，可限制他们的行进速度。这样会帮你把速度快的人和速度慢的人协调起来，进而影响战斗结果。"因为每一帧都只把目标设在"前方一丁点"，士兵实际就走得很慢、很克制。走得慢，快的单位就不会脱队冲进敌阵送死，全队能<strong>保持紧凑阵型一起推进</strong>——阵型不散，才能集中火力打赢遭遇战。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🐢 步长即油门</div>
+    <strong>步长大（如 +5）</strong>：士兵一次冲很远，快的单位远远甩开队友，容易被敌人各个击破。<br>
+    <strong>步长小（如 +0.35）</strong>：每帧只往前挪一丁点，全队慢而齐，阵型不散、火力集中。<br>
+    <strong>结论：</strong>这个"加多少"就像油门，数值越小，队伍推进越慢越稳。
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">调参思路：</span>如果你的士兵冲太快、阵型散了，就把 <code>0.35</code> 改得更小；如果推进太慢、迟迟找不到营地，就适当调大一点。没有唯一正确答案——这正是本关鼓励你"调数值、看结果"的实验精神。
+</div>
+
+<!-- ==================== 13.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-13-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+
+<div class="section-header" id="section-13-4">
+    <h2>13.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 狩猎派对 -->
+<div class="level-card" id="sec-13-4-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 狩猎派对</span>
+        <h3>🏹 狩猎派对 —— 搜山推进，猎杀营地</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/13-4-1-1_hunting_party.png" alt="扣哒世界 狩猎派对关卡 - koudashijie.com">
+            <div class="caption">图2：狩猎派对——率队缓慢向右推进搜索，沿途遇敌即战，直到发现并端掉兽人营地</div>
+        </div>
+
+        <h4>策略：慢速推进 + 各自迎敌</h4>
+        <p>本关任务是搜遍山峰、找出兽人营地。核心策略是把"行军"和"战斗"揉进同一个 for 循环：让整支队伍以极小步长<strong>缓慢向右推进</strong>搜索，谁的身边冒出敌人，谁就地开打，打完继续跟上。慢速推进保证阵型不散、火力能集中，这是能否啃下营地守军的关键。</p>
+
+        <div class="warn-box">
+            <span class="warn-label">英雄别亲自冲：</span>关卡明确警告"如果你试着亲自和兽人作战，你可能会吸引兽人刺客的注意"。所以英雄应退到后方，专注做"指挥官"——只发号施令，让士兵去执行，切勿自己冲进敌群。
+        </div>
+
+        <h4>思路拆解</h4>
+        <p>算法结构是"<code>while True</code> 外层 + <code>for</code> 内层"。每一轮：先 <code>friends = hero.findFriends()</code> 刷新部队；再 <code>for friend in friends</code> 遍历每个士兵；对每个士兵先 <code>enemy = friend.findNearestEnemy()</code> 从它自己的视角找最近的敌人；然后 <code>if enemy:</code> 就 <code>command(friend, "attack", enemy)</code>，<code>else:</code> 就用相对坐标 <code>{"x": friend.pos.x + 0.35, "y": friend.pos.y}</code> 命令它向右挪一小步。整支队伍就在"走一点、遇敌就打、打完再走"的节奏里逼近营地。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：遍历部队，遇敌就打，无敌向右一小步</span>
+<span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+    enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>       <span class="cmt"># 各找各的最近敌人</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        moveTo = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> friend<span class="punc">.</span>pos<span class="punc">.</span>x + <span class="num">0.35</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> friend<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">}</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> moveTo<span class="punc">)</span></pre>
+        </div>
+
+        <h4>算法要点回顾</h4>
+        <p>这段代码把本单元三样组合拳全用上了：<strong>for 遍历</strong>让每个士兵都收到指令；<strong>friend.findNearestEnemy()</strong> 让每个士兵独立感知威胁；<strong>相对坐标 + 小步长</strong>让队伍慢速齐进、阵型不散。三者缺一，狩猎行动就会失败——不遍历则只有一人行动，用英雄视角找敌则队伍乱作一团，步长过大则快兵脱队被围歼。</p>
+
+        <div class="info-box">
+            <span class="info-label">为什么用 move 而不是 moveXY？</span>命令士兵移动应使用 <code>command(friend, "move", ...)</code>，它是"下令后立即返回"的非阻塞方式，英雄能在同一轮里继续给其他士兵下令。若换成会卡住的阻塞式移动，就没法在一个循环里指挥全军了。这延续了前几单元关于 move 非阻塞特性的经验。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 13.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=h3-8 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<div class="section-header" id="section-13-5">
+    <h2>13.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-13-5-1">13.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>13.5.1.1 for 练习中的典型问题
+    <span class="en">Typical issues while practicing for loops</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/13-5-1-1_common_errors.png" alt="扣哒世界 狩猎派对常见错误速查 - koudashijie.com">
+    <div class="caption">图3：用错找敌视角、步长过大、写成绝对坐标，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>用 hero 找敌人——写成 <code>hero.findNearestEnemy()</code>，全队都追同一个目标，应改用 <code>friend.findNearestEnemy()</code> 让各自应敌。</li>
+        <li>写成绝对坐标——把 <code>friend.pos.x + 0.35</code> 误写成固定值如 <code>{"x": 60, "y": 40}</code>，所有士兵会挤向同一点。</li>
+        <li>步长太大——增量写成 5、10，快兵脱队冲进敌群被各个击破；应保持较小值以控速保阵型。</li>
+        <li>忘了改 y——只加 x、y 却写错或也加了值，士兵会斜着走偏离阵线；本关 y 应保持 <code>friend.pos.y</code> 不变。</li>
+        <li>findFriends 放在循环外——部队名单不刷新，阵亡单位残留、新单位漏掉，应放进 <code>while True</code> 每轮更新。</li>
+        <li>pos 属性链写错——写成 <code>friend.x</code> 或 <code>friend.pos["x"]</code> 而非 <code>friend.pos.x</code>，取不到坐标。</li>
+        <li>攻击传错目标——<code>"attack"</code> 第三参数要传敌人对象 <code>enemy</code>，<code>"move"</code> 才传坐标字典，别弄反。</li>
+        <li>英雄亲自上阵——招来兽人刺客；英雄应退后只做指挥。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-13-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:5b1f6d743d:START anchor=sec-13-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="5b1f6d743d">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC13-137F2544271A。</span>
+<!-- CC-PROTECTION:HIDDEN:5b1f6d743d:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在安息云峰完成了一场漂亮的猎杀行动！这一单元你把上一站学的 <code>for</code> 循环<strong>练到了真刀真枪的战场上</strong>：用 <code>while True</code> 套 <code>for</code> 的结构每轮刷新并遍历部队，用 <code>friend.findNearestEnemy()</code> 让每个士兵从自己的视角独立寻敌，用 <code>if enemy</code> 的分支决定"打还是走"，还第一次用上了<strong>相对坐标</strong> <code>{"x": friend.pos.x + 0.35, "y": friend.pos.y}</code>——以每个士兵的当前位置为基准往前挪一小步，并领悟了"步长即油门、小步长保阵型"的战术智慧。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>while 套 for</td><td>外层不停运转，内层遍历部队</td><td>狩猎派对</td></tr>
+            <tr><td>循环内重新感知</td><td>每轮 <code>findFriends()</code> 刷新名单</td><td>狩猎派对</td></tr>
+            <tr><td>各自找敌</td><td><code>friend.findNearestEnemy()</code></td><td>狩猎派对</td></tr>
+            <tr><td>打或走分支</td><td><code>if enemy</code> 攻击，否则前进</td><td>狩猎派对</td></tr>
+            <tr><td>读取 pos</td><td><code>friend.pos.x</code> / <code>friend.pos.y</code></td><td>狩猎派对</td></tr>
+            <tr><td>相对坐标</td><td>当前位置 + 小增量</td><td>狩猎派对</td></tr>
+            <tr><td>步长控速</td><td>小步长保持阵型、集中火力</td><td>狩猎派对</td></tr>
+            <tr><td>英雄退后指挥</td><td>只下令，不亲自冲阵</td><td>狩猎派对</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用 for 循环让每名士兵各自为战、又以小步长凝聚成阵的英雄，才配称云峰之上运筹帷幄的猎手。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🏹⚔️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（安息云峰）：第十三单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
