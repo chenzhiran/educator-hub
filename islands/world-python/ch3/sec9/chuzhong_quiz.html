@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="course" content="CS2 · 计算机科学2">
+    <title>CS2 · 计算机科学2 · 边际森林知识挑战 - 事件与事件处理机制 | 扣哒世界</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 (边际森林主题绿) --- */
+        :root {
+            --primary-color: #2E9E5B; 
+            --secondary-color: #4FBF7C;
+            --bg-color: #f7faf8;     
+            --card-bg: #FFFFFF;
+            --text-color: #14241a;   
+            --en-text-color: #6b8a76; 
+            --correct-color: #28c840;
+            --wrong-color: #ff5f57;  
+            --accent-yellow: #febc2e;
+            
+            /* 代码高亮颜色 */
+            --code-bg: #1e2a22;
+            --code-text: #b6c2ba;
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d5e5d9 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(46,158,91,0.15);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #d99e22;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #e3ece6;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 专属代码样式 --- */
+        .question-title code, .en-text code {
+            background-color: #e8f7ee; 
+            font-family: 'YouYuan', '幼圆', monospace;
+            font-weight: bold; 
+            color: var(--primary-color); 
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #e3ece6;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #c4d4c9;
+            display: flex;
+            flex-direction: column; 
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        .option-code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #314538;
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); 
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(0,0,0,0.25);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #95b8a0;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #1f9c31;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #c24640;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #e8f7ee;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); background: #eafaf1;}
+        .feedback-section.wrong { border-color: var(--wrong-color); background: #fceaea; }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #1F7A44;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #d99e22;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: var(--en-text-color); font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    
+/* KOUDA-KNOWLEDGE-FAB:START */
+.kouda-knowledge-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light,var(--secondary-color,#6ba6e8)),var(--primary,var(--primary-color,#3b82f6))); text-decoration:none; font-family:"PingFang SC","Microsoft YaHei",sans-serif; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-knowledge-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-knowledge-fab:focus-visible { outline:3px solid currentColor; outline-offset:3px; }
+@media (max-width:600px) { .kouda-knowledge-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-KNOWLEDGE-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-knowledge-fab" href="chuzhong.html" title="学知识" aria-label="学知识">学知识</a>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 15</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+            </div>
+
+            <div class="options-grid" id="options-container">
+            </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+        </div>
+    </div>
+
+    <script>
+        // --- 题目数据 (结合 Unit 9: 事件与事件处理机制) ---
+        const quizData = [
+            {
+                qZh: "1. 在第九单元中，我们认识了一位新伙伴：宠物（pet）。关于宠物，下列哪项说法是正确的？",
+                qEn: "In Unit 9, we meet a new companion: the pet. Which of the following is true about the pet?",
+                options: [
+                    { zh: "A. 宠物必须用一行行命令逐句指挥才能行动", en: "The pet must be commanded line by line to act" },
+                    { zh: "B. 宠物像 hero 一样可以接受指令，但主要靠“对事件做出反应”来行动", en: "The pet takes commands like hero, but primarily acts by 'reacting to events'" },
+                    { zh: "C. 宠物只能用来携带物品，不能说话或移动", en: "The pet can only carry items, cannot speak or move" },
+                    { zh: "D. 宠物会自动消灭地图上的所有敌人", en: "The pet will automatically destroy all enemies on the map" }
+                ],
+                correct: 1, 
+                descZh: "解析：宠物（`pet`）有自己的一套动作（如 `pet.say()`、`pet.moveXY()`），并且最特别的是，它不是靠主动逐行调用，而是靠对“事件”做出反应来自动执行任务的。",
+                descEn: "Explanation: The pet has its own actions (like `pet.say()`), and most uniquely, it acts by reacting to 'events' rather than being commanded line-by-line."
+            },
+            {
+                qZh: "2. 什么是编程中的“事件”（Event）？",
+                qEn: "What is an 'Event' in programming?",
+                options: [
+                    { zh: "A. 一种能让英雄跑得更快的魔法药水", en: "A magic potion that makes the hero run faster" },
+                    { zh: "B. 玩家按下键盘上的任意按键", en: "Any key press on the keyboard by the player" },
+                    { zh: "C. 程序运行过程中某个特定时刻自动发生的一件事（例如听到声音或被召唤）", en: "Something that happens automatically at a specific moment during program execution (like hearing a sound or being summoned)" },
+                    { zh: "D. 代码中的错误提示", en: "An error message in the code" }
+                ],
+                correct: 2,
+                descZh: "解析：事件是指程序运行中发生的事情。比如宠物“听到了声音”（`\"hear\"`）或者“被召唤出场”（`\"spawn\"`），这都是在满足特定条件时系统自动抛出的事件。",
+                descEn: "Explanation: An event is something that happens during the program. Like the pet 'hearing a sound' or 'being spawned', these are events automatically triggered when conditions are met."
+            },
+            {
+                qZh: "3. 什么是“事件处理器”（Event Handler）？",
+                qEn: "What is an 'Event Handler'?",
+                options: [
+                    { zh: "A. 事件发生时自动执行的函数", en: "A function that runs automatically when an event happens" },
+                    { zh: "B. 一种专门用来删除事件的工具", en: "A tool specifically used to delete events" },
+                    { zh: "C. 宠物的专用武器", en: "The pet's special weapon" },
+                    { zh: "D. 游戏界面的暂停按钮", en: "The pause button on the game interface" }
+                ],
+                correct: 0,
+                descZh: "解析：事件处理器就是你提前预设好的函数，告诉系统“当某个特定事件发生时，就去自动运行这个函数里的代码”。",
+                descEn: "Explanation: An event handler is a pre-defined function that tells the system 'when this specific event occurs, run the code inside this function automatically'."
+            },
+            {
+                qZh: "4. 如何把事件处理器“注册”（绑定）到某个事件上？",
+                qEn: "How do you 'register' (bind) an event handler to an event?",
+                options: [
+                    { zh: "A.", en: "", code: "pet.event('hear', speak)" },
+                    { zh: "B.", en: "", code: "pet.bind('hear', speak)" },
+                    { zh: "C.", en: "", code: "pet.on('hear', speak)" },
+                    { zh: "D.", en: "", code: "pet.listen('hear', speak)" }
+                ],
+                correct: 2,
+                descZh: "解析：使用 `.on()` 方法可以把处理器绑定到事件上。语法是 `pet.on(事件类型, 处理器函数名)`。",
+                descEn: "Explanation: Use the `.on()` method to bind a handler to an event. The syntax is `pet.on(eventType, handlerFunctionName)`."
+            },
+            {
+                qZh: "5. 【易错题】在调用 `pet.on()` 注册处理器时，有一条至关重要的规则是：",
+                qEn: "[Trick Question] When calling `pet.on()` to register a handler, what is a crucial rule?",
+                options: [
+                    { zh: "A. 函数名后面必须加上括号，如 `speak()`", en: "The function name must be followed by parentheses, like `speak()`" },
+                    { zh: "B. 函数名后面绝对不能加括号，如 `speak`，因为我们是要传递函数本身而不是立刻执行它", en: "Absolutely DO NOT add parentheses, like `speak`, because we want to pass the function itself, not execute it immediately" },
+                    { zh: "C. 事件名称不需要加引号", en: "The event name does not need quotes" },
+                    { zh: "D. 必须同时传入至少三个参数", en: "You must pass at least three arguments at the same time" }
+                ],
+                correct: 1,
+                descZh: "解析：带上括号意味着立刻调用该函数，而注册事件只是交出函数的“菜谱”（引用），让系统以后有需要时再去调用。所以必须写 `speak` 而不是 `speak()`！",
+                descEn: "Explanation: Parentheses mean calling the function instantly. Registering an event is giving the 'recipe' (reference) to the system for later use. So you must use `speak`, not `speak()`!"
+            },
+            {
+                qZh: "6. 事件处理器函数在定义时，通常需要接收一个参数（如 `def speak(event):`），这个参数代表什么？",
+                qEn: "When defining an event handler function, it usually takes one parameter (e.g., `def speak(event):`). What does this parameter represent?",
+                options: [
+                    { zh: "A. 宠物的生命值", en: "The pet's health" },
+                    { zh: "B. 触发事件的具体数据信息", en: "The specific data related to the triggered event" },
+                    { zh: "C. 下一个要攻击的敌人", en: "The next enemy to attack" },
+                    { zh: "D. 英雄的移动速度", en: "The hero's movement speed" }
+                ],
+                correct: 1,
+                descZh: "解析：这个参数（通常叫 `event` 或 `e`）用于接住该事件附带的相关信息数据。即使你暂时用不到它，定义函数时也要把这个形参留着。",
+                descEn: "Explanation: This parameter (usually `event` or `e`) is used to catch the data attached to the event. Even if you don't use it right away, the parameter must be included in the definition."
+            },
+            {
+                qZh: "7. 宠物的 `\"hear\"` 事件在什么情况下会被触发？",
+                qEn: "Under what conditions is the pet's `\"hear\"` event triggered?",
+                options: [
+                    { zh: "A. 只有当英雄下达明确指令时", en: "Only when the hero gives an explicit command" },
+                    { zh: "B. 只要有单位在离宠物足够近的地方说话（调用 `say`）", en: "Whenever any unit nearby speaks (calls `say`)" },
+                    { zh: "C. 每次宠物移动时自动触发", en: "Automatically triggers every time the pet moves" },
+                    { zh: "D. 只有在敌人靠近时", en: "Only when an enemy gets close" }
+                ],
+                correct: 1,
+                descZh: "解析：无论是英雄、农民还是奶牛，只要有人在离宠物足够近的地方调用 `.say()`，宠物的 `\"hear\"` 事件就会被触发。",
+                descEn: "Explanation: Whether it's the hero, a peasant, or a cow, as long as someone calls `.say()` close enough to the pet, its `\"hear\"` event triggers."
+            },
+            {
+                qZh: "8. 宠物的 `\"spawn\"` 事件的触发机制有什么特别之处？",
+                qEn: "What is special about the trigger mechanism of the pet's `\"spawn\"` event?",
+                options: [
+                    { zh: "A. 每隔 5 秒钟就会自动触发一次", en: "It automatically triggers once every 5 seconds" },
+                    { zh: "B. 只有在宠物吃到金币时触发", en: "It only triggers when the pet picks up a coin" },
+                    { zh: "C. 关卡开始、宠物被召唤出场时触发，且整局游戏只触发一次", en: "It triggers when the level starts and the pet is summoned, and fires ONLY ONCE per game" },
+                    { zh: "D. 可以通过英雄大声喊叫来无限次触发", en: "It can be triggered infinitely by the hero yelling" }
+                ],
+                correct: 2,
+                descZh: "解析：与可以反复触发的 `\"hear\"` 不同，`\"spawn\"`（生成）事件在整局游戏中只会触发一次，也就是在宠物登场的那一瞬间。",
+                descEn: "Explanation: Unlike `\"hear\"` which can trigger repeatedly, the `\"spawn\"` event only triggers once per game, at the exact moment the pet appears."
+            },
+            {
+                qZh: "9. 既然 `\"spawn\"` 事件只触发一次，那如何让宠物在出场后**持续不断**地工作（例如不断去捡药水）？",
+                qEn: "Since the `\"spawn\"` event only fires once, how do you make the pet work CONTINUOUSLY after appearing (e.g., constantly fetching potions)?",
+                options: [
+                    { zh: "A. 在主程序中不断重复调用 `pet.on(\"spawn\", goFetch)`", en: "Repeatedly call `pet.on(\"spawn\", goFetch)` in the main program" },
+                    { zh: "B. 在事件处理器函数内部放一个 `while True` 循环", en: "Put a `while True` loop INSIDE the event handler function" },
+                    { zh: "C. 使用多只宠物轮流工作", en: "Use multiple pets to work in turns" },
+                    { zh: "D. 这是不可能的，宠物只能执行一次动作", en: "It's impossible, the pet can only perform one action" }
+                ],
+                correct: 1,
+                descZh: "解析：这是一个非常经典的结构！通过在 `spawn` 的处理器里放一个无限循环，宠物就会在一登场后，不知疲倦地不断执行循环里的动作。",
+                descEn: "Explanation: This is a classic pattern! By placing an infinite loop inside the `spawn` handler, the pet will continuously execute those actions after spawning."
+            },
+            {
+                qZh: "10. “事件线程（Event Threads）的并行运行”是指什么现象？",
+                qEn: "What does 'parallel execution of Event Threads' refer to?",
+                options: [
+                    { zh: "A. 事件处理器里的代码和主循环里的代码同时进行、互不干扰（比如宠物后台取药，英雄前台战斗）", en: "Code in handlers and code in the main loop run simultaneously without interfering (e.g., pet fetches potions while hero fights)" },
+                    { zh: "B. 所有的敌人都排成一条直线向你走来", en: "All enemies walk towards you in a straight line" },
+                    { zh: "C. 游戏界面会分裂成两个窗口", en: "The game interface splits into two windows" },
+                    { zh: "D. 宠物必须等英雄完成动作后才能开始行动", en: "The pet must wait for the hero to finish moving before it can act" }
+                ],
+                correct: 0,
+                descZh: "解析：并行运行是事件机制最强大的地方。你可以把这想象成两条平行线，英雄和宠物各自按自己的逻辑行动，谁也不会被谁卡住。",
+                descEn: "Explanation: Parallel execution is the most powerful part of events. Think of it as parallel tracks where hero and pet act independently without blocking each other."
+            },
+            {
+                qZh: "11. 宠物不仅仅只会说话和捡东西，它还可以独立进行侦查！哪行代码可以让宠物寻找最近的敌人？",
+                qEn: "Pets do more than just talk and fetch, they can scout independently! Which code lets the pet find the nearest enemy?",
+                options: [
+                    { zh: "A.", en: "", code: "hero.findNearestEnemy()" },
+                    { zh: "B.", en: "", code: "pet.lookForEnemies()" },
+                    { zh: "C.", en: "", code: "pet.findNearestEnemy()" },
+                    { zh: "D.", en: "", code: "pet.scout()" }
+                ],
+                correct: 2,
+                descZh: "解析：在“看门狗”等关卡中，宠物不仅可以移动，还能调用属于自己的 `pet.findNearestEnemy()` 来充当预警机。",
+                descEn: "Explanation: In levels like 'Sentinel', the pet can use its own `pet.findNearestEnemy()` to act as an early warning system."
+            },
+            {
+                qZh: "12. 在编写代码时，为什么必须要**先**用 `pet.on()` 注册处理器，**然后**再让英雄说话（`hero.say`）去触发事件？",
+                qEn: "When coding, why must you FIRST use `pet.on()` to register the handler, and THEN have the hero speak (`hero.say`) to trigger the event?",
+                options: [
+                    { zh: "A. 因为 `pet.on()` 占用的代码行数比较少", en: "Because `pet.on()` takes up fewer lines of code" },
+                    { zh: "B. 先说话的话，宠物还没准备好监听事件，就会完美错过这次声音", en: "If you speak first, the pet hasn't started listening yet and will completely miss the sound" },
+                    { zh: "C. 英雄不允许在程序一开始就说话", en: "The hero is not allowed to speak at the very beginning of the program" },
+                    { zh: "D. 这是 Python 的随机要求，换个顺序也可以", en: "It's a random Python requirement, swapping the order works too" }
+                ],
+                correct: 1,
+                descZh: "解析：事件必须先被注册并开始“监听”，后续的触发才有意义。这就像是你要先打开手机的铃声开关，之后别人打电话进来你才能听到响。",
+                descEn: "Explanation: Events must be registered to start 'listening' before triggers matter. Like turning on your phone's ringer before someone calls so you can hear it."
+            },
+            {
+                qZh: "13. 如果你在代码开头写了 `hero.shield()`（举盾防守），紧跟着才写 `pet.on(\"spawn\", goFetch)`，会导致什么问题？",
+                qEn: "If you write `hero.shield()` at the start, followed immediately by `pet.on(\"spawn\", goFetch)`, what problem occurs?",
+                options: [
+                    { zh: "A. 没有问题，宠物会立刻开始工作", en: "No problem, the pet starts working instantly" },
+                    { zh: "B. 宠物的血量会增加", en: "The pet's health will increase" },
+                    { zh: "C. `hero.shield()` 会让英雄进入持续防守状态，导致后面的代码被阻塞，宠物根本没机会被注册上岗", en: "`hero.shield()` traps the hero in a continuous state, blocking subsequent code, so the pet never gets registered for work" },
+                    { zh: "D. 宠物也会举起一面盾牌", en: "The pet will also raise a shield" }
+                ],
+                correct: 2,
+                descZh: "解析：这也是易错点。持续状态动作（如 shield）会卡住代码的向下运行，所以任何 `pet.on()` 的注册工作，都要放在这类动作之前完成。",
+                descEn: "Explanation: Continuous actions (like shield) block the code from moving forward. Any `pet.on()` registration must happen before such actions."
+            },
+            {
+                qZh: "14. 在同一个关卡（如“充满事件的争论”）中，你可以让宠物**同时监听多个事件**吗？",
+                qEn: "In a single level (like 'Eventful Argument'), can you have the pet listen to MULTIPLE events simultaneously?",
+                options: [
+                    { zh: "A. 不行，一个宠物只能绑定一个事件", en: "No, a pet can only be bound to one event" },
+                    { zh: "B. 可以，你可以同时注册 `on(\"spawn\", ...)` 和 `on(\"hear\", ...)`，让它身兼多职协同工作", en: "Yes, you can register `on(\"spawn\", ...)` and `on(\"hear\", ...)` simultaneously, making it multitask" },
+                    { zh: "C. 可以，但必须买两只宠物", en: "Yes, but you have to buy two pets" },
+                    { zh: "D. 只有充值高级会员才能监听多个事件", en: "Only premium members can listen to multiple events" }
+                ],
+                correct: 1,
+                descZh: "解析：你可以为一只宠物注册多个不同的事件处理器。比如登场时去巡逻（spawn），同时听到呼救时回来支援（hear），这是构建复杂程序的基础。",
+                descEn: "Explanation: You can register multiple different event handlers for one pet. E.g., patrol on spawn, and return for support on hear. This builds complex programs."
+            },
+            {
+                qZh: "15. 总结：掌握“事件与事件处理机制”后，我们写的程序发生了怎样的进化？",
+                qEn: "Summary: After mastering 'Events and Event Handlers', how do our programs evolve?",
+                options: [
+                    { zh: "A. 只是增加了一些无意义的代码行数", en: "Just adding meaningless lines of code" },
+                    { zh: "B. 英雄变得刀枪不入了", en: "The hero becomes invulnerable" },
+                    { zh: "C. 程序不再只能死板地自上而下运行，而是具备了“监听环境变化、自动做出响应”的能力，且支持多任务并行", en: "Programs no longer just run rigidly top-down, but gain the ability to 'listen to environment changes and react automatically', supporting parallel multitasking" },
+                    { zh: "D. 游戏画面变成了 3D", en: "The game graphics become 3D" }
+                ],
+                correct: 2,
+                descZh: "解析：事件驱动是编程界的一大飞跃！它让代码变得鲜活、响应迅速，为你打开了编写复杂、智能并行逻辑的大门。",
+                descEn: "Explanation: Event-driven programming is a massive leap! It makes code responsive and opens the door to writing complex, intelligent, parallel logic."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr); 
+        }
+
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        function highlightDescCode(text) {
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#e8f7ee; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#1F7A44; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的事件处理大师！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Event Handler Master!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你已经完全掌握了事件与事件处理机制，懂得了如何让多任务并行运行，这份本领将让你在编程的道路上如虎添翼！<br><span class="en-text">Amazing! You've completely mastered events and event handlers, understanding how to run multiple tasks in parallel. This skill will give you wings on your programming journey!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！多留意一下事件注册和处理器的细节，下次一定拿满分！<br><span class="en-text">Good job! Pay closer attention to the details of event registration and handlers, and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
