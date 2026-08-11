@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC2-16EFA94334AC">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第二单元：坐标计算与位置属性 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --accent: #4FBF7C;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #2E9E5B;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1F7A44;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(255, 193, 7, 0.20); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #ffebee;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC2-16EFA94334AC | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第二单元</div>
+
+    <a href="#section-2-1" class="nav-section">2.1 对象与属性</a>
+    <a href="#sec-2-1-1" class="nav-sub">2.1.1 物品也是对象</a>
+    <a href="#sec-2-1-2" class="nav-sub">2.1.2 属性是对象的数据</a>
+    <a href="#sec-2-1-3" class="nav-sub">2.1.3 点号访问属性</a>
+
+    <a href="#section-2-2" class="nav-section">2.2 pos 位置属性</a>
+    <a href="#sec-2-2-1" class="nav-sub">2.2.1 pos 代表位置</a>
+    <a href="#sec-2-2-2" class="nav-sub">2.2.2 pos 里的 x 与 y</a>
+    <a href="#sec-2-2-3" class="nav-sub">2.2.3 嵌套属性的访问链</a>
+
+    <a href="#section-2-3" class="nav-section">2.3 用坐标行动与计算</a>
+    <a href="#sec-2-3-1" class="nav-sub">2.3.1 移动到对象位置</a>
+    <a href="#sec-2-3-2" class="nav-sub">2.3.2 直接引用还是存变量</a>
+    <a href="#sec-2-3-3" class="nav-sub">2.3.3 对坐标做运算</a>
+
+    <a href="#section-2-4" class="nav-section">2.4 实战关卡精讲</a>
+    <a href="#sec-2-4-1" class="nav-sub">2.4.1 币屑</a>
+    <a href="#sec-2-4-2" class="nav-sub">2.4.2 白兔</a>
+    <a href="#sec-2-4-3" class="nav-sub">2.4.3 伪装者</a>
+    <a href="#sec-2-4-4" class="nav-sub">2.4.4 富有且安全</a>
+    <a href="#sec-2-4-5" class="nav-sub">2.4.5 边地投弹</a>
+    <a href="#sec-2-4-6" class="nav-sub">2.4.6 风向校正</a>
+
+    <a href="#section-2-5" class="nav-section">2.5 常见错误</a>
+    <a href="#sec-2-5-1" class="nav-sub">2.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第二单元：坐标计算与位置属性</h1>
+    <div class="subtitle">Unit 2: Coordinates &amp; Position Properties</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 币屑 → 风向校正</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 2.1 ==================== -->
+<div class="section-header" id="section-2-1">
+    <h2>2.1 对象与属性</h2>
+    <div class="en-title">Objects and Properties</div>
+</div>
+
+<h3 id="sec-2-1-1">2.1.1 物品也是对象（Items Are Objects）</h3>
+
+<h4>2.1.1.1 一种能装更多数据的数据类型
+    <span class="en">A data type that holds more data</span>
+</h4>
+
+<p>本单元要让英雄学会"读懂"战场上的事物。"币屑"关卡揭示了一个重要真相：<strong>"每个物品都是一个对象（object），对象是一种数据类型，就像字符串或者数字。"</strong></p>
+
+<p>前面学的字符串和数字都是简单的数据，而<span class="keyword">对象（Object）</span>更高级——它能在自己身上<strong>打包携带许多份数据</strong>。地图上的硬币、宝石、药水、敌人、英雄，全都是对象。它们不只是一个值，而是一个装着多种信息的"百宝箱"。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-1-1-1_object_intro.png" alt="扣哒世界 对象与属性示意图 - koudashijie.com">
+    <div class="caption">图1：一个物品对象就像一个百宝箱,里面装着 type、pos 等多种数据</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8b8a886441:START anchor=sec-2-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8b8a886441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想解锁全部 11 张地图、2300+ 关卡？立即访问 <a href="https://koudashijie.com/">koudashijie.com</a>，开启你的编程冒险。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8b8a886441:END -->
+
+<h3 id="sec-2-1-2">2.1.2 属性是对象的数据（Properties Hold the Data）</h3>
+
+<h4>2.1.2.1 对象身上挂着的一个个标签
+    <span class="en">Labeled data attached to an object</span>
+</h4>
+
+<p>关卡定义道：<strong>"对象还包含其他的数据，我们称之为属性（property）。"</strong> <span class="keyword">属性（Property）</span>就是对象身上挂着的一个个带标签的数据。比如一个敌人对象，有 <code>type</code>（类型）属性，有 <code>pos</code>（位置）属性，还有 <code>health</code>（生命）属性等。</p>
+
+<p>"伪装者"关卡用了一个生动的类比：<strong>"如果你想知道朋友的头发长度和颜色，可以这样……"</strong>——头发长度、头发颜色，都是"朋友"这个对象身上的属性。读取属性，就是从对象这个百宝箱里取出某一份具体数据。</p>
+
+<h3 id="sec-2-1-3">2.1.3 点号访问属性（Dot Notation）</h3>
+
+<h4>2.1.3.1 用 . 取出对象的某个属性
+    <span class="en">Use a dot to reach into an object</span>
+</h4>
+
+<p>访问对象的属性，要用<strong>点号</strong>（<code>.</code>）。写法是"对象名 + 点 + 属性名"。你其实早就在用了——<code>enemy.type</code> 就是读敌人的类型，<code>item.pos</code> 就是读物品的位置。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 420 120" width="420" role="img" aria-label="点号访问属性">
+        <text x="60" y="60" font-size="24" font-family="monospace" fill="#f0c674">item</text>
+        <text x="118" y="60" font-size="24" font-family="monospace" fill="#e8845a">.</text>
+        <text x="132" y="60" font-size="24" font-family="monospace" fill="#e0a23f">pos</text>
+        <!-- 标注 -->
+        <line x1="85" y1="72" x2="85" y2="98" stroke="#E0A23F" stroke-width="2"/>
+        <text x="40" y="115" font-size="13" font-family="sans-serif" fill="#E0A23F">对象（百宝箱）</text>
+        <line x1="155" y1="72" x2="155" y2="98" stroke="#e8845a" stroke-width="2"/>
+        <text x="200" y="115" font-size="13" font-family="sans-serif" fill="#d98e32">属性（要取的那份数据）</text>
+    </svg>
+</div>
+
+<!-- ==================== 2.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-2-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+<!-- CC-PROTECTION:HIDDEN:f85c87ac0b:START anchor=sec-2-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="f85c87ac0b">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:f85c87ac0b:END -->
+
+<div class="section-header" id="section-2-2">
+    <h2>2.2 pos 位置属性</h2>
+    <div class="en-title">The "pos" Property</div>
+</div>
+
+<h3 id="sec-2-2-1">2.2.1 pos 代表位置（pos Means Position）</h3>
+
+<h4>2.2.1.1 每个单位都有 pos
+    <span class="en">Every unit has a pos</span>
+</h4>
+
+<p>本单元的核心属性是 <code>pos</code>。关卡明确：<strong>"每个物品（及单位）对象都有一个 pos 属性，代表它的位置。"</strong> 无论是硬币、宝石，还是敌人、英雄自己——"边地投弹"关卡强调连英雄都有——只要在地图上，就有一个 <code>pos</code> 告诉你它在哪儿。</p>
+
+<h3 id="sec-2-2-2">2.2.2 pos 里的 x 与 y（x and y Inside pos）</h3>
+
+<h4>2.2.2.1 pos 本身又是一个对象
+    <span class="en">pos is itself an object</span>
+</h4>
+
+<p>这里有个精妙的层次：<strong>"而每个 pos 本身也是一个对象，拥有 x 和 y 属性。"</strong> 也就是说，<code>pos</code> 不是一个简单的数字，它又是一个小对象，里面装着两个数：</p>
+
+<table class="styled-table">
+    <thead><tr><th>属性</th><th>含义</th><th>类型</th></tr></thead>
+    <tbody>
+        <tr><td><code>pos.x</code></td><td>水平位置（左右）</td><td>浮点（十进制）数字</td></tr>
+        <tr><td><code>pos.y</code></td><td>竖直位置（上下）</td><td>浮点（十进制）数字</td></tr>
+    </tbody>
+</table>
+
+<p>"边地投弹"关卡补充：<strong>"x 和 y 是浮点（十进制）数字。X 代表敌人的水平位置，Y 代表敌人的竖直位置。"</strong> 这两个数字正好可以喂给 <code>moveXY</code> 和 <code>buildXY</code> 使用。</p>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-2-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+<!-- CC-PROTECTION:HIDDEN:04fc4fa14e:START anchor=sec-2-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="04fc4fa14e">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:04fc4fa14e:END -->
+
+<h3 id="sec-2-2-3">2.2.3 嵌套属性的访问链（The Access Chain）</h3>
+
+<h4>2.2.3.1 一层套一层，点号往里钻
+    <span class="en">Drill down with chained dots</span>
+</h4>
+
+<p>既然 <code>item</code> 是对象、<code>pos</code> 也是对象，要拿到最里层的 <code>x</code>，就得用点号<strong>一层层往里钻</strong>：先从 <code>item</code> 取 <code>pos</code>，再从 <code>pos</code> 取 <code>x</code>，连起来就是 <code>item.pos.x</code>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 460 130" width="460" role="img" aria-label="嵌套属性访问链">
+        <text x="40" y="60" font-size="22" font-family="monospace" fill="#f0c674">item</text>
+        <text x="98" y="60" font-size="22" font-family="monospace" fill="#e8845a">.</text>
+        <text x="110" y="60" font-size="22" font-family="monospace" fill="#e0a23f">pos</text>
+        <text x="152" y="60" font-size="22" font-family="monospace" fill="#e8845a">.</text>
+        <text x="164" y="60" font-size="22" font-family="monospace" fill="#d4b14a">x</text>
+        <!-- 标注 -->
+        <line x1="62" y1="72" x2="62" y2="98" stroke="#E0A23F" stroke-width="2"/>
+        <text x="30" y="115" font-size="12" font-family="sans-serif" fill="#E0A23F">物品对象</text>
+        <line x1="125" y1="72" x2="125" y2="100" stroke="#e0a23f" stroke-width="2"/>
+        <text x="160" y="92" font-size="12" font-family="sans-serif" fill="#d98e32">取出位置对象</text>
+        <line x1="170" y1="40" x2="170" y2="18" stroke="#d4b14a" stroke-width="2"/>
+        <text x="200" y="26" font-size="12" font-family="sans-serif" fill="#bfa030">再取出水平坐标数字</text>
+    </svg>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 像查户口本一样层层翻</div>
+    <p>把 <code>item.pos.x</code> 想成"先翻开 item 这本册子，找到 pos 那一页，再读出 x 这一行"。每个点号都是"翻进下一层"的动作。理解这条访问链，你就能从任何对象里精确取出深藏的数据。</p>
+</div>
+
+<!-- ==================== 2.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-2-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<div class="section-header" id="section-2-3">
+    <h2>2.3 用坐标行动与计算</h2>
+    <div class="en-title">Acting and Calculating with Coordinates</div>
+</div>
+
+<h3 id="sec-2-3-1">2.3.1 移动到对象位置（Move to an Object's Position）</h3>
+
+<h4>2.3.1.1 让坐标驱动移动
+    <span class="en">Let coordinates drive movement</span>
+</h4>
+
+<p>读出坐标最直接的用途，就是移动过去。"币屑"关卡的完整思路是：找到物品 → 取出它的 <code>pos</code> → 拆出 <code>x</code> 和 <code>y</code> → 用 <code>moveXY</code> 走过去：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>item = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+<span class="kw">if</span> item<span class="punc">:</span>
+    itemX = item<span class="punc">.</span>pos<span class="punc">.</span>x      <span class="cmt"># 拆出水平坐标</span>
+    itemY = item<span class="punc">.</span>pos<span class="punc">.</span>y      <span class="cmt"># 拆出竖直坐标</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>itemX<span class="punc">,</span> itemY<span class="punc">)</span>   <span class="cmt"># 移动过去</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为何不用写死坐标：</span>"币屑"提交时<strong>迷宫会变化</strong>，所以不能写固定的数字坐标。关卡要求"使用物品的位置来代替绝对的坐标数字"——读取 <code>pos</code> 是<strong>动态</strong>的，无论物品出现在哪，代码都能正确跟上。这是位置属性最大的价值。
+</div>
+
+<h3 id="sec-2-3-2">2.3.2 直接引用还是存变量（Inline or Store First）</h3>
+
+<h4>2.3.2.1 两种写法，效果相同
+    <span class="en">Two styles, same result</span>
+</h4>
+
+<p>"白兔"关卡指出：<strong>"你也可以直接引用 x 和 y，而不使用变量。"</strong> 所以有两种等价写法——一种是先把坐标存进变量再用，另一种是直接把 <code>item.pos.x</code> 写进 <code>moveXY</code> 的括号里：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 写法一：先存变量（清晰、便于复用）</span>
+pos = item<span class="punc">.</span>pos
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>pos<span class="punc">.</span>x<span class="punc">,</span> pos<span class="punc">.</span>y<span class="punc">)</span>
+
+<span class="cmt"># 写法二：直接引用（简洁）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>item<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">如何取舍：</span>如果一个坐标只用一次，直接引用更简洁；如果要反复使用、或想让代码更易读，先存进变量更清晰。两者没有对错，按场景选择即可。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-2-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-2-3-3">2.3.3 对坐标做运算（Doing Math on Coordinates）</h3>
+
+<h4>2.3.3.1 把上一单元的运算用在 pos 上
+    <span class="en">Apply arithmetic to pos values</span>
+</h4>
+
+<p>既然 <code>pos.x</code>、<code>pos.y</code> 就是数字，自然可以对它们做加减乘除。"风向校正"关卡要求<strong>用 y 坐标减去 4</strong> 来修正火炮落点：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>y = enemy<span class="punc">.</span>pos<span class="punc">.</span>y <span class="hl">-</span> <span class="num">4</span>              <span class="cmt"># 对坐标做运算来校正</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>enemy<span class="punc">.</span>pos<span class="punc">.</span>x <span class="hl">+</span> <span class="str">","</span> <span class="hl">+</span> y<span class="punc">)</span>  <span class="cmt"># 再拼成"x,y"格式报点</span></pre>
+</div>
+
+<p>这一步把上一单元的<strong>坐标拼接</strong>与<strong>数学运算</strong>结合了起来：读属性 → 算坐标 → 拼字符串，三项技能环环相扣。</p>
+
+<!-- ==================== 2.4 ==================== -->
+<div class="section-header" id="section-2-4">
+    <h2>2.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"为什么要读 pos、怎么用坐标"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-2-4-1">2.4.1 币屑（Coin Crumbs）</h3>
+
+<h4>2.4.1.1 策略：跟着硬币轨迹动态走位
+    <span class="en">Strategy: follow the coin trail dynamically</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-4-1-1_coin_crumbs.png" alt="扣哒世界 币屑关卡 - koudashijie.com">
+    <div class="caption">图2：币屑——读取最近硬币的 pos 坐标,跟着轨迹躲开守卫逃出藏宝室</div>
+</div>
+
+<p>这是 <code>pos</code> 属性的首秀。藏宝室会随提交变化,且有迅捷守卫,所以<strong>绝不能写死坐标</strong>。算法思路是:循环中 <code>findNearestItem()</code> 找到最近硬币,读出 <code>item.pos.x</code> 和 <code>item.pos.y</code>,<code>moveXY</code> 走过去。硬币像面包屑一样指引路线,英雄读着坐标一路跟到出口。核心在于理解"读 pos 是动态的,地图怎么变都能应对"。</p>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-2-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3 id="sec-2-4-2">2.4.2 白兔（White Rabbit）</h3>
+
+<h4>2.4.2.1 策略：追逐会移动的发光石
+    <span class="en">Strategy: chase the moving glowstone</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-4-2-1_white_rabbit.png" alt="扣哒世界 白兔关卡 - koudashijie.com">
+    <div class="caption">图3：白兔——发光石跑得很快,但持续读它的 pos 就能穿过陷阱</div>
+</div>
+
+<p>这一关与"币屑"思路一致,但发光石<strong>会快速移动</strong>。算法关键在于把读坐标、移动放进 <code>while</code> 循环里<strong>不停重复</strong>——每一轮都重新 <code>findNearestItem()</code> 拿到发光石最新的 <code>pos</code>,再追过去。这样即使目标在跑,英雄也能持续锁定它的实时位置。这一关还示范了"直接引用 pos.x/pos.y"的简洁写法。</p>
+
+<h3 id="sec-2-4-3">2.4.3 伪装者（The Mighty Sand Yak）</h3>
+
+<h4>2.4.3.1 策略：边收集边防身
+    <span class="en">Strategy: collect while staying alert</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-4-3-1_impostors.png" alt="扣哒世界 伪装者关卡 - koudashijie.com">
+    <div class="caption">图4：伪装者——食人魔伪装成硬币宝石,靠近时要能及时攻击自保</div>
+</div>
+
+<p>这一关把读 pos 和战斗结合。食人魔会<strong>伪装成物品</strong>,必须靠近才能识破。算法思路是:循环中<strong>先</strong> <code>findNearestEnemy()</code>,看到敌人就 <code>attack</code> 自保;<strong>再</strong> <code>findNearestItem()</code>,读出 <code>pos.x</code>、<code>pos.y</code> 移动去收集。"先防身、后收集"的判断顺序,保证英雄在贴近伪装者时不会吃亏。</p>
+
+<div class="remember-box">
+    <span class="remember-label">顺序的讲究:</span>把攻击判断放在移动之前,是一种防御性设计——确保每靠近一个可疑物品前,都先检查它是不是伪装的敌人。读 pos 让英雄能精准走位,而判断顺序让走位变得安全。
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-2-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-2-4-4">2.4.4 富有且安全（概念挑战 · Rich and Safe）</h3>
+
+<h4>2.4.4.1 策略：用收集宝石当"护身符"
+    <span class="en">Strategy: collecting gems keeps you safe</span>
+</h4>
+
+<p>这是<strong>概念挑战</strong>,要在火焰攻击下存活 60 秒。诀窍很巧妙:<strong>食人魔不舍得砸坏宝石,所以只要英雄一直待在宝石旁收集,就是安全的</strong>。算法思路极简:循环中 <code>findNearestItem()</code> 找宝石,直接 <code>moveXY(item.pos.x, item.pos.y)</code> 移过去。不断收集 = 不断移动到安全点,生存问题就转化成了"持续读 pos 并移动"的问题。</p>
+
+
+<!-- CC-PROTECTION:AD:f739b47d40:START anchor=sec-2-4-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="f739b47d40">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，课程覆盖全球 190 多个国家，获得 32 万名全球教师的信赖。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f739b47d40:END -->
+<!-- CC-PROTECTION:HIDDEN:6487714c1a:START anchor=sec-2-4-4 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="6487714c1a">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC2-16EFA94334AC。</span>
+<!-- CC-PROTECTION:HIDDEN:6487714c1a:END -->
+
+<h3 id="sec-2-4-5">2.4.5 边地投弹（Backwoods Bombardier）</h3>
+
+<h4>2.4.5.1 策略：读敌人 pos 报点给火炮
+    <span class="en">Strategy: report enemy pos to the cannon</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-4-5-1_bombardier.png" alt="扣哒世界 边地投弹关卡 - koudashijie.com">
+    <div class="caption">图5：边地投弹——读出敌人 pos 的 x、y,拼成"x,y"格式喊给火炮</div>
+</div>
+
+<p>这一关让英雄当"炮兵观察员"。算法思路是:循环找敌人,读出 <code>enemy.pos.x</code> 和 <code>enemy.pos.y</code>,用 <code>+ "," +</code> 拼成"x,y"格式喊出来,火炮就按这个坐标开火;没有敌人时则喊"停止开火"。这里把<strong>读位置属性</strong>和<strong>字符串连接</strong>自然地结合在一起。</p>
+
+<div class="info-box">
+    <span class="info-label">格式要点:</span>火炮要求坐标用<strong>逗号分隔</strong>(<code>"x,y"</code>)。所以中间拼的是 <code>","</code> 而非空格。报点的格式必须严格匹配火炮能识别的样式,差一个符号都可能瞄不准。
+</div>
+
+<h3 id="sec-2-4-6">2.4.6 风向校正（组合挑战 · Wind Correction）</h3>
+
+<h4>2.4.6.1 策略：读 pos + 算坐标 + 拼字符串
+    <span class="en">Strategy: read pos, adjust, concatenate</span>
+</h4>
+
+<p>这是<strong>组合挑战</strong>,要把读属性、字符串连接、算术运算三项本领一次用全。任务是为大炮精确报点,但有风的干扰,需要<strong>把 y 坐标减去 4</strong> 来校正落点。算法思路是:读出敌人 <code>pos.x</code> 和 <code>pos.y</code>,把 <code>pos.y - 4</code> 算出新 y,再用逗号拼成"x,y"喊出。关卡提醒:只报 x 会漏掉一部分敌人,必须 x、y 都报才够精确。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    y = enemy<span class="punc">.</span>pos<span class="punc">.</span>y <span class="hl">-</span> <span class="num">4</span>          <span class="cmt"># ① 读属性 + ② 算坐标</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>enemy<span class="punc">.</span>pos<span class="punc">.</span>x <span class="hl">+</span> <span class="str">","</span> <span class="hl">+</span> y<span class="punc">)</span>  <span class="cmt"># ③ 拼字符串报点</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">三技合一:</span>这一关是第一、二单元的集大成——<strong>读位置属性(pos.x/pos.y)、对坐标做运算(-4)、把结果拼成字符串报点</strong>。三步一气呵成,正是处理"读取数据→加工数据→输出数据"这一通用流程的缩影。
+</div>
+
+<!-- ==================== 2.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-2-4-6 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<div class="section-header" id="section-2-5">
+    <h2>2.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-2-5-1">2.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>2.5.1.1 属性与坐标环节的典型问题
+    <span class="en">Typical issues with properties and coordinates</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch5_sec2_2-5-1-1_common_errors.png" alt="扣哒世界 坐标属性常见错误示意 - koudashijie.com">
+    <div class="caption">图6：漏写一层属性、写死坐标、未判断存在,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>漏写一层属性——想要坐标却写成 <code>item.x</code>，正确应是 <code>item.pos.x</code>（先 pos 再 x）。</li>
+        <li>把 pos 直接喂给 moveXY——<code>moveXY(item.pos)</code> 不行，要拆成 <code>moveXY(item.pos.x, item.pos.y)</code>。</li>
+        <li>写死绝对坐标——地图会变化时仍用固定数字，应改用动态的 <code>pos</code>。</li>
+        <li>没先判断对象是否存在——没找到物品时 <code>item</code> 为空，直接读 <code>item.pos</code> 会出错，要先 <code>if item:</code>。</li>
+        <li>报点格式用错分隔符——火炮要逗号 <code>","</code>，误用空格会瞄不准。</li>
+        <li>校正时忘了运算——"风向校正"需 <code>pos.y - 4</code>，漏掉减法落点就偏了。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成流金沙漠第二单元！你学会了把战场上的事物看作"对象"，并用点号一层层读取它们的属性。掌握了 <code>pos.x</code>、<code>pos.y</code>，你就能让英雄精准走位、动态追踪、为火炮报点——这是与世界互动的关键能力。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>对象 Object</td><td>能携带多份数据的数据类型</td><td>币屑</td></tr>
+            <tr><td>属性 Property</td><td>对象身上带标签的数据</td><td>伪装者</td></tr>
+            <tr><td>点号访问</td><td><code>对象.属性</code></td><td>全部</td></tr>
+            <tr><td>pos 属性</td><td>代表单位的位置</td><td>币屑、边地投弹</td></tr>
+            <tr><td>pos.x / pos.y</td><td>水平/竖直坐标，浮点数</td><td>边地投弹</td></tr>
+            <tr><td>嵌套访问链</td><td><code>item.pos.x</code> 层层往里钻</td><td>白兔</td></tr>
+            <tr><td>坐标驱动移动</td><td>读 pos 再 moveXY</td><td>币屑、白兔</td></tr>
+            <tr><td>动态优于写死</td><td>地图会变就用 pos</td><td>币屑、富有且安全</td></tr>
+            <tr><td>坐标 + 运算 + 拼接</td><td>读属性、算坐标、报点</td><td>风向校正</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会读属性、会算坐标的英雄，才能在流金沙漠中精准定位、步步为营。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️📍🧭
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=h3-17 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第二单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
