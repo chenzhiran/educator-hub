@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="course" content="CS2 · 计算机科学2">
+    <title>CS2 · 计算机科学2 · 边际森林知识挑战 - 多参数函数 | 扣哒世界</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基础设置 (边际森林主题绿) --- */
+        :root {
+            --primary-color: #2E9E5B; 
+            --secondary-color: #4FBF7C;
+            --bg-color: #f7faf8;     
+            --card-bg: #FFFFFF;
+            --text-color: #14241a;   
+            --en-text-color: #6b8a76; 
+            --correct-color: #28c840;
+            --wrong-color: #ff5f57;  
+            --accent-yellow: #febc2e;
+            
+            /* 代码高亮颜色 */
+            --code-bg: #1e2a22;
+            --code-text: #b6c2ba;
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d5e5d9 10%, transparent 10%);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- 游戏容器 --- */
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px; 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(46,158,91,0.15);
+            padding: 40px 50px;
+            text-align: center;
+            position: relative;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden; 
+        }
+
+        /* --- 顶部状态栏 --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            background: var(--accent-yellow);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 #d99e22;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 进度条 --- */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #e3ece6;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 题目区域 --- */
+        .question-area {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .question-title {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .en-text {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--en-text-color);
+            margin-bottom: 15px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        /* --- 专属代码样式 --- */
+        .question-title code, .en-text code {
+            background-color: #e8f7ee; 
+            font-family: 'YouYuan', '幼圆', monospace;
+            font-weight: bold; 
+            color: var(--primary-color); 
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            margin: 0 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 选项按钮 --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #e3ece6;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-color);
+            text-align: left;
+            position: relative;
+            top: 0;
+            box-shadow: 0 5px 0 #c4d4c9;
+            display: flex;
+            flex-direction: column; 
+            gap: 4px;
+        }
+
+        .opt-zh {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .opt-en {
+            font-size: 0.95rem;
+            color: var(--en-text-color);
+            font-weight: normal;
+        }
+
+        .option-code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            width: 100%;
+            border: 1px solid #314538;
+            white-space: pre-wrap; 
+            line-height: 1.5;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en {
+            color: rgba(255,255,255,0.85); 
+        }
+        .option-btn.correct .option-code, .option-btn.wrong .option-code {
+            background: rgba(0,0,0,0.25);
+            border-color: transparent;
+            color: white;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #95b8a0;
+        }
+
+        .option-btn:active:not([disabled]) {
+            top: 5px;
+            box-shadow: 0 0 0 #bdc3c7;
+        }
+        
+        .option-btn[disabled] {
+            cursor: default;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            box-shadow: 0 5px 0 #1f9c31;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+            box-shadow: 0 5px 0 #c24640;
+            animation: shake 0.5s;
+        }
+
+        /* --- 解析区域 --- */
+        .feedback-section {
+            display: none; 
+            text-align: left;
+            background: #e8f7ee;
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 30px;
+            border-left: 6px solid;
+            animation: slideUp 0.4s ease-out;
+        }
+        .feedback-section.correct { border-color: var(--correct-color); background: #eafaf1;}
+        .feedback-section.wrong { border-color: var(--wrong-color); background: #fceaea; }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correct .feedback-title { color: var(--correct-color); }
+        .wrong .feedback-title { color: var(--wrong-color); }
+
+        .explanation-text {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #1F7A44;
+            transition: all 0.2s;
+            float: right; 
+        }
+        .next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .next-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- 结算画面 --- */
+        .end-screen {
+            display: none;
+            padding: 20px 0;
+        }
+        .end-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; }
+        .end-score-box {
+            background: var(--accent-yellow);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 8px 0 #d99e22;
+        }
+        .end-score { font-size: 3.5rem; font-weight: bold; line-height: 1; }
+        .end-desc { color: var(--en-text-color); font-size: 1.1rem; margin-bottom: 30px; }
+        
+        .perfect-score-text {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* --- 动画 --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px; height: 12px;
+            background-color: #f00;
+            border-radius: 3px;
+            animation: fall linear forwards;
+            z-index: 10;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    
+/* KOUDA-KNOWLEDGE-FAB:START */
+.kouda-knowledge-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light,var(--secondary-color,#6ba6e8)),var(--primary,var(--primary-color,#3b82f6))); text-decoration:none; font-family:"PingFang SC","Microsoft YaHei",sans-serif; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-knowledge-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-knowledge-fab:focus-visible { outline:3px solid currentColor; outline-offset:3px; }
+@media (max-width:600px) { .kouda-knowledge-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-KNOWLEDGE-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-knowledge-fab" href="chuzhong.html" title="学知识" aria-label="学知识">学知识</a>
+
+    <div class="game-container">
+        <div id="quiz-view">
+            <div class="header-stats">
+                <span id="level-indicator">Level 1 / 15</span>
+                <div class="score-box">⭐ <span id="score">0</span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-area" id="question-container">
+            </div>
+
+            <div class="options-grid" id="options-container">
+            </div>
+
+            <div class="feedback-section" id="feedback-area">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <div style="overflow: hidden;"> 
+                    <button class="next-btn" onclick="nextQuestion()">下一题 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="end-screen" class="end-screen">
+        </div>
+    </div>
+
+    <script>
+        // --- 题目数据 (结合 Unit 8: 多参数函数) ---
+        const quizData = [
+            {
+                qZh: "1. 为什么我们有时需要给函数定义不止一个参数？",
+                qEn: "Why do we sometimes need to define MORE THAN ONE parameter for a function?",
+                options: [
+                    { zh: "A. 为了让函数运行得更快", en: "To make the function run faster" },
+                    { zh: "B. 因为现实任务往往需要同时处理多份信息（比如“建什么”以及“建在哪儿”）", en: "Because real tasks often need multiple pieces of info simultaneously (like 'what to build' and 'where to build')" },
+                    { zh: "C. 这是为了防止代码被敌人黑掉", en: "To prevent the code from being hacked by enemies" },
+                    { zh: "D. 英雄只能理解带有两个参数的函数", en: "Heroes can only understand functions with two parameters" }
+                ],
+                correct: 1, 
+                descZh: "解析：一个参数装不下那么多信息。像“去某个坐标建陷阱”，函数既要知道 x 坐标也要知道 y 坐标，所以需要多参数。",
+                descEn: "Explanation: One parameter isn't enough to hold that much information. For tasks like 'build a trap at a coordinate', the function needs both x and y coordinates, hence multiple parameters."
+            },
+            {
+                qZh: "2. 下列哪一个是英雄自带的（内置）多参数函数的最佳例子？",
+                qEn: "Which of the following is the best example of a built-in multiple-parameter function the hero already has?",
+                options: [
+                    { zh: "A.", en: "", code: "hero.attack(enemy)" },
+                    { zh: "B.", en: "", code: "hero.findNearestEnemy()" },
+                    { zh: "C.", en: "", code: "hero.buildXY(\"fire-trap\", 40, 20)" },
+                    { zh: "D.", en: "", code: "hero.say(\"Hello\")" }
+                ],
+                correct: 2,
+                descZh: "解析：`hero.buildXY` 接受三个参数：一个字符串（建造类型）和两个数字（坐标 x, y），是你一直在使用的多参数函数！",
+                descEn: "Explanation: `hero.buildXY` accepts three parameters: a string (type to build) and two numbers (x, y coordinates). You've been using it all along!"
+            },
+            {
+                qZh: "3. 在定义多参数函数时，应该用什么符号来分隔括号里的多个形参？",
+                qEn: "When defining a multiple-parameter function, what symbol should be used to SEPARATE the multiple parameters inside the parentheses?",
+                options: [
+                    { zh: "A. 空格 ( )", en: "Space ( )" },
+                    { zh: "B. 分号 (;)", en: "Semicolon (;)" },
+                    { zh: "C. 逗号 (,)", en: "Comma (,)" },
+                    { zh: "D. 加号 (+)", en: "Plus sign (+)" }
+                ],
+                correct: 2,
+                descZh: "解析：定义多参数函数，只需在 `def` 的括号里写下多个形参名，并用逗号隔开，如 `def maybeBuildTrap(x, y):`。",
+                descEn: "Explanation: To define a multi-parameter function, write the parameter names inside the `def` parentheses separated by commas, like `def maybeBuildTrap(x, y):`."
+            },
+            {
+                qZh: "4. 调用多参数函数时，有一条“最关键、也最容易出错的规则”，它是什么？",
+                qEn: "When calling a multi-parameter function, there is a 'most critical and error-prone rule'. What is it?",
+                options: [
+                    { zh: "A. 参数的名字必须全部大写", en: "Parameter names must be all uppercase" },
+                    { zh: "B. 调用时传入实参的顺序，必须与定义时形参的顺序一一对应", en: "The order of arguments passed during the call must match the order of parameters exactly" },
+                    { zh: "C. 不能同时传入字符串和数字", en: "You cannot pass strings and numbers at the same time" },
+                    { zh: "D. 函数最多只能有 3 个参数", en: "A function can have a maximum of 3 parameters" }
+                ],
+                correct: 1,
+                descZh: "解析：位置决定身份！第一个实参对应第一个形参，第二个对应第二个。如果顺序乱了，函数就会错误理解你传入的信息。",
+                descEn: "Explanation: Position determines identity! The 1st argument maps to the 1st parameter, the 2nd to the 2nd. If the order is mixed up, the function will misunderstand the info."
+            },
+            {
+                qZh: "5. 如果你定义了 `def buildSomething(type, x, y):`，但调用时写成了 `buildSomething(40, \"fence\", 20)`，会发生什么？",
+                qEn: "If you defined `def buildSomething(type, x, y):`, but called it as `buildSomething(40, \"fence\", 20)`, what happens?",
+                options: [
+                    { zh: "A. 没有任何问题，Python 会自动帮你纠正", en: "No problem, Python automatically corrects it for you" },
+                    { zh: "B. 英雄会随机建造一样东西", en: "The hero builds something randomly" },
+                    { zh: "C. 程序会报错，因为函数会误以为 40 是要建造的类型，而 \"fence\" 是坐标", en: "The program will error because it thinks 40 is the type to build and 'fence' is the coordinate" },
+                    { zh: "D. 函数直接被跳过不执行", en: "The function is simply skipped without executing" }
+                ],
+                correct: 2,
+                descZh: "解析：这是实参顺序错位导致的严重后果。参数对错位了，字符串和数字的含义也会完全乱套。",
+                descEn: "Explanation: This is a serious consequence of misordered arguments. With parameters out of order, the meaning of the strings and numbers is completely messed up."
+            },
+            {
+                qZh: "6. 多参数函数的参数类型有什么限制吗？",
+                qEn: "Are there any restrictions on the TYPES of parameters in a multi-parameter function?",
+                options: [
+                    { zh: "A. 所有的参数必须是同一类型（全是数字或全是字符串）", en: "All parameters must be of the same type (all numbers or all strings)" },
+                    { zh: "B. 类型可以各异，字符串、数字、对象可以在同一个函数里混搭作为参数", en: "Types can be different; strings, numbers, and objects can be mixed in the same function" },
+                    { zh: "C. 参数只能接收数字", en: "Parameters can only receive numbers" },
+                    { zh: "D. 只有内置函数可以混合类型，自定义函数不行", en: "Only built-in functions can mix types, not custom ones" }
+                ],
+                correct: 1,
+                descZh: "解析：同一个函数的不同形参，可以承载完全不同种类的信息，例如 `typeToBuild` 是字符串，而 `x, y` 是数字。",
+                descEn: "Explanation: Different parameters in the same function can carry completely different types of information, e.g., `typeToBuild` as a string, and `x, y` as numbers."
+            },
+            {
+                qZh: "7. 在“返回荆棘农场”关卡中，将 `x` 和 `y` 坐标设为参数的最大好处是什么？",
+                qEn: "In the 'Thornbush Farm' level, what is the biggest benefit of setting the `x` and `y` coordinates as parameters?",
+                options: [
+                    { zh: "A. 提升陷阱的爆炸伤害", en: "Increases the trap's explosion damage" },
+                    { zh: "B. 可以让同一个函数被带去地图上的任何位置巡逻执行任务，复用性极强", en: "The same function can be taken anywhere on the map to patrol and execute tasks, making it highly reusable" },
+                    { zh: "C. 会让代码变长从而获得更高评分", en: "It makes the code longer, earning a higher score" },
+                    { zh: "D. 防止食人魔踩到陷阱", en: "Prevents ogres from stepping on traps" }
+                ],
+                correct: 1,
+                descZh: "解析：把坐标参数化后，定义一次“去某点干活”的逻辑，就能在所有入口反复调用，每次只换坐标。",
+                descEn: "Explanation: By parameterizing coordinates, you define the 'go to point and work' logic once, and reuse it at all entrances by just changing the coordinates."
+            },
+            {
+                qZh: "8. 在“封闭的十字路口”关卡中，为了让同一个函数既能造 `fence` 又能造 `fire-trap`，你是怎么做的？",
+                qEn: "In 'Closed the Crossroads', how did you make the same function build BOTH `fence` and `fire-trap`?",
+                options: [
+                    { zh: "A. 写了两个不同的函数", en: "Wrote two different functions" },
+                    { zh: "B. 让英雄自己随机选择", en: "Let the hero choose randomly" },
+                    { zh: "C. 把“建造物类型”(`typeToBuild`)也变成一个参数传进去", en: "Made the 'build type' (`typeToBuild`) into a parameter passed in" },
+                    { zh: "D. 使用了 while 循环套嵌", en: "Used nested while loops" }
+                ],
+                correct: 2,
+                descZh: "解析：把“建什么”也作为参数传入，这样一个函数通吃，调用时传入不同的类型字符串和坐标即可。这就叫“差异点参数化”。",
+                descEn: "Explanation: Passing 'what to build' as a parameter makes one function universal. Just pass different type strings and coordinates when calling. This is 'parameterizing differences'."
+            },
+            {
+                qZh: "9. 编程术语中的<span class=\"keyword\">重构（Refactoring）</span>指的是什么？（参考“Agrippa 重构”关卡）",
+                qEn: "What does the programming term 'Refactoring' mean? (Referencing the 'Agrippa Refactored' level)",
+                options: [
+                    { zh: "A. 在不改变代码功能的前提下，改善代码的结构（如把嵌套逻辑抽成独立函数）", en: "Improving code structure without changing its function (like extracting nested logic into independent functions)" },
+                    { zh: "B. 删掉所有代码重新写一遍", en: "Deleting all code and rewriting it from scratch" },
+                    { zh: "C. 增加更多的功能和新武器", en: "Adding more features and new weapons" },
+                    { zh: "D. 故意写出会报错的代码", en: "Intentionally writing code that throws errors" }
+                ],
+                correct: 0,
+                descZh: "解析：重构指在不改变功能的前提下改善代码结构。把一大堆嵌套判断里“该劈斩还是该普攻”的逻辑抽进 `cleaveOrAttack` 函数就是经典的重构手段。",
+                descEn: "Explanation: Refactoring means improving code structure without changing functionality. Extracting nested cleave/attack logic into a `cleaveOrAttack` function is a classic example."
+            },
+            {
+                qZh: "10. 注意看这段代码：<br><code>def maybeBuildTrap(x, y):</code><br>代码里定义的 <code>x</code> 和 <code>y</code> 被称为什么？",
+                qEn: "Look at this code:<br><code>def maybeBuildTrap(x, y):</code><br>What are <code>x</code> and <code>y</code> defined here called?",
+                options: [
+                    { zh: "A. 实参（Argument）", en: "Arguments" },
+                    { zh: "B. 字符串常量", en: "String constants" },
+                    { zh: "C. 内置函数", en: "Built-in functions" },
+                    { zh: "D. 形参（Parameter）", en: "Parameters" }
+                ],
+                correct: 3,
+                descZh: "解析：形参（parameter）是在函数定义里的参数。实参（argument）是函数被调用时传进的实际参数值！",
+                descEn: "Explanation: Parameters are defined in the function definition. Arguments are the actual values passed in when the function is called!"
+            },
+            {
+                qZh: "11. 在 `maybeBuildTrap(x, y)` 函数内部，形参 `x` 和 `y` 只能被使用一次吗？",
+                qEn: "Inside the `maybeBuildTrap(x, y)` function, can the parameters `x` and `y` only be used ONCE?",
+                options: [
+                    { zh: "A. 是的，用过一次就会失效", en: "Yes, they become invalid after one use" },
+                    { zh: "B. 它们可以被多次使用（比如先用于 moveXY，再用于 buildXY）", en: "They can be used multiple times (e.g., first for moveXY, then for buildXY)" },
+                    { zh: "C. 完全不能在内部使用", en: "Cannot be used internally at all" },
+                    { zh: "D. 只有 x 能用多次，y 只能用一次", en: "Only x can be used multiple times, y only once" }
+                ],
+                correct: 1,
+                descZh: "解析：形参就是普通的变量。你可以用 `hero.moveXY(x, y)` 移动过去，再用 `hero.buildXY(\"fire-trap\", x, y)` 在同一点建造，同一对坐标被复用多次。",
+                descEn: "Explanation: Parameters are just variables. You can `hero.moveXY(x, y)` to move there, and `hero.buildXY(\"fire-trap\", x, y)` to build at the exact same spot, reusing them."
+            },
+            {
+                qZh: "12. 在“贪婪陷阱”关卡中，`maybeBuildTrap` 的算法思路发生了什么变化？",
+                qEn: "In the 'Greed Traps' level, what changed in the algorithmic thinking for `maybeBuildTrap`?",
+                options: [
+                    { zh: "A. 不再寻找敌人，而是把寻找硬币作为判断是否要造陷阱的“诱饵”依据", en: "Stopped looking for enemies, and used finding coins as the 'bait' condition to build traps" },
+                    { zh: "B. 取消了 x 和 y 坐标", en: "Removed the x and y coordinates" },
+                    { zh: "C. 变成了只防守农民不攻击的模式", en: "Changed to a mode that only defends peasants and doesn't attack" },
+                    { zh: "D. 要求同时打三个目标", en: "Required hitting three targets at once" }
+                ],
+                correct: 0,
+                descZh: "解析：因为农民也会游荡，不能见人就建陷阱。算法的精妙之处在于：用寻找硬币 `findNearestItem()` 作为发现敌军行动轨迹的依据。",
+                descEn: "Explanation: Since peasants also wander, you can't build traps for anyone you see. The clever part is using `findNearestItem()` as evidence of enemy troop movement."
+            },
+            {
+                qZh: "13. 易错题：如果定义了 `def checkPoint(x, y):`，但在主循环里调用时写成了 `hero.checkPoint(10, 30)`，这是犯了什么错误？",
+                qEn: "Trick question: If you defined `def checkPoint(x, y):`, but called it as `hero.checkPoint(10, 30)` in the main loop, what is the mistake?",
+                options: [
+                    { zh: "A. 忘记传第三个参数", en: "Forgot to pass the third parameter" },
+                    { zh: "B. 坐标数字不够大", en: "The coordinate numbers aren't big enough" },
+                    { zh: "C. 给自定义函数误加了 `hero.` 前缀，它是由你定义的，不是英雄自带的技能", en: "Mistakenly added the `hero.` prefix to a custom function; it's defined by you, not a built-in hero skill" },
+                    { zh: "D. 这是完全正确的写法", en: "This is a completely correct way to write it" }
+                ],
+                correct: 2,
+                descZh: "解析：`checkPoint` 是你自己写的函数，调用时直接写 `checkPoint(10, 30)` 即可，乱加 `hero.` 会导致代码找不到指令。",
+                descEn: "Explanation: `checkPoint` is your custom function. Just write `checkPoint(10, 30)` to call it. Adding `hero.` will cause a 'command not found' error."
+            },
+            {
+                qZh: "14. 新手写多参数函数时，“实参个数对不上”也是典型错误。比如定义了 3 个形参却只传 2 个实参，会导致什么？",
+                qEn: "When beginners write multi-parameter functions, 'mismatched argument counts' is a typical error. What happens if you define 3 parameters but only pass 2 arguments?",
+                options: [
+                    { zh: "A. 程序完美运行", en: "The program runs perfectly" },
+                    { zh: "B. 函数会自动将第三个参数设为敌人", en: "The function automatically sets the third parameter to an enemy" },
+                    { zh: "C. 函数收不全信息，执行时会因为缺少必要的参数而报错失效", en: "The function doesn't get complete information and fails with an error due to missing required arguments" },
+                    { zh: "D. 游戏会强行关闭", en: "The game forcibly closes" }
+                ],
+                correct: 2,
+                descZh: "解析：有几个“空盒子”（形参），就必须装几个“东西”（实参）。个数对不上，函数内部就无法正常运转。",
+                descEn: "Explanation: The number of 'empty boxes' (parameters) must match the 'things' (arguments) put in them. If counts mismatch, the function's internals will fail."
+            },
+            {
+                qZh: "15. 总结：通过学习第八单元，多参数函数带给代码最核心的价值是什么？",
+                qEn: "Summary: Having studied Unit 8, what is the CORE VALUE that multi-parameter functions bring to code?",
+                options: [
+                    { zh: "A. 让代码变得足够长，显得很厉害", en: "Making the code long enough to look impressive" },
+                    { zh: "B. 可以一次性接收多份不同类型的信息，将多重差异封装进参数，实现极其灵活的代码复用", en: "Receiving multiple pieces of different info at once, encapsulating multiple differences into parameters to achieve extremely flexible code reuse" },
+                    { zh: "C. 取代所有的循环语句", en: "Replacing all loop statements" },
+                    { zh: "D. 自动消灭所有食人魔", en: "Automatically destroying all ogres" }
+                ],
+                correct: 1,
+                descZh: "解析：把各种差异（坐标、目标、建造物类型）提炼为参数，函数体就变得统一。差异化越多被参数解决，函数通吃的范围就越广！",
+                descEn: "Explanation: Abstracting differences (coordinates, targets, build types) into parameters unifies the function body. The more differences parameterized, the more universal the function!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false; 
+
+        const quizView = document.getElementById('quiz-view');
+        const endScreen = document.getElementById('end-screen');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const levelIndicator = document.getElementById('level-indicator');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        function highlightCode(codeStr) {
+            if (!codeStr) return '';
+            return escapeHtml(codeStr); 
+        }
+
+        function loadQuestion() {
+            answered = false; 
+            feedbackArea.style.display = 'none'; 
+            
+            const data = quizData[currentQuestion];
+            
+            levelIndicator.innerText = `Level ${currentQuestion + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            scoreDisplay.innerText = score;
+            
+            let html = `
+                <div class="question-title">${highlightDescCode(data.qZh)}</div>
+                <div class="en-text">${highlightDescCode(data.qEn)}</div>
+            `;
+            questionContainer.innerHTML = html;
+            
+            optionsContainer.innerHTML = '';
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                
+                let btnHtml = `<span class="opt-zh">${highlightDescCode(opt.zh)}</span>`;
+                if (opt.en) {
+                    btnHtml += `<span class="opt-en">${highlightDescCode(opt.en)}</span>`;
+                }
+                if (opt.code) {
+                    btnHtml += `<div class="option-code">${highlightCode(opt.code)}</div>`;
+                }
+
+                btn.innerHTML = btnHtml;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (answered) return; 
+            answered = true;
+
+            const data = quizData[currentQuestion];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(btn => btn.setAttribute('disabled', 'true'));
+            
+            const fullDesc = `
+                <div style="margin-bottom:8px;">${highlightDescCode(data.descZh)}</div>
+                <div class="en-text">${highlightDescCode(data.descEn)}</div>
+            `;
+
+            if (selectedIndex === data.correct) {
+                btnElement.classList.add('correct');
+                score += 100; 
+                scoreDisplay.innerText = score;
+                createConfetti(); 
+                showFeedback(true, "🎉 回答正确！ Correct!", fullDesc);
+            } else {
+                btnElement.classList.add('wrong');
+                setTimeout(() => {
+                   allBtns[data.correct].classList.add('correct');
+                }, 400);
+                
+                const rightOptStr = String.fromCharCode(65 + data.correct); 
+                showFeedback(false, `❌ 回答错误。正确答案是 / Correct answer is: ${rightOptStr}`, fullDesc);
+            }
+        }
+
+        function highlightDescCode(text) {
+            return text.replace(/`([^`]+)`/g, '<code style="background-color:#e8f7ee; font-family:\'YouYuan\', \'幼圆\', monospace; font-weight:bold; color:#1F7A44; padding:3px 8px; border-radius:6px; font-size:1.15rem; margin:0 2px;">$1</code>');
+        }
+
+        function showFeedback(isCorrect, title, desc) {
+            feedbackArea.classList.remove('correct', 'wrong');
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackTitle.innerHTML = title;
+            explanationText.innerHTML = desc;
+            feedbackArea.style.display = 'block';
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            quizView.style.display = 'none';
+            endScreen.style.display = 'block';
+            progressBar.parentElement.style.display = 'none'; 
+
+            const totalScore = quizData.length * 100;
+            const isPerfect = (score === totalScore);
+            
+            let html = '';
+            if (isPerfect) {
+                for(let i=0; i<6; i++) setTimeout(createConfetti, i*350);
+                html += `<div class="end-title">🎉 完美的多参数大师！<br><span class="en-text" style="font-size: 1.2rem;">Perfect Multi-Parameter Master!</span>🎉</div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score perfect-score-text">${score}</div></div>`;
+                html += `<div class="end-desc">太棒了！你已经完全掌握了如何利用多重参数为函数赋予灵活多变的能力，这份本领将让你在编程的道路上所向披靡！<br><span class="en-text">Amazing! You've completely mastered using multiple parameters to give functions flexible capabilities. This skill will make you invincible in programming!</span></div>`;
+            } else {
+                html += `<div class="end-title">挑战完成！<br><span class="en-text" style="font-size: 1.2rem;">Challenge Completed!</span></div>`;
+                html += `<div class="end-score-box">总得分 Total Score<br><div class="end-score">${score} / ${totalScore}</div></div>`;
+                html += `<div class="end-desc">做得不错！多留意一下形参与实参顺序对应的细节，下次一定拿满分！<br><span class="en-text">Good job! Pay closer attention to how parameter order matches arguments, and aim for a perfect score next time!</span></div>`;
+            }
+            html += `<button class="next-btn" onclick="location.reload()" style="float:none; font-size:1.2rem; padding: 15px 40px; margin-top:20px;">🔄 再玩一次 Play Again</button>`;
+            
+            endScreen.innerHTML = html;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fdcb6e'];
+            const container = document.querySelector('.game-container');
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                const scale = Math.random() * 0.6 + 0.4;
+                confetti.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
