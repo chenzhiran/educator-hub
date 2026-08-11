@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC1-937A99840D01">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第一单元：字符串运算 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --accent: #4FBF7C;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #2E9E5B;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1F7A44;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(255, 193, 7, 0.20); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #ffebee;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC1-937A99840D01 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第一单元</div>
+
+    <a href="#section-1-1" class="nav-section">1.1 字符串连接入门</a>
+    <a href="#sec-1-1-1" class="nav-sub">1.1.1 什么是字符串连接</a>
+    <a href="#sec-1-1-2" class="nav-sub">1.1.2 + 号的双重身份</a>
+    <a href="#sec-1-1-3" class="nav-sub">1.1.3 连接变量里的字符串</a>
+
+    <a href="#section-1-2" class="nav-section">1.2 多段拼接与混合</a>
+    <a href="#sec-1-2-1" class="nav-sub">1.2.1 一行连接多个字符串</a>
+    <a href="#sec-1-2-2" class="nav-sub">1.2.2 字符串 + 数字</a>
+    <a href="#sec-1-2-3" class="nav-sub">1.2.3 拼接坐标与位置</a>
+
+    <a href="#section-1-3" class="nav-section">1.3 数学运算符</a>
+    <a href="#sec-1-3-1" class="nav-sub">1.3.1 加减乘除与求余</a>
+    <a href="#sec-1-3-2" class="nav-sub">1.3.2 用变量做运算</a>
+    <a href="#sec-1-3-3" class="nav-sub">1.3.3 运算顺序与括号</a>
+
+    <a href="#section-1-4" class="nav-section">1.4 实战关卡精讲</a>
+    <a href="#sec-1-4-1" class="nav-sub">1.4.1 友和敌</a>
+    <a href="#sec-1-4-2" class="nav-sub">1.4.2 似曾相识的味道</a>
+    <a href="#sec-1-4-3" class="nav-sub">1.4.3 罪与罚</a>
+    <a href="#sec-1-4-4" class="nav-sub">1.4.4 空中救援行动</a>
+    <a href="#sec-1-4-5" class="nav-sub">1.4.5 巫师之门</a>
+    <a href="#sec-1-4-6" class="nav-sub">1.4.6 巫师出没/天际层</a>
+    <a href="#sec-1-4-7" class="nav-sub">1.4.7 真炼金术</a>
+
+    <a href="#section-1-5" class="nav-section">1.5 常见错误</a>
+    <a href="#sec-1-5-1" class="nav-sub">1.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第一单元：字符串运算</h1>
+    <div class="subtitle">Unit 1: String Operations &amp; Concatenation</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 友和敌 → 真炼金术</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 1.1 ==================== -->
+<div class="section-header" id="section-1-1">
+    <h2>1.1 字符串连接入门</h2>
+    <div class="en-title">Getting Started with String Concatenation</div>
+</div>
+
+<h3 id="sec-1-1-1">1.1.1 什么是字符串连接（What Is Concatenation）</h3>
+
+<h4>1.1.1.1 把两段文字"粘"成一段
+    <span class="en">Gluing two pieces of text together</span>
+</h4>
+
+<p>欢迎来到流金沙漠！本单元的主角是<span class="keyword">字符串（String）</span>——也就是用引号括起来的文字。"友和敌"关卡开门见山地介绍：<strong>"你可以使用 + 运算符连接两个字符串。这就叫做'字符串连接'。"</strong></p>
+
+<p>关卡用一个直观的例子点破了原理：<strong>如果你有两个字符串 "foo" 和 "bar"，"foo" + "bar" 的结果就是 "foobar"。</strong> <code>+</code> 不过是把两段文字首尾相接、"粘"成一段更长的文字而已。这个动作的英文叫 <span class="keyword-en">concatenate</span>（连接）。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-1-1-1_concat_intro.png" alt="扣哒世界 字符串连接示意图 - koudashijie.com">
+    <div class="caption">图1：字符串连接就像把两块写有文字的木牌拼接成一块长牌</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-1-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3 id="sec-1-1-2">1.1.2 + 号的双重身份（The Two Roles of +）</h3>
+
+<h4>1.1.2.1 既能加数字，也能连文字
+    <span class="en">It adds numbers, and it joins text</span>
+</h4>
+
+<p>关卡有个精妙的类比：<strong>"就像两个数可以用 + 加起来一样，字符串也可以使用 + 运算符。"</strong> 同一个 <code>+</code> 号，遇到数字就做加法运算，遇到字符串就做连接拼合。这就是 <code>+</code> 的双重身份。</p>
+
+<table class="styled-table">
+    <thead><tr><th>表达式</th><th>+ 的作用</th><th>结果</th></tr></thead>
+    <tbody>
+        <tr><td><code>3 + 5</code></td><td>数字相加</td><td><code>8</code></td></tr>
+        <tr><td><code>"foo" + "bar"</code></td><td>字符串连接</td><td><code>"foobar"</code></td></tr>
+        <tr><td><code>"去战斗, " + "Sally"</code></td><td>字符串连接</td><td><code>"去战斗, Sally"</code></td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-1-1-3">1.1.3 连接变量里的字符串（Concatenating Variables）</h3>
+
+<h4>1.1.3.1 把"固定文字"接上"动态信息"
+    <span class="en">Joining fixed text with dynamic info</span>
+</h4>
+
+<p>连接的真正威力，在于把<strong>固定不变的文字</strong>和<strong>存在变量里的动态信息</strong>拼起来。"友和敌"关卡要求英雄喊出每个单位的名字命令它们行动，而每个单位的名字（<code>id</code>）是变化的，必须用变量获取再拼接：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>friend = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestFriend</span><span class="punc">()</span>
+<span class="kw">if</span> friend<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"去战斗, "</span> <span class="hl">+</span> friend<span class="punc">.</span>id <span class="hl">+</span> <span class="str">"!"</span><span class="punc">)</span></pre>
+</div>
+
+<p>关卡特别提醒：<strong>"仅仅叫名字是不行的，你得加上(连接)一些东西让他们行动。"</strong> 也就是说，光说 <code>friend.id</code> 不够，要把命令词("去战斗, ")拼在前面，才能让农民真正行动起来。</p>
+
+<!-- ==================== 1.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-1-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<div class="section-header" id="section-1-2">
+    <h2>1.2 多段拼接与混合</h2>
+    <div class="en-title">Multiple Joins &amp; Mixing Types</div>
+</div>
+
+<h3 id="sec-1-2-1">1.2.1 一行连接多个字符串（Many Strings in One Line）</h3>
+
+<h4>1.2.1.1 + 可以接龙
+    <span class="en">+ can chain</span>
+</h4>
+
+<p>"罪与罚"关卡指出：<strong>"字符串连接可以在同一行中连接多个字符串。"</strong> 你可以用多个 <code>+</code> 把好几段文字接成一长串，像接龙一样。例如：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="str">"Hello"</span> <span class="hl">+</span> <span class="str">" "</span> <span class="hl">+</span> <span class="str">"World"</span> <span class="hl">+</span> <span class="str">"!"</span>   <span class="cmt"># 结果："Hello World!"</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">空格小窍门：</span>连接时<strong>不会自动加空格</strong>。<code>"Hello"+"World"</code> 会得到 <code>"HelloWorld"</code> 粘在一起。想要词与词之间有空格，必须自己拼一个 <code>" "</code>（含空格的字符串）进去。</p>
+</div>
+
+<h3 id="sec-1-2-2">1.2.2 字符串 + 数字（String + Number）</h3>
+
+<h4>1.2.2.1 数字会被"拉进"文字里
+    <span class="en">Numbers join the text</span>
+</h4>
+
+<p>"似曾相识的味道"关卡介绍了混合连接：<strong>"你可以将字符串和其他字符串或数字连接起来。"</strong> 当 <code>+</code> 一边是字符串、另一边是数字时，数字会被当作文字拼进去。这一关用经典的"墙上的药水"歌曲来练习，把变量 <code>potionsOnTheWall</code>（数字）拼进歌词：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>potionsOnTheWall = <span class="num">10</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>potionsOnTheWall <span class="hl">+</span> <span class="str">" potions of health on the wall!"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Take "</span> <span class="hl">+</span> numToTakeDown <span class="hl">+</span> <span class="str">" down, pass it around!"</span><span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">算法亮点：</span>这首歌每唱一轮，药水数量就 <code>potionsOnTheWall -= numToTakeDown</code> 减少一次。所以同一段拼接代码，每轮唱出的数字都不同——<strong>变量在变，拼出的歌词也跟着变</strong>。这正是"固定文字 + 动态变量"的魅力。
+</div>
+
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-1-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<h3 id="sec-1-2-3">1.2.3 拼接坐标与位置（Joining Coordinates）</h3>
+
+<h4>1.2.3.1 把 x、y 拼成一句报点
+    <span class="en">Turn x, y into a readable report</span>
+</h4>
+
+<p>"罪与罚"关卡要把敌人和宝石的位置<strong>连接成容易理解的字符串</strong>，好让火炮听懂目标在哪。思路是把 <code>pos.x</code> 和 <code>pos.y</code> 两个坐标数字、再加一个空格拼成一句报点：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemyPos = enemy<span class="punc">.</span>pos<span class="punc">.</span>x <span class="hl">+</span> <span class="str">" "</span> <span class="hl">+</span> enemy<span class="punc">.</span>pos<span class="punc">.</span>y
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"敌人的位置在： "</span> <span class="hl">+</span> enemyPos<span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 1.3 ==================== -->
+<div class="section-header" id="section-1-3">
+    <h2>1.3 数学运算符</h2>
+    <div class="en-title">Math Operators</div>
+</div>
+
+<h3 id="sec-1-3-1">1.3.1 加减乘除与求余（Arithmetic Operators）</h3>
+
+<h4>1.3.1.1 五个基本运算符
+    <span class="en">The five basic operators</span>
+</h4>
+
+<p>从"巫师之门"开始，沙漠的巫师们要考验你的数学功力。关卡系统地列出了代码里的运算符——和纸上算术很像，但有几处关键差异：</p>
+
+<table class="styled-table">
+    <thead><tr><th>运算</th><th>符号</th><th>示例</th><th>结果</th></tr></thead>
+    <tbody>
+        <tr><td>加法</td><td><code>+</code></td><td><code>7 + 3</code></td><td>10</td></tr>
+        <tr><td>减法</td><td><code>-</code></td><td><code>7 - 3</code></td><td>4</td></tr>
+        <tr><td>乘法</td><td><code>*</code>（星号）</td><td><code>7 * 3</code></td><td>21</td></tr>
+        <tr><td>除法</td><td><code>/</code>（斜杠）</td><td><code>6 / 3</code></td><td>2</td></tr>
+        <tr><td>求余</td><td><code>%</code></td><td><code>7 % 3</code></td><td>1</td></tr>
+    </tbody>
+</table>
+
+<p>关卡特别强调，乘法用<strong>星号</strong>而非"×"，除法用<strong>斜杠</strong>而非"÷"；两数相除有余数时，用 <code>%</code> 求那个余数。</p>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-1-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:b982ae6976:START anchor=sec-1-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b982ae6976">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:b982ae6976:END -->
+
+<h3 id="sec-1-3-2">1.3.2 用变量做运算（Doing Math with Variables）</h3>
+
+<h4>1.3.2.1 变量能存任何东西
+    <span class="en">Variables can store anything</span>
+</h4>
+
+<p>"巫师之门"关卡点明了一个重要观念：<strong>"之前你学过用变量来存储敌人，其实变量可以存储任何东西！"</strong> 变量当然也能存数字，而且<strong>存了数字的变量可以像数字本身一样参与运算</strong>。这正是和巫师斗智的核心：每个魔法数字都是随机的，没法心算，必须用变量接住、再用代码计算。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>las = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestFriend</span><span class="punc">()</span><span class="punc">.</span><span class="fn">getSecret</span><span class="punc">()</span>  <span class="cmt"># 拿到巫师的秘密数字</span>
+erz = las <span class="hl">+</span> <span class="num">7</span>                            <span class="cmt"># 用变量做运算，结果再存进新变量</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>erz<span class="punc">)</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">核心思想：</span>每一步都<strong>"接住一个数 → 算出新数 → 存进新变量 → 说出来"</strong>。用变量记录中间结果，是巫师系列关卡的通用算法骨架。只有正确记录每个数字，才能一环扣一环算到最后。
+</div>
+
+<h3 id="sec-1-3-3">1.3.3 运算顺序与括号（Order of Operations）</h3>
+
+<h4>1.3.3.1 乘除优先，括号最大
+    <span class="en">Multiply/divide first, parentheses win</span>
+</h4>
+
+<p>"巫师天际层"关卡把难度推到顶点：<strong>"使用括号来确保公式顺序正确！记住，乘除优先于加减。"</strong> 和数学课一样，代码也遵循运算优先级——先算乘除、后算加减；而<strong>括号能强制改变顺序</strong>，让里面的运算先做。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 120" width="520" role="img" aria-label="运算顺序与括号">
+        <text x="40" y="55" font-size="20" font-family="monospace" fill="#f0c674">csi</text>
+        <text x="80" y="55" font-size="20" font-family="monospace" fill="#d8c8a8">=</text>
+        <text x="100" y="55" font-size="20" font-family="monospace" fill="#d8c8a8">(</text>
+        <text x="113" y="55" font-size="20" font-family="monospace" fill="#f0c674">tam</text>
+        <text x="152" y="55" font-size="20" font-family="monospace" fill="#e8845a">+</text>
+        <text x="170" y="55" font-size="20" font-family="monospace" fill="#f0c674">zso</text>
+        <text x="210" y="55" font-size="20" font-family="monospace" fill="#d8c8a8">)</text>
+        <text x="226" y="55" font-size="20" font-family="monospace" fill="#e8845a">*</text>
+        <text x="244" y="55" font-size="20" font-family="monospace" fill="#d8c8a8">(</text>
+        <text x="257" y="55" font-size="20" font-family="monospace" fill="#f0c674">zso</text>
+        <text x="296" y="55" font-size="20" font-family="monospace" fill="#e8845a">-</text>
+        <text x="312" y="55" font-size="20" font-family="monospace" fill="#f0c674">ist</text>
+        <text x="345" y="55" font-size="20" font-family="monospace" fill="#d8c8a8">)</text>
+        <!-- 标注 -->
+        <line x1="155" y1="65" x2="155" y2="92" stroke="#E0A23F" stroke-width="2"/>
+        <text x="105" y="110" font-size="12" font-family="sans-serif" fill="#E0A23F">先算括号 ①</text>
+        <line x1="300" y1="65" x2="300" y2="92" stroke="#E0A23F" stroke-width="2"/>
+        <text x="255" y="110" font-size="12" font-family="sans-serif" fill="#E0A23F">先算括号 ②</text>
+        <line x1="232" y1="30" x2="232" y2="12" stroke="#e8845a" stroke-width="2"/>
+        <text x="360" y="22" font-size="12" font-family="sans-serif" fill="#e8845a">最后才把两个括号结果相乘</text>
+    </svg>
+</div>
+
+<p>例如 <code>(tam + zso) * (zso - ist)</code>，括号保证了"两个和差先各自算好，再相乘"。如果不加括号，乘除会抢先执行，结果就全错了。</p>
+
+<!-- ==================== 1.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-1-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<div class="section-header" id="section-1-4">
+    <h2>1.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"为什么这样拼、这样算"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-1-4-1">1.4.1 友和敌（Friend and Foe）</h3>
+
+<h4>1.4.1.1 策略：用连接发出带名字的命令
+    <span class="en">Strategy: issue named commands via concatenation</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-4-1-1_friend_foe.png" alt="扣哒世界 友和敌关卡 - koudashijie.com">
+    <div class="caption">图2：友和敌——拼接命令词与单位 id,分别号令农民战斗、差役离开</div>
+</div>
+
+<p>这是字符串连接的首秀。算法思路是:在循环里分别 <code>findNearestFriend()</code> 和 <code>findNearestEnemy()</code>,各自判断存在后,把<strong>命令词 + 单位 id</strong>拼成一句喊出来。农民收到"去战斗, "开头的命令就战斗,差役收到"快滚开, "开头的命令就离开。关键在于理解:单位的 id 是动态的,必须连接固定命令词才能生效。</p>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-1-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<h3 id="sec-1-4-2">1.4.2 似曾相识的味道（A Familiar Tune）</h3>
+
+<h4>1.4.2.1 策略：字符串 + 数字唱循环歌
+    <span class="en">Strategy: sing a counting song</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-4-2-1_familiar_tune.png" alt="扣哒世界 似曾相识的味道关卡 - koudashijie.com">
+    <div class="caption">图3：似曾相识的味道——把递减的数字拼进歌词,唱出"墙上的药水"</div>
+</div>
+
+<p>这一关练的是<strong>字符串与数字混合连接</strong>。算法思路是:在 <code>while</code> 循环里,每轮把当前的 <code>potionsOnTheWall</code> 数字拼进四句歌词唱出,然后用 <code>-=</code> 把数量减少,下一轮自然唱出更小的数。妙处在于<strong>同一段拼接代码,因变量递减而唱出不断变化的歌词</strong>——这就是变量驱动文本的典型应用。</p>
+
+<h3 id="sec-1-4-3">1.4.3 罪与罚（Salt and Pepper）</h3>
+
+<h4>1.4.3.1 策略：把坐标拼成火炮能懂的报点
+    <span class="en">Strategy: format coordinates for the cannons</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-4-3-1_salt_pepper.png" alt="扣哒世界 罪与罚关卡 - koudashijie.com">
+    <div class="caption">图4：罪与罚——把敌人和宝石的 x、y 坐标拼成报点,引导火炮攻击</div>
+</div>
+
+<p>这一关让连接派上实际用场。算法思路是:找到敌人和宝石后,分别取出它们的 <code>pos.x</code> 和 <code>pos.y</code>,用 <code>+ " " +</code> 把两个坐标连成"x y"格式的字符串,再拼上说明文字喊出来。火炮听到这串坐标就能锁定目标。一举两得——既报敌人位置,又报宝石位置。</p>
+
+<div class="tip-box">
+    <span class="tip-label">思路要点:</span>中间那个 <code>" "</code> 空格至关重要——它把两个数字隔开,否则 <code>x</code> 和 <code>y</code> 会粘成一个看不懂的大数字。连接时"分隔符"的设计,直接决定输出是否清晰可读。
+</div>
+
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-1-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+<!-- CC-PROTECTION:HIDDEN:fed2b1660d:START anchor=sec-1-4-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="fed2b1660d">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:fed2b1660d:END -->
+
+<h3 id="sec-1-4-4">1.4.4 空中救援行动（概念挑战 · Aerial Rescue）</h3>
+
+<h4>1.4.4.1 策略：用前缀区分敌我
+    <span class="en">Strategy: prefix to tell friend from foe</span>
+</h4>
+
+<p>这是<strong>概念挑战</strong>。算法思路很清晰:循环中分别找敌人和朋友,对朋友喊 <code>"Friend " + friend.id</code>,对敌人喊 <code>"Enemy " + enemy.id</code>。飞行救援队听到 "Friend" 前缀就疏散、听到 "Enemy" 前缀就消灭。这关再次强化:<strong>用一个固定前缀 + 动态 id,就能给不同对象贴上不同"标签"</strong>。</p>
+
+<h3 id="sec-1-4-5">1.4.5 巫师之门（Wizard's Door）</h3>
+
+<h4>1.4.5.1 策略：逐个巫师、链式计算魔法数字
+    <span class="en">Strategy: compute magic numbers step by step</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-4-5-1_wizard_door.png" alt="扣哒世界 巫师之门关卡 - koudashijie.com">
+    <div class="caption">图5：巫师之门——从第一个巫师取数,逐步加减乘除算出后续每个魔法数字</div>
+</div>
+
+<p>这一关切换到<strong>数学运算</strong>主题。算法骨架是一条"计算链":先到第一个巫师处 <code>getSecret()</code> 拿到起始数字存入变量,然后按每个巫师的指示(加 7、除以 4、乘以前一个数……)<strong>一步步用变量计算出下一个数字</strong>,走到对应巫师处说出来。因为数字随机,必须靠代码计算而非心算。</p>
+
+<div class="info-box">
+    <span class="info-label">通关节奏:</span>关卡建议<strong>一次只处理一个巫师</strong>——编辑代码、运行、拿到下一条指示,再继续写。这种"小步快跑、逐步推进"的调试节奏,是应对未知信息时的实用策略。
+</div>
+
+
+<!-- CC-PROTECTION:AD:12766675f6:START anchor=sec-1-4-5 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="12766675f6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，你不是走进一间教室，而是一片等待被拯救的大陆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:12766675f6:END -->
+<!-- CC-PROTECTION:HIDDEN:5d57f473b2:START anchor=sec-1-4-5 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="5d57f473b2">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC1-937A99840D01。</span>
+<!-- CC-PROTECTION:HIDDEN:5d57f473b2:END -->
+
+<h3 id="sec-1-4-6">1.4.6 巫师出没 &amp; 巫师天际层（Wizard Levels）</h3>
+
+<h4>1.4.6.1 策略：从单步运算到带括号的复合运算
+    <span class="en">Strategy: from single ops to parenthesized formulas</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-4-6-1_wizard_skyspan.png" alt="扣哒世界 巫师天际层关卡 - koudashijie.com">
+    <div class="caption">图6：巫师天际层——用括号组合多个运算,完成复杂的魔法数字计算</div>
+</div>
+
+<p>这两关是"巫师之门"的进阶。"巫师出没"延续链式计算,重点练习<strong>除法及不整除的情况</strong>;"巫师天际层"则要求<strong>把多种运算组合起来</strong>,如 <code>(esz * 3) - 2</code>、<code>(tam + zso) / 2</code> 乃至 <code>(tam + zso) * (zso - ist)</code>。算法思路不变(取数→算→存→说),难点升级为<strong>正确使用括号控制运算顺序</strong>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">括号的价值:</span>面对"先把两数相加,再除以 2"这类指示,必须写成 <code>(tam + zso) / 2</code>。若漏掉括号写成 <code>tam + zso / 2</code>,会变成"只把 zso 除以 2 再加 tam",结果完全不同。<strong>把口语指示翻译成带括号的公式,是这关的核心技能。</strong>
+</div>
+
+<h3 id="sec-1-4-7">1.4.7 真炼金术（概念挑战 · True Alchemy）</h3>
+
+<h4>1.4.7.1 策略：分步炼金,层层接力
+    <span class="en">Strategy: chain results step by step</span>
+</h4>
+
+<p>这是<strong>概念挑战</strong>,综合运用基本运算符。任务是把金、银、铜币按四个步骤炼化:相加 → 减铜币 → 除以 3 → 乘以 2。算法思路是<strong>每一步都把上一步的结果存进新变量,并说出来</strong>:<code>sum</code> → <code>sub</code> → <code>div</code> → <code>mult</code> 层层接力。这种"用变量保存中间结果、逐步推进"的模式,正是处理多步计算的标准做法。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>sum = goldCoins <span class="hl">+</span> silverCoins   <span class="cmt"># 步骤①</span>
+sub = sum <span class="hl">-</span> bronzeCoins        <span class="cmt"># 步骤②：用上一步结果</span>
+div = sub <span class="hl">/</span> <span class="num">3</span>                  <span class="cmt"># 步骤③：再用上一步结果</span>
+mult = div <span class="hl">*</span> <span class="num">2</span>                 <span class="cmt"># 步骤④：层层接力</span></pre>
+</div>
+
+<!-- ==================== 1.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-1-4-7 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-1-5">
+    <h2>1.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-1-5-1">1.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>1.5.1.1 字符串与运算环节的典型问题
+    <span class="en">Typical issues with strings and math</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-5-1-1_common_errors.png" alt="扣哒世界 字符串运算常见错误示意 - koudashijie.com">
+    <div class="caption">图7：忘记空格、漏写括号、运算顺序错,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>连接时忘了加空格——<code>"Take"+num</code> 会粘成 <code>"Take3"</code>，需自己拼一个 <code>" "</code>。</li>
+        <li>字符串忘了引号——文字必须用引号括起来，否则会被当成变量名。</li>
+        <li>乘法误用 <code>x</code> 或 <code>×</code>、除法误用 <code>÷</code>——代码里只认 <code>*</code> 和 <code>/</code>。</li>
+        <li>该加括号却没加——把"先加后除"写成无括号形式，运算顺序就乱了。</li>
+        <li>忘记用变量保存中间结果——多步计算时没存变量，下一步就无从接力。</li>
+        <li>把魔法数字写死成具体数——巫师的数字是随机的，必须用 <code>getSecret()</code> 取并计算。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你踏入流金沙漠并完成第一单元！你学会了让 <code>+</code> 一身二用——既能拼接文字、也能做数学，还掌握了用变量保存中间结果、用括号掌控运算顺序。这些是处理数据与文本的基本功。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>字符串连接</td><td><code>+</code> 把文字首尾相接</td><td>友和敌</td></tr>
+            <tr><td>连接变量</td><td>固定文字 + 动态 id</td><td>友和敌、空中救援</td></tr>
+            <tr><td>多段拼接</td><td>一行可连多个 <code>+</code></td><td>罪与罚</td></tr>
+            <tr><td>字符串 + 数字</td><td>数字被拼进文字</td><td>似曾相识的味道</td></tr>
+            <tr><td>拼接坐标</td><td>用空格隔开 x、y</td><td>罪与罚</td></tr>
+            <tr><td>数学运算符</td><td><code>+ - * / %</code></td><td>巫师之门</td></tr>
+            <tr><td>变量做运算</td><td>变量可像数字一样计算</td><td>巫师系列</td></tr>
+            <tr><td>运算顺序与括号</td><td>乘除优先，括号最大</td><td>巫师天际层</td></tr>
+            <tr><td>分步保存结果</td><td>用变量层层接力</td><td>真炼金术</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会拼字符串、会算公式的英雄，才能在流金沙漠破解一切谜题。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️🔤🧮
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=h3-18 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第一单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
