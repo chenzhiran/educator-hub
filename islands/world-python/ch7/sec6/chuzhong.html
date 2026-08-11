@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC6-DFDFEEBB00EF">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第六单元：练习嵌套循环 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 对比双栏 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .compare-2col .col {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .compare-2col .col-head {
+            padding: 8px 14px;
+            font-weight: 700;
+            font-size: 0.9em;
+            color: #fff;
+        }
+        .compare-2col .col-idx .col-head { background: var(--primary); }
+        .compare-2col .col-exist .col-head { background: var(--info); }
+        .compare-2col .col-body { padding: 12px 14px; font-size: 0.88em; background: var(--bg-card); }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC6-DFDFEEBB00EF | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS4-第六单元</div>
+
+    <a href="#section-6-1" class="nav-section">6.1 热身回顾</a>
+    <a href="#sec-6-1-1" class="nav-sub">6.1.1 嵌套循环速记</a>
+    <a href="#sec-6-1-2" class="nav-sub">6.1.2 本单元的新练法</a>
+
+    <a href="#section-6-2" class="nav-section">6.2 用属性筛选物品</a>
+    <a href="#sec-6-2-1" class="nav-sub">6.2.1 value 属性辨类型</a>
+    <a href="#sec-6-2-2" class="nav-sub">6.2.2 筛选式遍历模板</a>
+
+    <a href="#section-6-3" class="nav-section">6.3 两种内层循环写法</a>
+    <a href="#sec-6-3-1" class="nav-sub">6.3.1 索引遍历法</a>
+    <a href="#sec-6-3-2" class="nav-sub">6.3.2 存在性循环法</a>
+    <a href="#sec-6-3-3" class="nav-sub">6.3.3 两种写法对比</a>
+
+    <a href="#section-6-4" class="nav-section">6.4 分阶段作战</a>
+    <a href="#sec-6-4-1" class="nav-sub">6.4.1 先收集后战斗</a>
+
+    <a href="#section-6-5" class="nav-section">6.5 实战关卡精讲</a>
+    <a href="#sec-6-5-1" class="nav-sub">6.5.1 捡闪亮东西的人</a>
+    <a href="#sec-6-5-2" class="nav-sub">6.5.2 掠夺者</a>
+
+    <a href="#section-6-6" class="nav-section">6.6 常见错误</a>
+    <a href="#sec-6-6-1" class="nav-sub">6.6.1 易错点清单</a>
+
+    <a href="#section-6-7" class="nav-section">6.7 自测练习</a>
+    <a href="#sec-6-7-1" class="nav-sub">6.7.1 自我检验</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第六单元：练习嵌套循环</h1>
+    <div class="subtitle">Unit 6: Practicing Nested Loops</div>
+    <div class="badge">计算机科学 4 · 流金沙漠 Sarven Desert · 捡闪亮东西的人 · 掠夺者</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 6.1 ==================== -->
+<div class="section-header" id="section-6-1">
+    <h2>6.1 热身回顾</h2>
+    <div class="en-title">Warm-Up Review</div>
+</div>
+
+<h3 id="sec-6-1-1">6.1.1 嵌套循环速记（Nested Loops in a Nutshell）</h3>
+
+<h4>6.1.1.1 内层不跑完，外层不前进
+    <span class="en">The outer waits for the inner</span>
+</h4>
+
+<p>欢迎回到流金沙漠！上一单元你正式认识了<span class="keyword">嵌套循环</span>——循环里再套一个循环。本单元不引入全新语法，而是通过两个精心设计的关卡，让你把嵌套循环<strong>练熟、练透</strong>。先快速回忆一下核心要义：外层循环负责"逐个选出目标"，内层循环负责"把当前这个目标彻底搞定"；而且<strong>外层每前进一步之前，内层必须先完整跑完</strong>。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔁 嵌套循环速记卡</div>
+    <strong>外层</strong>：遍历数组 / 反复守卫，决定"轮到谁"<br>
+    <strong>内层</strong>：条件循环，把"这一个"处理到底（打到死、追到手、收干净）<br>
+    <strong>顺序</strong>：内层跑完，外层才 +1；缩进决定归属，一格都不能错
+</div>
+
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-6-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+<h3 id="sec-6-1-2">6.1.2 本单元的新练法（New Angles to Practice）</h3>
+
+<h4>6.1.2.1 两个关卡，两个新视角
+    <span class="en">Two levels, two fresh angles</span>
+</h4>
+
+<p>本单元的两关虽然都用嵌套循环，但各自带来一个新的练习视角：</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>关卡</th><th>新练的技能</th><th>核心手法</th></tr></thead>
+    <tbody>
+        <tr><td>捡闪亮东西的人</td><td>用 <code>value</code> 属性筛选物品</td><td>遍历 + <code>if</code> 判断价值</td></tr>
+        <tr><td>掠夺者</td><td>用"对象存在性"做内层条件</td><td>先收集金币，再打破机械</td></tr>
+    </tbody>
+</table>
+</div>
+
+<!-- ==================== 6.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-6-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-6-2">
+    <h2>6.2 用属性筛选物品</h2>
+    <div class="en-title">Filtering Items by Property</div>
+</div>
+
+<h3 id="sec-6-2-1">6.2.1 value 属性辨类型（The value Property）</h3>
+
+<h4>6.2.1.1 硬币的"面值"藏在 value 里
+    <span class="en">Each coin's worth is in its value</span>
+</h4>
+
+<p>上一单元你学会了用敌人的 <code>type</code> 属性筛选目标。这一单元换个对象——<strong>物品</strong>也有可以用来筛选的属性。"捡闪亮东西的人"关卡告诉我们：<strong>"每个硬币的 value 属性可以判断硬币的类型。金币的 value 为 3。"</strong></p>
+
+<p>沙漠里散落着铜币、银币、金币，价值各不相同。时间有限，聪明的做法是<strong>只捡最值钱的金币</strong>。判断的依据就是 <code>coin.value</code> 这个属性：</p>
+
+<table class="styled-table">
+    <thead><tr><th>硬币类型</th><th>value 值</th><th>要不要捡</th></tr></thead>
+    <tbody>
+        <tr><td>铜币（bronze）</td><td>1</td><td>价值低，跳过</td></tr>
+        <tr><td>银币（silver）</td><td>2</td><td>价值中，跳过</td></tr>
+        <tr><td>金币（gold）</td><td>3</td><td>✅ 只捡这个</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">属性筛选的通用思想：</span>不管是敌人的 <code>type</code>、还是硬币的 <code>value</code>，本质都是<strong>读取对象的某个属性、用它作判断依据</strong>。学会这一招，你就能在一堆混杂的目标里精准挑出想要的那些。这是数据处理中极其常用的"过滤"操作。
+</div>
+
+<h3 id="sec-6-2-2">6.2.2 筛选式遍历模板（The Filter-While-Iterating Pattern）</h3>
+
+<h4>6.2.2.1 遍历 + if 判断 + 处理
+    <span class="en">Iterate, test, act</span>
+</h4>
+
+<p>"筛选式遍历"是一个固定套路：用遍历循环走过数组里每个元素，用 <code>if</code> 判断它是否符合条件，符合才处理、不符合就跳过——但<strong>无论符不符合，索引都要递增</strong>（这条铁律上一单元已经反复强调）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>coins = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>
+coinIndex = <span class="num">0</span>
+<span class="kw">while</span> coinIndex &lt; <span class="fn">len</span><span class="punc">(</span>coins<span class="punc">):</span>
+    coin = coins<span class="punc">[</span>coinIndex<span class="punc">]</span>
+    <span class="kw">if</span> coin<span class="punc">.</span>value == <span class="num">3</span><span class="punc">:</span>          <span class="cmt"># 只有金币（value 为 3）才捡</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> coin<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+    coinIndex += <span class="num">1</span>                <span class="cmt"># 不管捡没捡，都要 +1</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 175" width="520" role="img" aria-label="筛选式遍历模板">
+        <rect x="20" y="20" width="480" height="140" rx="10" fill="none" stroke="#C8821E" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="38" y="43" font-size="12" font-family="monospace" fill="#f0c674">while coinIndex &lt; len(coins):  ← 遍历每个硬币</text>
+        <rect x="55" y="55" width="420" height="35" rx="6" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="70" y="77" font-size="12" font-family="monospace" fill="#e0a23f">if coin.value == 3:  ← 判断是不是金币</text>
+        <rect x="80" y="98" width="380" height="28" rx="6" fill="#2b2014" stroke="#4a3820" stroke-width="1"/>
+        <text x="95" y="117" font-size="12" font-family="monospace" fill="#d8c8a8">moveXY(...)  ← 是金币才捡</text>
+        <text x="38" y="150" font-size="12" font-family="monospace" fill="#f0c674">    coinIndex += 1  ← 无论如何都递增（在 if 外！）</text>
+    </svg>
+</div>
+
+<!-- ==================== 6.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-6-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+<!-- CC-PROTECTION:HIDDEN:695c107aad:START anchor=sec-6-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="695c107aad">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:695c107aad:END -->
+
+<div class="section-header" id="section-6-3">
+    <h2>6.3 两种内层循环写法</h2>
+    <div class="en-title">Two Ways to Write the Inner Loop</div>
+</div>
+
+<h3 id="sec-6-3-1">6.3.1 索引遍历法（Index Iteration）</h3>
+
+<h4>6.3.1.1 用索引一个个走过整个数组
+    <span class="en">Walk the whole array with an index</span>
+</h4>
+
+<p>这是你已经很熟悉的写法——先 <code>findItems()</code> 拿到整个数组，再用 <code>index</code> 从 0 走到 <code>len()</code>，逐个访问。它的特点是<strong>面向"整个快照"</strong>：一次性拿到当前所有物品，然后按顺序处理。"捡闪亮东西的人"用的就是这种写法。</p>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-6-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:a3d9a70964:START anchor=sec-6-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a3d9a70964">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:a3d9a70964:END -->
+
+<h3 id="sec-6-3-2">6.3.2 存在性循环法（While-Object-Exists）</h3>
+
+<h4>6.3.2.1 只要还找得到，就一直处理
+    <span class="en">Keep going while something still exists</span>
+</h4>
+
+<p>"掠夺者"关卡展示了内层循环的另一种优雅写法——<strong>用"对象是否存在"作条件</strong>。关卡概览解释：<strong>"while 表达式可以在某些东西存在时执行一些操作……也可以检查一些东西是否存在。"</strong> 思路是：找到最近的一个金币存进变量，只要它存在就去捡，捡完再重新找下一个最近的；直到再也找不到（变量为空），循环结束。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>coin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+<span class="kw">while</span> coin<span class="punc">:</span>                          <span class="cmt"># 只要还有金币存在</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> coin<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+    coin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">())</span>  <span class="hl"># 关键：重新找、更新变量</span></pre>
+</div>
+
+<p>这种写法<strong>面向"实时状态"</strong>：不预先记住所有金币，而是每次只盯着"当前最近的那一个"，处理完再问"还有吗？"。它不需要索引变量，天然避免了越界问题；但<strong>必须记得在循环末尾重新赋值</strong>，否则变量永远指向那个已被收集的旧金币，条件永真、死循环。</p>
+
+<div class="warn-box">
+    <span class="warn-label">存在性循环的命门：</span>这正是第一单元"峡谷风暴"里学过的"变量做条件必须在循环里更新"。<code>while coin:</code> 靠的是 <code>coin</code> 变量会变空——只有在循环末尾重新 <code>coin = hero.findNearest(...)</code>，当金币收完时它才会变成 <code>None</code>，循环才能停下来。漏掉这句，就是最典型的死循环。
+</div>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-6-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+
+<h3 id="sec-6-3-3">6.3.3 两种写法对比（Comparing the Two）</h3>
+
+<h4>6.3.3.1 该用哪一种？
+    <span class="en">Which one should you use?</span>
+</h4>
+
+<p>两种内层写法都能"把一类东西收干净"，但适用场景略有不同。理解它们的差异，能让你在不同关卡里选对工具：</p>
+
+<div class="compare-2col">
+    <div class="col col-idx">
+        <div class="col-head">索引遍历法 · while index &lt; len()</div>
+        <div class="col-body">
+            <strong>拿到整个快照后逐个处理</strong><br>
+            ✅ 需要按顺序访问、或要筛选特定元素时更清晰<br>
+            ✅ 天然能配合 <code>if</code> 做筛选（如只捡 value==3）<br>
+            ⚠️ 数组是拍下的"旧快照"，处理途中若目标变动可能失准<br>
+            ⚠️ 要维护索引、记得递增，小心越界
+        </div>
+    </div>
+    <div class="col col-exist">
+        <div class="col-head">存在性循环 · while object</div>
+        <div class="col-body">
+            <strong>每次只盯最近的一个，实时刷新</strong><br>
+            ✅ 目标会移动/不断刷新时更稳（每轮都重新找最近的）<br>
+            ✅ 不用索引、不会越界，写法简洁<br>
+            ⚠️ 必须在循环末尾重新赋值，否则死循环<br>
+            ⚠️ 不方便"按顺序"或"按索引"精确控制
+        </div>
+    </div>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">殊途同归：</span>无论哪种写法，内核都是同一个"条件循环"——<strong>设一个迟早会变假的条件，在循环体内推动它变假</strong>。索引法靠 <code>index += 1</code> 逼近 <code>len()</code>；存在性法靠"收集/消灭目标"让对象最终消失。看透这一层，两种写法在你眼里就是一回事了。
+</div>
+
+<!-- ==================== 6.4 ==================== -->
+<div class="section-header" id="section-6-4">
+    <h2>6.4 分阶段作战</h2>
+    <div class="en-title">Fighting in Phases</div>
+</div>
+
+<h3 id="sec-6-4-1">6.4.1 先收集后战斗（Collect First, Then Fight）</h3>
+
+<h4>6.4.1.1 一轮里安排多个阶段
+    <span class="en">Multiple phases in one round</span>
+</h4>
+
+<p>"掠夺者"关卡还示范了一个重要的<strong>算法编排</strong>思想：在外层循环的一圈里，安排<strong>先后两个阶段</strong>——先把地上现有的金币收干净（一个内层循环），再去攻击机械把它打破（另一个内层循环）。机械被打破后又会掉出新金币，外层转到下一圈时再重新收集。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 195" width="520" role="img" aria-label="分阶段作战结构">
+        <rect x="15" y="15" width="490" height="170" rx="10" fill="none" stroke="#C8821E" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="30" y="37" font-size="12" font-family="monospace" fill="#f0c674">while True:  ← 外层：反复劫掠</text>
+        <rect x="45" y="50" width="440" height="55" rx="8" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="60" y="72" font-size="12" font-family="monospace" fill="#e0a23f">阶段① while coin:  ← 把地上金币收干净</text>
+        <text x="80" y="93" font-size="11" font-family="monospace" fill="#d8c8a8">moveXY(coin...) → 重新 findNearest</text>
+        <rect x="45" y="115" width="440" height="55" rx="8" fill="#3a2c18" stroke="#d98ec0" stroke-width="2"/>
+        <text x="60" y="137" font-size="12" font-family="monospace" fill="#d98ec0">阶段② while enemy.health &gt; 0:  ← 打破机械</text>
+        <text x="80" y="158" font-size="11" font-family="monospace" fill="#d8c8a8">attack(enemy)  → 掉出新金币，下一圈再收</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">顺序即策略：</span>"先收金币再打机械"的顺序不是随意的——先把安全能拿的钱收进口袋，再去冒险攻击，能让收益最大化、风险最小化。同时注意"掠夺者"在攻击前用了 <code>if enemy:</code> 先确认敌人存在，避免对着空气发起攻击而报错。<strong>把动作按合理的先后顺序编排，本身就是算法设计的一部分。</strong>
+</div>
+
+<!-- ==================== 6.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-6-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<div class="section-header" id="section-6-5">
+    <h2>6.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"用什么属性筛选、内层用哪种写法、动作如何编排"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-6-5-1">6.5.1 捡闪亮东西的人（Shine Getter）</h3>
+
+<h4>6.5.1.1 策略：遍历硬币，只捡 value 为 3 的金币
+    <span class="en">Strategy: iterate coins, take only value 3</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/6-5-1-1_shine_getter.png" alt="扣哒世界 捡闪亮东西的人关卡 - koudashijie.com">
+    <div class="caption">图1：捡闪亮东西的人——限时内只捡最值钱的金币（value=3），跳过铜银币</div>
+</div>
+
+<p>这一关练的是<strong>用属性筛选物品</strong>。地上散落着各种面值的硬币，时间紧迫，必须只捡最值钱的金币来最大化收益。算法思路是标准的"筛选式遍历嵌套"：外层 <code>while True</code> 反复刷新战场；内层先 <code>findItems()</code> 拿到硬币数组、<code>coinIndex = 0</code>，遍历每一枚硬币，用 <code>if coin.value == 3</code> 判断是不是金币，是才 <code>moveXY</code> 去捡，不是就跳过；无论捡没捡，<code>coinIndex += 1</code> 都要执行。</p>
+
+<p><strong>两个关键领悟</strong>：其一，<strong><code>value</code> 属性是筛选的钥匙</strong>——通过读取每个硬币的价值来决定取舍，这与上一单元用 <code>type</code> 筛敌人是同一思想；其二，<strong>索引递增必须在 <code>if</code> 外面</strong>，否则遇到铜银币时索引不动，直接死循环。外层的 <code>while True</code> 则保证金币刷新后能继续开采。</p>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-6-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-6-5-2">6.5.2 掠夺者（Raiders）</h3>
+
+<h4>6.5.2.1 策略：先用存在性循环收金币，再打破机械
+    <span class="en">Strategy: collect with a while-object loop, then smash</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/6-5-2-1_raiders.png" alt="扣哒世界 掠夺者关卡 - koudashijie.com">
+    <div class="caption">图2：掠夺者——先把散落金币收干净，再攻击装满钱的机械，循环劫掠</div>
+</div>
+
+<p>这一关练的是<strong>存在性循环</strong>与<strong>分阶段作战</strong>。前行的机械里装满了钱，要打破它们才能拿到。算法思路是外层 <code>while True</code> 里编排两个阶段：<strong>阶段一</strong>用存在性循环 <code>while coin:</code> 把地上现有的金币收干净——找到最近的金币就去捡，捡完在循环末尾 <code>coin = hero.findNearest(hero.findItems())</code> 重新找下一个，直到 <code>coin</code> 为空；<strong>阶段二</strong>找到最近的机械，先 <code>if enemy:</code> 确认存在，再用 <code>while enemy.health > 0</code> 反复攻击直到打破它。机械破碎掉出新金币，外层转下一圈时又回到阶段一收集。</p>
+
+<p><strong>三个关键领悟</strong>：其一，<strong>存在性循环靠"重新赋值"驱动</strong>——<code>while coin:</code> 能停下来，全靠循环末尾那句重新 <code>findNearest</code>，让 <code>coin</code> 在金币收完后变空；其二，<strong>攻击前先判断存在</strong>，<code>if enemy:</code> 避免对着不存在的目标出手；其三，<strong>阶段顺序即策略</strong>，先收安全的钱、再冒险破坏，收益与安全兼顾。这一关把两种内层写法（存在性循环 + 血量循环）在同一段代码里都用上了，是很好的综合练习。</p>
+
+<!-- ==================== 6.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:21f9328d9c:START anchor=sec-6-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="21f9328d9c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>目前 扣哒世界 支持 Python、JavaScript、C++ 等多种语言，会员还可解锁更多高级内容。官网：<a href="https://koudashijie.com/">koudashijie.com</a></span>
+</aside>
+<!-- CC-PROTECTION:AD:21f9328d9c:END -->
+
+<div class="section-header" id="section-6-6">
+    <h2>6.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-6-6-1">6.6.1 练习嵌套循环最容易踩的坑（Pitfalls）</h3>
+
+<h4>6.6.1.1 筛选与存在性循环的典型问题
+    <span class="en">Typical issues with filtering and existence loops</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch7_sec6_6-6-1-1_common_errors.png" alt="扣哒世界 嵌套循环练习常见错误示意 - koudashijie.com">
+    <div class="caption">图3：忘记重新赋值、递增放错位置、value 判断写错，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>存在性循环忘记重新赋值——写了 <code>while coin:</code> 却没在循环末尾重新 <code>findNearest</code>，coin 永不为空，直接死循环。这是"掠夺者"的第一大坑。</li>
+        <li>把索引递增放进 if 里——遇到非金币时索引不前进，外层卡死造成死循环。递增必须在 if 外。</li>
+        <li>value 判断写错——想捡金币应是 <code>value == 3</code>，写成别的值或用了 <code>!=</code> 会捡错硬币。</li>
+        <li>攻击前不判断存在——机械还没出现时直接 attack 会报错，应先 <code>if enemy:</code>。</li>
+        <li>阶段顺序搞反——先打机械再收金币，可能在战斗中损失，或漏收先掉的金币。</li>
+        <li>混用两种写法的要素——用了索引遍历却又忘了 len() 条件，或用了存在性循环却还去维护索引，逻辑打架。</li>
+        <li>缩进层级错乱——阶段一、阶段二、外层的缩进要分清，错一格就会变成"收一个金币就打一下机械"。</li>
+        <li>误用单等号 = 做比较——条件里应用 <code>==</code>，用 <code>=</code> 会报语法错误。</li>
+    </ul>
+</div>
+
+<!-- ==================== 6.7 ==================== -->
+<div class="section-header" id="section-6-7">
+    <h2>6.7 自测练习</h2>
+    <div class="en-title">Check Your Understanding</div>
+</div>
+
+<h3 id="sec-6-7-1">6.7.1 自我检验（Quick Self-Test）</h3>
+
+<h4>6.7.1.1 试着不看答案回答
+    <span class="en">Try to answer without peeking</span>
+</h4>
+
+<p>复习的最佳方式是主动回忆。合上前面的内容，试着回答这几个问题：</p>
+
+<table class="styled-table">
+    <thead><tr><th>#</th><th>问题</th><th>参考答案</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td>金币的 value 是多少？只捡金币的条件怎么写？</td><td>value 为 3；<code>if coin.value == 3</code></td></tr>
+        <tr><td>2</td><td>筛选式遍历里，索引递增该放在 if 里还是外？</td><td>外面，否则跳过元素时会死循环</td></tr>
+        <tr><td>3</td><td><code>while coin:</code> 靠什么才能停下来？</td><td>循环末尾重新赋值，金币收完后 coin 变空</td></tr>
+        <tr><td>4</td><td>索引遍历法和存在性循环各适合什么场景？</td><td>前者适合按序/筛选，后者适合目标实时变动</td></tr>
+        <tr><td>5</td><td>攻击敌人前为什么常写 <code>if enemy:</code>？</td><td>确认对象存在，避免对空目标出手报错</td></tr>
+        <tr><td>6</td><td>"先收金币再打机械"体现了什么？</td><td>动作编排/阶段顺序也是算法策略</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=sec-6-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+<!-- CC-PROTECTION:HIDDEN:0921fa1cab:START anchor=sec-6-7-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0921fa1cab">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC6-DFDFEEBB00EF。</span>
+<!-- CC-PROTECTION:HIDDEN:0921fa1cab:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在流金沙漠把<strong>嵌套循环</strong>练得更加纯熟！本单元没有全新语法，却让你从两个新视角把嵌套循环用活了：一是用物品的 <code>value</code> 属性做<strong>筛选式遍历</strong>，在混杂的硬币里只挑最值钱的金币；二是用"对象存在性"写<strong>存在性内层循环</strong>（<code>while coin:</code>），并把它和血量循环组合成<strong>分阶段作战</strong>。你也更深刻地理解了两种内层写法的异同——它们殊途同归，本质都是"设一个迟早变假的条件"。来回顾核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>value 属性筛选</td><td>金币 value==3，只捡金币</td><td>捡闪亮东西的人</td></tr>
+            <tr><td>筛选式遍历</td><td>遍历+if判断+处理，索引恒递增</td><td>捡闪亮东西的人</td></tr>
+            <tr><td>索引遍历法</td><td>拿整个快照，按索引逐个处理</td><td>捡闪亮东西的人</td></tr>
+            <tr><td>存在性循环</td><td><code>while coin:</code>，末尾必重新赋值</td><td>掠夺者</td></tr>
+            <tr><td>血量内层循环</td><td><code>while enemy.health > 0</code> 打到死</td><td>掠夺者</td></tr>
+            <tr><td>存在性判断</td><td>攻击前 <code>if enemy:</code> 确认存在</td><td>掠夺者</td></tr>
+            <tr><td>分阶段作战</td><td>一圈里先收集后战斗，顺序即策略</td><td>掠夺者</td></tr>
+            <tr><td>死循环防范</td><td>索引递增/重新赋值，让条件变假</td><td>两关皆是</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        能按属性精挑目标、按阶段排布动作、灵活切换两种内层写法的英雄，已把嵌套循环真正练到手了。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️🪙⚙️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（流金沙漠）：第六单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
