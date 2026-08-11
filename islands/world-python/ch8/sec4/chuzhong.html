@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC4-75493F950E64">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第四单元：模运算 · 让索引优雅地循环 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC4-75493F950E64 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第四单元</div>
+
+    <a href="#section-4-1" class="nav-section">4.1 什么是模运算</a>
+    <a href="#sec-4-1-1" class="nav-sub">4.1.1 余数的日常直觉</a>
+    <a href="#sec-4-1-2" class="nav-sub">4.1.2 为什么需要它</a>
+
+    <a href="#section-4-2" class="nav-section">4.2 模运算符 %</a>
+    <a href="#sec-4-2-1" class="nav-sub">4.2.1 a % b 的含义</a>
+    <a href="#sec-4-2-2" class="nav-sub">4.2.2 余数的循环规律</a>
+
+    <a href="#section-4-3" class="nav-section">4.3 len 与数组长度</a>
+    <a href="#sec-4-3-1" class="nav-sub">4.3.1 len 获取长度</a>
+    <a href="#sec-4-3-2" class="nav-sub">4.3.2 索引与越界</a>
+
+    <a href="#section-4-4" class="nav-section">4.4 取余实现循环折返</a>
+    <a href="#sec-4-4-1" class="nav-sub">4.4.1 索引 % 长度</a>
+    <a href="#sec-4-4-2" class="nav-sub">4.4.2 兵种轮换</a>
+    <a href="#sec-4-4-3" class="nav-sub">4.4.3 防止越界</a>
+
+    <a href="#section-4-5" class="nav-section">4.5 均分到多个点</a>
+    <a href="#sec-4-5-1" class="nav-sub">4.5.1 单位均分防御点</a>
+
+    <a href="#section-4-6" class="nav-section">4.6 实战关卡精讲</a>
+    <a href="#sec-4-6-1" class="nav-sub">4.6.1 联合作战</a>
+    <a href="#sec-4-6-2" class="nav-sub">4.6.2 钢爪间隙</a>
+
+    <a href="#section-4-7" class="nav-section">4.7 常见错误</a>
+    <a href="#sec-4-7-1" class="nav-sub">4.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第四单元：模运算 · 让索引优雅地循环</h1>
+    <div class="subtitle">Unit 4: The Modulo Operator — Wrapping Indices Elegantly</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 联合作战 → 钢爪间隙</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 4.1 ==================== -->
+<div class="section-header" id="section-4-1">
+    <h2>4.1 什么是模运算</h2>
+    <div class="en-title">What Is the Modulo Operation</div>
+</div>
+
+<p>在前几个单元里，你学会了封装函数、用分支做决策。这一单元你要认识一个看起来不起眼、却能优雅解决"轮流"和"循环"问题的运算——<span class="keyword">模运算（modulo）</span>，也就是求余数。它能让你用极短的一行代码，实现"士兵、弓箭手轮着召唤""把部队均匀分配到几个防御点""索引无论多大都不会越界"这些实用效果。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>你将掌握模运算符 <code>%</code>（求两数相除的余数）、用 <code>len()</code> 获取数组长度，并把二者结合成一个万能公式：<code>索引 % 数组长度</code>。这个公式能让索引在数组范围内"周而复始地折返"，从而实现<strong>兵种轮换</strong>（<code>len(hero.built) % len(summonTypes)</code>）、<strong>单位均分到多个防御点</strong>（<code>i % len(defendPoints)</code>），并从根本上<strong>杜绝数组越界</strong>。
+</div>
+
+<h3 id="sec-4-1-1">4.1.1 余数的日常直觉（The Everyday Intuition of Remainders）</h3>
+
+<h4>4.1.1.1 从"分东西"到"看钟表"
+    <span class="en">From sharing items to reading a clock</span>
+</h4>
+
+<p>余数其实你早就会了。把 12 颗糖平均分给 5 个小朋友，每人 2 颗，还<strong>剩 2 颗</strong>——这个"剩下的 2"就是余数，写作 <code>12 % 5 == 2</code>。再想想钟表：现在 10 点，过 5 小时是几点？<code>(10 + 5) % 12 == 3</code>，是 3 点——时针走到 12 就自动"折返"回头。模运算的精髓就是这种<strong>转圈、折返、周而复始</strong>的感觉。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🕐 模运算就像"钟表"</div>
+    钟面只有 12 个数，但时间可以无限增加。无论过了多少小时，时针总会落在 1~12 之间——因为它每到 12 就绕回起点。<br>
+    <strong>数组也只有有限个格子，但索引可以无限增加。用 <code>% 长度</code>，就能让索引像时针一样，永远落在有效范围内。</strong>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-4-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<h3 id="sec-4-1-2">4.1.2 为什么需要它（Why We Need It）</h3>
+
+<h4>4.1.2.1 用一个不断变大的数，反复取用有限的选项
+    <span class="en">Reusing a small set with an ever-growing counter</span>
+</h4>
+
+<p>游戏里你会不停召唤部队，第 1 个、第 2 个、第 100 个……这个"已造数量"只增不减、越来越大。但你想召唤的兵种只有那么几种（比如士兵、弓箭手两种）。怎么让一个不断变大的数字，反复地、循环地对应到这少数几个选项上？答案就是模运算。它把"无限增长的计数"折叠回"有限的选项范围"，让轮换自然发生。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 180" width="620" role="img" aria-label="用取余把无限计数折回有限选项">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">不断变大的计数，经过 %，折回有限选项</text>
+        <g font-family="sans-serif" font-size="12">
+            <text x="70" y="70" text-anchor="middle" fill="#6a8294">0 1 2 3 4 5 6 7 …</text>
+            <text x="70" y="90" text-anchor="middle" fill="#7d94a3" font-size="10">已造数量（越来越大）</text>
+
+            <defs>
+                <marker id="m-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#3E7CB1"/>
+                </marker>
+            </defs>
+            <rect x="200" y="52" width="120" height="34" rx="8" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="260" y="74" text-anchor="middle" fill="#2A5A85" font-family="monospace">% 2</text>
+            <line x1="140" y1="65" x2="196" y2="68" stroke="#3E7CB1" stroke-width="2" marker-end="url(#m-arr)"/>
+            <line x1="322" y1="68" x2="378" y2="68" stroke="#3E7CB1" stroke-width="2" marker-end="url(#m-arr)"/>
+
+            <text x="470" y="60" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="13">0 1 0 1 0 1 …</text>
+            <text x="470" y="82" text-anchor="middle" fill="#7d94a3" font-size="10">只在 0、1 之间打转</text>
+
+            <rect x="200" y="110" width="360" height="34" rx="8" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="380" y="132" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="12">→ 士兵、弓箭手、士兵、弓箭手…轮流召唤</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 4.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-4-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-4-2">
+    <h2>4.2 模运算符 %</h2>
+    <div class="en-title">The Modulo Operator %</div>
+</div>
+
+<h3 id="sec-4-2-1">4.2.1 a % b 的含义（What a % b Means）</h3>
+
+<h4>4.2.1.1 相除，取余
+    <span class="en">Divide, then take the remainder</span>
+</h4>
+
+<p>关卡把它说得很清楚："<code>a % b</code> 返回 <code>a</code> 除以 <code>b</code> 的余数（作为一个整数）。所以 <code>12 % 5 == 2</code>。"符号 <code>%</code> 在这里<strong>不是</strong>百分号，而是求余运算符。它的运算方法是：<code>a</code> 里能塞进多少个完整的 <code>b</code>，剩下不够再凑一个 <code>b</code> 的部分，就是余数。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 160" width="600" role="img" aria-label="a % b 求余解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">12 % 5 == 2</text>
+        <text x="150" y="80" font-size="22" font-family="monospace" fill="#e8a15a">12</text>
+        <text x="200" y="80" font-size="22" font-family="monospace" fill="#7cc7e8">%</text>
+        <text x="240" y="80" font-size="22" font-family="monospace" fill="#e8a15a">5</text>
+        <text x="290" y="80" font-size="22" font-family="monospace" fill="#cdddea">=</text>
+        <text x="320" y="80" font-size="22" font-family="monospace" fill="#9fd4a8">2</text>
+        <text x="160" y="112" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">被除数</text>
+        <text x="200" y="112" font-size="11" fill="#7cc7e8" text-anchor="middle" font-family="sans-serif">取余</text>
+        <text x="240" y="112" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">除数</text>
+        <text x="320" y="112" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">余数</text>
+        <text x="300" y="140" font-size="11" fill="#6a8294" text-anchor="middle" font-family="sans-serif">12 里有 2 个 5（=10），剩下 2</text>
+    </svg>
+</div>
+
+<h3 id="sec-4-2-2">4.2.2 余数的循环规律（The Cyclical Pattern of Remainders）</h3>
+
+<h4>4.2.2.1 余数永远在 0 到 b-1 之间转圈
+    <span class="en">Remainders always cycle from 0 to b-1</span>
+</h4>
+
+<p>这是模运算最重要的性质：<strong>无论被除数多大，<code>a % b</code> 的结果永远落在 <code>0</code> 到 <code>b-1</code> 之间</strong>，而且随着 <code>a</code> 递增，余数会 <code>0, 1, 2, …, b-1, 0, 1, 2, …</code> 这样周而复始地循环。关卡用一个数组的例子把这个规律列得明明白白：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 数组有 4 个元素，用 i % 4 环绕它</span>
+summonTypes = <span class="punc">[</span><span class="str">"soldier"</span><span class="punc">,</span> <span class="str">"archer"</span><span class="punc">,</span> <span class="str">"peasant"</span><span class="punc">,</span> <span class="str">"paladin"</span><span class="punc">]</span>
+
+<span class="num">0</span> % <span class="num">4</span> == <span class="num">0</span>   <span class="cmt"># → "soldier"</span>
+<span class="num">1</span> % <span class="num">4</span> == <span class="num">1</span>   <span class="cmt"># → "archer"</span>
+<span class="num">2</span> % <span class="num">4</span> == <span class="num">2</span>   <span class="cmt"># → "peasant"</span>
+<span class="num">3</span> % <span class="num">4</span> == <span class="num">3</span>   <span class="cmt"># → "paladin"</span>
+<span class="num">4</span> % <span class="num">4</span> == <span class="num">0</span>   <span class="cmt"># → "soldier"  绕回开头！</span>
+<span class="num">5</span> % <span class="num">4</span> == <span class="num">1</span>   <span class="cmt"># → "archer"   ……如此循环</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 260" width="560" role="img" aria-label="余数循环转圈">
+        <text x="280" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">i % 4 永远在 0→1→2→3→0 之间转圈</text>
+        <g font-family="monospace" font-size="14">
+            <circle cx="280" cy="150" r="80" fill="none" stroke="#cfe0eb" stroke-width="2"/>
+            <circle cx="280" cy="70" r="22" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="280" y="75" text-anchor="middle" fill="#2A5A85">0</text>
+            <circle cx="360" cy="150" r="22" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="360" y="155" text-anchor="middle" fill="#2f7a45">1</text>
+            <circle cx="280" cy="230" r="22" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="280" y="235" text-anchor="middle" fill="#bd7415">2</text>
+            <circle cx="200" cy="150" r="22" fill="#fbeae7" stroke="#C0453B"/>
+            <text x="200" y="155" text-anchor="middle" fill="#9e352c">3</text>
+        </g>
+        <g font-family="sans-serif" font-size="10" fill="#6a8294">
+            <text x="280" y="52" text-anchor="middle">soldier</text>
+            <text x="405" y="153" text-anchor="middle">archer</text>
+            <text x="280" y="262" text-anchor="middle">peasant</text>
+            <text x="155" y="153" text-anchor="middle">paladin</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 4.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-4-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+<!-- CC-PROTECTION:HIDDEN:95bf5d6342:START anchor=sec-4-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="95bf5d6342">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:95bf5d6342:END -->
+
+<div class="section-header" id="section-4-3">
+    <h2>4.3 len 与数组长度</h2>
+    <div class="en-title">len() and Array Length</div>
+</div>
+
+<h3 id="sec-4-3-1">4.3.1 len 获取长度（Getting the Length with len）</h3>
+
+<h4>4.3.1.1 数一数数组里有几个元素
+    <span class="en">Counting the elements</span>
+</h4>
+
+<p><code>len(数组)</code> 返回数组里元素的<strong>个数</strong>。比如 <code>summonTypes = ["soldier", "archer"]</code>，那么 <code>len(summonTypes)</code> 就是 <code>2</code>。<code>len(hero.built)</code> 则是你到目前为止造过的部队总数。把 <code>len()</code> 用作 <code>%</code> 的除数，是本单元最核心的组合——因为数组长度正是"选项的总数"，用它取余，索引就永远不会跑到数组外面去。</p>
+
+<div class="tip-box">
+    <span class="tip-label">用 len 而非写死数字：</span>写 <code>% len(summonTypes)</code> 比写 <code>% 2</code> 更好。将来你往 <code>summonTypes</code> 里多加一个兵种，<code>len()</code> 会自动变成 3，代码无需任何改动就能正确轮换三种兵。<strong>让代码自己去数长度，别把长度写死。</strong>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-4-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-4-3-2">4.3.2 索引与越界（Indexing and Out-of-Range）</h3>
+
+<h4>4.3.2.1 索引从 0 开始，最大是"长度减一"
+    <span class="en">Indices start at 0, max is length minus one</span>
+</h4>
+
+<p>数组的索引从 <code>0</code> 开始数，一个有 <code>n</code> 个元素的数组，合法索引是 <code>0</code> 到 <code>n-1</code>。一旦你用一个 <code>≥ n</code> 的索引去访问，就会<strong>越界</strong>（out of range），程序报错。而不断增长的计数器（如已造部队数）迟早会超过数组长度——这正是模运算大显身手的地方：<code>索引 % 长度</code> 保证结果永远在合法范围内。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>❌ 直接用大索引 → 越界</h5>
+        <div class="code-block">
+<pre><span class="cmt"># summonTypes 只有 2 个元素</span>
+i = <span class="num">5</span>
+type = summonTypes<span class="punc">[</span>i<span class="punc">]</span>
+<span class="cmt"># ✗ 索引 5 越界，报错！</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>✅ 先取余 → 永不越界</h5>
+        <div class="code-block">
+<pre>i = <span class="num">5</span>
+idx = i % <span class="fn">len</span><span class="punc">(</span>summonTypes<span class="punc">)</span>
+<span class="cmt"># 5 % 2 == 1</span>
+type = summonTypes<span class="punc">[</span>idx<span class="punc">]</span>  <span class="cmt"># ✓ 安全</span></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 4.4 ==================== -->
+<div class="section-header" id="section-4-4">
+    <h2>4.4 取余实现循环折返</h2>
+    <div class="en-title">Wrapping Indices with Modulo</div>
+</div>
+
+<h3 id="sec-4-4-1">4.4.1 索引 % 长度（index % length）</h3>
+
+<h4>4.4.1.1 本单元的万能公式
+    <span class="en">The one formula that does it all</span>
+</h4>
+
+<p>把前面所有零件拼起来，就得到本单元反复出现的黄金公式：</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 150" width="600" role="img" aria-label="索引取余长度公式">
+        <text x="300" y="30" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">数组[ 一个越来越大的数 % 数组长度 ]</text>
+        <text x="90" y="85" font-size="16" font-family="monospace" fill="#a5c8e8">summonTypes</text>
+        <text x="215" y="85" font-size="16" font-family="monospace" fill="#cdddea">[</text>
+        <text x="230" y="85" font-size="16" font-family="monospace" fill="#f0c674">len(hero.built)</text>
+        <text x="395" y="85" font-size="16" font-family="monospace" fill="#7cc7e8">%</text>
+        <text x="415" y="85" font-size="16" font-family="monospace" fill="#f0c674">len(summonTypes)</text>
+        <text x="580" y="85" font-size="16" font-family="monospace" fill="#cdddea">]</text>
+        <text x="300" y="120" text-anchor="middle" font-size="11" fill="#6a8294" font-family="sans-serif">已造数量不断变大，%长度后折回 0~长度-1，正好当索引</text>
+    </svg>
+</div>
+
+<p>它的读法是："用<strong>已经造过的部队数量</strong>对<strong>兵种数组的长度</strong>取余，得到一个永远合法的索引，再拿它去数组里取出这一次该召唤的兵种"。每召唤一个，<code>len(hero.built)</code> 就加一，取余结果就往后挪一格，从而实现自动轮换。</p>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-4-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+<!-- CC-PROTECTION:HIDDEN:1dade8c70a:START anchor=sec-4-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1dade8c70a">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:1dade8c70a:END -->
+
+<h3 id="sec-4-4-2">4.4.2 兵种轮换（Rotating Unit Types）</h3>
+
+<h4>4.4.2.1 按数组顺序，一种接一种地造
+    <span class="en">Summon types in round-robin order</span>
+</h4>
+
+<p>"联合作战"关卡就是练这个。你先在 <code>summonTypes</code> 里编排好想要的兵种和顺序，比如 <code>["soldier", "archer"]</code>，然后用公式挑出本次该召唤的类型。已造 0 个时造士兵，造完变 1 个时造弓箭手，变 2 个时 <code>2 % 2 == 0</code> 又回到士兵……士兵、弓箭手就这样 1:1 地交替建造。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 编排兵种与顺序</span>
+summonTypes = <span class="punc">[</span><span class="str">"soldier"</span><span class="punc">,</span> <span class="str">"archer"</span><span class="punc">]</span>
+
+<span class="kw">def</span> <span class="fn">summonTroops</span><span class="punc">():</span>
+    <span class="cmt"># 用取余在数组里不断折返，挑出本次兵种</span>
+    type = summonTypes<span class="punc">[</span><span class="fn">len</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>built<span class="punc">)</span> % <span class="fn">len</span><span class="punc">(</span>summonTypes<span class="punc">)]</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span>type<span class="punc">)</span> &lt;= <span class="obj">hero</span><span class="punc">.</span>gold<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span>type<span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">想改配比？改数组就行：</span>如果想让士兵更多，把数组写成 <code>["soldier", "soldier", "archer"]</code>，轮换就变成士兵、士兵、弓箭手，即 2:1 的配比。数组的<strong>内容和重复次数</strong>直接决定了兵种比例，非常灵活——这正是"数据驱动"的思想：改数据，不改逻辑。
+</div>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-4-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+
+<h3 id="sec-4-4-3">4.4.3 防止越界（Preventing Out-of-Range Errors）</h3>
+
+<h4>4.4.3.1 取余是天然的"安全护栏"
+    <span class="en">Modulo is a natural safety guard</span>
+</h4>
+
+<p>关卡默认代码的注释一语道破："这可以用在索引可能大于长度时，能够绕回数组的开头。"<code>len(hero.built)</code> 会一直增长到几十、上百，但只要套上 <code>% len(summonTypes)</code>，结果永远被"关"在 <code>0 ~ 长度-1</code> 之内，绝不会越界。你不必写任何 <code>if</code> 去检查索引超没超——取余本身就是护栏。</p>
+
+<!-- ==================== 4.5 ==================== -->
+<div class="section-header" id="section-4-5">
+    <h2>4.5 均分到多个点</h2>
+    <div class="en-title">Distributing Units Across Points</div>
+</div>
+
+<h3 id="sec-4-5-1">4.5.1 单位均分防御点（Spreading Units Evenly）</h3>
+
+<h4>4.5.1.1 用取余把每个单位分派到一个点
+    <span class="en">Assign each unit to a point by modulo</span>
+</h4>
+
+<p>模运算的另一个妙用是<strong>均分</strong>。"钢爪间隙"要把 8 个单位平均派到 4 个防御点，每点两个。诀窍是：遍历友军时，用每个友军的下标 <code>i</code> 对防御点数量取余，<code>defendPoints[i % len(defendPoints)]</code>，就能算出它该去哪个点。下标 0、1、2、3 分到 4 个不同的点，下标 4、5、6、7 又依次绕回这 4 个点——每点正好两个，自动均分。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 200" width="600" role="img" aria-label="用取余把8个单位均分到4个点">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">8 个单位 × (i % 4) → 4 个点各 2 个</text>
+        <g font-family="monospace" font-size="11">
+            <text x="40" y="70" fill="#6a8294">i=0→点0</text>
+            <text x="40" y="92" fill="#6a8294">i=1→点1</text>
+            <text x="40" y="114" fill="#6a8294">i=2→点2</text>
+            <text x="40" y="136" fill="#6a8294">i=3→点3</text>
+            <text x="150" y="70" fill="#2f7a45">i=4→点0</text>
+            <text x="150" y="92" fill="#2f7a45">i=5→点1</text>
+            <text x="150" y="114" fill="#2f7a45">i=6→点2</text>
+            <text x="150" y="136" fill="#2f7a45">i=7→点3</text>
+        </g>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="300" y="50" width="120" height="30" rx="6" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="360" y="70" text-anchor="middle" fill="#2A5A85">点0 ← 2 个</text>
+            <rect x="300" y="86" width="120" height="30" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="360" y="106" text-anchor="middle" fill="#2f7a45">点1 ← 2 个</text>
+            <rect x="440" y="50" width="120" height="30" rx="6" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="500" y="70" text-anchor="middle" fill="#bd7415">点2 ← 2 个</text>
+            <rect x="440" y="86" width="120" height="30" rx="6" fill="#fbeae7" stroke="#C0453B"/>
+            <text x="500" y="106" text-anchor="middle" fill="#9e352c">点3 ← 2 个</text>
+        </g>
+        <text x="430" y="160" text-anchor="middle" font-size="11" fill="#6a8294" font-family="sans-serif">下标绕回，兵力天然平均分布</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">轮换与均分，一体两面：</span>"兵种轮换"是让<strong>不同的计数</strong>轮流对应<strong>数组里的元素</strong>；"单位均分"是让<strong>不同的单位下标</strong>轮流对应<strong>不同的防御点</strong>。两者本质完全相同——都是 <code>索引 % 长度</code> 让一个递增的数在有限选项里循环。看懂一个，另一个自然就通了。
+</div>
+
+<!-- ==================== 4.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:d19090cfd1:START anchor=sec-4-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="d19090cfd1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，你敲下的 if 和 for，直接变成英雄的剑招与魔法。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d19090cfd1:END -->
+
+<div class="section-header" id="section-4-6">
+    <h2>4.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy & Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 联合作战 -->
+<div class="level-card" id="sec-4-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 联合作战</span>
+        <h3>🤝 联合作战 —— 用取余轮换兵种</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-1-1_combined_arms.png" alt="扣哒世界 联合作战关卡 - koudashijie.com">
+            <div class="caption">图2：联合作战——开放式防御关，找出最佳兵种组合，用取余让士兵与弓箭手交替成军，撑过食人魔攻势</div>
+        </div>
+
+        <h4>策略：编排数组，找出最佳组合</h4>
+        <p>这是一个<strong>开放式防御关</strong>，目标是生存 30 秒并收集 300 金钱（进阶挑战是撑到 60 秒）。关卡不限定你造什么兵，而是让你通过<strong>编排 <code>summonTypes</code> 数组</strong>来决定兵种的种类、顺序和配比。策略核心就是找到一套攻守兼备的组合——比如士兵扛线、弓箭手输出，让 <code>["soldier", "archer"]</code> 交替成军。</p>
+
+        <h4>思路拆解：三件事各一个函数</h4>
+        <p>整体沿用前几单元"一个函数做一件事"的结构，主循环每帧调用三件事：<code>summonTroops</code> 用取余公式轮换召唤、<code>gatherCoins</code> 移动去捡最近的金币维持经济、<code>commandTroops</code> 遍历友军各打最近的敌人。其中最关键的是 <code>summonTroops</code> 里的取余选型，以及召唤前用 <code>if hero.costOf(type) &lt;= hero.gold</code> 判断"买得起才召唤"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：编排数组 + 取余轮换</span>
+summonTypes = <span class="punc">[</span><span class="str">"soldier"</span><span class="punc">,</span> <span class="str">"archer"</span><span class="punc">]</span>
+
+<span class="kw">def</span> <span class="fn">summonTroops</span><span class="punc">():</span>
+    type = summonTypes<span class="punc">[</span><span class="fn">len</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>built<span class="punc">)</span> % <span class="fn">len</span><span class="punc">(</span>summonTypes<span class="punc">)]</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span>type<span class="punc">)</span> &lt;= <span class="obj">hero</span><span class="punc">.</span>gold<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span>type<span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">指挥时要跳过栅栏（palisade）：</span>关卡小贴士提醒，在 <code>commandTroops</code> 里遍历友军时，要<strong>跳过任何 <code>type == "palisade"</code> 的盟友</strong>。栅栏是不能移动、不能攻击的防御建筑，对它下达"攻击"命令毫无意义甚至报错。用一句 <code>if friend.type == "palisade": continue</code>（或反过来只对能战斗的单位下令）即可优雅避开。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">开放关的调优思路：</span>没通过？先想是"钱不够扩军"还是"兵种被克制"。可以调整数组配比（多加士兵扛线，或多加弓箭手输出）、优化捡币逻辑攒更多钱、或确保每帧都在指挥友军攻击。开放关的乐趣正在于反复试验、逼近最优解。
+        </div>
+    </div>
+</div>
+
+<!-- 钢爪间隙 -->
+<div class="level-card" id="sec-4-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 钢爪间隙</span>
+        
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=h3-11 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+<!-- CC-PROTECTION:HIDDEN:104dcadc44:START anchor=h3-11 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="104dcadc44">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC4-75493F950E64。</span>
+<!-- CC-PROTECTION:HIDDEN:104dcadc44:END -->
+
+<h3>🛡️ 钢爪间隙 —— 用取余均分防御点</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-2-1_the_gauntlet.png" alt="扣哒世界 钢爪间隙关卡 - koudashijie.com">
+            <div class="caption">图3：钢爪间隙——四面受敌，把 8 个单位用取余均匀派往 4 个防御点，每点两名，守住临时栅栏</div>
+        </div>
+
+        <h4>策略：八个单位，四点布防</h4>
+        <p>本关英雄被敌人四面包围，要靠部队守住一道临时栅栏。关卡设定得很直白：<strong>召唤 8 个单位、布防 4 个点，每点两个</strong>。这就要求把兵力<strong>均匀撒开</strong>，而不是全挤在一处——四个方向都得有人守。实现均分的钥匙，正是模运算 <code>unitIndex % 4</code>。</p>
+
+        <h4>思路拆解：两个数组 + 两处取余</h4>
+        <p>本关有两个预置数组：<code>defendPoints</code> 存 4 个防御点坐标，<code>summonTypes</code> 存 8 个单位的兵种顺序（4 士兵 + 4 弓箭手）。取余在两处发力。其一，<strong>召唤</strong>：<code>summonTroops</code> 仍用 <code>len(hero.built) % len(summonTypes)</code> 按顺序把 8 种配置造出来。其二，<strong>布防</strong>：<code>commandTroops</code> 遍历友军时，用友军下标 <code>i % len(defendPoints)</code> 算出它该去的点，再 <code>hero.command(friend, "defend", point)</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：用下标取余把每个友军派到一个防御点</span>
+<span class="kw">def</span> <span class="fn">commandTroops</span><span class="punc">():</span>
+    friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+        friend = friends<span class="punc">[</span>i<span class="punc">]</span>
+        <span class="cmt"># 下标 % 防御点数量 → 绕回 defendPoints</span>
+        point = defendPoints<span class="punc">[</span>i % <span class="fn">len</span><span class="punc">(</span>defendPoints<span class="punc">)]</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"defend"</span><span class="punc">,</span> point<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么 <code>i % 4</code> 就能均分？</span>因为下标是连续的 0、1、2、3、4、5、6、7，对 4 取余后依次是 0、1、2、3、0、1、2、3——前四个各占一个点，后四个又各绕回同一个点。只要单位总数是防御点数的整数倍，每个点分到的数量就完全相等。8 个单位、4 个点，每点正好 2 个。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">"defend" 与 "attack" 的区别：</span>本关用的是 <code>command(friend, "defend", point)</code>——让单位<strong>驻守某个坐标点</strong>，敌人靠近才应战。这和前面关卡的 <code>command(friend, "attack", enemy)</code>（主动扑向某个敌人）不同。四面受敌时，"守住阵位"比"追着敌人跑"更稳，能防止阵型被敌人各个击破。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 4.7 ==================== -->
+<div class="section-header" id="section-4-7">
+    <h2>4.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-4-7-1">4.7.1 取余与索引的典型坑（Pitfalls）</h3>
+
+<h4>4.7.1.1 模运算相关的常见问题
+    <span class="en">Typical issues with modulo & indexing</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec4_4-7-1-1_common_errors.png" alt="扣哒世界 模运算常见错误速查 - koudashijie.com">
+    <div class="caption">图4：忘了取余导致越界、除数写死、把 % 当百分号，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘了取余直接用大索引——<code>summonTypes[len(hero.built)]</code> 迟早越界报错，必须 <code>% len(summonTypes)</code>。</li>
+        <li>取余和索引位置写反——应是 <code>数组[i % len(数组)]</code>，别写成 <code>数组[i] % len(数组)</code>（那是先取元素再取余，逻辑全错）。</li>
+        <li>把除数写死成数字——写 <code>% 2</code> 而非 <code>% len(summonTypes)</code>，一旦数组增减元素就轮换错乱。</li>
+        <li>把 <code>%</code> 当成百分号理解——它是求余运算符，<code>12 % 5</code> 是 2，不是"百分之十二"。</li>
+        <li>用错取余的对象——兵种轮换用 <code>len(hero.built)</code>，均分防御点用友军下标 <code>i</code>，两者别混用。</li>
+        <li>召唤前不判断金钱——应先 <code>if hero.costOf(type) &lt;= hero.gold</code>，钱不够硬召唤无效。</li>
+        <li>指挥时没跳过栅栏——对 <code>type == "palisade"</code> 的盟友下攻击/移动命令没意义，要跳过。</li>
+        <li>混淆 "defend" 与 "attack"——钢爪间隙要 <code>defend</code> 守点，别错用成 <code>attack</code> 追敌。</li>
+        <li>单位数不是点数的整数倍——若总数不能被点数整除，各点会差一个单位，布防不完全均匀（本关 8÷4 正好整除）。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-4-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你掌握了模运算这件"以小博大"的利器！这一单元你理解了求余运算符 <code>%</code> 的含义（<code>a % b</code> 取相除的余数）与它<strong>周而复始、绝不越界</strong>的循环特性，学会了用 <code>len()</code> 取得数组长度，并把二者拼成本单元的黄金公式 <code>索引 % 数组长度</code>。你用它在"联合作战"里让士兵、弓箭手<strong>轮换成军</strong>，又在"钢爪间隙"里把 8 个单位<strong>均分</strong>到 4 个防御点，还顺带彻底解决了数组越界的隐患。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>模运算符 %</td><td><code>a % b</code> 取余数，如 12%5==2</td><td>两关</td></tr>
+            <tr><td>余数循环性</td><td>结果永远在 0 ~ b-1 之间转圈</td><td>两关</td></tr>
+            <tr><td>len 取长度</td><td>数组元素个数，作 % 的除数</td><td>两关</td></tr>
+            <tr><td>索引 % 长度</td><td>让不断变大的索引绕回数组开头</td><td>两关</td></tr>
+            <tr><td>兵种轮换</td><td><code>len(hero.built) % len(summonTypes)</code></td><td>联合作战</td></tr>
+            <tr><td>单位均分</td><td><code>i % len(defendPoints)</code> 平均布防</td><td>钢爪间隙</td></tr>
+            <tr><td>防止越界</td><td>取余是天然的安全护栏</td><td>两关</td></tr>
+            <tr><td>数据驱动配比</td><td>改数组内容即改兵种比例</td><td>联合作战</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得让一个小小的余数，指挥千军万马轮番上阵、四面布防的英雄，才是云峰之上真正举重若轻的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🤝🛡️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第四单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

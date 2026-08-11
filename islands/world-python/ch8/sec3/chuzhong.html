@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC3-959822A42F6E">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第三单元：分支策略 · 让程序学会做决定 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC3-959822A42F6E | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第三单元</div>
+
+    <a href="#section-3-1" class="nav-section">3.1 什么是分支策略</a>
+    <a href="#sec-3-1-1" class="nav-sub">3.1.1 从"做一件事"到"看情况做"</a>
+    <a href="#sec-3-1-2" class="nav-sub">3.1.2 决策与执行分离</a>
+
+    <a href="#section-3-2" class="nav-section">3.2 函数返回策略字符串</a>
+    <a href="#sec-3-2-1" class="nav-sub">3.2.1 return 关键字</a>
+    <a href="#sec-3-2-2" class="nav-sub">3.2.2 用字符串代表策略</a>
+    <a href="#sec-3-2-3" class="nav-sub">3.2.3 return 立即结束函数</a>
+
+    <a href="#section-3-3" class="nav-section">3.3 if / elif / else 分流</a>
+    <a href="#sec-3-3-1" class="nav-sub">3.3.1 根据返回值分流</a>
+    <a href="#sec-3-3-2" class="nav-sub">3.3.2 == 与 is 的比较</a>
+
+    <a href="#section-3-4" class="nav-section">3.4 筛选与距离判断</a>
+    <a href="#sec-3-4-1" class="nav-sub">3.4.1 findByType 按类型筛选</a>
+    <a href="#sec-3-4-2" class="nav-sub">3.4.2 distanceTo 距离判断</a>
+
+    <a href="#section-3-5" class="nav-section">3.5 针对性攻击</a>
+    <a href="#sec-3-5-1" class="nav-sub">3.5.1 带参数的函数</a>
+    <a href="#sec-3-5-2" class="nav-sub">3.5.2 不同兵种不同目标</a>
+
+    <a href="#section-3-6" class="nav-section">3.6 实战关卡精讲</a>
+    <a href="#sec-3-6-1" class="nav-sub">3.6.1 收割火焰</a>
+    <a href="#sec-3-6-2" class="nav-sub">3.6.2 劳心劳力</a>
+
+    <a href="#section-3-7" class="nav-section">3.7 常见错误</a>
+    <a href="#sec-3-7-1" class="nav-sub">3.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第三单元：分支策略 · 让程序学会做决定</h1>
+    <div class="subtitle">Unit 3: Branching Strategies — Teaching Your Program to Decide</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 收割火焰 → 劳心劳力</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 3.1 ==================== -->
+<div class="section-header" id="section-3-1">
+    <h2>3.1 什么是分支策略</h2>
+    <div class="en-title">What Is a Branching Strategy</div>
+</div>
+
+<p>在第一单元里你学会了用 <code>def</code> 把行为封装成函数，让主循环变成一份清爽的行动清单。但真实的战斗从来不是"每帧都做同样三件事"这么简单——敌人有骑士、有巫师、有弓箭手，战场形势瞬息万变。这一单元你要让程序<strong>学会看情况做决定</strong>：先分析当前局势、算出一个"该采取什么策略"的结论，再根据这个结论去执行相应的行为。这就是<span class="keyword">分支策略（branching strategy）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>你将学会让一个函数用 <code>return</code> 返回一段代表策略的<strong>字符串</strong>（如 <code>"griffin-rider"</code>、<code>"fight-back"</code>），再用 <code>if</code> / <code>elif</code> / <code>else</code> 根据这个返回值分流去调用不同的函数；同时掌握 <code>findByType</code> 按类型精确筛选敌人、<code>distanceTo</code> 做距离判断，最后学会写<strong>带参数的函数</strong>，让士兵和弓箭手瞄准各自最合适的目标。
+</div>
+
+<h3 id="sec-3-1-1">3.1.1 从"做一件事"到"看情况做"（From Doing to Deciding）</h3>
+
+<h4>3.1.1.1 先决策，再执行
+    <span class="en">Decide first, then act</span>
+</h4>
+
+<p>分支策略的核心，是把"我该怎么做"这个大问题拆成两小步：第一步<strong>决策</strong>——观察战场、算出一个结论；第二步<strong>执行</strong>——根据结论去做对应的动作。就像一位将军先派侦察兵摸清敌情（"敌方骑士已经逼近雷区左侧！"），再据此下达命令（"全军反击！"）。程序里，"侦察摸清敌情"就是一个返回策略的函数，"据此下令"就是一串 <code>if</code> / <code>elif</code> / <code>else</code>。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 210" width="620" role="img" aria-label="决策与执行两步走">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">分支策略：先算出"策略"，再据此"执行"</text>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="30" y="55" width="180" height="110" rx="10" fill="#eaf2f8" stroke="#4A7A9B" stroke-width="2"/>
+            <text x="120" y="80" text-anchor="middle" fill="#3a6480" font-weight="bold">① 决策函数</text>
+            <text x="120" y="104" text-anchor="middle" fill="#6a8294" font-size="10">观察战场</text>
+            <text x="120" y="122" text-anchor="middle" fill="#6a8294" font-size="10">chooseStrategy()</text>
+            <text x="120" y="146" text-anchor="middle" fill="#2f7a45" font-size="11">return "策略字符串"</text>
+
+            <defs>
+                <marker id="s-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+                </marker>
+            </defs>
+            <line x1="216" y1="110" x2="270" y2="110" stroke="#4d6373" stroke-width="2" marker-end="url(#s-arr)"/>
+            <text x="243" y="100" text-anchor="middle" fill="#4d6373" font-size="10">返回值</text>
+
+            <rect x="290" y="46" width="300" height="34" rx="8" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="440" y="68" text-anchor="middle" fill="#2A5A85" font-family="monospace" font-size="11">if 策略=="griffin-rider": 召唤</text>
+            <rect x="290" y="90" width="300" height="34" rx="8" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="440" y="112" text-anchor="middle" fill="#bd7415" font-family="monospace" font-size="11">elif 策略=="fight-back": 反击</text>
+            <rect x="290" y="134" width="300" height="34" rx="8" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="440" y="156" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="11">elif 策略=="collect-coins": 捡币</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-3-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<h3 id="sec-3-1-2">3.1.2 决策与执行分离（Separating Decision from Action）</h3>
+
+<h4>3.1.2.1 为什么要分开
+    <span class="en">Why separate the two</span>
+</h4>
+
+<p>把"决策"和"执行"分成两块，好处和第一单元"一个函数只做一件事"一脉相承：<code>chooseStrategy</code> 只负责思考、给出结论，具体每种策略怎么做则交给各自的函数（<code>commandAttack</code>、<code>pickUpCoin</code>、<code>heroAttack</code>）。将来想调整判断条件，只改决策函数；想改某种打法，只改对应的执行函数。二者互不干扰，代码清晰又好维护。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧭 决策函数就像"导航仪"</div>
+    <strong>决策（chooseStrategy）</strong>：导航仪根据路况算出"下一步该左转"——它只给结论，不替你踩油门。<br>
+    <strong>执行（if/elif/else 里的调用）</strong>：你听到"左转"后，真正打方向盘、踩油门。<br>
+    <strong>一个负责"想"，一个负责"做"，配合起来才能顺利到达终点。</strong>
+</div>
+
+<!-- ==================== 3.2 ==================== -->
+<div class="section-header" id="section-3-2">
+    <h2>3.2 函数返回策略字符串</h2>
+    <div class="en-title">Returning a Strategy String</div>
+</div>
+
+<h3 id="sec-3-2-1">3.2.1 return 关键字（The return Keyword）</h3>
+
+<h4>3.2.1.1 让函数"交出一个结果"
+    <span class="en">A function can hand back a value</span>
+</h4>
+
+<p>第一单元的函数都是"做完就完"，不给外面任何回信。这一单元的函数不一样：它要用 <code>return</code> 关键字<strong>把一个值交回给调用它的地方</strong>。比如 <code>chooseStrategy()</code> 想清楚了就 <code>return "fight-back"</code>，这个字符串会顺着调用点传回来，被外面的变量接住：<code>strategy = chooseStrategy()</code>。此后 <code>strategy</code> 里装的就是 <code>"fight-back"</code>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 150" width="600" role="img" aria-label="return 语句解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">return 语句的两个零件</text>
+        <text x="150" y="80" font-size="22" font-family="monospace" fill="#7cc7e8">return</text>
+        <text x="270" y="80" font-size="22" font-family="monospace" fill="#9fd4a8">"fight-back"</text>
+        <text x="185" y="112" font-size="11" fill="#7cc7e8" text-anchor="middle" font-family="sans-serif">关键字</text>
+        <text x="345" y="112" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">要交回的值（这里是字符串）</text>
+        <line x1="185" y1="88" x2="185" y2="102" stroke="#7cc7e8" stroke-width="1.5"/>
+        <line x1="345" y1="88" x2="345" y2="102" stroke="#9fd4a8" stroke-width="1.5"/>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-3-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<h3 id="sec-3-2-2">3.2.2 用字符串代表策略（Strings as Strategy Labels）</h3>
+
+<h4>3.2.2.1 一个字符串 = 一种打法
+    <span class="en">One string stands for one plan</span>
+</h4>
+
+<p>"收割火焰"关卡把三种打法各起了一个字符串名字：<code>"griffin-rider"</code>（有钱就召唤格里芬骑士）、<code>"fight-back"</code>（英雄亲自反击闯入雷区的骑士）、<code>"collect-coins"</code>（安全时去捡金币攒钱）。决策函数每帧观察一次战场，返回其中一个字符串。用字符串当"标签"的好处是<strong>可读性极高</strong>——看到 <code>return "fight-back"</code> 就知道此刻该反击，比返回 <code>1</code>、<code>2</code>、<code>3</code> 这种数字清楚得多。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 决策函数：观察战场，返回一个策略字符串</span>
+<span class="kw">def</span> <span class="fn">chooseStrategy</span><span class="punc">():</span>
+    <span class="cmt"># 如果买得起格里芬骑士，就返回它的标签</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold &gt;= <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span><span class="str">"griffin-rider"</span><span class="punc">):</span>
+        <span class="kw">return</span> <span class="str">"griffin-rider"</span>
+    <span class="cmt"># ...其他判断...</span>
+    <span class="kw">return</span> <span class="str">"collect-coins"</span>   <span class="cmt"># 兜底策略</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-3-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<h3 id="sec-3-2-3">3.2.3 return 立即结束函数（return Ends the Function）</h3>
+
+<h4>3.2.3.1 一旦返回，后面的代码不再执行
+    <span class="en">return exits immediately</span>
+</h4>
+
+<p>这是 <code>return</code> 一个非常重要、初学者常忽略的特性：<strong>只要执行到 <code>return</code>，函数立刻结束、把值交出去，它后面的代码一律不再运行</strong>。所以在决策函数里，把"最优先"的判断写在前面很关键——只要前面的条件满足并 <code>return</code> 了，后面的判断根本轮不到执行。这也让我们可以省掉很多 <code>else</code>：因为一旦 return，程序自然就不会走到下面。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 190" width="600" role="img" aria-label="return 立即结束函数">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">碰到 return，函数当场"下班"</text>
+        <g font-family="sans-serif" font-size="11">
+            <rect x="90" y="45" width="420" height="30" rx="6" fill="#eaf2f8" stroke="#4A7A9B"/>
+            <text x="300" y="65" text-anchor="middle" fill="#3a6480" font-family="monospace">if 买得起: return "griffin-rider"  ← 满足！</text>
+
+            <defs>
+                <marker id="r-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#C0453B"/>
+                </marker>
+            </defs>
+            <line x1="300" y1="78" x2="300" y2="98" stroke="#C0453B" stroke-width="2" marker-end="url(#r-arr)"/>
+            <text x="360" y="92" text-anchor="middle" fill="#C0453B" font-size="10">立即交出值、退出</text>
+
+            <rect x="90" y="105" width="420" height="30" rx="6" fill="#f0f0f0" stroke="#c9c9c9" stroke-dasharray="4"/>
+            <text x="300" y="125" text-anchor="middle" fill="#9e9e9e" font-family="monospace">for ... : return "fight-back"   ✗ 不会执行</text>
+            <rect x="90" y="143" width="420" height="30" rx="6" fill="#f0f0f0" stroke="#c9c9c9" stroke-dasharray="4"/>
+            <text x="300" y="163" text-anchor="middle" fill="#9e9e9e" font-family="monospace">return "collect-coins"          ✗ 不会执行</text>
+        </g>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">顺序即优先级：</span>决策函数里判断的<strong>书写顺序</strong>就是策略的<strong>优先级</strong>。"收割火焰"把"能召唤格里芬"放最前，是因为攒够钱扩军最划算；其次才是"有骑士闯雷区就反击"；都不满足才去"捡金币"。想调整战术优先级，只要调换这几段判断的顺序即可。
+</div>
+
+<!-- ==================== 3.3 ==================== -->
+<div class="section-header" id="section-3-3">
+    <h2>3.3 if / elif / else 分流</h2>
+    <div class="en-title">Branching with if / elif / else</div>
+</div>
+
+<h3 id="sec-3-3-1">3.3.1 根据返回值分流（Dispatching on the Return Value）</h3>
+
+<h4>3.3.1.1 拿到策略，对号入座
+    <span class="en">Match the strategy to an action</span>
+</h4>
+
+<p>决策函数交回策略字符串后，主循环就用 <code>if</code> / <code>elif</code> / <code>else</code> 把它"对号入座"：是 <code>"griffin-rider"</code> 就召唤、是 <code>"fight-back"</code> 就让英雄反击、是 <code>"collect-coins"</code> 就去捡币。这三条分支<strong>互斥</strong>——每帧只会走进其中一条，正好对应"当下只采取一种打法"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="fn">commandAttack</span><span class="punc">()</span>                 <span class="cmt"># 每帧都指挥友军攻击</span>
+    strategy = <span class="fn">chooseStrategy</span><span class="punc">()</span>   <span class="cmt"># 拿到本帧策略</span>
+    <span class="cmt"># 根据策略分流，只走进其中一条分支</span>
+    <span class="kw">if</span> strategy == <span class="str">"griffin-rider"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span><span class="str">"griffin-rider"</span><span class="punc">)</span>
+    <span class="kw">elif</span> strategy == <span class="str">"fight-back"</span><span class="punc">:</span>
+        <span class="fn">heroAttack</span><span class="punc">()</span>
+    <span class="kw">elif</span> strategy == <span class="str">"collect-coins"</span><span class="punc">:</span>
+        <span class="fn">pickUpCoin</span><span class="punc">()</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">if / elif / else 的分工：</span><code>if</code> 是第一道判断，<code>elif</code>（else if 的缩写）是"前面都不满足时再看这个"，<code>else</code> 是"前面全不满足时的兜底"。它们从上到下依次检查，一旦某条成立就执行对应代码块，其余分支全部跳过——保证同一时刻只做一件事。
+</div>
+
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-3-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<h3 id="sec-3-3-2">3.3.2 == 与 is 的比较（Comparing Strings）</h3>
+
+<h4>3.3.2.1 判断字符串是否相等
+    <span class="en">Checking string equality</span>
+</h4>
+
+<p>要判断策略字符串是不是某个值，标准写法是用<strong>相等运算符 <code>==</code></strong>：<code>if strategy == "fight-back":</code>。注意区分：<code>=</code> 是"赋值"（把右边装进左边），<code>==</code> 才是"比较是否相等"，别把两者写混。</p>
+
+<div class="tip-box">
+    <span class="tip-label">关于 <code>is</code>：</span>扣哒世界 的部分关卡示例里用了 <code>if strategy is "griffin-rider":</code>。在这些教学关里它能"碰巧"工作，但在正规 Python 中，比较两个值是否相等应当用 <code>==</code>；<code>is</code> 比较的是"是不是同一个对象"，用来判断字符串内容相等并不可靠。<strong>养成好习惯：判断内容相等一律用 <code>==</code>。</strong>
+</div>
+
+<div class="compare-2col">
+    <div>
+        <h5>✅ 推荐：用 == 比较内容</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> strategy == <span class="str">"fight-back"</span><span class="punc">:</span>
+    <span class="fn">heroAttack</span><span class="punc">()</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>⚠️ 关卡里出现但不推荐</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> strategy <span class="kw">is</span> <span class="str">"fight-back"</span><span class="punc">:</span>
+    <span class="fn">heroAttack</span><span class="punc">()</span></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 3.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-3-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:2ae9270ec1:START anchor=sec-3-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="2ae9270ec1">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:2ae9270ec1:END -->
+
+<div class="section-header" id="section-3-4">
+    <h2>3.4 筛选与距离判断</h2>
+    <div class="en-title">Filtering by Type & Judging Distance</div>
+</div>
+
+<h3 id="sec-3-4-1">3.4.1 findByType 按类型筛选（Filtering with findByType）</h3>
+
+<h4>3.4.1.1 只挑出"某一类"单位
+    <span class="en">Pick out only one kind of unit</span>
+</h4>
+
+<p><code>hero.findEnemies()</code> 会返回<strong>所有</strong>敌人，但很多时候你只关心其中某一类——比如只想找"骑士 fangrider"、只想找"巫师 witch"。这时就用 <code>hero.findByType("类型名")</code>，它返回一个<strong>只含该类型单位的列表</strong>。把它和 <code>findNearest</code> 结合，就能精确锁定"最近的某一类单位"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 只找出敌方骑士，再从中挑最近的一个</span>
+fangriders = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"fangrider"</span><span class="punc">)</span>
+nearestRider = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span>fangriders<span class="punc">)</span>
+
+<span class="cmt"># 也可以一行写完：找出所有巫师里最近的那个</span>
+nearestWitch = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"witch"</span><span class="punc">))</span></pre>
+</div>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-4-1-1_find_by_type.png" alt="扣哒世界 findByType 按类型筛选敌人 - koudashijie.com">
+    <div class="caption">图1：findByType 像一张"筛网"——从混杂的敌群里只漏下你指定的那一类单位</div>
+</div>
+
+<h4>3.4.1.2 遍历筛出来的列表
+    <span class="en">Loop over the filtered list</span>
+</h4>
+
+<p>筛出来的是一个列表，可以用 <code>for</code> 逐个查看。"收割火焰"里判断"雷区左侧是否有敌方骑士"，就是遍历所有 fangrider，看有没有谁的横坐标 <code>pos.x</code> 落在雷区范围内。这里也可以用 <code>range(len(...))</code> 配下标访问，效果一样。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>fangriders = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"fangrider"</span><span class="punc">)</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>fangriders<span class="punc">)):</span>
+    fangrider = fangriders<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="kw">if</span> fangrider<span class="punc">.</span>pos<span class="punc">.</span>x &lt; <span class="num">38</span><span class="punc">:</span>       <span class="cmt"># 骑士已闯入雷区左侧</span>
+        <span class="kw">return</span> <span class="str">"fight-back"</span>          <span class="cmt"># 立即决定反击</span></pre>
+</div>
+
+<h3 id="sec-3-4-2">3.4.2 distanceTo 距离判断（Distance Checks）</h3>
+
+<h4>3.4.2.1 够近才出手
+    <span class="en">Only strike when close enough</span>
+</h4>
+
+<p><code>hero.distanceTo(目标)</code> 返回英雄到目标的距离。攻击是有射程的，隔太远打不到，白白浪费动作。所以在英雄反击时，先用 <code>distanceTo</code> 判断距离，够近（例如 <code>&lt; 25</code> 或 <code>&lt; 15</code>）才 <code>attack</code>，否则先不动或移动靠近。这能避免"对着够不着的敌人挥空刀"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">heroAttack</span><span class="punc">():</span>
+    <span class="cmt"># 找到最近的敌方骑士</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"fangrider"</span><span class="punc">))</span>
+    <span class="cmt"># 存在、且距离够近，才出手</span>
+    <span class="kw">if</span> enemy <span class="kw">and</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span> &lt; <span class="num">25</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">先判断"存在"再判断"距离"：</span>写成 <code>if enemy and hero.distanceTo(enemy) &lt; 25:</code>。<code>and</code> 左边先确认 <code>enemy</code> 不是空（确实找到了敌人），右边再算距离。若敌人根本不存在，左边为假就直接跳过，不会因为对"空目标"求距离而出错。这种"先确认存在、再进一步判断"的写法很常用。
+</div>
+
+<!-- ==================== 3.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-3-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-3-5">
+    <h2>3.5 针对性攻击</h2>
+    <div class="en-title">Targeting the Right Enemy</div>
+</div>
+
+<h3 id="sec-3-5-1">3.5.1 带参数的函数（Functions with Parameters）</h3>
+
+<h4>3.5.1.1 给函数一个"输入"
+    <span class="en">Passing information into a function</span>
+</h4>
+
+<p>前面的函数括号都是空的，这一节的函数括号里要放一个<strong>参数</strong>。参数就是函数的"输入口"：调用时你塞进去一个值，函数体内就能用这个名字来引用它。"劳心劳力"要求定义 <code>chooseTarget(friend)</code>——它接收一个 <code>friend</code>（某个友军单位），根据这个 friend 的兵种，返回它<strong>该攻击的目标</strong>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 150" width="600" role="img" aria-label="带参数的函数解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">带参数的函数头部</text>
+        <text x="70" y="80" font-size="20" font-family="monospace" fill="#7cc7e8">def</text>
+        <text x="130" y="80" font-size="20" font-family="monospace" fill="#f0c674">chooseTarget</text>
+        <text x="315" y="80" font-size="20" font-family="monospace" fill="#cdddea">(</text>
+        <text x="330" y="80" font-size="20" font-family="monospace" fill="#a5c8e8">friend</text>
+        <text x="410" y="80" font-size="20" font-family="monospace" fill="#cdddea">)</text>
+        <text x="425" y="80" font-size="20" font-family="monospace" fill="#cdddea">:</text>
+        <text x="355" y="112" font-size="11" fill="#a5c8e8" text-anchor="middle" font-family="sans-serif">参数（函数的输入口）</text>
+        <line x1="355" y1="88" x2="355" y2="102" stroke="#a5c8e8" stroke-width="1.5"/>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># friend 是参数：调用时传进来一个友军单位</span>
+<span class="kw">def</span> <span class="fn">chooseTarget</span><span class="punc">(</span>friend<span class="punc">):</span>
+    target = <span class="kw">None</span>
+    <span class="cmt"># 函数体里可以直接用 friend 这个名字</span>
+    <span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"archer"</span><span class="punc">:</span>
+        <span class="cmt"># ...</span>
+        <span class="kw">pass</span>
+    <span class="kw">return</span> target</pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-3-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+<!-- CC-PROTECTION:HIDDEN:6c2a6ed1dc:START anchor=sec-3-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="6c2a6ed1dc">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:6c2a6ed1dc:END -->
+
+<h3 id="sec-3-5-2">3.5.2 不同兵种不同目标（Different Units, Different Targets）</h3>
+
+<h4>3.5.2.1 士兵打巫师，弓箭手打最近
+    <span class="en">Soldiers hit witches, archers hit nearest</span>
+</h4>
+
+<p>"劳心劳力"的战术精髓，是让不同兵种<strong>各打各的目标</strong>：士兵（soldier）血厚、能扛，让它们冲上去缠住危险的女巫（witch）；弓箭手（archer）脆但远程，让它们优先清掉离自己<strong>最近</strong>的任意敌人。判断依据就是 <code>friend.type</code>——用它区分这个友军是士兵还是弓箭手，再返回相应的目标。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>🏹 弓箭手 archer</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"archer"</span><span class="punc">:</span>
+    enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+    target = friend<span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span>enemies<span class="punc">)</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>🛡️ 士兵 soldier</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"soldier"</span><span class="punc">:</span>
+    witches = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"witch"</span><span class="punc">)</span>
+    target = friend<span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span>witches<span class="punc">)</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">用 friend.findNearest 而非 hero.findNearest：</span>注意示例里是 <code>friend.findNearest(witches)</code>，而不是 <code>hero.findNearest</code>。因为我们要的是离<strong>这名友军自己</strong>最近的目标，而不是离英雄最近的。这样每个士兵会各自扑向离它最近的女巫，把士兵自然地分成几组，避免全挤在一处被女巫的溅射（范围伤害）一锅端。
+</div>
+
+<!-- ==================== 3.6 ==================== -->
+<div class="section-header" id="section-3-6">
+    <h2>3.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy & Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 收割火焰 -->
+<div class="level-card" id="sec-3-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 收割火焰</span>
+        <h3>🔥 收割火焰 —— 让决策函数返回策略</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/3-6-1-1_harvest_fire.png" alt="扣哒世界 收割火焰关卡 - koudashijie.com">
+            <div class="caption">图2：收割火焰——指挥格里芬骑士飞越雷区保卫英雄，用一系列函数把复杂战斗拆成清晰的几块</div>
+        </div>
+
+        <h4>策略：三种打法，看局势切换</h4>
+        <p>本关目标是<strong>生存 30 秒并保住雷区完好至少 30 秒</strong>。食人魔骑士会试图冲过雷区，你既要攒钱召唤格里芬骑士扩军，又要在骑士闯入时亲自反击，安全时还得捡币维持经济。核心思路是写一个 <code>chooseStrategy()</code> 决策函数，每帧根据战场返回三种策略之一，主循环再据此调用不同函数。</p>
+
+        <h4>思路拆解：决策函数的三段判断</h4>
+        <p>决策函数按<strong>优先级从高到低</strong>写三段判断。第一，<strong>能扩军就扩军</strong>：<code>if hero.gold &gt;= hero.costOf("griffin-rider")</code> 成立就 <code>return "griffin-rider"</code>。第二，<strong>雷区告急就反击</strong>：用 <code>findByType("fangrider")</code> 取出所有敌方骑士，遍历检查有没有谁的 <code>pos.x</code> 已经越过雷区边界（如 <code>&lt; 38</code>），有就 <code>return "fight-back"</code>。第三，<strong>都不满足就攒钱</strong>：函数最后 <code>return "collect-coins"</code> 兜底。因为 <code>return</code> 会立即结束函数，前面满足了就轮不到后面，天然形成优先级。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：决策函数返回策略字符串</span>
+<span class="kw">def</span> <span class="fn">chooseStrategy</span><span class="punc">():</span>
+    <span class="cmt"># ① 买得起格里芬 → 扩军优先</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold &gt;= <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span><span class="str">"griffin-rider"</span><span class="punc">):</span>
+        <span class="kw">return</span> <span class="str">"griffin-rider"</span>
+    <span class="cmt"># ② 有骑士闯入雷区左侧 → 反击</span>
+    fangriders = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"fangrider"</span><span class="punc">)</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>fangriders<span class="punc">)):</span>
+        <span class="kw">if</span> fangriders<span class="punc">[</span>i<span class="punc">]</span><span class="punc">.</span>pos<span class="punc">.</span>x &lt; <span class="num">38</span><span class="punc">:</span>
+            <span class="kw">return</span> <span class="str">"fight-back"</span>
+    <span class="cmt"># ③ 都不满足 → 捡币攒钱（兜底）</span>
+    <span class="kw">return</span> <span class="str">"collect-coins"</span></pre>
+        </div>
+
+        <h4>思路拆解：主循环按返回值分流</h4>
+        <p>主循环里先 <code>commandAttack()</code> 让已有友军持续攻击，再 <code>strategy = chooseStrategy()</code> 拿到本帧策略，然后用 <code>if</code> / <code>elif</code> / <code>elif</code> 分流：<code>"griffin-rider"</code> 就 <code>hero.summon(...)</code>，<code>"fight-back"</code> 就 <code>heroAttack()</code>，<code>"collect-coins"</code> 就 <code>pickUpCoin()</code>。每个执行函数各司其职：<code>commandAttack</code> 遍历友军各打最近敌人，<code>heroAttack</code> 结合 <code>distanceTo</code> 判断够近才砍闯入的骑士，<code>pickUpCoin</code> 移动到最近金币处。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="fn">commandAttack</span><span class="punc">()</span>
+    strategy = <span class="fn">chooseStrategy</span><span class="punc">()</span>
+    <span class="kw">if</span> strategy == <span class="str">"griffin-rider"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span><span class="str">"griffin-rider"</span><span class="punc">)</span>
+    <span class="kw">elif</span> strategy == <span class="str">"fight-back"</span><span class="punc">:</span>
+        <span class="fn">heroAttack</span><span class="punc">()</span>
+    <span class="kw">elif</span> strategy == <span class="str">"collect-coins"</span><span class="punc">:</span>
+        <span class="fn">pickUpCoin</span><span class="punc">()</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么 commandAttack 放在分流之外？</span>因为"指挥友军攻击"是<strong>每帧都要做</strong>的事，和三选一的策略无关。把它放在 <code>if</code> 之前无条件执行，保证格里芬骑士时刻都在战斗；而召唤、反击、捡币这三件事才是"看情况三选一"的分支。分清"总要做的"和"看情况做的"，是组织主循环的关键。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别忘了兜底 return：</span>如果决策函数前面的条件都不满足却没有最后那句 <code>return "collect-coins"</code>，函数会返回 <code>None</code>，主循环的 if/elif 一条都匹配不上，英雄这一帧就什么都不做、白白浪费时间。永远给决策函数一个兜底返回值。
+        </div>
+    </div>
+</div>
+
+<!-- 劳心劳力 -->
+<div class="level-card" id="sec-3-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 劳心劳力</span>
+        
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:3a7b819be5:START anchor=h3-12 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="3a7b819be5">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC3-959822A42F6E。</span>
+<!-- CC-PROTECTION:HIDDEN:3a7b819be5:END -->
+
+<h3>🧙 劳心劳力 —— 带参数的目标选择函数</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/3-6-2-1_double_trouble.png" alt="扣哒世界 劳心劳力关卡 - koudashijie.com">
+            <div class="caption">图3：劳心劳力——食人魔女巫加倍麻烦，士兵专缠女巫、弓箭手清剿最近敌人，分工作战</div>
+        </div>
+
+        <h4>策略：分兵专攻，避开溅射</h4>
+        <p>本关登场的女巫（witch）攻击带<strong>范围溅射</strong>，友军挤成一团很容易被一锅端。破局思路是让不同兵种<strong>分工瞄准不同目标</strong>：士兵（soldier）冲上去各自缠住离自己最近的女巫，把队伍自然拆成几个小组分散站位；弓箭手（archer）则远程清掉离自己最近的任意敌人。这样既压制了危险的女巫，又避免了扎堆挨溅射。</p>
+
+        <h4>思路拆解：定义 chooseTarget(friend)</h4>
+        <p>核心是写一个带参数的 <code>chooseTarget(friend)</code> 函数，根据传入友军的 <code>friend.type</code> 返回它该打的目标。若是 <code>"archer"</code>，就在<strong>所有敌人</strong>里用 <code>friend.findNearest</code> 找最近的；若是 <code>"soldier"</code>，就先用 <code>findByType("witch")</code> 只取女巫，再 <code>friend.findNearest</code> 找最近的女巫。函数最后把选好的 <code>target</code> 返回出去。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：按兵种返回不同目标</span>
+<span class="kw">def</span> <span class="fn">chooseTarget</span><span class="punc">(</span>friend<span class="punc">):</span>
+    target = <span class="kw">None</span>
+    <span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"archer"</span><span class="punc">:</span>
+        <span class="cmt"># 弓箭手：离自己最近的任意敌人</span>
+        target = friend<span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">())</span>
+    <span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"soldier"</span><span class="punc">:</span>
+        <span class="cmt"># 士兵：离自己最近的女巫</span>
+        witches = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"witch"</span><span class="punc">)</span>
+        target = friend<span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span>witches<span class="punc">)</span>
+    <span class="kw">return</span> target</pre>
+        </div>
+
+        <h4>思路拆解：主循环遍历友军并下令</h4>
+        <p>主循环用 <code>for</code> 遍历所有友军，把每个 <code>friend</code> 交给 <code>chooseTarget(friend)</code> 算出它的目标，拿到 <code>enemy</code> 后<strong>先判断存在再下令</strong> <code>hero.command(friend, "attack", enemy)</code>。这里 <code>if enemy:</code> 很重要——如果场上暂时没有女巫，士兵的 target 会是 <code>None</code>，跳过下令即可，不会因对空目标发令而报错。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+        enemy = <span class="fn">chooseTarget</span><span class="punc">(</span>friend<span class="punc">)</span>   <span class="cmt"># 用函数决定打谁</span>
+        <span class="kw">if</span> enemy<span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">为什么士兵专打女巫？</span>女巫是本关最大的威胁（溅射范围伤害）。让血厚的士兵冲上去咬住女巫，等于用最耐揍的单位去承受最危险的敌人；脆弱的弓箭手则躲在后面点掉靠近的杂兵。这就是"用对的兵打对的敌人"——针对性攻击的价值，正在于把每个单位的长处用在刀刃上。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">用两个独立的 if 还是 if/elif？</span>示例用了两个独立的 <code>if</code>，因为一个友军的 type 不可能同时是 archer 又是 soldier，两条永远只会命中一条，效果和 <code>if/elif</code> 一致。若想更严谨、少做一次判断，也可写成 <code>if ... elif ...</code>。两种写法在本关都正确。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 3.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+
+<div class="section-header" id="section-3-7">
+    <h2>3.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-3-7-1">3.7.1 分支与返回值的典型坑（Pitfalls）</h3>
+
+<h4>3.7.1.1 决策与执行的常见问题
+    <span class="en">Typical issues with return & branching</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec3_3-7-1-1_common_errors.png" alt="扣哒世界 分支策略常见错误速查 - koudashijie.com">
+    <div class="caption">图4：忘写兜底 return、混用 = 与 ==、漏判目标是否存在，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>决策函数漏写兜底 <code>return</code>——所有条件都不满足时返回 <code>None</code>，主循环分流全落空，英雄无所事事。</li>
+        <li>忘记用变量接住返回值——只写 <code>chooseStrategy()</code> 而没有 <code>strategy = chooseStrategy()</code>，后面就没法判断策略。</li>
+        <li>把 <code>=</code> 当 <code>==</code> 用——比较相等要用 <code>==</code>，<code>=</code> 是赋值，写错会报错或逻辑错乱。</li>
+        <li>用 <code>is</code> 比较字符串内容——正规 Python 应用 <code>==</code>；<code>is</code> 比较是否同一对象，判断内容相等不可靠。</li>
+        <li>忘判断目标是否存在——直接 <code>command(friend,"attack",None)</code> 会出错，要先 <code>if enemy:</code>。</li>
+        <li>漏了距离判断——英雄对够不着的敌人 <code>attack</code> 是无效动作，应先 <code>distanceTo(...) &lt; 25</code>。</li>
+        <li>findByType 类型名拼错——类型字符串要和游戏里的准确名称一致（如 <code>"fangrider"</code>、<code>"witch"</code>），拼错会筛不到任何单位。</li>
+        <li>该用 <code>friend.findNearest</code> 却用了 <code>hero.findNearest</code>——目标选择要以"友军自身"为参照，才能分散站位、各打各的。</li>
+        <li>把每帧都要做的动作错放进某条分支里——像 <code>commandAttack()</code> 应放在 if 之外无条件执行。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你让程序学会了"看情况做决定"！这一单元你掌握了分支策略的完整链条：先用一个决策函数 <code>return</code> 出代表打法的<strong>策略字符串</strong>，再用 <code>if</code> / <code>elif</code> / <code>else</code> 根据返回值<strong>分流</strong>去执行不同的函数。你还学会了用 <code>findByType</code> 从敌群里精确筛出某一类单位、用 <code>distanceTo</code> 判断"够不够近才出手"，并第一次写出<strong>带参数的函数</strong> <code>chooseTarget(friend)</code>，让士兵专打巫师、弓箭手清剿最近敌人。在"收割火焰"和"劳心劳力"两关里，你把这些工具组合起来，指挥一支分工明确的军队打出了针对性的战术。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>return 返回值</td><td>把结果交回调用处，遇到即结束函数</td><td>收割火焰</td></tr>
+            <tr><td>策略字符串</td><td>一个字符串代表一种打法，可读性高</td><td>收割火焰</td></tr>
+            <tr><td>if / elif / else 分流</td><td>按返回值对号入座，只走一条分支</td><td>两关</td></tr>
+            <tr><td>== 比较相等</td><td>判断内容相等用 <code>==</code>，勿用 <code>=</code> 或 <code>is</code></td><td>两关</td></tr>
+            <tr><td>findByType 筛选</td><td>只取某一类单位，配 findNearest 锁定</td><td>两关</td></tr>
+            <tr><td>distanceTo 距离</td><td>够近（如 &lt;25）才出手，避免挥空</td><td>收割火焰</td></tr>
+            <tr><td>带参数的函数</td><td>括号里放输入口，函数体内引用它</td><td>劳心劳力</td></tr>
+            <tr><td>针对性攻击</td><td>士兵打巫师、弓箭手打最近</td><td>劳心劳力</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得先谋而后动、让每一支部队都攻其所长的英雄，才是云峰之上真正运筹帷幄的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🔥🧙
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f739b47d40:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="f739b47d40">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，课程覆盖全球 190 多个国家，获得 32 万名全球教师的信赖。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f739b47d40:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第三单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

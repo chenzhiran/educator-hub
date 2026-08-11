@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC6-19995E7B5919">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第六单元：绘制与函数 · 用代码画出图形 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC6-19995E7B5919 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第六单元</div>
+
+    <a href="#section-6-1" class="nav-section">6.1 什么是代码绘图</a>
+    <a href="#sec-6-1-1" class="nav-sub">6.1.1 英雄就是一支画笔</a>
+    <a href="#sec-6-1-2" class="nav-sub">6.1.2 花之戒指的三件工具</a>
+
+    <a href="#section-6-2" class="nav-section">6.2 落笔与提笔</a>
+    <a href="#sec-6-2-1" class="nav-sub">6.2.1 toggleFlowers 开关</a>
+    <a href="#sec-6-2-2" class="nav-sub">6.2.2 setFlowerColor 上色</a>
+
+    <a href="#section-6-3" class="nav-section">6.3 用 while 画圆</a>
+    <a href="#sec-6-3-1" class="nav-sub">6.3.1 圆是无数个点</a>
+    <a href="#sec-6-3-2" class="nav-sub">6.3.2 角度递增取点</a>
+    <a href="#sec-6-3-3" class="nav-sub">6.3.3 步长决定精细度</a>
+
+    <a href="#section-6-4" class="nav-section">6.4 顺序移动画方</a>
+    <a href="#sec-6-4-1" class="nav-sub">6.4.1 四角坐标</a>
+    <a href="#sec-6-4-2" class="nav-sub">6.4.2 依次连线成方</a>
+
+    <a href="#section-6-5" class="nav-section">6.5 参数化的绘图函数</a>
+    <a href="#sec-6-5-1" class="nav-sub">6.5.1 中心与大小</a>
+
+    <a href="#section-6-6" class="nav-section">6.6 实战关卡精讲</a>
+    <a href="#sec-6-6-1" class="nav-sub">6.6.1 花的几何学</a>
+
+    <a href="#section-6-7" class="nav-section">6.7 常见错误</a>
+    <a href="#sec-6-7-1" class="nav-sub">6.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第六单元：绘制与函数 · 用代码画出图形</h1>
+    <div class="subtitle">Unit 6: Drawing with Functions — Painting Shapes with Code</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 花的几何学</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 6.1 ==================== -->
+<div class="section-header" id="section-6-1">
+    <h2>6.1 什么是代码绘图</h2>
+    <div class="en-title">What Is Drawing with Code</div>
+</div>
+
+<p>前面的单元里，你把编程用来指挥军队、寻路、找目标。这一单元画风一转——你要拿到<strong>花之戒指</strong>，把英雄当成一支魔法画笔，用代码在大地上画出圆、方，乃至任何你想要的图案！这是一次把<strong>数学、循环、函数</strong>融会贯通的创意实践，也让你真切体会到"编程不只是解题，更是创造"。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>你将学会用 <code>toggleFlowers</code> 控制"落笔/提笔"、用 <code>setFlowerColor</code> 给花上色；用 <code>while</code> 循环配合三角函数 <code>Math.cos</code> / <code>Math.sin</code>，让<strong>角度不断递增、沿圆周描点画圆</strong>；用<strong>顺序移动到四个角</strong>画正方形；并理解这些绘图逻辑如何被封装成带"中心坐标"和"大小"参数的通用函数 <code>drawCircle</code>、<code>drawSquare</code>。
+</div>
+
+<h3 id="sec-6-1-1">6.1.1 英雄就是一支画笔（The Hero Is a Pen）</h3>
+
+<h4>6.1.1.1 走到哪，花开到哪
+    <span class="en">Flowers bloom where the hero walks</span>
+</h4>
+
+<p>代码绘图的核心心智模型很简单：<strong>英雄走过的路径，就是画出来的线条</strong>。当"绘花"开启时，英雄每移动一步，脚下就绽放花朵，连成线；当"绘花"关闭时，英雄照样移动，但不留痕迹——相当于提起画笔在纸上空移。想画什么图形，本质就是<strong>算出图形轮廓上一连串的点，让英雄依次走过它们</strong>。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🖊️ 就像"连点成画"</div>
+    小时候玩的连线游戏：按 1、2、3…的顺序把点连起来，一幅画就出现了。<br>
+    代码绘图也一样：<strong>先算出图形轮廓上的点，再让英雄按顺序走过它们</strong>。圆是密密麻麻的一圈点，正方形是四个角。落笔时走，提笔时移，图形就成形了。
+</div>
+
+
+<!-- CC-PROTECTION:AD:de8534a7d9:START anchor=sec-6-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="de8534a7d9">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从第一行代码开始，把你的想法变成真的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:de8534a7d9:END -->
+
+<h3 id="sec-6-1-2">6.1.2 花之戒指的三件工具（Three Tools of the Flower Ring）</h3>
+
+<h4>6.1.2.1 移动、开关、上色
+    <span class="en">Move, toggle, color</span>
+</h4>
+
+<div class="review-grid">
+    <div class="review-card">
+        <h4>🚶 moveXY(x, y)</h4>
+        <p>让英雄走到坐标 (x, y)。落笔状态下这一段路就会留下花线，是"画线"的动作。</p>
+    </div>
+    <div class="review-card">
+        <h4>🔘 toggleFlowers(开/关)</h4>
+        <p><code>toggleFlowers(True)</code> 落笔（走了留痕），<code>toggleFlowers(False)</code> 提笔（走了不留痕）。</p>
+    </div>
+    <div class="review-card">
+        <h4>🎨 setFlowerColor(颜色)</h4>
+        <p>设置花的颜色，如 <code>"red"</code>、<code>"purple"</code>、<code>"random"</code>，之后画的花都用这个色。</p>
+    </div>
+</div>
+
+<!-- ==================== 6.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-6-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<div class="section-header" id="section-6-2">
+    <h2>6.2 落笔与提笔</h2>
+    <div class="en-title">Pen Down and Pen Up</div>
+</div>
+
+<h3 id="sec-6-2-1">6.2.1 toggleFlowers 开关（The Drawing Toggle）</h3>
+
+<h4>6.2.1.1 先移动到起点，再落笔
+    <span class="en">Move to the start, then start drawing</span>
+</h4>
+
+<p><code>toggleFlowers(True/False)</code> 就是画笔的"落/提"开关。这个开关有一个非常重要的用法：<strong>在移动到图形起点的途中，要先关掉绘花</strong>，免得从旧位置到起点的这段"空移"也画上多余的线；到了起点再打开绘花，正式开始画。观察 <code>drawCircle</code> 的开头就是这个套路。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 提笔 → 走到起点 → 落笔，避免画出多余连线</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">False</span><span class="punc">)</span>   <span class="cmt"># 提笔（空移不留痕）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>startX<span class="punc">,</span> startY<span class="punc">)</span>   <span class="cmt"># 移动到图形起点</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">True</span><span class="punc">)</span>    <span class="cmt"># 落笔，开始正式作画</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 150" width="600" role="img" aria-label="提笔移动落笔">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">提笔空移到起点，再落笔作画</text>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="30" y="55" width="160" height="50" rx="8" fill="#fbeae7" stroke="#C0453B"/>
+            <text x="110" y="78" text-anchor="middle" fill="#9e352c">toggleFlowers(False)</text>
+            <text x="110" y="96" text-anchor="middle" fill="#6a8294" font-size="10">提笔 ✋</text>
+            <defs>
+                <marker id="p-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+                </marker>
+            </defs>
+            <line x1="192" y1="80" x2="218" y2="80" stroke="#4d6373" stroke-width="2" marker-end="url(#p-arr)"/>
+            <rect x="220" y="55" width="160" height="50" rx="8" fill="#eaf2f8" stroke="#4A7A9B"/>
+            <text x="300" y="78" text-anchor="middle" fill="#3a6480">moveXY(起点)</text>
+            <text x="300" y="96" text-anchor="middle" fill="#6a8294" font-size="10">空移，不留痕</text>
+            <line x1="382" y1="80" x2="408" y2="80" stroke="#4d6373" stroke-width="2" marker-end="url(#p-arr)"/>
+            <rect x="410" y="55" width="160" height="50" rx="8" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="490" y="78" text-anchor="middle" fill="#2f7a45">toggleFlowers(True)</text>
+            <text x="490" y="96" text-anchor="middle" fill="#6a8294" font-size="10">落笔 ✍️</text>
+        </g>
+    </svg>
+</div>
+
+<h3 id="sec-6-2-2">6.2.2 setFlowerColor 上色（Setting the Color）</h3>
+
+<h4>6.2.2.1 换一种颜色，画下一个图形
+    <span class="en">Change color before the next shape</span>
+</h4>
+
+<p><code>hero.setFlowerColor("颜色")</code> 决定接下来画的花是什么颜色，可选 <code>"pink"</code>、<code>"red"</code>、<code>"blue"</code>、<code>"purple"</code>、<code>"yellow"</code>、<code>"white"</code>，还有随机的 <code>"random"</code>。设色是"持续生效"的——设一次，之后所有花都是这个色，直到你再次改它。所以画多个不同色的图形时，<strong>在每个图形开画前先设好颜色</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">setFlowerColor</span><span class="punc">(</span><span class="str">"red"</span><span class="punc">)</span>      <span class="cmt"># 先设红色</span>
+<span class="fn">drawCircle</span><span class="punc">(</span>redX<span class="punc">.</span>x<span class="punc">,</span> redX<span class="punc">.</span>y<span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>  <span class="cmt"># 这个圆是红的</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">setFlowerColor</span><span class="punc">(</span><span class="str">"purple"</span><span class="punc">)</span>   <span class="cmt"># 改成紫色</span>
+<span class="fn">drawSquare</span><span class="punc">(</span>whiteX<span class="punc">.</span>x<span class="punc">,</span> whiteX<span class="punc">.</span>y<span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>  <span class="cmt"># 这个方是紫的</span></pre>
+</div>
+
+<!-- ==================== 6.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-6-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+<!-- CC-PROTECTION:HIDDEN:799640ed87:START anchor=sec-6-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="799640ed87">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:799640ed87:END -->
+
+<div class="section-header" id="section-6-3">
+    <h2>6.3 用 while 画圆</h2>
+    <div class="en-title">Drawing a Circle with while</div>
+</div>
+
+<h3 id="sec-6-3-1">6.3.1 圆是无数个点（A Circle Is Many Points）</h3>
+
+<h4>6.3.1.1 用一圈密集的点近似圆
+    <span class="en">Approximating a circle with points</span>
+</h4>
+
+<p>计算机画不出"真正光滑"的圆，它的办法是：<strong>沿着圆周取足够多的点，用短直线段把它们连起来</strong>——点够密，看起来就是圆滑的圆。这正是第五单元"极坐标转直角坐标"的直接应用：圆上任意一点，都由"圆心 + 半径 × (cos角度, sin角度)"确定。让角度从 0 转到一整圈（<code>2π</code>），描过的点就连成一个圆。</p>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-6-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-6-3-2">6.3.2 角度递增取点（Incrementing the Angle）</h3>
+
+<h4>6.3.2.1 while 让角度一圈转到底
+    <span class="en">The while loop sweeps the angle</span>
+</h4>
+
+<p><code>drawCircle</code> 的核心是一个 <code>while</code> 循环：让角度 <code>angle</code> 从 <code>0</code> 开始，每次循环加一点点（<code>+= 0.2</code>），直到转满一整圈（<code>angle &lt;= Math.PI * 2</code>）。每一步都用 <code>cos</code>、<code>sin</code> 算出当前角度对应的圆周点坐标，再 <code>moveXY</code> 过去。角度像时针一样扫过一圈，英雄的足迹就描出了整个圆。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">drawCircle</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> size<span class="punc">):</span>
+    angle = <span class="num">0</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">False</span><span class="punc">)</span>   <span class="cmt"># 先提笔移到起点</span>
+    <span class="kw">while</span> angle &lt;= <span class="obj">Math</span><span class="punc">.</span>PI * <span class="num">2</span><span class="punc">:</span>   <span class="cmt"># 转满一整圈（360°）</span>
+        newX = x + <span class="punc">(</span>size * <span class="obj">Math</span><span class="punc">.</span><span class="fn">cos</span><span class="punc">(</span>angle<span class="punc">))</span>   <span class="cmt"># 当前角度的圆周点</span>
+        newY = y + <span class="punc">(</span>size * <span class="obj">Math</span><span class="punc">.</span><span class="fn">sin</span><span class="punc">(</span>angle<span class="punc">))</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>newX<span class="punc">,</span> newY<span class="punc">)</span>            <span class="cmt"># 走过去，连成弧</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">True</span><span class="punc">)</span>          <span class="cmt"># 到第一个点后落笔</span>
+        angle += <span class="num">0.2</span>                        <span class="cmt"># 角度递增一步</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 500 240" width="500" role="img" aria-label="角度递增描点画圆">
+        <text x="250" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">angle 从 0 每次 +0.2，扫满 2π 描出整圆</text>
+        <circle cx="250" cy="135" r="80" fill="none" stroke="#cfe0eb" stroke-width="2"/>
+        <g fill="#3E7CB1">
+            <circle cx="330" cy="135" r="5"/>
+            <circle cx="322" cy="103" r="5"/>
+            <circle cx="298" cy="80" r="5"/>
+            <circle cx="266" cy="66" r="5"/>
+            <circle cx="234" cy="66" r="5"/>
+            <circle cx="202" cy="80" r="5"/>
+            <circle cx="178" cy="103" r="5"/>
+            <circle cx="170" cy="135" r="5"/>
+            <circle cx="178" cy="167" r="5"/>
+            <circle cx="202" cy="190" r="5"/>
+            <circle cx="234" cy="204" r="5"/>
+            <circle cx="266" cy="204" r="5"/>
+            <circle cx="298" cy="190" r="5"/>
+            <circle cx="322" cy="167" r="5"/>
+        </g>
+        <circle cx="250" cy="135" r="3" fill="#C0453B"/>
+        <text x="250" y="150" text-anchor="middle" font-size="9" fill="#9e352c" font-family="sans-serif">圆心(x,y)</text>
+        <text x="358" y="139" font-size="10" fill="#2f7a45" font-family="sans-serif">angle=0</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-6-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<h3 id="sec-6-3-3">6.3.3 步长决定精细度（Step Size Controls Smoothness）</h3>
+
+<h4>6.3.3.1 加得越小，圆越圆
+    <span class="en">Smaller steps, smoother curve</span>
+</h4>
+
+<p>那句 <code>angle += 0.2</code> 里的 <code>0.2</code> 是<strong>步长</strong>，它决定了圆的精细度。步长越小，一圈取的点越多，线段越短，圆看起来越光滑；步长越大，点越稀疏，圆会变成带棱角的多边形。这是"用离散的点近似连续曲线"时永恒的权衡：更精细 vs 更省步数。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>步长小 → 光滑</h5>
+        <div class="code-block">
+<pre>angle += <span class="num">0.1</span>
+<span class="cmt"># 一圈约 63 个点</span>
+<span class="cmt"># 圆润顺滑</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>步长大 → 有棱角</h5>
+        <div class="code-block">
+<pre>angle += <span class="num">1.0</span>
+<span class="cmt"># 一圈仅约 7 个点</span>
+<span class="cmt"># 更像多边形</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">别忘了让循环能结束：</span><code>while</code> 里每轮一定要有 <code>angle += 0.2</code> 这样的<strong>递增</strong>，让角度不断逼近 <code>2π</code> 的终止条件。如果忘了递增，<code>angle</code> 永远是 0、条件永远成立，就会陷入<strong>死循环</strong>，圆画不出来、程序也卡住。
+</div>
+
+<!-- ==================== 6.4 ==================== -->
+<div class="section-header" id="section-6-4">
+    <h2>6.4 顺序移动画方</h2>
+    <div class="en-title">Drawing a Square by Sequential Moves</div>
+</div>
+
+<h3 id="sec-6-4-1">6.4.1 四角坐标（The Four Corners）</h3>
+
+<h4>6.4.1.1 用"中心 ± 半边长"算出四个角
+    <span class="en">Corners from center ± half-side</span>
+</h4>
+
+<p>正方形不用循环——它只有四个角，直接顺序走过去连线即可。诀窍是先算<strong>半边长</strong> <code>cornerOffset = size / 2</code>，再以中心 <code>(x, y)</code> 为基准，用"加减半边长"的四种组合得到四个角：左下 <code>(x-半, y-半)</code>、右下 <code>(x+半, y-半)</code>、右上 <code>(x+半, y+半)</code>、左上 <code>(x-半, y+半)</code>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 500 220" width="500" role="img" aria-label="正方形四角坐标">
+        <text x="250" y="26" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">中心 (x,y) ± 半边长 = 四个角</text>
+        <rect x="160" y="60" width="180" height="120" fill="none" stroke="#5B9BD5" stroke-width="2"/>
+        <circle cx="250" cy="120" r="3" fill="#f0c674"/>
+        <text x="250" y="115" text-anchor="middle" font-size="10" fill="#f0c674" font-family="monospace">(x,y)</text>
+        <g font-family="monospace" font-size="10" fill="#9fd4a8">
+            <circle cx="160" cy="180" r="4" fill="#9fd4a8"/>
+            <text x="150" y="200" text-anchor="middle">(x-半,y-半)</text>
+            <circle cx="340" cy="180" r="4" fill="#9fd4a8"/>
+            <text x="350" y="200" text-anchor="middle">(x+半,y-半)</text>
+            <circle cx="340" cy="60" r="4" fill="#9fd4a8"/>
+            <text x="350" y="52" text-anchor="middle">(x+半,y+半)</text>
+            <circle cx="160" cy="60" r="4" fill="#9fd4a8"/>
+            <text x="150" y="52" text-anchor="middle">(x-半,y+半)</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:12766675f6:START anchor=sec-6-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="12766675f6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，你不是走进一间教室，而是一片等待被拯救的大陆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:12766675f6:END -->
+<!-- CC-PROTECTION:HIDDEN:0a3e180164:START anchor=sec-6-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0a3e180164">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:0a3e180164:END -->
+
+<h3 id="sec-6-4-2">6.4.2 依次连线成方（Connecting the Corners）</h3>
+
+<h4>6.4.2.1 提笔到起点，落笔绕一圈回到起点
+    <span class="en">Pen up to start, then trace the loop</span>
+</h4>
+
+<p>画法很直接：先<strong>提笔</strong>移到第一个角（左下），<strong>落笔</strong>，再依次 <code>moveXY</code> 到其余三个角，最后<strong>回到起点</strong>闭合。四条边就画好了。注意最后一定要走回第一个角，否则正方形会缺一条边、闭不上口。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">drawSquare</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> size<span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">False</span><span class="punc">)</span>
+    cornerOffset = size / <span class="num">2</span>            <span class="cmt"># 半边长</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x - cornerOffset<span class="punc">,</span> y - cornerOffset<span class="punc">)</span>  <span class="cmt"># 提笔到左下角</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">True</span><span class="punc">)</span>             <span class="cmt"># 落笔</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x + cornerOffset<span class="punc">,</span> y - cornerOffset<span class="punc">)</span>  <span class="cmt"># → 右下</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x + cornerOffset<span class="punc">,</span> y + cornerOffset<span class="punc">)</span>  <span class="cmt"># → 右上</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x - cornerOffset<span class="punc">,</span> y + cornerOffset<span class="punc">)</span>  <span class="cmt"># → 左上</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x - cornerOffset<span class="punc">,</span> y - cornerOffset<span class="punc">)</span>  <span class="cmt"># → 回左下，闭合</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">圆用循环，方用顺序——为什么不同？</span>圆有几十个点、且每个点靠公式算出，规律统一，最适合用 <code>while</code> 循环反复计算；正方形只有四个角、各不相同，写死四行 <code>moveXY</code> 反而更清楚直接。<strong>点多且有规律用循环，点少且各异用顺序</strong>——选对工具，代码才简洁。
+</div>
+
+<!-- ==================== 6.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-6-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-6-5">
+    <h2>6.5 参数化的绘图函数</h2>
+    <div class="en-title">Parameterized Drawing Functions</div>
+</div>
+
+<h3 id="sec-6-5-1">6.5.1 中心与大小（Center and Size）</h3>
+
+<h4>6.5.1.1 一个函数，画到任意位置、任意大小
+    <span class="en">One function, any place and size</span>
+</h4>
+
+<p><code>drawCircle(x, y, size)</code> 和 <code>drawSquare(x, y, size)</code> 都带三个参数：<code>x</code>、<code>y</code> 是图形<strong>中心</strong>，<code>size</code> 是图形<strong>大小</strong>（圆的半径 / 方的边长）。这就是参数的威力——同一个函数，换不同的参数，就能在<strong>任意位置</strong>画出<strong>任意大小</strong>的图形，不必为每个图形重写一遍绘图逻辑。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="fn">drawCircle</span><span class="punc">(</span><span class="num">28</span><span class="punc">,</span> <span class="num">36</span><span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>   <span class="cmt"># 在(28,36)画半径10的圆</span>
+<span class="fn">drawCircle</span><span class="punc">(</span><span class="num">50</span><span class="punc">,</span> <span class="num">50</span><span class="punc">,</span> <span class="num">5</span><span class="punc">)</span>    <span class="cmt"># 同一函数，换个位置画个小圆</span>
+<span class="fn">drawSquare</span><span class="punc">(</span><span class="num">44</span><span class="punc">,</span> <span class="num">36</span><span class="punc">,</span> <span class="num">20</span><span class="punc">)</span>   <span class="cmt"># 画个大方块</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🏗️ 绘图函数像"印章"</div>
+    <code>drawCircle</code> 就像一枚可缩放的圆形印章：告诉它盖在哪（x, y）、盖多大（size），它就在那儿印出一个圆。写好一次，随处可用、想画几个画几个——这正是函数"封装 + 复用"思想在绘图中的体现。
+</div>
+
+<!-- ==================== 6.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-6-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<div class="section-header" id="section-6-6">
+    <h2>6.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy & Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 花的几何学 -->
+<div class="level-card" id="sec-6-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 花的几何学</span>
+        <h3>🌷 花的几何学 —— 画圆、画方，随心创作</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/6-6-1-1_flower_geometry.png" alt="扣哒世界 花的几何学关卡 - koudashijie.com">
+            <div class="caption">图2：花的几何学——手握花之戒指，在红 X 处画圆、白 X 处画方，尽情用花朵作画</div>
+        </div>
+
+        <h4>策略：先按要求画两图，再自由发挥</h4>
+        <p>本关是一个<strong>轻松的创意练习关</strong>，没有敌人。通关要求很明确：在 <code>redX</code> 坐标处画一个大小为 10 的<strong>圆</strong>，在 <code>whiteX</code> 坐标处画一个大小为 10 的<strong>方</strong>。关卡已经把 <code>drawCircle</code> 和 <code>drawSquare</code> 两个函数写好给你，你只需<strong>正确地设色并调用它们</strong>；完成后还可以随意画任何你喜欢的图案。</p>
+
+        <h4>思路拆解：设色 + 调用</h4>
+        <p>算法思路非常简单，就四步。第一，<strong>选颜色</strong>：<code>hero.setFlowerColor("red")</code>。第二，<strong>画圆</strong>：把 <code>redX</code> 的 <code>x</code>、<code>y</code> 和大小 10 传给 <code>drawCircle(redX.x, redX.y, 10)</code>。第三，<strong>换颜色</strong>：<code>hero.setFlowerColor("purple")</code>。第四，<strong>画方</strong>：<code>drawSquare(whiteX.x, whiteX.y, 10)</code>。关键点是记得<strong>在每个图形前先设好颜色</strong>，以及正确地从坐标对象里取出 <code>.x</code>、<code>.y</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：设色 → 调用绘图函数</span>
+redX = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">28</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">36</span><span class="punc">}</span>
+whiteX = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">44</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">36</span><span class="punc">}</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">setFlowerColor</span><span class="punc">(</span><span class="str">"red"</span><span class="punc">)</span>          <span class="cmt"># 选红色</span>
+<span class="fn">drawCircle</span><span class="punc">(</span>redX<span class="punc">.</span>x<span class="punc">,</span> redX<span class="punc">.</span>y<span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>       <span class="cmt"># 红 X 处画圆</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">setFlowerColor</span><span class="punc">(</span><span class="str">"purple"</span><span class="punc">)</span>       <span class="cmt"># 换紫色</span>
+<span class="fn">drawSquare</span><span class="punc">(</span>whiteX<span class="punc">.</span>x<span class="punc">,</span> whiteX<span class="punc">.</span>y<span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>   <span class="cmt"># 白 X 处画方</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">进阶创作思路：</span>通关后不妨试试组合玩法：用 <code>while</code> 循环+取余在一排画好几个不同颜色的圆；把 <code>drawCircle</code> 的 <code>size</code> 由小到大循环，画出同心圆；或在一个大圆的圆周上，每隔一段角度画一个小圆，拼出一朵"花"。关卡也建议你去 <strong>Mountain Flower Grove</strong> 继续练习绘画技巧。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">把图形当积木：</span>复杂图案都是简单图形的组合。想画一张笑脸？就是"一个大圆（脸）+ 两个小圆（眼）+ 一段圆弧（嘴）"。学会用 <code>drawCircle</code>、<code>drawSquare</code> 这些"积木"和参数控制位置大小，你就能搭出无穷无尽的图案——这就是<strong>用函数组合去构建复杂事物</strong>的编程思维。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 6.7 ==================== -->
+<div class="section-header" id="section-6-7">
+    <h2>6.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-6-7-1">6.7.1 绘图与循环的典型坑（Pitfalls）</h3>
+
+<h4>6.7.1.1 画图相关的常见问题
+    <span class="en">Typical issues with drawing & loops</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec6_6-7-1-1_common_errors.png" alt="扣哒世界 绘图常见错误速查 - koudashijie.com">
+    <div class="caption">图3：忘递增导致死循环、忘落笔画不出线、忘换色、坐标取值错，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>while 里忘了 <code>angle += 0.2</code>——角度不变、条件永真，陷入死循环，圆永远画不完。</li>
+        <li>忘记落笔 <code>toggleFlowers(True)</code>——英雄走了一圈却不留花，什么都没画出来。</li>
+        <li>移到起点时忘提笔——从旧位置到起点的空移也画上了线，图形多出一条"尾巴"。</li>
+        <li>画多个图形忘换色——所有图形都是同一颜色，或忘了在每个图形前重新 <code>setFlowerColor</code>。</li>
+        <li>正方形忘了回到起点——少走最后一条边，方形缺口、闭不上。</li>
+        <li>坐标对象取值错——应写 <code>redX.x</code>、<code>redX.y</code>，别直接把整个 <code>redX</code> 当数字传进去。</li>
+        <li>把半径当直径用——圆的 <code>size</code> 是半径，方的 <code>size</code> 是边长，含义不同别混淆。</li>
+        <li>角度终止条件写错——要转满一圈是 <code>&lt;= Math.PI * 2</code>，写成 <code>Math.PI</code> 只画半圆。</li>
+        <li>步长过大——<code>angle</code> 每次加太多，圆会变成带棱角的多边形，不够圆润。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-6-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你解锁了花之戒指，把编程变成了画笔！这一单元你把前面学的<strong>循环、三角函数、函数封装</strong>全部串了起来：用 <code>toggleFlowers</code> 控制落笔/提笔、用 <code>setFlowerColor</code> 上色；理解了圆是"沿圆周描点近似"的，用 <code>while</code> 让<strong>角度递增、配合 cos/sin 画圆</strong>，并明白步长决定圆的精细度；用<strong>顺序移动到四个角</strong>画正方形；还看清了 <code>drawCircle</code>、<code>drawSquare</code> 如何用"中心 + 大小"参数变成可随处复用的通用工具。在"花的几何学"里，你设色、调用，画出了自己的第一幅代码画作。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>toggleFlowers 开关</td><td>True 落笔留痕，False 提笔空移</td><td>花的几何学</td></tr>
+            <tr><td>setFlowerColor 上色</td><td>持续生效，画前先设色</td><td>花的几何学</td></tr>
+            <tr><td>while + 三角函数</td><td>角度递增，cos/sin 描圆周点</td><td>花的几何学</td></tr>
+            <tr><td>步长与精细度</td><td>步长越小，圆越光滑</td><td>花的几何学</td></tr>
+            <tr><td>顺序移动画方</td><td>中心±半边长得四角，依次连线</td><td>花的几何学</td></tr>
+            <tr><td>回到起点闭合</td><td>正方形最后要走回第一个角</td><td>花的几何学</td></tr>
+            <tr><td>参数化绘图</td><td>中心 x,y + 大小 size，随处复用</td><td>花的几何学</td></tr>
+            <tr><td>图形组合创作</td><td>简单图形拼出复杂图案</td><td>花的几何学</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用循环与三角函数把冰冷的坐标化作满地繁花的英雄，才是云峰之上真正兼具理性与浪漫的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🌷🎨
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:df856ddad1:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="df856ddad1">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC6-19995E7B5919。</span>
+<!-- CC-PROTECTION:HIDDEN:df856ddad1:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第六单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

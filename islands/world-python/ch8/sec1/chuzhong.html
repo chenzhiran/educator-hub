@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC1-0DCC86F01BDD">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第一单元：函数综合应用 · 封装你的行为 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC1-0DCC86F01BDD | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第一单元</div>
+
+    <a href="#section-1-1" class="nav-section">1.1 什么是函数</a>
+    <a href="#sec-1-1-1" class="nav-sub">1.1.1 从"重复"到"封装"</a>
+    <a href="#sec-1-1-2" class="nav-sub">1.1.2 函数的两个阶段</a>
+
+    <a href="#section-1-2" class="nav-section">1.2 定义函数</a>
+    <a href="#sec-1-2-1" class="nav-sub">1.2.1 def 关键字与命名</a>
+    <a href="#sec-1-2-2" class="nav-sub">1.2.2 冒号与缩进的函数体</a>
+    <a href="#sec-1-2-3" class="nav-sub">1.2.3 代码延迟执行</a>
+
+    <a href="#section-1-3" class="nav-section">1.3 调用函数</a>
+    <a href="#sec-1-3-1" class="nav-sub">1.3.1 函数名加括号</a>
+    <a href="#sec-1-3-2" class="nav-sub">1.3.2 在 while 里调用</a>
+
+    <a href="#section-1-4" class="nav-section">1.4 用函数分解行为</a>
+    <a href="#sec-1-4-1" class="nav-sub">1.4.1 一个函数做一件事</a>
+
+    <a href="#section-1-5" class="nav-section">1.5 实战关卡精讲</a>
+    <a href="#sec-1-5-1" class="nav-sub">1.5.1 关键力量</a>
+    <a href="#sec-1-5-2" class="nav-sub">1.5.2 双生花</a>
+
+    <a href="#section-1-6" class="nav-section">1.6 常见错误</a>
+    <a href="#sec-1-6-1" class="nav-sub">1.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第一单元：函数综合应用 · 封装你的行为</h1>
+    <div class="subtitle">Unit 1: Working with Functions — Encapsulating Behavior</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 关键力量 → 双生花</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 1.1 ==================== -->
+<div class="section-header" id="section-1-1">
+    <h2>1.1 什么是函数</h2>
+    <div class="en-title">What Is a Function</div>
+</div>
+
+<p>欢迎来到计算机科学 5！在前面的旅程里，你已经掌握了变量、条件、循环、数组、字典，还学会了召唤和指挥军队。但随着程序越写越长，你会发现同一段逻辑要反复出现，主循环挤得密密麻麻、越来越难读。本单元你将拿到一件真正把编程能力"提高到下一个等级"的工具——<span class="keyword">函数（function）</span>。关卡"关键力量"的开场白说得很直白："用新的概念：函数，把你的编程能力提高到下一个等级！"</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>函数让你把一段"做某件事"的代码打包起来、起个名字，之后想做这件事，只要喊一声名字就行。你将学会用 <code>def</code> 定义函数、用缩进写函数体、理解函数内代码"先保存、后执行"的特性，并在 <code>while</code> 循环里调用自己写的函数，把"捡金币、召唤兵、指挥兵"这些重复行为各自封装成一个函数。
+</div>
+
+<h3 id="sec-1-1-1">1.1.1 从"重复"到"封装"（From Repetition to Encapsulation）</h3>
+
+<h4>1.1.1.1 把行为打包成一个名字
+    <span class="en">Pack a behavior behind a name</span>
+</h4>
+
+<p>关卡概览一语中的："函数非常适合将高级行为分解为更多小的部分。"想象你的主循环里要做三件事——捡最近的金币、召唤士兵、指挥士兵攻击。如果全堆在一起，循环体又长又乱。函数的思路是：把"捡金币"那几行打包成 <code>pickUpNearestCoin</code>，把"召唤兵"打包成 <code>summonSoldier</code>，把"指挥兵"打包成 <code>commandSoldiers</code>。主循环就变成清清爽爽的三行调用。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 200" width="620" role="img" aria-label="把行为封装成函数">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">把一大段行为，拆进三个命名的"盒子"</text>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="40" y="50" width="180" height="120" rx="10" fill="#fbeae7" stroke="#C0453B" stroke-width="2"/>
+            <text x="130" y="72" text-anchor="middle" fill="#9e352c" font-weight="bold">乱糟糟的主循环</text>
+            <text x="130" y="96" text-anchor="middle" fill="#6a8294" font-size="10">找物品…移动…</text>
+            <text x="130" y="114" text-anchor="middle" fill="#6a8294" font-size="10">比金币…召唤…</text>
+            <text x="130" y="132" text-anchor="middle" fill="#6a8294" font-size="10">遍历盟友…攻击…</text>
+            <text x="130" y="150" text-anchor="middle" fill="#6a8294" font-size="10">全挤在一起 😵</text>
+
+            <defs>
+                <marker id="f-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+                </marker>
+            </defs>
+            <line x1="228" y1="110" x2="290" y2="110" stroke="#4d6373" stroke-width="2" marker-end="url(#f-arr)"/>
+
+            <rect x="310" y="46" width="270" height="34" rx="8" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="445" y="68" text-anchor="middle" fill="#2A5A85" font-family="monospace">pickUpNearestCoin()</text>
+            <rect x="310" y="92" width="270" height="34" rx="8" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="445" y="114" text-anchor="middle" fill="#2f7a45" font-family="monospace">summonSoldier()</text>
+            <rect x="310" y="138" width="270" height="34" rx="8" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="445" y="160" text-anchor="middle" fill="#bd7415" font-family="monospace">commandSoldiers()</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-1-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-1-1-2">1.1.2 函数的两个阶段（Define, then Call）</h3>
+
+<h4>1.1.2.1 先"定义"，后"调用"
+    <span class="en">Definition and invocation are separate</span>
+</h4>
+
+<p>使用函数永远分两步：先<strong>定义</strong>（告诉程序"这个名字对应哪些代码"），再<strong>调用</strong>（真正让这些代码跑起来）。这两步是分开的——只定义不调用，代码一行都不会执行。关卡特别强调："请记住，在定义函数之后，你必须调用它！"这是初学者最常忘的一点。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">📦 函数就像"食谱"</div>
+    <strong>定义（def）</strong>：写下一张菜谱，标题是菜名，下面是做法步骤——但写菜谱本身并不会做出菜来。<br>
+    <strong>调用（名字 + 括号）</strong>：喊出菜名"照这张菜谱做一份！"——这时厨房才真正动起来。<br>
+    <strong>只写菜谱不点菜，永远吃不上饭。</strong>
+</div>
+
+<!-- ==================== 1.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:c1d65681b7:START anchor=sec-1-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="c1d65681b7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，编程小白都在偷偷玩的闯关游戏，写一行代码角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c1d65681b7:END -->
+
+<div class="section-header" id="section-1-2">
+    <h2>1.2 定义函数</h2>
+    <div class="en-title">Defining a Function</div>
+</div>
+
+<h3 id="sec-1-2-1">1.2.1 def 关键字与命名（The def Keyword）</h3>
+
+<h4>1.2.1.1 def 名字 括号 冒号
+    <span class="en">def name ( ) :</span>
+</h4>
+
+<p>定义函数用关键字 <code>def</code>（definition 的缩写）开头，后面跟函数名、一对括号 <code>()</code>、再加一个冒号 <code>:</code>。函数名要能说明它"做什么"，通常用动词短语，如 <code>pickUpNearestCoin</code>（捡起最近的金币）、<code>summonSoldier</code>（召唤士兵）。这一行叫函数的"头部"。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 150" width="600" role="img" aria-label="def 函数头部解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">函数头部的四个零件</text>
+        <text x="60" y="80" font-size="22" font-family="monospace" fill="#7cc7e8">def</text>
+        <text x="130" y="80" font-size="22" font-family="monospace" fill="#f0c674">summonSoldier</text>
+        <text x="345" y="80" font-size="22" font-family="monospace" fill="#cdddea">(</text>
+        <text x="360" y="80" font-size="22" font-family="monospace" fill="#cdddea">)</text>
+        <text x="378" y="80" font-size="22" font-family="monospace" fill="#cdddea">:</text>
+        <text x="90" y="112" font-size="11" fill="#7cc7e8" text-anchor="middle" font-family="sans-serif">关键字</text>
+        <text x="235" y="112" font-size="11" fill="#f0c674" text-anchor="middle" font-family="sans-serif">函数名</text>
+        <text x="352" y="112" font-size="11" fill="#cdddea" text-anchor="middle" font-family="sans-serif">括号</text>
+        <text x="378" y="112" font-size="11" fill="#cdddea" text-anchor="middle" font-family="sans-serif">冒号</text>
+        <line x1="90" y1="88" x2="90" y2="102" stroke="#7cc7e8" stroke-width="1.5"/>
+        <line x1="235" y1="88" x2="235" y2="102" stroke="#f0c674" stroke-width="1.5"/>
+        <line x1="352" y1="88" x2="352" y2="102" stroke="#cdddea" stroke-width="1.5"/>
+        <line x1="378" y1="88" x2="378" y2="102" stroke="#cdddea" stroke-width="1.5"/>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-1-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+<!-- CC-PROTECTION:HIDDEN:f3d22deaac:START anchor=sec-1-2-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="f3d22deaac">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:f3d22deaac:END -->
+
+<h3 id="sec-1-2-2">1.2.2 冒号与缩进的函数体（Colon &amp; Indentation）</h3>
+
+<h4>1.2.2.1 缩进决定"哪些代码属于函数"
+    <span class="en">Indentation marks the function body</span>
+</h4>
+
+<p>头部那行以冒号结尾，紧接着的<strong>缩进代码块</strong>就是"函数体"——真正要做的事。Python 靠<strong>缩进</strong>（通常 4 个空格）来判断哪些行属于这个函数：缩进在里面的就属于它，一旦回到不缩进，就说明函数结束了。下面这个 <code>pickUpNearestCoin</code> 是关卡给好的示范。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 定义：让英雄收集最近的金币</span>
+<span class="kw">def</span> <span class="fn">pickUpNearestCoin</span><span class="punc">():</span>
+    items = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>           <span class="cmt"># ← 缩进，属于函数体</span>
+    nearestCoin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span>items<span class="punc">)</span>
+    <span class="kw">if</span> nearestCoin<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>nearestCoin<span class="punc">.</span>pos<span class="punc">)</span>    <span class="cmt"># ← 更深缩进，属于 if</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">缩进错了，函数就散了：</span>函数体的每一行都必须缩进。如果忘了缩进，Python 会认为那行"不属于函数"，报缩进错误或逻辑出错。同一个函数体里的缩进层级也要一致——别一行 4 空格、一行 2 空格。
+</div>
+
+<h3 id="sec-1-2-3">1.2.3 代码延迟执行（Deferred Execution）</h3>
+
+<h4>1.2.3.1 定义时"只保存，不运行"
+    <span class="en">Defining saves the code for later</span>
+</h4>
+
+<p>这是函数最关键、也最容易被忽略的特性。关卡默认代码的注释写得非常清楚："放在函数内的代码并不会立刻执行，而是先保存好，以备后用。"也就是说，当程序读到 <code>def pickUpNearestCoin():</code> 这一段时，里面的 <code>findItems</code>、<code>move</code> 统统<strong>不会</strong>马上发生；它们只是被记下来、贴上 <code>pickUpNearestCoin</code> 这个标签，静静等待你日后"点名"。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 170" width="600" role="img" aria-label="定义时延迟执行">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">def 阶段：代码被"存进抽屉"，不运行</text>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="60" y="50" width="200" height="90" rx="10" fill="#eaf2f8" stroke="#4A7A9B" stroke-width="2"/>
+            <text x="160" y="74" text-anchor="middle" fill="#3a6480" font-weight="bold">def pickUpNearestCoin():</text>
+            <text x="160" y="98" text-anchor="middle" fill="#6a8294" font-size="11">findItems / move …</text>
+            <text x="160" y="120" text-anchor="middle" fill="#6a8294" font-size="11">💤 保存待用，未执行</text>
+
+            <defs>
+                <marker id="d2-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#2f7a45"/>
+                </marker>
+            </defs>
+            <line x1="262" y1="95" x2="335" y2="95" stroke="#2f7a45" stroke-width="2" marker-end="url(#d2-arr)"/>
+            <text x="300" y="86" text-anchor="middle" fill="#2f7a45" font-size="10">被调用时</text>
+
+            <rect x="340" y="50" width="200" height="90" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="440" y="74" text-anchor="middle" fill="#2f7a45" font-weight="bold">pickUpNearestCoin()</text>
+            <text x="440" y="98" text-anchor="middle" fill="#6a8294" font-size="11">▶ 抽屉里的代码</text>
+            <text x="440" y="120" text-anchor="middle" fill="#6a8294" font-size="11">这时才真正运行！</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 1.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-1-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<div class="section-header" id="section-1-3">
+    <h2>1.3 调用函数</h2>
+    <div class="en-title">Calling a Function</div>
+</div>
+
+<h3 id="sec-1-3-1">1.3.1 函数名加括号（Name Plus Parentheses）</h3>
+
+<h4>1.3.1.1 一对括号就是"运行指令"
+    <span class="en">The parentheses trigger the run</span>
+</h4>
+
+<p>要让保存好的函数真正执行，就<strong>调用</strong>它——写下函数名，末尾加一对括号 <code>()</code>。关卡说得明明白白："要调用一个函数，请在函数名称末尾使用 ()，如 <code>commandSoldiers()</code>。"注意区别：定义时写 <code>def 名字():</code>，调用时只写 <code>名字()</code>——没有 <code>def</code>、不缩进在别的函数里、末尾也没有冒号。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>定义（写菜谱）</h5>
+        <div class="code-block">
+<pre><span class="kw">def</span> <span class="fn">summonSoldier</span><span class="punc">():</span>
+    <span class="cmt"># ...函数体...</span>
+    <span class="kw">pass</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>调用（点这道菜）</h5>
+        <div class="code-block">
+<pre><span class="fn">summonSoldier</span><span class="punc">()</span>
+
+<span class="cmt"># 无 def、无冒号、不缩进</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">别忘那对括号：</span>只写函数名 <code>summonSoldier</code> 而漏掉括号，Python 不会执行它，只是"提到"了这个函数。加上 <code>()</code>，才是真正下令"现在就跑一遍"。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-1-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-1-3-2">1.3.2 在 while 里调用（Calling Inside a Loop）</h3>
+
+<h4>1.3.2.1 主循环变成一份"行动清单"
+    <span class="en">The main loop becomes a checklist</span>
+</h4>
+
+<p>把函数调用放进 <code>while True</code>，主循环就变成一份清爽的"行动清单"：每一帧依次点名三个函数，游戏就会反复执行"捡币→召唤→指挥"。关卡默认代码提示："在你的循环里，你可以'调用'你在上面定义的函数……下面一行代码会让 <code>pickUpNearestCoin</code> 函数里的代码被执行。"</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="fn">pickUpNearestCoin</span><span class="punc">()</span>   <span class="cmt"># 捡最近的金币</span>
+    <span class="fn">summonSoldier</span><span class="punc">()</span>       <span class="cmt"># 有钱就召唤</span>
+    <span class="fn">commandSoldiers</span><span class="punc">()</span>     <span class="cmt"># 指挥全军攻击</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">读代码像读目录：</span>看到这个主循环，就算不看函数内部，也能立刻明白程序"每帧做三件事：捡币、召唤、指挥"。这就是函数带来的<strong>可读性</strong>——把"做什么"和"怎么做"分开，主循环负责"做什么"，函数内部负责"怎么做"。
+</div>
+
+<!-- ==================== 1.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-1-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+<!-- CC-PROTECTION:HIDDEN:072404ffe0:START anchor=sec-1-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="072404ffe0">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:072404ffe0:END -->
+
+<div class="section-header" id="section-1-4">
+    <h2>1.4 用函数分解行为</h2>
+    <div class="en-title">Decomposing Behavior with Functions</div>
+</div>
+
+<h3 id="sec-1-4-1">1.4.1 一个函数做一件事（One Function, One Job）</h3>
+
+<h4>1.4.1.1 每项行动都有自己的函数
+    <span class="en">Each action gets its own function</span>
+</h4>
+
+<p>关卡给出了一条重要的设计原则："每一项行动都要有自己的函数！"也就是<strong>一个函数只专注做一件事</strong>：<code>pickUpNearestCoin</code> 只管捡币、<code>summonSoldier</code> 只管召唤、<code>commandSoldiers</code> 只管指挥。这样每个函数都短小、清晰、好测试，哪块出了问题也容易定位。这是编程里"关注点分离"的入门体现。</p>
+
+<div class="review-grid">
+    <div class="review-card">
+        <h4>💰 pickUpNearestCoin</h4>
+        <p>找到所有物品里最近的一个金币，移动过去捡起来。只负责"捡钱"。</p>
+    </div>
+    <div class="review-card">
+        <h4>⭐ summonSoldier</h4>
+        <p>判断 <code>gold</code> 是否够 <code>costOf("soldier")</code>，够就召唤。只负责"扩军"。</p>
+    </div>
+    <div class="review-card">
+        <h4>⚔️ commandSoldiers</h4>
+        <p>遍历所有士兵，各自找最近敌人并下令攻击。只负责"作战"。</p>
+    </div>
+</div>
+
+<!-- ==================== 1.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-1-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+<div class="section-header" id="section-1-5">
+    <h2>1.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 关键力量 -->
+<div class="level-card" id="sec-1-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 关键力量</span>
+        <h3>🔑 关键力量 —— 补全并调用你的第一个函数</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/1-5-1-1_critical_power.png" alt="扣哒世界 关键力量关卡 - koudashijie.com">
+            <div class="caption">图2：关键力量——一边捡金币、召唤士兵，一边指挥他们迎击食人魔，全部用函数组织</div>
+        </div>
+
+        <h4>策略：三个函数各司其职</h4>
+        <p>本关是函数的入门关。关卡已经替你写好了 <code>pickUpNearestCoin</code> 和 <code>commandSoldiers</code> 两个函数，留下 <code>summonSoldier</code> 让你补全，并要求你在主循环里把三个函数<strong>都调用一遍</strong>。策略非常清晰：让程序每帧都"捡币攒钱→有钱扩军→指挥作战"，同时英雄注意躲避食人魔的攻击。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是两件事。其一，<strong>补全 summonSoldier 函数体</strong>：在函数里写一个 if 判断——<code>if hero.gold &gt;= hero.costOf("soldier"):</code> 就 <code>hero.summon("soldier")</code>，把"钱够才召唤"的逻辑封装进去。其二，<strong>在 while 循环里调用三个函数</strong>：默认代码已经调用了 <code>pickUpNearestCoin()</code>，你需要在下面补上 <code>summonSoldier()</code> 和 <code>commandSoldiers()</code>——因为"定义之后必须调用，否则函数里的代码永远不会跑"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段一：补全 summonSoldier 的函数体</span>
+<span class="kw">def</span> <span class="fn">summonSoldier</span><span class="punc">():</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold &gt;= <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">)</span>
+
+<span class="cmt"># 关键片段二：在主循环里逐一调用三个函数</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="fn">pickUpNearestCoin</span><span class="punc">()</span>
+    <span class="fn">summonSoldier</span><span class="punc">()</span>
+    <span class="fn">commandSoldiers</span><span class="punc">()</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">定义 ≠ 调用：</span>本关最想让你记住的，就是"定义好 <code>summonSoldier</code> 只是写好了菜谱，必须在 while 里写上 <code>summonSoldier()</code> 才会真正召唤士兵"。很多人卡在"函数写对了却不生效"，十有八九是忘了调用。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">函数调用的顺序有讲究：</span>先捡币再召唤，是因为召唤需要金币；先召唤再指挥，是因为要先有士兵才能指挥。把三个函数按"攒钱→扩军→作战"的逻辑顺序排好，整支队伍的运转才顺畅。
+        </div>
+    </div>
+</div>
+
+<!-- 双生花 -->
+<div class="level-card" id="sec-1-5-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 双生花</span>
+        <h3>🌸 双生花 —— 自己动手写两个函数</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/1-5-2-1_twin_flowers.png" alt="扣哒世界 双生花关卡 - koudashijie.com">
+            <div class="caption">图3：双生花——花匠安危牵动双生花大小，靠士兵保护花匠、捡币扩军来撑过攻击</div>
+        </div>
+
+        <h4>策略：保护花匠，撑过攻势</h4>
+        <p>本关的设定很有意思：双生花和花匠命运相连——花匠被攻击，双生花就缩小；缩到普通花朵大小后花匠会开始受伤；花匠平安时双生花则会长大。所以策略核心是<strong>尽力保护花匠</strong>：不停召唤士兵、指挥士兵清剿逼近的敌人、捡金币维持扩军，用一支持续壮大的部队把攻击挡在花匠之外，撑到胜利。</p>
+
+        <h4>思路拆解</h4>
+        <p>与"关键力量"不同，本关的 <code>summonSoldiers</code> 已给好，需要你<strong>亲手定义 commandSoldiers 和 pickUpNearestCoin 两个函数</strong>，并在 while 循环里给它们<strong>取消注释</strong>后调用。算法思路是：<code>commandSoldiers</code> 用 <code>for</code> 遍历所有士兵（可用 <code>hero.findByType("soldier")</code> 精确取士兵），每个士兵 <code>findNearestEnemy()</code> 找到敌人就 <code>command(soldier, "attack", enemy)</code>；<code>pickUpNearestCoin</code> 则 <code>findNearest(findItems())</code> 找到金币就 <code>move</code> 过去。定义好后，在循环里依次调用 <code>summonSoldiers()</code>、<code>commandSoldiers()</code>、<code>pickUpNearestCoin()</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：亲手定义两个函数</span>
+<span class="kw">def</span> <span class="fn">commandSoldiers</span><span class="punc">():</span>
+    <span class="kw">for</span> soldier <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">):</span>
+        enemy = soldier<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+        <span class="kw">if</span> enemy<span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>
+
+<span class="kw">def</span> <span class="fn">pickUpNearestCoin</span><span class="punc">():</span>
+    coin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">())</span>
+    <span class="kw">if</span> coin<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">)</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别忘取消注释：</span>关卡默认把循环里的 <code>commandSoldiers()</code> 和 <code>pickUpNearestCoin()</code> 用 <code>#</code> 注释掉了。你把函数定义写好后，一定要记得删掉这两行前面的 <code>#</code>，否则函数虽已定义却从没被调用，士兵不会作战、金币也不会去捡。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">findByType 精确取某类单位：</span>本关用 <code>hero.findByType("soldier")</code> 只挑出"士兵"，而 <code>hero.findByType("peasant")[0]</code> 则取出第一个花匠。相比 <code>findFriends()</code>（所有盟友），<code>findByType</code> 能精确锁定某一类单位，让"指挥士兵"这件事不会误伤或漏掉其他角色。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 1.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+<!-- CC-PROTECTION:HIDDEN:5ab8bfa39e:START anchor=h3-10 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="5ab8bfa39e">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC1-0DCC86F01BDD。</span>
+<!-- CC-PROTECTION:HIDDEN:5ab8bfa39e:END -->
+
+<div class="section-header" id="section-1-6">
+    <h2>1.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-1-6-1">1.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>1.6.1.1 定义与调用的典型问题
+    <span class="en">Typical issues with define and call</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec1_1-6-1-1_common_errors.png" alt="扣哒世界 函数常见错误速查 - koudashijie.com">
+    <div class="caption">图4：定义了却不调用、漏括号、缩进错乱，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>定义了却不调用——函数体永远不会执行；定义之后一定要在循环里 <code>名字()</code> 调用它。</li>
+        <li>调用漏括号——写成 <code>summonSoldier</code> 而非 <code>summonSoldier()</code>，函数不会运行。</li>
+        <li>忘记取消注释——双生花里循环内的调用被 <code>#</code> 注释掉了，要记得删掉 <code>#</code>。</li>
+        <li>函数体没缩进——<code>def</code> 下面的代码必须缩进；不缩进会报错或不属于该函数。</li>
+        <li>缩进层级不一致——同一函数体里空格数要统一，别混用不同缩进。</li>
+        <li>头部漏冒号——<code>def 名字()</code> 后面必须有冒号 <code>:</code>，否则语法错误。</li>
+        <li>把调用写进别的函数里——三个函数应"平级"定义，调用则放在 <code>while</code> 循环中，别层层嵌套。</li>
+        <li>召唤条件写错——<code>summonSoldier</code> 里应是 <code>gold &gt;= costOf(...)</code>，够钱才召唤。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-1-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你把编程能力提升到了"下一个等级"——你学会了函数！这一单元你理解了函数的核心思想：把一段"做某件事"的代码用 <code>def</code> 打包命名、用缩进划定函数体，并牢牢记住了它最关键的两个特性——<strong>定义时代码只保存、不执行</strong>，<strong>必须用"函数名 + 括号"调用后才真正运行</strong>。你把"捡币、召唤、指挥"三项行为各自封装成一个函数，让主循环变成一份清爽的行动清单，还在"关键力量"和"双生花"两关里亲手定义并调用了自己的函数。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>def 定义函数</td><td><code>def 名字():</code> 头部四零件</td><td>两关</td></tr>
+            <tr><td>缩进函数体</td><td>缩进的代码块才属于函数</td><td>两关</td></tr>
+            <tr><td>延迟执行</td><td>定义只保存，调用才运行</td><td>关键力量</td></tr>
+            <tr><td>函数调用</td><td>函数名 + <code>()</code></td><td>两关</td></tr>
+            <tr><td>循环内调用</td><td>while 里点名，反复执行</td><td>两关</td></tr>
+            <tr><td>封装重复行为</td><td>一个函数只做一件事</td><td>两关</td></tr>
+            <tr><td>取消注释调用</td><td>删掉 <code>#</code> 才会被调用</td><td>双生花</td></tr>
+            <tr><td>findByType 取单位</td><td>精确挑出某一类角色</td><td>双生花</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把杂乱的行为封装成一个个命名函数、让主循环清晰如目录的英雄，才是云峰之上真正优雅的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🔑🌸
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第一单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
