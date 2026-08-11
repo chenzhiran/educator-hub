@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC8-AD19F706B5BF">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第八单元：逻辑运算 not | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --accent: #4FBF7C;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #2E9E5B;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1F7A44;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(255, 193, 7, 0.20); border-radius: 3px; padding: 0 2px; }
+        .code-block .bool { color: #6fae6f; font-weight: 600; }
+        .code-block .ret { color: #c678dd; font-weight: 600; }
+        .code-block .andkw { color: #b6d97e; font-weight: 700; }
+        .code-block .orkw { color: #7ec8e3; font-weight: 700; }
+        .code-block .notkw { color: #e39a7e; font-weight: 700; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #ffebee;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.tf-true { color: #4a8a3d; font-weight: 700; }
+        .styled-table td.tf-false { color: #c62828; font-weight: 700; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC8-AD19F706B5BF | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第八单元</div>
+
+    <a href="#section-8-1" class="nav-section">8.1 认识逻辑非 not</a>
+    <a href="#sec-8-1-1" class="nav-sub">8.1.1 not 的含义</a>
+    <a href="#sec-8-1-2" class="nav-sub">8.1.2 not 的真值表</a>
+    <a href="#sec-8-1-3" class="nav-sub">8.1.3 not 语法解剖</a>
+
+    <a href="#section-8-2" class="nav-section">8.2 短路求值</a>
+    <a href="#sec-8-2-1" class="nav-sub">8.2.1 什么是短路求值</a>
+    <a href="#sec-8-2-2" class="nav-sub">8.2.2 用 and 安全读属性</a>
+
+    <a href="#section-8-3" class="nav-section">8.3 组合三大运算符</a>
+    <a href="#sec-8-3-1" class="nav-sub">8.3.1 多值连锁 and/or</a>
+    <a href="#sec-8-3-2" class="nav-sub">8.3.2 运算优先级</a>
+    <a href="#sec-8-3-3" class="nav-sub">8.3.3 用括号明确顺序</a>
+
+    <a href="#section-8-4" class="nav-section">8.4 实战关卡精讲</a>
+    <a href="#sec-8-4-1" class="nav-sub">8.4.1 平常的一天</a>
+    <a href="#sec-8-4-2" class="nav-sub">8.4.2 逻辑之路</a>
+    <a href="#sec-8-4-3" class="nav-sub">8.4.3 逻辑之圈</a>
+    <a href="#sec-8-4-4" class="nav-sub">8.4.4 逻辑结论</a>
+    <a href="#sec-8-4-5" class="nav-sub">8.4.5 非与或</a>
+
+    <a href="#section-8-5" class="nav-section">8.5 常见错误</a>
+    <a href="#sec-8-5-1" class="nav-sub">8.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第八单元：逻辑运算 not</h1>
+    <div class="subtitle">Unit 8: The Logical "not" Operator</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 平常的一天 → 非与或</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 8.1 ==================== -->
+<div class="section-header" id="section-8-1">
+    <h2>8.1 认识逻辑非 not</h2>
+    <div class="en-title">Meet the Logical "not"</div>
+</div>
+
+<h3 id="sec-8-1-1">8.1.1 not 的含义（What "not" Means）</h3>
+
+<h4>8.1.1.1 把布尔值"翻个面"
+    <span class="en">Flip a boolean to its opposite</span>
+</h4>
+
+<p>你已经掌握了 <code>or</code>（满足其一）和 <code>and</code>（必须都满足）。本单元补上三大逻辑运算符的最后一块拼图——逻辑<strong>非（not）</strong>。它和前两个有个根本区别："逻辑之路"关卡点明：<strong>"非（NOT）运算符用法有所不同，它只有一个输入值，并将结果取反。"</strong></p>
+
+<p>也就是说，<code>and</code> 和 <code>or</code> 需要<strong>左右两个</strong>布尔值，而 <code>not</code> 只作用于<strong>一个</strong>布尔值，把它<strong>翻个面</strong>——<code>True</code> 变 <code>False</code>，<code>False</code> 变 <code>True</code>。它就像一个"反义词开关"。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/8-1-1-1_not_intro.png" alt="扣哒世界 逻辑非示意图 - koudashijie.com">
+    <div class="caption">图1：not 像一个反转开关——输入 True 输出 False,输入 False 输出 True</div>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🔄 生活中的 not</div>
+    <p>如果"下雨了"是 <code>True</code>,那么"<strong>没</strong>下雨"就是 <code>False</code>。<code>not</code> 做的就是把一句陈述变成它的否定。当你想表达"当某事<strong>不</strong>成立时才行动",<code>not</code> 就派上用场了——比如 <code>if not enemy:</code> 意思是"当<strong>没有</strong>敌人时"。</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-8-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<h3 id="sec-8-1-2">8.1.2 not 的真值表（Truth Table of "not"）</h3>
+
+<h4>8.1.2.1 最简单的真值表,只有两行
+    <span class="en">The simplest truth table, only two rows</span>
+</h4>
+
+<p>因为 <code>not</code> 只有一个输入，它的真值表是三大运算符里最简单的——只有两行：</p>
+
+<table class="styled-table">
+    <thead><tr><th>输入 A</th><th>not A</th></tr></thead>
+    <tbody>
+        <tr><td class="tf-true">True</td><td class="tf-false">False</td></tr>
+        <tr><td class="tf-false">False</td><td class="tf-true">True</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">双重否定:</span><code>not (not True)</code> 等于 <code>True</code>——翻两次面就转回来了,和数学里"负负得正"一个道理。虽然编程中很少故意写双重否定,但理解这一点能帮你看懂复杂的逻辑表达式。
+</div>
+
+<h3 id="sec-8-1-3">8.1.3 not 语法解剖（Anatomy of "not"）</h3>
+
+<h4>8.1.3.1 not 写在一个条件前面
+    <span class="en">Put "not" before one condition</span>
+</h4>
+
+<p>与 <code>and</code>/<code>or</code> 夹在两个值中间不同，<code>not</code> 写在<strong>一个</strong>条件的<strong>前面</strong>：</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 440 120" width="440" role="img" aria-label="not 运算符语法解剖">
+        <text x="60" y="55" font-size="22" font-family="monospace" fill="#e39a7e" font-weight="bold">not</text>
+        <text x="150" y="55" font-size="22" font-family="monospace" fill="#f0c674">secretB</text>
+        <!-- 标注 -->
+        <line x1="90" y1="68" x2="90" y2="95" stroke="#e39a7e" stroke-width="2"/>
+        <text x="45" y="110" font-size="13" font-family="sans-serif" fill="#d88a6a">取反运算符</text>
+        <line x1="200" y1="68" x2="200" y2="95" stroke="#E0A23F" stroke-width="2"/>
+        <text x="230" y="110" font-size="13" font-family="sans-serif" fill="#d98e32">被取反的布尔值</text>
+    </svg>
+</div>
+
+<p>回想第五单元学过的 <code>!=</code>：<code>a != b</code> 其实等价于 <code>not (a == b)</code>。<code>!=</code> 是"不等于"的专用简写，而 <code>not</code> 更通用——它能反转<strong>任何</strong>布尔值，不只是相等判断。</p>
+
+<!-- ==================== 8.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-8-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+<!-- CC-PROTECTION:HIDDEN:c6b604bac1:START anchor=sec-8-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="c6b604bac1">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:c6b604bac1:END -->
+
+<div class="section-header" id="section-8-2">
+    <h2>8.2 短路求值</h2>
+    <div class="en-title">Short-Circuit Evaluation</div>
+</div>
+
+<h3 id="sec-8-2-1">8.2.1 什么是短路求值（What Is Short-Circuiting）</h3>
+
+<h4>8.2.1.1 结果已定,就不再算后面
+    <span class="en">Once the result is known, stop early</span>
+</h4>
+
+<p>"平常的一天"关卡揭示了 <code>and</code> 的一个重要特性——<strong>短路求值</strong>。关卡原话：<strong>"使用与运算符时，如果第一个条件（左侧的条件）为 false，第二个条件（右侧的条件）就根本无需执行。"</strong></p>
+
+<p>道理很直白：<code>and</code> 要求两边都为真才为真。如果<strong>左边已经是 False</strong>，那不管右边是什么，整体铁定是 False——既然结果已经确定，程序就"偷懒"不再计算右边了。这个"提前收工"的行为就叫<span class="keyword">短路求值（Short-Circuit Evaluation）</span>。</p>
+
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-8-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<h3 id="sec-8-2-2">8.2.2 用 and 安全读属性（Safe Property Access）</h3>
+
+<h4>8.2.2.1 先确认存在,再读属性
+    <span class="en">Check existence before reading a property</span>
+</h4>
+
+<p>短路求值最实用的价值，是<strong>安全地读取可能不存在的对象的属性</strong>。想想看：如果周围没有敌人，<code>findNearestEnemy()</code> 返回的是"空"，此时直接读 <code>enemy.type</code> 就会报错——因为"空"没有 <code>type</code> 属性。以前我们得用两层嵌套 <code>if</code> 来防范：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 以前: 两层嵌套,先确认存在再读属性</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="kw">if</span> enemy<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"munchkin"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<p>有了短路求值，我们可以用一个 <code>and</code> 把两层合成一层。把 <code>enemy</code>（是否存在）放在 <code>and</code> 左边——如果它为"空"（False），右边的 <code>enemy.type == ...</code> 因短路而根本不会执行，自然就不会报错：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 现在: 一句话搞定,左边为假则右边不执行</span>
+<span class="kw">if</span> enemy <span class="andkw">and</span> enemy<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"munchkin"</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">顺序至关重要:</span>存在性检查<strong>必须放在 and 左边</strong>! 写成 <code>if enemy and enemy.type == "munchkin"</code> 是对的;若颠倒成 <code>if enemy.type == "munchkin" and enemy</code>,当 enemy 为空时,左边的 <code>enemy.type</code> 会先被计算而直接报错——短路就来不及救场了。记住:<strong>先问"在不在",再问"是什么"。</strong>
+</div>
+
+<!-- ==================== 8.3 ==================== -->
+<div class="section-header" id="section-8-3">
+    <h2>8.3 组合三大运算符</h2>
+    <div class="en-title">Combining the Three Operators</div>
+</div>
+
+<h3 id="sec-8-3-1">8.3.1 多值连锁 and/or（Chaining Many Values）</h3>
+
+<h4>8.3.1.1 一个 and 或 or 可连接多个值
+    <span class="en">One "and" / "or" can join more than two values</span>
+</h4>
+
+<p>"逻辑之圈"关卡指出：<strong>"像 AND 和 OR 这样的逻辑运算符，一次可以处理多于两个的值。"</strong> 你可以把好几个布尔值用同一个运算符串成一条链：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 三个都为真,结果才为真</span>
+secretD = secretA <span class="andkw">and</span> secretB <span class="andkw">and</span> secretC
+
+<span class="cmt"># 三个里有一个为真,结果就为真</span>
+secretE = secretA <span class="orkw">or</span> secretB <span class="orkw">or</span> secretC</pre>
+</div>
+
+<p>规律和两个值时一样：一串 <code>and</code>——<strong>全真才真</strong>（有一个假就假）；一串 <code>or</code>——<strong>一真则真</strong>（全假才假）。这让你能同时考察任意多个条件。</p>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-8-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-8-3-2">8.3.2 运算优先级（Operator Precedence）</h3>
+
+<h4>8.3.2.1 not 最先,and 其次,or 最后
+    <span class="en">not first, then and, then or</span>
+</h4>
+
+<p>当 <code>not</code>、<code>and</code>、<code>or</code> 混在一个表达式里时，谁先算？"逻辑结论"关卡给出了明确规则：<strong>"NOT 优先于 AND，AND 又优先于 OR。"</strong> 这就像数学里"先乘除、后加减"一样，逻辑运算也有自己的先后顺序：</p>
+
+<table class="styled-table">
+    <thead><tr><th>优先级</th><th>运算符</th><th>数学类比</th></tr></thead>
+    <tbody>
+        <tr><td>最先算</td><td><code>not</code></td><td>像取负号 -</td></tr>
+        <tr><td>其次算</td><td><code>and</code></td><td>像乘法 ×</td></tr>
+        <tr><td>最后算</td><td><code>or</code></td><td>像加法 +</td></tr>
+    </tbody>
+</table>
+
+<p>举例：<code>not False and True or False</code> 会按 <code>((not False) and True) or False</code> 来算——先 <code>not False</code> 得 <code>True</code>，再 <code>True and True</code> 得 <code>True</code>，最后 <code>True or False</code> 得 <code>True</code>。但这样的表达式很难一眼看懂……</p>
+
+
+<!-- CC-PROTECTION:AD:9dfa595e04:START anchor=sec-8-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9dfa595e04">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，玩家已累计编写超过 10 亿行真实代码，编程也能很酷。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9dfa595e04:END -->
+
+<h3 id="sec-8-3-3">8.3.3 用括号明确顺序（Use Parentheses）</h3>
+
+<h4>8.3.3.1 括号让逻辑清晰,也能改变顺序
+    <span class="en">Parentheses clarify and override order</span>
+</h4>
+
+<p>"逻辑结论"关卡强烈建议：<strong>"这太难阅读了！使用括号来明确哪些运算先进行。"</strong> 括号有两大作用：一是<strong>让人一眼看懂</strong>先算什么，二是<strong>强行改变</strong>默认的优先级——括号里的永远先算。看这一关的几个例子：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># A且B, 或者 C</span>
+tam = <span class="punc">(</span>secretA <span class="andkw">and</span> secretB<span class="punc">)</span> <span class="orkw">or</span> secretC
+
+<span class="cmt"># (A或B), 且 C —— 括号改变了顺序!</span>
+zso = <span class="punc">(</span>secretA <span class="orkw">or</span> secretB<span class="punc">)</span> <span class="andkw">and</span> secretC
+
+<span class="cmt"># A且B, 或者 (B且非C) —— not 嵌在括号里</span>
+csi = <span class="punc">(</span>secretA <span class="andkw">and</span> secretB<span class="punc">)</span> <span class="orkw">or</span> <span class="punc">(</span>secretB <span class="andkw">and</span> <span class="punc">(</span><span class="notkw">not</span> secretC<span class="punc">)</span><span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">好习惯:</span>即使你记得优先级规则,<strong>也建议用括号把意图写清楚</strong>。<code>(secretA or secretB) and secretC</code> 和 <code>secretA or (secretB and secretC)</code> 结果完全不同! 括号既防止自己算错,也让别人(和未来的你)读代码时不必费劲推敲。清晰永远胜过炫技。
+</div>
+
+<!-- ==================== 8.4 ==================== -->
+<div class="section-header" id="section-8-4">
+    <h2>8.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"逻辑运算符如何组合、括号如何摆放"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-8-4-1">8.4.1 平常的一天（Ordinary Day）</h3>
+
+<h4>8.4.1.1 策略：用 and 短路,一句话查存在与类型
+    <span class="en">Strategy: short-circuit existence + type in one line</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/8-4-1-1_ordinary_day.png" alt="扣哒世界 平常的一天关卡 - koudashijie.com">
+    <div class="caption">图2：平常的一天——用 and 的短路特性,一条 if 同时检查"存在"和"类型"</div>
+</div>
+
+<p>这一关的目标很"平常"——打矮人、收硬币，但它教的技巧非常实用：用 <code>and</code> 的短路特性简化代码。以往要写两层嵌套 <code>if</code>（先 <code>if enemy:</code> 再 <code>if enemy.type == ...`），现在合并成一层。</p>
+
+<p>算法思路是两段并列逻辑,各用一次"存在 and 类型":处理敌人时 <code>if enemy and enemy.type == "munchkin"</code> 才 <code>attack</code>;处理物品时 <code>if item and item.type == "coin"</code> 才 <code>moveXY</code> 收集。核心在于理解——<strong>把 <code>enemy</code>/<code>item</code>(存在性)放 and 左边</strong>,一旦对象为空,短路机制让右边的属性读取被跳过,既避免了报错,又让代码从两层缩成一层,清爽许多。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察:</span>这一关把"短路求值"这个抽象特性变成了一个看得见的实用技巧——<strong>"存在性 and 具体判断"是一种极常用的安全写法</strong>。以后凡是要读取"可能不存在的对象"的属性,都可以用这个模式一行搞定,不必再层层嵌套 if。
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-8-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-8-4-2">8.4.2 逻辑之路（Logical Path）</h3>
+
+<h4>8.4.2.1 策略：用三大运算符算出每个岔路的方向
+    <span class="en">Strategy: compute each fork with and/or/not</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/8-4-2-1_logical_path.png" alt="扣哒世界 逻辑之路关卡 - koudashijie.com">
+    <div class="caption">图3：逻辑之路——巫师给两个秘密值,每个岔路用逻辑运算决定走上还是走下</div>
+</div>
+
+<p>这是一关纯粹的"逻辑迷宫"。巫师给你两个秘密的 true/false 值（<code>secretA</code>、<code>secretB</code>），在每个岔路口，规则是：<strong>算出的布尔值为 True 走上路，为 False 走下路</strong>。你要用 <code>and</code>、<code>or</code>、<code>not</code> 分别算出各个岔路的方向。</p>
+
+<p>算法思路是把每道谜题翻译成一个逻辑表达式,存进变量再用 <code>if/else</code> 选路:"A 且 B" 写成 <code>secretA and secretB</code>;"A 或 B" 写成 <code>secretA or secretB</code>;"B 非真" 写成 <code>not secretB</code>。这一关是三大运算符的"基础操练场",让你把课本上的规则变成能跑起来的代码,建立起"逻辑表达式 → 布尔结果 → 选择分支"的完整直觉。</p>
+
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-8-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<h3 id="sec-8-4-3">8.4.3 逻辑之圈（Logical Circle）</h3>
+
+<h4>8.4.3.1 策略：多值连锁,层层推进选路
+    <span class="en">Strategy: chain many values through multiple forks</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/8-4-3-1_logical_circle.png" alt="扣哒世界 逻辑之圈关卡 - koudashijie.com">
+    <div class="caption">图4：逻辑之圈——三个秘密值,用连锁的 and/or 一路决定上下左右</div>
+</div>
+
+<p>这一关是"逻辑之路"的升级版：秘密值从两个增加到<strong>三个</strong>（<code>secretA/B/C</code>），岔路也更多，需要连续做上下、左右、再上下的一系列选择。这正好用上"多值连锁"的本领。</p>
+
+<p>算法思路是把多个值用同一运算符串起来:"三个都为真"写成 <code>secretA and secretB and secretC</code>;"三个里有一个为真"写成 <code>secretA or secretB or secretC</code>;每算出一个新布尔值就用它选一次路,并可把它<strong>存成新变量</strong>参与后续计算(如 <code>secretF = ... and secretD and secretE</code>)。这一关训练的是<strong>把复杂问题拆成一连串小的逻辑判断</strong>,用变量层层传递结果的能力。</p>
+
+<h3 id="sec-8-4-4">8.4.4 逻辑结论（Logical Conclusion）</h3>
+
+<h4>8.4.4.1 策略：用括号精确控制混合运算的顺序
+    <span class="en">Strategy: use parentheses to control mixed order</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/8-4-4-1_logical_conclusion.png" alt="扣哒世界 逻辑结论关卡 - koudashijie.com">
+    <div class="caption">图5：逻辑结论——天际层巫师的终极谜题,须用括号混合 and/or/not 回答每位巫师</div>
+</div>
+
+<p>这是逻辑三部曲的<strong>压轴关</strong>，也是本单元难度顶点。你要从 Eszter 处取得三个秘密值，然后回答天际层几位巫师各自的谜题——每道谜题都<strong>混合了 and、or、not</strong>，必须用括号保证运算顺序正确。</p>
+
+<p>算法思路是把每句自然语言的谜题准确翻译成带括号的逻辑表达式,再用 <code>say</code> 说出结果。例如"A 且 B,或者 C"→ <code>(secretA and secretB) or secretC</code>;"A 或 B,且 C"→ <code>(secretA or secretB) and secretC</code>;"A 且 B,或者 B 且非 C"→ <code>(secretA and secretB) or (secretB and (not secretC))</code>。<strong>关键全在括号</strong>——它决定了"且"和"或"谁先结合,一个括号放错,答案就全错。</p>
+
+<div class="tip-box">
+    <span class="tip-label">翻译技巧:</span>读到"……<strong>,或者</strong>……"时,逗号前后往往各是一个整体,该用括号括起来再用 <code>or</code> 连接;"……<strong>且</strong>……"同理。先在纸上把中文谜题按"或"切成几大块,每块内部用 and/not 组合并加括号,最后用 or 连起来——这套"先分块、再组合"的翻译法能帮你稳稳写对复杂逻辑。
+</div>
+
+
+<!-- CC-PROTECTION:AD:21f9328d9c:START anchor=sec-8-4-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="21f9328d9c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>目前 扣哒世界 支持 Python、JavaScript、C++ 等多种语言，会员还可解锁更多高级内容。官网：<a href="https://koudashijie.com/">koudashijie.com</a></span>
+</aside>
+<!-- CC-PROTECTION:AD:21f9328d9c:END -->
+<!-- CC-PROTECTION:HIDDEN:bb2b6ba8d1:START anchor=sec-8-4-4 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="bb2b6ba8d1">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:bb2b6ba8d1:END -->
+
+<h3 id="sec-8-4-5">8.4.5 非与或（组合挑战 · Not And Or）</h3>
+
+<h4>8.4.5.1 策略：!= 筛敌 + or 筛物品,综合运用
+    <span class="en">Strategy: != for enemies, or for items, combined</span>
+</h4>
+
+<p>这是本单元的<strong>组合挑战</strong>，要求综合运用至今学过的逻辑武器——<code>and</code>、<code>or</code>、<code>!=</code>，存活 60 秒。任务有两条：只收集 <code>"potion"</code> 或 <code>"lightstone"</code> 类物品；只攻击 <strong>type 不是 <code>"burl"</code> 且距离小于 15 米</strong>的敌人。</p>
+
+<p>算法思路是主循环里两段并列逻辑,各自挑用最合适的运算符:物品用 <code>or</code> 建"白名单"——<code>if item.type == "potion" or item.type == "lightstone"</code> 才收集;敌人用 <code>!=</code> 加 <code>and</code> 组合——<code>if enemy.type != "burl" and distance < 15</code> 才攻击(不是树精、且够近)。这一关的精髓在于:<strong>面对不同的筛选需求,判断该用"白名单式的 or"还是"排除式的 != 加限制的 and"</strong>——这正是对前几单元所有逻辑知识的融会贯通。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="bool">True</span><span class="punc">:</span>
+    item = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+    <span class="kw">if</span> item<span class="punc">:</span>
+        <span class="cmt"># 白名单: 是药水 或 是发光石</span>
+        <span class="kw">if</span> item<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"potion"</span> <span class="orkw">or</span> item<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"lightstone"</span><span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>item<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        distance = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>
+        <span class="cmt"># 排除 + 限制: 不是树精 且 距离小于15</span>
+        <span class="kw">if</span> enemy<span class="punc">.</span>type <span class="hl">!=</span> <span class="str">"burl"</span> <span class="andkw">and</span> distance <span class="hl">&lt;</span> <span class="num">15</span><span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 8.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-8-4-5 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:4a9401936d:START anchor=sec-8-4-5 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4a9401936d">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC8-AD19F706B5BF。</span>
+<!-- CC-PROTECTION:HIDDEN:4a9401936d:END -->
+
+<div class="section-header" id="section-8-5">
+    <h2>8.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-8-5-1">8.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>8.5.1.1 逻辑非与组合逻辑的典型问题
+    <span class="en">Typical issues with "not" and combined logic</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch5_sec8_8-5-1-1_common_errors.png" alt="扣哒世界 逻辑非常见错误示意 - koudashijie.com">
+    <div class="caption">图6：存在检查放错位置、漏写括号、优先级弄错,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>存在性检查放错位置——写成 <code>if enemy.type == "x" and enemy</code>，当没有敌人时左边先算就报错，必须把 <code>enemy</code> 放最左边。</li>
+        <li>混合逻辑不加括号——依赖记忆中的优先级容易算错，<code>(A or B) and C</code> 和 <code>A or (B and C)</code> 结果完全不同，务必用括号。</li>
+        <li>把 not 当成两输入运算符——<code>not</code> 只跟一个值，写成 <code>A not B</code> 是错的，应写 <code>A and not B</code> 之类。</li>
+        <li>优先级记反——记住 not 最先、and 其次、or 最后，别以为 or 会先算。</li>
+        <li>括号不配对——多层嵌套括号时漏了右括号，会直接语法报错，写完要数一数左右括号。</li>
+        <li>把逻辑运算符和比较运算符搞混——<code>not</code> 反转一个布尔值，<code>!=</code> 比较两个值是否不同，用途不同。</li>
+        <li>该短路时顺序放反——利用短路防报错时，"安全的判断"（如是否存在）必须在前，"有风险的判断"（如读属性）必须在后。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成流金沙漠第八单元！你集齐了三大逻辑运算符 <code>and</code>、<code>or</code>、<code>not</code>，并学会了把它们混合使用、用括号掌控运算顺序，还掌握了 <code>and</code> 短路求值这一安全读属性的实用技巧。从此，再复杂的判断条件，你都能拆解、组合、精确表达。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>逻辑非 not</td><td>反转单个布尔值</td><td>逻辑之路</td></tr>
+            <tr><td>not 真值表</td><td>True↔False 互换</td><td>逻辑之路</td></tr>
+            <tr><td>短路求值</td><td>左边为假则右边不算</td><td>平常的一天</td></tr>
+            <tr><td>安全读属性</td><td>存在 and 判断,一行搞定</td><td>平常的一天</td></tr>
+            <tr><td>多值连锁</td><td>and/or 可连多个值</td><td>逻辑之圈</td></tr>
+            <tr><td>运算优先级</td><td>not &gt; and &gt; or</td><td>逻辑结论</td></tr>
+            <tr><td>用括号控制顺序</td><td>清晰,并可改变优先级</td><td>逻辑结论</td></tr>
+            <tr><td>综合筛选</td><td>按需选 or / != / and</td><td>非与或</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        集齐 and、or、not 的英雄,能为任何情形写出精准无误的判断。<br>
+        流金沙漠的逻辑之旅告一段落,继续前进吧,勇敢的程序员！🏜️🔀🤖
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第八单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
