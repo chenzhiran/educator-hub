@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC11-14D32F32F10B">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十一单元：练习字典 · 召唤与指挥 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC11-14D32F32F10B | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS4-第十一单元</div>
+
+    <a href="#section-11-1" class="nav-section">11.1 字典温故知新</a>
+    <a href="#sec-11-1-1" class="nav-sub">11.1.1 字典的复习</a>
+    <a href="#sec-11-1-2" class="nav-sub">11.1.2 字典无处不在</a>
+
+    <a href="#section-11-2" class="nav-section">11.2 召唤军队</a>
+    <a href="#sec-11-2-1" class="nav-sub">11.2.1 costOf 与 summon</a>
+    <a href="#sec-11-2-2" class="nav-sub">11.2.2 用金钱做循环条件</a>
+
+    <a href="#section-11-3" class="nav-section">11.3 指挥军队</a>
+    <a href="#sec-11-3-1" class="nav-sub">11.3.1 command 的三参数</a>
+    <a href="#sec-11-3-2" class="nav-sub">11.3.2 遍历盟友数组下令</a>
+    <a href="#sec-11-3-3" class="nav-sub">11.3.3 move 与 attack 命令</a>
+
+    <a href="#section-11-4" class="nav-section">11.4 指挥官的完整节拍</a>
+    <a href="#sec-11-4-1" class="nav-sub">11.4.1 召唤-指挥-行动</a>
+
+    <a href="#section-11-5" class="nav-section">11.5 实战关卡精讲</a>
+    <a href="#sec-11-5-1" class="nav-sub">11.5.1 安息之云指挥官</a>
+    <a href="#sec-11-5-2" class="nav-sub">11.5.2 佣兵山</a>
+
+    <a href="#section-11-6" class="nav-section">11.6 常见错误</a>
+    <a href="#sec-11-6-1" class="nav-sub">11.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十一单元：练习字典 · 召唤与指挥</h1>
+    <div class="subtitle">Unit 11: Practicing Dictionaries — Summon &amp; Command</div>
+    <div class="badge">计算机科学 4 · 安息云峰 Cloudrip Mountain · 安息之云指挥官 → 佣兵山</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 11.1 ==================== -->
+<div class="section-header" id="section-11-1">
+    <h2>11.1 字典温故知新</h2>
+    <div class="en-title">Revisiting Dictionaries</div>
+</div>
+
+<p>在安息云峰的上一站，你第一次认识了<span class="keyword">字典（dictionary）</span>——用键值对存取数据、手写坐标字典 <code>{"x": 20, "y": 35}</code> 指挥英雄移动。本单元你将拿到一件威力大增的新装备——<strong>首领之星</strong>，学会<strong>召唤</strong>和<strong>指挥</strong>一支属于自己的军队。而指挥军队的每一道命令，背后都离不开字典。这一单元的主题就是：<strong>在真实的战场上把字典用熟、用活</strong>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>当你命令一名士兵移动到某处时，要传给它一个<strong>坐标字典</strong>（<code>{"x": 50, "y": 40}</code>）；当你把士兵编成队伍逐个下令时，要用<strong>数组遍历</strong>；当你决定召唤还是攻击时，要用<strong>条件判断</strong>。字典、数组、循环、条件——之前学的所有工具，都会在指挥军队时同时上阵。这正是"练习"二字的分量。
+</div>
+
+<h3 id="sec-11-1-1">11.1.1 字典的复习（A Quick Recap）</h3>
+
+<h4>11.1.1.1 键值对、花括号、取值
+    <span class="en">Key-value pairs at a glance</span>
+</h4>
+
+<p>先花一分钟温习字典的样子：用<strong>花括号 <code>{ }</code></strong> 包裹，键值之间用<strong>冒号 <code>:</code></strong>，多对之间用<strong>逗号 <code>,</code></strong>。一个位置字典就是 <code>{"x": 50, "y": 40}</code>，键 <code>"x"</code> 存横坐标，键 <code>"y"</code> 存纵坐标。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一个坐标字典，本单元处处要用它</span>
+target = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">50</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">40</span><span class="punc">}</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>target<span class="punc">)</span>   <span class="cmt"># 把整个字典作为一个参数传进去</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-11-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-11-1-2">11.1.2 字典无处不在（Dictionaries Everywhere）</h3>
+
+<h4>11.1.2.1 命令的"目的地"就是字典
+    <span class="en">The destination is a dictionary</span>
+</h4>
+
+<p>本单元你会看到，字典不只是给英雄自己用的 <code>move</code>——当你指挥士兵时，告诉他"去哪里"用的也是坐标字典，例如 <code>command(soldier, "move", {"x": 50, "y": 40})</code>。可以说，凡是涉及"某个位置"的地方，字典都在幕后默默工作。把字典练熟，指挥军队才能得心应手。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-1-2-1_dict_everywhere.png" alt="扣哒世界 字典无处不在示意图 - koudashijie.com">
+    <div class="caption">图1：从英雄移动到士兵调度，坐标字典是贯穿整个战场调度的通用语言</div>
+</div>
+
+<!-- ==================== 11.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-11-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<div class="section-header" id="section-11-2">
+    <h2>11.2 召唤军队</h2>
+    <div class="en-title">Summoning an Army</div>
+</div>
+
+<h3 id="sec-11-2-1">11.2.1 costOf 与 summon（Cost and Summon）</h3>
+
+<h4>11.2.1.1 先问价，再购买
+    <span class="en">Check the price, then buy</span>
+</h4>
+
+<p>有了首领之星，你可以<strong>召唤（summon）</strong>盟友。首领之星 I 能召唤<span class="keyword-en">"soldier"</span>（士兵）。但召唤要花钱，所以召唤前要先用 <code>hero.costOf("soldier")</code> 查一个士兵值多少金币，再和自己现有的 <code>hero.gold</code> 比较，钱够了才召唤。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 150" width="560" role="img" aria-label="召唤流程解剖">
+        <text x="280" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">召唤前先"问价 → 比钱 → 购买"</text>
+        <rect x="30" y="55" width="150" height="50" rx="10" fill="#182633" stroke="#7cc7e8" stroke-width="2"/>
+        <text x="105" y="78" text-anchor="middle" font-size="12" fill="#7cc7e8" font-family="sans-serif">问价</text>
+        <text x="105" y="96" text-anchor="middle" font-size="11" fill="#cdddea" font-family="monospace">costOf("soldier")</text>
+        <rect x="205" y="55" width="150" height="50" rx="10" fill="#182633" stroke="#e8a15a" stroke-width="2"/>
+        <text x="280" y="78" text-anchor="middle" font-size="12" fill="#e8a15a" font-family="sans-serif">比钱</text>
+        <text x="280" y="96" text-anchor="middle" font-size="11" fill="#cdddea" font-family="monospace">gold &gt; cost ?</text>
+        <rect x="380" y="55" width="150" height="50" rx="10" fill="#182633" stroke="#9fd4a8" stroke-width="2"/>
+        <text x="455" y="78" text-anchor="middle" font-size="12" fill="#9fd4a8" font-family="sans-serif">购买</text>
+        <text x="455" y="96" text-anchor="middle" font-size="11" fill="#cdddea" font-family="monospace">summon("soldier")</text>
+        <defs>
+            <marker id="s-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#6a8294"/>
+            </marker>
+        </defs>
+        <line x1="180" y1="80" x2="202" y2="80" stroke="#6a8294" stroke-width="2" marker-end="url(#s-arr)"/>
+        <line x1="355" y1="80" x2="377" y2="80" stroke="#6a8294" stroke-width="2" marker-end="url(#s-arr)"/>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:fc3dddac56:START anchor=sec-11-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="fc3dddac56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，把编程变成闯关游戏，玩着玩着就成了别人眼里的代码大佬。</span>
+</aside>
+<!-- CC-PROTECTION:AD:fc3dddac56:END -->
+
+<h3 id="sec-11-2-2">11.2.2 用金钱做循环条件（Gold as a Condition）</h3>
+
+<h4>11.2.2.1 有钱就一直招，招到没钱为止
+    <span class="en">Summon while you can afford it</span>
+</h4>
+
+<p>"安息之云指挥官"里用了一个巧妙的写法：把"钱是否够"直接当作 while 循环的条件。<code>while hero.gold &gt; hero.costOf("soldier"):</code> 意思是"只要金币还够买一个士兵，就继续召唤"，每召唤一个金币就减少，直到不够为止自动停下——一次性把手头的钱换成尽可能多的士兵。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 只要钱够买一个士兵，就一直召唤</span>
+<span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>gold &gt; <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">)</span>   <span class="cmt"># 每召唤一个，gold 就减少</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么条件会自动变假？</span>因为每次 <code>summon</code> 都会扣掉召唤费用，<code>hero.gold</code> 越来越少。当剩下的钱不够再买一个时，<code>gold &gt; costOf(...)</code> 变假，循环自然结束。这和第一单元"确保条件迟早变假、避免死循环"是同一个道理——只不过这次让条件变假的不是计数器，而是花掉的金币。
+</div>
+
+<!-- ==================== 11.3 ==================== -->
+<div class="section-header" id="section-11-3">
+    <h2>11.3 指挥军队</h2>
+    <div class="en-title">Commanding Your Troops</div>
+</div>
+
+<h3 id="sec-11-3-1">11.3.1 command 的三参数（Three Arguments）</h3>
+
+<h4>11.3.1.1 命令谁、做什么、对谁/去哪
+    <span class="en">Who, what, and where/whom</span>
+</h4>
+
+<p>指挥盟友用 <code>command</code> 方法，它是本单元的绝对主角。<code>command</code> 通常接收<strong>三个参数</strong>：第一个是<strong>被命令的盟友</strong>（哪名士兵），第二个是<strong>命令的动作</strong>（字符串，如 <code>"move"</code> 或 <code>"attack"</code>），第三个是<strong>动作的目标</strong>（去哪个坐标，或攻击哪个敌人）。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 140" width="600" role="img" aria-label="command三参数解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">command 的三个参数</text>
+        <text x="30" y="72" font-size="17" font-family="monospace" fill="#a5c8e8">hero.command(</text>
+        <text x="185" y="72" font-size="17" font-family="monospace" fill="#9fd4a8">soldier</text>
+        <text x="260" y="72" font-size="17" font-family="monospace" fill="#cdddea">,</text>
+        <text x="278" y="72" font-size="17" font-family="monospace" fill="#e8a15a">"move"</text>
+        <text x="360" y="72" font-size="17" font-family="monospace" fill="#cdddea">,</text>
+        <text x="378" y="72" font-size="17" font-family="monospace" fill="#7cc7e8">{"x":50,"y":40}</text>
+        <text x="560" y="72" font-size="17" font-family="monospace" fill="#a5c8e8">)</text>
+        <text x="215" y="100" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">命令谁</text>
+        <text x="315" y="100" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">做什么</text>
+        <text x="455" y="100" font-size="11" fill="#7cc7e8" text-anchor="middle" font-family="sans-serif">去哪 / 对谁</text>
+        <line x1="215" y1="80" x2="215" y2="90" stroke="#9fd4a8" stroke-width="1.5"/>
+        <line x1="315" y1="80" x2="315" y2="90" stroke="#e8a15a" stroke-width="1.5"/>
+        <line x1="455" y1="80" x2="455" y2="90" stroke="#7cc7e8" stroke-width="1.5"/>
+    </svg>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🎖️ command 参数速记</div>
+    <strong>①谁</strong>：一个盟友对象，如 <code>soldier</code><br>
+    <strong>②什么动作</strong>：字符串命令，如 <code>"move"</code>、<code>"attack"</code><br>
+    <strong>③目标</strong>：移动时传<strong>坐标字典</strong>，攻击时传<strong>敌人对象</strong><br>
+    <strong>三者顺序不能乱——先说命令谁，再说做什么，最后说目标。</strong>
+</div>
+
+
+<!-- CC-PROTECTION:AD:559a0fd970:START anchor=sec-11-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="559a0fd970">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，热门英雄安雅、塔林、艾达、服部半藏等你召唤，每个英雄都有独特技能。</span>
+</aside>
+<!-- CC-PROTECTION:AD:559a0fd970:END -->
+<!-- CC-PROTECTION:HIDDEN:47a8c68e0d:START anchor=sec-11-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="47a8c68e0d">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:47a8c68e0d:END -->
+
+<h3 id="sec-11-3-2">11.3.2 遍历盟友数组下令（Command Every Soldier）</h3>
+
+<h4>11.3.2.1 用循环给"每一个"士兵下令
+    <span class="en">One command reaches only one soldier</span>
+</h4>
+
+<p>一句 <code>command</code> 只能指挥<strong>一名</strong>士兵。要指挥整支军队，就得把 <code>command</code> 放进 <code>while</code> 循环，配合数组遍历——先用 <code>hero.findFriends()</code> 拿到所有盟友组成的数组，再用索引逐个取出、逐个下令。关卡特别提醒："你还需要把 command 代码放进一个 while 循环内，这样你就可以命令所有的士兵，而不仅限一个。"</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>soldiers = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>   <span class="cmt"># 拿到盟友数组</span>
+soldierIndex = <span class="num">0</span>
+<span class="kw">while</span> soldierIndex &lt; <span class="fn">len</span><span class="punc">(</span>soldiers<span class="punc">):</span>
+    soldier = soldiers<span class="punc">[</span>soldierIndex<span class="punc">]</span>   <span class="cmt"># 取出这一名士兵</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">50</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">40</span><span class="punc">})</span>
+    soldierIndex <span class="hl">+= 1</span>                <span class="cmt"># 索引前进，指向下一名</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">这就是数组遍历的实战：</span>这段代码正是第七、八单元"遍历数组三件套"的翻版——索引从 0 开始、<code>while soldierIndex &lt; len(soldiers)</code> 判断、<code>soldierIndex += 1</code> 前进。只不过这次循环体内做的不是求和或比较，而是给取出的每名士兵下达命令。同一套骨架，换了新用途。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-11-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<h3 id="sec-11-3-3">11.3.3 move 与 attack 命令（Move and Attack）</h3>
+
+<h4>11.3.3.1 目标的类型随命令而变
+    <span class="en">The target type depends on the order</span>
+</h4>
+
+<p>要留意第三个参数的类型会随命令变化：命令 <code>"move"</code> 时，第三个参数是<strong>坐标字典</strong>（<code>{"x": 50, "y": 40}</code>，去哪里）；命令 <code>"attack"</code> 时，第三个参数是<strong>敌人对象</strong>（<code>enemy</code>，打谁）。搞清"移动给地点、攻击给对象"这条规则，就不会把参数传错。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>命令移动 —— 传坐标字典</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</span>
+    <span class="str">"move"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">50</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">40</span><span class="punc">})</span>
+<span class="cmt"># 第三参数：去哪（字典）</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>命令攻击 —— 传敌人对象</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</>
+    <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>
+<span class="cmt"># 第三参数：打谁（对象）</span></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 11.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-11-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+<div class="section-header" id="section-11-4">
+    <h2>11.4 指挥官的完整节拍</h2>
+    <div class="en-title">The Commander's Rhythm</div>
+</div>
+
+<h3 id="sec-11-4-1">11.4.1 召唤-指挥-行动（Summon, Command, Act）</h3>
+
+<h4>11.4.1.1 一名合格指挥官的循环
+    <span class="en">The loop a commander repeats</span>
+</h4>
+
+<p>把召唤和指挥合起来，就是一名指挥官在战场上不断重复的节拍：<strong>攒钱 → 召唤 → 集结/攻击</strong>。"佣兵山"就把这套节拍装进一个 <code>while True</code> 大循环——每一轮都去捡硬币攒钱、有钱就召唤新兵、发现敌人就命令全军攻击。这与前面单元讲的 AI"感知→决策→行动"循环一脉相承。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 640 200" width="640" role="img" aria-label="指挥官循环节拍">
+        <text x="320" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">指挥官的循环节拍（while True）</text>
+        <defs>
+            <marker id="c-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="55" y="70" width="130" height="56" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="120" y="94" text-anchor="middle" fill="#bd7415" font-weight="bold">攒钱</text>
+            <text x="120" y="113" text-anchor="middle" fill="#4d6373" font-family="monospace">move(coin.pos)</text>
+
+            <rect x="255" y="70" width="130" height="56" rx="10" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+            <text x="320" y="94" text-anchor="middle" fill="#2A5A85" font-weight="bold">召唤</text>
+            <text x="320" y="113" text-anchor="middle" fill="#4d6373" font-family="monospace">summon("soldier")</text>
+
+            <rect x="455" y="70" width="130" height="56" rx="10" fill="#fbeae7" stroke="#C0453B" stroke-width="2"/>
+            <text x="520" y="94" text-anchor="middle" fill="#9e352c" font-weight="bold">指挥进攻</text>
+            <text x="520" y="113" text-anchor="middle" fill="#4d6373" font-family="monospace">command(...attack)</text>
+
+            <line x1="185" y1="98" x2="250" y2="98" stroke="#4d6373" stroke-width="2" marker-end="url(#c-arr)"/>
+            <line x1="385" y1="98" x2="450" y2="98" stroke="#4d6373" stroke-width="2" marker-end="url(#c-arr)"/>
+            <path d="M520,126 L520,170 L120,170 L120,128" fill="none" stroke="#4d6373" stroke-width="2" marker-end="url(#c-arr)"/>
+            <text x="320" y="190" text-anchor="middle" fill="#4d6373" font-style="italic">循环往复：边攒钱扩军，边指挥作战</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 11.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-11-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+<!-- CC-PROTECTION:HIDDEN:71fb437016:START anchor=sec-11-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="71fb437016">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:71fb437016:END -->
+
+<div class="section-header" id="section-11-5">
+    <h2>11.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 安息之云指挥官 -->
+<div class="level-card" id="sec-11-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 安息之云指挥官</span>
+        <h3>🎖️ 安息之云指挥官 —— 召唤并集结部队</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/11-5-1-1_cloudrip_commander.png" alt="扣哒世界 安息之云指挥官关卡 - koudashijie.com">
+            <div class="caption">图2：安息之云指挥官——先把金币换成一队士兵，命令他们集结，英雄再前去会合</div>
+        </div>
+
+        <h4>策略：召唤 → 遍历下令 → 英雄会合</h4>
+        <p>这是首领之星的入门关，任务很清晰：把手头的钱变成一支队伍，把队伍带到基地。策略分三步——先用"有钱就召唤"的循环把金币全换成士兵；再遍历士兵数组，逐个命令他们 <code>"move"</code> 到集结坐标；最后让英雄自己也移动过去与大家会合。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是：第一步 <code>while hero.gold &gt; hero.costOf("soldier"):</code> 反复 <code>summon("soldier")</code>，把钱花光换成兵；第二步用 <code>findFriends()</code> 取得士兵数组，配合索引遍历，对每个士兵 <code>command(soldier, "move", {"x": 50, "y": 40})</code>；第三步用 <code>while hero.distanceTo(target):</code> 让英雄一路 <code>move</code> 到自己的目标点。关键在于——<strong>命令必须放进遍历循环，才能让每名士兵都收到指令</strong>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：遍历士兵数组，逐个命令移动</span>
+<span class="kw">while</span> soldierIndex &lt; <span class="fn">len</span><span class="punc">(</span>soldiers<span class="punc">):</span>
+    soldier = soldiers<span class="punc">[</span>soldierIndex<span class="punc">]</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">50</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">40</span><span class="punc">})</span>
+    soldierIndex += <span class="num">1</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">先召唤再 findFriends：</span>顺序很重要——要先把士兵全召唤出来，<code>findFriends()</code> 才能把他们都收进数组。如果先 <code>findFriends</code> 再召唤，后召唤的士兵就没被数进去，命令时会漏掉他们。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别忘索引自增：</span>遍历士兵时若漏了 <code>soldierIndex += 1</code>，会卡在第一名士兵上死循环，其余士兵永远收不到命令，英雄也走不到会合点。
+        </div>
+    </div>
+</div>
+
+<!-- 佣兵山 -->
+<div class="level-card" id="sec-11-5-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 佣兵山</span>
+        <h3>⚔️ 佣兵山 —— 边攒钱扩军边指挥作战</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/11-5-2-1_mountain_mercenaries.png" alt="扣哒世界 佣兵山关卡 - koudashijie.com">
+            <div class="caption">图3：佣兵山——在 while True 循环里循环往复：捡币、扩军、命令士兵迎击兽人</div>
+        </div>
+
+        <h4>策略：一个大循环同时兼顾三件事</h4>
+        <p>佣兵山是召唤指挥的综合练习：一边要捡硬币攒钱、一边要不断扩军、一边还要指挥士兵抵挡兽人的猛攻。策略是把这三件事全塞进一个 <code>while True</code> 永久循环，每一轮都依次处理——移动捡币、钱够就召唤、发现敌人就命令全军攻击。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是每轮做三个"如果"：其一，<code>coin = findNearest(findItems())</code>，若有硬币就 <code>move(coin.pos)</code> 走过去（用 <code>move</code> 而非 <code>moveXY</code>，好让后续命令不被阻塞）；其二，<code>if hero.gold &gt; hero.costOf("soldier"):</code> 就 <code>summon("soldier")</code> 扩军；其三，<code>enemy = findNearest(findEnemies())</code>，若有敌人就遍历 <code>findFriends()</code> 得到的士兵数组，逐个 <code>command(soldier, "attack", enemy)</code>。三件事在同一轮循环里协同推进。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：发现敌人就命令全军攻击</span>
+enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">())</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    soldiers = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+    soldierIndex = <span class="num">0</span>
+    <span class="kw">while</span> soldierIndex &lt; <span class="fn">len</span><span class="punc">(</span>soldiers<span class="punc">):</span>
+        soldier = soldiers<span class="punc">[</span>soldierIndex<span class="punc">]</span>
+        soldierIndex += <span class="num">1</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>   <span class="cmt"># 攻击目标是敌人对象</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么用 move 而不是 moveXY？</span>关卡注释明确提示"使用 move 而不是 moveXY，以便于不断发出命令"。因为 <code>moveXY</code> 会阻塞程序、卡在走路上，士兵就得不到及时指挥；<code>move</code> 走一步就返回，让英雄能在移动的同时持续召唤和下令。这正是上一单元 move 非阻塞特性的延续应用。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">每轮重新 findFriends：</span>因为军队在不断扩大，士兵数组要在循环内每轮重新 <code>findFriends()</code> 获取，才能把新召唤的士兵也纳入指挥。若在循环外只取一次，新兵就会变成"没人指挥"的散兵。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 11.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+<!-- CC-PROTECTION:HIDDEN:3983e81901:START anchor=h3-10 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="3983e81901">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC11-14D32F32F10B。</span>
+<!-- CC-PROTECTION:HIDDEN:3983e81901:END -->
+
+<div class="section-header" id="section-11-6">
+    <h2>11.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-11-6-1">11.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>11.6.1.1 召唤与指挥的典型问题
+    <span class="en">Typical issues with summon and command</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch7_sec11_11-6-1-1_common_errors.png" alt="扣哒世界 召唤指挥常见错误速查 - koudashijie.com">
+    <div class="caption">图4：命令没进循环、参数传错、忘记重新 findFriends，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>command 只写一句——没放进循环，结果只有第一名士兵收到命令，其余全站着不动。</li>
+        <li>攻击时传错目标——<code>"attack"</code> 的第三参数要传<strong>敌人对象</strong>，不是坐标字典；移动才传坐标字典。</li>
+        <li>坐标字典写错——把 <code>{"x": 50, "y": 40}</code> 写成 <code>(50, 40)</code> 或漏了花括号、引号。</li>
+        <li>先 findFriends 再召唤——顺序反了，后召唤的士兵没进数组，命令时被漏掉。</li>
+        <li>循环外只 findFriends 一次——军队扩大后新兵得不到指挥，要在循环内每轮重新获取。</li>
+        <li>忘记索引自增——漏掉 <code>soldierIndex += 1</code>，在第一名士兵处死循环。</li>
+        <li>召唤条件写反——想"有钱就招"却写成 <code>while hero.gold &lt; hero.costOf(...)</code>，钱够时反而不招。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-11-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在安息云峰晋升为一名真正的<strong>指挥官</strong>！这一单元你把上一站学的字典<strong>练到了实战里</strong>：召唤军队时用金钱做循环条件"有钱就招"，指挥军队时用 <code>command</code> 的三参数说清"命令谁、做什么、去哪或打谁"，还学会了把命令放进循环遍历盟友数组、让每一名士兵都听令。你更把召唤、指挥、条件判断、数组遍历和 <code>move</code> 的非阻塞特性拧成了一套"攒钱→扩军→作战"的指挥官节拍。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>坐标字典实战</td><td><code>{"x":50,"y":40}</code> 作命令目标</td><td>安息之云指挥官</td></tr>
+            <tr><td>costOf 问价</td><td>召唤前先查士兵费用</td><td>两关</td></tr>
+            <tr><td>金钱做条件</td><td>有钱就召唤，钱尽自停</td><td>安息之云指挥官</td></tr>
+            <tr><td>command 三参数</td><td>谁 / 做什么 / 目标</td><td>两关</td></tr>
+            <tr><td>遍历下令</td><td>循环给每名士兵发命令</td><td>两关</td></tr>
+            <tr><td>move vs attack 目标</td><td>移动传字典，攻击传对象</td><td>佣兵山</td></tr>
+            <tr><td>先召唤再 findFriends</td><td>否则数组漏掉新兵</td><td>安息之云指挥官</td></tr>
+            <tr><td>循环内重新感知</td><td>每轮 findFriends / findEnemies</td><td>佣兵山</td></tr>
+            <tr><td>指挥官节拍</td><td>攒钱→扩军→作战循环</td><td>佣兵山</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用字典下令、用循环统率千军的英雄，才配称云峰之上的指挥官。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🎖️⚔️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（安息云峰）：第十一单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
