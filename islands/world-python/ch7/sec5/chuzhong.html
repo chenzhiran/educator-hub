@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC5-7278F1E4C0EF">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第五单元：认识嵌套循环 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC5-7278F1E4C0EF | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS4-第五单元</div>
+
+    <a href="#section-5-1" class="nav-section">5.1 嵌套循环基础</a>
+    <a href="#sec-5-1-1" class="nav-sub">5.1.1 什么是嵌套循环</a>
+    <a href="#sec-5-1-2" class="nav-sub">5.1.2 内外层的分工</a>
+    <a href="#sec-5-1-3" class="nav-sub">5.1.3 执行顺序</a>
+
+    <a href="#section-5-2" class="nav-section">5.2 边打边循环</a>
+    <a href="#sec-5-2-1" class="nav-sub">5.2.1 击败强敌的内循环</a>
+    <a href="#sec-5-2-2" class="nav-sub">5.2.2 靠近目标的内循环</a>
+    <a href="#sec-5-2-3" class="nav-sub">5.2.3 三层嵌套</a>
+
+    <a href="#section-5-3" class="nav-section">5.3 按类型筛选</a>
+    <a href="#sec-5-3-1" class="nav-sub">5.3.1 用 type 判断身份</a>
+    <a href="#sec-5-3-2" class="nav-sub">5.3.2 == 与 !=</a>
+    <a href="#sec-5-3-3" class="nav-sub">5.3.3 筛选中仍要递增</a>
+
+    <a href="#section-5-4" class="nav-section">5.4 两遍遍历策略</a>
+    <a href="#sec-5-4-1" class="nav-sub">5.4.1 优先级作战</a>
+
+    <a href="#section-5-5" class="nav-section">5.5 实战关卡精讲</a>
+    <a href="#sec-5-5-1" class="nav-sub">5.5.1 游魂</a>
+    <a href="#sec-5-5-2" class="nav-sub">5.5.2 潜伏</a>
+    <a href="#sec-5-5-3" class="nav-sub">5.5.3 优待</a>
+    <a href="#sec-5-5-4" class="nav-sub">5.5.4 Sarven 牧羊人</a>
+
+    <a href="#section-5-6" class="nav-section">5.6 常见错误</a>
+    <a href="#sec-5-6-1" class="nav-sub">5.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第五单元：认识嵌套循环</h1>
+    <div class="subtitle">Unit 5: Understanding Nested Loops</div>
+    <div class="badge">计算机科学 4 · 流金沙漠 Sarven Desert · 游魂 → Sarven 牧羊人</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 5.1 ==================== -->
+<div class="section-header" id="section-5-1">
+    <h2>5.1 嵌套循环基础</h2>
+    <div class="en-title">The Basics of Nested Loops</div>
+</div>
+
+<h3 id="sec-5-1-1">5.1.1 什么是嵌套循环（What Is a Nested Loop）</h3>
+
+<h4>5.1.1.1 循环里面再放一个循环
+    <span class="en">A loop inside another loop</span>
+</h4>
+
+<p>欢迎来到流金沙漠最烧脑、也最强大的一课！你已经学会了用 while 循环遍历数组、逐个处理元素。但真实的战场往往更复杂——一个敌人不是攻击一次就能倒下，一件物品也不是移动一次就能拿到。这时我们需要<span class="keyword">嵌套循环（nested loop）</span>：<strong>把一个循环整个放进另一个循环的循环体里。</strong></p>
+
+<p>"游魂"关卡一语道破：<strong>"对于强悍的敌人，只攻击一次是不够的，所以你应该使用 while 条件循环，当他们的 health 大于 0 时攻击。你可以把这个循环放入另一个 while 中，逐个击败敌人。"</strong> 换句话说——外层循环负责"轮到哪个敌人"，内层循环负责"把这个敌人彻底打死"。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/5-1-1-1_nested_intro.png" alt="扣哒世界 嵌套循环示意图 - koudashijie.com">
+    <div class="caption">图1：嵌套循环就像"套娃"——外层每转一圈，内层就要完整地跑完一整轮</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-5-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-5-1-2">5.1.2 内外层的分工（Inner vs. Outer）</h3>
+
+<h4>5.1.2.1 外层"逐个"，内层"搞定一个"
+    <span class="en">Outer picks one; inner finishes it</span>
+</h4>
+
+<p>理解嵌套循环的钥匙，是想清楚两层各自的职责。用本单元最典型的"攻击"场景来说：外层遍历循环决定"现在轮到打哪个敌人"，内层条件循环负责"对着这个敌人一直砍，直到它血量归零"。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 205" width="520" role="img" aria-label="嵌套循环内外层分工">
+        <rect x="25" y="20" width="470" height="170" rx="10" fill="none" stroke="#C8821E" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="45" y="43" font-size="13" font-family="monospace" fill="#f0c674">while enemyIndex &lt; len(enemies):  ← 外层：逐个敌人</text>
+        <rect x="60" y="58" width="410" height="55" rx="8" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="78" y="80" font-size="12" font-family="monospace" fill="#d8c8a8">enemy = enemies[enemyIndex]</text>
+        <text x="78" y="100" font-size="12" font-family="monospace" fill="#e0a23f">while enemy.health &gt; 0:  ← 内层：打死这一个</text>
+        <rect x="90" y="120" width="360" height="30" rx="6" fill="#2b2014" stroke="#4a3820" stroke-width="1"/>
+        <text x="108" y="140" font-size="12" font-family="monospace" fill="#d8c8a8">hero.attack(enemy)  ← 一直砍</text>
+        <text x="45" y="175" font-size="12" font-family="monospace" fill="#f0c674">    enemyIndex += 1  ← 打完这个，换下一个</text>
+    </svg>
+</div>
+
+<table class="styled-table">
+    <thead><tr><th></th><th>外层循环</th><th>内层循环</th></tr></thead>
+    <tbody>
+        <tr><td>条件</td><td><code>enemyIndex < len(enemies)</code></td><td><code>enemy.health > 0</code></td></tr>
+        <tr><td>职责</td><td>遍历数组，逐个选出敌人</td><td>对当前敌人反复攻击直到死亡</td></tr>
+        <tr><td>转一圈意味着</td><td>处理完一个敌人</td><td>成功命中一次攻击</td></tr>
+        <tr><td>推进方式</td><td><code>enemyIndex += 1</code></td><td>敌人被攻击后 health 自动下降</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-5-1-3">5.1.3 执行顺序（The Order of Execution）</h3>
+
+<h4>5.1.3.1 内层不跑完，外层不前进
+    <span class="en">The outer waits for the inner to finish</span>
+</h4>
+
+<p>嵌套循环最重要的执行规律是：<strong>外层每前进一步之前，内层必须先彻底跑完。</strong> 在"游魂"里，英雄不会打一下第一个骷髅就跳去打第二个——他会一直砍第一个直到它血量归零（内层循环结束），才执行 <code>enemyIndex += 1</code> 转向下一个（外层前进一步）。</p>
+
+<div class="remember-box">
+    <span class="remember-label">一个直观的比喻：</span>外层像"翻书"，一页一页翻；内层像"读完这一页的每个字"。你必须把当前这一页的字全部读完（内层跑完），才会翻到下一页（外层 +1）。理解了这个顺序，嵌套循环就不再神秘了。
+</div>
+
+<!-- ==================== 5.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:5744a41fe1:START anchor=sec-5-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="5744a41fe1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>遇到难题？来 <a href="https://koudashijie.com/">koudashijie.com</a>，扣哒鸭会及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:5744a41fe1:END -->
+<!-- CC-PROTECTION:HIDDEN:7663121868:START anchor=sec-5-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="7663121868">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:7663121868:END -->
+
+<div class="section-header" id="section-5-2">
+    <h2>5.2 边打边循环：内层条件循环</h2>
+    <div class="en-title">Inner Condition Loops</div>
+</div>
+
+<h3 id="sec-5-2-1">5.2.1 击败强敌的内循环（Attack Until Dead）</h3>
+
+<h4>5.2.1.1 while enemy.health &gt; 0
+    <span class="en">Keep attacking while health remains</span>
+</h4>
+
+<p>本单元四个关卡都反复出现同一个内层循环模式——<strong>只要敌人还有血，就一直攻击</strong>。这是因为强敌一次砍不死，必须持续输出。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> enemy<span class="punc">.</span>health &gt; <span class="num">0</span><span class="punc">:</span>   <span class="cmt"># 只要还有血</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>       <span class="cmt"># 就继续攻击</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">这个内循环为什么不会死循环？</span>因为每次 <code>hero.attack(enemy)</code> 都会让 <code>enemy.health</code> 减少。血量是随攻击<strong>自动下降</strong>的——这正是让条件"迟早变假"的推进力。当血量降到 0，条件 <code>enemy.health > 0</code> 为假，内层循环自然结束。这里不需要手动 <code>+= 1</code>，攻击本身就是"递减器"。
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-5-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+<!-- CC-PROTECTION:HIDDEN:ec37abb455:START anchor=sec-5-2-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ec37abb455">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:ec37abb455:END -->
+
+<h3 id="sec-5-2-2">5.2.2 靠近目标的内循环（Move Until Close）</h3>
+
+<h4>5.2.2.1 while hero.distanceTo(item) &gt; 2
+    <span class="en">Keep moving while still far away</span>
+</h4>
+
+<p>"游魂"关卡还展示了内层循环的另一种妙用——它不仅能用于敌人，也能用于物品。有些发光石会到处游荡，移动一次抓不到，就需要<strong>持续追赶直到足够近</strong>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>item<span class="punc">)</span> &gt; <span class="num">2</span><span class="punc">:</span>   <span class="cmt"># 距离大于 2 就还没拿到</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>item<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>  <span class="cmt"># 就继续朝它移动</span></pre>
+</div>
+
+<p>关卡概览说得很形象：<strong>"那些游荡的灵魂很难收集。你需要一直向一个球移动，直到能抓住它们为止！"</strong> 这里推进条件的是"距离"——每次 <code>moveXY</code> 都让英雄离物品更近，距离终会小于 2，循环随之结束。</p>
+
+<h3 id="sec-5-2-3">5.2.3 三层嵌套（Three Levels Deep）</h3>
+
+<h4>5.2.3.1 遍历循环里，套着条件循环
+    <span class="en">A condition loop inside an iteration loop inside a main loop</span>
+</h4>
+
+<p>"游魂"是本单元结构最复杂的一关，出现了<strong>三层嵌套</strong>！最外层 <code>while True</code> 反复守卫，中间层遍历敌人/物品数组，最内层则是"打到死"或"追到手"的条件循环。三层各司其职、层层包裹：</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 210" width="520" role="img" aria-label="三层嵌套结构">
+        <rect x="15" y="15" width="490" height="185" rx="10" fill="none" stroke="#C8821E" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="30" y="37" font-size="12" font-family="monospace" fill="#f0c674">while True:  ← 第 1 层：反复守卫</text>
+        <rect x="45" y="50" width="440" height="135" rx="8" fill="none" stroke="#E0A23F" stroke-width="2"/>
+        <text x="60" y="72" font-size="12" font-family="monospace" fill="#e0a23f">while enemyIndex &lt; len(enemies):  ← 第 2 层：逐个敌人</text>
+        <rect x="75" y="85" width="395" height="60" rx="6" fill="#3a2c18" stroke="#d98ec0" stroke-width="2"/>
+        <text x="90" y="107" font-size="12" font-family="monospace" fill="#d98ec0">while enemy.health &gt; 0:  ← 第 3 层：打到死</text>
+        <text x="110" y="128" font-size="12" font-family="monospace" fill="#d8c8a8">hero.attack(enemy)</text>
+        <text x="60" y="170" font-size="12" font-family="monospace" fill="#e0a23f">    enemyIndex += 1</text>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">层数越多越要小心缩进：</span>三层嵌套里，每一层的缩进都必须精确对齐。哪句属于第几层，全靠缩进决定。比如 <code>enemyIndex += 1</code> 必须和第 3 层的 <code>while</code> 对齐（属于第 2 层循环体），既不能缩进到第 3 层里面（那样永远加不到），也不能退到第 1 层（那样只会处理第一个敌人）。
+</div>
+
+<!-- ==================== 5.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-5-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<div class="section-header" id="section-5-3">
+    <h2>5.3 按类型筛选敌人</h2>
+    <div class="en-title">Filtering Enemies by Type</div>
+</div>
+
+<h3 id="sec-5-3-1">5.3.1 用 type 判断身份（Using enemy.type）</h3>
+
+<h4>5.3.1.1 遍历时挑出特定类型
+    <span class="en">Pick out specific types while iterating</span>
+</h4>
+
+<p>光会遍历还不够——很多时候战场上混着各种单位，你只想攻击其中<strong>某一类</strong>。每个单位都有一个 <code>type</code> 属性，记录着它的身份，比如 <code>"shaman"</code>（萨满）、<code>"thrower"</code>（投掷者）、<code>"sand-yak"</code>（沙牦牛）。在遍历循环里加一个 <code>if</code> 判断 <code>type</code>，就能实现"精准打击"。</p>
+
+<p>"潜伏"关卡的任务正是——<strong>牦牛群里混着兽人萨满，只打萨满、别误伤牦牛</strong>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> enemyIndex &lt; <span class="fn">len</span><span class="punc">(</span>enemies<span class="punc">):</span>
+    enemy = enemies<span class="punc">[</span>enemyIndex<span class="punc">]</span>
+    <span class="kw">if</span> enemy<span class="punc">.</span>type == <span class="str">'shaman'</span><span class="punc">:</span>   <span class="cmt"># 只有是萨满才打</span>
+        <span class="kw">while</span> enemy<span class="punc">.</span>health &gt; <span class="num">0</span><span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    enemyIndex += <span class="num">1</span>              <span class="cmt"># 不管是不是萨满，都要 +1</span></pre>
+</div>
+
+<h3 id="sec-5-3-2">5.3.2 == 与 !=（Equal and Not Equal）</h3>
+
+<h4>5.3.2.1 "是这类"与"不是这类"
+    <span class="en">Match a type, or exclude a type</span>
+</h4>
+
+<p>筛选有两种思路，对应两个比较运算符。想<strong>只打某一类</strong>，用 <code>==</code>（等于）正向匹配；想<strong>排除某一类、打其余所有</strong>，用 <code>!=</code>（不等于）反向筛选。"Sarven 牧羊人"关卡就用了后者——牦牛不能打，那就打"所有不是牦牛的"：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">.</span>type != <span class="str">"sand-yak"</span><span class="punc">:</span>   <span class="cmt"># "!=" 意思是"不等于"</span>
+    <span class="kw">while</span> enemy<span class="punc">.</span>health &gt; <span class="num">0</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<table class="styled-table">
+    <thead><tr><th>运算符</th><th>含义</th><th>典型用法</th><th>对应关卡</th></tr></thead>
+    <tbody>
+        <tr><td><code>==</code></td><td>等于（正向匹配）</td><td><code>if enemy.type == "shaman"</code></td><td>潜伏</td></tr>
+        <tr><td><code>!=</code></td><td>不等于（反向排除）</td><td><code>if enemy.type != "sand-yak"</code></td><td>Sarven 牧羊人</td></tr>
+    </tbody>
+</table>
+
+<div class="warn-box">
+    <span class="warn-label">别把 = 和 == 弄混：</span>比较用双等号 <code>==</code>（判断相等）或 <code>!=</code>（判断不等），赋值才用单等号 <code>=</code>。在 <code>if</code> 条件里写错成单个 <code>=</code> 会直接报语法错误。
+</div>
+
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=sec-5-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<h3 id="sec-5-3-3">5.3.3 筛选中仍要递增（Always Increment）</h3>
+
+<h4>5.3.3.1 即使跳过，索引也要 +1
+    <span class="en">Increment even when you skip</span>
+</h4>
+
+<p>这是筛选遍历里<strong>最致命的陷阱</strong>。"潜伏"关卡用醒目的口吻强调：<strong>"重点：确保每次循环运行时都增加 enemyIndex，即使敌人不是巫师！"</strong></p>
+
+<p>为什么这么重要？因为 <code>enemyIndex += 1</code> 必须放在 <code>if</code> 判断的<strong>外面</strong>（与 <code>if</code> 同级）。如果误把它放进 <code>if</code> 里面，那么一旦遇到不是萨满的牦牛，判断为假、跳过整个 <code>if</code> 块，索引就<strong>不会增加</strong>——外层循环卡在这只牦牛上，条件永真，直接死循环。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">📍 enemyIndex += 1 该放哪？</div>
+    <strong>✅ 正确</strong>：放在 <code>if</code> 外面（与 if 同级缩进）——无论当前敌人是否被攻击，索引都前进一格。<br>
+    <strong>❌ 错误</strong>：放在 <code>if</code> 里面——遇到不符合类型的敌人时索引原地不动，造成死循环。
+</div>
+
+<!-- ==================== 5.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-5-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-5-4">
+    <h2>5.4 两遍遍历策略</h2>
+    <div class="en-title">The Two-Pass Strategy</div>
+</div>
+
+<h3 id="sec-5-4-1">5.4.1 优先级作战（Attack by Priority）</h3>
+
+<h4>5.4.1.1 先清高威胁，再扫全场
+    <span class="en">Clear the threats first, then the rest</span>
+</h4>
+
+<p>"优待"关卡带来了一个精彩的算法思想——<strong>两遍遍历（two-pass）</strong>。战场上投掷者攻击力高但血薄，是最危险的目标。聪明的做法不是从头打到尾，而是<strong>把同一个数组遍历两次</strong>：第一遍只挑投掷者干掉，第二遍再清扫剩下的所有敌人。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">⚔️ 两遍遍历 · 算法思路</div>
+    <strong>第一遍</strong>：遍历 enemies，<code>if enemy.type == "thrower"</code> 才攻击 —— 优先铲除高威胁。<br>
+    <strong>第二遍</strong>：<strong>重新 findEnemies() 拿到新数组</strong>、索引归零，再遍历一次，攻击所有还活着的敌人。
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 第一遍：只打投掷者</span>
+enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+enemyIndex = <span class="num">0</span>
+<span class="kw">while</span> enemyIndex &lt; <span class="fn">len</span><span class="punc">(</span>enemies<span class="punc">):</span>
+    enemy = enemies<span class="punc">[</span>enemyIndex<span class="punc">]</span>
+    <span class="kw">if</span> enemy <span class="kw">and</span> enemy<span class="punc">.</span>type == <span class="str">"thrower"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    enemyIndex += <span class="num">1</span>
+
+<span class="cmt"># 第二遍：重新获取数组，清扫剩余</span>
+enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>   <span class="hl"># 关键：重新 find，索引重新归零</span>
+enemyIndex = <span class="num">0</span>
+<span class="kw">while</span> enemyIndex &lt; <span class="fn">len</span><span class="punc">(</span>enemies<span class="punc">):</span>
+    enemy = enemies<span class="punc">[</span>enemyIndex<span class="punc">]</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    enemyIndex += <span class="num">1</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么第二遍要重新 findEnemies()？</span>因为第一遍打死了投掷者，原来的 <code>enemies</code> 数组里已经混着"尸体"（失效引用）。重新调用 <code>findEnemies()</code> 拿到一份<strong>最新的存活名单</strong>，才能干净利落地清扫剩余敌人。这也是"数组会过时、要及时刷新"思想的又一次运用。注意代码里还用了 <code>if enemy</code> 先判断对象是否有效，多一层保险。
+</div>
+
+<!-- ==================== 5.5 ==================== -->
+<div class="section-header" id="section-5-5">
+    <h2>5.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"几层嵌套、内层循环的条件是什么、如何筛选、索引放哪"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-5-5-1">5.5.1 游魂（Wandering Souls）</h3>
+
+<h4>5.5.1.1 策略：三层嵌套，先歼敌再收石
+    <span class="en">Strategy: three levels, fight then collect</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/5-5-1-1_wandering_souls.png" alt="扣哒世界 游魂关卡 - koudashijie.com">
+    <div class="caption">图2：游魂——三层嵌套，内层"打到死/追到手"，让迷失的灵魂安息</div>
+</div>
+
+<p>这是本单元的开篇大关，一上来就是<strong>三层嵌套</strong>的完整演示。算法思路分两大块：先歼灭骷髅，再收集发光石。外层 <code>while True</code> 反复守卫；先遍历 <code>enemies</code>，对每个骷髅用内层 <code>while enemy.health > 0</code> 反复攻击直到消灭；再遍历 <code>items</code>，对每个游荡的发光石用内层 <code>while hero.distanceTo(item) > 2</code> 持续追赶直到抓住。</p>
+
+<p><strong>三个关键领悟</strong>：其一，<strong>内层循环的两种形态</strong>——一种以"血量归零"为终点（打敌人），一种以"距离够近"为终点（追物品），但本质都是"条件循环"；其二，<strong>两个遍历各用独立索引</strong>（<code>enemyIndex</code> 和 <code>itemIndex</code>），进循环前各自归零；其三，<strong>索引递增放在正确层级</strong>，必须在内层条件循环之后、外层遍历之内。</p>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-5-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-5-5-2">5.5.2 潜伏（Lurkers）</h3>
+
+<h4>5.5.2.1 策略：遍历中用 == 精准锁定萨满
+    <span class="en">Strategy: match "shaman" with ==</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/5-5-2-1_lurkers.png" alt="扣哒世界 潜伏关卡 - koudashijie.com">
+    <div class="caption">图3：潜伏——牦牛群里混着萨满，用 type=="shaman" 只打萨满不伤牦牛</div>
+</div>
+
+<p>这一关引入<strong>按类型筛选</strong>。牦牛群里潜伏着兽人萨满，你只能打萨满、绝不能误伤无辜的牦牛。算法思路是：遍历 <code>enemies</code>，对每个敌人用 <code>if enemy.type == 'shaman'</code> 判断身份，只有是萨满时才进入内层 <code>while enemy.health > 0</code> 循环把它打死；不是萨满就跳过。</p>
+
+<p><strong>本关的灵魂在于索引递增的位置</strong>：<code>enemyIndex += 1</code> 必须放在 <code>if</code> 判断的外面。关卡特别用醒目提示强调这一点——"即使敌人不是巫师"也要递增。因为如果把 <code>+= 1</code> 误放进 <code>if</code> 里，遇到牦牛时索引就不动了，外层循环会永远卡在那只牦牛身上，直接死循环。这是筛选遍历最经典的坑。</p>
+
+<h3 id="sec-5-5-3">5.5.3 优待（Preferential Treatment）</h3>
+
+<h4>5.5.3.1 策略：两遍遍历，先投掷者后其余
+    <span class="en">Strategy: two passes, throwers first</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/5-5-3-1_preferential.png" alt="扣哒世界 优待关卡 - koudashijie.com">
+    <div class="caption">图4：优待——投掷者攻高血薄，第一遍专杀投掷者，第二遍清扫全场</div>
+</div>
+
+<p>这一关教的是<strong>作战优先级</strong>与<strong>两遍遍历</strong>。投掷者攻击力高但血量低，是最该优先解决的威胁。算法思路是两段并列的遍历：第一段遍历 <code>enemies</code>，用 <code>if enemy.type == "thrower"</code> 只攻击投掷者；第二段<strong>重新 <code>findEnemies()</code> 获取最新数组、索引归零</strong>，再遍历一次，用 <code>if enemy</code> 攻击所有还活着的敌人。</p>
+
+<p><strong>两个关键领悟</strong>：其一，<strong>用两遍遍历实现优先级</strong>——第一遍专挑高威胁目标，比无差别攻击的存活率高得多，这是一种典型的算法策略；其二，<strong>第二遍必须重新获取数组</strong>，因为第一遍已经改变了战场，旧数组里的投掷者引用已失效，重新 find 才能拿到准确的存活名单。这一关的两段遍历是<strong>先后串联</strong>而非嵌套，注意与"游魂"的区别。</p>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-5-5-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+<h3 id="sec-5-5-4">5.5.4 Sarven 牧羊人（Sarven Shepherd）</h3>
+
+<h4>5.5.4.1 策略：用 != 排除牦牛，守卫绿洲
+    <span class="en">Strategy: exclude yaks with !=</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/5-5-4-1_sarven_shepherd.png" alt="扣哒世界 Sarven 牧羊人关卡 - koudashijie.com">
+    <div class="caption">图5：Sarven 牧羊人——打"所有不是牦牛的"敌人，每波清完回中心待命</div>
+</div>
+
+<p>这是本单元的收官关卡，把嵌套、筛选、外层守卫融为一体。任务是从数波兽人袭击中保护绿洲，同时不能伤害穿行其间的沙牦牛。算法思路是：外层 <code>while True</code> 反复守卫；每圈先 <code>findEnemies()</code> 刷新数组、索引归零，遍历 <code>enemies</code>，用 <code>if enemy.type != "sand-yak"</code>（反向排除）筛出所有非牦牛的敌人，对每个用内层 <code>while enemy.health > 0</code> 打死；一波清完后，在 <strong>遍历循环外、但在 while True 内</strong> 执行 <code>moveXY(40, 32)</code> 回到中心待命。</p>
+
+<p><strong>三个关键领悟</strong>：其一，<strong><code>!=</code> 反向筛选</strong>的妙用——与其枚举所有该打的类型，不如直接排除唯一不该打的牦牛；其二，仍然要注意 <code>enemyIndex += 1</code> 放在 <code>if</code> 外；其三，<strong>善后代码的层级</strong>——关卡特别提示，<code>moveXY</code> 要放在遍历循环<strong>后面（外面）</strong>、但仍在 <code>while True</code> <strong>里面</strong>，这样才是"每清完一波才回中心"，而不是"打完一个敌人就回一次"。</p>
+
+<!-- ==================== 5.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-5-5-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<div class="section-header" id="section-5-6">
+    <h2>5.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-5-6-1">5.6.1 嵌套循环最容易踩的坑（Pitfalls）</h3>
+
+<h4>5.6.1.1 嵌套 + 筛选的典型问题
+    <span class="en">Typical issues with nesting and filtering</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/5-6-1-1_common_errors.png" alt="扣哒世界 嵌套循环常见错误示意 - koudashijie.com">
+    <div class="caption">图6：递增放错层级、缩进混乱、==/!= 用反，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>把索引递增放进 if 里——遇到不符合类型的敌人时索引不前进，外层卡死，造成死循环。这是本单元第一大坑。</li>
+        <li>把索引递增放进内层循环里——只要内层一结束就想 +1，位置太深，导致外层无法正确遍历。递增应在内层之后、外层之内。</li>
+        <li>缩进层级错乱——三层嵌套里哪句属于哪层全靠缩进，错一格逻辑就全乱。</li>
+        <li>== 与 != 用反——想只打某类却用了 !=，或想排除某类却用了 ==，攻击对象完全相反。</li>
+        <li>把善后代码放错层级——如"牧羊人"的 moveXY 应在遍历外、while True 内，放错就变成"每打一个就回一次"。</li>
+        <li>两遍遍历时第二遍忘记重新 find 或忘记索引归零——沿用旧数组或旧索引，导致漏打或越界。</li>
+        <li>内层循环条件写错——攻击敌人应是 <code>enemy.health > 0</code>，追物品应是 <code>distanceTo > 2</code>，条件写反会立刻死循环或根本不执行。</li>
+        <li>误用单等号 = 做比较——条件里应用 == 或 !=，用 = 会报语法错误。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你征服了流金沙漠最具挑战的一课——<strong>嵌套循环</strong>！你理解了内外层的分工与执行顺序（内层不跑完，外层不前进），学会了用内层条件循环"把强敌打到死、把远物追到手"，掌握了用 <code>type</code> 属性配合 <code>==</code> / <code>!=</code> 精准筛选目标，还领会了"两遍遍历"实现作战优先级的算法思想。更重要的是，你记住了那条铁律：<strong>无论是否命中筛选条件，索引都必须递增。</strong>来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>嵌套循环</td><td>循环里再套循环，内层先跑完</td><td>游魂、潜伏</td></tr>
+            <tr><td>内层：打到死</td><td><code>while enemy.health > 0</code></td><td>游魂、潜伏、牧羊人</td></tr>
+            <tr><td>内层：追到手</td><td><code>while distanceTo(item) > 2</code></td><td>游魂</td></tr>
+            <tr><td>三层嵌套</td><td>守卫→遍历→条件循环</td><td>游魂、牧羊人</td></tr>
+            <tr><td>类型筛选 ==</td><td>只打指定类型</td><td>潜伏、优待</td></tr>
+            <tr><td>类型排除 !=</td><td>打除某类外的全部</td><td>Sarven 牧羊人</td></tr>
+            <tr><td>索引必递增</td><td>即使跳过也要 +1，否则死循环</td><td>潜伏（重点强调）</td></tr>
+            <tr><td>两遍遍历</td><td>先清高威胁，再清全场</td><td>优待</td></tr>
+            <tr><td>善后代码层级</td><td>放遍历外、主循环内</td><td>Sarven 牧羊人</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        能把循环层层嵌套、按类型精准筛选、按优先级排兵布阵的英雄，才是沙漠中真正的统帅。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️🔁⚔️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:d19090cfd1:START anchor=h3-16 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="d19090cfd1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，你敲下的 if 和 for，直接变成英雄的剑招与魔法。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d19090cfd1:END -->
+<!-- CC-PROTECTION:HIDDEN:249d5f0fc1:START anchor=h3-16 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="249d5f0fc1">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC5-7278F1E4C0EF。</span>
+<!-- CC-PROTECTION:HIDDEN:249d5f0fc1:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（流金沙漠）：第五单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
