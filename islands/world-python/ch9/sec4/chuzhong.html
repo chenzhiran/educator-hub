@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC4-B163DCEE4F79">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第四单元：向量运算 · 方向合成与智能避障 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC4-B163DCEE4F79 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS6-第四单元</div>
+
+    <a href="#section-4-1" class="nav-section">4.1 向量运算概述</a>
+    <a href="#sec-4-1-1" class="nav-sub">4.1.1 什么是向量</a>
+    <a href="#sec-4-1-2" class="nav-sub">4.1.2 位置就是向量</a>
+
+    <a href="#section-4-2" class="nav-section">4.2 减法与加法</a>
+    <a href="#sec-4-2-1" class="nav-sub">4.2.1 subtract 求方向</a>
+    <a href="#sec-4-2-2" class="nav-sub">4.2.2 add 合成位置</a>
+
+    <a href="#section-4-3" class="nav-section">4.3 归一化与缩放</a>
+    <a href="#sec-4-3-1" class="nav-sub">4.3.1 normalize 归一化</a>
+    <a href="#sec-4-3-2" class="nav-sub">4.3.2 multiply 缩放长度</a>
+
+    <a href="#section-4-4" class="nav-section">4.4 避障算法</a>
+    <a href="#sec-4-4-1" class="nav-sub">4.4.1 远离方向叠加</a>
+    <a href="#sec-4-4-2" class="nav-sub">4.4.2 力的合成模型</a>
+
+    <a href="#section-4-5" class="nav-section">4.5 角度与旗帜</a>
+    <a href="#sec-4-5-1" class="nav-sub">4.5.1 atan2 求角度</a>
+    <a href="#sec-4-5-2" class="nav-sub">4.5.2 findFlag/removeFlag</a>
+
+    <a href="#section-4-6" class="nav-section">4.6 实战关卡精讲</a>
+    <a href="#sec-4-6-1" class="nav-sub">4.6.1 绕圈</a>
+    <a href="#sec-4-6-2" class="nav-sub">4.6.2 滑走</a>
+    <a href="#sec-4-6-3" class="nav-sub">4.6.3 精准逆转</a>
+    <a href="#sec-4-6-4" class="nav-sub">4.6.4 冰球</a>
+    <a href="#sec-4-6-5" class="nav-sub">4.6.5 蛇法储蓄</a>
+
+    <a href="#section-4-7" class="nav-section">4.7 常见错误</a>
+    <a href="#sec-4-7-1" class="nav-sub">4.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第四单元：向量运算 · 方向合成与智能避障</h1>
+    <div class="subtitle">Unit 4: Vector Math — Direction Composition &amp; Smart Avoidance</div>
+    <div class="badge">计算机科学 6 · 安息云峰 Cloudrip Mountain · 绕圈 → 滑走 → 精准逆转 → 冰球 → 蛇法储蓄</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 4.1 ==================== -->
+<div class="section-header" id="section-4-1">
+    <h2>4.1 向量运算概述</h2>
+    <div class="en-title">Overview of Vector Operations</div>
+</div>
+
+<p>这是安息云峰上最"数学"、也最强大的一个单元。前面你都是用 <code>move</code> 直接走向某个点，但真实的移动往往更复杂——要绕着一个中心镜像转圈、要一边奔向目标一边躲开牦牛、要精确算出该从哪个角度把球踢向骨架。这些都需要一个全新的工具：<span class="keyword">向量（Vector）</span>。向量能同时表达<strong>方向</strong>和<strong>距离</strong>，还能像积木一样相加、缩放、组合。掌握了向量运算，你就拥有了控制"往哪走、走多远"的完整语言。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用 <code>Vector.subtract</code> 求两点之间的<strong>方向与距离向量</strong>；用 <code>Vector.add</code> <strong>合成新位置</strong>或叠加多个向量；用 <code>Vector.normalize</code> 把向量<strong>归一化</strong>成长度 1、只保留方向；用 <code>Vector.multiply</code> <strong>缩放向量长度</strong>；把"奔向目标"和"远离障碍"两个向量相加，实现<strong>避障算法</strong>；用 <code>Math.atan2</code> <strong>计算角度</strong>；用 <code>findFlag</code> 和 <code>removeFlag</code> <strong>获取与移除旗帜</strong>来动态指挥单位。</p>
+
+<h3 id="sec-4-1-1">4.1.1 什么是向量（What Is a Vector）</h3>
+
+<h4>4.1.1.1 一个带箭头的量
+    <span class="en">A quantity with an arrow</span>
+</h4>
+
+<p>普通数字（如"5"）只有大小，叫标量；<strong>向量则同时带有方向和大小</strong>，可以想象成一支箭头——箭头指向哪儿是"方向"，箭头多长是"距离（幅值 magnitude）"。在游戏里，一个向量常写成 <code>Vector(x, y)</code>，其中 <code>x</code> 和 <code>y</code> 是它在两个坐标轴上的分量。同一个向量，既能表示"一个位置坐标"，也能表示"从一点到另一点要走的方向和路程"。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 160" width="520" role="img" aria-label="向量示意">
+        <defs>
+            <marker id="v-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#3E7CB1"/>
+            </marker>
+        </defs>
+        <text x="260" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">向量 = 方向 + 长度</text>
+        <line x1="80" y1="120" x2="300" y2="55" stroke="#3E7CB1" stroke-width="3" marker-end="url(#v-arr)"/>
+        <circle cx="80" cy="120" r="5" fill="#2A5A85"/>
+        <text x="60" y="140" font-size="11" fill="#4d6373" font-family="sans-serif">起点</text>
+        <text x="310" y="55" font-size="11" fill="#4d6373" font-family="sans-serif">终点</text>
+        <text x="180" y="78" font-size="11" fill="#3E7CB1" font-family="sans-serif" transform="rotate(-16 180 78)">方向（箭头朝向）</text>
+        <text x="380" y="90" font-size="11" fill="#E0912F" font-family="sans-serif">长度 = 幅值 magnitude</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-4-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+<!-- CC-PROTECTION:HIDDEN:368631496f:START anchor=sec-4-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="368631496f">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:368631496f:END -->
+
+<h3 id="sec-4-1-2">4.1.2 位置就是向量（A Position IS a Vector）</h3>
+
+<h4>4.1.2.1 hero.pos 本身就是一个 Vector
+    <span class="en">hero.pos is itself a Vector</span>
+</h4>
+
+<p>一个关键认知：<strong>单位的位置 <code>hero.pos</code> 本身就是一个向量</strong>——它带着 <code>.x</code> 和 <code>.y</code> 两个分量。所以你可以直接把 <code>hero.pos</code>、<code>partner.pos</code>、<code>ball.pos</code> 当作向量来做加减运算。这也是向量强大的原因：位置、方向、位移都用同一套 <code>Vector</code> 语言表达，可以自由地相互运算。</p>
+
+<div class="info-box">
+    <span class="info-label">两种含义要分清：</span>同样是一个 <code>Vector(40, 34)</code>，当我们把它当"位置"用时，它表示地图上坐标 (40, 34) 那个点；当我们把它当"位移/方向"用时，它表示"向右走 40、向上走 34"这段移动。它到底是哪种含义，取决于你怎么用它。
+</div>
+
+<!-- ==================== 4.2 ==================== -->
+<div class="section-header" id="section-4-2">
+    <h2>4.2 减法与加法</h2>
+    <div class="en-title">Subtraction and Addition</div>
+</div>
+
+<h3 id="sec-4-2-1">4.2.1 subtract 求方向（Finding Direction with subtract）</h3>
+
+<h4>4.2.1.1 终点减起点，得到"从起点指向终点"的向量
+    <span class="en">End minus start gives the vector pointing from start to end</span>
+</h4>
+
+<p>向量减法是本单元最重要的操作。<code>Vector.subtract(A, B)</code> 得到的是一个<strong>从 B 指向 A</strong> 的向量——它同时告诉你"往哪个方向"和"有多远"。记忆口诀是<strong>"目标减自己"</strong>：想得到"从我这里指向目标"的向量，就写 <code>Vector.subtract(目标.pos, 我.pos)</code>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="向量减法">
+        <text x="260" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">Vector.subtract(goalPoint, hero.pos)</text>
+        <text x="130" y="60" text-anchor="middle" font-size="12" fill="#9fd4a8" font-family="monospace">goalPoint</text>
+        <text x="130" y="76" text-anchor="middle" font-size="10" fill="#6a8294" font-family="sans-serif">目标（终点）</text>
+        <text x="260" y="60" text-anchor="middle" font-size="16" fill="#7cc7e8" font-family="monospace">−</text>
+        <text x="390" y="60" text-anchor="middle" font-size="12" fill="#e8a15a" font-family="monospace">hero.pos</text>
+        <text x="390" y="76" text-anchor="middle" font-size="10" fill="#6a8294" font-family="sans-serif">自己（起点）</text>
+        <text x="260" y="120" text-anchor="middle" font-size="12" fill="#cdddea" font-family="sans-serif">= 从英雄指向目标的方向+距离向量</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 得到"从英雄指向目标点"的向量</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>goalPoint<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+
+<span class="cmt"># 得到"从牦牛指向英雄"的向量（用于逃离）</span>
+toHero <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> yak<span class="punc">.</span>pos<span class="punc">)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">减法顺序决定方向：</span><code>subtract(A, B)</code> 和 <code>subtract(B, A)</code> 方向<strong>正好相反</strong>！想"朝着目标去"用 <code>subtract(目标, 自己)</code>；想"远离障碍"用 <code>subtract(自己, 障碍)</code>。顺序写反，就会朝反方向走——这是本单元最致命的错误。
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-4-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+<h3 id="sec-4-2-2">4.2.2 add 合成位置（Composing Positions with add）</h3>
+
+<h4>4.2.2.1 起点加位移，得到终点
+    <span class="en">Start plus displacement gives the destination</span>
+</h4>
+
+<p><code>Vector.add</code> 做的是相反的事——<strong>把一个位置和一个位移向量相加，得到新的位置</strong>。比如"从我当前位置出发，沿着 <code>goal</code> 向量走"，落点就是 <code>Vector.add(hero.pos, goal)</code>。加法还能把<strong>多个方向向量叠加</strong>成一个合成方向，这正是避障算法的核心（后面详述）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 从当前位置沿 goal 向量前进，算出落点</span>
+moveToPos <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> goal<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>moveToPos<span class="punc">)</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">➕➖ 减法与加法是一对搭档</div>
+    <strong>减法</strong>回答"我该往哪个方向、走多远"（求出位移向量）；<strong>加法</strong>回答"沿这个位移走，会到哪里"（求出目标位置）。几乎所有关卡都是这个套路：先 <code>subtract</code> 求出方向，加工一下，再 <code>add</code> 回当前位置得到落脚点，最后 <code>move</code> 过去。
+</div>
+
+<!-- ==================== 4.3 ==================== -->
+<div class="section-header" id="section-4-3">
+    <h2>4.3 归一化与缩放</h2>
+    <div class="en-title">Normalizing and Scaling</div>
+</div>
+
+<h3 id="sec-4-3-1">4.3.1 normalize 归一化（Normalize to Unit Length）</h3>
+
+<h4>4.3.1.1 只留方向，长度归为 1
+    <span class="en">Keep the direction, set length to 1</span>
+</h4>
+
+<p>有时我们只关心一个向量<strong>指向哪儿</strong>，不关心它<strong>多长</strong>。<code>Vector.normalize(v)</code> 会保留 <code>v</code> 的方向，但把它的长度统一变成 <strong>1 米</strong>（这叫单位向量）。归一化后，我们就能用一个"纯方向"，再乘上任意想要的距离，精确控制移动步长——这是"想往这个方向走 X 米"的标准做法。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="归一化">
+        <defs>
+            <marker id="n-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#3E7CB1"/>
+            </marker>
+        </defs>
+        <text x="260" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">归一化：方向不变，长度变成 1</text>
+        <line x1="60" y1="110" x2="230" y2="55" stroke="#7d94a3" stroke-width="3" marker-end="url(#n-arr)"/>
+        <text x="120" y="105" font-size="10" fill="#7d94a3" font-family="sans-serif">原向量（长 8）</text>
+        <text x="270" y="85" font-size="16" fill="#4d6373">→</text>
+        <line x1="320" y1="90" x2="360" y2="77" stroke="#3E7CB1" stroke-width="3" marker-end="url(#n-arr)"/>
+        <text x="370" y="95" font-size="10" fill="#3E7CB1" font-family="sans-serif">单位向量（长 1，同方向）</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-4-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+
+<h3 id="sec-4-3-2">4.3.2 multiply 缩放长度（Scale Length with multiply）</h3>
+
+<h4>4.3.2.1 方向不变，长度乘以倍数
+    <span class="en">Same direction, length times a factor</span>
+</h4>
+
+<p><code>Vector.multiply(v, X)</code> 把向量 <code>v</code> 的长度<strong>乘以 X 倍</strong>，方向保持不变。把它和归一化连用，就是控制"移动多远"的黄金组合：<strong>先 normalize 归一化成长度 1，再 multiply 乘以想要的米数</strong>，就得到一个"朝目标方向、长度恰好 X 米"的向量。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 黄金三步：subtract 求方向 → normalize 归一化 → multiply 定长度</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>goalPoint<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>   <span class="cmt"># ① 得到指向目标的向量</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">normalize</span><span class="punc">(</span>goal<span class="punc">)</span>                <span class="cmt"># ② 压成长度 1，只留方向</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span>goal<span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>            <span class="cmt"># ③ 放大到 10 米长</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 540 90" width="540" role="img" aria-label="黄金三步">
+        <defs>
+            <marker id="g-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#f0c674"/>
+            </marker>
+        </defs>
+        <text x="90" y="30" text-anchor="middle" font-size="11" fill="#9fd4a8" font-family="sans-serif">subtract</text>
+        <text x="90" y="46" text-anchor="middle" font-size="9" fill="#6a8294" font-family="sans-serif">求方向</text>
+        <line x1="150" y1="38" x2="200" y2="38" stroke="#f0c674" stroke-width="2" marker-end="url(#g-arr)"/>
+        <text x="270" y="30" text-anchor="middle" font-size="11" fill="#7cc7e8" font-family="sans-serif">normalize</text>
+        <text x="270" y="46" text-anchor="middle" font-size="9" fill="#6a8294" font-family="sans-serif">长度归 1</text>
+        <line x1="335" y1="38" x2="385" y2="38" stroke="#f0c674" stroke-width="2" marker-end="url(#g-arr)"/>
+        <text x="460" y="30" text-anchor="middle" font-size="11" fill="#e8a15a" font-family="sans-serif">multiply</text>
+        <text x="460" y="46" text-anchor="middle" font-size="9" fill="#6a8294" font-family="sans-serif">放大到 X 米</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">两种写法风格：</span>关卡里既有 <code>goal = Vector.normalize(goal)</code> 这种"返回新向量再赋值"的写法，也有 <code>toYak.normalize()</code> 这种"直接修改原向量"的链式写法。两者效果相同，链式写法还能连写成 <code>chip.pos.copy().subtract(ballPos).normalize()</code>。用 <code>.copy()</code> 是为了避免改动原始位置。
+</div>
+
+<!-- ==================== 4.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-4-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<div class="section-header" id="section-4-4">
+    <h2>4.4 避障算法</h2>
+    <div class="en-title">Obstacle Avoidance</div>
+</div>
+
+<h3 id="sec-4-4-1">4.4.1 远离方向叠加（Adding a "Flee" Vector）</h3>
+
+<h4>4.4.1.1 一边奔向目标，一边推离障碍
+    <span class="en">Move toward the goal while being pushed off the obstacle</span>
+</h4>
+
+<p>"滑走"关卡的核心难题是：直线冲向目标会正好撞上牦牛。解决思路极其优雅——<strong>把两个向量相加</strong>。一个是"奔向目标"的向量 <code>goal</code>，另一个是"远离障碍"的向量（从障碍指向自己，即 <code>subtract(hero.pos, yak.pos)</code>）。两者相加得到的合成向量，会让英雄<strong>整体朝目标前进、但被障碍"推"得偏开一点</strong>，从而绕过去。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 190" width="520" role="img" aria-label="避障向量合成">
+        <defs>
+            <marker id="a-arr1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f7a45"/></marker>
+            <marker id="a-arr2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#C0453B"/></marker>
+            <marker id="a-arr3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#3E7CB1"/></marker>
+        </defs>
+        <text x="260" y="22" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">合成方向 = 奔向目标 + 远离障碍</text>
+        <circle cx="90" cy="120" r="5" fill="#2A5A85"/>
+        <text x="70" y="140" font-size="10" fill="#4d6373" font-family="sans-serif">英雄</text>
+        <line x1="90" y1="120" x2="270" y2="120" stroke="#2f7a45" stroke-width="2.5" marker-end="url(#a-arr1)"/>
+        <text x="180" y="112" font-size="10" fill="#2f7a45" font-family="sans-serif">goal 奔向目标</text>
+        <line x1="90" y1="120" x2="130" y2="60" stroke="#C0453B" stroke-width="2.5" marker-end="url(#a-arr2)"/>
+        <text x="60" y="55" font-size="10" fill="#C0453B" font-family="sans-serif">远离牦牛</text>
+        <line x1="90" y1="120" x2="290" y2="75" stroke="#3E7CB1" stroke-width="3" marker-end="url(#a-arr3)"/>
+        <text x="300" y="72" font-size="10" fill="#3E7CB1" font-family="sans-serif" font-weight="bold">合成：绕开牦牛奔向目标</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 若牦牛太近，叠加一个"远离牦牛"的向量</span>
+<span class="kw">if</span> distance <span class="punc">&lt;</span> <span class="num">10</span><span class="punc">:</span>
+    toYak <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> yak<span class="punc">.</span>pos<span class="punc">)</span>  <span class="cmt"># 从牦牛指向英雄</span>
+    toYak<span class="punc">.</span><span class="fn">normalize</span><span class="punc">()</span>                         <span class="cmt"># 只留方向</span>
+    toYak<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span><span class="num">10</span><span class="punc">)</span>                        <span class="cmt"># 放大成 10 米的"斥力"</span>
+    goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>goal<span class="punc">,</span> toYak<span class="punc">)</span>          <span class="cmt"># 叠加到目标向量上</span>
+moveToPos <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> goal<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>moveToPos<span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-4-4-2">4.4.2 力的合成模型（The Force-Composition Model）</h3>
+
+<h4>4.4.2.1 把向量想象成"拉力"和"斥力"
+    <span class="en">Think of vectors as attraction and repulsion</span>
+</h4>
+
+<p>理解避障最直观的方式，是把它想象成<strong>物理里的力</strong>。目标像磁铁一样对英雄有<strong>吸引力</strong>（goal 向量），障碍则像同极磁铁一样有<strong>排斥力</strong>（远离向量）。英雄实际的移动方向，是所有力<strong>加起来</strong>的合力。障碍越近，斥力应当越强——所以关卡里通常只在"距离小于某个阈值"时才施加斥力，且可以让斥力大小随距离变化。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧲 磁铁模型的威力</div>
+    这个"吸引+排斥"模型不只用于躲牦牛。在"蛇法储蓄"里，硬币是吸引力、自己的尾巴是排斥力；在"调剂团"里，药水是吸引力、火焰陷阱是排斥力。只要把"想去的"和"想躲的"各做成一个向量再相加，就能让单位在复杂环境里自动导航。这正是机器人和游戏 AI 里真实使用的<strong>势场法（potential field）</strong>思想。
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">斥力方向别搞反：</span>"远离障碍"的向量必须是 <code>subtract(自己.pos, 障碍.pos)</code>（从障碍指向自己）。如果写成 <code>subtract(障碍.pos, 自己.pos)</code>，就变成"扑向障碍"，会直接撞上去。这又一次说明减法顺序至关重要。
+</div>
+
+<!-- ==================== 4.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:5744a41fe1:START anchor=sec-4-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="5744a41fe1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>遇到难题？来 <a href="https://koudashijie.com/">koudashijie.com</a>，扣哒鸭会及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:5744a41fe1:END -->
+<!-- CC-PROTECTION:HIDDEN:84b8124d35:START anchor=sec-4-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="84b8124d35">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:84b8124d35:END -->
+
+<div class="section-header" id="section-4-5">
+    <h2>4.5 角度与旗帜</h2>
+    <div class="en-title">Angles and Flags</div>
+</div>
+
+<h3 id="sec-4-5-1">4.5.1 atan2 求角度（Computing Angles with atan2）</h3>
+
+<h4>4.5.1.1 从向量分量还原方向角
+    <span class="en">Recover the angle from a vector's components</span>
+</h4>
+
+<p>有时我们需要的不是向量本身，而是它<strong>指向的角度</strong>（比如判断球会往哪个方向飞、或让单位面朝某处）。<code>Math.atan2(y, x)</code> 能从一个向量的 <code>y</code> 和 <code>x</code> 分量算出它与水平方向的夹角（弧度）。它比普通的 <code>atan</code> 更聪明——能根据 <code>x</code>、<code>y</code> 的正负正确区分四个象限，给出 -π 到 π 的完整角度。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 求"从英雄指向敌人"这个方向的角度</span>
+diff <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>enemy<span class="punc">.</span>pos<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+angle <span class="punc">=</span> Math<span class="punc">.</span><span class="fn">atan2</span><span class="punc">(</span>diff<span class="punc">.</span>y<span class="punc">,</span> diff<span class="punc">.</span>x<span class="punc">)</span>   <span class="cmt"># 注意：先 y 后 x</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">参数顺序是 (y, x)：</span><code>Math.atan2</code> 的参数顺序很反直觉——<strong>先传 y，再传 x</strong>，写成 <code>atan2(diff.y, diff.x)</code>。写反成 <code>atan2(x, y)</code> 会得到错误的角度。这是使用它时最容易踩的坑。
+</div>
+
+<div class="info-box">
+    <span class="info-label">角度用来做什么：</span>在"精准逆转""冰球"这类推球关卡里，向量的<strong>方向/角度</strong>决定了球会朝哪儿飞。要让球命中特定骨架，就得让农民站到球的正确一侧、从正确角度去推——这背后就是对方向向量（及其角度）的精确计算。
+</div>
+
+<h3 id="sec-4-5-2">4.5.2 findFlag 与 removeFlag（Getting and Removing Flags）</h3>
+
+<h4>4.5.2.1 用旗帜动态下达指令
+    <span class="en">Give dynamic orders with flags</span>
+</h4>
+
+<p>旗帜（flag）是一种<strong>动态、临时的指令标记</strong>——你在游戏中点击放下一面旗，程序就能读到它并据此行动。<code>hero.findFlag("green")</code> 获取当前放置的绿旗（没有则返回空）；<code>hero.removeFlag(flag)</code> 则在用完后把它移除。典型套路是："如果检测到旗帜，就让最近的单位移向旗帜位置，等它靠近后移除旗帜"，这样你就能实时、灵活地指挥球员跑位。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 检测旗帜 → 派最近单位过去 → 到位后移除旗帜</span>
+flag <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFlag</span><span class="punc">(</span><span class="str">"green"</span><span class="punc">)</span>
+<span class="kw">if</span> flag<span class="punc">:</span>
+    <span class="cmt"># ...找出离旗帜最近的 closestFriend...</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>closestFriend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> flag<span class="punc">.</span>pos<span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">removeFlag</span><span class="punc">(</span>flag<span class="punc">)</span>   <span class="cmt"># 用完立即移除，避免重复触发</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">用完一定要 removeFlag：</span>如果读取旗帜后不 <code>removeFlag</code>，那面旗会一直存在，导致每一帧都重复派单位过去、逻辑卡死。"接收指令 → 执行 → 清除指令"是使用旗帜的固定节奏。
+</div>
+
+<!-- ==================== 4.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:8e73525d56:START anchor=sec-4-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8e73525d56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，有用户说它真的很适合打基础，触类旁通下 C 语言也学得很快。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8e73525d56:END -->
+
+<div class="section-header" id="section-4-6">
+    <h2>4.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 绕圈 -->
+<div class="level-card" id="sec-4-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 绕圈</span>
+        <h3>🔄 绕圈 —— 用向量镜像伙伴的移动</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-1-1_circling.png" alt="扣哒世界 绕圈关卡 - koudashijie.com">
+            <div class="caption">图2：绕圈——以中心 X 为对称点，用向量减法与加法，让英雄始终镜像伙伴绕中心移动</div>
+        </div>
+
+        <h4>策略：以中心 X 为对称点镜像移动</h4>
+        <p>本关要让英雄的位置永远和伙伴关于中心 X 点<strong>对称</strong>——伙伴在中心一侧，英雄就要在正对面的另一侧。这是理解"位置就是向量、减加互为逆运算"的最佳入门关。核心只有两步向量运算。</p>
+
+        <h4>思路拆解：subtract 求出偏移，add 镜像回去</h4>
+        <p>第一步，用 <code>Vector.subtract(center, partner.pos)</code> 求出"<strong>从伙伴指向中心</strong>"的向量——它描述了伙伴相对中心的偏移。第二步，把这个偏移<strong>从中心再加一次</strong>：<code>Vector.add(center, vector)</code>，就得到了中心另一侧的对称点。第三步，移动到这个点。因为偏移方向从伙伴→中心，再从中心继续同方向延伸，落点自然落在伙伴的正对面。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：镜像伙伴绕中心 X 移动</span>
+center <span class="punc">=</span> Vector<span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">34</span><span class="punc">)</span>
+partner <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"peasant"</span><span class="punc">)[</span><span class="num">0</span><span class="punc">]</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    vector <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>center<span class="punc">,</span> partner<span class="punc">.</span>pos<span class="punc">)</span>  <span class="cmt"># 伙伴→中心的偏移</span>
+    moveToPos <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>center<span class="punc">,</span> vector<span class="punc">)</span>       <span class="cmt"># 中心另一侧的对称点</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>moveToPos<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么这样就对称：</span>从中心到英雄的向量，恰好等于从伙伴到中心的向量。也就是说中心正好是伙伴和英雄连线的<strong>中点</strong>，两者永远关于中心镜像。这就是向量减加运算最直观的几何意义。
+        </div>
+    </div>
+</div>
+
+<!-- 滑走 -->
+<div class="level-card" id="sec-4-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 滑走</span>
+        <h3>🏃 滑走 —— 奔向目标同时躲开牦牛</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-2-1_gliding.png" alt="扣哒世界 滑走关卡 - koudashijie.com">
+            <div class="caption">图3：滑走——用"黄金三步"造出奔向 X 的向量，牦牛过近时叠加远离向量，合成出绕行路线</div>
+        </div>
+
+        <h4>策略：吸引力 + 斥力的合成导航</h4>
+        <p>本关要走到红色 X，但直线过去会撞上牦牛。策略是经典的<strong>势场避障</strong>：始终有一个"奔向目标"的向量，一旦牦牛进入 10 米范围，就再叠加一个"远离牦牛"的向量，两者相加得到既朝目标、又绕开牦牛的合成方向。关键是<strong>每一步都必须整体朝目标推进</strong>，否则永远到不了。</p>
+
+        <h4>思路拆解：两个向量各自加工再相加</h4>
+        <p><strong>目标向量</strong>用黄金三步造出：<code>subtract(goalPoint, hero.pos)</code> 求方向、<code>normalize</code> 归一化、<code>multiply(goal, 10)</code> 定长 10 米。<strong>避障向量</strong>只在 <code>distance &lt; 10</code> 时才造：<code>subtract(hero.pos, yak.pos)</code>（从牦牛指向自己）、归一化、乘 10，得到 10 米的斥力。最后 <code>Vector.add(goal, toYak)</code> 把两者合成，再 <code>add(hero.pos, goal)</code> 算出落点并移动。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：目标向量 + 条件性避障向量</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>goalPoint<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">normalize</span><span class="punc">(</span>goal<span class="punc">)</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span>goal<span class="punc">,</span> <span class="num">10</span><span class="punc">)</span>
+yak <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">())</span>
+<span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>yak<span class="punc">)</span> <span class="punc">&lt;</span> <span class="num">10</span><span class="punc">:</span>
+    toYak <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> yak<span class="punc">.</span>pos<span class="punc">)</span>
+    toYak<span class="punc">.</span><span class="fn">normalize</span><span class="punc">()</span>
+    toYak<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span><span class="num">10</span><span class="punc">)</span>
+    goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>goal<span class="punc">,</span> toYak<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">move</span><span class="punc">(</span>Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> goal<span class="punc">))</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">斥力别盖过引力：</span>如果避障向量比目标向量强太多，英雄会光顾着逃、原地打转到不了 X。让两者长度相当（都是 10 米）能保证"边躲边前进"。这也是为什么要先把两个向量都归一化再乘同样的倍数——好让它们"势均力敌"。
+        </div>
+    </div>
+</div>
+
+<!-- 精准逆转 -->
+<div class="level-card" id="sec-4-6-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 精准逆转</span>
+        
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<h3>🎯 精准逆转 —— 从正确角度把球推向目标</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-3-1_precision_reverse.png" alt="扣哒世界 精准逆转关卡 - koudashijie.com">
+            <div class="caption">图4：精准逆转——用向量算出每个蓝骨架方向，令农民绕到球的反方向一侧，把球精准推向蓝骨架</div>
+        </div>
+
+        <h4>策略：站到球背后，把球推向目标</h4>
+        <p>本关要用球撞倒所有蓝骨架、不碰红骨架。要让球朝某个蓝骨架飞，农民必须站到<strong>球相对目标的"反方向"一侧</strong>去推——就像台球，想让球往前走，得从后面击打。所以关键是为每个蓝骨架算出正确的<strong>击球点（kickPoint）</strong>。</p>
+
+        <h4>思路拆解：用方向向量反推击球点</h4>
+        <p>对每个蓝骨架 <code>chip</code>，先求"从球指向骨架"的方向：<code>chip.pos.copy().subtract(ballPos).normalize()</code>（用 <code>copy()</code> 避免改动骨架真实坐标）。这个单位向量指向骨架。击球点要在球的<strong>相反</strong>一侧，所以把方向<strong>乘以 -8</strong> 再加到球位上：<code>Vector.add(ballPos, direction.multiply(-8))</code>。农民走到这个点后再推向球，球就会朝骨架飞去。逐个处理完所有蓝骨架，并在每次击球后回到中心。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：为每个蓝骨架算出球背后的击球点</span>
+<span class="kw">for</span> chip <span class="kw">in</span> blueChips<span class="punc">:</span>
+    direction <span class="punc">=</span> chip<span class="punc">.</span>pos<span class="punc">.</span><span class="fn">copy</span><span class="punc">()</span><span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>ballPos<span class="punc">)</span><span class="punc">.</span><span class="fn">normalize</span><span class="punc">()</span>
+    kickPoint <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>ballPos<span class="punc">,</span> direction<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span><span class="punc">-</span><span class="num">8</span><span class="punc">))</span>  <span class="cmt"># 负号→球的另一侧</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>kicker<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> kickPoint<span class="punc">)</span>
+    <span class="cmt"># ...等农民到位后，再命令它 move 向 ballPos 把球推出...</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">负号的妙用：</span><code>multiply(direction, -8)</code> 里的负号让向量<strong>反向</strong>——原本指向骨架，取负后就指向骨架的相反侧。加到球位上，就得到"球的背后 8 米处"这个击球点。用正负号翻转方向，是向量运算里非常实用的小技巧。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">用 magnitude 判断球是否停下：</span>关卡提示可检查 <code>ball.velocity.magnitude()</code> 来判断球是否已经停回中心。幅值接近 0 表示球停住了，此时才好进行下一次击球，避免在球还在滚时乱推。
+        </div>
+    </div>
+</div>
+
+<!-- 冰球 -->
+<div class="level-card" id="sec-4-6-4">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 冰球</span>
+        
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+<!-- CC-PROTECTION:HIDDEN:710c9c956c:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="710c9c956c">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC4-B163DCEE4F79。</span>
+<!-- CC-PROTECTION:HIDDEN:710c9c956c:END -->
+
+<h3>🏒 冰球 —— 用旗帜动态指挥球员</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-4-1_ice_puck.png" alt="扣哒世界 冰球关卡 - koudashijie.com">
+            <div class="caption">图5：冰球——通过放置/移除旗帜实时调度最近球员，并用向量算好击球点把球射向对方球门</div>
+        </div>
+
+        <h4>策略：旗帜跑位 + 向量击球</h4>
+        <p>本关要在食人魔进三球前先得三分。它融合了本单元几乎所有技能：用<strong>旗帜</strong>动态指挥球员跑位、用<strong>"找最近单位"</strong>的擂台算法选人、用<strong>向量</strong>算出正确的击球点把球射向前方。这是一关综合演练。</p>
+
+        <h4>思路拆解：三段逻辑</h4>
+        <p><strong>第一段·旗帜调度</strong>：每帧 <code>findFlag("green")</code>，若有旗，就用"最近距离擂台"找出离旗最近的球员，命令它 <code>move</code> 到旗位，然后 <code>removeFlag</code> 清除旗帜。<strong>第二段·选控球者</strong>：再用一次擂台找出离球最近的球员 <code>closestFriend</code>。<strong>第三段·向量击球</strong>：当控球者站在球的正确一侧且足够近时，用 <code>subtract</code> 求出击球方向、<code>normalize</code>、<code>multiply(3)</code> 定长，再 <code>add</code> 出击球点，命令球员移过去把球顶向前方球门。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：旗帜调度最近球员</span>
+flag <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFlag</span><span class="punc">(</span><span class="str">"green"</span><span class="punc">)</span>
+<span class="kw">if</span> flag<span class="punc">:</span>
+    closest <span class="punc">=</span> <span class="kw">None</span>
+    closestDist <span class="punc">=</span> <span class="num">9999</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+        <span class="kw">if</span> friend<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>flag<span class="punc">)</span> <span class="punc">&lt;</span> closestDist<span class="punc">:</span>
+            closest <span class="punc">=</span> friend
+            closestDist <span class="punc">=</span> friend<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>flag<span class="punc">)</span>
+    <span class="kw">if</span> closest<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>closest<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> flag<span class="punc">.</span>pos<span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">removeFlag</span><span class="punc">(</span>flag<span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">击球点要在球的后方：</span>和"精准逆转"一样，想把球往前推，球员要站在球的后侧。通过 <code>goalPoint = Vector(ball.pos.x - 3, ball.pos.y)</code> 之类的计算，让球员绕到球的一侧再推，就能把球送向正确方向。多试几次找手感——正如关卡玩笑说的，"至少游戏很快就会结束"。
+        </div>
+    </div>
+</div>
+
+<!-- 蛇法储蓄 -->
+<div class="level-card" id="sec-4-6-5">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 蛇法储蓄（挑战）</span>
+        <h3>🐍 蛇法储蓄 —— 一边贪吃蛇一边避开自己的尾巴</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/4-6-5-1_snake_savings.png" alt="扣哒世界 蛇法储蓄关卡 - koudashijie.com">
+            <div class="caption">图6：蛇法储蓄——农民像贪吃蛇般收集硬币，身后拖出会致命的尾巴，需用向量避障绕开自己的尾巴</div>
+        </div>
+
+        <h4>策略：性价比选币 + 避开自己的尾巴</h4>
+        <p>这是本单元的高难挑战关，是前面所有技能的集大成。农民像贪吃蛇一样收集硬币，身后拖出不断变长的尾巴，一旦碰到尾巴（或墙、或别的蛇）就会被摧毁，要凑够 200 金币。策略是把<strong>第三单元的价值/距离选币</strong>和<strong>本单元的向量避障</strong>结合起来——朝最划算的硬币去，同时用斥力向量绕开自己的尾巴。</p>
+
+        <h4>思路拆解：吸引力（硬币）+ 斥力（尾巴）</h4>
+        <p><strong>选币</strong>：用 <code>findBestItem</code> 按 <code>value / distance</code> 打擂台选出性价比最高的硬币。<strong>造吸引力</strong>：<code>subtract(coin.pos, friend.pos)</code> → 归一化 → 乘 7，得到奔向硬币的向量 <code>goal</code>。<strong>造斥力</strong>：读取农民身后的 <code>friend.snakeBackward</code>（尾巴），用 <code>subtract(friend.pos, tail.pos)</code>（从尾巴指向自己）→ 归一化 → 乘 7，得到远离尾巴的向量 <code>toTail</code>。<strong>合成</strong>：<code>Vector.add(goal, toTail)</code> 相加，再加回当前位置得到落点。这正是"滑走"避障模型在动态障碍上的复用。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：奔向硬币 + 远离自己的尾巴</span>
+coin <span class="punc">=</span> <span class="fn">findBestItem</span><span class="punc">(</span>friend<span class="punc">,</span> coins<span class="punc">)</span>       <span class="cmt"># 价值/距离选币</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">,</span> friend<span class="punc">.</span>pos<span class="punc">)</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">normalize</span><span class="punc">(</span>goal<span class="punc">)</span>
+goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span>goal<span class="punc">,</span> <span class="num">7</span><span class="punc">)</span>
+<span class="kw">if</span> friend<span class="punc">.</span>snakeBackward<span class="punc">:</span>              <span class="cmt"># 身后的尾巴</span>
+    tail <span class="punc">=</span> friend<span class="punc">.</span>snakeBackward
+    toTail <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>friend<span class="punc">.</span>pos<span class="punc">,</span> tail<span class="punc">.</span>pos<span class="punc">)</span>
+    toTail <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">normalize</span><span class="punc">(</span>toTail<span class="punc">)</span>
+    toTail <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span>toTail<span class="punc">,</span> <span class="num">7</span><span class="punc">)</span>
+    goal <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>goal<span class="punc">,</span> toTail<span class="punc">)</span>   <span class="cmt"># 合成方向</span>
+moveToPos <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>friend<span class="punc">.</span>pos<span class="punc">,</span> goal<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> moveToPos<span class="punc">)</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">这是可选挑战关：</span>蛇法储蓄难度很高，要同时避开尾巴、墙壁和其他蛇。如果暂时攻克不下也没关系——它需要你把整个单元的向量与避障融会贯通。建议先把前四关吃透，再回头挑战它。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">对尾巴的完整避障：</span>更稳的做法是遍历尾巴上的<strong>多个</strong>节点，对每一节都叠加一个斥力向量（离得越近斥力越强），而不只避开最近一节。这就是 4.4 节"力的合成"在多个障碍上的推广——把所有斥力都 <code>add</code> 进合成方向里。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 4.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<div class="section-header" id="section-4-7">
+    <h2>4.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-4-7-1">4.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>4.7.1.1 向量运算的典型问题
+    <span class="en">Typical issues with vector math</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch9_sec4_4-7-1-1_common_errors.png" alt="扣哒世界 向量运算常见错误速查 - koudashijie.com">
+    <div class="caption">图7：减法顺序反、忘记归一化、atan2 参数反、旗帜不移除，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>减法顺序写反——朝目标去用 <code>subtract(目标, 自己)</code>，远离障碍用 <code>subtract(自己, 障碍)</code>；写反会朝相反方向移动。</li>
+        <li>忘记归一化就乘倍数——不先 <code>normalize</code> 就 <code>multiply</code>，长度会失控，移动步长忽大忽小。</li>
+        <li>避障向量太强盖过目标——两个向量要长度相当（都归一化再乘同样倍数），否则英雄只顾逃跑到不了目标。</li>
+        <li>直接改到原始位置——对 <code>chip.pos</code> 等真实坐标做运算前要先 <code>.copy()</code>，否则会污染单位的实际位置。</li>
+        <li>Math.atan2 参数顺序反——必须是 <code>atan2(y, x)</code>（先 y 后 x），写成 <code>atan2(x, y)</code> 角度全错。</li>
+        <li>读取旗帜后不移除——用完 <code>findFlag</code> 要 <code>removeFlag</code>，否则每帧重复触发、逻辑卡死。</li>
+        <li>击球点方向没取负——想把球推向目标，击球点要在球的相反侧，记得给方向向量乘负数。</li>
+        <li>合成后忘记加回当前位置——算好合成方向向量后，还要 <code>add(自己.pos, goal)</code> 得到真正的落点才能 move。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>这是安息云峰上分量最重的一个单元，你掌握了控制"往哪走、走多远"的完整向量语言！你学会了用 <code>Vector.subtract</code> 求两点间的<strong>方向与距离向量</strong>（牢记"目标减自己"）；用 <code>Vector.add</code> <strong>合成位置</strong>与叠加向量；用 <code>Vector.normalize</code> 把向量<strong>压成长度 1 只留方向</strong>、再用 <code>Vector.multiply</code> <strong>缩放到想要的长度</strong>——这"黄金三步"是所有移动的基石；你还理解了把"吸引力"和"斥力"相加的<strong>避障算法</strong>（势场思想），会用 <code>Math.atan2</code> <strong>求方向角度</strong>，并用 <code>findFlag</code>、<code>removeFlag</code> <strong>动态指挥</strong>单位。从绕圈的镜像、滑走的避障、精准逆转与冰球的击球，到蛇法储蓄的动态避障，你把向量运算用得淋漓尽致。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>subtract 求方向</td><td>目标减自己 / 自己减障碍</td><td>绕圈·滑走</td></tr>
+            <tr><td>add 合成位置</td><td>当前位置 + 位移 = 落点</td><td>绕圈</td></tr>
+            <tr><td>normalize 归一化</td><td>保方向、长度变 1</td><td>滑走</td></tr>
+            <tr><td>multiply 缩放</td><td>长度乘倍数（负号可反向）</td><td>滑走·精准逆转</td></tr>
+            <tr><td>避障算法</td><td>目标向量 + 远离向量 相加</td><td>滑走·蛇法储蓄</td></tr>
+            <tr><td>Math.atan2 求角</td><td>参数顺序 (y, x)</td><td>精准逆转·冰球</td></tr>
+            <tr><td>findFlag/removeFlag</td><td>读旗调度、用完即删</td><td>冰球</td></tr>
+            <tr><td>综合避障</td><td>选币吸引 + 尾巴排斥</td><td>蛇法储蓄</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用向量精确表达方向与距离、能把吸引与排斥合成为一条智慧路线的英雄，才是真正驾驭空间与运动的云峰智者。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️➡️🧲</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=h3-17 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（安息云峰）：第四单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

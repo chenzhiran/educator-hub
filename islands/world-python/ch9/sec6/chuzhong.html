@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC6-CBA42970AFF1">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第六单元：字符串算法 · 解码部署命令 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 字符索引带（字符串可视化）===== */
+        .str-strip {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 10px 0;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .str-strip .ch {
+            width: 34px;
+            text-align: center;
+            border-radius: 6px;
+            padding: 6px 0 2px;
+            font-weight: 700;
+            font-size: 0.95em;
+            position: relative;
+        }
+        .str-strip .ch .idx {
+            display: block;
+            font-size: 0.62em;
+            font-weight: 400;
+            color: var(--text-lighter);
+            margin-top: 2px;
+        }
+        .ch-type { background: #cfeadd; color: #2f7a45; border: 2px solid #6bbf88; }
+        .ch-x    { background: #d5ecf7; color: #197C91; border: 2px solid #6fb8dc; }
+        .ch-y    { background: #fdeccf; color: #bd7415; border: 2px solid #e6b566; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC6-CBA42970AFF1 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第六单元</div>
+
+    <a href="#section-6-1" class="nav-section">6.1 字符串算法概述</a>
+    <a href="#sec-6-1-1" class="nav-sub">6.1.1 什么是字符串</a>
+    <a href="#sec-6-1-2" class="nav-sub">6.1.2 读取指令牌信息</a>
+
+    <a href="#section-6-2" class="nav-section">6.2 字符串截取 substr</a>
+    <a href="#sec-6-2-1" class="nav-sub">6.2.1 索引与截取</a>
+    <a href="#sec-6-2-2" class="nav-sub">6.2.2 取出类型与坐标</a>
+
+    <a href="#section-6-3" class="nav-section">6.3 字典映射</a>
+    <a href="#sec-6-3-1" class="nav-sub">6.3.1 字符→兵种</a>
+    <a href="#sec-6-3-2" class="nav-sub">6.3.2 用键取值</a>
+
+    <a href="#section-6-4" class="nav-section">6.4 解析固定格式命令</a>
+    <a href="#sec-6-4-1" class="nav-sub">6.4.1 Txxyy 格式</a>
+    <a href="#sec-6-4-2" class="nav-sub">6.4.2 步长为5的循环</a>
+
+    <a href="#section-6-5" class="nav-section">6.5 召唤与指挥</a>
+    <a href="#sec-6-5-1" class="nav-sub">6.5.1 summon 召唤</a>
+    <a href="#sec-6-5-2" class="nav-sub">6.5.2 command 移动</a>
+    <a href="#sec-6-5-3" class="nav-sub">6.5.3 int 与 Vector</a>
+
+    <a href="#section-6-6" class="nav-section">6.6 实战关卡精讲</a>
+    <a href="#sec-6-6-1" class="nav-sub">6.6.1 编码订单</a>
+
+    <a href="#section-6-7" class="nav-section">6.7 常见错误</a>
+    <a href="#sec-6-7-1" class="nav-sub">6.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第六单元：字符串算法 · 解码部署命令</h1>
+    <div class="subtitle">Unit 6: String Algorithms — Decoding Deployment Orders</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 编码订单 Coded Orders</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 6.1 ==================== -->
+<div class="section-header" id="section-6-1">
+    <h2>6.1 字符串算法概述</h2>
+    <div class="en-title">Overview of String Algorithms</div>
+</div>
+
+<p>欢迎来到封神冰川的最后一个单元！在这片被冰雪封印的战场上，你的指挥总部下达了一套<strong>加密的部署命令</strong>——所有指令被压缩进了一根指令牌（sign）的一长串文本里。你不能再靠肉眼一个个数坐标，而要让程序<strong>自动读懂这串文本、召唤正确的兵种、并把它们精确送到指定坐标</strong>。这正是<span class="keyword">字符串算法（string algorithms）</span>大显身手的地方：把一段看似杂乱的字符，按照约定的规则拆解成有意义的信息。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>字符串</strong>是有序的字符序列；用 <code>substr</code>（字符串截取）按索引取出子串；用<strong>字典（dict）</strong>把类型字母映射成兵种名；识别 <code>Txxyy</code> 这种<strong>固定格式命令</strong>；用<strong>步长为 5</strong> 的循环逐条解析整条消息；最后用 <code>hero.summon</code> 召唤单位、<code>hero.command</code> 把单位移动到解析出的坐标。
+</div>
+
+<h3 id="sec-6-1-1">6.1.1 什么是字符串（What Is a String）</h3>
+
+<h4>6.1.1.1 字符串是"排好队的字符"
+    <span class="en">A string is an ordered sequence of characters</span>
+</h4>
+
+<p>字符串就是一串按顺序排列的字符——字母、数字、符号都算。它和数组很像：每个字符都有一个<strong>索引（index）</strong>，从 <code>0</code> 开始编号。比如字符串 <code>"a1536"</code> 里，第 0 个字符是 <code>a</code>，第 1 个是 <code>1</code>，第 2 个是 <code>5</code>，以此类推。正是因为字符有固定的位置，我们才能"按位置"把想要的部分精准截取出来。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 480 120" width="480" role="img" aria-label="字符串的索引">
+        <text x="240" y="24" text-anchor="middle" font-size="14" fill="#1C5E7C" font-weight="bold" font-family="sans-serif">字符串 "a1536" 的每个字符都有索引</text>
+        <g font-family="monospace" font-size="20" text-anchor="middle">
+            <rect x="60" y="45" width="60" height="45" rx="6" fill="#cfeadd" stroke="#6bbf88" stroke-width="2"/><text x="90" y="75" fill="#2f7a45">a</text>
+            <rect x="130" y="45" width="60" height="45" rx="6" fill="#d5ecf7" stroke="#6fb8dc" stroke-width="2"/><text x="160" y="75" fill="#1f6a95">1</text>
+            <rect x="200" y="45" width="60" height="45" rx="6" fill="#d5ecf7" stroke="#6fb8dc" stroke-width="2"/><text x="230" y="75" fill="#1f6a95">5</text>
+            <rect x="270" y="45" width="60" height="45" rx="6" fill="#fdeccf" stroke="#e6b566" stroke-width="2"/><text x="300" y="75" fill="#bd7415">3</text>
+            <rect x="340" y="45" width="60" height="45" rx="6" fill="#fdeccf" stroke="#e6b566" stroke-width="2"/><text x="370" y="75" fill="#bd7415">6</text>
+        </g>
+        <g font-family="monospace" font-size="12" text-anchor="middle" fill="#7794a3">
+            <text x="90" y="108">0</text><text x="160" y="108">1</text><text x="230" y="108">2</text><text x="300" y="108">3</text><text x="370" y="108">4</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-6-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:35bda69a02:START anchor=sec-6-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="35bda69a02">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:35bda69a02:END -->
+
+<h3 id="sec-6-1-2">6.1.2 读取指令牌信息（Reading the Sign's Message）</h3>
+
+<h4>6.1.2.1 从 sign 上拿到那串命令
+    <span class="en">Get the command string from the sign</span>
+</h4>
+
+<p>关卡里的部署命令写在场上的一块指令牌（<code>sign</code>）上。先用 <code>hero.findByType("sign")</code> 找到它，取出第一块（索引 <code>[0]</code>），再读取它的 <code>.message</code> 属性——这就是我们要解码的那一长串文本。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 找到指令牌，读取上面的部署命令</span>
+sign <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"sign"</span><span class="punc">)[</span><span class="num">0</span><span class="punc">]</span>
+message <span class="punc">=</span> sign<span class="punc">.</span>message
+<span class="cmt"># message 现在是类似 "a1536s4532P2455..." 的一长串字符</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">解析（parse）是什么意思：</span>解析就是"按照约定的规则，把一大段文本拆成一小块一小块有意义的信息"。这里我们要把 <code>message</code> 拆成一条条 <code>Txxyy</code> 命令，再从每条里分离出兵种类型和坐标。学会解析，是处理真实世界数据（配置文件、网络协议、日志）的基本功。
+</div>
+
+<!-- ==================== 6.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-6-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+<div class="section-header" id="section-6-2">
+    <h2>6.2 字符串截取 substr</h2>
+    <div class="en-title">Slicing Strings with substr</div>
+</div>
+
+<h3 id="sec-6-2-1">6.2.1 索引与截取（Index and Slice）</h3>
+
+<h4>6.2.1.1 substr(起点, 长度) 取出一段子串
+    <span class="en">substr(start, length) returns a substring</span>
+</h4>
+
+<p>字符串截取用 <code>substr(start, length)</code>：从索引 <code>start</code> 处开始，取 <code>length</code> 个字符，返回一个新的子字符串。它<strong>不改变</strong>原字符串，只是"复制出"其中一段。这是本单元最核心的工具——正是靠它，我们才能把 <code>Txxyy</code> 拆成 <code>T</code>、<code>xx</code>、<code>yy</code> 三部分。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 130" width="520" role="img" aria-label="substr 解剖">
+        <text x="260" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">message.substr(起点, 长度)</text>
+        <text x="120" y="78" font-size="18" font-family="monospace" fill="#a5d4e8">message</text>
+        <text x="225" y="78" font-size="18" font-family="monospace" fill="#cfe3ee">.</text>
+        <text x="235" y="78" font-size="18" font-family="monospace" fill="#f0c674">substr</text>
+        <text x="315" y="78" font-size="18" font-family="monospace" fill="#e8a15a">(index, 2)</text>
+        <text x="140" y="106" font-size="11" fill="#a5d4e8" text-anchor="middle" font-family="sans-serif">从哪个字符串取</text>
+        <text x="360" y="106" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">从 index 起取 2 个字符</text>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">substr 与索引的区别：</span><code>message[i]</code> 只取<strong>一个</strong>字符；而 <code>message.substr(i, n)</code> 能取<strong>连续 n 个</strong>字符。坐标 <code>xx</code> 是两位数，必须用 <code>substr(i, 2)</code> 一次取两个字符，才能得到完整的 <code>"15"</code> 而不是单个 <code>"1"</code>。
+</div>
+
+<h3 id="sec-6-2-2">6.2.2 取出类型与坐标（Extracting Type and Coordinates）</h3>
+
+<h4>6.2.2.1 一条 Txxyy 命令怎么拆
+    <span class="en">How to split one Txxyy command</span>
+</h4>
+
+<p>假设某条命令从索引 <code>index</code> 开始。类型字母 <code>T</code> 在第 <code>index</code> 位，取 1 个；x 坐标在第 <code>index+1</code> 位，取 2 个；y 坐标在第 <code>index+3</code> 位，取 2 个。三次 <code>substr</code> 就把一条命令拆得清清楚楚。</p>
+
+<div class="concept-viz">
+    <div class="str-strip">
+        <span class="ch ch-type">a<span class="idx">index</span></span>
+        <span class="ch ch-x">1<span class="idx">+1</span></span>
+        <span class="ch ch-x">5<span class="idx">+2</span></span>
+        <span class="ch ch-y">3<span class="idx">+3</span></span>
+        <span class="ch ch-y">6<span class="idx">+4</span></span>
+    </div>
+    <div style="font-size:0.85em;color:#47606E;margin-top:6px;">
+        <span style="color:#2f7a45;font-weight:700;">■ 类型</span> substr(index,1) = "a" &nbsp;·&nbsp;
+        <span style="color:#1f6a95;font-weight:700;">■ x坐标</span> substr(index+1,2) = "15" &nbsp;·&nbsp;
+        <span style="color:#bd7415;font-weight:700;">■ y坐标</span> substr(index+3,2) = "36"
+    </div>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 从 index 位置拆出一条 Txxyy 命令</span>
+type <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index<span class="punc">,</span> <span class="num">1</span><span class="punc">)</span>       <span class="cmt"># 类型字母，如 "a"</span>
+x <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index <span class="punc">+</span> <span class="num">1</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>   <span class="cmt"># x 坐标，如 "15"</span>
+y <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index <span class="punc">+</span> <span class="num">3</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>   <span class="cmt"># y 坐标，如 "36"</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">此刻坐标还是字符串！</span><code>substr</code> 取出的 <code>"15"</code> 是<strong>文本</strong>而不是<strong>数字</strong>。要用它来定位坐标，后面必须用 <code>int()</code> 把它转成整数（详见 6.5.3），否则 <code>"15"+"36"</code> 会变成拼接成 <code>"1536"</code>，而不是我们要的坐标。
+</div>
+
+<!-- ==================== 6.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-6-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<div class="section-header" id="section-6-3">
+    <h2>6.3 字典映射字符到兵种</h2>
+    <div class="en-title">Mapping Characters to Unit Types with a Dict</div>
+</div>
+
+<h3 id="sec-6-3-1">6.3.1 字符→兵种（Character to Unit Type）</h3>
+
+<h4>6.3.1.1 用字典建立"字母↔兵种"的对照表
+    <span class="en">Build a lookup table from letter to unit type</span>
+</h4>
+
+<p>命令里的类型是单个字母（<code>a</code>、<code>s</code>、<code>p</code>…），但 <code>hero.summon</code> 需要的是完整的兵种名（<code>"archer"</code>、<code>"soldier"</code>…）。如果用一长串 <code>if / elif</code> 一一对应会很啰嗦。更优雅的做法是用<strong>字典（dictionary）</strong>——一张"键值对照表"，把每个字母（键）映射到对应的兵种名（值）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 字典：字母 → 兵种名 的对照表</span>
+summonTypes <span class="punc">=</span> <span class="punc">{</span>
+    <span class="str">"a"</span><span class="punc">:</span> <span class="str">"archer"</span><span class="punc">,</span>          <span class="cmt"># 弓箭手</span>
+    <span class="str">"s"</span><span class="punc">:</span> <span class="str">"soldier"</span><span class="punc">,</span>         <span class="cmt"># 士兵</span>
+    <span class="str">"p"</span><span class="punc">:</span> <span class="str">"peasant"</span><span class="punc">,</span>         <span class="cmt"># 农民</span>
+    <span class="str">"g"</span><span class="punc">:</span> <span class="str">"griffin-rider"</span><span class="punc">,</span>   <span class="cmt"># 狮鹫骑士</span>
+    <span class="str">"P"</span><span class="punc">:</span> <span class="str">"paladin"</span><span class="punc">,</span>         <span class="cmt"># 圣骑士</span>
+    <span class="str">"A"</span><span class="punc">:</span> <span class="str">"artillery"</span>         <span class="cmt"># 炮兵</span>
+<span class="punc">}</span></pre>
+</div>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>命令字母（键）</th><th>兵种名（值）</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">"a"</td><td class="mono">"archer"</td><td>弓箭手，远程输出</td></tr>
+        <tr><td class="mono">"s"</td><td class="mono">"soldier"</td><td>士兵，近战肉盾</td></tr>
+        <tr><td class="mono">"p"</td><td class="mono">"peasant"</td><td>农民，收集资源</td></tr>
+        <tr><td class="mono">"g"</td><td class="mono">"griffin-rider"</td><td>狮鹫骑士，飞行进攻</td></tr>
+        <tr><td class="mono">"P"</td><td class="mono">"paladin"</td><td>圣骑士，治疗防御</td></tr>
+        <tr><td class="mono">"A"</td><td class="mono">"artillery"</td><td>炮兵，范围轰炸</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">大小写敏感：</span>注意 <code>"p"</code>（小写，农民 peasant）和 <code>"P"</code>（大写，圣骑士 paladin）是<strong>两个不同的键</strong>！字典和字符串都严格区分大小写，抄写命令表时千万别把它们混为一谈。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-6-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-6-3-2">6.3.2 用键取值（Looking Up by Key）</h3>
+
+<h4>6.3.2.1 中括号一查，字母变兵种
+    <span class="en">Use square brackets to look up a value</span>
+</h4>
+
+<p>建好字典后，用 <code>字典[键]</code> 的写法就能瞬间查到对应的值。比如解析出类型字母是 <code>"a"</code>，那么 <code>summonTypes["a"]</code> 立刻返回 <code>"archer"</code>。这比一长串 <code>if</code> 判断简洁得多，而且新增兵种时只要往字典里加一行即可。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用解析出的字母作键，查出完整兵种名</span>
+letter <span class="punc">=</span> <span class="str">"a"</span>
+unitType <span class="punc">=</span> summonTypes<span class="punc">[</span>letter<span class="punc">]</span>   <span class="cmt"># 得到 "archer"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span>unitType<span class="punc">)</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">📖 像查字典一样</div>
+    想象一本词典：你翻到 "a" 这一页，上面写着解释 "archer"。字典（dict）在编程里做的正是这件事——给它一个"词条"（键），它立刻返回"释义"（值）。查找几乎是瞬间完成的，比一页页翻找（一个个 if 判断）快得多。
+</div>
+
+<!-- ==================== 6.4 ==================== -->
+<div class="section-header" id="section-6-4">
+    <h2>6.4 解析固定格式命令</h2>
+    <div class="en-title">Parsing Fixed-Format Commands</div>
+</div>
+
+<h3 id="sec-6-4-1">6.4.1 Txxyy 格式（The Txxyy Format）</h3>
+
+<h4>6.4.1.1 每条命令恰好 5 个字符
+    <span class="en">Each command is exactly 5 characters</span>
+</h4>
+
+<p>整条消息由若干条命令<strong>首尾相接</strong>拼成，每条命令都严格遵守 <code>Txxyy</code> 这个<strong>固定格式（fixed format）</strong>：1 个类型字母 + 2 位 x 坐标 + 2 位 y 坐标，正好 5 个字符。正因为长度固定，我们才能靠"数格子"精确定位每条命令的起点——第 1 条从 0 开始，第 2 条从 5 开始，第 3 条从 10 开始……</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="消息由若干5字符命令拼成">
+        <text x="280" y="22" text-anchor="middle" font-size="14" fill="#1C5E7C" font-weight="bold" font-family="sans-serif">"a1536 s4532 P2455 ..." 每 5 个字符一条命令</text>
+        <g font-family="monospace" font-size="15" text-anchor="middle">
+            <rect x="30" y="42" width="150" height="46" rx="8" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/>
+            <text x="105" y="72" fill="#1C5E7C" font-weight="bold">a1536</text>
+            <rect x="200" y="42" width="150" height="46" rx="8" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/>
+            <text x="275" y="72" fill="#1C5E7C" font-weight="bold">s4532</text>
+            <rect x="370" y="42" width="150" height="46" rx="8" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/>
+            <text x="445" y="72" fill="#1C5E7C" font-weight="bold">P2455</text>
+        </g>
+        <g font-family="monospace" font-size="11" text-anchor="middle" fill="#7794a3">
+            <text x="105" y="108">起点 0</text>
+            <text x="275" y="108">起点 5</text>
+            <text x="445" y="108">起点 10</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:12766675f6:START anchor=sec-6-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="12766675f6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，你不是走进一间教室，而是一片等待被拯救的大陆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:12766675f6:END -->
+
+<h3 id="sec-6-4-2">6.4.2 步长为 5 的循环（Looping with a Step of 5）</h3>
+
+<h4>6.4.2.1 range(起点, 终点, 步长) 中的步长
+    <span class="en">The step in range(start, stop, step)</span>
+</h4>
+
+<p>要每次跳到下一条命令的起点，就得让循环变量每轮<strong>增加 5</strong> 而不是 1。<code>range</code> 的第三个参数正是<strong>步长（step）</strong>：<code>range(0, len(message), 5)</code> 会依次产生 <code>0, 5, 10, 15, ...</code>——恰好是每条命令的起始索引。这样循环体每跑一次，正好处理一条完整命令。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>步长 1（逐字符）</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> <span class="num">15</span><span class="punc">):</span>
+    <span class="cmt"># 0,1,2,3,...,14</span>
+    <span class="cmt"># 每次只前进 1 个字符</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>步长 5（逐命令）</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> <span class="num">15</span><span class="punc">,</span> <span class="num">5</span><span class="punc">):</span>
+    <span class="cmt"># 0,5,10</span>
+    <span class="cmt"># 每次跳过一整条命令</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 以步长 5 遍历整条消息，逐条解析每个 Txxyy</span>
+<span class="kw">for</span> index <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> <span class="fn">len</span><span class="punc">(</span>message<span class="punc">),</span> <span class="num">5</span><span class="punc">):</span>
+    type <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index<span class="punc">,</span> <span class="num">1</span><span class="punc">)</span>
+    x <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index <span class="punc">+</span> <span class="num">1</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>
+    y <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index <span class="punc">+</span> <span class="num">3</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>
+    <span class="fn">summonTroops</span><span class="punc">(</span>type<span class="punc">,</span> x<span class="punc">,</span> y<span class="punc">)</span>   <span class="cmt"># 交给召唤函数处理</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么用 len(message)：</span>消息可能有很多条命令，我们不知道具体多少条。用 <code>len(message)</code> 作为循环终点，无论消息多长都能自动跑完——这让代码对任意长度的命令串都通用。因为每条命令都是 5 个字符且首尾相接，<code>len(message)</code> 一定是 5 的整数倍。
+</div>
+
+<!-- ==================== 6.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-6-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+<!-- CC-PROTECTION:HIDDEN:88f3aecf3a:START anchor=sec-6-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="88f3aecf3a">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:88f3aecf3a:END -->
+
+<div class="section-header" id="section-6-5">
+    <h2>6.5 召唤与指挥单位</h2>
+    <div class="en-title">Summoning and Commanding Units</div>
+</div>
+
+<h3 id="sec-6-5-1">6.5.1 summon 召唤（Summoning Units）</h3>
+
+<h4>6.5.1.1 hero.summon 花金币变出一个单位
+    <span class="en">hero.summon spends gold to create a unit</span>
+</h4>
+
+<p><code>hero.summon("archer")</code> 会消耗一定金币，在你身边召唤出一个弓箭手。召唤需要 <strong>Boss Star</strong> 权限——不同兵种要求不同等级的 Boss Star（士兵最低，圣骑士、炮兵较高）。召唤前应先用 <code>hero.costOf(type)</code> 查询价格，确认 <code>hero.gold</code> 够用，避免召唤失败。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 金币足够时才召唤，避免浪费一帧</span>
+<span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold <span class="punc">&gt;</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span>type<span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span>type<span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">Boss Star 的分级：</span>关卡说明提到，要召唤并指挥<strong>所有</strong>兵种（含圣骑士、炮兵）需要 Boss Star IV；如果你只有 Boss Star III，也能召唤基础兵种（士兵、弓箭手、狮鹫等）完成关卡的基础形式。装备等级越高，可指挥的兵种越丰富。
+</div>
+
+<h3 id="sec-6-5-2">6.5.2 command 移动（Commanding Units to Move）</h3>
+
+<h4>6.5.2.1 召唤后立刻找到"最新那个"并派它去坐标
+    <span class="en">Find the just-summoned unit and send it</span>
+</h4>
+
+<p>召唤只是把单位变出来，它还停在你身边。要把它送到指定坐标，得用 <code>hero.command(单位, "move", 目标位置)</code>。难点在于：怎么在一群同类单位里找到<strong>刚刚召唤的那一个</strong>？技巧是——召唤后重新查一次该兵种的所有单位，<strong>数组里的最后一个（索引 <code>len(friends)-1</code>）就是最新召唤的</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 召唤后，取该兵种数组的最后一个 = 刚召唤的单位</span>
+friends <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span>unitType<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">())</span>
+newUnit <span class="punc">=</span> friends<span class="punc">[</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">]</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>newUnit<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> <span class="fn">Vector</span><span class="punc">(</span><span class="fn">int</span><span class="punc">(</span>x<span class="punc">),</span> <span class="fn">int</span><span class="punc">(</span>y<span class="punc">)))</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么是最后一个：</span>新召唤的单位会被<strong>追加</strong>到友军数组的末尾，所以 <code>friends[len(friends)-1]</code>（即最后一个元素）总是最新那一个。指挥它移动，就不会误派到之前已经就位的同类单位。
+</div>
+
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-6-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+<!-- CC-PROTECTION:HIDDEN:3094cafed8:START anchor=sec-6-5-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="3094cafed8">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC6-CBA42970AFF1。</span>
+<!-- CC-PROTECTION:HIDDEN:3094cafed8:END -->
+
+<h3 id="sec-6-5-3">6.5.3 int 与 Vector（Converting to Numbers and Positions）</h3>
+
+<h4>6.5.3.1 字符串坐标要先转数字，再包成向量
+    <span class="en">Convert string coordinates to a Vector</span>
+</h4>
+
+<p><code>substr</code> 得到的 <code>x</code>、<code>y</code> 还是文本（如 <code>"15"</code>、<code>"36"</code>）。移动指令需要的是数字坐标，所以要用 <code>int()</code> 把它们转成整数，再用 <code>Vector(int(x), int(y))</code> 打包成一个位置向量传给 <code>command</code>。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 90" width="560" role="img" aria-label="字符串到向量的转换流程">
+        <defs>
+            <marker id="v-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="monospace" font-size="13" text-anchor="middle">
+            <rect x="20" y="30" width="120" height="40" rx="8" fill="#fdeccf" stroke="#e6b566" stroke-width="2"/>
+            <text x="80" y="55" fill="#bd7415">"15", "36"</text>
+            <line x1="142" y1="50" x2="195" y2="50" stroke="#2E8BB0" stroke-width="2" marker-end="url(#v-arr)"/>
+            <rect x="200" y="30" width="150" height="40" rx="8" fill="#d5ecf7" stroke="#6fb8dc" stroke-width="2"/>
+            <text x="275" y="55" fill="#1f6a95">int() → 15, 36</text>
+            <line x1="352" y1="50" x2="405" y2="50" stroke="#2E8BB0" stroke-width="2" marker-end="url(#v-arr)"/>
+            <rect x="410" y="30" width="140" height="40" rx="8" fill="#cfeadd" stroke="#6bbf88" stroke-width="2"/>
+            <text x="480" y="55" fill="#2f7a45">Vector(15, 36)</text>
+        </g>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">忘了 int 会出错：</span>如果直接把字符串 <code>"15"</code> 当坐标，程序无法正确计算位置；而且用 <code>+</code> 连接两个字符串是<strong>拼接</strong>不是相加（<code>"1"+"5"</code> 得到 <code>"15"</code> 而非 <code>6</code>）。所以取出的坐标一定要 <code>int()</code> 转成数字后再使用。
+</div>
+
+<!-- ==================== 6.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:fc3dddac56:START anchor=sec-6-5-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="fc3dddac56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，把编程变成闯关游戏，玩着玩着就成了别人眼里的代码大佬。</span>
+</aside>
+<!-- CC-PROTECTION:AD:fc3dddac56:END -->
+
+<div class="section-header" id="section-6-6">
+    <h2>6.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 编码订单 -->
+<div class="level-card" id="sec-6-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 15 关 · 编码订单</span>
+        <h3>🧊 编码订单 —— 解码消息、召唤并部署军队</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/6-6-1-1_coded_orders.png" alt="扣哒世界 编码订单关卡 - koudashijie.com">
+            <div class="caption">图2：编码订单——指令牌上写着一长串 Txxyy 加密命令，解码后召唤对应兵种并送往冰川上的指定坐标</div>
+        </div>
+
+        <h4>策略：读牌 → 解析 → 召唤 → 部署</h4>
+        <p>本关的部署命令全部编码在一块指令牌里，形如 <code>"a1536s4532P2455..."</code>。你的任务是把这串"密文"翻译成实际行动。整体策略分四步：<strong>读牌</strong>——从 <code>sign.message</code> 取出命令串；<strong>解析</strong>——以步长 5 逐条拆出类型和坐标；<strong>召唤</strong>——用字典把字母翻译成兵种名再 <code>summon</code>；<strong>部署</strong>——把刚召唤的单位 <code>command</code> 移动到解析出的坐标。</p>
+
+        <div class="concept-viz">
+            <svg viewBox="0 0 620 90" width="620" role="img" aria-label="四步流程">
+                <defs>
+                    <marker id="s-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+                    </marker>
+                </defs>
+                <g font-family="sans-serif" font-size="13" text-anchor="middle">
+                    <rect x="10" y="30" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="70" y="55" fill="#1C5E7C" font-weight="bold">① 读牌</text>
+                    <line x1="132" y1="50" x2="163" y2="50" stroke="#2E8BB0" stroke-width="2" marker-end="url(#s-arr)"/>
+                    <rect x="168" y="30" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="228" y="55" fill="#1C5E7C" font-weight="bold">② 解析</text>
+                    <line x1="290" y1="50" x2="321" y2="50" stroke="#2E8BB0" stroke-width="2" marker-end="url(#s-arr)"/>
+                    <rect x="326" y="30" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="386" y="55" fill="#1C5E7C" font-weight="bold">③ 召唤</text>
+                    <line x1="448" y1="50" x2="479" y2="50" stroke="#2E8BB0" stroke-width="2" marker-end="url(#s-arr)"/>
+                    <rect x="484" y="30" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="544" y="55" fill="#1C5E7C" font-weight="bold">④ 部署</text>
+                </g>
+            </svg>
+        </div>
+
+        <h4>思路拆解一：用字典代替一堆 if</h4>
+        <p>解析出来的类型是字母，但召唤需要兵种全名。与其写六个 <code>if / elif</code>，不如建一张字典 <code>summonTypes</code>，把 <code>"a"→"archer"</code>、<code>"s"→"soldier"</code> …一次性对应好。这样"翻译"只需一句 <code>summonTypes[num]</code>，代码短、也更易扩展。这体现了<strong>用数据结构消除重复分支</strong>的思想。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：字母→兵种 的字典映射</span>
+summonTypes <span class="punc">=</span> <span class="punc">{</span>
+    <span class="str">"a"</span><span class="punc">:</span> <span class="str">"archer"</span><span class="punc">,</span>  <span class="str">"s"</span><span class="punc">:</span> <span class="str">"soldier"</span><span class="punc">,</span>  <span class="str">"p"</span><span class="punc">:</span> <span class="str">"peasant"</span><span class="punc">,</span>
+    <span class="str">"g"</span><span class="punc">:</span> <span class="str">"griffin-rider"</span><span class="punc">,</span>  <span class="str">"P"</span><span class="punc">:</span> <span class="str">"paladin"</span><span class="punc">,</span>  <span class="str">"A"</span><span class="punc">:</span> <span class="str">"artillery"</span>
+<span class="punc">}</span></pre>
+        </div>
+
+        <h4>思路拆解二：把召唤+部署封装成一个函数</h4>
+        <p>把"召唤某兵种并送到 (x, y)"这套动作封装进一个函数 <code>summonTroops(num, coorX, coorY)</code>，主循环只管解析、然后调用它。函数内部：先用字典查出兵种名，检查金币是否够，<code>summon</code> 召唤，再取该兵种数组的最后一个（最新召唤的），<code>command</code> 它移动到 <code>Vector(int(coorX), int(coorY))</code>。注意炮兵（artillery）等高级兵种可能因权限或金币而单独判断。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：召唤并部署一个单位（封装成函数）</span>
+<span class="kw">def</span> <span class="fn">summonTroops</span><span class="punc">(</span>num<span class="punc">,</span> coorX<span class="punc">,</span> coorY<span class="punc">):</span>
+    unitType <span class="punc">=</span> summonTypes<span class="punc">[</span>num<span class="punc">]</span>          <span class="cmt"># 字典翻译字母</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold <span class="punc">&gt;</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span>unitType<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span>unitType<span class="punc">)</span>
+        friends <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span>unitType<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">())</span>
+        newUnit <span class="punc">=</span> friends<span class="punc">[</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">]</span>   <span class="cmt"># 最新召唤的</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>newUnit<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> <span class="fn">Vector</span><span class="punc">(</span><span class="fn">int</span><span class="punc">(</span>coorX<span class="punc">),</span> <span class="fn">int</span><span class="punc">(</span>coorY<span class="punc">)))</span></pre>
+        </div>
+
+        <h4>思路拆解三：步长 5 的主循环把一切串起来</h4>
+        <p>最后，用步长为 5 的循环遍历整条消息：每轮从 <code>index</code> 处用三次 <code>substr</code> 拆出类型、x、y，交给 <code>summonTroops</code>。循环跑完，全部命令就依次执行完毕。这就是解析固定格式数据的经典骨架。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：以步长 5 逐条解析并执行命令</span>
+sign <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"sign"</span><span class="punc">)[</span><span class="num">0</span><span class="punc">]</span>
+message <span class="punc">=</span> sign<span class="punc">.</span>message
+<span class="kw">for</span> index <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> <span class="fn">len</span><span class="punc">(</span>message<span class="punc">),</span> <span class="num">5</span><span class="punc">):</span>
+    type <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index<span class="punc">,</span> <span class="num">1</span><span class="punc">)</span>
+    x <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index <span class="punc">+</span> <span class="num">1</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>
+    y <span class="punc">=</span> message<span class="punc">.</span><span class="fn">substr</span><span class="punc">(</span>index <span class="punc">+</span> <span class="num">3</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>
+    <span class="fn">summonTroops</span><span class="punc">(</span>type<span class="punc">,</span> x<span class="punc">,</span> y<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">默认代码里的小陷阱：</span>关卡默认代码是 <code>hero.findByType("sign")[8]</code>，但通常应取索引 <code>[0]</code> 才是那块部署指令牌。若拿错指令牌，读到的 <code>message</code> 就不对。开始前不妨用 <code>hero.say(message)</code> 把消息打印出来核对格式。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别在一帧里反复召唤：</span>如果把解析循环放进一个 <code>while True</code> 里而不加控制，会不断重复召唤同一批单位、瞬间耗光金币。本关的解析循环应<strong>只跑一遍</strong>（一次性把命令全部执行），而不是每帧都重跑。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 6.7 ==================== -->
+<div class="section-header" id="section-6-7">
+    <h2>6.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-6-7-1">6.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>6.7.1.1 字符串解析的典型问题
+    <span class="en">Typical issues with string parsing</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch9_sec6_6-7-1-1_common_errors.png" alt="扣哒世界 字符串算法常见错误速查 - koudashijie.com">
+    <div class="caption">图3：忘转 int、步长写错、substr 长度取错、字典大小写混淆，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>坐标忘转 int——<code>substr</code> 取出的是字符串，必须 <code>int(x)</code> 转数字，否则位置计算出错、或 <code>+</code> 变成字符串拼接。</li>
+        <li>步长写错——遍历命令要用 <code>range(0, len(message), 5)</code>；漏掉步长 5 会逐字符乱解析。</li>
+        <li>substr 长度取错——坐标是两位数要 <code>substr(i, 2)</code>；写成 <code>substr(i, 1)</code> 只取到一位，坐标就错了。</li>
+        <li>索引偏移算错——x 从 <code>index+1</code>、y 从 <code>index+3</code> 开始；偏移量数错会把类型和坐标错位。</li>
+        <li>字典大小写混淆——<code>"p"</code>（农民）与 <code>"P"</code>（圣骑士）是不同键，别写混。</li>
+        <li>指挥错了单位——要指挥"最新召唤"的那个，即数组 <code>len-1</code> 位；随便挑一个会派错单位。</li>
+        <li>把解析放进死循环——命令应一次性执行完，别放 <code>while True</code> 里反复召唤耗光金币。</li>
+        <li>取错指令牌——默认代码的索引可能不对，务必确认取到的是那块部署命令牌。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-6-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你成为一名合格的"密令译电员"！在封神冰川的这一单元，你学会了字符串是有序的字符序列、每个字符都有从 0 起的索引；掌握了用 <code>substr(start, length)</code> 按位置截取子串，把一条 <code>Txxyy</code> 命令拆成类型、x、y 三部分；学会用<strong>字典</strong>把类型字母优雅地映射成兵种名，替代冗长的 <code>if</code> 判断；理解了固定格式命令为何能靠<strong>步长为 5</strong> 的循环逐条解析；并用 <code>hero.summon</code> 召唤单位、用 <code>int</code>+<code>Vector</code> 转换坐标、用 <code>hero.command</code> 把最新召唤的单位精确送到目的地。在"编码订单"一关里，你把这一整套字符串解析流程融会贯通。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>读取消息</td><td>从指令牌取命令串</td><td class="mono">sign.message</td></tr>
+            <tr><td>字符串截取</td><td>按起点+长度取子串</td><td class="mono">message.substr(i, 2)</td></tr>
+            <tr><td>字典映射</td><td>字母→兵种名</td><td class="mono">summonTypes["a"]</td></tr>
+            <tr><td>固定格式</td><td>每条命令 5 字符</td><td class="mono">Txxyy</td></tr>
+            <tr><td>步长循环</td><td>每次前进 5</td><td class="mono">range(0, len(m), 5)</td></tr>
+            <tr><td>字符串转数字</td><td>坐标转整数</td><td class="mono">int(x)</td></tr>
+            <tr><td>召唤单位</td><td>花金币变出兵种</td><td class="mono">hero.summon(type)</td></tr>
+            <tr><td>指挥移动</td><td>最新单位送到坐标</td><td class="mono">command(u, "move", Vector(...))</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        能把一串冰冷的密文，翻译成一支各就各位的大军——你已经掌握了程序员处理数据的看家本领。<br>
+        封神冰川的试炼到此圆满，愿你在代码的世界里继续封神！🧊❄️⚔️</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第六单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

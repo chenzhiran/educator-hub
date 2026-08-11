@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC1-320D36973B7A">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第一单元：最优目标 · 协作指挥与价值决策 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC1-320D36973B7A | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS6-第一单元</div>
+
+    <a href="#section-1-1" class="nav-section">1.1 协作指挥概述</a>
+    <a href="#sec-1-1-1" class="nav-sub">1.1.1 从个人到团队</a>
+    <a href="#sec-1-1-2" class="nav-sub">1.1.2 用函数封装逻辑</a>
+
+    <a href="#section-1-2" class="nav-section">1.2 避免重复选择</a>
+    <a href="#sec-1-2-1" class="nav-sub">1.2.1 in 检查过滤</a>
+    <a href="#sec-1-2-2" class="nav-sub">1.2.2 已选清单模式</a>
+
+    <a href="#section-1-3" class="nav-section">1.3 最优目标决策</a>
+    <a href="#sec-1-3-1" class="nav-sub">1.3.1 价值/距离比值</a>
+    <a href="#sec-1-3-2" class="nav-sub">1.3.2 打擂台求最优</a>
+
+    <a href="#section-1-4" class="nav-section">1.4 技能与指挥</a>
+    <a href="#sec-1-4-1" class="nav-sub">1.4.1 canCast 判断可用</a>
+    <a href="#sec-1-4-2" class="nav-sub">1.4.2 command 指挥单位</a>
+    <a href="#sec-1-4-3" class="nav-sub">1.4.3 buildXY 建造诱饵</a>
+
+    <a href="#section-1-5" class="nav-section">1.5 寻找最低血量友军</a>
+    <a href="#sec-1-5-1" class="nav-sub">1.5.1 求最小值算法</a>
+
+    <a href="#section-1-6" class="nav-section">1.6 实战关卡精讲</a>
+    <a href="#sec-1-6-1" class="nav-sub">1.6.1 雾岛矿</a>
+    <a href="#sec-1-6-2" class="nav-sub">1.6.2 严峻的决心</a>
+
+    <a href="#section-1-7" class="nav-section">1.7 常见错误</a>
+    <a href="#sec-1-7-1" class="nav-sub">1.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第一单元：最优目标 · 协作指挥与价值决策</h1>
+    <div class="subtitle">Unit 1: Optimal Targets — Coordinated Command &amp; Value-Based Decisions</div>
+    <div class="badge">计算机科学 6 · 安息云峰 Cloudrip Mountain · 雾岛矿 → 严峻的决心</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 1.1 ==================== -->
+<div class="section-header" id="section-1-1">
+    <h2>1.1 协作指挥概述</h2>
+    <div class="en-title">Overview of Coordinated Command</div>
+</div>
+
+<p>欢迎来到计算机科学 6！你已经能熟练使用函数、数组、循环和条件判断了。在这个进阶篇章的第一单元，你将迎来一个全新的挑战：<strong>不再只操纵英雄一个人，而是同时指挥一支由农民、圣骑士、狮鹫骑士组成的队伍</strong>。要让这么多单位各司其职、不互相"抢活"、还能在恰当时机施法治疗——这需要更高级的编程思维。本单元的核心，是学会用<span class="keyword">最优目标决策（optimal target selection）</span>和<span class="keyword">协作过滤</span>来指挥一支高效协同的队伍。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>把每类单位的行为封装成独立函数（如 <code>commandPaladin</code>、<code>findBestItem</code>）；用 <code>in</code> 检查过滤掉"已被别人选中"的目标，避免重复；用<strong>价值/距离比值</strong>挑出性价比最高的金币；用 <code>canCast</code> 判断技能是否可用、用 <code>command</code> 指挥单位施放治疗或盾牌、用 <code>buildXY</code> 建造诱饵；并写出"寻找生命值最低友军"的求最小值算法。
+</div>
+
+<h3 id="sec-1-1-1">1.1.1 从个人到团队（From One Hero to a Team）</h3>
+
+<h4>1.1.1.1 遍历不同兵种，分类指挥
+    <span class="en">Iterate over unit types and dispatch by role</span>
+</h4>
+
+<p>指挥一支队伍的第一步，是<strong>按兵种分工</strong>。你会遍历所有友军，判断每个单位的 <code>type</code>，再根据类型调用对应的指挥函数——农民去收集金币、圣骑士负责治疗与防御、狮鹫骑士负责进攻。这种"分类调度"结构让复杂的团队行为变得井井有条。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 遍历所有友军，按兵种分派任务</span>
+<span class="kw">def</span> <span class="fn">commandFriends</span><span class="punc">():</span>
+    friends <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+        <span class="kw">if</span> friend<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"peasant"</span><span class="punc">:</span>
+            <span class="fn">commandPeasant</span><span class="punc">(</span>friend<span class="punc">)</span>       <span class="cmt"># 农民收集金币</span>
+        <span class="kw">elif</span> friend<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"griffin-rider"</span><span class="punc">:</span>
+            <span class="fn">commandGriffin</span><span class="punc">(</span>friend<span class="punc">)</span>       <span class="cmt"># 狮鹫进攻</span>
+        <span class="kw">elif</span> friend<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"paladin"</span><span class="punc">:</span>
+            <span class="fn">commandPaladin</span><span class="punc">(</span>friend<span class="punc">)</span>       <span class="cmt"># 圣骑士治疗/防御</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-1-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-1-1-2">1.1.2 用函数封装协作逻辑（Encapsulating Logic in Functions）</h3>
+
+<h4>1.1.2.1 一个兵种，一个函数
+    <span class="en">One unit type, one function</span>
+</h4>
+
+<p>回顾计算机科学 5 学的函数思想——"一个函数做一件事"。在团队指挥里，这个原则升级为"一个兵种一个函数"。把圣骑士该做的所有判断（治疗？防御？攻击？）都封装进 <code>commandPaladin</code>，主循环就只需一句调用。这样代码清晰、易于调试，某个兵种的行为出问题时也能快速定位。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🎖️ 像军队的指挥链</div>
+    总指挥（主循环）不必亲自告诉每个士兵每一步怎么做，而是把命令下达给各兵种的"小队长"函数：<code>commandPaladin</code> 负责所有圣骑士的决策，<code>commandGriffin</code> 负责所有狮鹫。总指挥只管"点名派活"，具体怎么打交给小队长——这就是<strong>封装</strong>的力量。
+</div>
+
+<!-- ==================== 1.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-1-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<div class="section-header" id="section-1-2">
+    <h2>1.2 避免重复选择</h2>
+    <div class="en-title">Avoiding Duplicate Choices</div>
+</div>
+
+<h3 id="sec-1-2-1">1.2.1 in 检查过滤（Filtering with in）</h3>
+
+<h4>1.2.1.1 用 in 判断元素是否已在数组里
+    <span class="en">Use in to test membership</span>
+</h4>
+
+<p>当多个农民同时找金币时，一个大问题浮现：<strong>如果他们都盯上同一枚金币，就会挤在一起抢、效率极低</strong>。解决办法是维护一个"已被认领"的清单，每个农民选目标前，先用 <code>in</code> 运算符检查这枚金币是不是已经被别人选走了。如果在清单里，就用 <code>continue</code> 跳过它。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+    <span class="cmt"># 用 in 检查这枚金币是否已被别的农民认领</span>
+    <span class="kw">if</span> item <span class="kw">in</span> excludedItems<span class="punc">:</span>
+        <span class="kw">continue</span>   <span class="cmt"># 已被认领，跳过它</span>
+    <span class="cmt"># ...否则考虑把它作为候选目标...</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">in 运算符：</span><code>x in 数组</code> 会返回 <code>True</code> 或 <code>False</code>，表示 <code>x</code> 是否是数组里的一个元素。它省去了手写循环逐个比对的麻烦，是判断"某物是否已存在于集合中"的利器。
+</div>
+
+<h3 id="sec-1-2-2">1.2.2 已选清单模式（The Claimed-List Pattern）</h3>
+
+<h4>1.2.2.1 认领后加入清单，下一个就绕开
+    <span class="en">Claim it, then add to the list</span>
+</h4>
+
+<p>这个模式分三步：每轮循环开始时创建一个<strong>空的已选清单</strong>；每个农民选定目标后，把该目标 <code>append</code> 进清单；后续农民选目标时用 <code>in</code> 跳过清单里的项。这样就实现了"分工不撞车"——每枚金币最多被一个农民认领。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 540 180" width="540" role="img" aria-label="已选清单避免重复">
+        <text x="270" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">已选清单：认领一个就把它排除掉</text>
+        <defs>
+            <marker id="cl-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="11">
+            <rect x="30" y="55" width="110" height="50" rx="10" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+            <text x="85" y="78" text-anchor="middle" fill="#2A5A85" font-weight="bold">农民 A</text>
+            <text x="85" y="95" text-anchor="middle" fill="#6a8294">选金币💰1</text>
+            <line x1="142" y1="80" x2="185" y2="80" stroke="#4d6373" stroke-width="2" marker-end="url(#cl-arr)"/>
+            <rect x="188" y="55" width="150" height="50" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="263" y="78" text-anchor="middle" fill="#2f7a45" font-weight="bold">claimedItems</text>
+            <text x="263" y="95" text-anchor="middle" fill="#6a8294">[💰1]</text>
+            <line x1="340" y1="80" x2="383" y2="80" stroke="#4d6373" stroke-width="2" marker-end="url(#cl-arr)"/>
+            <rect x="386" y="55" width="120" height="50" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="446" y="78" text-anchor="middle" fill="#bd7415" font-weight="bold">农民 B</text>
+            <text x="446" y="95" text-anchor="middle" fill="#6a8294">跳过💰1，选💰2</text>
+            <text x="270" y="140" text-anchor="middle" fill="#7d94a3" font-size="11">每枚金币只被一个农民认领，分工不撞车</text>
+        </g>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    peasants <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"peasant"</span><span class="punc">)</span>
+    claimedItems <span class="punc">=</span> <span class="punc">[]</span>   <span class="cmt"># 每轮循环都新建一个空清单</span>
+    <span class="kw">for</span> peasant <span class="kw">in</span> peasants<span class="punc">:</span>
+        item <span class="punc">=</span> <span class="fn">findBestItem</span><span class="punc">(</span>peasant<span class="punc">,</span> claimedItems<span class="punc">)</span>
+        <span class="kw">if</span> item<span class="punc">:</span>
+            claimedItems<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>   <span class="cmt"># 认领：加入清单</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">清单要在循环内新建：</span>注意 <code>claimedItems = []</code> 必须放在 <code>while</code> 循环<strong>内部</strong>、每一帧都重置。因为金币的分配是逐帧重新计算的，如果清单放在循环外只建一次，旧的认领记录会残留，导致农民无金币可选。
+</div>
+
+<!-- ==================== 1.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-1-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<div class="section-header" id="section-1-3">
+    <h2>1.3 最优目标决策</h2>
+    <div class="en-title">Choosing the Optimal Target</div>
+</div>
+
+<h3 id="sec-1-3-1">1.3.1 价值/距离比值（Value-to-Distance Ratio）</h3>
+
+<h4>1.3.1.1 又值钱又近的才是好目标
+    <span class="en">The best target is both valuable and close</span>
+</h4>
+
+<p>怎样算"最优"的金币？只看价值不行——一枚很值钱但在天边的金币，跑过去的时间够捡好几枚近的了；只看距离也不行——最近的可能只值一点点。真正的性价比是<strong>价值除以距离</strong>：<code>item.value / friend.distanceTo(item)</code>。这个比值越大，说明"单位路程能换来的价值"越高，就越值得去。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 130" width="520" role="img" aria-label="价值距离比值">
+        <text x="260" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">性价比 = 价值 ÷ 距离</text>
+        <text x="90" y="80" font-size="18" font-family="monospace" fill="#9fd4a8">item.value</text>
+        <text x="215" y="80" font-size="20" font-family="monospace" fill="#7cc7e8">/</text>
+        <text x="240" y="80" font-size="18" font-family="monospace" fill="#e8a15a">distanceTo(item)</text>
+        <text x="150" y="108" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">金币值多少</text>
+        <text x="330" y="108" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">要跑多远</text>
+        <text x="450" y="80" font-size="13" fill="#cdddea" font-family="sans-serif">→ 越大越好</text>
+    </svg>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🪙 举个例子</div>
+    金币 A 值 5，距离 10 → 比值 0.5；金币 B 值 3，距离 3 → 比值 1.0。虽然 A 更值钱，但 B 的性价比更高（每单位距离换来更多价值），所以应该优先去捡 B。这就是<strong>贪心策略</strong>里的"局部最优选择"。
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-1-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<h3 id="sec-1-3-2">1.3.2 打擂台求最优（Finding the Max by Comparison）</h3>
+
+<h4>1.3.2.1 遍历所有候选，留下比值最高的
+    <span class="en">Iterate and keep the highest ratio</span>
+</h4>
+
+<p>要在一堆金币里找出比值最高的那个，用经典的<strong>"打擂台"求最大值算法</strong>：先设一个"擂主" <code>bestItem = None</code> 和它的比值 <code>bestItemValue = 0</code>，遍历每枚（未被认领的）金币，算出它的比值，若比当前擂主更高，就让它当新擂主。遍历结束，擂台上的就是最优目标。这正是关卡 <code>findBestItem</code> 函数的核心。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">findBestItem</span><span class="punc">(</span>friend<span class="punc">,</span> excludedItems<span class="punc">):</span>
+    items <span class="punc">=</span> friend<span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>
+    bestItem <span class="punc">=</span> <span class="kw">None</span>
+    bestItemValue <span class="punc">=</span> <span class="num">0</span>          <span class="cmt"># 擂主初始比值</span>
+    <span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+        <span class="kw">if</span> item <span class="kw">in</span> excludedItems<span class="punc">:</span>   <span class="cmt"># 过滤已认领</span>
+            <span class="kw">continue</span>
+        value <span class="punc">=</span> item<span class="punc">.</span>value <span class="punc">/</span> friend<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>item<span class="punc">)</span>
+        <span class="kw">if</span> value <span class="punc">&gt;</span> bestItemValue<span class="punc">:</span>   <span class="cmt"># 打赢擂主</span>
+            bestItem <span class="punc">=</span> item
+            bestItemValue <span class="punc">=</span> value
+    <span class="kw">return</span> bestItem</pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">别忘了 return：</span>决策函数一定要把选出的最优目标 <code>return bestItem</code> 交回调用处。如果找不到合适目标（比如全被认领了），<code>bestItem</code> 会保持 <code>None</code>，调用方需要判断"如果有目标才行动"。
+</div>
+
+<!-- ==================== 1.4 ==================== -->
+<div class="section-header" id="section-1-4">
+    <h2>1.4 技能与指挥</h2>
+    <div class="en-title">Abilities and Commands</div>
+</div>
+
+<h3 id="sec-1-4-1">1.4.1 canCast 判断技能是否可用（Checking with canCast）</h3>
+
+<h4>1.4.1.1 施法前先问"冷却好了吗"
+    <span class="en">Ask if the spell is ready before casting</span>
+</h4>
+
+<p>圣骑士的治疗术不是随时能用的——它有冷却时间。贸然施法会失败、浪费一帧。所以施法前必须用 <code>canCast("heal", target)</code> 检查：它返回 <code>True</code> 表示"这个技能现在可以对这个目标施放"，返回 <code>False</code> 则说明还在冷却或目标不合适。只有确认可用，才下令施法。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 施法前先用 canCast 确认技能可用</span>
+<span class="kw">if</span> lowest <span class="kw">and</span> paladin<span class="punc">.</span><span class="fn">canCast</span><span class="punc">(</span><span class="str">"heal"</span><span class="punc">,</span> lowest<span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>paladin<span class="punc">,</span> <span class="str">"cast"</span><span class="punc">,</span> <span class="str">"heal"</span><span class="punc">,</span> lowest<span class="punc">)</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9d3b42c181:START anchor=sec-1-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9d3b42c181">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，有人称它为年度最佳发明之一，零基础也能玩，别怕——英雄都是从不会走路开始的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9d3b42c181:END -->
+<!-- CC-PROTECTION:HIDDEN:957b0c7be3:START anchor=sec-1-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="957b0c7be3">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:957b0c7be3:END -->
+
+<h3 id="sec-1-4-2">1.4.2 command 指挥单位（Commanding Units）</h3>
+
+<h4>1.4.2.1 一条命令，多种动作
+    <span class="en">One command, many actions</span>
+</h4>
+
+<p><code>hero.command(单位, 动作, ...)</code> 是指挥友军的总接口。第一个参数是要指挥的单位，第二个是动作名，后面跟该动作需要的额外参数。同一个 <code>command</code> 能让单位移动、攻击、施法、防御——通过不同的动作名切换。圣骑士的三种典型指挥如下：</p>
+
+<div class="styled-table-wrap">
+<table class="styled-table">
+    <thead><tr><th>指挥写法</th><th>作用</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">command(p, "cast", "heal", target)</td><td>让圣骑士 p 对 target 施放治疗</td></tr>
+        <tr><td class="mono">command(p, "shield")</td><td>让圣骑士 p 举盾防御，承受更少伤害</td></tr>
+        <tr><td class="mono">command(p, "attack", enemy)</td><td>让圣骑士 p 用狼牙棒攻击 enemy</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="info-box">
+    <span class="info-label">优先级顺序很关键：</span>圣骑士的决策应有明确优先级——先看有没有受伤的队友要治，再看自己血量低不低（低就举盾），最后才去攻击。用 <code>if / elif / elif</code> 把这三种情况按优先级串起来，就能让圣骑士"该救人时救人、该保命时保命、没事时打人"。
+</div>
+
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-1-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+<h3 id="sec-1-4-3">1.4.3 buildXY 建造诱饵（Building a Decoy）</h3>
+
+<h4>1.4.3.1 用诱饵把敌人引开
+    <span class="en">Distract enemies with a decoy</span>
+</h4>
+
+<p>当农民成为食人魔的攻击目标时，直接逃跑往往来不及。更聪明的做法是命令农民建造一个<strong>诱饵（decoy）</strong>——一个假目标，把食人魔吸引过去（在关卡里还能顺势把敌人引入箭塔的射程）。建造用 <code>command(peasant, "buildXY", "decoy", x, y)</code>，关卡建议在 <code>peasant.pos.x - 2</code> 处建造。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 农民被敌人盯上、且金币够（诱饵需要 25 金）时建诱饵</span>
+<span class="kw">if</span> enemy<span class="punc">.</span>target <span class="punc">==</span> peasant <span class="kw">and</span> <span class="fn">enoughGoldForDecoy</span><span class="punc">():</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"buildXY"</span><span class="punc">,</span> <span class="str">"decoy"</span><span class="punc">,</span> peasant<span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">-</span> <span class="num">2</span><span class="punc">,</span> peasant<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+    <span class="kw">continue</span>   <span class="cmt"># 建造时就别再去收集金币了</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">建完记得 continue：</span>农民一帧只能做一件事。命令它建诱饵后，要用 <code>continue</code> 跳过本轮剩下的"收集金币"逻辑，否则会覆盖掉建造命令，诱饵就建不成了。
+</div>
+
+<!-- ==================== 1.5 ==================== -->
+<div class="section-header" id="section-1-5">
+    <h2>1.5 寻找最低血量友军</h2>
+    <div class="en-title">Finding the Lowest-Health Ally</div>
+</div>
+
+<h3 id="sec-1-5-1">1.5.1 求最小值算法（The Minimum-Finding Algorithm）</h3>
+
+<h4>1.5.1.1 打"反向擂台"找最伤者
+    <span class="en">Reverse the tournament to find the minimum</span>
+</h4>
+
+<p>治疗应该优先给伤得最重的人。找"生命值最低的友军"用的是求最大值的镜像——<strong>求最小值算法</strong>：先设一个大得离谱的初始值 <code>lowestHealth = 99999</code>，遍历每个友军，谁的血量比当前记录更低，就更新记录。这里还加了两个过滤条件：只看圣骑士（<code>type != "paladin"</code> 就跳过），且只考虑真正受伤的（<code>health &lt; maxHealth</code>）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">lowestHealthPaladin</span><span class="punc">():</span>
+    lowestHealth <span class="punc">=</span> <span class="num">99999</span>       <span class="cmt"># 故意设很大，方便被刷新</span>
+    lowestFriend <span class="punc">=</span> <span class="kw">None</span>
+    friends <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+        <span class="kw">if</span> friend<span class="punc">.</span>type <span class="punc">!=</span> <span class="str">"paladin"</span><span class="punc">:</span>
+            <span class="kw">continue</span>                <span class="cmt"># 只关心圣骑士</span>
+        <span class="kw">if</span> friend<span class="punc">.</span>health <span class="punc">&lt;</span> lowestHealth <span class="kw">and</span> friend<span class="punc">.</span>health <span class="punc">&lt;</span> friend<span class="punc">.</span>maxHealth<span class="punc">:</span>
+            lowestHealth <span class="punc">=</span> friend<span class="punc">.</span>health
+            lowestFriend <span class="punc">=</span> friend
+    <span class="kw">return</span> lowestFriend</pre>
+</div>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 500 150" width="500" role="img" aria-label="求最小血量">
+        <text x="250" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">遍历比较，留下血量最低的友军</text>
+        <g font-family="monospace" font-size="12">
+            <rect x="40" y="50" width="80" height="60" rx="6" fill="#dcf0e0" stroke="#2f7a45"/><text x="80" y="78" text-anchor="middle" fill="#2f7a45">HP 80</text><text x="80" y="98" text-anchor="middle" fill="#7d94a3" font-size="9" font-family="sans-serif">健康</text>
+            <rect x="140" y="50" width="80" height="60" rx="6" fill="#fdf3e0" stroke="#E0912F"/><text x="180" y="78" text-anchor="middle" fill="#bd7415">HP 45</text><text x="180" y="98" text-anchor="middle" fill="#7d94a3" font-size="9" font-family="sans-serif">受伤</text>
+            <rect x="240" y="50" width="80" height="60" rx="6" fill="#fbeae7" stroke="#C0453B" stroke-width="2.5"/><text x="280" y="78" text-anchor="middle" fill="#9e352c">HP 12 ★</text><text x="280" y="98" text-anchor="middle" fill="#9e352c" font-size="9" font-family="sans-serif">最危险！</text>
+            <rect x="340" y="50" width="80" height="60" rx="6" fill="#dcf0e0" stroke="#2f7a45"/><text x="380" y="78" text-anchor="middle" fill="#2f7a45">HP 90</text><text x="380" y="98" text-anchor="middle" fill="#7d94a3" font-size="9" font-family="sans-serif">健康</text>
+            <text x="250" y="135" text-anchor="middle" fill="#C0453B" font-size="11" font-family="sans-serif">优先治疗血量最低的这一位</text>
+        </g>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">初始值为什么设很大：</span>求最小值时，初始的 <code>lowestHealth</code> 必须比任何可能的血量都大（如 99999），这样第一个受伤友军就一定能"打赢"它、成功刷新记录。反过来，求最大值时初始值要设得很小（如 0）。
+</div>
+
+<!-- ==================== 1.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-1-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+<!-- CC-PROTECTION:HIDDEN:966cb5ccb7:START anchor=sec-1-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="966cb5ccb7">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:966cb5ccb7:END -->
+
+<div class="section-header" id="section-1-6">
+    <h2>1.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 雾岛矿 -->
+<div class="level-card" id="sec-1-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 雾岛矿</span>
+        <h3>⛏️ 雾岛矿 —— 农民协作收币与建诱饵</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/1-6-1-1_misty_island_mine.png" alt="扣哒世界 雾岛矿关卡 - koudashijie.com">
+            <div class="caption">图2：雾岛矿——多个农民分工收集金币，各选性价比最高且未被认领的目标，被追时建诱饵把食人魔引入箭塔</div>
+        </div>
+
+        <h4>策略：分工收币，遇袭建诱饵</h4>
+        <p>本关要指挥一群农民高效收集金币。两大挑战：其一，<strong>别让农民抢同一枚金币</strong>——要用"已选清单"分工；其二，<strong>农民会被食人魔追杀</strong>——被盯上时建诱饵把敌人引入箭塔。策略是：每帧遍历所有农民，被追的先建诱饵自保，其余的各自挑一枚性价比最高、且没被同伴认领的金币去捡。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法有三块。第一，<strong>补全 findBestItem</strong>：用价值/距离比值打擂台，同时用 <code>in</code> 过滤 <code>excludedItems</code> 里已认领的金币，返回最优目标。第二，<strong>遇袭建诱饵</strong>：若 <code>enemy.target == peasant</code>（该农民正是敌人的目标）且 <code>enoughGoldForDecoy()</code>（金币≥25），就 <code>buildXY</code> 建诱饵并 <code>continue</code>。第三，<strong>认领并收币</strong>：为农民选出最优金币后，先 <code>append</code> 进 <code>claimedItems</code> 再命令它去捡。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：诱饵优先，否则认领并收集最优金币</span>
+<span class="kw">for</span> peasant <span class="kw">in</span> peasants<span class="punc">:</span>
+    enemy <span class="punc">=</span> peasant<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy <span class="kw">and</span> enemy<span class="punc">.</span>target <span class="punc">==</span> peasant <span class="kw">and</span> <span class="fn">enoughGoldForDecoy</span><span class="punc">():</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"buildXY"</span><span class="punc">,</span> <span class="str">"decoy"</span><span class="punc">,</span> peasant<span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">-</span> <span class="num">2</span><span class="punc">,</span> peasant<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+        <span class="kw">continue</span>   <span class="cmt"># 建造时不再收集金币</span>
+    item <span class="punc">=</span> <span class="fn">findBestItem</span><span class="punc">(</span>peasant<span class="punc">,</span> claimedItems<span class="punc">)</span>
+    <span class="kw">if</span> item<span class="punc">:</span>
+        claimedItems<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">enemy.target == peasant 的含义：</span>每个敌人都有一个 <code>target</code>（当前锁定的目标）。判断 <code>enemy.target == peasant</code> 就是问"这个食人魔正在追的是不是<strong>这个</strong>农民"。只有正被追杀的农民才需要建诱饵自救，其他农民照常收币，避免浪费金币。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">诱饵成本要检查：</span>建诱饵要花 25 金，所以务必先用 <code>enoughGoldForDecoy()</code> 确认金币够。没钱硬建会失败。这也是"行动前先检查前提条件"这一防御性编程思想的体现。
+        </div>
+    </div>
+</div>
+
+<!-- 严峻的决心 -->
+<div class="level-card" id="sec-1-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 严峻的决心</span>
+        
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=h3-11 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3>🛡️ 严峻的决心 —— 圣骑士治疗、防御与召唤</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/1-6-2-1_stern_resolve.png" alt="扣哒世界 严峻的决心关卡 - koudashijie.com">
+            <div class="caption">图3：严峻的决心——圣骑士按优先级治疗最伤的队友、危急时举盾、平时攻击，配合农民收币、召唤狮鹫作战</div>
+        </div>
+
+        <h4>策略：多兵种协同，保护 Reynaldo</h4>
+        <p>本关要顶住食人魔巫师的攻势、保护圣骑士 Reynaldo。你要指挥三个兵种：<strong>圣骑士</strong>负责治疗与防御、<strong>农民</strong>收集金币、<strong>狮鹫骑士</strong>负责进攻，同时在金币充足时不断召唤新的狮鹫增援。策略核心是给每个兵种写好独立的指挥函数，再在主循环里统一调度并召唤。</p>
+
+        <h4>思路拆解：圣骑士的优先级决策</h4>
+        <p>最关键的是 <code>commandPaladin</code>，它要按<strong>优先级</strong>做三选一。第一优先<strong>治疗</strong>：用 <code>lowestHealthPaladin()</code> 找到最伤的圣骑士，若存在且 <code>canCast("heal", lowest)</code> 就施治疗。第二优先<strong>防御</strong>：若自己血量低于最大值的某个比例（如 70%），就 <code>shield</code> 举盾。第三<strong>攻击</strong>：否则找最近的敌人用狼牙棒 <code>attack</code>。三种情况用 <code>if / elif / elif</code> 串联，保证"救人 &gt; 保命 &gt; 输出"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：圣骑士按优先级治疗 / 防御 / 攻击</span>
+<span class="kw">def</span> <span class="fn">commandPaladin</span><span class="punc">(</span>paladin<span class="punc">):</span>
+    nearest <span class="punc">=</span> paladin<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    lowest <span class="punc">=</span> <span class="fn">lowestHealthPaladin</span><span class="punc">()</span>
+    <span class="kw">if</span> lowest <span class="kw">and</span> paladin<span class="punc">.</span><span class="fn">canCast</span><span class="punc">(</span><span class="str">"heal"</span><span class="punc">,</span> lowest<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>paladin<span class="punc">,</span> <span class="str">"cast"</span><span class="punc">,</span> <span class="str">"heal"</span><span class="punc">,</span> lowest<span class="punc">)</span>       <span class="cmt"># 先救人</span>
+    <span class="kw">elif</span> paladin<span class="punc">.</span>health <span class="punc">&lt;</span> paladin<span class="punc">.</span>maxHealth <span class="punc">*</span> <span class="num">0.7</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>paladin<span class="punc">,</span> <span class="str">"shield"</span><span class="punc">)</span>                       <span class="cmt"># 再保命</span>
+    <span class="kw">elif</span> nearest<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>paladin<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> nearest<span class="punc">)</span>            <span class="cmt"># 最后输出</span></pre>
+        </div>
+
+        <h4>思路拆解：主循环调度与召唤</h4>
+        <p>主循环每帧调用 <code>commandFriends()</code> 统一指挥所有兵种；之后判断金币是否够召唤狮鹫（<code>hero.gold &gt;= hero.costOf("griffin-rider")</code>），够就 <code>hero.summon("griffin-rider")</code>。狮鹫的指挥 <code>commandGriffin</code> 则很直接——找到最近敌人就攻击，没敌人就移动到指定集结点待命。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：主循环统一调度 + 有钱就召唤狮鹫</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    <span class="fn">commandFriends</span><span class="punc">()</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold <span class="punc">&gt;=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">costOf</span><span class="punc">(</span><span class="str">"griffin-rider"</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span><span class="str">"griffin-rider"</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">优先级顺序不能乱：</span>如果把"攻击"写在"治疗"前面，圣骑士就会只顾打架、见死不救。<code>if / elif</code> 结构天然实现了优先级——一旦满足前面的条件就不会执行后面的，所以把最重要的动作（治疗）放在最前面至关重要。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">只治真正受伤的：</span><code>lowestHealthPaladin</code> 里的 <code>health &lt; maxHealth</code> 条件很重要——它保证只把满血的圣骑士排除在外。否则函数可能返回一个满血单位，白白浪费一次治疗的冷却。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 1.7 ==================== -->
+<div class="section-header" id="section-1-7">
+    <h2>1.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-1-7-1">1.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>1.7.1.1 协作指挥的典型问题
+    <span class="en">Typical issues with team command</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/1-7-1-1_common_errors.png" alt="扣哒世界 协作指挥常见错误速查 - koudashijie.com">
+    <div class="caption">图4：清单位置错、忘记认领、优先级颠倒、施法前不检查，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>已选清单放错位置——<code>claimedItems = []</code> 必须在 <code>while</code> 循环内每帧重建，放循环外会导致旧认领残留、农民无币可选。</li>
+        <li>选中目标却忘记认领——选完金币要 <code>append</code> 进清单，否则 <code>in</code> 过滤形同虚设，农民仍会撞车。</li>
+        <li>圣骑士优先级颠倒——治疗要在攻击之前判断，否则圣骑士只顾打架、队友阵亡。</li>
+        <li>施法前不用 canCast——直接 <code>cast</code> 而不检查冷却，会施法失败、浪费回合。</li>
+        <li>建诱饵后忘写 continue——农民一帧只能做一件事，不 <code>continue</code> 会让后面的收币命令覆盖建造。</li>
+        <li>求最值初始值设反——求最小血量初值要很大（99999），求最大比值初值要很小（0），设反了永远刷不出结果。</li>
+        <li>决策函数忘写 return——<code>findBestItem</code>、<code>lowestHealthPaladin</code> 必须 return 结果，否则调用方拿到 None。</li>
+        <li>治疗满血单位——求最伤友军要加 <code>health &lt; maxHealth</code> 条件，避免对满血单位浪费治疗。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-1-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+<!-- CC-PROTECTION:HIDDEN:b1046c60e3:START anchor=sec-1-7-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b1046c60e3">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC1-320D36973B7A。</span>
+<!-- CC-PROTECTION:HIDDEN:b1046c60e3:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你从"单人英雄"晋级为"团队指挥官"！这一单元你学会了用函数把每个兵种的行为封装成独立的指挥逻辑；用 <code>in</code> 检查配合"已选清单"过滤掉被认领的目标，让农民分工不撞车；用<strong>价值/距离比值</strong>打擂台挑出性价比最高的金币；用 <code>canCast</code> 在施法前检查技能可用、用 <code>command</code> 指挥单位治疗（<code>cast heal</code>）、防御（<code>shield</code>）或攻击、用 <code>buildXY</code> 建造诱饵引开敌人；还掌握了"寻找生命值最低友军"的求最小值算法。在"雾岛矿"和"严峻的决心"两关里，你把这些技巧融会贯通，指挥出一支高效协同的队伍。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>函数封装协作</td><td>一个兵种一个指挥函数</td><td>两关</td></tr>
+            <tr><td>in 检查过滤</td><td><code>if item in excludedItems</code></td><td>雾岛矿</td></tr>
+            <tr><td>已选清单</td><td>认领后 append，循环内重建</td><td>雾岛矿</td></tr>
+            <tr><td>价值/距离比值</td><td><code>value / distanceTo</code> 打擂台</td><td>雾岛矿</td></tr>
+            <tr><td>buildXY 建诱饵</td><td>引开敌人，建完 continue</td><td>雾岛矿</td></tr>
+            <tr><td>canCast 判可用</td><td>施法前检查冷却</td><td>严峻的决心</td></tr>
+            <tr><td>command 指挥</td><td>cast / shield / attack</td><td>严峻的决心</td></tr>
+            <tr><td>求最低血量</td><td>初值设大，遍历刷新最小</td><td>严峻的决心</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得让每个单位各司其职、用数据权衡出最优选择、在危急时刻做对决策的英雄，才是云峰之上真正运筹帷幄的指挥官。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🎖️⚔️</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（安息云峰）：第一单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

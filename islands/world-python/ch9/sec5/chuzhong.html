@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC5-59D5BEE7BB6E">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第五单元：递归分形 · 自相似与雪花绘制 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC5-59D5BEE7BB6E | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS6-第五单元</div>
+
+    <a href="#section-5-1" class="nav-section">5.1 递归分形概述</a>
+    <a href="#sec-5-1-1" class="nav-sub">5.1.1 什么是递归</a>
+    <a href="#sec-5-1-2" class="nav-sub">5.1.2 什么是分形</a>
+
+    <a href="#section-5-2" class="nav-section">5.2 递归函数结构</a>
+    <a href="#sec-5-2-1" class="nav-sub">5.2.1 调用自身</a>
+    <a href="#sec-5-2-2" class="nav-sub">5.2.2 递归的两部分</a>
+
+    <a href="#section-5-3" class="nav-section">5.3 终止条件</a>
+    <a href="#sec-5-3-1" class="nav-sub">5.3.1 长度阈值</a>
+    <a href="#sec-5-3-2" class="nav-sub">5.3.2 return 退出</a>
+
+    <a href="#section-5-4" class="nav-section">5.4 向量旋转</a>
+    <a href="#sec-5-4-1" class="nav-sub">5.4.1 Vector.rotate</a>
+    <a href="#sec-5-4-2" class="nav-sub">5.4.2 度转弧度</a>
+
+    <a href="#section-5-5" class="nav-section">5.5 自相似绘制</a>
+    <a href="#sec-5-5-1" class="nav-sub">5.5.1 一段变四段</a>
+    <a href="#sec-5-5-2" class="nav-sub">5.5.2 递归展开</a>
+
+    <a href="#section-5-6" class="nav-section">5.6 实战关卡精讲</a>
+    <a href="#sec-5-6-1" class="nav-sub">5.6.1 冰上的雪花</a>
+
+    <a href="#section-5-7" class="nav-section">5.7 常见错误</a>
+    <a href="#sec-5-7-1" class="nav-sub">5.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第五单元：递归分形 · 自相似与雪花绘制</h1>
+    <div class="subtitle">Unit 5: Recursive Fractals — Self-Similarity &amp; Drawing Snowflakes</div>
+    <div class="badge">计算机科学 6 · 安息云峰 Cloudrip Mountain · 冰上的雪花</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 5.1 ==================== -->
+<div class="section-header" id="section-5-1">
+    <h2>5.1 递归分形概述</h2>
+    <div class="en-title">Overview of Recursive Fractals</div>
+</div>
+
+<p>欢迎来到安息云峰上最富艺术气息、也最烧脑的一个单元。前面你学会了循环、函数、向量——现在要把它们组合成一种全新的思维方式：<span class="keyword">递归（recursion）</span>。你将用一个"会调用自己的函数"，在冰面上绘制出精美的<span class="keyword">分形雪花（fractal snowflake）</span>。这一单元关卡不多，但它揭示的思想——"用自身定义自身"——是整个计算机科学中最优雅、也最强大的概念之一。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>递归函数</strong>——一个在自己内部调用自己的函数；给递归设置<strong>终止条件</strong>（线段长度小于阈值时停止），避免无限递归；用 <code>Vector.rotate</code> <strong>旋转向量</strong>、用 <code>degreesToRadians</code> 把<strong>角度转成弧度</strong>；理解<strong>分形的自相似性</strong>——整体和局部长得一样；并通过<strong>让 line 函数调用自身绘制更短的子线段</strong>，把一条直线变成锯齿状的分形曲线，再拼成六角雪花。</p>
+
+<h3 id="sec-5-1-1">5.1.1 什么是递归（What Is Recursion）</h3>
+
+<h4>5.1.1.1 自己调用自己
+    <span class="en">A function that calls itself</span>
+</h4>
+
+<p>递归，就是<strong>一个函数在自己的定义里调用自己</strong>。听起来像绕口令，但它对应着一种很自然的想法：<em>把一个大问题，拆成一个更小的、同类型的问题，再拆，直到小到可以直接解决</em>。比如"画一条分形线"可以拆成"画四条更短的分形线"，每条短线又可以继续拆——每一层的"任务"都是同一件事，只是规模越来越小。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🪆 俄罗斯套娃的比喻</div>
+    递归就像俄罗斯套娃：打开一个娃娃，里面是一个<strong>一模一样但更小</strong>的娃娃，再打开还是……直到最小的那个实心娃娃（不能再打开了，这就是"终止条件"）。递归函数处理问题的方式完全一样——每一层都做同样的事、把问题缩小一号，直到抵达最小的、可以直接完成的那一层。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-5-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-5-1-2">5.1.2 什么是分形（What Is a Fractal）</h3>
+
+<h4>5.1.2.1 放大局部，还是同一个图案
+    <span class="en">Zoom into a part, and it looks like the whole</span>
+</h4>
+
+<p>分形是一种奇妙的几何图形，它最大的特征是<strong>自相似（self-similarity）</strong>——无论你放大到哪一部分，看到的形状都和整体相似。雪花、海岸线、树枝、闪电、花椰菜……大自然里到处是分形。本关要画的分形线，就是把一条直线的每一段都替换成一个"凸起的小锯齿"，而每个小锯齿的每一段又替换成更小的锯齿，层层嵌套，形成毛茸茸的边缘。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 540 170" width="540" role="img" aria-label="分形自相似">
+        <text x="270" y="22" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">自相似：整体的形状在局部重复出现</text>
+        <line x1="40" y1="90" x2="150" y2="90" stroke="#7d94a3" stroke-width="2"/>
+        <text x="95" y="115" text-anchor="middle" font-size="10" fill="#7d94a3" font-family="sans-serif">① 一条直线</text>
+        <text x="175" y="90" font-size="16" fill="#4d6373">→</text>
+        <polyline points="200,90 230,90 245,65 260,90 290,90" fill="none" stroke="#3E7CB1" stroke-width="2"/>
+        <text x="245" y="115" text-anchor="middle" font-size="10" fill="#3E7CB1" font-family="sans-serif">② 变成带尖的锯齿</text>
+        <text x="315" y="90" font-size="16" fill="#4d6373">→</text>
+        <polyline points="340,90 352,90 358,80 364,90 370,90 376,75 382,63 388,75 394,90 400,90 406,80 412,90 424,90 436,90 442,80 448,90 460,90 466,75 472,63 478,75 484,90 490,90 496,80 502,90 514,90" fill="none" stroke="#2A5A85" stroke-width="1.5"/>
+        <text x="427" y="115" text-anchor="middle" font-size="10" fill="#2A5A85" font-family="sans-serif">③ 每段再变锯齿……</text>
+        <text x="270" y="150" text-anchor="middle" font-size="11" fill="#7d94a3" font-family="sans-serif">每一层都重复"直线→锯齿"的规则，这就是递归分形</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">递归与分形是天生一对：</span>分形"整体由缩小的自己组成"，递归"函数由缩小规模的自己调用组成"——两者的结构完全吻合。所以画分形最自然的工具就是递归函数：让画线的函数在内部调用自己去画更短的线。
+</div>
+
+<!-- ==================== 5.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-5-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:84cba11c66:START anchor=sec-5-1-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="84cba11c66">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:84cba11c66:END -->
+
+<div class="section-header" id="section-5-2">
+    <h2>5.2 递归函数结构</h2>
+    <div class="en-title">The Structure of a Recursive Function</div>
+</div>
+
+<h3 id="sec-5-2-1">5.2.1 调用自身（Calling Itself）</h3>
+
+<h4>5.2.1.1 在函数体里写出函数名
+    <span class="en">Write the function's own name inside it</span>
+</h4>
+
+<p>递归的写法出人意料地简单：<strong>在函数的定义内部，直接写出这个函数自己的名字来调用它</strong>。本关的 <code>line</code> 函数负责"画一条分形线"，它在处理完拆分后，会调用四次 <code>line</code>——每次传入一段更短的子线段。这四个 <code>line(...)</code> 调用的就是它自己。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">line</span><span class="punc">(</span>start<span class="punc">,</span> end<span class="punc">):</span>
+    <span class="cmt"># ...（先判断、再拆分成 4 段）...</span>
+    <span class="fn">line</span><span class="punc">(</span>start<span class="punc">,</span> A<span class="punc">)</span>   <span class="cmt"># ← 调用自己！</span>
+    <span class="fn">line</span><span class="punc">(</span>A<span class="punc">,</span> B<span class="punc">)</span>       <span class="cmt"># ← 调用自己！</span>
+    <span class="fn">line</span><span class="punc">(</span>B<span class="punc">,</span> A<span class="punc">)</span>       <span class="cmt"># ← 调用自己！</span>
+    <span class="fn">line</span><span class="punc">(</span>A<span class="punc">,</span> end<span class="punc">)</span>   <span class="cmt"># ← 调用自己！</span></pre>
+</div>
+
+<h3 id="sec-5-2-2">5.2.2 递归的两个必备部分（The Two Essential Parts）</h3>
+
+<h4>5.2.2.1 基础情形 + 递归情形
+    <span class="en">Base case + recursive case</span>
+</h4>
+
+<p>任何正确的递归函数都必须有<strong>两个部分</strong>，缺一不可。第一是<strong>基础情形（base case）</strong>——问题已经小到可以直接解决、不再往下拆的情况；这是递归的"刹车"。第二是<strong>递归情形（recursive case）</strong>——把问题缩小一号，然后调用自己去处理。没有基础情形，递归会无限进行下去直到程序崩溃；没有递归情形，函数就不是递归了。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 520 180" width="520" role="img" aria-label="递归两部分">
+        <defs>
+            <marker id="r-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#3E7CB1"/></marker>
+        </defs>
+        <rect x="150" y="30" width="220" height="40" rx="10" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+        <text x="260" y="55" text-anchor="middle" font-size="12" fill="#2A5A85" font-weight="bold" font-family="sans-serif">进入递归函数，先做判断</text>
+        <line x1="200" y1="70" x2="120" y2="105" stroke="#3E7CB1" stroke-width="2" marker-end="url(#r-arr)"/>
+        <line x1="320" y1="70" x2="400" y2="105" stroke="#3E7CB1" stroke-width="2" marker-end="url(#r-arr)"/>
+        <rect x="20" y="108" width="190" height="55" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+        <text x="115" y="130" text-anchor="middle" font-size="12" fill="#2f7a45" font-weight="bold" font-family="sans-serif">够小了？基础情形</text>
+        <text x="115" y="148" text-anchor="middle" font-size="10" fill="#6a8294" font-family="sans-serif">直接画线并 return</text>
+        <rect x="320" y="108" width="190" height="55" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+        <text x="415" y="130" text-anchor="middle" font-size="12" fill="#bd7415" font-weight="bold" font-family="sans-serif">还太大？递归情形</text>
+        <text x="415" y="148" text-anchor="middle" font-size="10" fill="#6a8294" font-family="sans-serif">拆成 4 段，各自调用自己</text>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">一定要先写基础情形：</span>递归函数的开头几乎总是"先检查是否满足基础情形，满足就处理并 <code>return</code>"。只有没触发基础情形时，才往下走到递归情形。顺序不能反——否则永远拆不到头。
+</div>
+
+<!-- ==================== 5.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:2e3e6cfba7:START anchor=sec-5-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="2e3e6cfba7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从暗影地牢的对象与方法起步，到流金沙漠的算法拓展，一路闯关一路变强。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2e3e6cfba7:END -->
+
+<div class="section-header" id="section-5-3">
+    <h2>5.3 终止条件</h2>
+    <div class="en-title">The Termination Condition</div>
+</div>
+
+<h3 id="sec-5-3-1">5.3.1 长度阈值（The Length Threshold）</h3>
+
+<h4>5.3.1.1 线段短到一定程度就停手
+    <span class="en">Stop when the segment gets short enough</span>
+</h4>
+
+<p>本关的基础情形，是用<strong>线段长度</strong>来判断的：每次进入 <code>line</code>，先算出这条线段的总长度，如果它<strong>小于阈值 4</strong>，就说明"已经够小了，不必再拆"，直接画一条实线段并退出。这个阈值就是递归的终点——它保证每拆一次线段就变短，最终必然短到小于 4，从而停下来。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">line</span><span class="punc">(</span>start<span class="punc">,</span> end<span class="punc">):</span>
+    <span class="cmt"># 先算出整段向量和它的长度</span>
+    full <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>end<span class="punc">,</span> start<span class="punc">)</span>
+    distance <span class="punc">=</span> full<span class="punc">.</span><span class="fn">magnitude</span><span class="punc">()</span>   <span class="cmt"># 线段有多长</span>
+    <span class="kw">if</span> distance <span class="punc">&lt;</span> <span class="num">4</span><span class="punc">:</span>              <span class="cmt"># 基础情形：够短了</span>
+        <span class="cmt"># ...直接画一条实线段...</span>
+        <span class="kw">return</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:4e7be9e733:START anchor=sec-5-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="4e7be9e733">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，在知识树中系统学习对象、方法、字符串、变量、循环、条件分支、函数、参数、事件和地图设计。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4e7be9e733:END -->
+<!-- CC-PROTECTION:HIDDEN:2a4c0f598f:START anchor=sec-5-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="2a4c0f598f">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:2a4c0f598f:END -->
+
+<h3 id="sec-5-3-2">5.3.2 用 return 退出（Exiting with return）</h3>
+
+<h4>5.3.2.1 return 让这一层立即返回
+    <span class="en">return ends this level right away</span>
+</h4>
+
+<p>在基础情形里，画完实线段后必须写一个 <code>return</code>。它的作用是<strong>让当前这一层的 line 函数立即结束、返回到调用它的上一层</strong>，绝不会继续往下执行拆分代码。如果忘了 <code>return</code>，即便触发了基础情形，程序也会接着去拆分、继续递归，终止条件就形同虚设。</p>
+
+<div class="warn-box">
+    <span class="warn-label">忘记 return = 无限递归：</span>基础情形里少写一个 <code>return</code>，是递归最经典、最致命的 bug。它会让"够小了"的判断白做，函数继续无休止地拆分自己，最终耗尽内存导致程序崩溃（这也是关卡提示里"注意内存泄漏、经常刷新"的原因）。
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🛑 终止条件是递归的"刹车"</div>
+    想象你在往下挖井，每挖一层都问一句"到底了吗？"。终止条件就是"到底了"的信号——一旦触发，你就停下并往回爬。没有这个信号，你会一直往下挖到天荒地老。递归里，<strong>"长度 &lt; 4"就是那个到底的信号，<code>return</code> 就是往回爬的动作</strong>。
+</div>
+
+<!-- ==================== 5.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-5-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<div class="section-header" id="section-5-4">
+    <h2>5.4 向量旋转</h2>
+    <div class="en-title">Rotating Vectors</div>
+</div>
+
+<h3 id="sec-5-4-1">5.4.1 Vector.rotate 旋转向量（Rotating a Vector）</h3>
+
+<h4>5.4.1.1 让方向转一个角度
+    <span class="en">Turn a direction by an angle</span>
+</h4>
+
+<p>要画出锯齿状的"凸起"，需要把一段向量<strong>转个方向</strong>。<code>Vector.rotate(v, angle)</code> 会把向量 <code>v</code> 逆时针旋转 <code>angle</code> 弧度，长度不变、只改方向。本关画分形线时，需要把半段向量<strong>旋转 90 度</strong>，让它"翘起来"，从而算出锯齿尖端 B 点的位置。旋转正是让分形产生弯折、变得毛茸茸的关键操作。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 500 170" width="500" role="img" aria-label="向量旋转">
+        <defs>
+            <marker id="rot-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#3E7CB1"/></marker>
+            <marker id="rot-arr2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#E0912F"/></marker>
+        </defs>
+        <text x="250" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">Vector.rotate 把向量转一个角度（长度不变）</text>
+        <circle cx="150" cy="130" r="5" fill="#2A5A85"/>
+        <line x1="150" y1="130" x2="290" y2="130" stroke="#7d94a3" stroke-width="2.5" marker-end="url(#rot-arr)"/>
+        <text x="230" y="150" font-size="11" fill="#7d94a3" font-family="sans-serif">原向量</text>
+        <line x1="150" y1="130" x2="150" y2="55" stroke="#E0912F" stroke-width="2.5" marker-end="url(#rot-arr2)"/>
+        <text x="160" y="70" font-size="11" fill="#E0912F" font-family="sans-serif">旋转 90° 后</text>
+        <path d="M 200 130 A 50 50 0 0 0 150 80" fill="none" stroke="#3E7CB1" stroke-width="1.5" stroke-dasharray="3"/>
+        <text x="205" y="95" font-size="11" fill="#3E7CB1" font-family="sans-serif">90°</text>
+    </svg>
+</div>
+
+<h3 id="sec-5-4-2">5.4.2 度转弧度（Degrees to Radians）</h3>
+
+<h4>5.4.2.1 向量运算只认弧度
+    <span class="en">Vector math speaks in radians</span>
+</h4>
+
+<p>这里有个重要陷阱：<strong>我们习惯用"度"（90°、60°），但 <code>Vector.rotate</code> 只接受"弧度"</strong>。所以旋转前必须先换算。关卡提供了 <code>degreesToRadians</code> 函数，公式是 <code>Math.PI / 180 * degrees</code>——因为 180 度等于 π 弧度，把度数按这个比例换算即可。旋转 90 度、60 度前，都要先经过它转换。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 角度转弧度：180° = π 弧度</span>
+<span class="kw">def</span> <span class="fn">degreesToRadians</span><span class="punc">(</span>degrees<span class="punc">):</span>
+    <span class="kw">return</span> Math<span class="punc">.</span>PI <span class="punc">/</span> <span class="num">180</span> <span class="punc">*</span> degrees
+
+<span class="cmt"># 用法：把半段向量旋转 90 度</span>
+rotate <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">rotate</span><span class="punc">(</span>half<span class="punc">,</span> <span class="fn">degreesToRadians</span><span class="punc">(</span><span class="num">90</span><span class="punc">))</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">忘记换算就会转错方向：</span>如果直接写 <code>Vector.rotate(half, 90)</code>，程序会把 90 当成 90 <em>弧度</em>（相当于转了十几圈还多），锯齿方向全乱。凡是给旋转函数传角度，永远先用 <code>degreesToRadians</code> 包一层。
+</div>
+
+<!-- ==================== 5.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=sec-5-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+
+<div class="section-header" id="section-5-5">
+    <h2>5.5 自相似绘制</h2>
+    <div class="en-title">Drawing with Self-Similarity</div>
+</div>
+
+<h3 id="sec-5-5-1">5.5.1 一段变四段（One Segment Becomes Four）</h3>
+
+<h4>5.5.1.1 把直线折成一个凸起
+    <span class="en">Fold a straight line into a bump</span>
+</h4>
+
+<p>分形线的核心规则是：<strong>把一条线段替换成四条更短的线段，拼成一个向上凸起的尖角</strong>。具体做法是先求出半段向量 <code>half</code>，据此算出中点附近的两个关键点 A 和 B——A 是起点加半段向量得到的中点，B 是把半段向量旋转 90 度、缩短到 1/3 原长后加到 A 上得到的"尖端"。于是原线段 start→end 被拆成了 <code>start→A</code>、<code>A→B</code>、<code>B→A</code>、<code>A→end</code> 四段。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 递归情形：把一段拆成 4 段（形成一个尖角）</span>
+half <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">divide</span><span class="punc">(</span>full<span class="punc">,</span> <span class="num">2</span><span class="punc">)</span>          <span class="cmt"># 半段向量</span>
+A <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>half<span class="punc">,</span> start<span class="punc">)</span>            <span class="cmt"># 中点 A</span>
+rotate <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">rotate</span><span class="punc">(</span>half<span class="punc">,</span> <span class="fn">degreesToRadians</span><span class="punc">(</span><span class="num">90</span><span class="punc">))</span>  <span class="cmt"># 半段转 90°</span>
+rotate <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">multiply</span><span class="punc">(</span>rotate<span class="punc">,</span> <span class="num">2</span><span class="punc">/</span><span class="num">3</span><span class="punc">)</span>    <span class="cmt"># 缩到 1/3 原长</span>
+B <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>rotate<span class="punc">,</span> A<span class="punc">)</span>              <span class="cmt"># 尖端 B</span></pre>
+</div>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 500 170" width="500" role="img" aria-label="一段变四段">
+        <text x="250" y="22" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">start→end 被拆成 4 段，凸起一个尖角</text>
+        <circle cx="60" cy="130" r="5" fill="#2A5A85"/><text x="45" y="150" font-size="10" fill="#4d6373" font-family="sans-serif">start</text>
+        <circle cx="250" cy="130" r="5" fill="#3E7CB1"/><text x="240" y="150" font-size="10" fill="#3E7CB1" font-family="sans-serif">A（中点）</text>
+        <circle cx="440" cy="130" r="5" fill="#2A5A85"/><text x="430" y="150" font-size="10" fill="#4d6373" font-family="sans-serif">end</text>
+        <circle cx="250" cy="55" r="5" fill="#E0912F"/><text x="262" y="55" font-size="10" fill="#E0912F" font-family="sans-serif">B（尖端）</text>
+        <line x1="60" y1="130" x2="250" y2="130" stroke="#7d94a3" stroke-width="2"/><text x="150" y="123" font-size="9" fill="#7d94a3" font-family="sans-serif">start→A</text>
+        <line x1="250" y1="130" x2="250" y2="55" stroke="#E0912F" stroke-width="2"/><text x="258" y="95" font-size="9" fill="#E0912F" font-family="sans-serif">A→B</text>
+        <line x1="250" y1="55" x2="250" y2="130" stroke="#E0912F" stroke-width="2" stroke-dasharray="2"/><text x="200" y="95" font-size="9" fill="#bd7415" font-family="sans-serif">B→A</text>
+        <line x1="250" y1="130" x2="440" y2="130" stroke="#7d94a3" stroke-width="2"/><text x="345" y="123" font-size="9" fill="#7d94a3" font-family="sans-serif">A→end</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-5-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<h3 id="sec-5-5-2">5.5.2 递归展开（The Recursion Unfolds）</h3>
+
+<h4>5.5.2.1 每一子段又重复整个过程
+    <span class="en">Each sub-segment repeats the whole process</span>
+</h4>
+
+<p>魔法就在于：拆出四段后，我们<strong>不是</strong>直接画这四段直线，而是对每一段<strong>再次调用 <code>line</code> 函数</strong>。于是每一小段又会被判断长度、再拆成四段、再对子段调用 line……这个过程一层层展开，直到某段短于阈值 4 才真正落笔画实线。最终，一条原本笔直的线，就长满了大大小小、自相似的尖角，成为一条分形曲线。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 对四个子段递归调用自己（而非直接画直线）</span>
+<span class="fn">line</span><span class="punc">(</span>start<span class="punc">,</span> A<span class="punc">)</span>
+<span class="fn">line</span><span class="punc">(</span>A<span class="punc">,</span> B<span class="punc">)</span>
+<span class="fn">line</span><span class="punc">(</span>B<span class="punc">,</span> A<span class="punc">)</span>
+<span class="fn">line</span><span class="punc">(</span>A<span class="punc">,</span> end<span class="punc">)</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 540 180" width="540" role="img" aria-label="递归展开树">
+        <defs>
+            <marker id="t-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6a8294"/></marker>
+        </defs>
+        <text x="270" y="22" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">递归展开：一层层拆成更小的 line</text>
+        <rect x="220" y="35" width="100" height="28" rx="6" fill="#182633" stroke="#3E7CB1"/><text x="270" y="54" text-anchor="middle" font-size="11" fill="#7cc7e8" font-family="monospace">line(长)</text>
+        <line x1="240" y1="63" x2="120" y2="95" stroke="#6a8294" stroke-width="1.5" marker-end="url(#t-arr)"/>
+        <line x1="260" y1="63" x2="220" y2="95" stroke="#6a8294" stroke-width="1.5" marker-end="url(#t-arr)"/>
+        <line x1="280" y1="63" x2="320" y2="95" stroke="#6a8294" stroke-width="1.5" marker-end="url(#t-arr)"/>
+        <line x1="300" y1="63" x2="420" y2="95" stroke="#6a8294" stroke-width="1.5" marker-end="url(#t-arr)"/>
+        <rect x="75" y="98" width="90" height="26" rx="6" fill="#182633" stroke="#5B9BD5"/><text x="120" y="116" text-anchor="middle" font-size="10" fill="#a5c8e8" font-family="monospace">line(中)</text>
+        <rect x="175" y="98" width="90" height="26" rx="6" fill="#182633" stroke="#5B9BD5"/><text x="220" y="116" text-anchor="middle" font-size="10" fill="#a5c8e8" font-family="monospace">line(中)</text>
+        <rect x="275" y="98" width="90" height="26" rx="6" fill="#182633" stroke="#5B9BD5"/><text x="320" y="116" text-anchor="middle" font-size="10" fill="#a5c8e8" font-family="monospace">line(中)</text>
+        <rect x="375" y="98" width="90" height="26" rx="6" fill="#182633" stroke="#5B9BD5"/><text x="420" y="116" text-anchor="middle" font-size="10" fill="#a5c8e8" font-family="monospace">line(中)</text>
+        <text x="270" y="150" text-anchor="middle" font-size="11" fill="#9fd4a8" font-family="sans-serif">……继续拆，直到某段 &lt; 4 触发基础情形，落笔画实线</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">六角雪花怎么来的：</span>画好一条分形线后，<code>flake</code> 函数把这条边<strong>旋转 60 度</strong>、重复 6 次（<code>for i in range(6)</code>），六条分形边首尾相接，就围成了一片完整的六角雪花。这里又用到了向量旋转——旋转 60 度得到下一条边的起止点。
+</div>
+
+<!-- ==================== 5.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-5-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<div class="section-header" id="section-5-6">
+    <h2>5.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 冰上的雪花 -->
+<div class="level-card" id="sec-5-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 冰上的雪花</span>
+        <h3>❄️ 冰上的雪花 —— 用递归绘制分形雪花</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/5-6-1-1_snowflakes_on_ice.png" alt="扣哒世界 冰上的雪花关卡 - koudashijie.com">
+            <div class="caption">图2：冰上的雪花——用递归的 line 函数画出分形线，再由 flake 旋转 6 次拼成六角雪花，在指定坐标处绘制图案</div>
+        </div>
+
+        <h4>策略：读懂递归的 line，补全旋转的 flake</h4>
+        <p>本关是一次"艺术编程"，目标是在冰面上画出六角形雪花分形。关卡已经给出了递归 <code>line</code> 函数（供你阅读理解递归），你的任务有两部分：<strong>读懂 line 如何用递归把直线变成分形</strong>，以及<strong>补全 flake 函数</strong>——让它把一条分形边旋转 60 度、重复六次围成雪花，并在给定的白色/红色坐标点实际调用函数把雪花画出来。</p>
+
+        <h4>思路拆解一：line 函数的递归逻辑</h4>
+        <p><code>line</code> 的结构是标准的递归模板。<strong>基础情形</strong>：算出线段长度 <code>distance = full.magnitude()</code>，若 <code>distance &lt; 4</code>，就用 <code>toggleFlowers</code> 配合 <code>moveXY</code> 从 start 画一条实线到 end，然后 <code>return</code> 结束。<strong>递归情形</strong>：否则求半段 <code>half</code>，算出中点 A 和旋转 90 度得到的尖端 B，把线段拆成四段，对四段分别递归调用 <code>line</code>。理解这个"判断长度→不够短就拆四段递归"的循环往复，是本关的核心。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：line 的基础情形（画实线并 return）</span>
+full <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>end<span class="punc">,</span> start<span class="punc">)</span>
+distance <span class="punc">=</span> full<span class="punc">.</span><span class="fn">magnitude</span><span class="punc">()</span>
+<span class="kw">if</span> distance <span class="punc">&lt;</span> <span class="num">4</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">False</span><span class="punc">)</span>   <span class="cmt"># 抬笔，移动不画</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>start<span class="punc">.</span>x<span class="punc">,</span> start<span class="punc">.</span>y<span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">toggleFlowers</span><span class="punc">(</span><span class="kw">True</span><span class="punc">)</span>    <span class="cmt"># 落笔，移动即画线</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>end<span class="punc">.</span>x<span class="punc">,</span> end<span class="punc">.</span>y<span class="punc">)</span>
+    <span class="kw">return</span>   <span class="cmt"># 关键！不 return 会无限递归</span></pre>
+        </div>
+
+        <h4>思路拆解二：补全 flake 的旋转循环</h4>
+        <p><code>flake</code> 要画六条边围成雪花。先求出第一条边向量 <code>side = subtract(end, start)</code>，用 <code>a</code>、<code>b</code> 记录当前边的起止点。循环 6 次，每次先 <code>line(a, b)</code> 画一条分形边，然后<strong>把边向量旋转 60 度</strong>得到下一条边的方向，据此更新 <code>a</code> 和 <code>b</code>（新边的起点是上一条边的终点，终点是起点加上旋转后的边向量）。六次之后，六条分形边首尾相连，一片雪花就成型了。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：flake 旋转 60° 画 6 条分形边（思路示意）</span>
+<span class="kw">def</span> <span class="fn">flake</span><span class="punc">(</span>start<span class="punc">,</span> end<span class="punc">):</span>
+    side <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span>end<span class="punc">,</span> start<span class="punc">)</span>
+    a <span class="punc">=</span> start
+    b <span class="punc">=</span> end
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">6</span><span class="punc">):</span>
+        <span class="fn">line</span><span class="punc">(</span>a<span class="punc">,</span> b<span class="punc">)</span>                          <span class="cmt"># 画一条分形边</span>
+        side <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">rotate</span><span class="punc">(</span>side<span class="punc">,</span> <span class="fn">degreesToRadians</span><span class="punc">(</span><span class="num">60</span><span class="punc">))</span>  <span class="cmt"># 边转 60°</span>
+        a <span class="punc">=</span> b                             <span class="cmt"># 新起点 = 旧终点</span>
+        b <span class="punc">=</span> Vector<span class="punc">.</span><span class="fn">add</span><span class="punc">(</span>a<span class="punc">,</span> side<span class="punc">)</span>            <span class="cmt"># 新终点</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">必须用真正的 Vector 对象：</span>关卡特别强调——调用 <code>flake</code>、<code>line</code> 时，传入的起止点<strong>必须是真正的 <code>Vector(x, y)</code> 对象</strong>，而不是 <code>{x: .., y: ..}</code> 这种普通对象。因为只有 Vector 对象才带有 <code>subtract</code>、<code>rotate</code>、<code>magnitude</code> 等向量方法，普通对象会报错。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">注意内存、经常刷新：</span>递归会同时展开很多层调用，非常消耗资源。关卡提示"经常刷新以避免内存泄漏和崩溃"。这从侧面说明：递归虽优雅，但代价不小——每一层调用都占用内存，层数过深会撑爆内存。这也是设置合理终止阈值的重要意义。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">toggleFlowers 是"画笔开关"：</span>本关用 <code>toggleFlowers(False)</code> 表示"抬笔"（移动但不留痕迹），<code>toggleFlowers(True)</code> 表示"落笔"（移动时画出线条）。画每一小段实线前先抬笔移到起点，再落笔移到终点，才能画出连续而不多余的线段。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 5.7 ==================== -->
+<div class="section-header" id="section-5-7">
+    <h2>5.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-5-7-1">5.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>5.7.1.1 递归分形的典型问题
+    <span class="en">Typical issues with recursion and fractals</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch9_sec5_5-7-1-1_common_errors.png" alt="扣哒世界 递归分形常见错误速查 - koudashijie.com">
+    <div class="caption">图3：忘记 return、没有终止条件、角度没转弧度、传错对象类型，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>基础情形忘写 return——画完实线不 <code>return</code>，会继续往下拆分、陷入无限递归导致崩溃。</li>
+        <li>根本没有终止条件——递归函数必须有基础情形（如 <code>distance &lt; 4</code>），否则永远拆不到头。</li>
+        <li>角度没转弧度——<code>Vector.rotate</code> 只认弧度，传角度前必须用 <code>degreesToRadians</code> 换算，否则转错方向。</li>
+        <li>旋转角度用错——line 内的凸起转 90 度、flake 拼边转 60 度，两者别混淆。</li>
+        <li>递归情形直接画直线——应对四个子段调用 <code>line</code> 递归，而不是直接画四条直线，否则得不到分形。</li>
+        <li>传入普通对象而非 Vector——参数必须是 <code>Vector(x, y)</code> 对象，普通对象没有向量方法会报错。</li>
+        <li>忘记更新 a、b——flake 循环里每次要把 <code>a</code> 设为旧 <code>b</code>、<code>b</code> 设为新终点，忘了更新会原地画同一条边。</li>
+        <li>递归层数过深——阈值设得太小会让递归层数暴增、耗尽内存，注意关卡提示的刷新与内存问题。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-5-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>你在冰面上完成了整个计算机科学 6 里最优雅的一课！你理解了<strong>递归</strong>——一个在自己内部调用自己的函数，以及它必备的<strong>两个部分</strong>：作为"刹车"的<strong>基础情形</strong>（线段长度小于阈值 4 时画实线并 <code>return</code>）和把问题缩小再自我调用的<strong>递归情形</strong>；你学会了用 <code>Vector.rotate</code> <strong>旋转向量</strong>、用 <code>degreesToRadians</code> 把<strong>角度转成弧度</strong>（记住向量运算只认弧度）；你体会了<strong>分形的自相似</strong>——把一段直线折成四段带尖角的子线段，再对每段递归展开，直线就长成了毛茸茸的分形曲线；最后由 <code>flake</code> 旋转 60 度重复六次，拼出一片完整的六角雪花。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td>递归函数</td><td>函数内部调用自己</td><td>把大问题拆成同类小问题</td></tr>
+            <tr><td>基础情形</td><td><code>if distance &lt; 4: ... return</code></td><td>递归的"刹车"，防止无限递归</td></tr>
+            <tr><td>递归情形</td><td>拆 4 段，对每段调用 line</td><td>把问题缩小并自我调用</td></tr>
+            <tr><td>Vector.rotate</td><td>旋转向量、长度不变</td><td>制造锯齿凸起、旋转雪花边</td></tr>
+            <tr><td>degreesToRadians</td><td><code>Math.PI / 180 * 度数</code></td><td>把角度换成旋转所需的弧度</td></tr>
+            <tr><td>自相似绘制</td><td>一段→四段，层层重复</td><td>把直线变成分形曲线</td></tr>
+            <tr><td>flake 拼雪花</td><td>旋转 60° 重复 6 次</td><td>六条分形边围成六角雪花</td></tr>
+            <tr><td>Vector 对象</td><td>参数必须是真 Vector</td><td>才能调用向量方法</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得让函数优雅地调用自己、用简单规则的层层重复生成无穷复杂之美的英雄，才算真正触摸到了计算机科学中最深邃的诗意。<br>
+        向雪山之巅的最后征程进发吧，勇敢的程序员！🏔️❄️🌀</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+<!-- CC-PROTECTION:HIDDEN:c47ea4240f:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="c47ea4240f">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC5-59D5BEE7BB6E。</span>
+<!-- CC-PROTECTION:HIDDEN:c47ea4240f:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（安息云峰）：第五单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

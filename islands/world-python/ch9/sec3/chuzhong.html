@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC3-AE9D0EE430B2">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第三单元：均值筛选 · 求和平均与多条件选优 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC3-AE9D0EE430B2 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS6-第三单元</div>
+
+    <a href="#section-3-1" class="nav-section">3.1 均值筛选概述</a>
+    <a href="#sec-3-1-1" class="nav-sub">3.1.1 为什么用平均值</a>
+    <a href="#sec-3-1-2" class="nav-sub">3.1.2 两步走思路</a>
+
+    <a href="#section-3-2" class="nav-section">3.2 遍历数组求和</a>
+    <a href="#sec-3-2-1" class="nav-sub">3.2.1 累加器模式</a>
+    <a href="#sec-3-2-2" class="nav-sub">3.2.2 索引访问属性</a>
+
+    <a href="#section-3-3" class="nav-section">3.3 计算平均值</a>
+    <a href="#sec-3-3-1" class="nav-sub">3.3.1 sum / length</a>
+    <a href="#sec-3-3-2" class="nav-sub">3.3.2 封装 average 函数</a>
+
+    <a href="#section-3-4" class="nav-section">3.4 多条件筛选</a>
+    <a href="#sec-3-4-1" class="nav-sub">3.4.1 用 and 组合条件</a>
+    <a href="#sec-3-4-2" class="nav-sub">3.4.2 距离近且高于均值</a>
+
+    <a href="#section-3-5" class="nav-section">3.5 更新最佳目标</a>
+    <a href="#sec-3-5-1" class="nav-sub">3.5.1 条件擂台算法</a>
+    <a href="#sec-3-5-2" class="nav-sub">3.5.2 返回目标对象</a>
+
+    <a href="#section-3-6" class="nav-section">3.6 实战关卡精讲</a>
+    <a href="#sec-3-6-1" class="nav-sub">3.6.1 寻找开始</a>
+    <a href="#sec-3-6-2" class="nav-sub">3.6.2 诱骗牦牛</a>
+    <a href="#sec-3-6-3" class="nav-sub">3.6.3 睡眠样本</a>
+
+    <a href="#section-3-7" class="nav-section">3.7 常见错误</a>
+    <a href="#sec-3-7-1" class="nav-sub">3.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第三单元：均值筛选 · 求和平均与多条件选优</h1>
+    <div class="subtitle">Unit 3: Average Filtering — Summation, Mean &amp; Multi-Condition Selection</div>
+    <div class="badge">计算机科学 6 · 安息云峰 Cloudrip Mountain · 寻找开始 → 诱骗牦牛 → 睡眠样本</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 3.1 ==================== -->
+<div class="section-header" id="section-3-1">
+    <h2>3.1 均值筛选概述</h2>
+    <div class="en-title">Overview of Average-Based Filtering</div>
+</div>
+
+<p>前两个单元你学会了协作指挥和反转操作。这一单元，捕手 Senick 要在云峰上追踪一头传说中体型无与伦比的树妖——<strong>Burleous Majorus</strong>。要抓住它，Senick 得先做一件很"科学"的事：<strong>测量一群单位的平均大小，把平均值当作基线（baseline），再从中筛选出那些"超出平均水平"的目标</strong>。这正是数据分析的思想——先算出群体的整体水平，再据此判断个体是否突出。本单元的核心，就是<span class="keyword">求平均值</span>与<span class="keyword">多条件筛选</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用<strong>累加器模式遍历数组求和</strong>；用 <code>sum / length</code> <strong>计算平均值</strong>并把它封装成 <code>average</code> 函数；用 <code>and</code> 把<strong>"距离更近"和"大小高于平均值"两个条件组合起来做多条件筛选</strong>；在遍历中不断<strong>更新那个"最近且满足条件"的最佳元素</strong>；最后把选出的<strong>最佳目标对象返回</strong>给调用者。</p>
+
+<h3 id="sec-3-1-1">3.1.1 为什么用平均值（Why the Average）</h3>
+
+<h4>3.1.1.1 平均值是一条"基线"
+    <span class="en">The average is a baseline</span>
+</h4>
+
+<p>Senick 不知道 Burleous Majorus 到底该有"多大"才算大。孤立地看一个数字没有意义——身高 3 米算大吗？如果周围的树妖平均身高就是 3 米，那它只是普通个头。所以正确的做法是<strong>先算出整个种群的平均大小</strong>，把它当作一条参考基线：<em>凡是超过平均值的，才是"偏大"的候选</em>。平均值把绝对数值变成了有意义的相对判断。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">📏 平均值 = 群体的"中间水平"</div>
+    平均值告诉我们"典型的一个"大概是什么样。有了它，我们就能回答"这个个体是高于还是低于群体水平"这类问题。在关卡里，Senick 正是靠"大小 &gt; 平均值"来剔除小个子、锁定真正够大的诱饵和目标。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-3-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-3-1-2">3.1.2 两步走思路（The Two-Step Approach）</h3>
+
+<h4>3.1.2.1 先求均值，再做筛选
+    <span class="en">First compute the mean, then filter</span>
+</h4>
+
+<p>本单元所有关卡都遵循同一个"两步走"结构。<strong>第一步</strong>：遍历所有单位，求出它们某个属性（如 <code>size</code>）的平均值。<strong>第二步</strong>：再遍历一次，用这个平均值作为筛选标准，挑出满足条件（高于平均且距离最近）的最佳目标。理解这个"先统计、后决策"的两遍遍历结构，就抓住了整个单元的骨架。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 540 130" width="540" role="img" aria-label="两步走流程">
+        <defs>
+            <marker id="fl-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#3E7CB1"/>
+            </marker>
+        </defs>
+        <rect x="40" y="45" width="180" height="50" rx="10" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+        <text x="130" y="68" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">第一步：求平均值</text>
+        <text x="130" y="85" text-anchor="middle" font-size="10" fill="#6a8294" font-family="sans-serif">遍历求和 → sum / length</text>
+        <line x1="222" y1="70" x2="315" y2="70" stroke="#3E7CB1" stroke-width="2.5" marker-end="url(#fl-arr)"/>
+        <rect x="320" y="45" width="180" height="50" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+        <text x="410" y="68" text-anchor="middle" font-size="13" fill="#2f7a45" font-weight="bold" font-family="sans-serif">第二步：多条件筛选</text>
+        <text x="410" y="85" text-anchor="middle" font-size="10" fill="#6a8294" font-family="sans-serif">高于均值 且 距离最近</text>
+    </svg>
+</div>
+
+<!-- ==================== 3.2 ==================== -->
+<div class="section-header" id="section-3-2">
+    <h2>3.2 遍历数组求和</h2>
+    <div class="en-title">Summing an Array by Iteration</div>
+</div>
+
+<h3 id="sec-3-2-1">3.2.1 累加器模式（The Accumulator Pattern）</h3>
+
+<h4>3.2.1.1 从 0 开始，逐个加进去
+    <span class="en">Start from zero, add each one in</span>
+</h4>
+
+<p>求和是求平均的第一步，用的是编程里最经典的<strong>累加器模式（accumulator pattern）</strong>：先建一个初始为 <code>0</code> 的变量 <code>sum</code>，然后遍历数组，把每个元素的目标属性一个个<strong>加到</strong> <code>sum</code> 上。循环结束时，<code>sum</code> 里装的就是所有元素的总和。这个"变量+循环累加"的套路，是数据统计的基本功。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 540 150" width="540" role="img" aria-label="累加器过程">
+        <text x="270" y="24" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">累加器：sum 从 0 开始不断长大</text>
+        <g font-family="monospace" font-size="12">
+            <rect x="40" y="50" width="80" height="34" rx="5" fill="#182633" stroke="#2c4155"/><text x="80" y="72" text-anchor="middle" fill="#9fd4a8">sum=0</text>
+            <text x="128" y="72" fill="#7cc7e8">+3→</text>
+            <rect x="165" y="50" width="80" height="34" rx="5" fill="#182633" stroke="#2c4155"/><text x="205" y="72" text-anchor="middle" fill="#9fd4a8">sum=3</text>
+            <text x="253" y="72" fill="#7cc7e8">+5→</text>
+            <rect x="290" y="50" width="80" height="34" rx="5" fill="#182633" stroke="#2c4155"/><text x="330" y="72" text-anchor="middle" fill="#9fd4a8">sum=8</text>
+            <text x="378" y="72" fill="#7cc7e8">+2→</text>
+            <rect x="415" y="50" width="90" height="34" rx="5" fill="#182633" stroke="#e8a15a" stroke-width="2"/><text x="460" y="72" text-anchor="middle" fill="#e8a15a">sum=10 ✓</text>
+            <text x="270" y="120" text-anchor="middle" fill="#cdddea" font-size="11" font-family="sans-serif">遍历 [3, 5, 2]，总和为 10</text>
+        </g>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 累加器模式：求数组中所有元素 size 的总和</span>
+<span class="kw">def</span> <span class="fn">sumSize</span><span class="punc">(</span>burls<span class="punc">):</span>
+    sum <span class="punc">=</span> <span class="num">0</span>                        <span class="cmt"># 1. 初始化累加器</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>burls<span class="punc">)</span><span class="punc">):</span>    <span class="cmt"># 2. 遍历每个元素</span>
+        burl <span class="punc">=</span> burls<span class="punc">[</span>i<span class="punc">]</span>
+        sum <span class="punc">+=</span> burl<span class="punc">.</span>size          <span class="cmt"># 3. 把它的 size 加进去</span>
+    <span class="kw">return</span> sum                    <span class="cmt"># 4. 返回总和</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">sum 必须在循环外初始化：</span><code>sum = 0</code> 一定要写在 <code>for</code> 循环<strong>之前</strong>。如果放进循环里，每一轮都会把 <code>sum</code> 重置为 0，最后只会剩下最后一个元素的值，得不到总和。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-3-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<h3 id="sec-3-2-2">3.2.2 用索引访问属性（Accessing Attributes by Index）</h3>
+
+<h4>3.2.2.1 array[i].属性名
+    <span class="en">array[i].attribute</span>
+</h4>
+
+<p>关卡里的数组元素都是<strong>单位对象</strong>，每个对象带着自己的属性（如 <code>size</code>、<code>health</code>、<code>pos</code>）。用 <code>range(len(array))</code> 遍历时，<code>i</code> 是索引，<code>array[i]</code> 是第 <code>i</code> 个对象，<code>array[i].size</code> 才是它的大小。也可以先把对象取出到变量再访问，两种写法等价，后者更易读。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>先取对象（更清晰）</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>burls<span class="punc">)</span><span class="punc">):</span>
+    burl <span class="punc">=</span> burls<span class="punc">[</span>i<span class="punc">]</span>
+    sum <span class="punc">+=</span> burl<span class="punc">.</span>size</pre>
+        </div>
+    </div>
+    <div>
+        <h5>直接下标（更紧凑）</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>burls<span class="punc">)</span><span class="punc">):</span>
+    sum <span class="punc">+=</span> burls<span class="punc">[</span>i<span class="punc">]</span><span class="punc">.</span>size</pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 3.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:f739b47d40:START anchor=sec-3-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="f739b47d40">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，课程覆盖全球 190 多个国家，获得 32 万名全球教师的信赖。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f739b47d40:END -->
+<!-- CC-PROTECTION:HIDDEN:069abc717a:START anchor=sec-3-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="069abc717a">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:069abc717a:END -->
+
+<div class="section-header" id="section-3-3">
+    <h2>3.3 计算平均值</h2>
+    <div class="en-title">Computing the Average</div>
+</div>
+
+<h3 id="sec-3-3-1">3.3.1 平均值 = 总和 ÷ 数量（sum / length）</h3>
+
+<h4>3.3.1.1 一个除法就搞定
+    <span class="en">Just one division</span>
+</h4>
+
+<p>有了总和，求平均值就非常简单——<strong>用总和除以元素的数量</strong>。数量就是数组的长度，在关卡里写作 <code>burls.length</code>（标准 Python 里是 <code>len(burls)</code>）。这一个除法，就把一堆数字浓缩成了一个代表"整体水平"的值。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 120" width="520" role="img" aria-label="平均值公式">
+        <text x="260" y="30" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">平均值 = 总和 ÷ 数量</text>
+        <text x="120" y="78" font-size="18" font-family="monospace" fill="#9fd4a8">sum</text>
+        <text x="200" y="78" font-size="20" font-family="monospace" fill="#7cc7e8">/</text>
+        <text x="225" y="78" font-size="18" font-family="monospace" fill="#e8a15a">len(array)</text>
+        <text x="150" y="102" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">所有大小加起来</text>
+        <text x="290" y="102" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">一共几个</text>
+        <text x="420" y="78" font-size="13" fill="#cdddea" font-family="sans-serif">→ average</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 平均值的最小例子</span>
+sum <span class="punc">=</span> <span class="num">1</span> <span class="punc">+</span> <span class="num">2</span> <span class="punc">+</span> <span class="num">5</span> <span class="punc">+</span> <span class="num">4</span>   <span class="cmt"># 总和 = 12</span>
+average <span class="punc">=</span> sum <span class="punc">/</span> <span class="num">4</span>          <span class="cmt"># 4 个元素 → 平均值 = 3</span></pre>
+</div>
+
+<h3 id="sec-3-3-2">3.3.2 封装成 average 函数（Encapsulate an average Function）</h3>
+
+<h4>3.3.2.1 一个函数完成"求和 + 相除"
+    <span class="en">One function to sum and divide</span>
+</h4>
+
+<p>把求和与相除合并进一个函数，就得到了通用的求平均值工具。它接收一个数组，内部用累加器求和，最后返回 <code>sum / len(array)</code>。这样主程序只要写一句 <code>averageSize(yaks)</code> 就能拿到平均大小，干净利落。这正是"睡眠样本"关卡要求你<strong>从头独立实现</strong>的函数。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 通用的求平均大小函数（求和与相除合二为一）</span>
+<span class="kw">def</span> <span class="fn">averageSize</span><span class="punc">(</span>units<span class="punc">):</span>
+    sum <span class="punc">=</span> <span class="num">0</span>                        <span class="cmt"># 初始化累加器</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>units<span class="punc">)</span><span class="punc">):</span>
+        unit <span class="punc">=</span> units<span class="punc">[</span>i<span class="punc">]</span>
+        sum <span class="punc">+=</span> unit<span class="punc">.</span>size          <span class="cmt"># 累加每个单位的大小</span>
+    <span class="kw">return</span> sum <span class="punc">/</span> <span class="fn">len</span><span class="punc">(</span>units<span class="punc">)</span>      <span class="cmt"># 总和 ÷ 数量 = 平均值</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">四步口诀（来自关卡提示）：</span>写 <code>average</code> 函数只需记住四句话——<strong>初始化 sum 变量；遍历每个元素；把元素的 size 加到 sum；返回 sum 除以数组长度</strong>。任何"求某属性平均值"的需求，都套这四步。
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">当心空数组：</span>如果传进来的数组是空的，<code>len(units)</code> 为 0，除法会出错（除以零）。稳妥的做法是在相除前先判断 <code>if len(units) &gt; 0</code>，否则返回 0 或跳过，避免程序崩溃。
+</div>
+
+<!-- ==================== 3.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:21f9328d9c:START anchor=sec-3-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="21f9328d9c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>目前 扣哒世界 支持 Python、JavaScript、C++ 等多种语言，会员还可解锁更多高级内容。官网：<a href="https://koudashijie.com/">koudashijie.com</a></span>
+</aside>
+<!-- CC-PROTECTION:AD:21f9328d9c:END -->
+
+<div class="section-header" id="section-3-4">
+    <h2>3.4 多条件筛选</h2>
+    <div class="en-title">Multi-Condition Filtering</div>
+</div>
+
+<h3 id="sec-3-4-1">3.4.1 用 and 组合条件（Combining with and）</h3>
+
+<h4>3.4.1.1 两个条件必须同时成立
+    <span class="en">Both conditions must hold at once</span>
+</h4>
+
+<p>"诱骗牦牛"关卡的挑战在于：好诱饵<strong>既要够大、又要够近</strong>。只看距离不行——可能选到一头很近的小牦牛，骗不到大树妖；只看大小也不行——最大的那头可能远在牛群深处，跑过去会激怒整群牦牛。所以要用逻辑运算符 <code>and</code> 把两个条件<strong>串成一个</strong>：只有<em>同时</em>满足"大小 &gt; 平均值"<strong>且</strong>"距离 &lt; 当前最近"的牦牛，才算合格候选。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="and 组合条件">
+        <text x="260" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">两个条件用 and 连接，缺一不可</text>
+        <g font-family="sans-serif" font-size="11">
+            <rect x="50" y="45" width="150" height="45" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="125" y="65" text-anchor="middle" fill="#2f7a45" font-weight="bold">条件① 大小</text>
+            <text x="125" y="82" text-anchor="middle" fill="#6a8294">size &gt; avgSize</text>
+            <text x="245" y="72" text-anchor="middle" fill="#3E7CB1" font-size="18" font-weight="bold" font-family="monospace">and</text>
+            <rect x="290" y="45" width="180" height="45" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="380" y="65" text-anchor="middle" fill="#bd7415" font-weight="bold">条件② 距离</text>
+            <text x="380" y="82" text-anchor="middle" fill="#6a8294">distance &lt; closestDist</text>
+            <text x="260" y="125" text-anchor="middle" fill="#7d94a3" font-size="11">两者都为 True，这头牦牛才是新的最佳候选</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-3-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-3-4-2">3.4.2 距离近且高于均值（Closer AND Above Average）</h3>
+
+<h4>3.4.2.1 把两个判断写进一个 if
+    <span class="en">Put both tests in one if</span>
+</h4>
+
+<p>在遍历牦牛的循环里，对每头牦牛先算出它的距离 <code>yakDistance</code> 和大小 <code>yakSize</code>，然后用一个 <code>if</code> 同时检查两个条件。只有当这头牦牛<strong>比目前记录的最佳更近，并且大小超过平均值</strong>时，才认为它是"更好的选择"，进而更新记录。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用 and 同时检查"高于均值"和"更近"两个条件</span>
+yakDistance <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>yak<span class="punc">)</span>
+yakSize <span class="punc">=</span> yak<span class="punc">.</span>size
+<span class="kw">if</span> yakSize <span class="punc">&gt;</span> avgSize <span class="kw">and</span> yakDistance <span class="punc">&lt;</span> closestDist<span class="punc">:</span>
+    <span class="cmt"># 这头牦牛又大又近，是更好的候选</span>
+    ...</pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">条件顺序与含义别混：</span>务必是 <code>yakSize &gt; avgSize</code>（大小要<strong>大于</strong>平均）而不是小于，否则会选到小牦牛。同样，距离要 <code>&lt; closestDist</code>（越来越近）。把大于小于写反，是本关最常见的失误。
+</div>
+
+<!-- ==================== 3.5 ==================== -->
+<div class="section-header" id="section-3-5">
+    <h2>3.5 更新最佳目标</h2>
+    <div class="en-title">Updating the Best Target</div>
+</div>
+
+<h3 id="sec-3-5-1">3.5.1 条件擂台算法（The Conditional Tournament）</h3>
+
+<h4>3.5.1.1 带筛选条件的"打擂台"
+    <span class="en">A tournament with a filter</span>
+</h4>
+
+<p>这其实是第一单元"打擂台求最值"的升级版。区别在于：现在<strong>擂主的更换不只看一个指标，还要先通过筛选条件</strong>。做法是设两个记录变量——<code>bestYak = None</code>（当前最佳）和 <code>closestDist = Infinity</code>（当前最近距离，初始设为无穷大）。遍历每头牦牛，若它<strong>同时满足两个条件</strong>，就让它当新擂主：更新 <code>bestYak</code> 和 <code>closestDist</code>。遍历结束，擂台上就是那头"高于平均、且在合格者中最近"的最佳牦牛。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 条件擂台：找出高于均值且最近的最佳牦牛</span>
+bestYak <span class="punc">=</span> <span class="kw">None</span>
+closestDist <span class="punc">=</span> <span class="num">9999</span>          <span class="cmt"># 初始设成很大的距离</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>yaks<span class="punc">)</span><span class="punc">):</span>
+    yak <span class="punc">=</span> yaks<span class="punc">[</span>i<span class="punc">]</span>
+    yakDistance <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>yak<span class="punc">)</span>
+    yakSize <span class="punc">=</span> yak<span class="punc">.</span>size
+    <span class="kw">if</span> yakSize <span class="punc">&gt;</span> avgSize <span class="kw">and</span> yakDistance <span class="punc">&lt;</span> closestDist<span class="punc">:</span>
+        bestYak <span class="punc">=</span> yak            <span class="cmt"># 更新最佳目标</span>
+        closestDist <span class="punc">=</span> yakDistance  <span class="cmt"># 更新最近记录</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么 closestDist 初始设很大：</span>因为我们求的是"最近"（最小距离）。初始 <code>closestDist</code> 必须比任何真实距离都大（如 9999 或 Infinity），这样第一头合格的牦牛就一定能"打赢"它、成功成为擂主。这和第二单元求最小血量设 99999 是同一个道理。
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">两个变量要一起更新：</span>发现更好的牦牛时，<code>bestYak</code> 和 <code>closestDist</code> <strong>必须同时更新</strong>。只更新 <code>bestYak</code> 却忘了更新 <code>closestDist</code>，下一次比较用的还是旧距离，擂台机制就失灵了。
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-3-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<h3 id="sec-3-5-2">3.5.2 返回目标对象（Returning the Target Object）</h3>
+
+<h4>3.5.2.1 返回的是对象，不是数字
+    <span class="en">Return the object, not a number</span>
+</h4>
+
+<p>筛选的最终产物是一个<strong>单位对象</strong>（那头最佳牦牛），而不仅仅是它的大小或距离。把整个 <code>bestYak</code> 对象保存下来并返回，调用方才能对它下命令——比如 <code>hero.say(bestYak)</code> 标出它，或指挥单位移向 <code>bestYak.pos</code>。记住：我们要的是"哪一个"，所以保存和返回的应当是元素本身。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🎯 数字 vs. 对象</div>
+    <code>closestDist</code> 是一个数字，只用来<strong>比较</strong>；<code>bestYak</code> 是一个对象，是我们真正<strong>想要的结果</strong>。很多新手只记住了最小的距离值，却忘了同时记住"是哪头牦牛"，导致循环结束后手里只有一个数字、找不到目标本体。
+</div>
+
+<!-- ==================== 3.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-3-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<div class="section-header" id="section-3-6">
+    <h2>3.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 寻找开始 -->
+<div class="level-card" id="sec-3-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 寻找开始</span>
+        <h3>🌲 寻找开始 —— 求树妖的平均大小</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/3-6-1-1_finding_the_start.png" alt="扣哒世界 寻找开始关卡 - koudashijie.com">
+            <div class="caption">图2：寻找开始——趁树妖迁徙时测量种群平均大小，作为日后识别传说树妖 Burleous Majorus 的基线</div>
+        </div>
+
+        <h4>策略：先建立"平均大小"这条基线</h4>
+        <p>Senick 要找传说中体型无与伦比的 Burleous Majorus，可他不知道"多大才算大"。本关的任务是趁树妖迁徙，<strong>测出这群树妖的平均大小</strong>并说出来，作为将来识别巨型树妖的参考基线。这是整个单元的起点——一切筛选都建立在"平均值"之上。</p>
+
+        <h4>思路拆解：拆成两个函数</h4>
+        <p>关卡把求平均值拆成了两个协作的函数。<strong>sumSize</strong> 负责用累加器模式遍历所有树妖、把它们的 <code>size</code> 累加成总和；<strong>averageSize</strong> 则调用 <code>sumSize</code> 拿到总和，再除以数量得到平均值。这种"求和归求和、相除归相除"的分工，体现了函数职责单一的思想。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：sumSize 求总和，averageSize 求平均</span>
+<span class="kw">def</span> <span class="fn">sumSize</span><span class="punc">(</span>burls<span class="punc">):</span>
+    sum <span class="punc">=</span> <span class="num">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>burls<span class="punc">)</span><span class="punc">):</span>
+        sum <span class="punc">+=</span> burls<span class="punc">[</span>i<span class="punc">]</span><span class="punc">.</span>size   <span class="cmt"># 累加每个树妖的大小</span>
+    <span class="kw">return</span> sum
+
+<span class="kw">def</span> <span class="fn">averageSize</span><span class="punc">(</span>burls<span class="punc">):</span>
+    sum <span class="punc">=</span> <span class="fn">sumSize</span><span class="punc">(</span>burls<span class="punc">)</span>       <span class="cmt"># 借助 sumSize 拿到总和</span>
+    <span class="kw">return</span> sum <span class="punc">/</span> <span class="fn">len</span><span class="punc">(</span>burls<span class="punc">)</span>   <span class="cmt"># 总和 ÷ 数量</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">主循环怎么用：</span>在 <code>while True</code> 里先用 <code>hero.findEnemies()</code> 拿到树妖数组，调用 <code>averageSize</code> 得到平均值，再用 <code>hero.say(avgSize)</code> 说出来。这样每帧都会报告当前视野内树妖的平均大小。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">pass 只是占位：</span>默认代码里 <code>sumSize</code> 函数体是一个 <code>pass</code>，那只是"什么都不做"的占位符，提醒你这里需要自己填写累加逻辑。真正实现时要把 <code>pass</code> 替换成累加器代码。
+        </div>
+    </div>
+</div>
+
+<!-- 诱骗牦牛 -->
+<div class="level-card" id="sec-3-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 诱骗牦牛</span>
+        <h3>🐂 诱骗牦牛 —— 挑一头又大又近的诱饵</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/3-6-2-1_luring_the_yak.png" alt="扣哒世界 诱骗牦牛关卡 - koudashijie.com">
+            <div class="caption">图3：诱骗牦牛——为陷阱挑选一头大小高于平均值、且距离最近的牦牛作诱饵，切勿深入牛群激怒整群</div>
+        </div>
+
+        <h4>策略：大陷阱要配大诱饵，但别太深入</h4>
+        <p>要抓大树妖 Majorus，需要一头够分量的诱饵牦牛。本关的两难在于：诱饵<strong>必须大小高于平均值</strong>（够大才骗得到大树妖），但又<strong>不能选牛群深处那一头</strong>（跑太远会激怒整群牦牛）。所以最佳策略是——在所有"高于平均大小"的牦牛里，挑<strong>距离英雄最近</strong>的那一头。这就把"大小"和"距离"两个属性结合了起来。</p>
+
+        <h4>思路拆解：均值 + 条件擂台</h4>
+        <p>算法分两步。<strong>第一步</strong>补全 <code>averageSize</code>，求出牦牛的平均大小 <code>avgSize</code>。<strong>第二步</strong>做条件擂台：设 <code>bestYak = None</code>、<code>closestDist = Infinity</code>，遍历每头牦牛，用 <code>if yakSize &gt; avgSize and yakDistance &lt; closestDist</code> 同时检查"够大"和"更近"，满足就更新 <code>bestYak</code> 与 <code>closestDist</code>。最后 <code>hero.say(bestYak)</code> 标出这头最佳诱饵。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：在高于均值的牦牛中找最近的一头</span>
+avgSize <span class="punc">=</span> <span class="fn">averageSize</span><span class="punc">(</span>yaks<span class="punc">)</span>
+bestYak <span class="punc">=</span> <span class="kw">None</span>
+closestDist <span class="punc">=</span> <span class="num">9999</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>yaks<span class="punc">)</span><span class="punc">):</span>
+    yak <span class="punc">=</span> yaks<span class="punc">[</span>i<span class="punc">]</span>
+    yakDistance <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>yak<span class="punc">)</span>
+    <span class="kw">if</span> yak<span class="punc">.</span>size <span class="punc">&gt;</span> avgSize <span class="kw">and</span> yakDistance <span class="punc">&lt;</span> closestDist<span class="punc">:</span>
+        bestYak <span class="punc">=</span> yak
+        closestDist <span class="punc">=</span> yakDistance
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>bestYak<span class="punc">)</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别只按距离选：</span>本关的核心提醒是——<strong>不要把"最近"当作唯一标准</strong>。如果只写 <code>if yakDistance &lt; closestDist</code>，很可能选中一头很近的小牦牛，Senick 就抓不到大树妖了。<code>size &gt; avgSize</code> 这个条件绝不能省。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么"最近"能防激怒：</span>牛群深处的牦牛跑过去要穿过整群，容易惊动其他牦牛。在合格（够大）的牦牛中选最近的，就能尽量在牛群边缘取饵，降低激怒风险。这是"距离条件"背后的实战考量。
+        </div>
+    </div>
+</div>
+
+<!-- 睡眠样本 -->
+<div class="level-card" id="sec-3-6-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 睡眠样本</span>
+        
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+<!-- CC-PROTECTION:HIDDEN:ce84d0099e:START anchor=h3-12 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ce84d0099e">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:ce84d0099e:END -->
+
+<h3>💤 睡眠样本 —— 从头独立写 average 函数</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/3-6-3-1_sleepy_sampling.png" alt="扣哒世界 睡眠样本关卡 - koudashijie.com">
+            <div class="caption">图4：睡眠样本——计划的最后一步，独立从零实现求平均值的函数，测出雪人的平均尺寸</div>
+        </div>
+
+        <h4>策略：计划收官，独立实现均值函数</h4>
+        <p>这是 Senick 大计划的最后一步。前两关你分别学会了"求和"和"求和+相除"，本关不再给你任何脚手架——要求你<strong>从零开始、独立地写出完整的 average 函数</strong>，测出雪人的平均尺寸。这是对本单元核心技能的一次综合检验。</p>
+
+        <h4>思路拆解：先按类型找，再套四步模板</h4>
+        <p>算法很清晰。<strong>第一步</strong>用 <code>hero.findByType("yeti")</code> 精确找出所有雪人（而不是所有敌人），存进 <code>yetis</code>。<strong>第二步</strong>套用求平均值的四步模板：初始化 <code>sum = 0</code>、遍历累加每个雪人的 <code>size</code>、返回 <code>sum / len(yetis)</code>。<strong>第三步</strong>用 <code>hero.say(...)</code> 说出平均尺寸。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：findByType 精确取雪人，再求平均</span>
+yetis <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"yeti"</span><span class="punc">)</span>   <span class="cmt"># 只要雪人</span>
+
+<span class="kw">def</span> <span class="fn">averageSize</span><span class="punc">(</span>yetis<span class="punc">):</span>
+    sum <span class="punc">=</span> <span class="num">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>yetis<span class="punc">)</span><span class="punc">):</span>
+        sum <span class="punc">+=</span> yetis<span class="punc">[</span>i<span class="punc">]</span><span class="punc">.</span>size
+    <span class="kw">return</span> sum <span class="punc">/</span> <span class="fn">len</span><span class="punc">(</span>yetis<span class="punc">)</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="fn">averageSize</span><span class="punc">(</span>yetis<span class="punc">))</span>   <span class="cmt"># 说出雪人平均尺寸</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">findByType 比 findEnemies 更精准：</span>本关要的是"雪人"这一特定类型，用 <code>findByType("yeti")</code> 能只挑出雪人，避免把其他单位也算进平均值里。当你只关心某一类单位时，<code>findByType</code> 往往比笼统的 <code>findEnemies</code> 更合适。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">这是一次"默写"：</span>睡眠样本没有默认代码框架，正是要检验你能否<strong>凭记忆完整写出求平均值的四步</strong>。如果卡住了，回想那句口诀：初始化 sum、遍历、累加 size、返回 sum 除以长度。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 3.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+<!-- CC-PROTECTION:HIDDEN:2d76c2696a:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="2d76c2696a">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC3-AE9D0EE430B2。</span>
+<!-- CC-PROTECTION:HIDDEN:2d76c2696a:END -->
+
+<div class="section-header" id="section-3-7">
+    <h2>3.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-3-7-1">3.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>3.7.1.1 均值筛选的典型问题
+    <span class="en">Typical issues with average filtering</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch9_sec3_3-7-1-1_common_errors.png" alt="扣哒世界 均值筛选常见错误速查 - koudashijie.com">
+    <div class="caption">图5：sum 位置错、忘记相除、条件写反、只更新一个变量，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>sum 在循环内初始化——<code>sum = 0</code> 必须放在 <code>for</code> 循环之前，放里面每轮重置会只剩最后一个元素的值。</li>
+        <li>求和后忘记相除——<code>average</code> 函数要 <code>return sum / len(array)</code>，只 return 总和就成了"求和"而非"求平均"。</li>
+        <li>大小条件写反——诱饵要 <code>size &gt; avgSize</code>（大于平均），写成小于会选到小牦牛，骗不到大树妖。</li>
+        <li>只按距离选、漏掉大小条件——必须用 <code>and</code> 同时判断大小与距离，只看距离会选错目标。</li>
+        <li>closestDist 初始值太小——求最近距离时初值要设很大（9999 或 Infinity），设小了第一个候选也刷不进去。</li>
+        <li>两个记录变量没同步更新——发现更优目标时 <code>bestYak</code> 和 <code>closestDist</code> 要一起更新，只更新一个会让擂台失灵。</li>
+        <li>只记住了数字、忘了记对象——要保存 <code>bestYak</code> 这个对象本身，光有 <code>closestDist</code> 数字找不到目标。</li>
+        <li>除以零——空数组时 <code>len</code> 为 0，相除会报错，必要时先判断数组非空。</li>
+        <li>用 findEnemies 代替 findByType——只需某类单位（如雪人）时，笼统的 <code>findEnemies</code> 会混入其他单位污染平均值。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>这一单元你和捕手 Senick 一起，把"数据分析"的思想带进了云峰狩猎！你掌握了用<strong>累加器模式遍历数组求和</strong>——从 0 开始、逐个把属性加进去；学会了用 <code>sum / length</code> <strong>计算平均值</strong>，并把它封装成通用的 <code>average</code> 函数；懂得了用 <code>and</code> 把<strong>"大小高于平均"和"距离更近"两个条件组合</strong>起来做多条件筛选；通过<strong>条件擂台</strong>不断<strong>更新那个最近又合格的最佳目标</strong>，并把整个<strong>目标对象返回</strong>给调用者。在"寻找开始""诱骗牦牛""睡眠样本"三关里，你从测基线、到按均值筛诱饵、再到独立默写均值函数，一步步走完了 Senick 的完整计划。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>遍历数组求和</td><td>sum=0 起步，循环累加属性</td><td>寻找开始</td></tr>
+            <tr><td>函数分工</td><td>sumSize 求和，averageSize 相除</td><td>寻找开始</td></tr>
+            <tr><td>计算平均值</td><td><code>sum / len(array)</code></td><td>三关</td></tr>
+            <tr><td>多条件筛选</td><td><code>size &gt; avg and dist &lt; closest</code></td><td>诱骗牦牛</td></tr>
+            <tr><td>条件擂台</td><td>closestDist 初值设大，逐步刷新</td><td>诱骗牦牛</td></tr>
+            <tr><td>更新最佳目标</td><td>bestYak 与 closestDist 同步更新</td><td>诱骗牦牛</td></tr>
+            <tr><td>返回对象</td><td>保存元素本身，而非只存数字</td><td>诱骗牦牛</td></tr>
+            <tr><td>独立写均值函数</td><td>findByType + 四步模板</td><td>睡眠样本</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得先测出群体基线、再用多个条件权衡取舍、最后精准锁定最佳目标的英雄，才是既有数据头脑、又有决断力的真正猎手。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️📊🐂</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（安息云峰）：第三单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

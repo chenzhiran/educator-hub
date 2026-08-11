@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC2-64B2E77E6EBF">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第二单元：反转操作 · 倒序遍历与反向匹配 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC2-64B2E77E6EBF | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS6-第二单元</div>
+
+    <a href="#section-2-1" class="nav-section">2.1 反转操作概述</a>
+    <a href="#sec-2-1-1" class="nav-sub">2.1.1 为什么需要反转</a>
+    <a href="#sec-2-1-2" class="nav-sub">2.1.2 索引与顺序</a>
+
+    <a href="#section-2-2" class="nav-section">2.2 倒序遍历列表</a>
+    <a href="#sec-2-2-1" class="nav-sub">2.2.1 range 三参数</a>
+    <a href="#sec-2-2-2" class="nav-sub">2.2.2 三个值怎么定</a>
+    <a href="#sec-2-2-3" class="nav-sub">2.2.3 while 倒序写法</a>
+
+    <a href="#section-2-3" class="nav-section">2.3 反转字符串</a>
+    <a href="#sec-2-3-1" class="nav-sub">2.3.1 字符串即字符序列</a>
+    <a href="#sec-2-3-2" class="nav-sub">2.3.2 从末尾拼接算法</a>
+    <a href="#sec-2-3-3" class="nav-sub">2.3.3 判断反转相等</a>
+
+    <a href="#section-2-4" class="nav-section">2.4 嵌套循环配对</a>
+    <a href="#sec-2-4-1" class="nav-sub">2.4.1 两层 for 遍历所有对</a>
+    <a href="#sec-2-4-2" class="nav-sub">2.4.2 复杂度直觉</a>
+
+    <a href="#section-2-5" class="nav-section">2.5 break 提前终止</a>
+    <a href="#sec-2-5-1" class="nav-sub">2.5.1 找到即停</a>
+
+    <a href="#section-2-6" class="nav-section">2.6 实战关卡精讲</a>
+    <a href="#sec-2-6-1" class="nav-sub">2.6.1 雪人食人族</a>
+    <a href="#sec-2-6-2" class="nav-sub">2.6.2 拓地</a>
+
+    <a href="#section-2-7" class="nav-section">2.7 常见错误</a>
+    <a href="#sec-2-7-1" class="nav-sub">2.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第二单元：反转操作 · 倒序遍历与反向匹配</h1>
+    <div class="subtitle">Unit 2: Reversal — Backward Iteration &amp; Reverse Matching</div>
+    <div class="badge">计算机科学 6 · 安息云峰 Cloudrip Mountain · 雪人食人族 → 拓地</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 2.1 ==================== -->
+<div class="section-header" id="section-2-1">
+    <h2>2.1 反转操作概述</h2>
+    <div class="en-title">Overview of Reversal Operations</div>
+</div>
+
+<p>上一单元你学会了指挥一支队伍、挑选最优目标。这一单元我们要研究一个看似简单、却处处有坑的主题——<strong>反转（reversal）</strong>。有时候我们手上的数据顺序正好和需要的相反：巫师只能把敌人<strong>从最强到最弱</strong>排序，可我们必须<strong>从最弱到最强</strong>逐个击破；术士给每个弓箭手克隆了一个"名字倒着念"的邪恶分身，我们得靠<strong>把字符串反转</strong>来找出谁是谁的对头。学会反转，就是学会"倒着看世界"。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用 <code>for i in range(len-1, -1, -1)</code> 从后往前<strong>倒序遍历列表</strong>；用"从末尾逐字符拼接"的算法<strong>反转一个字符串</strong>；判断"一个字符串反转后是否等于另一个字符串"来做<strong>反向匹配</strong>；用<strong>嵌套循环</strong>遍历所有"友军×敌军"的配对组合；并用 <code>break</code> 在找到答案后<strong>提前终止循环</strong>，避免无谓的计算。</p>
+
+<h3 id="sec-2-1-1">2.1.1 为什么需要反转（Why We Reverse）</h3>
+
+<h4>2.1.1.1 数据顺序不总合你意
+    <span class="en">Data doesn't always come in the order you want</span>
+</h4>
+
+<p>编程里经常遇到这种局面：<strong>你能拿到的数据，顺序和你需要的正好相反</strong>。在"雪人食人族"关卡中，巫师的排序法术只能生成<em>由强到弱</em>的雪人列表，但英雄吞噬生命力的机制要求<em>由弱到强</em>逐个击败。与其请巫师重排（他做不到），不如我们自己<strong>倒着读这个列表</strong>——这就是倒序遍历的用武之地。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔄 反转的两种含义</div>
+    本单元的"反转"有两层意思：一是<strong>倒序遍历</strong>——列表本身不动，只是我们把访问顺序调转（从最后一个元素往第一个走）；二是<strong>反转生成</strong>——真的造出一个内容颠倒的新字符串（如 <code>"archer"</code> → <code>"rehcra"</code>）。前者关心"怎么读"，后者关心"造出什么"。
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-2-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+<!-- CC-PROTECTION:HIDDEN:ff66045b75:START anchor=sec-2-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ff66045b75">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:ff66045b75:END -->
+
+<h3 id="sec-2-1-2">2.1.2 索引与顺序（Indices and Order）</h3>
+
+<h4>2.1.2.1 最后一个元素的索引是 len - 1
+    <span class="en">The last element's index is len - 1</span>
+</h4>
+
+<p>要倒着读列表，得先知道"最后一个元素在哪儿"。Python 的索引<strong>从 0 开始</strong>，所以一个长度为 <code>n</code> 的列表，第一个元素索引是 <code>0</code>，最后一个元素索引是 <code>n - 1</code>（也就是 <code>len(array) - 1</code>）。倒序遍历就是从这个最大索引出发，一步步减到 <code>0</code>。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 140" width="520" role="img" aria-label="索引示意">
+        <text x="260" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">长度为 4 的列表：索引 0 到 3</text>
+        <g font-family="monospace" font-size="13">
+            <rect x="60" y="45" width="90" height="50" rx="6" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/><text x="105" y="76" text-anchor="middle" fill="#2A5A85">"a"</text>
+            <rect x="160" y="45" width="90" height="50" rx="6" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/><text x="205" y="76" text-anchor="middle" fill="#2A5A85">"b"</text>
+            <rect x="260" y="45" width="90" height="50" rx="6" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/><text x="305" y="76" text-anchor="middle" fill="#2A5A85">"c"</text>
+            <rect x="360" y="45" width="90" height="50" rx="6" fill="#fdf3e0" stroke="#E0912F" stroke-width="2.5"/><text x="405" y="76" text-anchor="middle" fill="#bd7415">"d"</text>
+            <text x="105" y="118" text-anchor="middle" fill="#7d94a3" font-size="11">0</text>
+            <text x="205" y="118" text-anchor="middle" fill="#7d94a3" font-size="11">1</text>
+            <text x="305" y="118" text-anchor="middle" fill="#7d94a3" font-size="11">2</text>
+            <text x="405" y="118" text-anchor="middle" fill="#bd7415" font-size="11" font-weight="bold">3 = len-1</text>
+        </g>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">别用 len(array) 当最后索引：</span><code>array[len(array)]</code> 会越界报错（IndexError），因为长度为 4 的列表最大合法索引是 3，而不是 4。倒序起点永远是 <code>len(array) - 1</code>，牢记这个"减一"。
+</div>
+
+<!-- ==================== 2.2 ==================== -->
+<div class="section-header" id="section-2-2">
+    <h2>2.2 倒序遍历列表</h2>
+    <div class="en-title">Iterating a List in Reverse</div>
+</div>
+
+<h3 id="sec-2-2-1">2.2.1 range 的三个参数（The Three Arguments of range）</h3>
+
+<h4>2.2.1.1 起点、终点、步长
+    <span class="en">Start, stop, and step</span>
+</h4>
+
+<p>正序遍历我们常写 <code>for i in range(len(array))</code>，它默认从 0 开始、步长为 1、走到 <code>len-1</code>。要倒序，就得用到 <code>range</code> 的<strong>完整三参数形式</strong>：<code>range(起点, 终点, 步长)</code>。倒序遍历的写法是这个单元最核心的一行代码：</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 540 150" width="540" role="img" aria-label="range 三参数解剖">
+        <text x="270" y="28" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">range( len(array)-1 , -1 , -1 )</text>
+        <line x1="120" y1="45" x2="120" y2="80" stroke="#9fd4a8" stroke-width="2"/>
+        <line x1="290" y1="45" x2="290" y2="80" stroke="#7cc7e8" stroke-width="2"/>
+        <line x1="370" y1="45" x2="370" y2="80" stroke="#e8a15a" stroke-width="2"/>
+        <text x="120" y="100" text-anchor="middle" font-size="11" fill="#9fd4a8" font-family="sans-serif">起点 = 最后索引</text>
+        <text x="290" y="100" text-anchor="middle" font-size="11" fill="#7cc7e8" font-family="sans-serif">终点 = -1（不含）</text>
+        <text x="370" y="118" text-anchor="middle" font-size="11" fill="#e8a15a" font-family="sans-serif">步长 = -1（每次减一）</text>
+        <text x="270" y="140" text-anchor="middle" font-size="11" fill="#cdddea" font-family="sans-serif">于是 i 依次取 len-1, len-2, ..., 1, 0</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 倒序遍历：从最后一个元素走到第一个</span>
+array <span class="punc">=</span> <span class="punc">[</span><span class="num">1</span><span class="punc">,</span> <span class="num">2</span><span class="punc">,</span> <span class="num">3</span><span class="punc">]</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>array<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>array<span class="punc">[</span>i<span class="punc">]</span><span class="punc">)</span>   <span class="cmt"># 依次说出 3, 2, 1</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-2-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3 id="sec-2-2-2">2.2.2 三个值分别怎么定（How to Choose Each Value）</h3>
+
+<h4>2.2.2.1 终点为什么是 -1 而不是 0
+    <span class="en">Why the stop value is -1, not 0</span>
+</h4>
+
+<p>这是倒序遍历最容易搞错的地方。<code>range</code> 的<strong>终点值是"取不到"的</strong>（左闭右开）。我们希望 <code>i</code> 一直减到 <code>0</code> 并且<strong>包含 0</strong>（第 0 个元素也要访问），所以终点必须再往下一格写成 <code>-1</code>。如果写成 <code>range(len-1, 0, -1)</code>，循环会在 <code>i = 1</code> 时停下，<strong>漏掉第 0 个元素</strong>。</p>
+
+<table class="styled-table">
+    <thead><tr><th>参数</th><th>取值</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">起点</td><td class="mono">len(array) - 1</td><td>从最后一个元素的索引开始</td></tr>
+        <tr><td class="mono">终点</td><td class="mono">-1</td><td>减到 0 之后再走一步才停，保证包含索引 0</td></tr>
+        <tr><td class="mono">步长</td><td class="mono">-1</td><td>每次索引减 1，实现"往回走"</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">口诀记忆：</span>倒序三参数 = <strong>"长度减一、负一、负一"</strong>。第一个"减一"是起点（最后索引），后面两个"负一"分别是终点和步长。念顺了就不会漏第 0 个元素。
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-2-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+<!-- CC-PROTECTION:HIDDEN:940e73c8a8:START anchor=sec-2-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="940e73c8a8">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:940e73c8a8:END -->
+
+<h3 id="sec-2-2-3">2.2.3 用 while 写倒序（Reverse with while）</h3>
+
+<h4>2.2.3.1 手动维护索引
+    <span class="en">Maintaining the index by hand</span>
+</h4>
+
+<p>倒序遍历也能用 <code>while</code> 循环实现，本质完全一样——手动设一个索引，每轮减 1，直到它小于 0。理解这个写法能帮你看清 <code>range</code> 背后到底发生了什么。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>for 写法</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>array<span class="punc">)</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>array<span class="punc">[</span>i<span class="punc">]</span><span class="punc">)</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>while 写法</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>index <span class="punc">=</span> <span class="fn">len</span><span class="punc">(</span>array<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span>
+<span class="kw">while</span> index <span class="punc">&gt;=</span> <span class="num">0</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>array<span class="punc">[</span>index<span class="punc">]</span><span class="punc">)</span>
+    index <span class="punc">-=</span> <span class="num">1</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="info-box">
+    <span class="info-label">两种写法等价：</span><code>while index &gt;= 0</code> 和 <code>while index &gt; -1</code> 意思完全相同。用 <code>while</code> 时千万别忘了循环体末尾的 <code>index -= 1</code>，否则索引永远不变，会变成死循环。
+</div>
+
+<!-- ==================== 2.3 ==================== -->
+<div class="section-header" id="section-2-3">
+    <h2>2.3 反转字符串</h2>
+    <div class="en-title">Reversing a String</div>
+</div>
+
+<h3 id="sec-2-3-1">2.3.1 字符串即字符序列（A String is a Sequence of Characters）</h3>
+
+<h4>2.3.1.1 把字符串当数组看
+    <span class="en">Treat a string like an array</span>
+</h4>
+
+<p>反转字符串的秘诀，是意识到<strong>字符串和数组本质上是一回事</strong>——都是一串按索引排列的元素。数组的元素是任意值，字符串的元素则是单个字符。所以 <code>"archer"[0]</code> 是 <code>"a"</code>，<code>"archer"[5]</code> 是 <code>"r"</code>，<code>len("archer")</code> 是 6。倒序遍历列表的技巧，可以原样搬到字符串上。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 540 120" width="540" role="img" aria-label="字符串索引">
+        <text x="270" y="22" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">字符串 "archer" 的每个字符都有索引</text>
+        <g font-family="monospace" font-size="15">
+            <rect x="90" y="40" width="60" height="45" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="120" y="69" text-anchor="middle" fill="#2A5A85">a</text>
+            <rect x="150" y="40" width="60" height="45" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="180" y="69" text-anchor="middle" fill="#2A5A85">r</text>
+            <rect x="210" y="40" width="60" height="45" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="240" y="69" text-anchor="middle" fill="#2A5A85">c</text>
+            <rect x="270" y="40" width="60" height="45" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="300" y="69" text-anchor="middle" fill="#2A5A85">h</text>
+            <rect x="330" y="40" width="60" height="45" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="360" y="69" text-anchor="middle" fill="#2A5A85">e</text>
+            <rect x="390" y="40" width="60" height="45" rx="5" fill="#fdf3e0" stroke="#E0912F"/><text x="420" y="69" text-anchor="middle" fill="#bd7415">r</text>
+            <text x="120" y="105" text-anchor="middle" fill="#7d94a3" font-size="11">0</text>
+            <text x="180" y="105" text-anchor="middle" fill="#7d94a3" font-size="11">1</text>
+            <text x="240" y="105" text-anchor="middle" fill="#7d94a3" font-size="11">2</text>
+            <text x="300" y="105" text-anchor="middle" fill="#7d94a3" font-size="11">3</text>
+            <text x="360" y="105" text-anchor="middle" fill="#7d94a3" font-size="11">4</text>
+            <text x="420" y="105" text-anchor="middle" fill="#bd7415" font-size="11">5</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-2-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+<h3 id="sec-2-3-2">2.3.2 从末尾拼接算法（Build by Appending from the End）</h3>
+
+<h4>2.3.2.1 反转字符串的五步法
+    <span class="en">The five-step string-reversal algorithm</span>
+</h4>
+
+<p>关卡"拓地"给出了标准的字符串反转算法。思路很朴素：<strong>准备一个空字符串，然后从原字符串的最后一个字符开始，一个个把它们拼接到新字符串的末尾</strong>。原来最后的字符第一个被拼进去，就自然排到了新串的最前面——反转就完成了。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">📝 五步算法（来自关卡提示）</div>
+    1. 创建一个<strong>空字符串</strong>来存储反转的结果；<br>
+    2. 从原字符串的<strong>最后一个索引</strong>开始；<br>
+    3. 把当前这个字符<strong>加到</strong>结果字符串后面；<br>
+    4. 把索引<strong>减 1</strong>；<br>
+    5. 重复第 2–4 步，直到到达第一个索引——现在你就得到了一个颠倒的字符串！
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 反转一个字符串：从末尾往前逐字符拼接</span>
+<span class="kw">def</span> <span class="fn">reverseString</span><span class="punc">(</span>text<span class="punc">):</span>
+    result <span class="punc">=</span> <span class="str">""</span>                    <span class="cmt"># 1. 空字符串</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>text<span class="punc">)</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>   <span class="cmt"># 2. 从末尾开始倒序</span>
+        result <span class="punc">+=</span> text<span class="punc">[</span>i<span class="punc">]</span>          <span class="cmt"># 3. 把字符拼到后面</span>
+    <span class="kw">return</span> result</pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 540 170" width="540" role="img" aria-label="反转拼接过程">
+        <text x="270" y="22" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">"cat" 反转的逐步拼接过程</text>
+        <g font-family="monospace" font-size="12">
+            <text x="30" y="55" fill="#4d6373">i=2</text>
+            <rect x="70" y="40" width="150" height="26" rx="5" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="145" y="58" text-anchor="middle" fill="#2f7a45">result = "t"</text>
+            <text x="250" y="55" fill="#7d94a3">← 取 "cat"[2]="t"</text>
+
+            <text x="30" y="95" fill="#4d6373">i=1</text>
+            <rect x="70" y="80" width="150" height="26" rx="5" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="145" y="98" text-anchor="middle" fill="#2f7a45">result = "ta"</text>
+            <text x="250" y="95" fill="#7d94a3">← 取 "cat"[1]="a"</text>
+
+            <text x="30" y="135" fill="#4d6373">i=0</text>
+            <rect x="70" y="120" width="150" height="26" rx="5" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="145" y="138" text-anchor="middle" fill="#bd7415">result = "tac" ✓</text>
+            <text x="250" y="135" fill="#7d94a3">← 取 "cat"[0]="c"，完成！</text>
+        </g>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">+= 拼接的含义：</span><code>result += text[i]</code> 等价于 <code>result = result + text[i]</code>，意思是"把新字符接到已有结果的<strong>末尾</strong>"。因为我们是<em>倒着</em>取字符、<em>顺着</em>往后接，所以整体效果就是反转。
+</div>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-2-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+<!-- CC-PROTECTION:HIDDEN:d9a9cb1abc:START anchor=sec-2-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="d9a9cb1abc">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC2-64B2E77E6EBF。</span>
+<!-- CC-PROTECTION:HIDDEN:d9a9cb1abc:END -->
+
+<h3 id="sec-2-3-3">2.3.3 判断反转后是否相等（Testing if Reversed Equals Another）</h3>
+
+<h4>2.3.3.1 反转再比较
+    <span class="en">Reverse, then compare</span>
+</h4>
+
+<p>"拓地"关卡真正要判断的，是<strong>两个单位的名字是否互为反向</strong>——比如 <code>"tim"</code> 和 <code>"mit"</code>。做法非常直接：把第一个名字反转，看反转结果是否恰好<strong>等于</strong>第二个名字。这就是关卡里的 <code>areAntipodes</code>（对映体判断）函数。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 判断两个单位的 id 是否互为反转</span>
+<span class="kw">def</span> <span class="fn">areAntipodes</span><span class="punc">(</span>unit1<span class="punc">,</span> unit2<span class="punc">):</span>
+    reversed1 <span class="punc">=</span> <span class="str">""</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>unit1<span class="punc">.</span>id<span class="punc">)</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>
+        reversed1 <span class="punc">+=</span> unit1<span class="punc">.</span>id<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="kw">return</span> reversed1 <span class="punc">==</span> unit2<span class="punc">.</span>id   <span class="cmt"># 反转后相等 → 是对映体</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">== 直接返回布尔值：</span><code>return reversed1 == unit2.id</code> 会直接把比较的结果（<code>True</code> 或 <code>False</code>）返回。不需要写成 <code>if ... return True else return False</code>，那样是多余的——比较表达式本身就是一个布尔值。
+</div>
+
+<!-- ==================== 2.4 ==================== -->
+<div class="section-header" id="section-2-4">
+    <h2>2.4 嵌套循环配对</h2>
+    <div class="en-title">Pairing with Nested Loops</div>
+</div>
+
+<h3 id="sec-2-4-1">2.4.1 两层 for 遍历所有单位对（Two Loops for All Pairs）</h3>
+
+<h4>2.4.1.1 外层友军，内层敌军
+    <span class="en">Friends outside, enemies inside</span>
+</h4>
+
+<p>要给每个弓箭手找到它的反向克隆，我们不知道谁配谁，只能<strong>把每个友军和每个敌军都比一遍</strong>。这需要<strong>嵌套循环</strong>：外层循环遍历每个友军，内层循环遍历每个敌军，在内层里检查"这一对是不是互为反转"。如果是，就命令这个友军移向对应的敌人。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 190" width="520" role="img" aria-label="嵌套循环配对">
+        <text x="260" y="22" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">每个友军都要和每个敌军比一遍</text>
+        <g font-family="sans-serif" font-size="11">
+            <rect x="40" y="45" width="90" height="30" rx="6" fill="#dcf0e0" stroke="#2f7a45"/><text x="85" y="65" text-anchor="middle" fill="#2f7a45">友军 tim</text>
+            <rect x="40" y="90" width="90" height="30" rx="6" fill="#dcf0e0" stroke="#2f7a45"/><text x="85" y="110" text-anchor="middle" fill="#2f7a45">友军 bob</text>
+
+            <rect x="390" y="45" width="90" height="30" rx="6" fill="#fbeae7" stroke="#C0453B"/><text x="435" y="65" text-anchor="middle" fill="#9e352c">敌军 mit</text>
+            <rect x="390" y="90" width="90" height="30" rx="6" fill="#fbeae7" stroke="#C0453B"/><text x="435" y="110" text-anchor="middle" fill="#9e352c">敌军 bob</text>
+
+            <line x1="130" y1="60" x2="390" y2="60" stroke="#2f7a45" stroke-width="2"/>
+            <text x="260" y="52" text-anchor="middle" fill="#2f7a45" font-size="10">tim↔mit ✓ 匹配</text>
+            <line x1="130" y1="63" x2="390" y2="103" stroke="#cfe0eb" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="130" y1="107" x2="390" y2="63" stroke="#cfe0eb" stroke-width="1" stroke-dasharray="3"/>
+            <line x1="130" y1="105" x2="390" y2="105" stroke="#cfe0eb" stroke-width="1" stroke-dasharray="3"/>
+            <text x="260" y="160" text-anchor="middle" fill="#7d94a3" font-size="11">2 个友军 × 2 个敌军 = 4 次比较</text>
+        </g>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>friends <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+enemies <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+<span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>          <span class="cmt"># 外层：每个友军</span>
+    <span class="kw">for</span> enemy <span class="kw">in</span> enemies<span class="punc">:</span>      <span class="cmt"># 内层：每个敌军</span>
+        <span class="kw">if</span> <span class="fn">areAntipodes</span><span class="punc">(</span>friend<span class="punc">,</span> enemy<span class="punc">):</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> enemy<span class="punc">.</span>pos<span class="punc">)</span>
+            <span class="kw">break</span>              <span class="cmt"># 找到对手就不用再比了</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-2-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-2-4-2">2.4.2 复杂度直觉（A Feel for Complexity）</h3>
+
+<h4>2.4.2.1 循环次数是乘法关系
+    <span class="en">The number of iterations multiplies</span>
+</h4>
+
+<p>嵌套循环的一个重要直觉：<strong>总的比较次数是两层循环长度的乘积</strong>。如果有 5 个友军、5 个敌军，内层就会执行 5×5 = 25 次。友军和敌军越多，比较次数增长得越快。这也是为什么下面要讲的 <code>break</code> 很有价值——它能在找到答案后省下剩余的无用比较。</p>
+
+<div class="info-box">
+    <span class="info-label">为什么先反转再嵌套：</span>注意 <code>areAntipodes</code> 内部本身还有一个反转字符串的循环。所以这里其实是"三层"计算：外层友军、内层敌军、最内层反转字符。理解这一点，你就能明白代码到底做了多少工作。
+</div>
+
+<!-- ==================== 2.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:9dfa595e04:START anchor=sec-2-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9dfa595e04">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，玩家已累计编写超过 10 亿行真实代码，编程也能很酷。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9dfa595e04:END -->
+
+<div class="section-header" id="section-2-5">
+    <h2>2.5 break 提前终止</h2>
+    <div class="en-title">Ending Loops Early with break</div>
+</div>
+
+<h3 id="sec-2-5-1">2.5.1 找到即停（Stop as Soon as You Find It）</h3>
+
+<h4>2.5.1.1 break 立即跳出当前循环
+    <span class="en">break exits the current loop immediately</span>
+</h4>
+
+<p>每个弓箭手<strong>只有一个</strong>反向对手。一旦在内层循环里找到了它、并下达了移动命令，就没必要再把剩下的敌人比完了。<code>break</code> 语句会<strong>立即跳出它所在的那一层循环</strong>，让外层循环去处理下一个友军。这既符合逻辑，又省下计算。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> enemy <span class="kw">in</span> enemies<span class="punc">:</span>
+    <span class="kw">if</span> <span class="fn">areAntipodes</span><span class="punc">(</span>friend<span class="punc">,</span> enemy<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> enemy<span class="punc">.</span>pos<span class="punc">)</span>
+        <span class="kw">break</span>   <span class="cmt"># 已找到对手，跳出内层循环</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🚪 break 就像"找到就走人"</div>
+    想象你在一排储物柜里找自己的柜子。一旦找到写着你名字的那个，你就直接停下、拿东西离开，绝不会继续把剩下的柜子挨个打开检查。<code>break</code> 做的正是这件事——目标达成，立刻退出循环。
+</div>
+
+<div class="compare-2col">
+    <div>
+        <h5>break 与 continue 的区别</h5>
+        <p style="font-size:0.9em; margin:0;"><code>break</code>：<strong>彻底跳出</strong>整个循环，后面的元素一个都不再看。</p>
+    </div>
+    <div>
+        <h5>&nbsp;</h5>
+        <p style="font-size:0.9em; margin:0;"><code>continue</code>：只<strong>跳过当前这一轮</strong>，循环仍会继续处理后面的元素。</p>
+    </div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">break 只跳一层：</span>在嵌套循环里，内层的 <code>break</code> 只会跳出<strong>内层</strong>，外层循环照常继续。所以上面的代码里，一个友军找到对手后 <code>break</code>，外层会立刻接着处理下一个友军——这正是我们想要的。
+</div>
+
+<!-- ==================== 2.6 ==================== -->
+<div class="section-header" id="section-2-6">
+    <h2>2.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 雪人食人族 -->
+<div class="level-card" id="sec-2-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 雪人食人族</span>
+        <h3>❄️ 雪人食人族 —— 倒序击败雪人</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/2-6-1-1_yeti_cannibalism.png" alt="扣哒世界 雪人食人族关卡 - koudashijie.com">
+            <div class="caption">图2：雪人食人族——巫师把雪人从强到弱排好序，英雄需倒序遍历该列表，从最弱的雪人开始逐个击败并吞噬</div>
+        </div>
+
+        <h4>策略：由弱到强，倒着打</h4>
+        <p>本关的核心机制是：英雄击败雪人时会<strong>吞噬它的生命力</strong>，所以必须从最弱的开始打，越打越强，才能应付后面更强的雪人。麻烦在于——巫师的排序法术只能把雪人排成<strong>从最强到最弱</strong>的列表。既然列表方向反了，我们就<strong>倒序遍历</strong>这个列表：从最后一个（最弱的）打到第一个（最强的）。</p>
+
+        <h4>思路拆解</h4>
+        <p>第一步，<strong>拿到排好序的列表</strong>：找到巫师朋友，调用它的 <code>findEnemies()</code> 得到"由强到弱"的雪人列表 <code>yetis</code>。第二步，<strong>倒序遍历</strong>：用 <code>for i in range(len(yetis)-1, -1, -1)</code>，让索引 <code>i</code> 从最后往前走，这样先访问到的就是最弱的雪人。第三步，<strong>逐个击败</strong>：对每个雪人反复攻击，直到它的生命值归零，再进入下一个。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：倒序遍历，从最弱雪人打起</span>
+wizard <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">())</span>
+yetis <span class="punc">=</span> wizard<span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>   <span class="cmt"># 由强到弱的列表</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>yetis<span class="punc">)</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>   <span class="cmt"># 倒序 → 先弱后强</span>
+    <span class="kw">while</span> yetis<span class="punc">[</span>i<span class="punc">]</span><span class="punc">.</span>health <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>yetis<span class="punc">[</span>i<span class="punc">]</span><span class="punc">)</span>   <span class="cmt"># 打到这个雪人倒下</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么用 while 内层：</span>攻击一次未必能杀死一个雪人。用 <code>while yetis[i].health &gt; 0</code> 内层循环，保证对当前这个雪人持续攻击、直到它彻底倒下，再由外层 <code>for</code> 推进到下一个更强的雪人。这是"外层选目标、内层打到死"的经典结构。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">关键在起点和步长：</span>本关成败全系于那一行 <code>range(len(yetis)-1, -1, -1)</code>。起点写成 <code>len(yetis)-1</code> 才是最弱雪人；步长 <code>-1</code> 才能往回走。任何一处写错，就会先打到强雪人而被反杀。
+        </div>
+    </div>
+</div>
+
+<!-- 拓地 -->
+<div class="level-card" id="sec-2-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 拓地</span>
+        
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+<h3>🏹 拓地 —— 反向名字匹配对手</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/2-6-2-1_expanding_territory.png" alt="扣哒世界 拓地关卡 - koudashijie.com">
+            <div class="caption">图3：拓地——术士克隆出名字反向的邪恶弓箭手，需为每个友军弓箭手找到名字互为反转的克隆并令其接触，最后击败术士</div>
+        </div>
+
+        <h4>策略：找到反灵魂伴侣去湮灭它</h4>
+        <p>术士用"克隆"法术造出了我方弓箭手的邪恶镜像——每个克隆的名字都是某个友军名字的<strong>反向拼写</strong>（如友军 <code>tim</code> 对应克隆 <code>mit</code>）。规则很微妙：如果弓箭手<strong>接触到自己正确的对手</strong>，克隆就会消失；但如果碰到<strong>错误</strong>的克隆或去攻击它，克隆就会开始战斗。所以我们必须<strong>精确配对</strong>，只让每个友军去接触它真正的反向对手。等所有克隆湮灭后，再一起攻击术士。</p>
+
+        <h4>思路拆解：三个算法层层嵌套</h4>
+        <p>本关的算法结构非常有层次。<strong>最内层</strong>是反转字符串：<code>areAntipodes</code> 函数把 <code>unit1.id</code> 倒序拼接成 <code>reversed1</code>，再判断 <code>reversed1 == unit2.id</code>，返回它们是否互为反向。<strong>中间层</strong>是嵌套循环配对：外层遍历每个友军、内层遍历每个敌军，对每一对调用 <code>areAntipodes</code>。<strong>最外层</strong>是收尾：所有克隆消失后攻击术士。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段一：反转 id 判断是否互为对映体</span>
+<span class="kw">def</span> <span class="fn">areAntipodes</span><span class="punc">(</span>unit1<span class="punc">,</span> unit2<span class="punc">):</span>
+    reversed1 <span class="punc">=</span> <span class="str">""</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>unit1<span class="punc">.</span>id<span class="punc">)</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>
+        reversed1 <span class="punc">+=</span> unit1<span class="punc">.</span>id<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="kw">return</span> reversed1 <span class="punc">==</span> unit2<span class="punc">.</span>id</pre>
+        </div>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段二：嵌套循环为每个友军找到对手</span>
+<span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+    <span class="kw">for</span> enemy <span class="kw">in</span> enemies<span class="punc">:</span>
+        <span class="kw">if</span> <span class="fn">areAntipodes</span><span class="punc">(</span>friend<span class="punc">,</span> enemy<span class="punc">):</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> enemy<span class="punc">.</span>pos<span class="punc">)</span>
+            <span class="kw">break</span>   <span class="cmt"># 找到唯一对手即停</span></pre>
+        </div>
+
+        <h4>思路拆解：收尾攻击术士</h4>
+        <p>克隆全部湮灭后，场上只剩术士。用一个 <code>while True</code> 循环持续查找最近敌人，若它确实是术士（<code>type == "warlock"</code>），就指挥所有弓箭手一起攻击、英雄也一同出手。集火才能快速解决这个能"感受侵略"的对手。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段三：所有克隆消失后集火术士</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    nearest <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">())</span>
+    <span class="kw">if</span> nearest <span class="kw">and</span> nearest<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"warlock"</span><span class="punc">:</span>
+        <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> nearest<span class="punc">)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>nearest<span class="punc">)</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别碰错克隆：</span>本关最大的陷阱是"接触错误的克隆会激活它"。所以绝不能让友军盲目移向最近的敌人，<strong>必须先用 areAntipodes 确认是它真正的对手</strong>，再下 <code>move</code> 命令。这正是精确匹配比"就近处理"更重要的场景。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">先湮灭克隆，再打术士：</span>提示里说"术士看似平静，但能感受到任何侵略"。含义是：应当<strong>先安静地把克隆一个个匹配湮灭</strong>，等场面清干净了再集火术士，避免过早惊动它、陷入多线作战。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 2.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<div class="section-header" id="section-2-7">
+    <h2>2.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-2-7-1">2.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>2.7.1.1 反转操作的典型问题
+    <span class="en">Typical issues with reversal</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-7-1-1_common_errors.png" alt="扣哒世界 反转操作常见错误速查 - koudashijie.com">
+    <div class="caption">图4：起点没减一、终点写成 0、步长忘记负号、结果字符串没初始化，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>起点忘记减一——倒序起点必须是 <code>len(array) - 1</code>，直接写 <code>len(array)</code> 会索引越界报错。</li>
+        <li>终点写成 0 而非 -1——<code>range(len-1, 0, -1)</code> 会漏掉第 0 个元素（最强雪人或名字首字符），终点必须是 <code>-1</code>。</li>
+        <li>步长忘记负号——<code>range(len-1, -1, 1)</code> 步长为正、起点又大于终点，循环一次都不执行。倒序步长必须是 <code>-1</code>。</li>
+        <li>结果字符串没初始化——反转前要先 <code>result = ""</code>，否则拼接时会因变量未定义而报错。</li>
+        <li>用 + 号连接字符时用错变量——务必是 <code>result += text[i]</code>，取的是<strong>当前索引</strong>的字符，不要写死成某个固定下标。</li>
+        <li>嵌套循环里 break 位置错——<code>break</code> 要放在"找到对手并下命令之后"，且只跳内层；放错会导致提前中断或永不停止。</li>
+        <li>while 倒序忘记减索引——用 <code>while</code> 写倒序时，循环体末尾必须有 <code>index -= 1</code>，否则死循环。</li>
+        <li>直接移向最近敌人——"拓地"关必须先 <code>areAntipodes</code> 确认再移动，碰错克隆会激活它反被攻击。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>这一单元你掌握了"倒着看世界"的一整套本领！你学会了用 <code>for i in range(len-1, -1, -1)</code> <strong>倒序遍历列表</strong>——起点是最后索引、终点是 -1、步长是 -1，缺一不可；理解了字符串本质上就是字符序列，从而用"从末尾逐字符拼接"的五步算法<strong>反转任意字符串</strong>；会用"反转再用 == 比较"来<strong>判断两个名字是否互为反向</strong>；用<strong>嵌套循环</strong>遍历所有"友军×敌军"配对，并在找到对手后用 <code>break</code> <strong>提前终止内层循环</strong>。在"雪人食人族"里你倒序击败雪人，在"拓地"里你为每个弓箭手精确匹配了反向克隆。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>倒序遍历列表</td><td><code>range(len-1, -1, -1)</code></td><td>雪人食人族</td></tr>
+            <tr><td>while 倒序</td><td>索引从 len-1 起，每轮 -1</td><td>雪人食人族</td></tr>
+            <tr><td>外层选目标内层打</td><td>for 选雪人，while 打到死</td><td>雪人食人族</td></tr>
+            <tr><td>字符串反转</td><td>空串起步，末尾逐字符拼接</td><td>拓地</td></tr>
+            <tr><td>反转后判等</td><td><code>reversed1 == unit2.id</code></td><td>拓地</td></tr>
+            <tr><td>嵌套循环配对</td><td>外层友军 × 内层敌军</td><td>拓地</td></tr>
+            <tr><td>break 提前终止</td><td>找到对手即跳出内层</td><td>拓地</td></tr>
+            <tr><td>精确匹配再行动</td><td>确认对映体后才 move</td><td>拓地</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得倒着遍历、能把字符串翻转过来、会在茫茫单位中精确配对的英雄，才是驾驭"反转之力"的真正智者。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🔄🏹</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（安息云峰）：第二单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
