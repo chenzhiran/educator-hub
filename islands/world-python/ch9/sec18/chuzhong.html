@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC18-160A6A772D38">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十八单元：三角函数 · 反正切与角度计算 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 象限徽章 ===== */
+        .quadrant-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+            font-size: 0.85em;
+        }
+        .quadrant-badges .qbadge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: var(--primary-light);
+            color: #fff;
+            font-weight: 700;
+        }
+        .quadrant-badges .qbadge small { font-family: sans-serif; font-size: 0.72em; opacity: 0.92; font-weight: normal; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC18-160A6A772D38 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第十八单元</div>
+
+    <a href="#section-18-1" class="nav-section">18.1 三角函数概述</a>
+    <a href="#sec-18-1-1" class="nav-sub">18.1.1 为何要算角度</a>
+    <a href="#sec-18-1-2" class="nav-sub">18.1.2 SOH-CAH-TOA</a>
+
+    <a href="#section-18-2" class="nav-section">18.2 向量与方向</a>
+    <a href="#sec-18-2-1" class="nav-sub">18.2.1 位置差得到向量</a>
+    <a href="#sec-18-2-2" class="nav-sub">18.2.2 subtract 求差</a>
+
+    <a href="#section-18-3" class="nav-section">18.3 atan2 反正切</a>
+    <a href="#sec-18-3-1" class="nav-sub">18.3.1 从斜率到角度</a>
+    <a href="#sec-18-3-2" class="nav-sub">18.3.2 atan2(y, x)</a>
+    <a href="#sec-18-3-3" class="nav-sub">18.3.3 Y 在前的原因</a>
+
+    <a href="#section-18-4" class="nav-section">18.4 弧度与度数</a>
+    <a href="#sec-18-4-1" class="nav-sub">18.4.1 弧度是什么</a>
+    <a href="#sec-18-4-2" class="nav-sub">18.4.2 弧度转度数</a>
+
+    <a href="#section-18-5" class="nav-section">18.5 输出角度指挥</a>
+    <a href="#sec-18-5-1" class="nav-sub">18.5.1 say 说出角度</a>
+
+    <a href="#section-18-6" class="nav-section">18.6 实战关卡精讲</a>
+    <a href="#sec-18-6-1" class="nav-sub">18.6.1 轰炸行动</a>
+
+    <a href="#section-18-7" class="nav-section">18.7 常见错误</a>
+    <a href="#sec-18-7-1" class="nav-sub">18.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十八单元：三角函数 · 反正切与角度计算</h1>
+    <div class="subtitle">Unit 18: Trigonometry — atan2 &amp; Angle Calculation</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 轰炸行动</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 18.1 ==================== -->
+<div class="section-header" id="section-18-1">
+    <h2>18.1 三角函数概述</h2>
+    <div class="en-title">Overview of Trigonometry in Code</div>
+</div>
+
+<p>封神冰川上空,你的狮鹫轰炸机队严阵以待。食人魔从四面八方逼近——"Incoming oscars!"的战报此起彼伏。可是狮鹫要精准投弹,光知道"敌人在那边"还不够,你必须算出<strong>敌人相对你的精确角度</strong>,把这个数字喊出去,才能指挥轰炸机转到正确的方向开火。这一单元只有一关,却把数学中优雅的<span class="keyword">三角函数(trigonometry)</span>搬进了实战:你将学会用 <span class="keyword-en">Math.atan2(y, x)</span> 把一个方向向量转成角度,把令人头疼的"弧度"换算成直观的"度数",最终输出一个能指挥全军的角度值。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解为什么需要"角度"来描述方向;用<strong>敌人位置减英雄位置</strong>得到<strong>方向向量</strong>;用 <code>Math.atan2(y, x)</code> 计算这个向量与 X 轴的<strong>夹角(弧度)</strong>——注意 <strong>Y 在前、X 在后</strong>;用 <code>* 180 / Math.PI</code> 把<strong>弧度转成度数</strong>;最后用 <code>hero.say(angle)</code> 把角度<strong>说出去指挥轰炸</strong>。这些正是游戏、机器人、AI 中"由坐标算方向"的通用数学工具。
+</div>
+
+<h3 id="sec-18-1-1">18.1.1 为何要算角度（Why We Need Angles）</h3>
+
+<h4>18.1.1.1 坐标告诉你"在哪",角度告诉你"朝哪"
+    <span class="en">Coordinates say "where", angles say "which way"</span>
+</h4>
+
+<p>我们平时用 <code>(x, y)</code> 坐标描述一个物体的<strong>位置</strong>。但"朝哪个方向开火""转多少度瞄准",描述的是<strong>方向</strong>——这时候<strong>角度</strong>才是最自然的语言。轰炸机不理解"敌人在 (100, 50)",它只听得懂"转到 30 度方向"。把"位置差"翻译成"角度",正是本关要解决的核心问题。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🦅 就像给狮鹫下达开火指令</div>
+    你不能对狮鹫说"飞到那个食人魔身边再投弹"——太慢了。你要像炮兵一样,一眼算出敌人相对你在"几点钟方向、偏多少度",然后喊出这个角度。狮鹫立刻转到那个朝向,一轮齐射覆盖过去。把空间关系压缩成一个角度数字,是精确指挥的关键。
+</div>
+
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-18-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+
+<h3 id="sec-18-1-2">18.1.2 SOH-CAH-TOA（传说中的三角口诀）</h3>
+
+<h4>18.1.2.1 正弦、余弦、正切的三个定义
+    <span class="en">Sine, cosine, tangent in one mnemonic</span>
+</h4>
+
+<p>直角三角形里,三角函数把"角度"和"边长比例"联系起来。传说中的口诀 <span class="keyword-en">SOH-CAH-TOA</span> 帮你记住三个定义:正弦(Sin)= 对边/斜边(<strong>O/H</strong>)、余弦(Cos)= 邻边/斜边(<strong>A/H</strong>)、正切(Tan)= 对边/邻边(<strong>O/A</strong>)。本关的关键是<strong>正切</strong>:已知一个方向向量的 x、y 分量(相当于邻边和对边),它们的比值 y/x 就是<strong>斜率</strong>,而由斜率反推角度,靠的正是正切的逆运算——<strong>反正切(arctangent)</strong>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 460 200" width="460" role="img" aria-label="直角三角形与SOH-CAH-TOA">
+        <polygon points="80,160 340,160 340,50" fill="rgba(79,181,216,0.12)" stroke="#4FB5D8" stroke-width="2"/>
+        <text x="210" y="178" text-anchor="middle" font-size="13" fill="#a5d4e8" font-family="monospace">邻边 Adjacent (x)</text>
+        <text x="360" y="110" text-anchor="middle" font-size="13" fill="#e8a15a" font-family="monospace" transform="rotate(90 360 110)">对边 Opposite (y)</text>
+        <text x="185" y="98" text-anchor="middle" font-size="13" fill="#9fd4a8" font-family="monospace" transform="rotate(-23 185 98)">斜边 Hypotenuse</text>
+        <path d="M120 160 A40 40 0 0 0 110 133" fill="none" stroke="#f0c674" stroke-width="2"/>
+        <text x="128" y="148" font-size="13" fill="#f0c674" font-family="monospace">θ</text>
+        <rect x="322" y="143" width="17" height="17" fill="none" stroke="#4FB5D8"/>
+        <text x="210" y="30" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">SOH · CAH · TOA</text>
+    </svg>
+</div>
+
+<div class="quadrant-badges">
+    <div class="qbadge">SOH<small>Sin = 对/斜</small></div>
+    <div class="qbadge">CAH<small>Cos = 邻/斜</small></div>
+    <div class="qbadge">TOA<small>Tan = 对/邻</small></div>
+</div>
+
+<!-- ==================== 18.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-18-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+
+<div class="section-header" id="section-18-2">
+    <h2>18.2 向量与方向</h2>
+    <div class="en-title">Vectors and Direction</div>
+</div>
+
+<h3 id="sec-18-2-1">18.2.1 位置差得到向量（Position Difference as a Vector）</h3>
+
+<h4>18.2.1.1 从我指向敌人的箭头
+    <span class="en">An arrow pointing from me to the enemy</span>
+</h4>
+
+<p><strong>方向向量(direction vector)</strong>描述的是"从一点指向另一点"的箭头。要得到"从英雄指向敌人"的向量,只需把<strong>敌人的位置减去英雄的位置</strong>。相减的结果是一个新向量,它的 <code>x</code> 分量表示"敌人在我右边多少",<code>y</code> 分量表示"敌人在我上面多少"。这个向量既包含了方向,也包含了距离。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 320 220" width="320" role="img" aria-label="位置差得到方向向量">
+        <rect x="0" y="0" width="320" height="220" fill="#eef8fb"/>
+        <line x1="20" y1="180" x2="300" y2="180" stroke="#7794a3" stroke-width="1"/>
+        <line x1="60" y1="210" x2="60" y2="20" stroke="#7794a3" stroke-width="1"/>
+        <circle cx="90" cy="150" r="8" fill="#4FB5D8"/>
+        <text x="90" y="172" text-anchor="middle" font-size="10" fill="#1C5E7C" font-family="sans-serif">英雄</text>
+        <circle cx="240" cy="60" r="8" fill="#C0453B"/>
+        <text x="240" y="50" text-anchor="middle" font-size="10" fill="#9e352c" font-family="sans-serif">敌人</text>
+        <defs>
+            <marker id="v-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#D98A2B"/>
+            </marker>
+        </defs>
+        <line x1="90" y1="150" x2="234" y2="66" stroke="#D98A2B" stroke-width="2.5" marker-end="url(#v-arr)"/>
+        <text x="175" y="98" font-size="10" fill="#bd7415" font-family="sans-serif">方向向量 = 敌人pos - 英雄pos</text>
+        <line x1="90" y1="150" x2="240" y2="150" stroke="#a5d4e8" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="165" y="164" font-size="9" fill="#3F7D9B" font-family="monospace">Δx</text>
+        <line x1="240" y1="150" x2="240" y2="60" stroke="#a5d4e8" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="250" y="108" font-size="9" fill="#3F7D9B" font-family="monospace">Δy</text>
+    </svg>
+</div>
+
+<h3 id="sec-18-2-2">18.2.2 subtract 求差（Computing the Difference）</h3>
+
+<h4>18.2.2.1 用 subtract 一步得到向量
+    <span class="en">Get the vector with subtract</span>
+</h4>
+
+<p>在 扣哒世界 里,位置对象 <code>pos</code> 提供了 <code>subtract</code> 方法,能直接做向量减法。<code>enemy.pos.subtract(hero.pos)</code> 返回的就是"从英雄指向敌人"的方向向量,它有 <code>.x</code> 和 <code>.y</code> 两个分量。这一步是整个角度计算的起点——先有向量,才能谈角度。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 找到攻击的向量:敌人位置 - 英雄位置</span>
+enemy <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+vectorDirection <span class="punc">=</span> enemy<span class="punc">.</span>pos<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+<span class="cmt"># vectorDirection.x → 水平分量;vectorDirection.y → 垂直分量</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">相减顺序不能反：</span>一定是<strong>敌人减英雄</strong>(<code>enemy.pos.subtract(hero.pos)</code>),得到的才是"从英雄<strong>指向</strong>敌人"的向量。如果写反成"英雄减敌人",箭头方向会完全相反,算出的角度也会差 180 度,轰炸机会朝反方向开火。
+</div>
+
+<!-- ==================== 18.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-18-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+<!-- CC-PROTECTION:HIDDEN:a02e28bda1:START anchor=sec-18-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a02e28bda1">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:a02e28bda1:END -->
+
+<div class="section-header" id="section-18-3">
+    <h2>18.3 atan2 反正切</h2>
+    <div class="en-title">The atan2 Function</div>
+</div>
+
+<h3 id="sec-18-3-1">18.3.1 从斜率到角度（From Slope to Angle）</h3>
+
+<h4>18.3.1.1 已知 y/x,反推那个角
+    <span class="en">Given y/x, find the angle</span>
+</h4>
+
+<p>正切告诉我们 <code>tan(θ) = y / x</code>(对边比邻边)。现在情况反过来:我们已知向量的 x、y 分量(也就知道了斜率 y/x),想求出角度 θ。这需要正切的<strong>逆运算——反正切(arctangent,记作 atan 或 tan⁻¹)</strong>。反正切吃进一个斜率,吐出一个角度。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 500 110" width="500" role="img" aria-label="正切与反正切互逆">
+        <g font-family="monospace" font-size="15" text-anchor="middle">
+            <rect x="40" y="35" width="180" height="45" rx="8" fill="#234254" stroke="#4FB5D8"/>
+            <text x="130" y="63" fill="#cfe3ee">tan(角度) = y/x</text>
+            <text x="250" y="52" fill="#f0c674" font-size="13">互逆</text>
+            <text x="250" y="70" fill="#f0c674" font-size="18">⇄</text>
+            <rect x="280" y="35" width="180" height="45" rx="8" fill="#2f5a3f" stroke="#6bbf88"/>
+            <text x="370" y="63" fill="#a8e0be">atan(y/x) = 角度</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-18-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+<h3 id="sec-18-3-2">18.3.2 Math.atan2(y, x)（更聪明的反正切）</h3>
+
+<h4>18.3.2.1 一次搞定所有方向
+    <span class="en">Handles every direction correctly</span>
+</h4>
+
+<p>普通的 <code>atan(y/x)</code> 有个缺陷:它只把 y/x 当作一个比值,分不清向量到底在哪个<strong>象限</strong>——(1,1) 和 (-1,-1) 的比值都是 1,却指向完全相反的方向。计算机专门提供了更聪明的 <span class="keyword-en">Math.atan2(y, x)</span>:它<strong>分别</strong>接收 y 和 x 两个参数,因此能根据两者的正负号判断出正确的象限,返回 -π 到 π 之间<strong>覆盖全方向</strong>的准确角度(单位是弧度)。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用 atan2 计算向量与 X 轴的夹角(结果是弧度)</span>
+angle <span class="punc">=</span> Math<span class="punc">.</span><span class="fn">atan2</span><span class="punc">(</span>vectorDirection<span class="punc">.</span>y<span class="punc">,</span> vectorDirection<span class="punc">.</span>x<span class="punc">)</span>
+<span class="cmt"># 注意:y 在前,x 在后!</span></pre>
+</div>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 260 260" width="260" role="img" aria-label="atan2四象限">
+        <rect x="0" y="0" width="260" height="260" fill="#eef8fb"/>
+        <line x1="10" y1="130" x2="250" y2="130" stroke="#7794a3" stroke-width="1.5"/>
+        <line x1="130" y1="250" x2="130" y2="10" stroke="#7794a3" stroke-width="1.5"/>
+        <text x="245" y="124" font-size="10" fill="#47606E" font-family="monospace">+x</text>
+        <text x="138" y="20" font-size="10" fill="#47606E" font-family="monospace">+y</text>
+        <text x="185" y="70" font-size="10" fill="#2E8BB0" font-family="monospace">x&gt;0,y&gt;0</text>
+        <text x="55" y="70" font-size="10" fill="#2E8BB0" font-family="monospace">x&lt;0,y&gt;0</text>
+        <text x="55" y="195" font-size="10" fill="#2E8BB0" font-family="monospace">x&lt;0,y&lt;0</text>
+        <text x="185" y="195" font-size="10" fill="#2E8BB0" font-family="monospace">x&gt;0,y&lt;0</text>
+        <circle cx="130" cy="130" r="3" fill="#1C5E7C"/>
+        <text x="130" y="245" text-anchor="middle" font-size="10" fill="#9e352c" font-family="sans-serif">atan2 靠 x、y 的符号分辨象限</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">atan2 是"工程版"反正切：</span>正因为普通 <code>atan</code> 会丢失象限信息,几乎所有编程语言(JavaScript、Python、C……)都提供了 <code>atan2</code>。在游戏、机器人、图形学里,"由向量求朝向"几乎总是用 <code>atan2</code>。记住它,你就掌握了方向计算的万能钥匙。
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-18-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3 id="sec-18-3-3">18.3.3 Y 在前的原因（Why Y Comes First）</h3>
+
+<h4>18.3.3.1 别把参数顺序写反
+    <span class="en">Don't swap the arguments</span>
+</h4>
+
+<p>这是最容易犯的错:<code>Math.atan2</code> 的参数顺序是 <strong>(y, x)</strong>——<strong>y 在前,x 在后</strong>!这和我们平时写坐标 (x, y) 的习惯正好相反。之所以这样设计,是因为角度定义为"对边(y)比邻边(x)"的反正切,而 atan2 沿用了 <code>atan(y/x)</code> 里 y 在分子的顺序。写反成 <code>atan2(x, y)</code> 会得到一个完全错误的角度。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>✅ 正确：y 在前</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="fn">atan2</span><span class="punc">(</span>vec<span class="punc">.</span>y<span class="punc">,</span> vec<span class="punc">.</span>x<span class="punc">)</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>❌ 错误：顺序颠倒</h5>
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="err">atan2(vec.x, vec.y)</span></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 18.4 ==================== -->
+<div class="section-header" id="section-18-4">
+    <h2>18.4 弧度与度数</h2>
+    <div class="en-title">Radians and Degrees</div>
+</div>
+
+<h3 id="sec-18-4-1">18.4.1 弧度是什么（What Is a Radian）</h3>
+
+<h4>18.4.1.1 数学天生说"弧度"
+    <span class="en">Math speaks in radians</span>
+</h4>
+
+<p><code>Math.atan2</code> 返回的角度不是我们熟悉的"度",而是<strong>弧度(radian)</strong>。弧度是数学里更"自然"的角度单位:一整圈 360 度等于 <code>2π</code> 弧度,半圈 180 度等于 <code>π</code> 弧度。所有编程语言的三角函数(sin、cos、atan2……)默认都用弧度。可惜人类读不惯弧度——"1.05 弧度"远不如"60 度"直观,所以我们需要换算。</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>度数（直观）</th><th>弧度（数学）</th><th>方向</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">0°</td><td class="mono">0</td><td>正右方 +x</td></tr>
+        <tr><td class="mono">90°</td><td class="mono">π/2 ≈ 1.57</td><td>正上方 +y</td></tr>
+        <tr><td class="mono">180°</td><td class="mono">π ≈ 3.14</td><td>正左方 -x</td></tr>
+        <tr><td class="mono">360°</td><td class="mono">2π ≈ 6.28</td><td>转回一整圈</td></tr>
+    </tbody>
+</table>
+</div>
+
+
+<!-- CC-PROTECTION:AD:72e5ce6ad0:START anchor=sec-18-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="72e5ce6ad0">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，全球超 2000 万用户通过它开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:72e5ce6ad0:END -->
+
+<h3 id="sec-18-4-2">18.4.2 弧度转度数（Radians to Degrees）</h3>
+
+<h4>18.4.2.1 乘以 180 / π
+    <span class="en">Multiply by 180 over pi</span>
+</h4>
+
+<p>换算规则来自 <code>π 弧度 = 180 度</code>:所以 <strong>1 弧度 = 180/π 度</strong>。要把弧度转成度数,只需<strong>乘以 <code>(180 / Math.PI)</code></strong>。本关要求最终答案必须是度数,所以在 <code>atan2</code> 之后一定要做这步换算,否则喊出去的是弧度,轰炸机会转到完全错误的角度。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 把弧度换算成度数:乘以 (180 / Math.PI)</span>
+angle <span class="punc">=</span> angle <span class="punc">*</span> <span class="punc">(</span><span class="num">180</span> <span class="punc">/</span> Math<span class="punc">.</span>PI<span class="punc">)</span>
+<span class="cmt"># 例如:π/2 弧度 × (180/π) = 90 度</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 480 90" width="480" role="img" aria-label="弧度转度数">
+        <g font-family="monospace" font-size="14" text-anchor="middle">
+            <rect x="30" y="30" width="120" height="40" rx="8" fill="#234254" stroke="#4FB5D8"/>
+            <text x="90" y="55" fill="#cfe3ee">弧度值</text>
+            <text x="185" y="55" fill="#f0c674" font-size="16">× (180/π)</text>
+            <text x="270" y="55" fill="#e8a15a" font-size="18">→</text>
+            <rect x="310" y="30" width="140" height="40" rx="8" fill="#2f5a3f" stroke="#6bbf88"/>
+            <text x="380" y="55" fill="#a8e0be">度数值(可用)</text>
+        </g>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">反过来:度数转弧度乘 π/180：</span>如果哪天需要把度数转回弧度(比如要传给 <code>sin</code>/<code>cos</code>),规则正好相反——<strong>乘以 <code>(Math.PI / 180)</code></strong>。记住这一对互逆系数:<code>180/π</code> 弧度变度,<code>π/180</code> 度变弧度,方向计算就再不会晕头转向。
+</div>
+
+<!-- ==================== 18.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-18-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:875e5d9be5:START anchor=sec-18-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="875e5d9be5">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:875e5d9be5:END -->
+
+<div class="section-header" id="section-18-5">
+    <h2>18.5 输出角度指挥轰炸</h2>
+    <div class="en-title">Announcing the Angle to Command</div>
+</div>
+
+<h3 id="sec-18-5-1">18.5.1 say 说出角度（Say the Angle）</h3>
+
+<h4>18.5.1.1 把数字喊给轰炸机
+    <span class="en">Call out the number to the bombers</span>
+</h4>
+
+<p>算出度数后,用 <code>hero.say(angle)</code> 把它"喊"出去。在本关的设定里,狮鹫轰炸机会听从这个角度指令,转到对应方向发起轰炸。<code>say</code> 在这里不只是聊天,而是<strong>把计算结果作为指令传递</strong>——你的数学运算,直接变成了对全军的作战命令。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 说出角度,指挥狮鹫轰炸机!</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>angle<span class="punc">)</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 100" width="620" role="img" aria-label="完整计算链路">
+        <defs>
+            <marker id="chain-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="10.5" text-anchor="middle">
+            <rect x="8" y="35" width="105" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="60" y="52" fill="#1C5E7C" font-weight="bold">找最近敌人</text><text x="60" y="67" fill="#7794a3" font-size="9">findNearestEnemy</text>
+            <line x1="115" y1="55" x2="140" y2="55" stroke="#2E8BB0" stroke-width="2" marker-end="url(#chain-arr)"/>
+            <rect x="145" y="35" width="105" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="197" y="52" fill="#1C5E7C" font-weight="bold">求方向向量</text><text x="197" y="67" fill="#7794a3" font-size="9">subtract</text>
+            <line x1="252" y1="55" x2="277" y2="55" stroke="#2E8BB0" stroke-width="2" marker-end="url(#chain-arr)"/>
+            <rect x="282" y="35" width="105" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="334" y="52" fill="#1C5E7C" font-weight="bold">算角度(弧度)</text><text x="334" y="67" fill="#7794a3" font-size="9">atan2(y, x)</text>
+            <line x1="389" y1="55" x2="414" y2="55" stroke="#2E8BB0" stroke-width="2" marker-end="url(#chain-arr)"/>
+            <rect x="419" y="35" width="105" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="471" y="52" fill="#1C5E7C" font-weight="bold">转成度数</text><text x="471" y="67" fill="#7794a3" font-size="9">× 180/π</text>
+            <line x1="526" y1="55" x2="551" y2="55" stroke="#2E8BB0" stroke-width="2" marker-end="url(#chain-arr)"/>
+            <rect x="556" y="35" width="58" height="40" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/><text x="585" y="52" fill="#2f7a45" font-weight="bold">say</text><text x="585" y="67" fill="#5a9a6f" font-size="9">指挥</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 18.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-18-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<div class="section-header" id="section-18-6">
+    <h2>18.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦本关的<strong>策略、思路与算法设计</strong>,只展示用于说明的关键片段,完整通关程序请你自己动手完成。</p>
+
+<div class="level-card" id="sec-18-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 36 关 · 轰炸行动</span>
+        <h3>🦅 轰炸行动 —— 算准角度指挥狮鹫投弹</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/18-6-1-1_bombing_run.png" alt="扣哒世界 轰炸行动关卡 - koudashijie.com">
+            <div class="caption">图2：轰炸行动——食人魔来袭,英雄需实时算出敌人相对自己的角度并喊出,指挥狮鹫轰炸机转向开火</div>
+        </div>
+
+        <h4>策略：找敌 → 求向量 → 算角度 → 转度数 → 喊出</h4>
+        <p>本关的整体策略是一条清晰的"计算流水线":在 <code>while True</code> 循环里不断<strong>找到最近的敌人</strong>,用它的位置减去英雄位置得到<strong>方向向量</strong>,用 <code>atan2</code> 把向量转成<strong>弧度角</strong>,再乘 <code>180/Math.PI</code> 换成<strong>度数</strong>,最后 <code>say</code> 出去指挥轰炸。没有复杂的分支和数据结构,难点全在于<strong>把数学步骤一步不差地翻译成代码</strong>——尤其是 atan2 的参数顺序和弧度转度数这两处。</p>
+
+        <h4>思路拆解一:先确认有敌人再计算</h4>
+        <p>每轮循环先 <code>findNearestEnemy()</code>,并用 <code>if enemy:</code> 判空——只有确实有敌人时才继续算角度。这既避免了对 <code>None</code> 取 <code>pos</code> 而报错,也符合"有目标才开火"的作战逻辑。这个判空习惯在前面几个单元里已经反复强调过。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:循环找敌并判空</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    enemy <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        <span class="cmt"># 有敌人,开始计算攻击角度……</span>
+        <span class="kw">pass</span></pre>
+        </div>
+
+        <h4>思路拆解二:三步算出度数角</h4>
+        <p>核心三步环环相扣:<strong>(1)</strong> 用 <code>enemy.pos.subtract(hero.pos)</code> 得到方向向量;<strong>(2)</strong> 用 <code>Math.atan2(向量.y, 向量.x)</code> 求出弧度角(<strong>y 在前</strong>);<strong>(3)</strong> 乘以 <code>(180 / Math.PI)</code> 把弧度换成度数。三步都不能漏、顺序不能乱,任何一处出错角度都会偏。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:三步算出度数角</span>
+vectorDirection <span class="punc">=</span> enemy<span class="punc">.</span>pos<span class="punc">.</span><span class="fn">subtract</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>   <span class="cmt"># 1) 方向向量</span>
+angle <span class="punc">=</span> Math<span class="punc">.</span><span class="fn">atan2</span><span class="punc">(</span>vectorDirection<span class="punc">.</span>y<span class="punc">,</span> vectorDirection<span class="punc">.</span>x<span class="punc">)</span>  <span class="cmt"># 2) 弧度角(y在前)</span>
+angle <span class="punc">=</span> angle <span class="punc">*</span> <span class="punc">(</span><span class="num">180</span> <span class="punc">/</span> Math<span class="punc">.</span>PI<span class="punc">)</span>            <span class="cmt"># 3) 转成度数</span></pre>
+        </div>
+
+        <h4>思路拆解三:喊出角度完成指挥</h4>
+        <p>最后 <code>hero.say(angle)</code> 把度数喊出去,狮鹫轰炸机据此转向轰炸。由于是 <code>while True</code> 循环,敌人位置一旦变化,下一轮会重新计算并更新角度——<strong>实时跟踪、动态瞄准</strong>,这正是循环 + 三角计算的威力。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:说出角度,指挥轰炸</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>angle<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">关卡的调试小助手：</span>本关在场景里画了一个标注各点<strong>度数与弧度</strong>的圆圈作为参照。当你算出角度后,可以对照这个圆检查:比如敌人正在右上方,算出的度数应落在 0°~90° 之间。<strong>用已知的几何直觉验算代码结果</strong>,是排查角度错误最快的办法。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">两个"必查点"决定成败：</span>本关九成的失败都出在这两处——<strong>①</strong> atan2 参数写成了 <code>(x, y)</code>(应为 <code>(y, x)</code>);<strong>②</strong> 忘了乘 <code>180/Math.PI</code>、直接把弧度喊了出去。提交前务必逐字检查这两行,它们是整关的命门。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">举一反三——这套算法无处不在：</span>"两点位置 → 方向向量 → atan2 求角 → 转度数"这条链路,在<strong>让炮塔瞄准、让 NPC 面向玩家、计算子弹飞行方向、机器人转向目标</strong>等无数场景中通用。学会这一关,等于握住了游戏与机器人开发里"面向目标"的通用公式。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 18.7 ==================== -->
+<div class="section-header" id="section-18-7">
+    <h2>18.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-18-7-1">18.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>18.7.1.1 角度计算的典型问题
+    <span class="en">Typical issues with angle calculation</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/18-7-1-1_common_errors.png" alt="扣哒世界 三角函数常见错误速查 - koudashijie.com">
+    <div class="caption">图3：参数顺序颠倒、忘转度数、相减方向反、忘记判空,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>atan2 参数顺序错——必须是 <code>Math.atan2(y, x)</code>,<strong>y 在前</strong>;写成 (x, y) 角度全错。</li>
+        <li>忘记弧度转度数——atan2 返回弧度,要 <code>* 180 / Math.PI</code> 才是关卡要的度数。</li>
+        <li>相减方向反——要 <code>enemy.pos.subtract(hero.pos)</code>;反过来向量朝向相反,差 180°。</li>
+        <li>忘记判空——没写 <code>if enemy:</code> 就取 <code>enemy.pos</code>,没有敌人时会报错崩溃。</li>
+        <li>把系数写反——弧度转度乘 <code>180/π</code>;度转弧度才乘 <code>π/180</code>,别搞混。</li>
+        <li>用了 atan 而非 atan2——普通 <code>atan(y/x)</code> 分不清象限,方向可能整体差 180°。</li>
+        <li>系数打错数字——是 <code>180</code> 不是别的数(原始注释里把它误写成 188 是笔误)。</li>
+        <li>忘了放进循环——敌人会移动,计算要在 <code>while True</code> 里持续更新,才能实时瞄准。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-18-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:55f0be1381:START anchor=sec-18-7-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="55f0be1381">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC18-160A6A772D38。</span>
+<!-- CC-PROTECTION:HIDDEN:55f0be1381:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你指挥狮鹫轰炸机精准覆盖了来犯的食人魔,也把数学中优雅的<strong>三角函数</strong>真正用在了实战里!这一关虽小,却串起了"由坐标求方向"的完整链路。你理解了为什么需要用<strong>角度</strong>描述方向,复习了 <strong>SOH-CAH-TOA</strong> 三角口诀;学会了用<strong>敌人位置减英雄位置</strong>(<code>subtract</code>)得到方向向量;掌握了用 <code>Math.atan2(y, x)</code> 从向量算出夹角,并牢记了<strong>Y 在前</strong>、atan2 能正确分辨象限;懂得了 atan2 返回的是<strong>弧度</strong>,要乘 <code>180 / Math.PI</code> <strong>转成度数</strong>;最后用 <code>hero.say(angle)</code> 把结果<strong>作为指令输出</strong>。这套"位置差 → 向量 → atan2 → 度数"的公式,是游戏 AI 与机器人"面向目标"的通用武器。来回顾一下核心概念:</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>方向向量</td><td>敌人位置减英雄位置</td><td class="mono">enemy.pos.subtract(hero.pos)</td></tr>
+            <tr><td>反正切 atan2</td><td>由向量求角度(弧度)</td><td class="mono">Math.atan2(vec.y, vec.x)</td></tr>
+            <tr><td>参数顺序</td><td>Y 在前,X 在后</td><td class="mono">(y, x)</td></tr>
+            <tr><td>象限判断</td><td>靠 x、y 符号分辨方向</td><td class="mono">atan2 自动处理</td></tr>
+            <tr><td>弧度转度数</td><td>乘 180 除以 π</td><td class="mono">angle * (180 / Math.PI)</td></tr>
+            <tr><td>度数转弧度</td><td>反向乘 π 除以 180</td><td class="mono">angle * (Math.PI / 180)</td></tr>
+            <tr><td>输出指挥</td><td>把角度喊出去</td><td class="mono">hero.say(angle)</td></tr>
+            <tr><td>先判空</td><td>有敌人才计算</td><td class="mono">if enemy:</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得"把位置差翻译成方向角"——三角函数这份连接坐标与朝向的智慧,是让程序"看得懂方向、瞄得准目标"的核心力量。<br>
+        封神冰川的三角试炼圆满完成,愿你带着这把数学利器,征战更广阔的算法疆场!🦅📐❄️</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:15fc1530ec:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="15fc1530ec">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，超过 520 万编程比赛专业选手也在玩，写代码就是你的超能力。</span>
+</aside>
+<!-- CC-PROTECTION:AD:15fc1530ec:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第十八单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC9-B5BAC7464CD8">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第九单元：队列操作 · 先进先出与任务调度 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 队列格子（FIFO 可视化）===== */
+        .queue-viz {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .queue-viz .qcell {
+            min-width: 48px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+        .queue-viz .qcell.head { background: #6bbf88; }
+        .queue-viz .qcell.tail { background: var(--warning); }
+        .queue-viz .qarrow { color: var(--primary-dark); font-weight: 700; }
+        .queue-viz .qlabel { font-size: 0.72em; color: var(--text-lighter); font-family: sans-serif; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC9-B5BAC7464CD8 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第九单元</div>
+
+    <a href="#section-9-1" class="nav-section">9.1 队列数据结构概述</a>
+    <a href="#sec-9-1-1" class="nav-sub">9.1.1 什么是队列</a>
+    <a href="#sec-9-1-2" class="nav-sub">9.1.2 FIFO 先进先出</a>
+
+    <a href="#section-9-2" class="nav-section">9.2 入队与出队</a>
+    <a href="#sec-9-2-1" class="nav-sub">9.2.1 enqueue 入队</a>
+    <a href="#sec-9-2-2" class="nav-sub">9.2.2 dequeue 出队</a>
+    <a href="#sec-9-2-3" class="nav-sub">9.2.3 peek 查看队首</a>
+
+    <a href="#section-9-3" class="nav-section">9.3 用列表实现队列</a>
+    <a href="#sec-9-3-1" class="nav-sub">9.3.1 append 与 pop(0)</a>
+    <a href="#sec-9-3-2" class="nav-sub">9.3.2 空队列检查</a>
+
+    <a href="#section-9-4" class="nav-section">9.4 按状态与顺序调度</a>
+    <a href="#sec-9-4-1" class="nav-sub">9.4.1 idle 决定入队</a>
+    <a href="#sec-9-4-2" class="nav-sub">9.4.2 顺序处理任务</a>
+
+    <a href="#section-9-5" class="nav-section">9.5 循环更新队列</a>
+    <a href="#sec-9-5-1" class="nav-sub">9.5.1 每次操作后更新</a>
+
+    <a href="#section-9-6" class="nav-section">9.6 实战关卡精讲</a>
+    <a href="#sec-9-6-1" class="nav-sub">9.6.1 第一个出局</a>
+    <a href="#sec-9-6-2" class="nav-sub">9.6.2 双队列</a>
+    <a href="#sec-9-6-3" class="nav-sub">9.6.3 队列管理</a>
+
+    <a href="#section-9-7" class="nav-section">9.7 常见错误</a>
+    <a href="#sec-9-7-1" class="nav-sub">9.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第九单元：队列操作 · 先进先出与任务调度</h1>
+    <div class="subtitle">Unit 9: Queue Operations — FIFO &amp; Task Scheduling</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 第一个出局 → 双队列 → 队列管理</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 9.1 ==================== -->
+<div class="section-header" id="section-9-1">
+    <h2>9.1 队列数据结构概述</h2>
+    <div class="en-title">Overview of the Queue Data Structure</div>
+</div>
+
+<p>封神冰川上，你的英雄被冰封住动弹不得，无法直接指挥部队。但没关系——你的军队学会了用<strong>队列（queue）</strong>自我组织！所有士兵、农民、工人排成整齐的一列，谁先排进队，就谁先被派出去打怪或干活。这一单元由三个关卡组成，你将系统掌握计算机科学中最重要的基础数据结构之一：<span class="keyword">队列（queue）</span>，以及它"先来后到、公平有序"的处事之道。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>队列</strong>是一种<strong>先进先出（FIFO）</strong>的数据结构；掌握三大操作——<code>enqueue</code>（入队，用 <code>append</code>）、<code>dequeue</code>（出队，用 <code>pop(0)</code>）、<code>peek</code>（查看队首但不移除）；学会用列表实现队列并在取元素前<strong>检查是否为空</strong>；根据单位状态（<code>idle</code>）决定是否入队；按队列顺序<strong>分配任务</strong>；并在每次操作后<strong>正确更新队列</strong>。
+</div>
+
+<h3 id="sec-9-1-1">9.1.1 什么是队列（What Is a Queue）</h3>
+
+<h4>9.1.1.1 一头进、一头出的集合
+    <span class="en">A collection you add to one end and remove from the other</span>
+</h4>
+
+<p>队列是一种线性集合：元素总是从<strong>队尾（back）</strong>加入，从<strong>队首（front）</strong>取出。你唯一能直接取到的，永远是"最早加进来"的那个元素。这和上一单元学的选择排序里的数组不同——队列有严格的进出方向，不能随便从中间插队或取走。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 就像冰川脚下的滑雪缆车排队</div>
+    游客们在缆车入口排成一队。先到的人排在最前面（队首），后到的人依次接到队尾。缆车来了，永远是<strong>最前面那位先上</strong>；新来的人只能乖乖排到最后。没有人能插队——这份"先来先服务"的公平，正是队列的灵魂。
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-9-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-9-1-2">9.1.2 FIFO 先进先出（First In, First Out）</h3>
+
+<h4>9.1.2.1 谁先进，谁先出
+    <span class="en">The first one in is the first one out</span>
+</h4>
+
+<p>队列的核心规则叫 <span class="keyword-en">FIFO</span>——First In, First Out，"先进先出"。第一个排进队列的元素，也会是第一个被取出的。这与另一种结构"栈（stack）"的"后进先出（LIFO）"正好相反。队列的公平性让它特别适合处理"按到达顺序服务"的场景：任务调度、打印排队、消息队列等。</p>
+
+<div class="concept-viz">
+    <div class="queue-viz">
+        <span class="qlabel">出队 ←</span>
+        <span class="qcell head">A</span>
+        <span class="qcell">B</span>
+        <span class="qcell">C</span>
+        <span class="qcell tail">D</span>
+        <span class="qlabel">← 入队</span>
+    </div>
+    <div style="font-size:0.85em;color:var(--text-light);">
+        <span style="color:#6bbf88;font-weight:700;">■ 队首 front</span>（A 先进，先出）&nbsp;·&nbsp;
+        <span style="color:var(--warning);font-weight:700;">■ 队尾 back</span>（D 最后进，最后出）
+    </div>
+</div>
+
+<div class="compare-2col">
+    <div>
+        <h5>队列 Queue（FIFO）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">先进先出。像排队买票——先来的先走。本单元的主角。</p>
+    </div>
+    <div>
+        <h5>栈 Stack（LIFO）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">后进先出。像叠盘子——最后放上去的最先拿走。作为对比了解。</p>
+    </div>
+</div>
+
+<!-- ==================== 9.2 ==================== -->
+<div class="section-header" id="section-9-2">
+    <h2>9.2 入队与出队</h2>
+    <div class="en-title">Enqueue and Dequeue</div>
+</div>
+
+<h3 id="sec-9-2-1">9.2.1 enqueue 入队（Adding to the Back）</h3>
+
+<h4>9.2.1.1 把元素加到队尾
+    <span class="en">Add an element to the back</span>
+</h4>
+
+<p><strong>入队（enqueue）</strong>就是把一个新元素加到队列的末尾。在"第一个出局"关卡里，中士（sergeant）有专门的 <code>enqueue(unit)</code> 命令，把士兵一个个排进队；用列表实现时，入队就是 <code>append</code>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关卡里：中士把士兵逐个入队</span>
+<span class="kw">for</span> soldier <span class="kw">in</span> soldiers<span class="punc">:</span>
+    sergeant<span class="punc">.</span><span class="fn">enqueue</span><span class="punc">(</span>soldier<span class="punc">)</span>   <span class="cmt"># 加到队尾</span>
+
+<span class="cmt"># 用列表实现时，入队 = append</span>
+queue <span class="punc">=</span> <span class="punc">[]</span>
+queue<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="num">1</span><span class="punc">)</span>   <span class="cmt"># ENQUEUE 1 → [1]</span>
+queue<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="num">2</span><span class="punc">)</span>   <span class="cmt"># ENQUEUE 2 → [1, 2]</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-9-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-9-2-2">9.2.2 dequeue 出队（Removing from the Front）</h3>
+
+<h4>9.2.2.1 从队首取走元素
+    <span class="en">Remove the element at the front</span>
+</h4>
+
+<p><strong>出队（dequeue）</strong>就是把队首（最早加入）的元素取出并移除。中士用 <code>dequeue()</code> 派出排在最前的士兵去迎敌；用列表实现时，出队就是 <code>pop(0)</code>——移除并返回索引 0（第一个）的元素。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关卡里：中士派出队首士兵</span>
+sergeant<span class="punc">.</span><span class="fn">dequeue</span><span class="punc">()</span>   <span class="cmt"># 最先入队的先出去</span>
+
+<span class="cmt"># 用列表实现时，出队 = pop(0)</span>
+first <span class="punc">=</span> queue<span class="punc">.</span><span class="fn">pop</span><span class="punc">(</span><span class="num">0</span><span class="punc">)</span>   <span class="cmt"># DEQUEUE，结果 == 1，队列变 [2]</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">Python 用 pop(0)，不是 shift()：</span>有些语言用 <code>shift()</code> 从头部取元素，但 Python 没有 <code>shift()</code>。在 Python 里出队一律用 <code>pop(0)</code>——它移除并返回列表第一个元素，效果等同 FIFO 的 dequeue。<code>pop()</code>（不带参数）取的是最后一个，那是栈的行为，别混用。
+</div>
+
+
+<!-- CC-PROTECTION:AD:d19090cfd1:START anchor=sec-9-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="d19090cfd1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，你敲下的 if 和 for，直接变成英雄的剑招与魔法。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d19090cfd1:END -->
+
+<h3 id="sec-9-2-3">9.2.3 peek 查看队首（Peeking at the Front）</h3>
+
+<h4>9.2.3.1 只看不取
+    <span class="en">Look without removing</span>
+</h4>
+
+<p><strong>查看队首（peek）</strong>是指"看一眼最前面是谁"，但<strong>不把它取走</strong>。在"双队列"关卡里，<code>findNearestFriend()</code> 和 <code>findNearestItem()</code> 返回的最近单位/物品，其实就相当于对两个队列做 peek——你先"偷看"队首是什么，再决定要不要处理它。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># peek：只查看队首，不移除</span>
+<span class="kw">if</span> queue<span class="punc">:</span>
+    front <span class="punc">=</span> queue<span class="punc">[</span><span class="num">0</span><span class="punc">]</span>   <span class="cmt"># 看第一个是谁，队列不变</span></pre>
+</div>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>操作</th><th>作用</th><th>列表写法</th><th>队列是否改变</th></tr></thead>
+    <tbody>
+        <tr><td>enqueue 入队</td><td>加到队尾</td><td class="mono">queue.append(x)</td><td>变长</td></tr>
+        <tr><td>dequeue 出队</td><td>取走队首</td><td class="mono">queue.pop(0)</td><td>变短</td></tr>
+        <tr><td>peek 查看</td><td>看队首</td><td class="mono">queue[0]</td><td>不变</td></tr>
+        <tr><td>isEmpty 判空</td><td>是否为空</td><td class="mono">not queue / len==0</td><td>不变</td></tr>
+    </tbody>
+</table>
+</div>
+
+<!-- ==================== 9.3 ==================== -->
+<div class="section-header" id="section-9-3">
+    <h2>9.3 用列表实现队列</h2>
+    <div class="en-title">Implementing a Queue with a List</div>
+</div>
+
+<h3 id="sec-9-3-1">9.3.1 append 与 pop(0)（The Two Core Methods）</h3>
+
+<h4>9.3.1.1 一个列表 + 两个方法 = 队列
+    <span class="en">A list plus two methods makes a queue</span>
+</h4>
+
+<p>队列不需要什么特殊类型——一个普通列表就能实现。约定好"从尾部 <code>append</code> 加入、从头部 <code>pop(0)</code> 取出"，这个列表就成了一个 FIFO 队列。"队列管理"关卡里，你就要亲手用列表 <code>queue = []</code> 来管理一支工人队伍。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 130" width="520" role="img" aria-label="列表实现队列">
+        <text x="260" y="24" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">列表两端各司其职</text>
+        <g font-family="monospace" font-size="14" text-anchor="middle">
+            <rect x="120" y="45" width="70" height="45" rx="6" fill="#2f5a3f" stroke="#6bbf88" stroke-width="2"/><text x="155" y="73" fill="#a8e0be">"One"</text>
+            <rect x="190" y="45" width="70" height="45" rx="6" fill="#234254" stroke="#4FB5D8"/><text x="225" y="73" fill="#a5d4e8">"Two"</text>
+            <rect x="260" y="45" width="70" height="45" rx="6" fill="#234254" stroke="#4FB5D8"/><text x="295" y="73" fill="#a5d4e8">"Three"</text>
+        </g>
+        <text x="155" y="112" text-anchor="middle" font-size="11" fill="#a8e0be" font-family="sans-serif">pop(0) 从这头出</text>
+        <text x="360" y="73" font-size="11" fill="#e8a15a" font-family="sans-serif">← append 从这头进</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用列表完整演示一个队列</span>
+queue <span class="punc">=</span> <span class="punc">[]</span>
+queue<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="str">"One"</span><span class="punc">)</span>   <span class="cmt"># 入队 → ["One"]</span>
+queue<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="str">"Two"</span><span class="punc">)</span>   <span class="cmt"># 入队 → ["One", "Two"]</span>
+first <span class="punc">=</span> queue<span class="punc">.</span><span class="fn">pop</span><span class="punc">(</span><span class="num">0</span><span class="punc">)</span>    <span class="cmt"># 出队 → first = "One"，队列 = ["Two"]</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>first<span class="punc">)</span>          <span class="cmt"># 说出 "One"</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-9-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+<!-- CC-PROTECTION:HIDDEN:f5291f8ce7:START anchor=sec-9-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="f5291f8ce7">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:f5291f8ce7:END -->
+
+<h3 id="sec-9-3-2">9.3.2 空队列检查（Checking for an Empty Queue）</h3>
+
+<h4>9.3.2.1 取元素前先确认队里有人
+    <span class="en">Make sure the queue isn't empty first</span>
+</h4>
+
+<p>从空队列里 <code>pop(0)</code> 会直接报错。所以每次出队或 peek <strong>之前</strong>，都要先检查队列非空。在 Python 里，非空列表本身为"真"、空列表为"假"，可以直接 <code>if queue:</code> 判断，简洁又安全。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 先判空，再安全出队</span>
+<span class="kw">if</span> <span class="fn">len</span><span class="punc">(</span>queue<span class="punc">)</span> <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>   <span class="cmt"># 或直接写 if queue:</span>
+    worker <span class="punc">=</span> queue<span class="punc">.</span><span class="fn">pop</span><span class="punc">(</span><span class="num">0</span><span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">养成"先判空"的习惯：</span>处理任何队列/列表的取头、取尾操作前都先判空，是防御性编程的重要一环。哪怕你觉得"队列此刻肯定有人"，加上这层检查也能避免边界情况下的崩溃。
+</div>
+
+<!-- ==================== 9.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-9-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-9-4">
+    <h2>9.4 按状态与顺序调度</h2>
+    <div class="en-title">Scheduling by Status and Order</div>
+</div>
+
+<h3 id="sec-9-4-1">9.4.1 idle 决定入队（Enqueue Based on Status）</h3>
+
+<h4>9.4.1.1 只让"空闲"的单位排队
+    <span class="en">Only enqueue units that are idle</span>
+</h4>
+
+<p>在"队列管理"关卡里，工人有一个 <code>status</code> 属性。只有当工人<strong>空闲（idle）</strong>——即没在干活、正等着派活时，才应该把他加入队列。这避免了把正在忙碌的工人重复排进队。判断很简单：<code>if worker.status == "idle":</code> 就入队。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 遍历工人，空闲的才入队</span>
+<span class="kw">for</span> worker <span class="kw">in</span> workers<span class="punc">:</span>
+    <span class="kw">if</span> worker<span class="punc">.</span>status <span class="punc">==</span> <span class="str">"idle"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>worker <span class="punc">+</span> <span class="str">" in"</span><span class="punc">)</span>   <span class="cmt"># 语音命令：让他进队</span>
+        queue<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>worker<span class="punc">)</span>          <span class="cmt"># 同步加入我们维护的队列</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">用状态过滤，避免重复：</span>为什么要判断 idle？因为已经被派去干活的工人状态会变（不再 idle），如果不加这层过滤，每帧都会把所有工人重复入队，队列就乱了。用状态作为"是否需要排队"的开关，是任务调度里常见的模式。
+</div>
+
+<h3 id="sec-9-4-2">9.4.2 顺序处理任务（Processing Tasks in Order）</h3>
+
+<h4>9.4.2.1 任务与工人的配对
+    <span class="en">Matching tasks with workers</span>
+</h4>
+
+<p>队列最经典的用途就是<strong>任务分配</strong>。把工人看成"资源"、把物品/敌人看成"任务"：当有任务到来（如出现一个物品），就从工人队列里 <code>pop(0)</code> 出队首那位——他排队最久，理应最先被派工。在"双队列"关卡里，则是同时 peek 两个队列（单位队列、物品队列），看队首的组合是否匹配（如药水配士兵、剑配农民），匹配就处理，不匹配就喊"Next"把它挪到队尾。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 540 130" width="540" role="img" aria-label="任务分配">
+        <text x="270" y="22" text-anchor="middle" font-size="13" fill="#1C5E7C" font-weight="bold" font-family="sans-serif">任务到来 → 队首工人出队接单</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle">
+            <rect x="40" y="40" width="60" height="42" rx="6" fill="#6bbf88" stroke="#2f7a45"/><text x="70" y="66" fill="#fff">工人A</text>
+            <rect x="105" y="40" width="60" height="42" rx="6" fill="#4FB5D8"/><text x="135" y="66" fill="#fff">工人B</text>
+            <rect x="170" y="40" width="60" height="42" rx="6" fill="#4FB5D8"/><text x="200" y="66" fill="#fff">工人C</text>
+            <text x="270" y="66" fill="#1C5E7C" font-size="20">→</text>
+            <rect x="300" y="40" width="90" height="42" rx="6" fill="#fdeccf" stroke="#e6b566"/><text x="345" y="66" fill="#bd7415">任务来了</text>
+            <text x="200" y="105" fill="#7794a3" font-size="11" font-family="sans-serif">A 排最久 → A 先出队接任务</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 9.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-9-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+<div class="section-header" id="section-9-5">
+    <h2>9.5 循环控制队列更新</h2>
+    <div class="en-title">Controlling Queue Updates in a Loop</div>
+</div>
+
+<h3 id="sec-9-5-1">9.5.1 每次操作后更新（Update After Each Operation）</h3>
+
+<h4>9.5.1.1 一次只放一个走，及时更新队列
+    <span class="en">Let one out at a time, keep the queue in sync</span>
+</h4>
+
+<p>"队列管理"关卡特别强调：<strong>每次只让第一名工人离队，并在每个命令之后保证队列被正确更新</strong>。也就是说，喊完 <code>"Name out"</code> 派走队首后，必须立刻 <code>pop(0)</code> 把他从队列里移除，让下一位递补成新队首。若不同步更新，队列里的顺序就会与实际情况脱节，导致重复派工或漏派。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 有任务且队列非空时，派出队首并同步移除</span>
+item <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+<span class="kw">if</span> item <span class="kw">and</span> <span class="fn">len</span><span class="punc">(</span>queue<span class="punc">)</span> <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>queue<span class="punc">[</span><span class="num">0</span><span class="punc">]</span> <span class="punc">+</span> <span class="str">" out"</span><span class="punc">)</span>   <span class="cmt"># 喊队首出列</span>
+    queue<span class="punc">.</span><span class="fn">pop</span><span class="punc">(</span><span class="num">0</span><span class="punc">)</span>                    <span class="cmt"># 同步从队列移除，下一位递补</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 120" width="560" role="img" aria-label="队列更新循环">
+        <defs>
+            <marker id="q-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="12" text-anchor="middle">
+            <rect x="15" y="40" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="75" y="65" fill="#1C5E7C" font-weight="bold">空闲工人入队</text>
+            <line x1="137" y1="60" x2="168" y2="60" stroke="#2E8BB0" stroke-width="2" marker-end="url(#q-arr)"/>
+            <rect x="173" y="40" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="233" y="65" fill="#1C5E7C" font-weight="bold">有任务？</text>
+            <line x1="295" y1="60" x2="326" y2="60" stroke="#2E8BB0" stroke-width="2" marker-end="url(#q-arr)"/>
+            <rect x="331" y="40" width="130" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="396" y="65" fill="#1C5E7C" font-weight="bold">队首出队接任务</text>
+            <line x1="463" y1="60" x2="494" y2="60" stroke="#2E8BB0" stroke-width="2" marker-end="url(#q-arr)"/>
+            <rect x="499" y="40" width="55" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="526" y="65" fill="#1C5E7C" font-weight="bold">循环</text>
+            <path d="M526,82 L526,105 L75,105 L75,82" fill="none" stroke="#2E8BB0" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#q-arr)"/>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 9.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-9-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+<div class="section-header" id="section-9-6">
+    <h2>9.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 第一个出局 -->
+<div class="level-card" id="sec-9-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 18 关 · 第一个出局</span>
+        <h3>🧊 第一个出局 —— 用队列组织士兵与农民</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/9-6-1-1_first_out.png" alt="扣哒世界 第一个出局关卡 - koudashijie.com">
+            <div class="caption">图2：第一个出局——英雄被冰封，靠中士 enqueue 把士兵排队、敌人来袭时 dequeue 依次派出，实践最基本的 FIFO</div>
+        </div>
+
+        <h4>策略：先把队排好，再按需依次放出</h4>
+        <p>英雄被冰封无法直接指挥，但中士（sergeant）能 <code>enqueue</code> 入队、<code>dequeue</code> 出队。策略分两阶段：<strong>准备阶段</strong>——先把所有士兵（和农民）逐个 <code>enqueue</code> 排进队列；<strong>作战阶段</strong>——侦察兵（scout）发现敌人时，用 <code>dequeue</code> 把队首士兵一个个派出去迎敌；等敌人清空后，再依次放出农民。这就是最纯粹的 FIFO 应用。</p>
+
+        <h4>思路拆解：入队准备 + 按信号出队</h4>
+        <p>先用 <code>for</code> 循环把 <code>soldiers</code> 逐个 <code>sergeant.enqueue()</code>。然后在循环里用 <code>scout.findNearestEnemy()</code> 侦测：一旦发现敌人，就 <code>dequeue</code> 放出队首士兵应战。关键在于<strong>顺序</strong>——最先入队的士兵最先出战，公平且有序。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：准备阶段——士兵逐个入队</span>
+<span class="kw">for</span> soldier <span class="kw">in</span> soldiers<span class="punc">:</span>
+    sergeant<span class="punc">.</span><span class="fn">enqueue</span><span class="punc">(</span>soldier<span class="punc">)</span>
+
+<span class="cmt"># 关键片段：敌人来袭时，派出队首士兵</span>
+enemy <span class="punc">=</span> scout<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    sergeant<span class="punc">.</span><span class="fn">dequeue</span><span class="punc">()</span>   <span class="cmt"># 最先入队者最先出战</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">enqueue/dequeue 的本质：</span>本关的 <code>enqueue</code>/<code>dequeue</code> 是中士的特殊命令，帮你直观感受队列的两端操作。它们背后的逻辑，和用列表 <code>append</code>/<code>pop(0)</code> 完全一致——加到队尾、从队首取走。理解了这一关，后面两关自己用列表实现队列就顺理成章。
+        </div>
+    </div>
+</div>
+
+<!-- 双队列 -->
+<div class="level-card" id="sec-9-6-2">
+    <div class="level-head">
+        <span class="lv-num">第 19 关 · 双队列</span>
+        <h3>❄️ 双队列 —— peek 两个队列做任务配对</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/9-6-2-1_two_queues.png" alt="扣哒世界 双队列关卡 - koudashijie.com">
+            <div class="caption">图3：双队列——单位队列与物品队列并行，peek 两队队首判断是否匹配（药水配士兵、剑配农民），不匹配就喊 Next</div>
+        </div>
+
+        <h4>策略：同时看两个队首，能配对就处理</h4>
+        <p>这一关有<strong>两个队列</strong>：单位队列和物品队列。用 <code>findNearestFriend()</code> 和 <code>findNearestItem()</code> 分别 <strong>peek</strong>（偷看）两队的队首。规则是：如果队首物品是<strong>药水（potion）</strong>且队首单位是<strong>士兵（soldier）</strong>，或者队首物品是<strong>剑（sword）</strong>且队首单位是<strong>农民（peasant）</strong>，就匹配成功——说出单位名字处理它；否则喊 <code>"Next"</code> 把队首挪到队尾，换下一个来试。</p>
+
+        <h4>思路拆解：先判空，再按 type 配对</h4>
+        <p>每轮先 peek 出 <code>item</code> 和 <code>unit</code>，若任一为空（<code>not item or not unit</code>）就 <code>continue</code> 跳过——这就是"取元素前先判空"。拿到后用 <code>type</code> 属性判断配对关系，用 <code>if / elif / else</code> 分三种情况处理。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：peek 两队队首，按类型配对</span>
+item <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>     <span class="cmt"># peek 物品队列</span>
+unit <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestFriend</span><span class="punc">()</span>   <span class="cmt"># peek 单位队列</span>
+<span class="kw">if</span> <span class="kw">not</span> item <span class="kw">or</span> <span class="kw">not</span> unit<span class="punc">:</span>
+    <span class="kw">continue</span>                          <span class="cmt"># 判空保护</span>
+<span class="kw">if</span> item<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"potion"</span> <span class="kw">and</span> unit<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"soldier"</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>unit<span class="punc">.</span>id<span class="punc">)</span>                 <span class="cmt"># 药水配士兵</span>
+<span class="kw">elif</span> item<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"sword"</span> <span class="kw">and</span> unit<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"peasant"</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>unit<span class="punc">.</span>id<span class="punc">)</span>                 <span class="cmt"># 剑配农民</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Next"</span><span class="punc">)</span>              <span class="cmt"># 不匹配，挪到队尾</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">"Next" 的作用：</span>喊 <code>"Next"</code> 相当于对队列做一次"轮转"——把当前队首送到队尾，让下一个元素成为新队首。这样即使当前队首暂时无法配对，也不会卡死，队列会不断轮换直到找到能匹配的组合。这体现了队列在<strong>任务调度</strong>中的灵活性。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">墙会挡住视线：</span>关卡提示墙壁会阻挡感知（连 Twilight 眼镜也挡），所以 <code>findNearest</code> 只能看到当前可见的队首。这恰好符合队列"只能访问队首"的特性——你不需要看到全部，只处理最前面的即可。
+        </div>
+    </div>
+</div>
+
+<!-- 队列管理 -->
+<div class="level-card" id="sec-9-6-3">
+    <div class="level-head">
+        <span class="lv-num">第 20 关 · 队列管理</span>
+        
+<!-- CC-PROTECTION:AD:c1d65681b7:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="c1d65681b7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，编程小白都在偷偷玩的闯关游戏，写一行代码角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c1d65681b7:END -->
+<!-- CC-PROTECTION:HIDDEN:a2fa086153:START anchor=h3-12 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a2fa086153">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:a2fa086153:END -->
+
+<h3>🏔️ 队列管理 —— 亲手用列表维护工人队列</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/9-6-3-1_queue_management.png" alt="扣哒世界 队列管理关卡 - koudashijie.com">
+            <div class="caption">图4：队列管理——用 queue=[] 自建队列，空闲工人喊 in 入队，有任务时喊队首 out 并 pop(0) 移除，每步保持队列同步</div>
+        </div>
+
+        <h4>策略：自建队列，in 入队、out 出队，每步同步</h4>
+        <p>这是本单元的综合关：你要<strong>亲手用一个列表 <code>queue = []</code> 管理工人</strong>。用语音命令控制——喊 <code>"名字 in"</code> 让工人进队，喊 <code>"名字 out"</code> 让工人出队。策略：遍历所有工人，<strong>空闲（idle）</strong>的就喊 in 并 <code>append</code> 入队；当有任务（物品）且队列非空时，喊队首 out 并 <code>pop(0)</code> 移除，让下一位递补。</p>
+
+        <h4>思路拆解一：空闲工人入队</h4>
+        <p>遍历 <code>workers</code>，用 <code>worker.status == "idle"</code> 筛出空闲的，先喊 <code>hero.say(worker + " in")</code> 发出入队命令，再把他 <code>append</code> 进我们维护的 <code>queue</code>，保持"语音命令"与"程序里的队列"两边一致。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：空闲工人入队</span>
+<span class="kw">for</span> worker <span class="kw">in</span> workers<span class="punc">:</span>
+    <span class="kw">if</span> worker<span class="punc">.</span>status <span class="punc">==</span> IDLE<span class="punc">:</span>          <span class="cmt"># IDLE = "idle"</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>worker <span class="punc">+</span> <span class="str">" "</span> <span class="punc">+</span> PHRASE_IN<span class="punc">)</span>   <span class="cmt"># "名字 in"</span>
+        queue<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>worker<span class="punc">)</span>              <span class="cmt"># 同步入队</span></pre>
+        </div>
+
+        <h4>思路拆解二：有任务就派队首出队</h4>
+        <p>检查是否有任务（<code>item</code> 存在）<strong>且</strong>队列非空。两个条件都满足，才喊队首工人 out，并立刻 <code>pop(0)</code> 把他移出队列。"先判空再取"和"每步同步更新"是本关得分的关键。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：有任务且队列非空时，派出队首</span>
+item <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+<span class="kw">if</span> item <span class="kw">and</span> <span class="fn">len</span><span class="punc">(</span>queue<span class="punc">)</span> <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>queue<span class="punc">[</span><span class="num">0</span><span class="punc">]</span> <span class="punc">+</span> <span class="str">" "</span> <span class="punc">+</span> PHRASE_OUT<span class="punc">)</span>   <span class="cmt"># "队首名字 out"</span>
+    queue<span class="punc">.</span><span class="fn">pop</span><span class="punc">(</span><span class="num">0</span><span class="punc">)</span>                              <span class="cmt"># 同步移除队首</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">Python 用 pop(0) 而非 shift()：</span>关卡明确提示——在 Python 里要用 <code>array.pop(0)</code> 代替 <code>array.shift()</code>，因为 Python 没有 <code>shift()</code>。别照搬其他语言的写法。同时切记<strong>只让第一名工人离队</strong>（<code>pop(0)</code> 每次只移一个），并在每个命令后同步更新队列。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">用常量让代码更清晰：</span>关卡预定义了 <code>PHRASE_IN = "in"</code>、<code>PHRASE_OUT = "out"</code>、<code>IDLE = "idle"</code> 这些常量。用它们代替裸字符串，既能避免拼写错误，也让代码意图一目了然——这是良好的编程习惯。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<div class="section-header" id="section-9-7">
+    <h2>9.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-9-7-1">9.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>9.7.1.1 队列操作的典型问题
+    <span class="en">Typical issues with queue operations</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch9_sec9_9-7-1-1_common_errors.png" alt="扣哒世界 队列操作常见错误速查 - koudashijie.com">
+    <div class="caption">图5：用错 pop()、忘记判空、不同步更新队列、没按状态过滤，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>出队用错方法——FIFO 出队要 <code>pop(0)</code>（取队首）；写成 <code>pop()</code> 会取队尾，变成了栈的行为。</li>
+        <li>用了 shift()——Python 没有 <code>shift()</code>，出队一律用 <code>pop(0)</code>。</li>
+        <li>取元素前不判空——从空队列 <code>pop(0)</code> 会报错；出队/peek 前务必 <code>if queue:</code> 检查。</li>
+        <li>队列不同步更新——喊了 out 却忘 <code>pop(0)</code>，队首没移除，会重复派同一个人。</li>
+        <li>不按 idle 过滤——不判断 <code>status == "idle"</code> 就入队，会把忙碌工人重复排进队列。</li>
+        <li>一次放走多个——本关要求每命令只让第一名离队，<code>pop(0)</code> 每次只移一个，别在一步里连出多个。</li>
+        <li>peek 和 dequeue 混淆——只想"看队首"用 <code>queue[0]</code>（不移除）；要"取走"才用 <code>pop(0)</code>。</li>
+        <li>入队用错端——入队要 <code>append</code>（加到队尾）；若加到队首会破坏 FIFO 顺序。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你掌握了计算机科学中最实用的基础数据结构之一——<strong>队列</strong>！在封神冰川的这三关里，你理解了队列的<strong>先进先出（FIFO）</strong>特性；掌握了三大核心操作——<code>enqueue</code> 入队（<code>append</code> 到队尾）、<code>dequeue</code> 出队（<code>pop(0)</code> 取队首）、<code>peek</code> 查看队首（<code>queue[0]</code> 不移除）；学会了用列表实现队列并在取元素前<strong>判空保护</strong>；懂得根据 <code>status == "idle"</code> 决定是否入队、按队列顺序做<strong>任务分配</strong>；也牢记了每次操作后必须<strong>同步更新队列</strong>。从"第一个出局"的基础 FIFO，到"双队列"的 peek 配对，再到"队列管理"的亲手实现，你已经能用队列优雅地组织复杂的工作流。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>FIFO 特性</td><td>先进先出</td><td class="mono">First In First Out</td></tr>
+            <tr><td>enqueue 入队</td><td>加到队尾</td><td class="mono">queue.append(x)</td></tr>
+            <tr><td>dequeue 出队</td><td>取走队首</td><td class="mono">queue.pop(0)</td></tr>
+            <tr><td>peek 查看</td><td>看队首不移除</td><td class="mono">queue[0]</td></tr>
+            <tr><td>空队列检查</td><td>取前先判空</td><td class="mono">if queue: / len&gt;0</td></tr>
+            <tr><td>按状态入队</td><td>空闲才排队</td><td class="mono">if worker.status=="idle"</td></tr>
+            <tr><td>任务分配</td><td>队首先接单</td><td class="mono">配对 / say("Next")</td></tr>
+            <tr><td>同步更新</td><td>每步保持一致</td><td class="mono">say out → pop(0)</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得让资源与任务"先来先服务、有序流转"——队列这份公平与秩序的智慧，会成为你构建复杂系统的可靠基石。<br>
+        封神冰川的队列试炼圆满完成，向着更深的数据结构世界，继续前行！🧊❄️📋</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:0bfa46359a:START anchor=h3-15 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0bfa46359a">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC9-B5BAC7464CD8。</span>
+<!-- CC-PROTECTION:HIDDEN:0bfa46359a:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第九单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

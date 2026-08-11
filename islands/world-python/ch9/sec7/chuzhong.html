@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC7-02D0B04C84E1">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第七单元：二分查找 · 猜数博弈与折半逼近 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 区间条（二分可视化）===== */
+        .range-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid var(--border);
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 0.85em;
+            font-weight: 700;
+        }
+        .range-bar .seg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .seg-dead { background: #b7c7d0; color: #526984; }
+        .seg-live { background: var(--primary-light); }
+        .seg-mid  { background: var(--warning); }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC7-02D0B04C84E1 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第七单元</div>
+
+    <a href="#section-7-1" class="nav-section">7.1 二分查找概述</a>
+    <a href="#sec-7-1-1" class="nav-sub">7.1.1 什么是二分查找</a>
+    <a href="#sec-7-1-2" class="nav-sub">7.1.2 为何比逐个猜快</a>
+
+    <a href="#section-7-2" class="nav-section">7.2 折半的核心思想</a>
+    <a href="#sec-7-2-1" class="nav-sub">7.2.1 每次砍掉一半</a>
+    <a href="#sec-7-2-2" class="nav-sub">7.2.2 取中点公式</a>
+
+    <a href="#section-7-3" class="nav-section">7.3 判断高低</a>
+    <a href="#sec-7-3-1" class="nav-sub">7.3.1 scout 与 munchkin</a>
+    <a href="#sec-7-3-2" class="nav-sub">7.3.2 太大还是太小</a>
+
+    <a href="#section-7-4" class="nav-section">7.4 调整搜索区间</a>
+    <a href="#sec-7-4-1" class="nav-sub">7.4.1 移动上下边界</a>
+    <a href="#sec-7-4-2" class="nav-sub">7.4.2 区间不断收缩</a>
+
+    <a href="#section-7-5" class="nav-section">7.5 有限次内逼近</a>
+    <a href="#sec-7-5-1" class="nav-sub">7.5.1 对数级次数</a>
+    <a href="#sec-7-5-2" class="nav-sub">7.5.2 逐帧节奏</a>
+
+    <a href="#section-7-6" class="nav-section">7.6 实战关卡精讲</a>
+    <a href="#sec-7-6-1" class="nav-sub">7.6.1 猜猜我的数字</a>
+
+    <a href="#section-7-7" class="nav-section">7.7 常见错误</a>
+    <a href="#sec-7-7-1" class="nav-sub">7.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第七单元：二分查找 · 猜数博弈与折半逼近</h1>
+    <div class="subtitle">Unit 7: Binary Search — Guessing Games &amp; Halving the Range</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 猜猜我的数字 Guess My Number</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 7.1 ==================== -->
+<div class="section-header" id="section-7-1">
+    <h2>7.1 二分查找概述</h2>
+    <div class="en-title">Overview of Binary Search</div>
+</div>
+
+<p>封神冰川的深处，狡猾的<strong>谜语者（Riddler）</strong>心里想了一个 1 到 999 之间的数字，只给你 <strong>10 次机会</strong>去猜中它。每猜一次，他会用召唤怪物的方式暗示你"猜大了"还是"猜小了"。999 个可能、10 次机会——如果一个一个地试，永远也来不及。这一单元你将掌握计算机科学里最优雅、最重要的搜索算法之一：<span class="keyword">二分查找（binary search）</span>。它的威力惊人——哪怕有一百万个数字，它也能在 20 次以内锁定答案。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>二分查找</strong>的核心思想——每次猜"当前区间的正中间"，据反馈把搜索范围<strong>砍掉一半</strong>；学会根据敌人类型（<code>scout</code> 说明目标更大、<code>munchkin</code> 说明目标更小）判断猜测的高低；据此<strong>调整搜索区间</strong>的上下边界；理解为什么这样能在<strong>有限次数（对数级）</strong>内逼近并命中目标。
+</div>
+
+<h3 id="sec-7-1-1">7.1.1 什么是二分查找（What Is Binary Search）</h3>
+
+<h4>7.1.1.1 "折半+排除"的猜数策略
+    <span class="en">A halve-and-eliminate strategy</span>
+</h4>
+
+<p>二分查找是一种在<strong>有序范围</strong>里快速定位目标的算法。它的名字里"二分"就是"一分为二"的意思：每一步都猜正中间的那个数，然后根据"太大/太小"的提示，果断丢掉一半不可能的区间，只在剩下的一半里继续找。就这样一半、一半地砍，范围飞快地缩小，很快就只剩下目标本身。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 就像在冰层里找一条鱼</div>
+    你知道鱼在一条 999 米长的冰缝里。你在正中间（500 米处）凿一个洞，如果鱼在更深处，你就再也不用管前半段——直接去后半段的正中间凿。每凿一次，要搜的冰缝就短一半。这种"果断放弃一半"的自信，正是二分查找的精髓。
+</div>
+
+
+<!-- CC-PROTECTION:AD:de8534a7d9:START anchor=sec-7-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="de8534a7d9">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从第一行代码开始，把你的想法变成真的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:de8534a7d9:END -->
+<!-- CC-PROTECTION:HIDDEN:5fdafeb0fe:START anchor=sec-7-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="5fdafeb0fe">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:5fdafeb0fe:END -->
+
+<h3 id="sec-7-1-2">7.1.2 为何比逐个猜快（Why It Beats Guessing One by One）</h3>
+
+<h4>7.1.2.1 线性 vs 二分：天壤之别
+    <span class="en">Linear vs binary: a huge difference</span>
+</h4>
+
+<p>如果从 1 开始一个一个往上猜（<strong>线性查找</strong>），最坏情况要猜 999 次。而二分查找每次把范围减半，999 → 500 → 250 → 125 → … 只需约 <strong>10 次</strong> 就能覆盖全部 999 个数字。这就是关卡只给 10 次机会、却依然稳赢的原因——它逼着你使用二分查找。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>线性查找（慢）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">从 1 试到 999，一次只排除一个。最坏要 <strong>999 次</strong>——远超 10 次机会，必输。</p>
+    </div>
+    <div>
+        <h5>二分查找（快）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">每次砍掉一半，<strong>约 10 次</strong>覆盖 999 个数。恰好在机会用完前锁定目标。</p>
+    </div>
+</div>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="范围每次减半">
+        <text x="260" y="22" text-anchor="middle" font-size="14" fill="#1C5E7C" font-weight="bold" font-family="sans-serif">每猜一次，剩余范围减半</text>
+        <g font-family="monospace" font-size="12" fill="#1C5E7C">
+            <rect x="60" y="38" width="400" height="18" rx="4" fill="#4FB5D8"/><text x="470" y="52" fill="#47606E">999</text>
+            <rect x="60" y="62" width="200" height="18" rx="4" fill="#4FB5D8"/><text x="270" y="76" fill="#47606E">500</text>
+            <rect x="60" y="86" width="100" height="18" rx="4" fill="#4FB5D8"/><text x="170" y="100" fill="#47606E">250</text>
+            <rect x="60" y="110" width="50" height="18" rx="4" fill="#4FB5D8"/><text x="120" y="124" fill="#47606E">125 → … → 1</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 7.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-7-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-7-2">
+    <h2>7.2 折半的核心思想</h2>
+    <div class="en-title">The Core Idea of Halving</div>
+</div>
+
+<h3 id="sec-7-2-1">7.2.1 每次砍掉一半（Cut the Range in Half）</h3>
+
+<h4>7.2.1.1 用两个边界圈定"还可能的范围"
+    <span class="en">Track the range with two borders</span>
+</h4>
+
+<p>二分查找要时刻记住"目标还可能在哪个范围内"。我们用两个变量描述这个范围：下边界 <code>lowBorder</code> 和上边界 <code>highBorder</code>。开始时目标可能是 1 到 999 中任意一个，所以把边界设在范围之外——<code>lowBorder = 0</code>、<code>highBorder = 1000</code>（即 <code>lowestPossible-1</code> 与 <code>highestPossible+1</code>）。每次猜完，就把其中一个边界往中间挪，范围随之缩小。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 初始化：把边界设在可能范围的两侧之外</span>
+lowestPossible <span class="punc">=</span> <span class="num">1</span>
+highestPossible <span class="punc">=</span> <span class="num">999</span>
+lowBorder <span class="punc">=</span> lowestPossible <span class="punc">-</span> <span class="num">1</span>     <span class="cmt"># 0，比最小值还小</span>
+highBorder <span class="punc">=</span> highestPossible <span class="punc">+</span> <span class="num">1</span>   <span class="cmt"># 1000，比最大值还大</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">边界为什么设在范围外：</span>把 <code>lowBorder</code> 设成 0（而非 1）、<code>highBorder</code> 设成 1000（而非 999），是为了让取中点公式能覆盖到 1 和 999 这两个端点值。如果边界正好卡在 1 和 999，那么算出的中点就永远碰不到端点，万一答案是 1 或 999 就会漏掉。
+</div>
+
+<h3 id="sec-7-2-2">7.2.2 取中点公式（The Midpoint Formula）</h3>
+
+<h4>7.2.2.1 猜就猜正中间
+    <span class="en">Always guess the middle</span>
+</h4>
+
+<p>每一次都猜当前区间的<strong>正中间</strong>，才能保证无论目标偏大还是偏小，被排除掉的都恰好是一半。中点的算法是"下边界加上区间长度的一半"：<code>guess = int(lowBorder + (highBorder - lowBorder) / 2)</code>。用 <code>int()</code> 是因为猜测必须是整数，而除以 2 可能得到小数。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 540 120" width="540" role="img" aria-label="取中点公式解剖">
+        <text x="270" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">guess = int( lowBorder + (highBorder − lowBorder) / 2 )</text>
+        <text x="150" y="72" font-size="14" font-family="monospace" fill="#a5d4e8">lowBorder</text>
+        <text x="245" y="72" font-size="14" font-family="monospace" fill="#cfe3ee">+</text>
+        <text x="270" y="72" font-size="14" font-family="monospace" fill="#e8a15a">(区间长度) / 2</text>
+        <text x="180" y="100" font-size="11" fill="#a5d4e8" text-anchor="middle" font-family="sans-serif">从下边界出发</text>
+        <text x="330" y="100" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">前进半个区间 → 落在正中间</text>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么不直接 (low+high)/2：</span><code>lowBorder + (highBorder - lowBorder) / 2</code> 和 <code>(lowBorder + highBorder) / 2</code> 数学上相等，但前者写法更稳健——在处理超大数字时能避免两数相加溢出。养成这个习惯，将来处理大规模数据时会受益。
+</div>
+
+<!-- ==================== 7.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-7-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+
+<div class="section-header" id="section-7-3">
+    <h2>7.3 判断猜测的高低</h2>
+    <div class="en-title">Judging If the Guess Is Too High or Low</div>
+</div>
+
+<h3 id="sec-7-3-1">7.3.1 scout 与 munchkin（The Two Ogre Types）</h3>
+
+<h4>7.3.1.1 谜语者用怪物类型给暗示
+    <span class="en">The Riddler hints via ogre type</span>
+</h4>
+
+<p>谜语者不直接说话，而是每次召唤一只怪物来暗示。规则是：如果出现的是<strong>侦察兵（scout）</strong>，说明真正的数字比你猜的<strong>更大</strong>（greater）；如果出现的是<strong>Munchkin 食人魔</strong>，说明真正的数字比你猜的<strong>更小</strong>。你要先用 <code>enemy.type</code> 读出怪物类型，再据此判断该往哪个方向调整。</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>出现的怪物</th><th>含义</th><th>目标数字</th><th>下一步</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">"scout"（侦察兵）</td><td>猜小了</td><td>比 guess 更大</td><td>抬高下边界</td></tr>
+        <tr><td class="mono">"munchkin"（食人魔）</td><td>猜大了</td><td>比 guess 更小</td><td>压低上边界</td></tr>
+    </tbody>
+</table>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-7-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+
+<h3 id="sec-7-3-2">7.3.2 太大还是太小（Too High or Too Low）</h3>
+
+<h4>7.3.2.1 用 enemy.type 分支决定方向
+    <span class="en">Branch on enemy.type to pick a direction</span>
+</h4>
+
+<p>读出怪物类型后，用 <code>if / elif</code> 分两种情况处理。侦察兵表示目标更大，那说明"我们猜的这个数太小了"，可以把它作为新的<strong>下边界</strong>；Munchkin 表示目标更小，说明"这个数太大了"，把它作为新的<strong>上边界</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 根据怪物类型判断猜大了还是猜小了</span>
+<span class="kw">if</span> enemy<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"scout"</span><span class="punc">:</span>     <span class="cmt"># 目标更大 → 猜小了</span>
+    lowBorder <span class="punc">=</span> guess           <span class="cmt"># 抬高下边界</span>
+<span class="kw">elif</span> enemy<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"munchkin"</span><span class="punc">:</span>   <span class="cmt"># 目标更小 → 猜大了</span>
+    highBorder <span class="punc">=</span> guess          <span class="cmt"># 压低上边界</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">别把方向记反：</span>这是本关最容易搞错的地方——scout 对应"更大"、munchkin 对应"更小"。记反了，边界就会朝错误方向移动，范围不但不缩小，反而永远找不到答案。可以用口诀"<strong>侦察兵往高处侦察（大）、小食人魔往低处（小）</strong>"帮助记忆。
+</div>
+
+<!-- ==================== 7.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-7-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<div class="section-header" id="section-7-4">
+    <h2>7.4 调整搜索区间</h2>
+    <div class="en-title">Adjusting the Search Range</div>
+</div>
+
+<h3 id="sec-7-4-1">7.4.1 移动上下边界（Moving the Borders）</h3>
+
+<h4>7.4.1.1 把刚才的猜测变成新边界
+    <span class="en">Turn the last guess into a new border</span>
+</h4>
+
+<p>调整区间的关键动作，就是把"这次的猜测 <code>guess</code>"赋值给某个边界。猜小了（scout）就 <code>lowBorder = guess</code>，意思是"目标一定大于 guess，所以下界抬到这里"；猜大了（munchkin）就 <code>highBorder = guess</code>，意思是"目标一定小于 guess，上界压到这里"。这样每次都把不可能的那一半永久排除。</p>
+
+<div class="concept-viz">
+    <div style="max-width:460px;margin:0 auto;text-align:left;font-family:'SF Mono',monospace;font-size:0.85em;">
+        <div style="color:#47606E;margin-bottom:4px;">初始区间 0 &lt;──────────────────&gt; 1000</div>
+        <div class="range-bar">
+            <div class="seg seg-live" style="flex:1;">可能区间 1~999</div>
+        </div>
+        <div style="color:#47606E;margin:8px 0 4px;">猜 500，出现 scout（太小）→ lowBorder=500</div>
+        <div class="range-bar">
+            <div class="seg seg-dead" style="flex:1;">已排除 ≤500</div>
+            <div class="seg seg-live" style="flex:1;">剩 501~999</div>
+        </div>
+        <div style="color:#47606E;margin:8px 0 4px;">猜 750，出现 munchkin（太大）→ highBorder=750</div>
+        <div class="range-bar">
+            <div class="seg seg-dead" style="flex:1;">已排除 ≤500</div>
+            <div class="seg seg-live" style="flex:0.5;">剩 501~750</div>
+            <div class="seg seg-dead" style="flex:0.5;">≥750</div>
+        </div>
+    </div>
+</div>
+
+<h3 id="sec-7-4-2">7.4.2 区间不断收缩（The Range Keeps Shrinking）</h3>
+
+<h4>7.4.2.1 收缩到只剩一个数即命中
+    <span class="en">Shrink until only the answer remains</span>
+</h4>
+
+<p>每一轮"猜中点 → 看怪物 → 移边界"都会让区间缩小一半。随着 <code>lowBorder</code> 和 <code>highBorder</code> 越来越接近，中点也越来越逼近真正的数字。当区间收缩到只剩一个可能值时，那个中点就正是谜语者藏的数字——命中，胜利！</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="二分查找循环流程">
+        <defs>
+            <marker id="b-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="12" text-anchor="middle">
+            <rect x="15" y="45" width="110" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="70" y="70" fill="#1C5E7C" font-weight="bold">算中点 guess</text>
+            <line x1="127" y1="65" x2="158" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#b-arr)"/>
+            <rect x="163" y="45" width="110" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="218" y="70" fill="#1C5E7C" font-weight="bold">说出猜测</text>
+            <line x1="275" y1="65" x2="306" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#b-arr)"/>
+            <rect x="311" y="45" width="110" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="366" y="70" fill="#1C5E7C" font-weight="bold">看怪物类型</text>
+            <line x1="423" y1="65" x2="454" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#b-arr)"/>
+            <rect x="459" y="45" width="90" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="504" y="70" fill="#1C5E7C" font-weight="bold">移边界</text>
+            <path d="M504,87 L504,110 L70,110 L70,87" fill="none" stroke="#2E8BB0" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#b-arr)"/>
+            <text x="287" y="126" fill="#7794a3" font-size="11">循环：区间不断减半，直到命中</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 7.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-7-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<div class="section-header" id="section-7-5">
+    <h2>7.5 在有限次数内逼近</h2>
+    <div class="en-title">Converging Within a Limited Number of Tries</div>
+</div>
+
+<h3 id="sec-7-5-1">7.5.1 对数级次数（Logarithmic Number of Tries）</h3>
+
+<h4>7.5.1.1 为什么 10 次就够
+    <span class="en">Why 10 tries are enough</span>
+</h4>
+
+<p>每次减半，意味着 N 个数字最多需要 <strong>log₂(N)</strong> 次就能锁定。999 个数字，<code>log₂(999) ≈ 9.96</code>，向上取整就是 <strong>10 次</strong>——这正是关卡给你 10 次机会的原因，不多不少。这种"次数随规模只对数级增长"的特性，让二分查找即便面对海量数据也快得惊人。</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>数字范围 N</th><th>线性查找最坏次数</th><th>二分查找最坏次数</th></tr></thead>
+    <tbody>
+        <tr><td>10</td><td>10</td><td>4</td></tr>
+        <tr><td>1000</td><td>1000</td><td>10</td></tr>
+        <tr><td>1000000</td><td>1000000</td><td>20</td></tr>
+        <tr><td>10 亿</td><td>10 亿</td><td>约 30</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="info-box">
+    <span class="info-label">现实中的二分查找：</span>字典查词、猜价格游戏、数据库索引、Git 用 <code>git bisect</code> 定位引入 bug 的提交、甚至调试时"注释掉一半代码看问题还在不在"——本质上都是二分查找。它是计算机科学里应用最广的思想之一。
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-7-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-7-5-2">7.5.2 逐帧节奏：先打怪再猜（Beat the Ogre, Then Guess）</h3>
+
+<h4>7.5.2.1 每轮之间要先清场
+    <span class="en">Clear the ogre before the next guess</span>
+</h4>
+
+<p>关卡有个特别的节奏：每次猜测召唤的怪物，必须先被<strong>击败</strong>，你才能进行下一次猜测。所以主循环里要判断——如果场上有敌人，就先根据它的类型调整边界、再攻击它；如果没有敌人，才计算新中点并说出猜测。这样"猜一次 → 打一次"交替进行，直到猜中。</p>
+
+<!-- ==================== 7.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-7-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<div class="section-header" id="section-7-6">
+    <h2>7.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 猜猜我的数字 -->
+<div class="level-card" id="sec-7-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 16 关 · 猜猜我的数字</span>
+        <h3>❄️ 猜猜我的数字 —— 10 次机会破解谜语者</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/7-6-1-1_guess_my_number.png" alt="扣哒世界 猜猜我的数字关卡 - koudashijie.com">
+            <div class="caption">图2：猜猜我的数字——谜语者想了 1~999 的数字，每次猜测召唤 scout（太小）或 munchkin（太大）暗示，10 次内用二分查找命中</div>
+        </div>
+
+        <h4>策略：用二分查找把 999 个可能压进 10 次</h4>
+        <p>谜语者臭名昭著地爱撒谎，但他<strong>无法违背"更大/更小"这条规则</strong>——这就是我们的突破口。策略只有一个：<strong>永远猜当前区间的正中间</strong>。每次猜测都恰好排除一半可能，10 次减半足以从 999 个数字里锁定唯一答案。这是一场"用算法碾压运气"的博弈。</p>
+
+        <h4>思路拆解一：初始化两个边界</h4>
+        <p>先设定搜索范围。可能值是 1~999，但边界要设在范围<strong>之外</strong>：<code>lowBorder = lowestPossible - 1</code>（0）、<code>highBorder = highestPossible + 1</code>（1000）。这样取中点时才能覆盖到 1 和 999 两个端点，不会因边界卡死而漏掉答案。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：把边界设在可能范围两侧之外</span>
+lowestPossible <span class="punc">=</span> <span class="num">1</span>
+highestPossible <span class="punc">=</span> <span class="num">999</span>
+lowBorder <span class="punc">=</span> lowestPossible <span class="punc">-</span> <span class="num">1</span>       <span class="cmt"># 0</span>
+highBorder <span class="punc">=</span> highestPossible <span class="punc">+</span> <span class="num">1</span>     <span class="cmt"># 1000</span></pre>
+        </div>
+
+        <h4>思路拆解二：有敌人就"读暗示 + 移边界 + 清场"</h4>
+        <p>主循环每轮先看场上有没有怪物。若有，说明这是对上一次猜测的反馈：读 <code>enemy.type</code>，是 scout 就抬 <code>lowBorder</code>、是 munchkin 就压 <code>highBorder</code>，然后 <code>hero.attack</code> 击败它腾出下一次猜测的机会。移边界<strong>必须在攻击前或攻击时完成</strong>，否则怪物消失后就读不到暗示了。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：根据怪物类型调整区间，再清场</span>
+enemy <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">())</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="kw">if</span> enemy<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"scout"</span><span class="punc">:</span>       <span class="cmt"># 目标更大 → 猜小了</span>
+        lowBorder <span class="punc">=</span> guess
+    <span class="kw">elif</span> enemy<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"munchkin"</span><span class="punc">:</span>   <span class="cmt"># 目标更小 → 猜大了</span>
+        highBorder <span class="punc">=</span> guess
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>                  <span class="cmt"># 击败后才能继续猜</span></pre>
+        </div>
+
+        <h4>思路拆解三：没敌人就算新中点并说出</h4>
+        <p>当场上清空、没有怪物时，就该发起新一轮猜测：用取中点公式算出当前区间正中间的整数 <code>guess</code>，再 <code>hero.say(guess)</code> 把它喊给谜语者。喊完谜语者会召唤新怪物暗示——循环回到上一步继续收缩区间。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：没敌人时，猜当前区间的正中间</span>
+<span class="kw">else</span><span class="punc">:</span>
+    guess <span class="punc">=</span> <span class="fn">int</span><span class="punc">(</span>lowBorder <span class="punc">+</span> <span class="punc">(</span>highBorder <span class="punc">-</span> lowBorder<span class="punc">)</span> <span class="punc">/</span> <span class="num">2</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>guess<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么这套结构能赢：</span>整个循环就是"猜中点 → 打怪读暗示 → 移边界 → 再猜中点"的不断重复。因为每次都猜正中间，无论谜语者的数字偏哪边，都能排除一半——10 轮足以把 999 个可能收缩到 1 个。谜语者再怎么"骗"，也逃不出他自己定下的"更大/更小"规则。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">guess 要先有值：</span>第一轮循环时若先进入"有敌人"分支去用 <code>guess</code>，而 <code>guess</code> 还没被赋过值，程序会报错。实际关卡里第一帧通常没有敌人，会先走 <code>else</code> 分支算出首个 <code>guess</code>；但严谨起见，可在循环外给 <code>guess</code> 一个初始中点值。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 7.7 ==================== -->
+<div class="section-header" id="section-7-7">
+    <h2>7.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-7-7-1">7.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>7.7.1.1 二分查找的典型问题
+    <span class="en">Typical issues with binary search</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/7-7-1-1_common_errors.png" alt="扣哒世界 二分查找常见错误速查 - koudashijie.com">
+    <div class="caption">图3：方向记反、忘取整、边界设错、先攻击后读类型，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>高低方向记反——scout 是"更大"（抬下界）、munchkin 是"更小"（压上界），反了区间就永远收不拢。</li>
+        <li>忘记取整——中点要 <code>int(...)</code> 转成整数，否则猜测带小数，谜语者无法匹配。</li>
+        <li>边界初值设错——应设成 <code>lowestPossible-1</code> 和 <code>highestPossible+1</code>；若正好卡在 1 和 999，答案是端点时会漏掉。</li>
+        <li>攻击后才读类型——怪物被击败就消失了，必须<strong>先读 <code>enemy.type</code> 调整边界，再 <code>attack</code></strong>。</li>
+        <li>没有先打怪就猜——每次猜测前须清场，敌人还在时直接说下一个猜测会无效。</li>
+        <li>用了线性查找——从 1 逐个往上猜，10 次机会根本不够，必须用二分。</li>
+        <li>guess 未初始化——首轮就引用 <code>guess</code> 可能报错，注意让它先在 <code>else</code> 分支取到值。</li>
+        <li>边界更新方向写错——把 <code>lowBorder = guess</code> 和 <code>highBorder = guess</code> 对调，会导致区间朝反方向"扩张"。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:15fc1530ec:START anchor=sec-7-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="15fc1530ec">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，超过 520 万编程比赛专业选手也在玩，写代码就是你的超能力。</span>
+</aside>
+<!-- CC-PROTECTION:AD:15fc1530ec:END -->
+<!-- CC-PROTECTION:HIDDEN:6242577821:START anchor=sec-7-7-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="6242577821">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:6242577821:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你破解了谜语者的骗局！在封神冰川的这一单元，你掌握了计算机科学中最经典的算法之一——<strong>二分查找</strong>。你理解了它"每次猜正中间、据反馈砍掉一半"的核心思想；学会用 <code>lowBorder</code> 与 <code>highBorder</code> 圈定搜索区间、用取中点公式 <code>int(lowBorder + (highBorder - lowBorder) / 2)</code> 计算猜测；懂得根据怪物类型判断高低（<code>scout</code> 更大、<code>munchkin</code> 更小）并相应移动边界；也明白了为什么区间对数级收缩能让 10 次机会稳赢 999 个可能。在"猜猜我的数字"一关里，你把这套"折半逼近"的算法演绎得淋漓尽致。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>初始化边界</td><td>设在可能范围之外</td><td class="mono">low=lowest-1, high=highest+1</td></tr>
+            <tr><td>取中点</td><td>猜当前区间正中间</td><td class="mono">int(low + (high-low)/2)</td></tr>
+            <tr><td>读暗示</td><td>看怪物类型</td><td class="mono">enemy.type</td></tr>
+            <tr><td>scout</td><td>目标更大，抬下界</td><td class="mono">lowBorder = guess</td></tr>
+            <tr><td>munchkin</td><td>目标更小，压上界</td><td class="mono">highBorder = guess</td></tr>
+            <tr><td>清场再猜</td><td>先击败怪物</td><td class="mono">hero.attack(enemy)</td></tr>
+            <tr><td>说出猜测</td><td>喊给谜语者</td><td class="mono">hero.say(guess)</td></tr>
+            <tr><td>对数级效率</td><td>N 个数约 log₂N 次</td><td class="mono">999 → 约 10 次</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得果断放弃一半可能、用最少的尝试锁定真相——这份"折半的智慧"会伴随你走遍代码世界的每一座高峰。<br>
+        封神冰川的谜题已被你逐一破解，向着算法之巅，继续前行！🧊❄️🔍</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+<!-- CC-PROTECTION:HIDDEN:5603eee5da:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="5603eee5da">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC7-02D0B04C84E1。</span>
+<!-- CC-PROTECTION:HIDDEN:5603eee5da:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第七单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

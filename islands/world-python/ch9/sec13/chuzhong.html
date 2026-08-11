@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC13-A4851AAB8038">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十三单元：图遍历 · 深度优先搜索与连通路径 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 栈可视化 ===== */
+        .stack-viz {
+            display: inline-flex;
+            flex-direction: column-reverse;
+            border: 2px solid var(--primary-dark);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            min-width: 140px;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .stack-viz .scell {
+            padding: 8px 14px;
+            border-top: 1px dashed var(--border);
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            font-size: 0.85em;
+            text-align: center;
+        }
+        .stack-viz .scell.top { background: var(--warning); color: #fff; font-weight: 700; }
+
+        /* ===== 雷区网格 ===== */
+        .grid-map {
+            display: grid;
+            gap: 3px;
+            justify-content: center;
+            margin: 16px auto;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .grid-map .gcell {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 700;
+            background: #f0f6f9;
+            color: var(--text-lighter);
+            border: 1px solid var(--border);
+        }
+        .grid-map .gcell.mine { background: var(--primary-light); color: #fff; border-color: var(--primary-dark); }
+        .grid-map .gcell.path { background: #e8944a; color: #fff; border-color: #bd7415; }
+        .grid-map .gcell.start { background: #6bbf88; color: #fff; border-color: #2f7a45; }
+        .grid-map-legend { font-size: 0.82em; color: var(--text-light); margin-top: 6px; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC13-A4851AAB8038 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第十三单元</div>
+
+    <a href="#section-13-1" class="nav-section">13.1 图与网格遍历概述</a>
+    <a href="#sec-13-1-1" class="nav-sub">13.1.1 什么是图遍历</a>
+    <a href="#sec-13-1-2" class="nav-sub">13.1.2 网格即图</a>
+
+    <a href="#section-13-2" class="nav-section">13.2 深度优先搜索 DFS</a>
+    <a href="#sec-13-2-1" class="nav-sub">13.2.1 DFS 的核心思想</a>
+    <a href="#sec-13-2-2" class="nav-sub">13.2.2 DFS vs BFS</a>
+
+    <a href="#section-13-3" class="nav-section">13.3 用栈保存待访问节点</a>
+    <a href="#sec-13-3-1" class="nav-sub">13.3.1 栈驱动 DFS</a>
+    <a href="#sec-13-3-2" class="nav-sub">13.3.2 push 与 pop</a>
+
+    <a href="#section-13-4" class="nav-section">13.4 visited 判重</a>
+    <a href="#sec-13-4-1" class="nav-sub">13.4.1 避免重复访问</a>
+    <a href="#sec-13-4-2" class="nav-sub">13.4.2 坐标字符串化</a>
+
+    <a href="#section-13-5" class="nav-section">13.5 四方向邻接</a>
+    <a href="#sec-13-5-1" class="nav-sub">13.5.1 上下左右偏移</a>
+    <a href="#sec-13-5-2" class="nav-sub">13.5.2 越界检查</a>
+
+    <a href="#section-13-6" class="nav-section">13.6 连通性判断</a>
+    <a href="#sec-13-6-1" class="nav-sub">13.6.1 从底到顶找路径</a>
+
+    <a href="#section-13-7" class="nav-section">13.7 实战关卡精讲</a>
+    <a href="#sec-13-7-1" class="nav-sub">13.7.1 匹配火线</a>
+
+    <a href="#section-13-8" class="nav-section">13.8 常见错误</a>
+    <a href="#sec-13-8-1" class="nav-sub">13.8.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十三单元：图遍历 · 深度优先搜索与连通路径</h1>
+    <div class="subtitle">Unit 13: Graph Traversal — Depth-First Search &amp; Connectivity</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 匹配火线</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 13.1 ==================== -->
+<div class="section-header" id="section-13-1">
+    <h2>13.1 图与网格遍历概述</h2>
+    <div class="en-title">Overview of Graph and Grid Traversal</div>
+</div>
+
+<p>封神冰川的关口前,食人魔布下了密密麻麻的雷区来保护他们的酋长。这些地雷有个致命弱点——只要点燃一颗,它就会像多米诺骨牌一样,把上下左右<strong>相邻的地雷</strong>逐个引爆,形成一条蔓延的火线。你的任务,就是找出<strong>哪一列的地雷能一路连锁引爆、最终把火烧到酋长脚下</strong>。这本质上是一道经典的算法题:<strong>在网格上寻找一条连通的路径</strong>。这一单元虽然只有一个关卡,却是本课程数据结构的巅峰之作——你将掌握计算机科学中极其重要的<strong>图遍历</strong>技术,尤其是<strong>深度优先搜索(DFS)</strong>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>图/网格遍历</strong>的思想;掌握<strong>深度优先搜索(DFS)</strong>算法;用<strong>栈(stack)</strong>保存待访问节点(push/pop);用 <strong>visited 集合</strong>避免重复访问、防止死循环;把<strong>坐标转成字符串</strong>(如 <code>"row-col"</code>)来判重;做<strong>四方向邻接判断</strong>(上、下、左、右);并配合<strong>越界检查</strong>,最终判断从<strong>底部到顶部</strong>是否存在一条连通的地雷路径。
+</div>
+
+<h3 id="sec-13-1-1">13.1.1 什么是图遍历（What Is Graph Traversal）</h3>
+
+<h4>13.1.1.1 系统地访问所有能到达的节点
+    <span class="en">Systematically visit every reachable node</span>
+</h4>
+
+<p><strong>图(graph)</strong>是由<strong>节点(node)</strong>和连接节点的<strong>边(edge)</strong>组成的数据结构。<strong>图遍历(graph traversal)</strong>就是从某个起点出发,沿着边,系统地访问所有能到达的节点。它是解决"迷宫寻路""连通区域""社交网络关系""网页爬取"等无数问题的通用武器。本关的雷区,正是一张图:每颗地雷是一个节点,相邻的地雷之间有一条边。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 就像冰川上蔓延的裂缝</div>
+    想象冰面上有许多小裂口。你在最靠近自己的一排点一颗火星,火顺着相接触的裂缝向前爬——能碰到的裂缝都会烧起来,碰不到的则安然无恙。图遍历要回答的正是:"从起点出发,火最终能烧到哪些地方?"如果火能一路烧到酋长脚下那一排,你就找到了制胜的火线。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-13-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<h3 id="sec-13-1-2">13.1.2 网格即图（A Grid Is a Graph）</h3>
+
+<h4>13.1.2.1 每个格子是节点，相邻格子有边
+    <span class="en">Each cell is a node; adjacent cells share an edge</span>
+</h4>
+
+<p>本关的地图是一个<strong>字符串数组</strong>:每个字符 <code>"x"</code> 表示一颗地雷、<code>"."</code> 表示空地。这样的二维网格本身就是一张图——每个格子是节点,<strong>上下左右相邻</strong>且同为地雷的格子之间存在边。地图的<strong>第一行(索引 0)最靠近英雄/最靠上、酋长在这一侧;最后一行(底部)最靠近雷区起点</strong>。我们要找的,是一条从底部某颗地雷出发、能连通到顶部第 0 行的连锁路径。</p>
+
+<div class="concept-viz">
+    <div class="grid-map" style="grid-template-columns: repeat(5, 34px);">
+        <span class="gcell mine">x</span><span class="gcell">.</span><span class="gcell path">x</span><span class="gcell">.</span><span class="gcell mine">x</span>
+        <span class="gcell mine">x</span><span class="gcell">.</span><span class="gcell path">x</span><span class="gcell mine">x</span><span class="gcell">.</span>
+        <span class="gcell">.</span><span class="gcell">.</span><span class="gcell path">x</span><span class="gcell mine">x</span><span class="gcell">.</span>
+        <span class="gcell mine">x</span><span class="gcell">.</span><span class="gcell start">x</span><span class="gcell">.</span><span class="gcell mine">x</span>
+    </div>
+    <div class="grid-map-legend">
+        <span style="color:#2f7a45;font-weight:700;">■ 起点(底行地雷)</span> ·
+        <span style="color:#bd7415;font-weight:700;">■ 连通到顶部的火线</span> ·
+        <span style="color:var(--primary-dark);font-weight:700;">■ 孤立地雷</span> ·
+        · 空地
+    </div>
+</div>
+
+<!-- ==================== 13.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-13-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<div class="section-header" id="section-13-2">
+    <h2>13.2 深度优先搜索 DFS</h2>
+    <div class="en-title">Depth-First Search</div>
+</div>
+
+<h3 id="sec-13-2-1">13.2.1 DFS 的核心思想（The Core Idea of DFS）</h3>
+
+<h4>13.2.1.1 一条路走到黑，再回头换路
+    <span class="en">Go as deep as possible, then backtrack</span>
+</h4>
+
+<p><strong>深度优先搜索(Depth-First Search, DFS)</strong>的策略是"不撞南墙不回头":从起点出发,沿着一条路径尽可能<strong>往深处走</strong>,直到走不通(没有未访问的邻居)为止;然后<strong>回退</strong>到上一个还有别的岔路的节点,换一条路继续深入。如此反复,直到访问完所有能到达的节点。这种"先深入、再回头"的探索方式,正是它名字的由来。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔍 走迷宫的 DFS 直觉</div>
+    进了迷宫,你选一个方向一直走,遇到岔路就随便挑一条继续深入。走到死胡同,就原路退回最近的岔路口,换一条没走过的路再往里冲。只要坚持"能往前就往前,不行才回头",迟早能走遍所有相连的通道。DFS 就是把这种直觉写成算法。
+</div>
+
+<h3 id="sec-13-2-2">13.2.2 DFS vs BFS（Depth-First vs Breadth-First）</h3>
+
+<h4>13.2.2.1 深度优先与广度优先的区别
+    <span class="en">The difference between DFS and BFS</span>
+</h4>
+
+<p>图遍历有两大经典策略:<strong>深度优先搜索(DFS)</strong>用<strong>栈</strong>,一头扎到底再回头;<strong>广度优先搜索(BFS)</strong>用<strong>队列</strong>,像水波一样一圈圈向外扩散。对于"判断两点是否连通"这类问题,两者都能解决;本关采用 DFS + 栈的方案。有趣的是,把上一单元学的"栈"换成"队列",DFS 就变成了 BFS——它们的骨架几乎一样,区别只在于用什么容器存待访问节点。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>DFS 深度优先（本关）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">用<strong>栈</strong>(后进先出)。沿一条路深入到底再回头。实现简单,适合判断连通性、找任意一条路径。</p>
+    </div>
+    <div>
+        <h5>BFS 广度优先（对比）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">用<strong>队列</strong>(先进先出)。一层层向外扩散。能找到<strong>最短</strong>路径,但需要更多内存记录当前层。</p>
+    </div>
+</div>
+
+<div class="info-box">
+    <span class="info-label">本关只需判连通：</span>"匹配火线"要找的是"哪一列能连锁到顶部",本质是<strong>连通性判断</strong>——只要底部某颗地雷能通过连锁到达第 0 行即可,不要求最短。因此用 DFS + 栈最直接。理解了这一点,再回看代码结构就清晰多了。</div>
+
+<!-- ==================== 13.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-13-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<div class="section-header" id="section-13-3">
+    <h2>13.3 用栈保存待访问节点</h2>
+    <div class="en-title">Using a Stack to Hold Nodes to Visit</div>
+</div>
+
+<h3 id="sec-13-3-1">13.3.1 栈驱动 DFS（Stack-Driven DFS）</h3>
+
+<h4>13.3.1.1 栈的"后进先出"天然实现深入
+    <span class="en">A stack's LIFO nature naturally goes deep</span>
+</h4>
+
+<p>DFS 的迭代实现靠一个<strong>栈(stack)</strong>来记录"接下来要访问的节点"。栈是<strong>后进先出(LIFO)</strong>的:最后放进去的最先取出。每次从栈顶取一个节点来处理,把它未访问的邻居们再压入栈顶——由于最新压入的邻居会最先被取出,程序自然就"顺着最新发现的路往深处钻",完美契合深度优先的行为。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 500 170" width="500" role="img" aria-label="栈驱动DFS">
+        <text x="250" y="24" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">栈:后进先出,驱动"往深处走"</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle">
+            <rect x="180" y="45" width="140" height="26" rx="4" fill="#D98A2B" stroke="#e8a15a"/><text x="250" y="63" fill="#fff">最新邻居 ← 栈顶(先出)</text>
+            <rect x="180" y="73" width="140" height="26" rx="4" fill="#234254" stroke="#4FB5D8"/><text x="250" y="91" fill="#a5d4e8">…</text>
+            <rect x="180" y="101" width="140" height="26" rx="4" fill="#234254" stroke="#4FB5D8"/><text x="250" y="119" fill="#a5d4e8">较早节点</text>
+            <rect x="180" y="129" width="140" height="26" rx="4" fill="#2f5a3f" stroke="#6bbf88"/><text x="250" y="147" fill="#a8e0be">起点 ← 栈底(后出)</text>
+        </g>
+        <text x="380" y="63" fill="#e8a15a" font-size="11" font-family="sans-serif">pop 从这里取</text>
+        <text x="380" y="147" fill="#a8e0be" font-size="11" font-family="sans-serif">push 从这里进</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-13-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+<!-- CC-PROTECTION:HIDDEN:4b19d3d88c:START anchor=sec-13-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4b19d3d88c">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:4b19d3d88c:END -->
+
+<h3 id="sec-13-3-2">13.3.2 push 与 pop（Push and Pop）</h3>
+
+<h4>13.3.2.1 压入待访问、弹出来处理
+    <span class="en">Push what's to visit, pop to process</span>
+</h4>
+
+<p>在关卡里,节点用 <code>[row, col]</code>(行、列坐标)表示。核心操作两个:<strong><code>stack.push([row, col])</code></strong> 把一个待访问节点压入栈顶;<strong><code>stack.pop()</code></strong> 从栈顶取出一个节点来处理。主循环 <code>while len(stack):</code>(栈非空)不断弹出、处理、再把新邻居压入,直到栈空——那时说明这一片连通区域已全部走完。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># DFS 的骨架:栈驱动的主循环</span>
+stack <span class="punc">=</span> <span class="punc">[]</span>
+visited <span class="punc">=</span> <span class="punc">[]</span>
+
+<span class="cmt"># 先把底行所有地雷作为起点压入栈</span>
+<span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>width<span class="punc">):</span>
+    <span class="kw">if</span> fieldMap<span class="punc">[</span>height <span class="punc">-</span> <span class="num">1</span><span class="punc">][</span>j<span class="punc">]</span> <span class="punc">==</span> <span class="str">"x"</span><span class="punc">:</span>
+        stack<span class="punc">.</span><span class="fn">push</span><span class="punc">([</span>height <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> j<span class="punc">])</span>
+
+<span class="kw">while</span> <span class="fn">len</span><span class="punc">(</span>stack<span class="punc">):</span>          <span class="cmt"># 栈非空就继续</span>
+    state <span class="punc">=</span> stack<span class="punc">.</span><span class="fn">pop</span><span class="punc">()</span>   <span class="cmt"># 取出栈顶节点</span>
+    row <span class="punc">=</span> state<span class="punc">[</span><span class="num">0</span><span class="punc">]</span>
+    col <span class="punc">=</span> state<span class="punc">[</span><span class="num">1</span><span class="punc">]</span>
+    <span class="cmt"># … 处理该节点、把邻居压入栈 …</span></pre>
+</div>
+
+<div class="stack-viz">
+    <span class="scell">[3, 2] 起点</span>
+    <span class="scell">[2, 2]</span>
+    <span class="scell top">[1, 2] ← 栈顶,下一个 pop</span>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">栈空 = 走完这片区域：</span>当 <code>while len(stack)</code> 条件为假(栈空)时,意味着从起点出发能连锁到的所有地雷都已访问过。若途中没能到达第 0 行,就说明这条火线烧不到酋长,该换起点了。</div>
+
+<!-- ==================== 13.4 ==================== -->
+<div class="section-header" id="section-13-4">
+    <h2>13.4 visited 判重</h2>
+    <div class="en-title">Avoiding Repeats with a visited Set</div>
+</div>
+
+<h3 id="sec-13-4-1">13.4.1 避免重复访问（Avoid Revisiting）</h3>
+
+<h4>13.4.1.1 没有 visited 就会无限循环
+    <span class="en">Without visited, you loop forever</span>
+</h4>
+
+<p>网格里的邻接是<strong>双向</strong>的:A 是 B 的邻居,B 也是 A 的邻居。如果不做记录,程序会在 A、B 之间来回横跳、永远停不下来。解决办法是维护一个 <strong><code>visited</code></strong> 集合,记录已经处理过的节点。每次取出一个节点,先检查它是否已在 <code>visited</code> 里——若是,就 <code>continue</code> 跳过;否则把它加入 <code>visited</code> 再处理。这样每个节点最多处理一次,循环必然终止。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用 visited 防止重复访问、避免死循环</span>
+strPos <span class="punc">=</span> <span class="fn">str</span><span class="punc">(</span>row<span class="punc">)</span> <span class="punc">+</span> <span class="str">"-"</span> <span class="punc">+</span> <span class="fn">str</span><span class="punc">(</span>col<span class="punc">)</span>   <span class="cmt"># 坐标转字符串</span>
+<span class="kw">if</span> strPos <span class="kw">in</span> visited<span class="punc">:</span>
+    <span class="kw">continue</span>                    <span class="cmt"># 已访问过,跳过</span>
+visited<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>strPos<span class="punc">)</span>          <span class="cmt"># 标记为已访问</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-13-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:0f67ce34e1:START anchor=sec-13-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0f67ce34e1">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:0f67ce34e1:END -->
+
+<h3 id="sec-13-4-2">13.4.2 坐标字符串化（Stringifying Coordinates）</h3>
+
+<h4>13.4.2.1 为什么用 "row-col" 表示坐标
+    <span class="en">Why represent a coordinate as "row-col"</span>
+</h4>
+
+<p>判断"某坐标是否访问过",需要一种能<strong>可靠比较</strong>的表示方式。关卡把坐标 <code>[row, col]</code> 拼成一个字符串,如 <code>"2-3"</code>,再放进 <code>visited</code> 判重。用字符串的好处是:同一个坐标永远生成同一个字符串,<code>in</code> 判断简单可靠,不用担心比较两个列表是否"相等"的麻烦。行列之间用分隔符(如 <code>"-"</code>)隔开,能避免歧义——否则 <code>1</code> 和 <code>12</code> 拼接可能与 <code>12</code> 和 <code>1</code> 混淆。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 480 90" width="480" role="img" aria-label="坐标字符串化">
+        <g font-family="monospace" font-size="13" text-anchor="middle">
+            <rect x="40" y="30" width="110" height="36" rx="8" fill="#234254" stroke="#4FB5D8"/><text x="95" y="53" fill="#a5d4e8">[2, 3]</text>
+            <text x="175" y="53" fill="#2E8BB0" font-size="18">→</text>
+            <rect x="200" y="30" width="180" height="36" rx="8" fill="#2f5a3f" stroke="#6bbf88"/><text x="290" y="53" fill="#a8e0be">"2-3"</text>
+            <text x="420" y="53" fill="#7794a3" font-size="11" font-family="sans-serif">放入 visited</text>
+        </g>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">拼接前记得转字符串：</span>在 Python 里 <code>row</code> 和 <code>col</code> 是整数,直接 <code>row + "-" + col</code> 会报错(数字不能和字符串相加)。要先用 <code>str(row)</code>、<code>str(col)</code> 转成字符串再拼接。这是把坐标字符串化时最容易忽略的一步。</div>
+
+<!-- ==================== 13.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-13-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-13-5">
+    <h2>13.5 四方向邻接判断</h2>
+    <div class="en-title">Four-Direction Adjacency</div>
+</div>
+
+<h3 id="sec-13-5-1">13.5.1 上下左右偏移（Up/Down/Left/Right Offsets）</h3>
+
+<h4>13.5.1.1 用偏移量数组枚举四个邻居
+    <span class="en">Enumerate four neighbors with an offset array</span>
+</h4>
+
+<p>网格里每个格子有四个正交邻居:上、下、左、右(<strong>不含对角线</strong>,因为多米诺链式反应只在水平和垂直方向传播)。与其写四段重复代码,不如用一个<strong>偏移量数组</strong> <code>neighbourDiffs</code> 统一枚举:每个偏移是 <code>[行变化, 列变化]</code>。遍历这个数组,把当前坐标加上偏移,就能依次得到四个邻居的坐标。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 四方向偏移:上、下、左、右(无对角线)</span>
+neighbourDiffs <span class="punc">=</span> <span class="punc">[[</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="num">0</span><span class="punc">],</span> <span class="punc">[</span><span class="num">1</span><span class="punc">,</span> <span class="num">0</span><span class="punc">],</span> <span class="punc">[</span><span class="num">0</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">],</span> <span class="punc">[</span><span class="num">0</span><span class="punc">,</span> <span class="num">1</span><span class="punc">]]</span>
+
+<span class="kw">for</span> diff <span class="kw">in</span> neighbourDiffs<span class="punc">:</span>
+    neighRow <span class="punc">=</span> row <span class="punc">+</span> diff<span class="punc">[</span><span class="num">0</span><span class="punc">]</span>   <span class="cmt"># 邻居的行</span>
+    neighCol <span class="punc">=</span> col <span class="punc">+</span> diff<span class="punc">[</span><span class="num">1</span><span class="punc">]</span>   <span class="cmt"># 邻居的列</span>
+    <span class="cmt"># … 检查这个邻居 …</span></pre>
+</div>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 260 200" width="260" role="img" aria-label="四方向邻接">
+        <g font-family="monospace" font-size="12" text-anchor="middle">
+            <rect x="100" y="15" width="60" height="45" rx="6" fill="#4FB5D8"/><text x="130" y="42" fill="#fff">上 [-1,0]</text>
+            <rect x="100" y="80" width="60" height="45" rx="6" fill="#e8944a" stroke="#bd7415" stroke-width="2"/><text x="130" y="107" fill="#fff">当前</text>
+            <rect x="100" y="145" width="60" height="45" rx="6" fill="#4FB5D8"/><text x="130" y="172" fill="#fff">下 [1,0]</text>
+            <rect x="20" y="80" width="70" height="45" rx="6" fill="#4FB5D8"/><text x="55" y="107" fill="#fff">左[0,-1]</text>
+            <rect x="170" y="80" width="70" height="45" rx="6" fill="#4FB5D8"/><text x="205" y="107" fill="#fff">右[0,1]</text>
+        </g>
+    </svg>
+</div>
+
+<h3 id="sec-13-5-2">13.5.2 越界检查（Boundary Checks）</h3>
+
+<h4>13.5.2.1 邻居可能跑到地图外面
+    <span class="en">A neighbor might fall outside the map</span>
+</h4>
+
+<p>算出的邻居坐标可能超出地图边界——比如最左列的格子没有"左邻居",最上行的格子没有"上邻居"。必须先做<strong>越界检查</strong>:如果 <code>neighRow</code> 或 <code>neighCol</code> 小于 0,或者大于等于地图的高/宽,就 <code>continue</code> 跳过这个非法邻居。只有落在地图内、且是地雷 <code>"x"</code>、且未访问过的邻居,才值得压入栈继续探索。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 越界检查 + 是否地雷 + 是否已访问</span>
+<span class="kw">if</span> neighRow <span class="punc">&lt;</span> <span class="num">0</span> <span class="kw">or</span> neighCol <span class="punc">&lt;</span> <span class="num">0</span> <span class="kw">or</span> neighRow <span class="punc">&gt;=</span> height <span class="kw">or</span> neighCol <span class="punc">&gt;=</span> width<span class="punc">:</span>
+    <span class="kw">continue</span>                    <span class="cmt"># 跑出地图,跳过</span>
+
+strNeighPos <span class="punc">=</span> <span class="fn">str</span><span class="punc">(</span>neighRow<span class="punc">)</span> <span class="punc">+</span> <span class="str">"-"</span> <span class="punc">+</span> <span class="fn">str</span><span class="punc">(</span>neighCol<span class="punc">)</span>
+<span class="kw">if</span> strNeighPos <span class="kw">in</span> visited<span class="punc">:</span>
+    <span class="kw">continue</span>                    <span class="cmt"># 已访问,跳过</span>
+<span class="kw">if</span> fieldMap<span class="punc">[</span>neighRow<span class="punc">][</span>neighCol<span class="punc">]</span> <span class="punc">==</span> <span class="str">"x"</span><span class="punc">:</span>
+    stack<span class="punc">.</span><span class="fn">push</span><span class="punc">([</span>neighRow<span class="punc">,</span> neighCol<span class="punc">])</span>   <span class="cmt"># 是地雷,压栈待访问</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">越界检查必须在访问之前：</span>如果不先判越界就去读 <code>fieldMap[neighRow][neighCol]</code>,负索引或超界索引会导致取到错误数据甚至报错。<strong>先判边界、再访问数据</strong>是网格遍历里不可省略的防护顺序。</div>
+
+<!-- ==================== 13.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:c1d65681b7:START anchor=sec-13-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="c1d65681b7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，编程小白都在偷偷玩的闯关游戏，写一行代码角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c1d65681b7:END -->
+<!-- CC-PROTECTION:HIDDEN:61a9bcff9c:START anchor=sec-13-5-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="61a9bcff9c">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC13-A4851AAB8038。</span>
+<!-- CC-PROTECTION:HIDDEN:61a9bcff9c:END -->
+
+<div class="section-header" id="section-13-6">
+    <h2>13.6 连通性判断</h2>
+    <div class="en-title">Determining Connectivity</div>
+</div>
+
+<h3 id="sec-13-6-1">13.6.1 从底到顶找路径（Path from Bottom to Top）</h3>
+
+<h4>13.6.1.1 到达第 0 行即为成功
+    <span class="en">Reaching row 0 means success</span>
+</h4>
+
+<p>整个搜索的目标很明确:<strong>从底行(最后一行)的地雷出发,看能否连锁到达顶行(第 0 行)。</strong>因此在弹出每个节点处理时,先检查它的行号——一旦 <code>row == 0</code>,说明火线已经烧到了最靠近酋长的那一排,当前这一列就是答案!记下它的列号 <code>resultColumn = col</code>,然后 <code>break</code> 结束搜索。这就是把 DFS 用于"连通性判断"的关键落点。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 到达顶部第 0 行 → 找到通往酋长的火线</span>
+<span class="kw">if</span> row <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>
+    resultColumn <span class="punc">=</span> col   <span class="cmt"># 记下这一列</span>
+    <span class="kw">break</span>                 <span class="cmt"># 找到答案,结束搜索</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="从底到顶搜索流程">
+        <defs>
+            <marker id="g-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="11.5" text-anchor="middle">
+            <rect x="12" y="45" width="100" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="62" y="70" fill="#1C5E7C" font-weight="bold">底行地雷入栈</text>
+            <line x1="114" y1="65" x2="140" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#g-arr)"/>
+            <rect x="145" y="45" width="90" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="190" y="70" fill="#1C5E7C" font-weight="bold">弹出栈顶</text>
+            <line x1="237" y1="65" x2="263" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#g-arr)"/>
+            <rect x="268" y="45" width="100" height="40" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/><text x="318" y="70" fill="#2f7a45" font-weight="bold">row==0?成功</text>
+            <line x1="370" y1="65" x2="396" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#g-arr)"/>
+            <rect x="401" y="45" width="150" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="476" y="70" fill="#1C5E7C" font-weight="bold">否则邻居入栈,循环</text>
+            <path d="M476,87 L476,108 L190,108 L190,87" fill="none" stroke="#2E8BB0" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#g-arr)"/>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 13.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-13-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<div class="section-header" id="section-13-7">
+    <h2>13.7 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>,只展示用于说明的关键片段,完整通关程序请你自己动手完成。</p>
+
+<!-- 匹配火线 -->
+<div class="level-card" id="sec-13-7-1">
+    <div class="level-head">
+        <span class="lv-num">第 30 关 · 匹配火线</span>
+        <h3>🔥 匹配火线 —— DFS 寻找连锁引爆的路径</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/13-7-1-1_match_fireline.png" alt="扣哒世界 匹配火线关卡 - koudashijie.com">
+            <div class="caption">图2：匹配火线——雷区是字符串网格,用 DFS + 栈从底行地雷向上搜索,找出能连锁引爆到酋长(顶行)的那一列</div>
+        </div>
+
+        <h4>策略:把雷区当成图,用 DFS 判断"哪列能连通到顶部"</h4>
+        <p>侦察员给出雷区地图 <code>fieldMap</code>(字符串数组,<code>"x"</code> 是地雷、<code>"."</code> 是空地),第一行(索引 0)靠近酋长,最后一行靠近你。地雷会与上下左右相邻的地雷链式引爆。策略:<strong>从底行的每颗地雷出发做 DFS,沿相邻地雷向上蔓延,若能到达第 0 行,那一列就是能引爆酋长的火线。</strong>踩上那一列的地雷即可获胜。</p>
+
+        <h4>思路拆解一:准备地图尺寸与起点</h4>
+        <p>先取地图,算出 <code>height = len(fieldMap)</code> 和 <code>width = len(fieldMap[0])</code>。初始化空栈 <code>stack</code> 和空 <code>visited</code>。然后遍历底行(<code>height - 1</code>)每一列,把是地雷的格子作为起点 <code>push([height-1, j])</code> 压入栈——这体现了"从底部开始搜索"的要求。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:尺寸 + 底行起点入栈</span>
+fieldMap <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()[</span><span class="num">0</span><span class="punc">]</span><span class="punc">.</span><span class="fn">getMap</span><span class="punc">()</span>
+height <span class="punc">=</span> <span class="fn">len</span><span class="punc">(</span>fieldMap<span class="punc">)</span>
+width <span class="punc">=</span> <span class="fn">len</span><span class="punc">(</span>fieldMap<span class="punc">[</span><span class="num">0</span><span class="punc">])</span>
+stack <span class="punc">=</span> <span class="punc">[]</span>
+visited <span class="punc">=</span> <span class="punc">[]</span>
+
+<span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>width<span class="punc">):</span>
+    <span class="kw">if</span> fieldMap<span class="punc">[</span>height <span class="punc">-</span> <span class="num">1</span><span class="punc">][</span>j<span class="punc">]</span> <span class="punc">==</span> <span class="str">"x"</span><span class="punc">:</span>
+        stack<span class="punc">.</span><span class="fn">push</span><span class="punc">([</span>height <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> j<span class="punc">])</span>   <span class="cmt"># 底行地雷 = 起点</span></pre>
+        </div>
+
+        <h4>思路拆解二:DFS 主循环 + 到顶判定</h4>
+        <p>主循环 <code>while len(stack):</code> 弹出栈顶节点、拆出 <code>row</code>/<code>col</code>。先做<strong>到顶判定</strong>:若 <code>row == 0</code> 则记下 <code>resultColumn = col</code> 并 <code>break</code>。再做<strong>判重</strong>:坐标字符串化,若在 <code>visited</code> 就跳过,否则标记。这几步的<strong>先后顺序</strong>很关键——到顶判定应在判重之前,才能第一时间捕捉成功。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:主循环核心逻辑</span>
+<span class="kw">while</span> <span class="fn">len</span><span class="punc">(</span>stack<span class="punc">):</span>
+    state <span class="punc">=</span> stack<span class="punc">.</span><span class="fn">pop</span><span class="punc">()</span>
+    row <span class="punc">=</span> state<span class="punc">[</span><span class="num">0</span><span class="punc">]</span>
+    col <span class="punc">=</span> state<span class="punc">[</span><span class="num">1</span><span class="punc">]</span>
+    strPos <span class="punc">=</span> <span class="fn">str</span><span class="punc">(</span>row<span class="punc">)</span> <span class="punc">+</span> <span class="str">"-"</span> <span class="punc">+</span> <span class="fn">str</span><span class="punc">(</span>col<span class="punc">)</span>
+    <span class="kw">if</span> row <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>              <span class="cmt"># 到达顶部 → 成功</span>
+        resultColumn <span class="punc">=</span> col
+        <span class="kw">break</span>
+    <span class="kw">if</span> strPos <span class="kw">in</span> visited<span class="punc">:</span>      <span class="cmt"># 判重</span>
+        <span class="kw">continue</span>
+    visited<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>strPos<span class="punc">)</span>
+    <span class="cmt"># … 接着枚举四方向邻居并压栈(见 13.5)…</span></pre>
+        </div>
+
+        <h4>思路拆解三:把列号换算成坐标去踩雷</h4>
+        <p>找到 <code>resultColumn</code> 后,用关卡给的常量把列号换算成实际的 X 坐标:<code>resultX = resultColumn * mineDistance + firstXPos</code>,再 <code>moveXY</code> 走过去踩上那颗地雷,引爆整条火线。逻辑与地图数据之间靠这套换算公式对齐。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:列号 → 坐标,前往引爆</span>
+resultX <span class="punc">=</span> resultColumn <span class="punc">*</span> mineDistance <span class="punc">+</span> firstXPos
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>resultX<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>   <span class="cmt"># 先横向对齐</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>resultX<span class="punc">,</span> firstYPos<span class="punc">)</span>     <span class="cmt"># 再踏上地雷</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">网格坐标与游戏坐标的桥梁：</span>算法在"行列网格"里思考,游戏世界用"XY 米"定位。<code>resultColumn * mineDistance + firstXPos</code> 正是连接两者的桥——列号乘以雷距、再加上第一列的起始 X。理解这种"逻辑坐标 ↔ 物理坐标"的换算,是把算法落到实际场景的常见技能。</div>
+
+        <div class="warn-box">
+            <span class="warn-label">压栈时也要判重与判雷：</span>为效率和正确性,压入邻居前最好先确认它是地雷、未访问且未越界。同时切记坐标拼接前用 <code>str()</code> 转换,并且四方向邻接<strong>不含对角线</strong>——多米诺只沿水平和垂直传播。</div>
+    </div>
+</div>
+
+<!-- ==================== 13.8 ==================== -->
+<div class="section-header" id="section-13-8">
+    <h2>13.8 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-13-8-1">13.8.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>13.8.1.1 DFS 与网格遍历的典型问题
+    <span class="en">Typical issues with DFS and grid traversal</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/13-8-1-1_common_errors.png" alt="扣哒世界 图遍历常见错误速查 - koudashijie.com">
+    <div class="caption">图3：忘记 visited 导致死循环、漏做越界检查、坐标未转字符串、含了对角线,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘记 visited 判重——不记录已访问节点会在相邻格子间来回横跳,陷入<strong>无限循环</strong>。</li>
+        <li>漏做越界检查——不判 <code>&lt; 0</code> 或 <code>&gt;= height/width</code> 就访问 <code>fieldMap</code>,会取到错误数据或报错。</li>
+        <li>坐标未转字符串——<code>row + "-" + col</code> 中 row/col 是整数,须先 <code>str()</code> 转换再拼接。</li>
+        <li>邻接含了对角线——本关多米诺只沿水平/垂直传播,四方向偏移<strong>不能</strong>加入斜对角。</li>
+        <li>到顶判定放错位置——<code>if row == 0</code> 应在判重之后或恰当位置及时捕捉成功,顺序错会漏判或误判。</li>
+        <li>用错容器——DFS 要用<strong>栈(pop 取栈顶)</strong>;若改用队列取队首,行为就变成 BFS 了(本关两者虽都可行,但要清楚区别)。</li>
+        <li>忘记从底行开始——起点应是<strong>底行(height-1)</strong>的所有地雷,搞错起点方向会找不到通往顶部的路径。</li>
+        <li>列号换算错——<code>resultColumn * mineDistance + firstXPos</code> 的公式或常量用错,会走到错误位置踩空。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:f739b47d40:START anchor=sec-13-8-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="f739b47d40">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，课程覆盖全球 190 多个国家，获得 32 万名全球教师的信赖。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f739b47d40:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你攀上了本课程数据结构的顶峰——<strong>图遍历与深度优先搜索</strong>!在封神冰川的"匹配火线"一关里,你理解了<strong>网格就是一张图</strong>(格子是节点、相邻格子有边);掌握了<strong>深度优先搜索(DFS)</strong>"一条路走到底、再回头换路"的思想;学会了用<strong>栈(stack)</strong>保存待访问节点(<code>push</code>/<code>pop</code>)来驱动搜索;懂得用 <strong>visited 集合</strong>配合<strong>坐标字符串化</strong>(<code>"row-col"</code>)来判重、避免死循环;能做<strong>四方向邻接判断</strong>(上下左右、不含对角线)并配合<strong>越界检查</strong>;最终以"从底行搜索到第 0 行"的方式完成了<strong>连通性判断</strong>。这套方法是无数寻路、连通、搜索问题的通用钥匙。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>图/网格遍历</td><td>格子是节点</td><td class="mono">fieldMap[row][col]</td></tr>
+            <tr><td>DFS 深度优先</td><td>深入到底再回头</td><td class="mono">用栈 pop 栈顶</td></tr>
+            <tr><td>栈驱动</td><td>push 待访问, pop 处理</td><td class="mono">stack.push / stack.pop</td></tr>
+            <tr><td>visited 判重</td><td>避免重复与死循环</td><td class="mono">if strPos in visited</td></tr>
+            <tr><td>坐标字符串化</td><td>可靠比较坐标</td><td class="mono">str(row)+"-"+str(col)</td></tr>
+            <tr><td>四方向邻接</td><td>上下左右无对角</td><td class="mono">[[-1,0],[1,0],[0,-1],[0,1]]</td></tr>
+            <tr><td>越界检查</td><td>访问前先判边界</td><td class="mono">if r&lt;0 or c&lt;0 or r&gt;=h …</td></tr>
+            <tr><td>连通性判断</td><td>到达第 0 行即成功</td><td class="mono">if row == 0: break</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把复杂世界抽象成"节点与边",再用一枚栈、一个 visited 集合系统地探索每一条路径——图遍历这份洞察万物联系的智慧,是你算法之路上最锋利的武器之一。<br>
+        封神冰川的图遍历试炼圆满完成,恭喜你走完计算机科学 6 的数据结构之旅!🧊❄️🔥</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第十三单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

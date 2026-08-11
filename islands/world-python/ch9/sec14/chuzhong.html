@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC14-C5EE53A03CC7">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十四单元：动态规划 · 最优子结构与路径决策 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== DP 表格可视化 ===== */
+        .dp-grid {
+            display: grid;
+            gap: 4px;
+            just-content: center;
+            margin: 16px auto;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .dp-grid .dcell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 700;
+            background: #f0f6f9;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+        }
+        .dp-grid .dcell.zero { background: #eef3f5; color: var(--text-lighter); font-weight: 400; }
+        .dp-grid .dcell.coin { background: var(--primary-light); color: #fff; border-color: var(--primary-dark); }
+        .dp-grid .dcell.best { background: #e8944a; color: #fff; border-color: #bd7415; }
+        .dp-grid .dcell.start { background: #6bbf88; color: #fff; border-color: #2f7a45; }
+        .dp-legend { font-size: 0.82em; color: var(--text-light); margin-top: 8px; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC14-C5EE53A03CC7 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第十四单元</div>
+
+    <a href="#section-14-1" class="nav-section">14.1 动态规划概述</a>
+    <a href="#sec-14-1-1" class="nav-sub">14.1.1 什么是动态规划</a>
+    <a href="#sec-14-1-2" class="nav-sub">14.1.2 最优子结构</a>
+
+    <a href="#section-14-2" class="nav-section">14.2 二维数组建模</a>
+    <a href="#sec-14-2-1" class="nav-sub">14.2.1 硬币地图</a>
+    <a href="#sec-14-2-2" class="nav-sub">14.2.2 坐标换算索引</a>
+
+    <a href="#section-14-3" class="nav-section">14.3 自底向上递推</a>
+    <a href="#sec-14-3-1" class="nav-sub">14.3.1 从底部逐行累计</a>
+    <a href="#sec-14-3-2" class="nav-sub">14.3.2 倒序遍历</a>
+
+    <a href="#section-14-4" class="nav-section">14.4 状态转移方程</a>
+    <a href="#sec-14-4-1" class="nav-sub">14.4.1 取左下右下较大者</a>
+    <a href="#sec-14-4-2" class="nav-sub">14.4.2 边界处理</a>
+
+    <a href="#section-14-5" class="nav-section">14.5 选起点与回溯路径</a>
+    <a href="#sec-14-5-1" class="nav-sub">14.5.1 选最优起点</a>
+    <a href="#sec-14-5-2" class="nav-sub">14.5.2 记录左右方向</a>
+
+    <a href="#section-14-6" class="nav-section">14.6 沿路径移动</a>
+    <a href="#sec-14-6-1" class="nav-sub">14.6.1 按方向前进</a>
+
+    <a href="#section-14-7" class="nav-section">14.7 实战关卡精讲</a>
+    <a href="#sec-14-7-1" class="nav-sub">14.7.1 黄金选择</a>
+
+    <a href="#section-14-8" class="nav-section">14.8 常见错误</a>
+    <a href="#sec-14-8-1" class="nav-sub">14.8.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十四单元：动态规划 · 最优子结构与路径决策</h1>
+    <div class="subtitle">Unit 14: Dynamic Programming — Optimal Substructure &amp; Path Decisions</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 黄金选择</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 14.1 ==================== -->
+<div class="section-header" id="section-14-1">
+    <h2>14.1 动态规划概述</h2>
+    <div class="en-title">Overview of Dynamic Programming</div>
+</div>
+
+<p>封神冰川的最后一道试炼里,门卫要求你收集足够多的黄金才能通关。硬币一行行铺在唯一的出口通道上,你每往前走一行只能拾取一枚,而且只能选下一行里<strong>紧邻的左右两枚</strong>之一。一步走错,致命的光束就会将你烧成灰烬。要在"每步只有局部两个选择"的约束下,收集到<strong>全局最多</strong>的黄金——这正是计算机科学中一门威力强大的算法思想:<strong>动态规划(Dynamic Programming, DP)</strong>。这是本课程数据结构与算法之旅的压轴单元,也是你从"会写代码"迈向"会设计算法"的关键一跃。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用<strong>二维数组</strong>存储每行每列的硬币价值;<strong>从底部向上逐行计算</strong>每个格子出发能收集到的最大累计值;写出<strong>状态转移方程</strong>(把当前格加上"左下、右下"中较大者);从顶行<strong>选出最优起点</strong>;<strong>回溯记录每一步的左右方向</strong>;最终根据这条路径<strong>移动英雄</strong>、精准踩过每一枚硬币。
+</div>
+
+<h3 id="sec-14-1-1">14.1.1 什么是动态规划（What Is Dynamic Programming）</h3>
+
+<h4>14.1.1.1 用子问题的解拼出大问题的解
+    <span class="en">Build the big answer from sub-answers</span>
+</h4>
+
+<p><strong>动态规划</strong>是一种把复杂问题拆成一系列<strong>重叠子问题</strong>、并<strong>复用子问题结果</strong>来求最优解的方法。它的精髓在于:不重复计算已经算过的子问题,而是把每个子问题的答案<strong>存起来</strong>(通常放在一张表里),后续直接查用。相比"暴力枚举所有路径"(路径数会指数级爆炸),DP 把工作量降到了可控的多项式级别。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 就像规划下山的最佳雪道</div>
+    你站在冰川顶端要滑到山脚,每个岔路口只能往左下或右下。与其把所有可能的路线全走一遍(那太多了),不如反过来想:先算出"从山脚每个点出发能得多少分",再一层层往上推"从每个岔路口出发能得的最高分"。等推回山顶,哪条起步方向分最高,一眼就能看出——每个岔路口的答案都只算一次,却被上层反复复用。这就是动态规划的智慧。
+</div>
+
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-14-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+<!-- CC-PROTECTION:HIDDEN:562fc81aeb:START anchor=sec-14-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="562fc81aeb">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:562fc81aeb:END -->
+
+<h3 id="sec-14-1-2">14.1.2 最优子结构（Optimal Substructure）</h3>
+
+<h4>14.1.2.1 大问题的最优解含子问题的最优解
+    <span class="en">The best overall solution contains best sub-solutions</span>
+</h4>
+
+<p>动态规划能奏效,靠的是问题具备<strong>最优子结构</strong>:一条从某格出发的最优路径,必然由"这一格 + 它下面某个邻居出发的最优路径"构成。所以只要知道了"左下格"和"右下格"各自能拿到的最大值,当前格的最大值就等于<strong>自身价值 + 两者中的较大者</strong>。这个"局部最优拼出全局最优"的性质,正是我们敢于逐行递推的底气。</p>
+
+<div class="info-box">
+    <span class="info-label">DP 的两大前提：</span>一是<strong>最优子结构</strong>(大问题的最优解可由子问题最优解组合而来);二是<strong>重叠子问题</strong>(同一个子问题会被多次用到,值得存起来复用)。本关的硬币路径两条件都满足——每个格子的"最大累计值"会被它上方的多个格子引用,因此用一张表存下来最划算。</div>
+
+<!-- ==================== 14.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-14-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+<div class="section-header" id="section-14-2">
+    <h2>14.2 二维数组建模</h2>
+    <div class="en-title">Modeling with a 2D Array</div>
+</div>
+
+<h3 id="sec-14-2-1">14.2.1 硬币地图（The Gold Map）</h3>
+
+<h4>14.2.1.1 把散落的硬币装进网格
+    <span class="en">Place scattered coins into a grid</span>
+</h4>
+
+<p>第一步是把游戏世界里散落的硬币,整理成一个整齐的<strong>二维数组(gold map)</strong>:行代表第几排、列代表这一排的第几个位置,每个元素存该位置硬币的价值,没硬币的地方填 0。关卡用列表推导式先造出一张全 0 的模板,再把每枚硬币按坐标"归位"填进去。这种"先建表、再填值"的建模,是动态规划的起点。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 先造一张全 0 的二维模板,再填入硬币价值</span>
+<span class="kw">def</span> <span class="fn">makeGoldMap</span><span class="punc">(</span>coins<span class="punc">):</span>
+    template <span class="punc">=</span> <span class="punc">[[</span><span class="num">0</span> <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">2</span> <span class="punc">*</span> coinLines <span class="punc">-</span> <span class="num">1</span><span class="punc">)]</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>coinLines<span class="punc">)]</span>
+    <span class="kw">for</span> coin <span class="kw">in</span> coins<span class="punc">:</span>
+        row <span class="punc">=</span> <span class="fn">int</span><span class="punc">((</span>coin<span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">-</span> zeroPoint<span class="punc">.</span>y<span class="punc">)</span> <span class="punc">/</span> distanceY<span class="punc">)</span>
+        col <span class="punc">=</span> <span class="fn">int</span><span class="punc">((</span>coin<span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">-</span> zeroPoint<span class="punc">.</span>x<span class="punc">)</span> <span class="punc">/</span> distanceX<span class="punc">)</span>
+        template<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">]</span> <span class="punc">=</span> coin<span class="punc">.</span>value
+    <span class="kw">return</span> template</pre>
+</div>
+
+<div class="concept-viz">
+    <div class="dp-grid" style="grid-template-columns: repeat(5, 40px);">
+        <span class="dcell coin">1</span><span class="dcell zero">0</span><span class="dcell coin">9</span><span class="dcell zero">0</span><span class="dcell coin">4</span>
+        <span class="dcell zero">0</span><span class="dcell coin">1</span><span class="dcell zero">0</span><span class="dcell coin">9</span><span class="dcell zero">0</span>
+        <span class="dcell coin">8</span><span class="dcell zero">0</span><span class="dcell coin">2</span><span class="dcell zero">0</span><span class="dcell coin">9</span>
+    </div>
+    <div class="dp-legend">硬币地图示例:<span style="color:var(--primary-dark);font-weight:700;">■ 硬币价值</span> · 0 表示空位。行是排、列是位置</div>
+</div>
+
+<h3 id="sec-14-2-2">14.2.2 坐标换算索引（Converting Coordinates to Indices）</h3>
+
+<h4>14.2.2.1 从游戏坐标算出行列
+    <span class="en">Compute row/col from game coordinates</span>
+</h4>
+
+<p>游戏里硬币有 <code>pos.x</code>、<code>pos.y</code> 的物理坐标,要把它们换算成数组的<strong>行、列索引</strong>。做法是:减去起点 <code>zeroPoint</code>、再除以行/列间距、取整。<code>row = int((coin.pos.y - zeroPoint.y) / distanceY)</code> 得到第几排,<code>col</code> 同理得到第几列。这套"物理坐标 → 逻辑索引"的换算,让算法能在干净的网格上思考,最后再换算回去移动英雄。</p>
+
+<div class="tip-box">
+    <span class="tip-label">锯齿状网格：</span>本关每行的硬币是<strong>交错排列</strong>的(相邻两行的列位错开),所以列数用了 <code>2 * coinLines - 1</code> 来容纳。这正是为什么每步只能选"左下"或"右下"——下一行的硬币恰好落在当前列的左下方和右下方。理解这个几何布局,状态转移就顺理成章。</div>
+
+<!-- ==================== 14.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-14-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<div class="section-header" id="section-14-3">
+    <h2>14.3 自底向上递推</h2>
+    <div class="en-title">Bottom-Up Recurrence</div>
+</div>
+
+<h3 id="sec-14-3-1">14.3.1 从底部逐行累计（Accumulate Row by Row from the Bottom）</h3>
+
+<h4>14.3.1.1 为什么从最后一行往上算
+    <span class="en">Why compute from the last row upward</span>
+</h4>
+
+<p>动态规划的核心步骤是<strong>递推</strong>。这里我们采用<strong>自底向上(bottom-up)</strong>:最后一行本身就是"从该格出发能拿到的最大值"(因为下面没有格子了),把它当作基础;然后<strong>倒数第二行</strong>的每个格子,加上它左下/右下中较大的那个已算好的值;如此一行行往上,直到第一行。每个格子最终存的,就是"从此格出发,一路向下能收集到的黄金最大总和"。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 500 180" width="500" role="img" aria-label="自底向上递推">
+        <text x="250" y="24" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">自底向上:下一行算好了,才算上一行</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle">
+            <text x="60" y="60" fill="#a5d4e8" font-family="sans-serif" font-size="11">第 i 行(待算)</text>
+            <rect x="180" y="45" width="60" height="30" rx="5" fill="#e8944a" stroke="#bd7415"/><text x="210" y="65" fill="#fff">当前</text>
+            <text x="60" y="120" fill="#a8e0be" font-family="sans-serif" font-size="11">第 i+1 行(已算)</text>
+            <rect x="140" y="105" width="60" height="30" rx="5" fill="#2f5a3f" stroke="#6bbf88"/><text x="170" y="125" fill="#a8e0be">左下</text>
+            <rect x="220" y="105" width="60" height="30" rx="5" fill="#2f5a3f" stroke="#6bbf88"/><text x="250" y="125" fill="#a8e0be">右下</text>
+            <path d="M200,76 L175,103" stroke="#e8a15a" stroke-width="2" fill="none"/>
+            <path d="M220,76 L245,103" stroke="#e8a15a" stroke-width="2" fill="none"/>
+        </g>
+        <text x="250" y="165" text-anchor="middle" font-size="11" fill="#6a8294" font-family="sans-serif">当前格 += max(左下, 右下)</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-14-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+<!-- CC-PROTECTION:HIDDEN:1247558801:START anchor=sec-14-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1247558801">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:1247558801:END -->
+
+<h3 id="sec-14-3-2">14.3.2 倒序遍历（Iterating in Reverse）</h3>
+
+<h4>14.3.2.1 用 range 从倒数第二行走到第 0 行
+    <span class="en">Use range to loop from the second-to-last row to row 0</span>
+</h4>
+
+<p>"自底向上"在代码里就是<strong>倒序遍历行</strong>。最后一行是基础不用动,从<strong>倒数第二行</strong>(索引 <code>len - 2</code>)开始,一直递推到<strong>第 0 行</strong>(索引 0)。Python 用 <code>range(len(goldMap) - 2, -1, -1)</code> 实现这个"从大到小、步长 -1"的倒序循环。方向对了,才能保证每次用到的"下一行"都是已经算好的。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 倒序遍历:从倒数第二行递推到第 0 行</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>goldMap<span class="punc">)</span> <span class="punc">-</span> <span class="num">2</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>
+    line <span class="punc">=</span> goldMap<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>line<span class="punc">)):</span>
+        <span class="kw">if</span> line<span class="punc">[</span>j<span class="punc">]</span> <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>
+            <span class="kw">continue</span>          <span class="cmt"># 空位跳过,不是硬币</span>
+        <span class="cmt"># … 在这里做状态转移(见 14.4)…</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">方向反了就全错：</span>动态规划的递推方向至关重要。若从顶行往下算,用到的"下一行"还没算好,结果就是错的。必须<strong>先算下面、再算上面</strong>——所以用倒序 <code>range(len-2, -1, -1)</code>。这是 DP 里最需要想清楚的一点。</div>
+
+<!-- ==================== 14.4 ==================== -->
+<div class="section-header" id="section-14-4">
+    <h2>14.4 状态转移方程</h2>
+    <div class="en-title">The State Transition Equation</div>
+</div>
+
+<h3 id="sec-14-4-1">14.4.1 取左下右下较大者（Take the Larger of Down-Left and Down-Right）</h3>
+
+<h4>14.4.1.1 动态规划的灵魂公式
+    <span class="en">The soul of dynamic programming</span>
+</h4>
+
+<p><strong>状态转移方程</strong>是动态规划的灵魂——它描述"当前状态的值,如何由更小的子状态推出"。本关的方程很简洁:<strong>当前格的累计值 = 自身价值 + max(左下格累计值, 右下格累计值)</strong>。因为从当前格只能走向左下或右下,自然要选那个"后续收益更大"的方向。用 <code>max()</code> 一步选出较大者,累加上去即可。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 状态转移:当前格 += 左下、右下中较大者</span>
+goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> <span class="fn">max</span><span class="punc">(</span>goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">-</span> <span class="num">1</span><span class="punc">],</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">+</span> <span class="num">1</span><span class="punc">])</span>
+<span class="cmt">#            自身已含 ↑            左下(i+1,j-1)          右下(i+1,j+1)</span></pre>
+</div>
+
+<div class="concept-viz">
+    <div class="dp-grid" style="grid-template-columns: repeat(3, 40px);">
+        <span class="dcell zero">·</span><span class="dcell best">当前<br>3</span><span class="dcell zero">·</span>
+    </div>
+    <div class="dp-grid" style="grid-template-columns: repeat(3, 40px); margin-top:4px;">
+        <span class="dcell coin">10</span><span class="dcell zero">·</span><span class="dcell coin">7</span>
+    </div>
+    <div class="dp-legend">当前格价值 3,左下已算得 10、右下已算得 7 → 3 + max(10, 7) = <strong>13</strong>,并记下"选左下"</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:559a0fd970:START anchor=sec-14-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="559a0fd970">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，热门英雄安雅、塔林、艾达、服部半藏等你召唤，每个英雄都有独特技能。</span>
+</aside>
+<!-- CC-PROTECTION:AD:559a0fd970:END -->
+
+<h3 id="sec-14-4-2">14.4.2 边界处理（Handling the Edges）</h3>
+
+<h4>14.4.2.1 最左列没有左下、最右列没有右下
+    <span class="en">The leftmost column has no down-left; the rightmost has no down-right</span>
+</h4>
+
+<p>方程在网格<strong>边缘</strong>要特殊处理:最左列(<code>j == 0</code>)没有左下邻居,只能选右下;最右列(<code>j == len - 1</code>)没有右下邻居,只能选左下;中间的格子才用 <code>max()</code> 二选一。这三种情况用 <code>if / elif / else</code> 分开处理,避免访问到不存在的邻居而取错值或越界。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 边界分情况:最左只能右下,最右只能左下,中间取较大</span>
+<span class="kw">if</span> j <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>
+    goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">+</span> <span class="num">1</span><span class="punc">]</span>   <span class="cmt"># 只有右下</span>
+<span class="kw">elif</span> j <span class="punc">==</span> <span class="fn">len</span><span class="punc">(</span>line<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">:</span>
+    goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">-</span> <span class="num">1</span><span class="punc">]</span>   <span class="cmt"># 只有左下</span>
+<span class="kw">else</span><span class="punc">:</span>
+    goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> <span class="fn">max</span><span class="punc">(</span>goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">-</span> <span class="num">1</span><span class="punc">],</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">+</span> <span class="num">1</span><span class="punc">])</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">边界是 DP 的常见陷阱：</span>状态转移方程本身往往优雅简洁,但边界情况(第一行/最后一行、最左列/最右列)容易被忽略。养成"先想清楚边界怎么办、再写主逻辑"的习惯,能避免绝大多数 DP 的隐蔽 bug。</div>
+
+<!-- ==================== 14.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:12766675f6:START anchor=sec-14-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="12766675f6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，你不是走进一间教室，而是一片等待被拯救的大陆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:12766675f6:END -->
+
+<div class="section-header" id="section-14-5">
+    <h2>14.5 选起点与回溯路径</h2>
+    <div class="en-title">Choosing the Start and Recovering the Path</div>
+</div>
+
+<h3 id="sec-14-5-1">14.5.1 选最优起点（Choose the Best Starting Column）</h3>
+
+<h4>14.5.1.1 第一行里累计值最大的那一列
+    <span class="en">The column in row 0 with the largest accumulated value</span>
+</h4>
+
+<p>递推完成后,<strong>第一行(第 0 行)每个格子的值,就是"从该格起步能收集到的黄金总和"</strong>。要拿最多黄金,只需在第一行里找出<strong>值最大的那一列</strong>作为起点。遍历第 0 行,用一个"擂台"变量记录当前最大值和对应列号,一遍扫下来就得到最优起点 <code>bestCol</code>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 在第 0 行找累计值最大的列 = 最优起点</span>
+<span class="kw">def</span> <span class="fn">chooseStartCol</span><span class="punc">(</span>goldMap<span class="punc">):</span>
+    bestCol <span class="punc">=</span> <span class="num">0</span>
+    bestValue <span class="punc">=</span> <span class="num">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>goldMap<span class="punc">[</span><span class="num">0</span><span class="punc">])):</span>
+        <span class="kw">if</span> goldMap<span class="punc">[</span><span class="num">0</span><span class="punc">][</span>i<span class="punc">]</span> <span class="punc">&gt;</span> bestValue<span class="punc">:</span>
+            bestValue <span class="punc">=</span> goldMap<span class="punc">[</span><span class="num">0</span><span class="punc">][</span>i<span class="punc">]</span>
+            bestCol <span class="punc">=</span> i
+    <span class="kw">return</span> bestCol</pre>
+</div>
+
+<h3 id="sec-14-5-2">14.5.2 记录左右方向（Recording Left/Right Choices）</h3>
+
+<h4>14.5.2.1 从起点再走一遍，逐行决定方向
+    <span class="en">Walk down from the start, deciding direction each row</span>
+</h4>
+
+<p>知道起点和每格的最大值后,还要<strong>回溯出具体的行走路径</strong>。从起点列开始,逐行向下:比较当前格的左下和右下哪个累计值更大,就往哪边走,并把这一步记为 <code>"L"</code>(左)或 <code>"R"</code>(右),同时更新列号。边界列则只能朝唯一可行的方向走。这样得到一个方向序列 <code>path</code>,就是英雄该走的完整路线。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 从起点逐行回溯,记录每步是往左(L)还是往右(R)</span>
+<span class="kw">def</span> <span class="fn">findPath</span><span class="punc">(</span>goldMap<span class="punc">,</span> col<span class="punc">):</span>
+    path <span class="punc">=</span> <span class="punc">[]</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>goldMap<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">):</span>
+        <span class="kw">if</span> col <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>                 <span class="cmt"># 最左列只能向右</span>
+            path<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="str">"R"</span><span class="punc">)</span>
+            col <span class="punc">+=</span> <span class="num">1</span>
+        <span class="kw">elif</span> col <span class="punc">==</span> <span class="fn">len</span><span class="punc">(</span>goldMap<span class="punc">[</span>i<span class="punc">])</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">:</span>   <span class="cmt"># 最右列只能向左</span>
+            path<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="str">"L"</span><span class="punc">)</span>
+            col <span class="punc">-=</span> <span class="num">1</span>
+        <span class="kw">elif</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>col <span class="punc">-</span> <span class="num">1</span><span class="punc">]</span> <span class="punc">&lt;</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>col <span class="punc">+</span> <span class="num">1</span><span class="punc">]:</span>
+            path<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="str">"R"</span><span class="punc">)</span>       <span class="cmt"># 右下更大,向右</span>
+            col <span class="punc">+=</span> <span class="num">1</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            path<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="str">"L"</span><span class="punc">)</span>       <span class="cmt"># 否则向左</span>
+            col <span class="punc">-=</span> <span class="num">1</span>
+    <span class="kw">return</span> path</pre>
+</div>
+
+<div class="concept-viz">
+    <div class="dp-grid" style="grid-template-columns: repeat(5, 40px);">
+        <span class="dcell zero">·</span><span class="dcell zero">·</span><span class="dcell start">起23</span><span class="dcell zero">·</span><span class="dcell zero">·</span>
+    </div>
+    <div class="dp-grid" style="grid-template-columns: repeat(5, 40px); margin-top:4px;">
+        <span class="dcell zero">·</span><span class="dcell best">R→20</span><span class="dcell zero">·</span><span class="dcell coin">13</span><span class="dcell zero">·</span>
+    </div>
+    <div class="dp-grid" style="grid-template-columns: repeat(5, 40px); margin-top:4px;">
+        <span class="dcell best">L→11</span><span class="dcell zero">·</span><span class="dcell coin">6</span><span class="dcell zero">·</span><span class="dcell coin">4</span>
+    </div>
+    <div class="dp-legend">从起点(23)回溯:每步选累计值更大的下一格,记下方向 R、L……得到路径 <code>["R", "L", …]</code></div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">"算最大值"与"记路径"是两步：</span>动态规划常常分成两个阶段——先自底向上算出每格的最优值(<code>processMap</code>),再从最优起点顺着这些值回溯出具体路径(<code>findPath</code>)。前者回答"最多能拿多少",后者回答"具体怎么走"。很多 DP 问题都遵循这个"先求值、再回溯"的经典范式。</div>
+
+<!-- ==================== 14.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-14-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+<!-- CC-PROTECTION:HIDDEN:0f50be04b1:START anchor=sec-14-5-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0f50be04b1">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC14-C5EE53A03CC7。</span>
+<!-- CC-PROTECTION:HIDDEN:0f50be04b1:END -->
+
+<div class="section-header" id="section-14-6">
+    <h2>14.6 沿路径移动英雄</h2>
+    <div class="en-title">Moving the Hero Along the Path</div>
+</div>
+
+<h3 id="sec-14-6-1">14.6.1 按方向前进（Advance by Direction）</h3>
+
+<h4>14.6.1.1 把 L/R 序列翻译成移动指令
+    <span class="en">Translate the L/R sequence into moves</span>
+</h4>
+
+<p>最后,把起点列换算回游戏 X 坐标先走到起点,再遍历 <code>path</code> 序列:遇到 <code>"L"</code> 就向左下方移动一格(<code>x - distanceX, y + distanceY</code>),遇到 <code>"R"</code> 就向右下方移动一格(<code>x + distanceX, y + distanceY</code>)。每一步都精准落在下一枚硬币上,既收集了黄金,又避开了致命光束。这一步把"逻辑上的路径"变成了"世界里的行动"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 沿路径移动:L 向左下, R 向右下</span>
+<span class="kw">for</span> p <span class="kw">in</span> route<span class="punc">:</span>
+    <span class="kw">if</span> p <span class="punc">==</span> <span class="str">"L"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">-</span> distanceX<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">+</span> distanceY<span class="punc">)</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">+</span> distanceX<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">+</span> distanceY<span class="punc">)</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 120" width="560" role="img" aria-label="DP 完整流程">
+        <defs>
+            <marker id="d-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="11" text-anchor="middle">
+            <rect x="8" y="45" width="95" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="55" y="70" fill="#1C5E7C" font-weight="bold">建二维地图</text>
+            <line x1="105" y1="65" x2="125" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#d-arr)"/>
+            <rect x="130" y="45" width="105" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="182" y="70" fill="#1C5E7C" font-weight="bold">自底向上递推</text>
+            <line x1="237" y1="65" x2="257" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#d-arr)"/>
+            <rect x="262" y="45" width="90" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="307" y="70" fill="#1C5E7C" font-weight="bold">选最优起点</text>
+            <line x1="354" y1="65" x2="374" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#d-arr)"/>
+            <rect x="379" y="45" width="80" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="419" y="70" fill="#1C5E7C" font-weight="bold">回溯路径</text>
+            <line x1="461" y1="65" x2="481" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#d-arr)"/>
+            <rect x="486" y="45" width="66" height="40" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/><text x="519" y="70" fill="#2f7a45" font-weight="bold">移动</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 14.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-14-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-14-7">
+    <h2>14.7 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>,只展示用于说明的关键片段,完整通关程序请你自己动手完成。</p>
+
+<!-- 黄金选择 -->
+<div class="level-card" id="sec-14-7-1">
+    <div class="level-head">
+        <span class="lv-num">第 31 关 · 黄金选择</span>
+        <h3>🪙 黄金选择 —— 动态规划求最大黄金路径</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/14-7-1-1_gold_choice.png" alt="扣哒世界 黄金选择关卡 - koudashijie.com">
+            <div class="caption">图2：黄金选择——硬币交错铺在通道上,每行只能取一枚且只能选左下/右下;用动态规划算出黄金最多的路径并沿之前进</div>
+        </div>
+
+        <h4>策略:建表 → 递推 → 选起点 → 回溯 → 移动</h4>
+        <p>门卫要求收集足够黄金,你沿唯一出口方向前进,每行取一枚硬币,只能选下一行紧邻的左下或右下之一,走错就被光束烧毁。这是典型的<strong>网格最大路径和</strong>问题,标准动态规划五步走:<strong>① 把硬币建成二维地图;② 自底向上递推每格最大累计值;③ 在顶行选最优起点;④ 回溯出左右方向序列;⑤ 按序列移动英雄。</strong></p>
+
+        <h4>思路拆解一:递推每格的最大累计值</h4>
+        <p><code>processMap</code> 倒序遍历行(从倒数第二行到第 0 行),对每个硬币格套用状态转移:边界列只能朝唯一方向累加,中间列用 <code>max()</code> 取左下右下较大者。空位(值为 0)直接 <code>continue</code> 跳过。递推完,顶行每格就存着"从此起步的黄金总和"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:自底向上递推(核心)</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>goldMap<span class="punc">)</span> <span class="punc">-</span> <span class="num">2</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">):</span>
+    line <span class="punc">=</span> goldMap<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>line<span class="punc">)):</span>
+        <span class="kw">if</span> line<span class="punc">[</span>j<span class="punc">]</span> <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>
+            <span class="kw">continue</span>
+        <span class="kw">if</span> j <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>
+            goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">+</span> <span class="num">1</span><span class="punc">]</span>
+        <span class="kw">elif</span> j <span class="punc">==</span> <span class="fn">len</span><span class="punc">(</span>line<span class="punc">)</span> <span class="punc">-</span> <span class="num">1</span><span class="punc">:</span>
+            goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">-</span> <span class="num">1</span><span class="punc">]</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            goldMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]</span> <span class="punc">+=</span> <span class="fn">max</span><span class="punc">(</span>goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">-</span> <span class="num">1</span><span class="punc">],</span> goldMap<span class="punc">[</span>i <span class="punc">+</span> <span class="num">1</span><span class="punc">][</span>j <span class="punc">+</span> <span class="num">1</span><span class="punc">])</span></pre>
+        </div>
+
+        <h4>思路拆解二:选起点并回溯路径</h4>
+        <p>用 <code>chooseStartCol</code> 在顶行找出累计值最大的列作为 <code>startColumn</code>;再用 <code>findPath</code> 从这一列逐行向下,比较左下右下、记录 <code>"L"</code>/<code>"R"</code>。注意回溯时用的比较逻辑要与递推时的选择<strong>保持一致</strong>,才能沿着当初算出的最优路径行走。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:选起点 + 回溯 + 走到起点</span>
+processedMap <span class="punc">=</span> <span class="fn">processMap</span><span class="punc">(</span>myMap<span class="punc">)</span>
+startColumn <span class="punc">=</span> <span class="fn">chooseStartCol</span><span class="punc">(</span>processedMap<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>startColumn <span class="punc">*</span> distanceX <span class="punc">+</span> zeroPoint<span class="punc">[</span><span class="str">"x"</span><span class="punc">],</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+route <span class="punc">=</span> <span class="fn">findPath</span><span class="punc">(</span>processedMap<span class="punc">,</span> startColumn<span class="punc">)</span>   <span class="cmt"># 得到 L/R 方向序列</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么不暴力枚举：</span>若硬币有 10 行、每步 2 选 1,路径总数高达 2⁹ = 512 条,行数再多会指数爆炸。动态规划把每个格子的最优值<strong>只算一次并存起来复用</strong>,总工作量只与格子数成正比。这就是 DP 相比暴力搜索的核心威力——用空间(那张表)换时间。</div>
+
+        <div class="warn-box">
+            <span class="warn-label">精准踩点,一步都不能错：</span>关卡强调"准确地移动到下一枚硬币上,一个错误的步骤会被光束烧毁"。所以坐标换算(<code>col * distanceX + zeroPoint["x"]</code>)和每步 <code>distanceX / distanceY</code> 的位移必须精确;逻辑索引与物理坐标要严格对齐,算法算得再对,走偏一格也会失败。</div>
+    </div>
+</div>
+
+<!-- ==================== 14.8 ==================== -->
+<div class="section-header" id="section-14-8">
+    <h2>14.8 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-14-8-1">14.8.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>14.8.1.1 动态规划的典型问题
+    <span class="en">Typical issues with dynamic programming</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/14-8-1-1_common_errors.png" alt="扣哒世界 动态规划常见错误速查 - koudashijie.com">
+    <div class="caption">图3：递推方向反了、漏了边界、回溯与递推逻辑不一致、坐标换算出错,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>递推方向搞反——必须<strong>自底向上</strong>(倒序 <code>range(len-2, -1, -1)</code>),从顶往下算会用到还没算好的值。</li>
+        <li>漏了边界处理——最左列没左下、最右列没右下,不分情况直接取会取错值或越界。</li>
+        <li>回溯与递推不一致——<code>findPath</code> 里选方向的比较逻辑要和 <code>processMap</code> 里的选择对应,否则走的不是最优路径。</li>
+        <li>忘记跳过空位——值为 0 的空位不是硬币,不 <code>continue</code> 跳过会把 0 也当路径节点处理。</li>
+        <li>坐标换算出错——<code>row/col</code> 与 <code>pos.x/pos.y</code> 的换算、以及移动时的 <code>distanceX/distanceY</code> 必须精确对齐。</li>
+        <li>起点擂台初值不当——<code>chooseStartCol</code> 里 <code>bestValue</code> 初值要足够小(如 0),否则可能选不出真正的最大列。</li>
+        <li>把"求值"和"回溯"混为一谈——先递推算最大值、再单独回溯路径是两个阶段,别试图一次循环里既算值又定路径而搞乱。</li>
+        <li>混淆行列索引——<code>goldMap[i][j]</code> 中 i 是行、j 是列,写反会全盘错乱。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-14-8-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你征服了算法世界里最令人着迷的思想之一——<strong>动态规划</strong>!在封神冰川的收官之作"黄金选择"里,你学会了用<strong>二维数组</strong>为问题建模、存储每行每列的硬币价值;掌握了<strong>自底向上逐行递推</strong>(倒序遍历、先算下面再算上面);写出了本关的<strong>状态转移方程</strong>——当前格加上"左下、右下"中的较大者,并妥善处理了边界;学会了在顶行<strong>选出最优起点</strong>、再<strong>回溯记录每一步的左右方向</strong>;最终把逻辑路径翻译成移动指令,<strong>精准地驱动英雄</strong>收集最多黄金。这套"建表—递推—求最优—回溯"的范式,是解决无数最优化问题的通用利器。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>二维数组建模</td><td>行列存硬币价值</td><td class="mono">goldMap[row][col]</td></tr>
+            <tr><td>自底向上递推</td><td>先算下面再算上面</td><td class="mono">range(len-2, -1, -1)</td></tr>
+            <tr><td>状态转移方程</td><td>加左下右下较大者</td><td class="mono">+= max(左下, 右下)</td></tr>
+            <tr><td>边界处理</td><td>最左/最右只有一个方向</td><td class="mono">if j==0 / elif j==len-1</td></tr>
+            <tr><td>选最优起点</td><td>顶行最大累计值</td><td class="mono">chooseStartCol</td></tr>
+            <tr><td>回溯路径</td><td>逐行记 L/R</td><td class="mono">findPath → ["R","L",…]</td></tr>
+            <tr><td>沿路径移动</td><td>L 左下 / R 右下</td><td class="mono">moveXY(x±dX, y+dY)</td></tr>
+            <tr><td>DP 优势</td><td>子问题只算一次</td><td class="mono">空间换时间</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把大问题拆成子问题、用一张表记住每个子问题的最优答案、再拼出全局最优——动态规划这份"以退为进、步步为营"的智慧,是你算法修行中一座重要的里程碑。<br>
+        封神冰川的动态规划试炼圆满完成,计算机科学 6 的征途至此功德圆满,恭喜你!🧊❄️🪙</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第十四单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

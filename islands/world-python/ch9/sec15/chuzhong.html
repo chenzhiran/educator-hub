@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC15-6EDC3DE032F0">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十五单元：汉诺塔 · 递归思想与栈的堆叠 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 汉诺塔可视化 ===== */
+        .hanoi-viz {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 40px;
+            margin: 20px 0;
+            min-height: 130px;
+        }
+        .hanoi-peg {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 3px;
+            position: relative;
+            padding-bottom: 6px;
+            border-bottom: 4px solid var(--primary-dark);
+            min-width: 130px;
+        }
+        .hanoi-peg .peg-rod {
+            position: absolute;
+            bottom: 6px;
+            width: 5px;
+            height: 110px;
+            background: var(--text-lighter);
+            border-radius: 3px;
+            z-index: 0;
+        }
+        .hanoi-peg .disk {
+            height: 20px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 0.72em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            font-family: 'SF Mono', monospace;
+        }
+        .hanoi-peg .d1 { width: 40px; background: #6bbf88; }
+        .hanoi-peg .d2 { width: 60px; background: #77E1E8; }
+        .hanoi-peg .d3 { width: 80px; background: #3BC7D3; }
+        .hanoi-peg .d4 { width: 100px; background: #D98A2B; }
+        .hanoi-peg .d5 { width: 120px; background: #197C91; }
+        .hanoi-peg .peg-label { margin-top: 10px; font-size: 0.8em; color: var(--text-light); font-weight: 600; }
+
+        /* ===== 栈可视化 ===== */
+        .stack-viz {
+            display: inline-flex;
+            flex-direction: column-reverse;
+            border: 2px solid var(--primary-dark);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            min-width: 150px;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .stack-viz .scell {
+            padding: 8px 14px;
+            border-top: 1px dashed var(--border);
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            font-size: 0.85em;
+            text-align: center;
+        }
+        .stack-viz .scell.top { background: var(--warning); color: #fff; font-weight: 700; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+            .hanoi-viz { gap: 16px; }
+            .hanoi-peg { min-width: 90px; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC15-6EDC3DE032F0 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第十五单元</div>
+
+    <a href="#section-15-1" class="nav-section">15.1 汉诺塔问题概述</a>
+    <a href="#sec-15-1-1" class="nav-sub">15.1.1 什么是汉诺塔</a>
+    <a href="#sec-15-1-2" class="nav-sub">15.1.2 三条规则</a>
+
+    <a href="#section-15-2" class="nav-section">15.2 栈与后进先出</a>
+    <a href="#sec-15-2-1" class="nav-sub">15.2.1 柱子就是栈</a>
+    <a href="#sec-15-2-2" class="nav-sub">15.2.2 大盘不压小盘</a>
+
+    <a href="#section-15-3" class="nav-section">15.3 push/pop 模拟移动</a>
+    <a href="#sec-15-3-1" class="nav-sub">15.3.1 pickUpItem 出栈</a>
+    <a href="#sec-15-3-2" class="nav-sub">15.3.2 dropItem 入栈</a>
+    <a href="#sec-15-3-3" class="nav-sub">15.3.3 peekItem/viewStack</a>
+
+    <a href="#section-15-4" class="nav-section">15.4 递归思想</a>
+    <a href="#sec-15-4-1" class="nav-sub">15.4.1 分而治之</a>
+    <a href="#sec-15-4-2" class="nav-sub">15.4.2 基线与递归</a>
+
+    <a href="#section-15-5" class="nav-section">15.5 递归解法拆解</a>
+    <a href="#sec-15-5-1" class="nav-sub">15.5.1 三步递归</a>
+    <a href="#sec-15-5-2" class="nav-sub">15.5.2 参数角色轮换</a>
+
+    <a href="#section-15-6" class="nav-section">15.6 移动次数规律</a>
+    <a href="#sec-15-6-1" class="nav-sub">15.6.1 2ⁿ − 1 步</a>
+
+    <a href="#section-15-7" class="nav-section">15.7 实战关卡精讲</a>
+    <a href="#sec-15-7-1" class="nav-sub">15.7.1 Kelvintaph 柱子</a>
+
+    <a href="#section-15-8" class="nav-section">15.8 常见错误</a>
+    <a href="#sec-15-8-1" class="nav-sub">15.8.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十五单元：汉诺塔 · 递归思想与栈的堆叠</h1>
+    <div class="subtitle">Unit 15: Tower of Hanoi — Recursion &amp; Stack Stacking</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · Kelvintaph 柱子</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 15.1 ==================== -->
+<div class="section-header" id="section-15-1">
+    <h2>15.1 汉诺塔问题概述</h2>
+    <div class="en-title">Overview of the Tower of Hanoi</div>
+</div>
+
+<p>在 Kelvintaph 冰川最高峰的僧侣中,流传着一个既能取暖又能锻炼头脑的古老游戏:三根柱子,一根上按从大到小叠着一摞圆盘,要把整摞盘子搬到另一根柱子上——一次只能搬一个,而且永远不能把大盘压在小盘上面。你的冒险队没有真正的柱子和圆盘,那就用这些身材各异的农民和三个树桩来玩吧!这个看似简单的搬运游戏,正是计算机科学中最经典的<strong>递归</strong>范例:<strong>汉诺塔(Tower of Hanoi)</strong>。作为封神冰川的终极试炼,它会让你真正领悟"递归"这一优雅而强大的思想。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>汉诺塔问题</strong>的抽象与三条规则;认识<strong>柱子(树桩)就是栈</strong>、遵循<strong>后进先出(LIFO)</strong>、大盘不能压小盘;用 <code>pickUpItem</code>(出栈/pop)和 <code>dropItem</code>(入栈/push)模拟圆盘移动,用 <code>peekItem</code>/<code>viewStack</code> 查看栈;掌握<strong>递归思想</strong>——把移动 n 个盘拆成移动 n-1 个盘的子问题;写出经典的<strong>三步递归解法</strong>并理解参数角色的轮换。
+</div>
+
+<h3 id="sec-15-1-1">15.1.1 什么是汉诺塔（What Is the Tower of Hanoi）</h3>
+
+<h4>15.1.1.1 三根柱子间搬移一摞圆盘
+    <span class="en">Move a stack of disks among three pegs</span>
+</h4>
+
+<p><strong>汉诺塔</strong>是一个数学谜题:有三根柱子(记作起点、目标、中转),起点柱上叠着 <code>n</code> 个大小不一的圆盘,大的在下、小的在上。目标是把这 <code>n</code> 个圆盘全部搬到目标柱,搬完后依然保持"大在下、小在上"的顺序。它之所以在计算机科学中如此重要,是因为它<strong>用递归解决极其简洁,用非递归(循环)却相当繁琐</strong>——是理解递归思想的绝佳教材。</p>
+
+<div class="concept-viz">
+    <div class="hanoi-viz">
+        <div class="hanoi-peg">
+            <div class="peg-rod"></div>
+            <div class="disk d5">5</div>
+            <div class="disk d4">4</div>
+            <div class="disk d3">3</div>
+            <div class="disk d2">2</div>
+            <div class="disk d1">1</div>
+            <div class="peg-label">起点 stump1</div>
+        </div>
+        <div class="hanoi-peg">
+            <div class="peg-rod"></div>
+            <div class="peg-label">目标 stump2</div>
+        </div>
+        <div class="hanoi-peg">
+            <div class="peg-rod"></div>
+            <div class="peg-label">中转 stump3</div>
+        </div>
+    </div>
+    <div style="font-size:0.85em;color:var(--text-light);">目标:把起点柱上从大(5)到小(1)的一摞农民,整体搬到目标柱,始终保持大在下、小在上</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-15-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-15-1-2">15.1.2 三条规则（The Three Rules）</h3>
+
+<h4>15.1.2.1 简单的规则，深刻的挑战
+    <span class="en">Simple rules, deep challenge</span>
+</h4>
+
+<p>汉诺塔的规则只有三条,却让问题充满智慧:<strong>①</strong> 一次只能移动<strong>一个</strong>圆盘;<strong>②</strong> 每次只能移动某根柱子<strong>最顶端</strong>的圆盘;<strong>③</strong> 任何时候都<strong>不能把大盘放在小盘之上</strong>。在本关里,这三条对应:一次只能带一个农民、只能取树桩顶端的农民、不能把大农民压在小农民身上。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 为什么这三条规则如此关键</div>
+    正是"一次一个""只能动顶端""大不压小"这三条约束,让你不能简单地把整摞盘子一把抓起。你必须精心安排每一步的顺序——先把上面的小盘们暂时挪到中转柱,才能搬动最底下的大盘。这种"为了搬大的、先安置小的"的思路,天然就是递归的雏形。
+</div>
+
+<!-- ==================== 15.2 ==================== -->
+<div class="section-header" id="section-15-2">
+    <h2>15.2 栈与后进先出</h2>
+    <div class="en-title">Stacks and Last-In-First-Out</div>
+</div>
+
+<h3 id="sec-15-2-1">15.2.1 柱子就是栈（A Peg Is a Stack）</h3>
+
+<h4>15.2.1.1 只能从顶端存取的数据结构
+    <span class="en">A structure you can only access from the top</span>
+</h4>
+
+<p>每根柱子(树桩)本质上就是一个<strong>栈(stack)</strong>——一种只能从<strong>顶端</strong>存取的数据结构。你只能看到、取走最顶端的圆盘,底下的都被压住无法直接触及。栈遵循<strong>后进先出(LIFO, Last In First Out)</strong>规则:最后放上去的,最先被取下来。汉诺塔的每根柱子,都完美体现了栈的这一特性。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>栈 Stack（本关的柱子）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">后进先出(LIFO)。只能操作顶端。最后压入的最先弹出。汉诺塔的每根柱子都是栈。</p>
+    </div>
+    <div>
+        <h5>队列 Queue（对比回顾）</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">先进先出(FIFO)。一端进、另一端出。像排队。与栈的存取方向正好相反。</p>
+    </div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:72e5ce6ad0:START anchor=sec-15-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="72e5ce6ad0">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，全球超 2000 万用户通过它开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:72e5ce6ad0:END -->
+
+<h3 id="sec-15-2-2">15.2.2 大盘不压小盘（Never Stack Big on Small）</h3>
+
+<h4>15.2.2.1 栈顶总是最小的圆盘
+    <span class="en">The top is always the smallest disk</span>
+</h4>
+
+<p>由于规则限制"大不压小",每根柱子(栈)在任意时刻,从下往上都是<strong>严格递减</strong>的:越靠底越大、越靠顶越小,栈顶永远是这根柱子上最小的圆盘。这条约束保证了移动的合法性——你 <code>dropItem</code> 放盘时,放上去的必须比目标柱顶端的盘更小。理解这一点,就明白为什么递归要"先把小盘们清走"。</p>
+
+<div class="warn-box">
+    <span class="warn-label">合法移动的前提：</span>把一个盘从 A 移到 B,B 要么是空的,要么 B 顶端的盘比要放的盘更大。正确的递归解法会<strong>自动</strong>保证每一步都合法——你无需手动检查,只要严格按递归结构执行,大压小的非法情况根本不会出现。这正是递归解法的优雅之处。</div>
+
+<!-- ==================== 15.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-15-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:8d2e0f18f9:START anchor=sec-15-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="8d2e0f18f9">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:8d2e0f18f9:END -->
+
+<div class="section-header" id="section-15-3">
+    <h2>15.3 用 push/pop 模拟圆盘移动</h2>
+    <div class="en-title">Simulating Disk Moves with push/pop</div>
+</div>
+
+<h3 id="sec-15-3-1">15.3.1 pickUpItem 出栈（pickUpItem as pop）</h3>
+
+<h4>15.3.1.1 拿起顶端 = 从栈弹出
+    <span class="en">Picking up the top = popping the stack</span>
+</h4>
+
+<p>关卡提供的 <code>hero.pickUpItem(container)</code> 会拾取容器<strong>顶端(最后一个)</strong>的物品——这正是栈的 <strong>pop</strong> 操作:它把目标柱的栈顶元素弹出,并压入英雄自己的手(英雄可看作一个只能拿一个盘的临时栈)。一次只能拿一个,对应"一次只移动一个圆盘"的规则。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># pickUpItem = pop:从目标柱弹出顶端圆盘,拿在手上</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">pickUpItem</span><span class="punc">(</span>stump1<span class="punc">)</span>   <span class="cmt"># 取走 stump1 栈顶的农民</span></pre>
+</div>
+
+<h3 id="sec-15-3-2">15.3.2 dropItem 入栈（dropItem as push）</h3>
+
+<h4>15.3.2.1 放下 = 压入栈顶
+    <span class="en">Dropping = pushing onto the top</span>
+</h4>
+
+<p><code>hero.dropItem(container)</code> 则把英雄手上的圆盘放到目标容器<strong>顶端</strong>——这是栈的 <strong>push</strong> 操作:从英雄的手弹出,压入目标柱的栈顶。<code>pickUpItem</code> 与 <code>dropItem</code> 成对出现,一取一放,就完成了"把一个圆盘从一根柱子移到另一根柱子"的完整动作。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一次完整的圆盘移动 = pop + push</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">pickUpItem</span><span class="punc">(</span>who<span class="punc">)</span>    <span class="cmt"># pop:从 who 柱取顶端盘</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">dropItem</span><span class="punc">(</span>whom<span class="punc">)</span>     <span class="cmt"># push:放到 whom 柱顶端</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="pickUp和drop模拟栈">
+        <text x="260" y="24" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">pickUpItem = pop ，dropItem = push</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle">
+            <rect x="60" y="90" width="90" height="24" rx="4" fill="#2f5a3f" stroke="#6bbf88"/><text x="105" y="107" fill="#a8e0be">底盘(大)</text>
+            <rect x="70" y="66" width="70" height="24" rx="4" fill="#4FB5D8"/><text x="105" y="83" fill="#fff">中盘</text>
+            <rect x="80" y="42" width="50" height="24" rx="4" fill="#D98A2B"/><text x="105" y="59" fill="#fff">顶盘(小)</text>
+            <text x="105" y="132" fill="#a5d4e8" font-family="sans-serif" font-size="11">who 柱</text>
+            <path d="M150,54 Q230,30 310,54" fill="none" stroke="#e8a15a" stroke-width="2" marker-end="url(#h-arr)"/>
+            <text x="230" y="30" fill="#e8a15a" font-family="sans-serif" font-size="11">pop → push</text>
+            <rect x="360" y="90" width="90" height="24" rx="4" fill="#1C5E7C" stroke="#7FD4E8"/><text x="405" y="107" fill="#cfe3ee">现有盘</text>
+            <rect x="370" y="66" width="70" height="24" rx="4" fill="#D98A2B" stroke="#fff" stroke-dasharray="3,2"/><text x="405" y="83" fill="#fff">新到顶盘</text>
+            <text x="405" y="132" fill="#a5d4e8" font-family="sans-serif" font-size="11">whom 柱</text>
+        </g>
+        <defs><marker id="h-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#e8a15a"/></marker></defs>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-15-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+<!-- CC-PROTECTION:HIDDEN:5312dc3336:START anchor=sec-15-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="5312dc3336">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:5312dc3336:END -->
+
+<h3 id="sec-15-3-3">15.3.3 peekItem 与 viewStack（Peek and View）</h3>
+
+<h4>15.3.3.1 只看不取的观察工具
+    <span class="en">Look without taking</span>
+</h4>
+
+<p>关卡还提供两个"只读"工具:<code>peekItem()</code> 返回栈顶(最后一个)物品但<strong>不移除</strong>它;<code>viewStack()</code> 返回整个栈的物品数组(索引 <code>length-1</code> 是栈顶)。农民还有 <code>size</code> 属性表示其规模。这些用于观察当前局面、调试或验证——比如查看某柱顶端农民的尺寸,确认移动是否合法。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 观察工具:peek 看栈顶, viewStack 看整个栈</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"第1柱有这些农民:"</span> <span class="punc">+</span> stump1<span class="punc">.</span><span class="fn">viewStack</span><span class="punc">())</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"第2柱顶端农民尺寸:"</span> <span class="punc">+</span> stump2<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">()</span><span class="punc">.</span>size<span class="punc">)</span></pre>
+</div>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>栈操作</th><th>关卡 API</th><th>作用</th><th>栈是否改变</th></tr></thead>
+    <tbody>
+        <tr><td>pop 出栈</td><td class="mono">pickUpItem(c)</td><td>取走顶端圆盘</td><td>变短</td></tr>
+        <tr><td>push 入栈</td><td class="mono">dropItem(c)</td><td>放到顶端</td><td>变长</td></tr>
+        <tr><td>peek 查看</td><td class="mono">c.peekItem()</td><td>看栈顶不移除</td><td>不变</td></tr>
+        <tr><td>view 全览</td><td class="mono">c.viewStack()</td><td>看整个栈数组</td><td>不变</td></tr>
+    </tbody>
+</table>
+</div>
+
+<!-- ==================== 15.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-15-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<div class="section-header" id="section-15-4">
+    <h2>15.4 递归思想</h2>
+    <div class="en-title">The Idea of Recursion</div>
+</div>
+
+<h3 id="sec-15-4-1">15.4.1 分而治之（Divide and Conquer）</h3>
+
+<h4>15.4.1.1 把大问题变成同类的小问题
+    <span class="en">Turn a big problem into a smaller same-shaped problem</span>
+</h4>
+
+<p><strong>递归(recursion)</strong>是"函数调用自己"来解决问题的方法。它的核心是<strong>分而治之</strong>:把一个大问题,转化成一个或多个<strong>结构相同、规模更小</strong>的子问题。汉诺塔就是递归的完美化身——"移动 n 个盘"可以借助"移动 n-1 个盘"来完成。只要你能把 n-1 个盘搬来搬去,搬 n 个盘就迎刃而解。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔍 汉诺塔的递归直觉</div>
+    要把 5 个盘从起点搬到目标,与其纠结 5 个盘怎么走,不如假设"我已经会搬 4 个盘了":① 先把上面 4 个盘(借目标柱当中转)搬到中转柱;② 把最底下第 5 个大盘直接搬到目标柱;③ 再把那 4 个盘(借起点柱当中转)从中转柱搬到目标柱。而"搬 4 个盘"又可以用"搬 3 个盘"来解决……层层缩小,直到只剩 0 个盘——什么都不用做。这就是递归。
+</div>
+
+<h3 id="sec-15-4-2">15.4.2 基线条件与递归条件（Base Case and Recursive Case）</h3>
+
+<h4>15.4.2.1 递归必须有终点
+    <span class="en">Recursion must have a stopping point</span>
+</h4>
+
+<p>每个递归都必须包含两部分:<strong>基线条件(base case)</strong>——问题小到可以直接解决、停止递归的情形;<strong>递归条件(recursive case)</strong>——把问题缩小、调用自身的情形。在汉诺塔里,基线条件是 <code>n == 0</code>(没有盘要搬,直接 <code>return</code>);递归条件则是 <code>n ≥ 1</code> 时的三步搬运。<strong>没有基线条件,递归会无限调用下去直到崩溃</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 递归的两大要素</span>
+<span class="kw">def</span> <span class="fn">hanoi</span><span class="punc">(</span>n<span class="punc">,</span> who<span class="punc">,</span> whom<span class="punc">,</span> via<span class="punc">):</span>
+    <span class="kw">if</span> n <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>       <span class="cmt"># 基线条件:没有盘,停止</span>
+        <span class="kw">return</span>
+    <span class="cmt"># 递归条件:调用自己解决更小的问题(见 15.5)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">忘了基线 = 无限递归：</span>如果漏写 <code>if n == 0: return</code>,函数会带着越来越小的 n 一直调用自己(n 变负数也停不下来),最终导致<strong>栈溢出(RecursionError)</strong>。写任何递归,<strong>第一件事就是想清楚基线条件</strong>。</div>
+
+<!-- ==================== 15.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:21f9328d9c:START anchor=sec-15-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="21f9328d9c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>目前 扣哒世界 支持 Python、JavaScript、C++ 等多种语言，会员还可解锁更多高级内容。官网：<a href="https://koudashijie.com/">koudashijie.com</a></span>
+</aside>
+<!-- CC-PROTECTION:AD:21f9328d9c:END -->
+
+<div class="section-header" id="section-15-5">
+    <h2>15.5 递归解法拆解</h2>
+    <div class="en-title">Breaking Down the Recursive Solution</div>
+</div>
+
+<h3 id="sec-15-5-1">15.5.1 三步递归（The Three-Step Recursion）</h3>
+
+<h4>15.5.1.1 移上面、移最大、再移上面
+    <span class="en">Move the top n-1, move the biggest, move the top n-1 again</span>
+</h4>
+
+<p>汉诺塔的完整递归解法只有优雅的三步:<strong>①</strong> 把上面 <code>n-1</code> 个盘从起点(who)借助目标(whom)当中转,移到中转柱(via);<strong>②</strong> 把最底下那个最大的盘,从起点(who)直接搬到目标(whom)——这一步就是 <code>pickUpItem + dropItem</code>;<strong>③</strong> 把那 <code>n-1</code> 个盘从中转柱(via)借助起点(who)当中转,移到目标柱(whom)。三步之后,n 个盘全部就位。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 汉诺塔的经典三步递归</span>
+<span class="kw">def</span> <span class="fn">hanoi</span><span class="punc">(</span>n<span class="punc">,</span> who<span class="punc">,</span> whom<span class="punc">,</span> via<span class="punc">):</span>
+    <span class="kw">if</span> n <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>
+        <span class="kw">return</span>
+    <span class="fn">hanoi</span><span class="punc">(</span>n <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> who<span class="punc">,</span> via<span class="punc">,</span> whom<span class="punc">)</span>   <span class="cmt"># ① 上面 n-1 个:起点 → 中转</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">pickUpItem</span><span class="punc">(</span>who<span class="punc">)</span>            <span class="cmt"># ② 最大盘:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">dropItem</span><span class="punc">(</span>whom<span class="punc">)</span>             <span class="cmt">#    起点 → 目标</span>
+    <span class="fn">hanoi</span><span class="punc">(</span>n <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> via<span class="punc">,</span> whom<span class="punc">,</span> who<span class="punc">)</span>   <span class="cmt"># ③ 那 n-1 个:中转 → 目标</span></pre>
+</div>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 560 170" width="560" role="img" aria-label="三步递归示意">
+        <g font-family="sans-serif" font-size="11" text-anchor="middle">
+            <!-- 第一步 -->
+            <text x="93" y="20" fill="#1C5E7C" font-weight="bold">① n-1 盘:起→中</text>
+            <rect x="20" y="35" width="45" height="60" rx="6" fill="#eef8fb" stroke="#4FB5D8"/><text x="42" y="110" fill="#7794a3">起点</text>
+            <rect x="75" y="35" width="45" height="60" rx="6" fill="#eef8fb" stroke="#4FB5D8"/><text x="97" y="110" fill="#7794a3">目标</text>
+            <rect x="130" y="35" width="45" height="60" rx="6" fill="#dcf0e0" stroke="#6bbf88" stroke-width="2"/><text x="152" y="110" fill="#2f7a45">中转★</text>
+            <!-- 第二步 -->
+            <text x="280" y="20" fill="#1C5E7C" font-weight="bold">② 最大盘:起→目标</text>
+            <rect x="210" y="35" width="45" height="60" rx="6" fill="#eef8fb" stroke="#4FB5D8"/><text x="232" y="110" fill="#7794a3">起点</text>
+            <rect x="265" y="35" width="45" height="60" rx="6" fill="#fdeccf" stroke="#D98A2B" stroke-width="2"/><text x="287" y="110" fill="#bd7415">目标★</text>
+            <rect x="320" y="35" width="45" height="60" rx="6" fill="#eef8fb" stroke="#4FB5D8"/><text x="342" y="110" fill="#7794a3">中转</text>
+            <!-- 第三步 -->
+            <text x="470" y="20" fill="#1C5E7C" font-weight="bold">③ n-1 盘:中→目标</text>
+            <rect x="400" y="35" width="45" height="60" rx="6" fill="#eef8fb" stroke="#4FB5D8"/><text x="422" y="110" fill="#7794a3">起点</text>
+            <rect x="455" y="35" width="45" height="60" rx="6" fill="#dcf0e0" stroke="#6bbf88" stroke-width="2"/><text x="477" y="110" fill="#2f7a45">目标★</text>
+            <rect x="510" y="35" width="45" height="60" rx="6" fill="#eef8fb" stroke="#4FB5D8"/><text x="532" y="110" fill="#7794a3">中转</text>
+            <text x="280" y="150" fill="#6a8294" font-size="11">三步之后,整摞盘子从起点搬到了目标</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-15-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<h3 id="sec-15-5-2">15.5.2 参数角色轮换（Rotating the Roles of Parameters）</h3>
+
+<h4>15.5.2.1 起点、目标、中转在递归中互换身份
+    <span class="en">Source, target, and spare swap identities in recursion</span>
+</h4>
+
+<p>递归解法最精妙、也最烧脑的地方,是<strong>三根柱子的角色在每层递归里互相轮换</strong>。函数签名 <code>hanoi(n, who, whom, via)</code> 里,<code>who</code> 是当前的起点、<code>whom</code> 是目标、<code>via</code> 是中转。第一步递归 <code>hanoi(n-1, who, via, whom)</code> 里,原来的"目标 whom"临时充当了"中转";第三步 <code>hanoi(n-1, via, whom, who)</code> 里,原来的"中转 via"变成了新的"起点"。正是这种角色轮换,让同一个函数能处理每一层不同的搬运方向。</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>递归调用</th><th>who 起点</th><th>whom 目标</th><th>via 中转</th></tr></thead>
+    <tbody>
+        <tr><td>hanoi(n, who, whom, via)</td><td class="mono">who</td><td class="mono">whom</td><td class="mono">via</td></tr>
+        <tr><td>① hanoi(n-1, who, via, whom)</td><td class="mono">who</td><td class="mono">via</td><td class="mono">whom</td></tr>
+        <tr><td>③ hanoi(n-1, via, whom, who)</td><td class="mono">via</td><td class="mono">whom</td><td class="mono">who</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">别试图跟踪每一步：</span>递归的魅力在于——你<strong>不需要</strong>在脑中追踪 32 步的每一个动作。只要相信"<code>hanoi(n-1, ...)</code> 一定能正确搬好 n-1 个盘",再把最大盘搬好,整体就对了。这种"信任递归"的思维方式,是掌握递归的关键心法。纠结于展开每一层,反而会迷失。</div>
+
+<!-- ==================== 15.6 ==================== -->
+<div class="section-header" id="section-15-6">
+    <h2>15.6 移动次数规律</h2>
+    <div class="en-title">The Pattern of Move Counts</div>
+</div>
+
+<h3 id="sec-15-6-1">15.6.1 2ⁿ − 1 步（Two to the n, Minus One）</h3>
+
+<h4>15.6.1.1 盘数每加一，步数几乎翻倍
+    <span class="en">Each extra disk nearly doubles the moves</span>
+</h4>
+
+<p>汉诺塔搬 <code>n</code> 个盘的最少移动次数是 <strong>2ⁿ − 1</strong> 步。因为搬 n 个盘 = 搬 n-1 个 + 搬 1 个 + 再搬 n-1 个,即 <code>T(n) = 2·T(n-1) + 1</code>,展开正好是 2ⁿ − 1。本关搬 5 个农民,就需要 2⁵ − 1 = <strong>31 步</strong>。这个指数增长非常惊人:传说中 64 个金盘的"梵天之塔",需要约 1800 亿亿步,即使每秒一步也要几千亿年。</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>盘数 n</th><th>移动次数 2ⁿ − 1</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td class="mono">1</td></tr>
+        <tr><td>3</td><td class="mono">7</td></tr>
+        <tr><td>5（本关）</td><td class="mono">31</td></tr>
+        <tr><td>10</td><td class="mono">1023</td></tr>
+        <tr><td>64（传说）</td><td class="mono">约 1.8 × 10¹⁹</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="info-box">
+    <span class="info-label">指数复杂度的直观感受：</span>汉诺塔的步数是 <strong>O(2ⁿ)</strong>——典型的指数级增长。这提醒我们:有些问题的<strong>本质</strong>就需要大量步骤,再聪明的算法也无法避免(因为最少就是 2ⁿ − 1 步)。递归让代码写起来简单,但并不改变问题固有的计算量。理解"算法复杂度"与"问题本质难度"的区别,是算法思维的重要一课。</div>
+
+<!-- ==================== 15.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-15-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+<!-- CC-PROTECTION:HIDDEN:59a0f26aa4:START anchor=sec-15-6-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="59a0f26aa4">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC15-6EDC3DE032F0。</span>
+<!-- CC-PROTECTION:HIDDEN:59a0f26aa4:END -->
+
+<div class="section-header" id="section-15-7">
+    <h2>15.7 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>,只展示用于说明的关键片段,完整通关程序请你自己动手完成。</p>
+
+<!-- Kelvintaph 柱子 -->
+<div class="level-card" id="sec-15-7-1">
+    <div class="level-head">
+        <span class="lv-num">第 32 关 · Kelvintaph 柱子</span>
+        <h3>🗼 Kelvintaph 柱子 —— 用递归搬运一摞农民</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/15-7-1-1_kelvintaph_pillars.png" alt="扣哒世界 Kelvintaph 柱子关卡 - koudashijie.com">
+            <div class="caption">图2：Kelvintaph 柱子——三个树桩当柱子、身材不一的农民当圆盘,用汉诺塔递归把整摞农民从起点树桩搬到目标树桩</div>
+        </div>
+
+        <h4>策略:把农民当圆盘、树桩当柱子,套用汉诺塔递归</h4>
+        <p>三个树桩 <code>stump1/2/3</code> 就是三根柱子,身材从大到小叠放的农民就是圆盘。规则完全对应:一次只带一个农民、只能取树桩顶端的、不能把大农民压在小农民上。策略非常清晰:<strong>识别出这是汉诺塔问题,写一个递归函数 <code>hanoi</code>,再用起点、目标、中转三个树桩调用它。</strong>递归会自动生成合法的 31 步搬运顺序。</p>
+
+        <h4>思路拆解一:定义递归函数骨架</h4>
+        <p>函数 <code>hanoi(n, who, whom, via)</code> 表示"把 who 上的 n 个农民搬到 whom,via 作中转"。先写<strong>基线条件</strong> <code>if n == 0: return</code>(没有农民要搬就结束),这是防止无限递归的关键。然后是三步递归主体。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:递归函数骨架 + 基线条件</span>
+<span class="kw">def</span> <span class="fn">hanoi</span><span class="punc">(</span>n<span class="punc">,</span> who<span class="punc">,</span> whom<span class="punc">,</span> via<span class="punc">):</span>
+    <span class="kw">if</span> n <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>   <span class="cmt"># 基线:没有农民要搬,直接返回</span>
+        <span class="kw">return</span>
+    <span class="cmt"># 递归主体(见下)…</span></pre>
+        </div>
+
+        <h4>思路拆解二:三步搬运的递归主体</h4>
+        <p>主体严格按"移上面 n-1、移最大、再移上面 n-1"三步展开。中间那步用 <code>pickUpItem(who)</code> 取起点树桩顶端农民、<code>dropItem(whom)</code> 放到目标树桩,正是"移动一个圆盘"的实现。两侧的递归调用注意<strong>参数角色的轮换</strong>——中转与目标/起点互换。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:三步递归主体</span>
+    <span class="fn">hanoi</span><span class="punc">(</span>n <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> who<span class="punc">,</span> via<span class="punc">,</span> whom<span class="punc">)</span>   <span class="cmt"># ① 上面 n-1 个 → 中转</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">pickUpItem</span><span class="punc">(</span>who<span class="punc">)</span>            <span class="cmt"># ② 取最大农民</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">dropItem</span><span class="punc">(</span>whom<span class="punc">)</span>             <span class="cmt">#    搬到目标</span>
+    <span class="fn">hanoi</span><span class="punc">(</span>n <span class="punc">-</span> <span class="num">1</span><span class="punc">,</span> via<span class="punc">,</span> whom<span class="punc">,</span> who<span class="punc">)</span>   <span class="cmt"># ③ 中转的 n-1 个 → 目标</span></pre>
+        </div>
+
+        <h4>思路拆解三:用三个树桩发起调用</h4>
+        <p>最后一行是"点火"——<code>hanoi(5, stump1, stump2, stump3)</code>,意思是"把 stump1 上的 5 个农民搬到 stump2,用 stump3 作中转"。传入 5 是因为有 5 个农民;三个树桩的顺序决定了起点、目标、中转。一句调用,整个 31 步的搬运便自动展开。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:发起递归(起点, 目标, 中转)</span>
+<span class="fn">hanoi</span><span class="punc">(</span><span class="num">5</span><span class="punc">,</span> stump1<span class="punc">,</span> stump2<span class="punc">,</span> stump3<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">递归自动保证合法：</span>你可能担心某一步会不会把大农民压到小农民上——不会。只要严格按这个递归结构执行,每一步 <code>dropItem</code> 时目标树桩顶端要么为空、要么是更大的农民,大压小的非法情况绝不会发生。这是汉诺塔递归解法数学上被证明的正确性,你只管信任它。</div>
+
+        <div class="warn-box">
+            <span class="warn-label">两处递归调用的参数别写错：</span>本关最容易错的就是两个 <code>hanoi(n-1, …)</code> 里三个树桩参数的顺序。第一步是 <code>(who, via, whom)</code>、第三步是 <code>(via, whom, who)</code>——中转与目标/起点的轮换必须精确,写反一个,搬运顺序就乱了、会触发非法移动。对照 15.5.2 的角色轮换表逐一核对。</div>
+    </div>
+</div>
+
+<!-- ==================== 15.8 ==================== -->
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<div class="section-header" id="section-15-8">
+    <h2>15.8 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-15-8-1">15.8.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>15.8.1.1 递归与汉诺塔的典型问题
+    <span class="en">Typical issues with recursion and Hanoi</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/15-8-1-1_common_errors.png" alt="扣哒世界 汉诺塔常见错误速查 - koudashijie.com">
+    <div class="caption">图3：忘写基线条件、递归参数顺序写错、pickUp 与 drop 不配对、试图手动跟踪每步,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘写基线条件——漏了 <code>if n == 0: return</code> 会导致<strong>无限递归、栈溢出</strong>,这是递归的头号错误。</li>
+        <li>递归参数顺序写错——两个 <code>hanoi(n-1, …)</code> 里 who/whom/via 的轮换必须精确,写反会触发非法移动。</li>
+        <li>pickUp 与 drop 不配对——中间那步必须"取一个、放一个"成对出现,只取不放或只放不取都会出错。</li>
+        <li>pickUp/drop 目标搞反——应从 <code>who</code>(起点)取、往 <code>whom</code>(目标)放,方向弄反会把盘搬错柱子。</li>
+        <li>试图手动跟踪每一步——不要在脑中展开全部 31 步,应"信任递归"、只关注"三步 + 基线"的结构。</li>
+        <li>n 传错值——农民有几个就传几(本关传 5),传错数量会漏搬或多搬。</li>
+        <li>混淆栈的方向——柱子是<strong>后进先出(LIFO)</strong>,只能操作顶端;当成队列(先进先出)来想就全错了。</li>
+        <li>把递归写成两次独立调用却漏了中间移动——三步缺一不可,尤其别漏掉中间的 pickUp+drop。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你登顶封神冰川,征服了计算机科学中最优雅的思想——<strong>递归</strong>!在 Kelvintaph 的收官之作里,你理解了<strong>汉诺塔问题</strong>的抽象与三条规则;认识到<strong>每根柱子(树桩)就是一个栈</strong>,遵循<strong>后进先出(LIFO)</strong>、大盘不能压小盘;学会用 <code>pickUpItem</code>(pop 出栈)与 <code>dropItem</code>(push 入栈)成对模拟圆盘移动,用 <code>peekItem</code>/<code>viewStack</code> 观察栈;更重要的是,你掌握了<strong>递归思想</strong>——用基线条件终止、用"移上面 n-1、移最大、再移上面 n-1"的三步把大问题化为同类的小问题,并领会了三根柱子<strong>参数角色轮换</strong>的精妙。你还认识了 <strong>2ⁿ − 1</strong> 的指数增长规律。"信任递归、分而治之"的智慧,将伴随你未来所有的算法探索。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>汉诺塔问题</td><td>三柱搬盘, 大不压小</td><td class="mono">hanoi(n, who, whom, via)</td></tr>
+            <tr><td>柱子=栈</td><td>后进先出 LIFO</td><td class="mono">只操作顶端</td></tr>
+            <tr><td>pop 出栈</td><td>取走顶端圆盘</td><td class="mono">hero.pickUpItem(who)</td></tr>
+            <tr><td>push 入栈</td><td>放到顶端</td><td class="mono">hero.dropItem(whom)</td></tr>
+            <tr><td>peek/view</td><td>只看不取</td><td class="mono">peekItem / viewStack</td></tr>
+            <tr><td>基线条件</td><td>递归的终点</td><td class="mono">if n == 0: return</td></tr>
+            <tr><td>三步递归</td><td>移上、移最大、移上</td><td class="mono">hanoi(n-1)…pick+drop…hanoi(n-1)</td></tr>
+            <tr><td>移动次数</td><td>指数级增长</td><td class="mono">2ⁿ − 1</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把庞大的问题层层拆解成同类的小问题、写下终止的基线、然后信任递归自会完成其余——这份"分而治之"的思维,是程序员最珍贵的智慧之一。<br>
+        封神冰川的汉诺塔试炼圆满完成,计算机科学 6 的全部征途至此功德圆满。恭喜你,冰川之巅的勇者!🧊❄️🗼</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第十五单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

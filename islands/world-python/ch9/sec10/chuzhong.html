@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC10-A7FB335D03AD">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十单元：栈操作 · 后进先出与物品调度 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 栈盒子（LIFO 竖直可视化）===== */
+        .stack-viz {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 5px;
+            margin: 14px auto;
+            width: fit-content;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .stack-viz .scell {
+            min-width: 120px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            color: #fff;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.88em;
+        }
+        .stack-viz .scell.top { background: var(--warning); }
+        .stack-viz .scell.base { background: var(--primary-dark); }
+        .stack-viz .slabel { font-size: 0.72em; color: var(--text-lighter); font-family: sans-serif; margin: 2px 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC10-A7FB335D03AD | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第十单元</div>
+
+    <a href="#section-10-1" class="nav-section">10.1 栈数据结构概述</a>
+    <a href="#sec-10-1-1" class="nav-sub">10.1.1 什么是栈</a>
+    <a href="#sec-10-1-2" class="nav-sub">10.1.2 LIFO 后进先出</a>
+
+    <a href="#section-10-2" class="nav-section">10.2 入栈与出栈</a>
+    <a href="#sec-10-2-1" class="nav-sub">10.2.1 pickUpItem 入栈</a>
+    <a href="#sec-10-2-2" class="nav-sub">10.2.2 dropItem 出栈</a>
+    <a href="#sec-10-2-3" class="nav-sub">10.2.3 peekItem 查看栈顶</a>
+
+    <a href="#section-10-3" class="nav-section">10.3 用列表实现栈</a>
+    <a href="#sec-10-3-1" class="nav-sub">10.3.1 append 与 pop()</a>
+    <a href="#sec-10-3-2" class="nav-sub">10.3.2 空栈检查</a>
+
+    <a href="#section-10-4" class="nav-section">10.4 顺序即命运</a>
+    <a href="#sec-10-4-1" class="nav-sub">10.4.1 入栈顺序决定出栈</a>
+    <a href="#sec-10-4-2" class="nav-sub">10.4.2 按栈顶类型放置</a>
+
+    <a href="#section-10-5" class="nav-section">10.5 队列 vs 栈</a>
+    <a href="#sec-10-5-1" class="nav-sub">10.5.1 两种结构对比</a>
+
+    <a href="#section-10-6" class="nav-section">10.6 实战关卡精讲</a>
+    <a href="#sec-10-6-1" class="nav-sub">10.6.1 密钥栈</a>
+    <a href="#sec-10-6-2" class="nav-sub">10.6.2 堆栈分类</a>
+    <a href="#sec-10-6-3" class="nav-sub">10.6.3 炼金堆</a>
+
+    <a href="#section-10-7" class="nav-section">10.7 常见错误</a>
+    <a href="#sec-10-7-1" class="nav-sub">10.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十单元：栈操作 · 后进先出与物品调度</h1>
+    <div class="subtitle">Unit 10: Stack Operations — LIFO &amp; Inventory Management</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 密钥栈 → 堆栈分类 → 炼金堆</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 10.1 ==================== -->
+<div class="section-header" id="section-10-1">
+    <h2>10.1 栈数据结构概述</h2>
+    <div class="en-title">Overview of the Stack Data Structure</div>
+</div>
+
+<p>上一单元你掌握了"先进先出"的队列，这一单元将学习它的孪生兄弟——<strong>栈（stack）</strong>。在封神冰川的地牢里，农民背着一个特殊的背包：他每拾起一件物品，物品就叠在背包<strong>最上面</strong>；他也<strong>只能取出最上面那一件</strong>。三把钥匙、三扇门，收集的顺序稍有差错就会打不开门。这背后正是计算机科学又一个核心数据结构：<span class="keyword">栈（stack）</span>，以及它"后来居上、先出先取"的独特脾气。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解<strong>栈</strong>是一种<strong>后进先出（LIFO）</strong>的数据结构；掌握三大操作——<code>pickUpItem</code>（入栈/push，放到栈顶）、<code>dropItem</code>（出栈/pop，取走栈顶）、<code>peekItem</code>（查看栈顶但不取走）；学会用列表实现栈并在取元素前<strong>检查是否为空</strong>；理解<strong>入栈顺序决定出栈顺序</strong>（顺序即命运）；根据<strong>栈顶物品类型</strong>决定把它放到哪里。
+</div>
+
+<h3 id="sec-10-1-1">10.1.1 什么是栈（What Is a Stack）</h3>
+
+<h4>10.1.1.1 只能在顶部进出的集合
+    <span class="en">A collection you add to and remove from the top</span>
+</h4>
+
+<p>栈是一种线性集合：元素总是从<strong>顶部（top）</strong>加入，也只能从<strong>顶部</strong>取出。你唯一能直接访问的，永远是"最后一个放进去"的元素。要拿到底部的东西，必须先把压在它上面的一件件取走。这与队列的"两端进出"截然不同——栈只有一个开口。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 就像一摞冰盘</div>
+    你把冰盘一个个叠起来：先放的在最底下，后放的压在上面。要取盘子，只能从<strong>最上面</strong>拿——最后放上去的那个最先被取走。想拿最底下那个？得先把上面的全搬走。农民的背包就是这样一个"栈"：先进去的钥匙压在最底下，最后拿的钥匙在最上面。
+</div>
+
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-10-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<h3 id="sec-10-1-2">10.1.2 LIFO 后进先出（Last In, First Out）</h3>
+
+<h4>10.1.2.1 最后进的最先出
+    <span class="en">The last one in is the first one out</span>
+</h4>
+
+<p>栈的核心规则叫 <span class="keyword-en">LIFO</span>——Last In, First Out，"后进先出"。最后一个入栈的元素，会是第一个出栈的。这与队列的"先进先出（FIFO）"正好相反。栈特别适合处理"撤销/回退""层层嵌套""最近优先"的场景：浏览器的后退按钮、编辑器的撤销、函数调用栈等，本质都是栈。</p>
+
+<div class="concept-viz">
+    <div class="stack-viz">
+        <div class="scell base">🔑 金钥匙（先入，最后出）</div>
+        <div class="scell">🔑 银钥匙</div>
+        <div class="scell top">🔑 铜钥匙（后入，最先出）</div>
+    </div>
+    <div style="font-size:0.85em;color:var(--text-light);">
+        <span style="color:var(--warning);font-weight:700;">■ 栈顶 top</span>（铜钥匙最后放，最先取）&nbsp;·&nbsp;
+        <span style="color:var(--primary-dark);font-weight:700;">■ 栈底 base</span>（金钥匙先放，最后取）
+    </div>
+</div>
+
+<!-- ==================== 10.2 ==================== -->
+<div class="section-header" id="section-10-2">
+    <h2>10.2 入栈与出栈</h2>
+    <div class="en-title">Push and Pop</div>
+</div>
+
+<h3 id="sec-10-2-1">10.2.1 pickUpItem 入栈（Push to the Top）</h3>
+
+<h4>10.2.1.1 把物品压到栈顶
+    <span class="en">Add an item onto the top</span>
+</h4>
+
+<p><strong>入栈（push）</strong>就是把一个新元素放到栈的顶部。关卡里农民用 <code>pickUpItem</code> 拾取物品——每拾一件，它就叠到背包最上面。用列表实现时，入栈就是 <code>append</code>（加到列表末尾，末尾即栈顶）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关卡里：农民拾取物品 = 入栈</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> goldKey<span class="punc">)</span>   <span class="cmt"># 金钥匙压到栈顶</span>
+
+<span class="cmt"># 用列表实现时，入栈 = append</span>
+stack <span class="punc">=</span> <span class="punc">[]</span>
+stack<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="num">3</span><span class="punc">)</span>   <span class="cmt"># PUSH 3 → [3]</span>
+stack<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="num">5</span><span class="punc">)</span>   <span class="cmt"># PUSH 5 → [3, 5]，5 在栈顶</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-10-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<h3 id="sec-10-2-2">10.2.2 dropItem 出栈（Pop from the Top）</h3>
+
+<h4>10.2.2.1 只能取走栈顶那一件
+    <span class="en">Remove the item on top</span>
+</h4>
+
+<p><strong>出栈（pop）</strong>就是把栈顶（最后放入）的元素取出并移除。农民用 <code>dropItem</code> 放下物品——他只能放下<strong>最上面</strong>那一件。用列表实现时，出栈就是 <code>pop()</code>（不带参数，移除并返回列表最后一个元素）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关卡里：农民放下栈顶物品 = 出栈</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">40</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">34</span><span class="punc">})</span>   <span class="cmt"># 放下最上面那件</span>
+
+<span class="cmt"># 用列表实现时，出栈 = pop()</span>
+top <span class="punc">=</span> stack<span class="punc">.</span><span class="fn">pop</span><span class="punc">()</span>   <span class="cmt"># POP → top=5，栈变 [3]</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">栈用 pop()，队列用 pop(0)：</span>这是本单元和上一单元最容易混淆的地方！<strong>栈出栈用 <code>pop()</code></strong>（取最后一个 = 栈顶，LIFO）；<strong>队列出队用 <code>pop(0)</code></strong>（取第一个 = 队首，FIFO）。一个"顶"、一个"首"，方向相反，务必分清。
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-10-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-10-2-3">10.2.3 peekItem 查看栈顶（Peek at the Top）</h3>
+
+<h4>10.2.3.1 只看栈顶，不取走
+    <span class="en">Look at the top without removing</span>
+</h4>
+
+<p><strong>查看栈顶（peek）</strong>是指"看一眼最上面是什么"，但<strong>不把它取走</strong>。农民用 <code>peasant.peekItem()</code> 返回背包顶部的物品。这在"扔掉之前先看清楚"的场景里极其有用——先 peek 判断栈顶类型，再决定该把它 <code>dropItem</code> 到哪里。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># peek：先看栈顶是什么，栈不变</span>
+topItem <span class="punc">=</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">()</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>topItem<span class="punc">.</span>type<span class="punc">)</span>   <span class="cmt"># 说出栈顶物品的类型</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">peek 能省计算：</span>如果想知道栈顶是什么，也可以"pop 出来看一眼再 push 回去"，但那要两步操作。<code>peek</code> 一步就能读到栈顶的值而不改变栈——更高效、更简洁。空栈时 <code>peekItem()</code> 会返回空值（<code>None</code>），可用来判断栈是否已空。
+</div>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>操作</th><th>作用</th><th>关卡命令</th><th>列表写法</th></tr></thead>
+    <tbody>
+        <tr><td>push 入栈</td><td>放到栈顶</td><td class="mono">pickUpItem</td><td class="mono">stack.append(x)</td></tr>
+        <tr><td>pop 出栈</td><td>取走栈顶</td><td class="mono">dropItem</td><td class="mono">stack.pop()</td></tr>
+        <tr><td>peek 查看</td><td>看栈顶不取</td><td class="mono">peekItem()</td><td class="mono">stack[-1]</td></tr>
+        <tr><td>isEmpty 判空</td><td>是否为空</td><td class="mono">peekItem()==None</td><td class="mono">not stack</td></tr>
+    </tbody>
+</table>
+</div>
+
+<!-- ==================== 10.3 ==================== -->
+<div class="section-header" id="section-10-3">
+    <h2>10.3 用列表实现栈</h2>
+    <div class="en-title">Implementing a Stack with a List</div>
+</div>
+
+<h3 id="sec-10-3-1">10.3.1 append 与 pop()（The Two Core Methods）</h3>
+
+<h4>10.3.1.1 一个列表 + 两个方法 = 栈
+    <span class="en">A list plus two methods makes a stack</span>
+</h4>
+
+<p>和队列一样，栈也能用普通列表实现——只不过约定改成"从末尾 <code>append</code> 入栈、从末尾 <code>pop()</code> 出栈"。列表的末尾同时充当"栈顶"，进出都在这一端。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 130" width="520" role="img" aria-label="列表实现栈">
+        <text x="260" y="24" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">列表末尾 = 栈顶，进出都在这头</text>
+        <g font-family="monospace" font-size="14" text-anchor="middle">
+            <rect x="130" y="45" width="70" height="45" rx="6" fill="#234254" stroke="#4FB5D8"/><text x="165" y="73" fill="#a5d4e8">3</text>
+            <rect x="200" y="45" width="70" height="45" rx="6" fill="#234254" stroke="#4FB5D8"/><text x="235" y="73" fill="#a5d4e8">5</text>
+            <rect x="270" y="45" width="70" height="45" rx="6" fill="#5a4420" stroke="#e6b566" stroke-width="2"/><text x="305" y="73" fill="#f0c674">8 ← 栈顶</text>
+        </g>
+        <text x="305" y="112" text-anchor="middle" font-size="11" fill="#e8a15a" font-family="sans-serif">append 加这头，pop() 也从这头取</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用列表完整演示一个栈</span>
+stack <span class="punc">=</span> <span class="punc">[]</span>
+stack<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="num">3</span><span class="punc">)</span>   <span class="cmt"># PUSH → [3]</span>
+stack<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="num">5</span><span class="punc">)</span>   <span class="cmt"># PUSH → [3, 5]</span>
+top <span class="punc">=</span> stack<span class="punc">.</span><span class="fn">pop</span><span class="punc">()</span>   <span class="cmt"># POP → top=5，栈=[3]（后进的 5 先出）</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-10-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-10-3-2">10.3.2 空栈检查（Checking for an Empty Stack）</h3>
+
+<h4>10.3.2.1 取栈顶前先确认栈里有东西
+    <span class="en">Make sure the stack isn't empty first</span>
+</h4>
+
+<p>从空栈 <code>pop()</code> 会报错。所以出栈或 peek 前要先判空。关卡里常用 <code>while peasant.peekItem():</code> 作为循环条件——只要栈顶还有物品（peek 非空）就继续处理，一旦栈空 peek 返回 <code>None</code>（假），循环自动停止。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用 peek 是否为空来控制循环，处理到栈空为止</span>
+<span class="kw">while</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">():</span>   <span class="cmt"># 栈顶还有东西就继续</span>
+    topItem <span class="punc">=</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">()</span>
+    <span class="cmt"># ...根据 topItem 决定放哪里，再 dropItem...</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">"先判空再取"是铁律：</span>无论栈还是队列，任何取顶/取首前都要先判空。栈里可以用 <code>if peasant.peekItem():</code> 或 <code>if stack:</code>（列表非空为真）来判断。养成这个习惯能避免大量边界崩溃。
+</div>
+
+<!-- ==================== 10.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:8b8a886441:START anchor=sec-10-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8b8a886441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想解锁全部 11 张地图、2300+ 关卡？立即访问 <a href="https://koudashijie.com/">koudashijie.com</a>，开启你的编程冒险。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8b8a886441:END -->
+
+<div class="section-header" id="section-10-4">
+    <h2>10.4 顺序即命运</h2>
+    <div class="en-title">Order Is Everything</div>
+</div>
+
+<h3 id="sec-10-4-1">10.4.1 入栈顺序决定出栈顺序（Push Order Dictates Pop Order）</h3>
+
+<h4>10.4.1.1 想最先取谁，就最后放谁
+    <span class="en">To pop it first, push it last</span>
+</h4>
+
+<p>栈最烧脑也最精妙的一点：<strong>你入栈的顺序，反过来就是出栈的顺序</strong>。在"密钥栈"关卡里，三把钥匙要按门的顺序放下。因为最后拾起的钥匙在栈顶、会最先被放下，所以——<strong>想让某把钥匙最先用，就要最后才拾起它</strong>。这需要"倒着想"：先规划好放下的顺序，再反推拾起的顺序。</p>
+
+<div class="concept-viz">
+    <svg viewBox="0 0 540 150" width="540" role="img" aria-label="入栈出栈顺序相反">
+        <text x="270" y="20" text-anchor="middle" font-size="13" fill="#1C5E7C" font-weight="bold" font-family="sans-serif">拾取顺序：金 → 银 → 铜（铜在栈顶）</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle" fill="#fff">
+            <rect x="60" y="35" width="90" height="34" rx="5" fill="#2E8BB0"/><text x="105" y="57">1.金</text>
+            <rect x="60" y="72" width="90" height="34" rx="5" fill="#4FB5D8"/><text x="105" y="94">2.银</text>
+            <rect x="60" y="109" width="90" height="34" rx="5" fill="#D98A2B"/><text x="105" y="131">3.铜(顶)</text>
+        </g>
+        <text x="270" y="90" font-size="24" fill="#1C5E7C">⇄</text>
+        <text x="410" y="20" text-anchor="middle" font-size="13" fill="#9e352c" font-weight="bold" font-family="sans-serif">放下顺序：铜 → 银 → 金（反过来！）</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle" fill="#fff">
+            <rect x="365" y="35" width="90" height="34" rx="5" fill="#D98A2B"/><text x="410" y="57">1.铜先放</text>
+            <rect x="365" y="72" width="90" height="34" rx="5" fill="#4FB5D8"/><text x="410" y="94">2.银</text>
+            <rect x="365" y="109" width="90" height="34" rx="5" fill="#2E8BB0"/><text x="410" y="131">3.金最后</text>
+        </g>
+    </svg>
+</div>
+
+<h3 id="sec-10-4-2">10.4.2 按栈顶类型决定放置位置（Route by Top Item's Type）</h3>
+
+<h4>10.4.2.1 先 peek 看类型，再 drop 到对应位置
+    <span class="en">Peek the type, then drop to the right place</span>
+</h4>
+
+<p>在"堆栈分类"和"炼金堆"里，物品要按<strong>类型</strong>送到不同地方（蘑菇给雪人、药水给英雄/牦牛、发光石给骷髅）。做法是：循环中先 <code>peekItem()</code> 读出栈顶物品，用 <code>if / elif</code> 判断它的 <code>type</code>，再 <code>dropItem</code> 把它放到对应目标的位置。这样每次都根据"最上面是什么"来决定"该丢到哪"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 先 peek 看栈顶类型，再决定放到哪个位置</span>
+<span class="kw">while</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">():</span>
+    topItem <span class="punc">=</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">()</span>
+    <span class="kw">if</span> topItem<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"potion"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> yakPos<span class="punc">)</span>       <span class="cmt"># 药水给牦牛</span>
+    <span class="kw">elif</span> topItem<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"mushroom"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> yetiPos<span class="punc">)</span>      <span class="cmt"># 蘑菇给雪人</span>
+    <span class="kw">elif</span> topItem<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"lightstone"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> skeletonPos<span class="punc">)</span>  <span class="cmt"># 发光石给骷髅</span></pre>
+</div>
+
+<!-- ==================== 10.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:2e3e6cfba7:START anchor=sec-10-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="2e3e6cfba7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从暗影地牢的对象与方法起步，到流金沙漠的算法拓展，一路闯关一路变强。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2e3e6cfba7:END -->
+
+<div class="section-header" id="section-10-5">
+    <h2>10.5 队列 vs 栈</h2>
+    <div class="en-title">Queue vs Stack</div>
+</div>
+
+<h3 id="sec-10-5-1">10.5.1 两种结构对比（Comparing the Two Structures）</h3>
+
+<h4>10.5.1.1 一个先进先出，一个后进先出
+    <span class="en">FIFO versus LIFO</span>
+</h4>
+
+<p>队列和栈是一对经典的"孪生数据结构"，都用列表实现、都只在特定位置进出，区别只在<strong>出的方向</strong>。理解它们的对照，能帮你在遇到问题时选对工具：需要"公平排队、先来先服务"用队列；需要"回退、撤销、最近优先"用栈。</p>
+
+<div class="styled-table">
+<table class="styled-table">
+    <thead><tr><th>对比项</th><th>队列 Queue</th><th>栈 Stack</th></tr></thead>
+    <tbody>
+        <tr><td>规则</td><td>FIFO 先进先出</td><td>LIFO 后进先出</td></tr>
+        <tr><td>入（列表）</td><td class="mono">append()</td><td class="mono">append()</td></tr>
+        <tr><td>出（列表）</td><td class="mono">pop(0) 取队首</td><td class="mono">pop() 取栈顶</td></tr>
+        <tr><td>类比</td><td>排队买票</td><td>叠盘子</td></tr>
+        <tr><td>典型用途</td><td>任务调度、消息队列</td><td>撤销、括号匹配、函数调用</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="info-box">
+    <span class="info-label">记忆口诀：</span>队列像<strong>水管</strong>——从一头进、另一头出，先进的先流出（FIFO）；栈像<strong>直筒杯</strong>装弹珠——从口进、也从口出，最后放的最先拿（LIFO）。列表出栈/出队都用 pop，区别就是括号里带不带 0。
+</div>
+
+<!-- ==================== 10.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-10-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+<!-- CC-PROTECTION:HIDDEN:f9d92dfaf8:START anchor=sec-10-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="f9d92dfaf8">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:f9d92dfaf8:END -->
+
+<div class="section-header" id="section-10-6">
+    <h2>10.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 密钥栈 -->
+<div class="level-card" id="sec-10-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 21 关 · 密钥栈</span>
+        <h3>🧊 密钥栈 —— 用入栈顺序规划开门</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-6-1-1_key_stack.png" alt="扣哒世界 密钥栈关卡 - koudashijie.com">
+            <div class="caption">图2：密钥栈——农民背包是个栈，最后拾起的钥匙在栈顶最先放下，须倒推拾取顺序才能依次开三扇门</div>
+        </div>
+
+        <h4>策略：倒着规划——想先放的钥匙最后拾</h4>
+        <p>三把钥匙对应三扇门，钥匙必须放在对应门边才能开门（扔远了会碎、门还会自动关）。核心难点在于：农民只能放下栈顶（最后拾起）的钥匙。所以策略是<strong>倒推</strong>——先确定放钥匙的先后（第一扇门先开、就要第一个放），再反过来安排拾取顺序：<strong>第一个要放的钥匙，最后一个拾起</strong>（让它待在栈顶）。</p>
+
+        <h4>思路拆解：拾取与放下顺序相反</h4>
+        <p>假设三扇门从近到远要依次用钥匙 A、B、C 打开。因为栈是 LIFO，拾取顺序要写成 C、B、A（A 最后拾、在栈顶）。这样第一次 <code>dropItem</code> 放下的就是栈顶的 A，正好开第一扇门；接着 B、再 C。拾取和放下，方向恰好相反——这正是栈"顺序即命运"的直接体现。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：按倒序拾取（最后拾的钥匙将最先放下）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> goldKey<span class="punc">)</span>     <span class="cmt"># 先拾，压栈底</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> silverKey<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> bronzeKey<span class="punc">)</span>   <span class="cmt"># 最后拾，在栈顶</span>
+
+<span class="cmt"># 放下顺序 = 拾取的逆序：栈顶(铜)先放</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">40</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">34</span><span class="punc">})</span>   <span class="cmt"># 第一扇门</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">31</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">34</span><span class="punc">})</span>   <span class="cmt"># 第二扇门</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">22</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">34</span><span class="punc">})</span>   <span class="cmt"># 第三扇门</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">钥匙别扔远、动作要快：</span>关卡提示——钥匙扔离门口会碎，且门开后短时间会关。所以要先在门边就位再放，放完钥匙后立刻让农民/英雄冲进去收集宝藏，别磨蹭。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">这一关的意义：</span>密钥栈让你亲身体会栈"只能操作栈顶"的约束，以及由此带来的"倒序思维"。这种"要先用的东西最后放"的规划，在很多实际问题（如撤销操作、递归回溯）中都会遇到。
+        </div>
+    </div>
+</div>
+
+<!-- 堆栈分类 -->
+<div class="level-card" id="sec-10-6-2">
+    <div class="level-head">
+        <span class="lv-num">第 22 关 · 堆栈分类</span>
+        <h3>❄️ 堆栈分类 —— peek 栈顶再按类型分发</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-6-2-1_stack_triage.png" alt="扣哒世界 堆栈分类关卡 - koudashijie.com">
+            <div class="caption">图3：堆栈分类——先把物品全部入栈，再循环 peekItem 看栈顶类型，蘑菇给雪人、药水给牦牛、发光石给骷髅</div>
+        </div>
+
+        <h4>策略：先全部入栈，再逐个 peek 分发</h4>
+        <p>这一关要把物品按类型送给三个对象。策略分两阶段：<strong>收集阶段</strong>——用 <code>for</code> 循环把所有物品 <code>pickUpItem</code> 全部入栈；<strong>分发阶段</strong>——用 <code>while peasant.peekItem():</code> 循环，每次先 peek 看栈顶是什么类型，再 <code>dropItem</code> 到对应目标位置，直到栈空。"扔之前先看一眼"是本关的点题之笔。</p>
+
+        <h4>思路拆解：peek 判断 + 分类 drop</h4>
+        <p>分发时用 <code>peekItem()</code> 拿到栈顶物品（不移除），判断 <code>type</code>：potion → 牦牛、mushroom → 雪人、lightstone → 骷髅，用 <code>if / elif</code> 分派，再 <code>dropItem</code> 到对应坐标。<code>dropItem</code> 会把栈顶那件放下（即移除），于是下次循环 peek 到的就是新栈顶。循环条件 <code>while peasant.peekItem()</code> 保证栈空自动停止。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：收集阶段——全部入栈</span>
+<span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> item<span class="punc">)</span>
+
+<span class="cmt"># 关键片段：分发阶段——peek 栈顶，按类型 drop</span>
+<span class="kw">while</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">():</span>
+    topItem <span class="punc">=</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">()</span>
+    <span class="kw">if</span> topItem<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"potion"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> yakPos<span class="punc">)</span>
+    <span class="kw">elif</span> topItem<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"mushroom"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> yetiPos<span class="punc">)</span>
+    <span class="kw">elif</span> topItem<span class="punc">.</span>type <span class="punc">==</span> <span class="str">"lightstone"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> skeletonPos<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么先 peek 再 drop：</span>因为你必须先知道栈顶是什么类型，才能决定把它送到哪里。<code>peek</code> 让你"只看不动"地读取类型，判断好目标后再 <code>drop</code>。如果不先 peek 就盲目 drop，物品就可能被送错对象。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别忘了循环判空：</span>用 <code>while peasant.peekItem():</code> 而不是 <code>while True:</code>——栈空时 peek 返回 None，循环才能正常结束。若用死循环又不判空，栈空后再 peek/drop 就会出错。
+        </div>
+    </div>
+</div>
+
+<!-- 炼金堆 -->
+<div class="level-card" id="sec-10-6-3">
+    <div class="level-head">
+        <span class="lv-num">第 23 关 · 炼金堆</span>
+        
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3>🏔️ 炼金堆 —— 栈的综合运用击败雪人</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-6-3-1_alchemy_stack.png" alt="扣哒世界 炼金堆关卡 - koudashijie.com">
+            <div class="caption">图4：炼金堆——先用钥匙开门（钥匙留到最后拾放栈顶），再把蘑菇喂雪人削弱、药水治英雄，最后击败雪人</div>
+        </div>
+
+        <h4>策略：先开门取物，再按类型分发治敌</h4>
+        <p>这是栈单元的综合关，融合了前两关的技巧。目标是削弱并击败古代雪人：<strong>蘑菇喂雪人</strong>削弱它、<strong>药水献给英雄</strong>治愈自己，最后攻击取胜。难点在于还有一把金钥匙要开门——它必须<strong>最后拾起</strong>好留在栈顶最先放下开门，其余物品先入栈。</p>
+
+        <h4>思路拆解一：钥匙留到最后拾（放栈顶）</h4>
+        <p>先用 <code>for</code> 循环把<strong>除钥匙外</strong>的物品都入栈（用 <code>if item.type != "gold-key"</code> 过滤掉钥匙），然后单独把钥匙 <code>pickUpItem</code>——这样钥匙就在栈顶。先 <code>dropItem</code> 放下钥匙开门，再处理下面的蘑菇和药水。这正是"要先用的最后放"的应用。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：先入其他物品，钥匙最后拾放栈顶</span>
+<span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+    <span class="kw">if</span> item<span class="punc">.</span>type <span class="punc">!=</span> <span class="str">"gold-key"</span><span class="punc">:</span>       <span class="cmt"># 钥匙先不拾</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> item<span class="punc">)</span>
+key <span class="punc">=</span> peasant<span class="punc">.</span><span class="fn">findNearestByType</span><span class="punc">(</span><span class="str">"gold-key"</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"pickUpItem"</span><span class="punc">,</span> key<span class="punc">)</span>     <span class="cmt"># 钥匙最后拾 → 栈顶</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">38</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">34</span><span class="punc">})</span>  <span class="cmt"># 先放钥匙开门</span></pre>
+        </div>
+
+        <h4>思路拆解二：peek 分发蘑菇与药水，再攻击</h4>
+        <p>开门后，用 <code>while peasant.peekItem():</code> 循环处理剩下的物品：peek 栈顶，若是 <code>potion</code> 就 <code>dropItem</code> 到英雄脚下（<code>hero.pos</code>）治疗，否则（蘑菇）就丢到雪人位置削弱它。全部分发完，再用一个循环持续 <code>hero.attack(yeti)</code> 直到击败它。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：药水给英雄，蘑菇给雪人</span>
+<span class="kw">while</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">():</span>
+    <span class="kw">if</span> peasant<span class="punc">.</span><span class="fn">peekItem</span><span class="punc">().</span>type <span class="punc">==</span> <span class="str">"potion"</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>   <span class="cmt"># 药水治英雄</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"dropItem"</span><span class="punc">,</span> yeti<span class="punc">.</span>pos<span class="punc">)</span>   <span class="cmt"># 蘑菇削弱雪人</span>
+<span class="cmt"># 削弱并治愈后，攻击直到击败雪人</span>
+<span class="kw">while</span> yeti<span class="punc">.</span>health <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>yeti<span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">卡关就回顾前两关：</span>关卡官方建议——如果炼金堆卡住了，重玩"密钥栈"和"堆栈分类"能帮你复习。开门难点在于"拿钥匙前先检查物品类型、把钥匙留到最后拾"，这样它就在栈顶、能第一个放下开门。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 10.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+<!-- CC-PROTECTION:HIDDEN:dc4d1310ff:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="dc4d1310ff">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:dc4d1310ff:END -->
+
+<div class="section-header" id="section-10-7">
+    <h2>10.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-10-7-1">10.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>10.7.1.1 栈操作的典型问题
+    <span class="en">Typical issues with stack operations</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch9_sec10_10-7-1-1_common_errors.png" alt="扣哒世界 栈操作常见错误速查 - koudashijie.com">
+    <div class="caption">图5：拾取顺序搞反、pop 用错、不先 peek、忘判空，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>拾取顺序搞反——栈是 LIFO，想最先放下的物品要<strong>最后</strong>拾起（放栈顶）；顺序想成 FIFO 就会开错门。</li>
+        <li>出栈用错方法——栈出栈用 <code>pop()</code>（取栈顶）；写成 <code>pop(0)</code> 就变成队列出队了。</li>
+        <li>不先 peek 就 drop——必须先 <code>peekItem()</code> 看栈顶类型再决定放哪，盲目 drop 会送错对象。</li>
+        <li>循环忘判空——用 <code>while peasant.peekItem():</code> 而非死循环，栈空时 peek 返回 None 才能停。</li>
+        <li>peek 与 drop 混淆——peek 只看不取（栈不变），drop 才会移除栈顶；别把两者当成一回事。</li>
+        <li>钥匙扔太远——钥匙要放在门边，扔远会碎、门也会自动关，动作要快。</li>
+        <li>钥匙没留栈顶——炼金堆里要用 <code>type != "gold-key"</code> 过滤，让钥匙最后拾、在栈顶先放开门。</li>
+        <li>混淆栈和队列——记住：队列 FIFO 用 <code>pop(0)</code>，栈 LIFO 用 <code>pop()</code>，别张冠李戴。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你征服了栈这座数据结构的高峰！在封神冰川的这三关里，你理解了栈的<strong>后进先出（LIFO）</strong>特性；掌握了三大核心操作——<code>pickUpItem</code> 入栈（push，压到栈顶）、<code>dropItem</code> 出栈（pop，取走栈顶）、<code>peekItem</code> 查看栈顶（只看不取）；学会用列表实现栈（<code>append</code> 入、<code>pop()</code> 出）并在取顶前<strong>判空保护</strong>；深刻体会了<strong>入栈顺序决定出栈顺序</strong>的"倒序思维"；也懂得先 peek 看栈顶类型、再按类型 drop 到对应位置。从"密钥栈"的顺序规划，到"堆栈分类"的 peek 分发，再到"炼金堆"的综合运用，你已能用栈灵活管理物品与流程。别忘了把它和上一单元的队列对照记忆——一个 LIFO、一个 FIFO。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>LIFO 特性</td><td>后进先出</td><td class="mono">Last In First Out</td></tr>
+            <tr><td>push 入栈</td><td>压到栈顶</td><td class="mono">pickUpItem / append</td></tr>
+            <tr><td>pop 出栈</td><td>取走栈顶</td><td class="mono">dropItem / pop()</td></tr>
+            <tr><td>peek 查看</td><td>看栈顶不取</td><td class="mono">peekItem() / stack[-1]</td></tr>
+            <tr><td>空栈检查</td><td>取前先判空</td><td class="mono">while peekItem()</td></tr>
+            <tr><td>顺序即命运</td><td>想先出就后进</td><td class="mono">倒序拾取</td></tr>
+            <tr><td>按类型分发</td><td>peek 后分类 drop</td><td class="mono">if topItem.type==...</td></tr>
+            <tr><td>栈 vs 队列</td><td>pop() vs pop(0)</td><td class="mono">LIFO vs FIFO</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得"后来居上、层层回退"的栈，与"先来先服务"的队列，你已握住了组织数据的两把金钥匙。<br>
+        封神冰川的栈之试炼圆满通关，向着更广阔的算法天地，继续攀登！🧊❄️🗝️</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+<!-- CC-PROTECTION:HIDDEN:a6c060d287:START anchor=h3-15 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a6c060d287">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC10-A7FB335D03AD。</span>
+<!-- CC-PROTECTION:HIDDEN:a6c060d287:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第十单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

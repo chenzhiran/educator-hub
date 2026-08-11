@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH9-SEC16-9159F5758DD6">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十六单元：迷宫算法 · 左手定则与深度优先搜索 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（封神冰川主题）===== */
+        :root {
+            --primary: #3BC7D3;
+            --primary-light: #77E1E8;
+            --primary-lighter: #E7FCFF;
+            --primary-dark: #197C91;
+            --accent: #7667E8;
+            --dark: #101C35;
+            --dark-code: #14223D;
+            --dark-code-border: #29395C;
+            --text: #1D2D47;
+            --text-light: #526984;
+            --text-lighter: #8296AD;
+            --bg: #ffffff;
+            --bg-alt: #F2FAFF;
+            --bg-card: #ffffff;
+            --border: #C4EAF0;
+            --success: #3BC7D3;
+            --warning: #D98A2B;
+            --error: #C0453B;
+            --info: #3BC7D3;
+            --frost: #AFC5FF;
+            --code-keyword: #77E1E8;
+            --code-string: #9fd4a8;
+            --code-comment: #6F86A2;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8EDF4;
+            --code-punctuation: #D8EDF4;
+            --code-object: #AFC5FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #101C35;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #172843; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D7E8F2;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(59, 199, 211, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #243858;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #AFC6D8;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 冰川雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.28) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.22) 40%, rgba(255,255,255,0.22) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(16,28,53,0.30); }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.95; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #DDF8FA;
+            color: #197C91;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #E7FCFF;
+            color: #197C91;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6F86A2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(59, 199, 211, 0.30); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #E7FCFF;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #197C91; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(25,124,145,0.16);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(25,124,145,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F2FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 概念图示 ===== */
+        .concept-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .concept-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(25,124,145,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(25,124,145,0.12);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 迷宫网格可视化 ===== */
+        .maze-grid {
+            display: inline-grid;
+            gap: 3px;
+            margin: 14px auto;
+        }
+        .maze-grid .mcell {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+        .maze-grid .wall { background: #29395C; color: #6F86A2; }
+        .maze-grid .path { background: var(--primary-lighter); color: var(--primary-dark); }
+        .maze-grid .visited { background: #6bbf88; color: #fff; }
+        .maze-grid .hero { background: var(--warning); color: #fff; }
+        .maze-grid .goal { background: var(--error); color: #fff; }
+        .maze-grid .unknown { background: #E7FCFF; color: #7794a3; }
+
+        /* ===== 方向罗盘 ===== */
+        .compass-viz {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .compass-viz .dcell {
+            min-width: 60px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--primary-light);
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85em;
+        }
+        .compass-viz .dcell small { font-family: sans-serif; font-size: 0.75em; opacity: 0.9; }
+        .compass-viz .darrow { color: var(--primary-dark); font-weight: 700; font-size: 1.2em; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH9-SEC16-9159F5758DD6 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">封神冰川·CS6-第十六单元</div>
+
+    <a href="#section-16-1" class="nav-section">16.1 迷宫问题概述</a>
+    <a href="#sec-16-1-1" class="nav-sub">16.1.1 什么是迷宫算法</a>
+    <a href="#sec-16-1-2" class="nav-sub">16.1.2 两种探索思路</a>
+
+    <a href="#section-16-2" class="nav-section">16.2 方向与移动</a>
+    <a href="#sec-16-2-1" class="nav-sub">16.2.1 方向常量</a>
+    <a href="#sec-16-2-2" class="nav-sub">16.2.2 左右转换</a>
+    <a href="#sec-16-2-3" class="nav-sub">16.2.3 moveXY 移动</a>
+
+    <a href="#section-16-3" class="nav-section">16.3 isPathClear 检测</a>
+    <a href="#sec-16-3-1" class="nav-sub">16.3.1 探测门是否通畅</a>
+    <a href="#sec-16-3-2" class="nav-sub">16.3.2 目标点计算</a>
+
+    <a href="#section-16-4" class="nav-section">16.4 左手定则算法</a>
+    <a href="#sec-16-4-1" class="nav-sub">16.4.1 靠墙走原理</a>
+    <a href="#sec-16-4-2" class="nav-sub">16.4.2 尝试转向逻辑</a>
+
+    <a href="#section-16-5" class="nav-section">16.5 迷宫地图建模</a>
+    <a href="#sec-16-5-1" class="nav-sub">16.5.1 二维数组地图</a>
+    <a href="#sec-16-5-2" class="nav-sub">16.5.2 行列与坐标转换</a>
+
+    <a href="#section-16-6" class="nav-section">16.6 栈与 DFS 搜索</a>
+    <a href="#sec-16-6-1" class="nav-sub">16.6.1 用栈实现 DFS</a>
+    <a href="#sec-16-6-2" class="nav-sub">16.6.2 记录已访问房间</a>
+
+    <a href="#section-16-7" class="nav-section">16.7 实战关卡精讲</a>
+    <a href="#sec-16-7-1" class="nav-sub">16.7.1 脆弱的迷宫</a>
+    <a href="#sec-16-7-2" class="nav-sub">16.7.2 冰块中的宝藏</a>
+
+    <a href="#section-16-8" class="nav-section">16.8 常见错误</a>
+    <a href="#sec-16-8-1" class="nav-sub">16.8.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十六单元：迷宫算法 · 左手定则与深度优先搜索</h1>
+    <div class="subtitle">Unit 16: Maze Algorithms — Left-Hand Rule &amp; Depth-First Search</div>
+    <div class="badge">计算机科学 6 · 封神冰川 Deified Glacier · 脆弱的迷宫 → 冰块中的宝藏</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 16.1 ==================== -->
+<div class="section-header" id="section-16-1">
+    <h2>16.1 迷宫问题概述</h2>
+    <div class="en-title">Overview of Maze-Solving Problems</div>
+</div>
+
+<p>封神冰川深处，冰封的迷宫残酷而寂静。层层冰墙之间，有些门被牢牢堵死，有些门却会因你的脚步声而悄然开启。出口确实存在——但如何在错综复杂的冰室中<strong>找到那条路</strong>？这正是计算机科学中经典的<span class="keyword">迷宫求解问题（maze solving）</span>。本单元由两个关卡组成，你将学习两种截然不同却都威力强大的迷宫算法：先用简洁的<strong>左手定则（Left-Hand Rule）</strong>贴墙逃生，再用系统化的<strong>深度优先搜索（DFS）</strong>配合<strong>栈（stack）</strong>和<strong>二维地图</strong>去搜寻宝藏。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>理解迷宫求解的两大思路——<strong>贴墙行走</strong>与<strong>系统搜索</strong>；掌握<strong>方向常量</strong>与<strong>左右转换</strong>；用 <code>isPathClear</code> 检测某个方向的门是否通畅；用 <code>moveXY</code> 精确移动英雄；把迷宫抽象成<strong>二维数组地图</strong>；用<strong>栈</strong>实现<strong>DFS</strong> 路径搜索；并通过<strong>记录已访问房间</strong>避免重复兜圈。这些都是 AI 路径规划、图搜索的重要基石。</p>
+</div>
+
+<h3 id="sec-16-1-1">16.1.1 什么是迷宫算法（What Is a Maze Algorithm）</h3>
+
+<h4>16.1.1.1 在墙与路之间找到出口
+    <span class="en">Finding an exit among walls and passages</span>
+</h4>
+
+<p>迷宫算法是一类<strong>自动寻路的方法</strong>：给定一个由墙壁和通道组成的网格，算法要找出从起点到出口（或到某个目标）的路径。迷宫可以抽象成图论里的<strong>图（graph）</strong>——每个房间是一个节点，能互通的门是连接节点的边。找路的过程，本质上就是在图上做<strong>遍历（traversal）</strong>。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧊 就像被困在冰川的镜厅里</div>
+    你站在冰室的入口，四面都是通道与死路。你看不到全局，只能感知眼前的门开着还是堵着。要走出去，要么<strong>始终用一只手扶着冰墙</strong>一直走下去（左手定则），要么<strong>在脑中画一张地图</strong>、系统地把每条岔路都试一遍并记住走过哪里（DFS）。这两种智慧，正是本单元的核心。
+</div>
+
+
+<!-- CC-PROTECTION:AD:d19090cfd1:START anchor=sec-16-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="d19090cfd1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，你敲下的 if 和 for，直接变成英雄的剑招与魔法。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d19090cfd1:END -->
+<!-- CC-PROTECTION:HIDDEN:c7e26a6294:START anchor=sec-16-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="c7e26a6294">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:c7e26a6294:END -->
+
+<h3 id="sec-16-1-2">16.1.2 两种探索思路（Two Exploration Strategies）</h3>
+
+<h4>16.1.2.1 贴墙走 vs. 系统搜索
+    <span class="en">Wall-following vs. systematic search</span>
+</h4>
+
+<p>本单元的两关分别代表两类经典算法。第 33 关"脆弱的迷宫"用<strong>左手定则</strong>：不需要记地图，只要一直贴着左边的墙走，对<strong>简单连通</strong>的迷宫必能到达出口。第 34 关"冰块中的宝藏"用<strong>DFS + 二维地图</strong>：需要构建地图、用栈系统地搜索、记录访问过的房间——它更复杂，但能处理"先找宝藏、再回出口"这样的多目标任务。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>左手定则 Left-Hand Rule</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">贴墙行走，无需记忆。像蒙眼扶墙走出房间——简单、省内存，但只保证走出简单连通迷宫，不保证最短。用于"脆弱的迷宫"。</p>
+    </div>
+    <div>
+        <h5>深度优先搜索 DFS</h5>
+        <p style="font-size:0.9em;color:#47606E;margin:0;">用栈系统探索，需记录已访问。像手绘地图逐条试路——能应对复杂任务与多目标，但要维护地图和访问记录。用于"冰块中的宝藏"。</p>
+    </div>
+</div>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/16-1-2-1_two_strategies.png" alt="扣哒世界 两种迷宫探索思路对比 - koudashijie.com">
+    <div class="caption">图1：两种迷宫探索思路——左：左手定则贴墙走；右：DFS 借助地图与栈系统搜索</div>
+</div>
+
+<!-- ==================== 16.2 ==================== -->
+<div class="section-header" id="section-16-2">
+    <h2>16.2 方向与移动</h2>
+    <div class="en-title">Directions and Movement</div>
+</div>
+
+<h3 id="sec-16-2-1">16.2.1 方向常量（Direction Constants）</h3>
+
+<h4>16.2.1.1 用列表存放四个方向
+    <span class="en">Store the four directions in a list</span>
+</h4>
+
+<p>迷宫是网格，英雄每次只能朝<strong>上、下、左、右</strong>四个方向之一移动。为了让代码清晰、便于旋转，我们把四个方向<strong>按顺时针（或逆时针）顺序</strong>放进一个列表常量。这样"下一个方向"就变成了列表里的"下一个索引",转向就成了简单的索引运算。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 方向常量：按固定顺序排列（脆弱的迷宫）</span>
+DIRECTIONS <span class="punc">=</span> <span class="punc">[</span><span class="str">"left"</span><span class="punc">,</span> <span class="str">"up"</span><span class="punc">,</span> <span class="str">"right"</span><span class="punc">,</span> <span class="str">"down"</span><span class="punc">]</span>
+
+<span class="cmt"># 房间之间的固定距离——每次移动跨一格</span>
+distanceBetweenRooms <span class="punc">=</span> <span class="num">16</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么用常量而不是裸字符串？</span>把方向、房间距离这类"固定不变的值"定义成常量（如 <code>DIRECTIONS</code>、<code>distanceBetweenRooms</code>），既避免到处敲字符串出错，又让转向逻辑可以用索引来统一处理。这是把"数据"和"逻辑"分离的好习惯。
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-16-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-16-2-2">16.2.2 左右转换（Turning Left and Right）</h3>
+
+<h4>16.2.2.1 用查找表实现"左转"
+    <span class="en">Use a lookup table to turn left</span>
+</h4>
+
+<p>左手定则的核心动作是<strong>"相对当前朝向左转"</strong>。有两种实现方式。一种是<strong>字典查找表</strong>：直接写死"面朝某方向时，左手边是哪个方向"。另一种是<strong>索引旋转</strong>：在 <code>DIRECTIONS</code> 列表上用取模 <code>% 4</code> 得到相邻方向。关卡里两种都用到了。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 方式一：查找表——面朝 key 时，左手边是 value</span>
+LEFT_FOR <span class="punc">=</span> <span class="punc">{</span>
+    <span class="str">"left"</span><span class="punc">:</span>  <span class="str">"down"</span><span class="punc">,</span>
+    <span class="str">"up"</span><span class="punc">:</span>    <span class="str">"left"</span><span class="punc">,</span>
+    <span class="str">"down"</span><span class="punc">:</span>  <span class="str">"right"</span><span class="punc">,</span>
+    <span class="str">"right"</span><span class="punc">:</span> <span class="str">"up"</span>
+<span class="punc">}</span>
+
+<span class="cmt"># 方式二：索引旋转——取列表里的下一个方向（顺时针转）</span>
+<span class="kw">def</span> <span class="fn">findNextDirection</span><span class="punc">(</span>current<span class="punc">)</span><span class="punc">:</span>
+    <span class="kw">return</span> DIRECTIONS<span class="punc">[</span><span class="punc">(</span>DIRECTIONS<span class="punc">.</span><span class="fn">index</span><span class="punc">(</span>current<span class="punc">)</span> <span class="punc">+</span> <span class="num">1</span><span class="punc">)</span> <span class="punc">%</span> <span class="num">4</span><span class="punc">]</span></pre>
+</div>
+
+<div class="compass-viz">
+    <div class="dcell">up<small>朝上</small></div>
+    <span class="darrow">→左手→</span>
+    <div class="dcell">left<small>朝左</small></div>
+    <span class="darrow">→左手→</span>
+    <div class="dcell">down<small>朝下</small></div>
+    <span class="darrow">→左手→</span>
+    <div class="dcell">right<small>朝右</small></div>
+    <span class="darrow">→左手→</span>
+    <div class="dcell">up<small>回到起点</small></div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">取模 % 是"环形"的关键：</span><code>(index + 1) % 4</code> 让索引在 0~3 之间循环——走到列表末尾会自动绕回开头。这个"环形数组"技巧在方向、时钟、轮转调度里到处都是，值得牢牢记住。
+</div>
+
+<h3 id="sec-16-2-3">16.2.3 moveXY 移动英雄（Moving the Hero）</h3>
+
+<h4>16.2.3.1 精确移动到目标坐标
+    <span class="en">Move precisely to a target coordinate</span>
+</h4>
+
+<p><code>hero.moveXY(x, y)</code> 让英雄直线走到指定坐标点。和 <code>moveRight</code> 之类的相对移动不同，<code>moveXY</code> 是<strong>绝对坐标</strong>移动，非常适合迷宫这种"格点式"的精确走位。在冰迷宫里还有个小细节:冰面很滑，关卡里连续调用了<strong>两次</strong> <code>moveXY</code> 到同一点，以确保英雄稳稳停在格子中央而不打滑越位。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 移动到目标点；冰面易滑，调用两次确保停稳</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span>   <span class="cmt"># 第二次：防滑，停回格心</span></pre>
+</div>
+
+<!-- ==================== 16.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-16-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<div class="section-header" id="section-16-3">
+    <h2>16.3 isPathClear 路径检测</h2>
+    <div class="en-title">Path Detection with isPathClear</div>
+</div>
+
+<h3 id="sec-16-3-1">16.3.1 探测门是否通畅（Is the Door Open）</h3>
+
+<h4>16.3.1.1 走之前先看看路通不通
+    <span class="en">Check the path before you move</span>
+</h4>
+
+<p>迷宫里的门有的堵死、有的开着。<code>hero.isPathClear(start, end)</code> 会检测从 <code>start</code> 到 <code>end</code> 两点之间的路径是否<strong>畅通无阻</strong>，返回 <code>True</code>（通）或 <code>False</code>（堵）。它是英雄的"眼睛"——在真正 <code>moveXY</code> 之前，先用它探一探目标方向能不能走。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 先探测，再决定走不走</span>
+tryPoint <span class="punc">=</span> <span class="fn">pointInDirection</span><span class="punc">(</span>tryDir<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+<span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isPathClear</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> tryPoint<span class="punc">)</span><span class="punc">:</span>
+    <span class="cmt"># 路通！可以朝这个方向移动</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=sec-16-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+<!-- CC-PROTECTION:HIDDEN:933b93445c:START anchor=sec-16-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="933b93445c">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:933b93445c:END -->
+
+<h3 id="sec-16-3-2">16.3.2 目标点计算（Computing the Target Point）</h3>
+
+<h4>16.3.2.1 由方向算出下一个坐标
+    <span class="en">Compute the next coordinate from a direction</span>
+</h4>
+
+<p>要用 <code>isPathClear</code> 探测，得先算出"朝某方向走一格"会到哪个坐标。<code>pointInDirection</code> 就是把"方向名"转成"目标坐标点"的工具——它根据方向在当前坐标上加减一个 <code>distanceBetweenRooms</code>。注意坐标系：向上 <code>y</code> 增大，向下 <code>y</code> 减小,向左 <code>x</code> 减小,向右 <code>x</code> 增大。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 根据方向，从当前 pos 计算目标坐标</span>
+<span class="kw">def</span> <span class="fn">pointInDirection</span><span class="punc">(</span>direction<span class="punc">,</span> pos<span class="punc">)</span><span class="punc">:</span>
+    <span class="kw">if</span> direction <span class="punc">==</span> <span class="str">"left"</span><span class="punc">:</span>
+        <span class="kw">return</span> <span class="fn">Vector</span><span class="punc">(</span>pos<span class="punc">.</span>x <span class="punc">-</span> distanceBetweenRooms<span class="punc">,</span> pos<span class="punc">.</span>y<span class="punc">)</span>
+    <span class="kw">elif</span> direction <span class="punc">==</span> <span class="str">"right"</span><span class="punc">:</span>
+        <span class="kw">return</span> <span class="fn">Vector</span><span class="punc">(</span>pos<span class="punc">.</span>x <span class="punc">+</span> distanceBetweenRooms<span class="punc">,</span> pos<span class="punc">.</span>y<span class="punc">)</span>
+    <span class="kw">elif</span> direction <span class="punc">==</span> <span class="str">"down"</span><span class="punc">:</span>
+        <span class="kw">return</span> <span class="fn">Vector</span><span class="punc">(</span>pos<span class="punc">.</span>x<span class="punc">,</span> pos<span class="punc">.</span>y <span class="punc">-</span> distanceBetweenRooms<span class="punc">)</span>
+    <span class="kw">elif</span> direction <span class="punc">==</span> <span class="str">"up"</span><span class="punc">:</span>
+        <span class="kw">return</span> <span class="fn">Vector</span><span class="punc">(</span>pos<span class="punc">.</span>x<span class="punc">,</span> pos<span class="punc">.</span>y <span class="punc">+</span> distanceBetweenRooms<span class="punc">)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">y 轴方向别搞反：</span>在 扣哒世界 的坐标系里，<strong>y 向上为正</strong>。所以 "up" 是 <code>pos.y + 距离</code>，"down" 是 <code>pos.y - 距离</code>。如果照搬"屏幕坐标向下为正"的直觉，方向就会全反，英雄会往错误的方向撞墙。
+</div>
+
+<!-- ==================== 16.4 ==================== -->
+<div class="section-header" id="section-16-4">
+    <h2>16.4 左手定则算法</h2>
+    <div class="en-title">The Left-Hand Rule Algorithm</div>
+</div>
+
+<h3 id="sec-16-4-1">16.4.1 靠墙走原理（Why Wall-Following Works）</h3>
+
+<h4>16.4.1.1 永远让左手贴着墙
+    <span class="en">Always keep your left hand on the wall</span>
+</h4>
+
+<p>左手定则（也叫"靠墙法"）的规则朴素得惊人：<strong>始终让左手扶着墙,一直往前走</strong>。只要迷宫是<strong>简单连通</strong>的（所有墙都连成一体、出入口在外墙上），这样走一定能走到出口,绝不会永远迷失。原因是拓扑上的:贴着一堵连通的墙走,等于沿着它的边界绕一圈,最终必然遍历到出口。</p>
+
+<div class="concept-viz">
+    <div class="maze-grid" style="grid-template-columns: repeat(5, 34px);">
+        <div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell goal">出</div>
+        <div class="mcell wall">X</div><div class="mcell visited">•</div><div class="mcell visited">•</div><div class="mcell path"></div><div class="mcell path"></div>
+        <div class="mcell wall">X</div><div class="mcell visited">•</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell path"></div>
+        <div class="mcell wall">X</div><div class="mcell hero">你</div><div class="mcell path"></div><div class="mcell path"></div><div class="mcell path"></div>
+        <div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div>
+    </div>
+    <div style="font-size:0.85em;color:var(--text-light);">
+        <span style="color:#6bbf88;font-weight:700;">■ 已走过</span>&nbsp;·&nbsp;
+        <span style="color:var(--warning);font-weight:700;">■ 英雄</span>&nbsp;·&nbsp;
+        <span style="color:var(--error);font-weight:700;">■ 出口</span>&nbsp;·&nbsp;左手贴墙即可绕出
+    </div>
+</div>
+
+<div class="info-box">
+    <span class="info-label">左手定则 = 有序的深度优先：</span>从图论看,靠墙走其实是对迷宫这棵"树"做<strong>深度优先的中序遍历</strong>。它不需要额外内存记录去过哪里,是最省资源的解法之一——但代价是不保证走的是最短路,也无法处理"迷宫中间有环"的复杂情形。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-16-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-16-4-2">16.4.2 尝试转向逻辑（The Turn-Try Loop）</h3>
+
+<h4>16.4.2.1 优先左转,不通就顺时针试下一个
+    <span class="en">Try left first, then rotate clockwise</span>
+</h4>
+
+<p>算法的每一步都遵循同一个套路:<strong>相对当前朝向,优先尝试左转的方向</strong>;如果那个方向的门堵着,就顺时针依次尝试下一个方向,直到找到一条通路走过去。走通之后,记下新的朝向 <code>prev</code>,进入下一轮。用 <code>LEFT_FOR[prev]</code> 拿到"左手方向"作为首选,再用 <code>findNextDirection</code> 逐个换方向。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 左手定则主循环（关键片段）</span>
+prev <span class="punc">=</span> <span class="str">"up"</span>                       <span class="cmt"># 初始朝向</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    tryDir <span class="punc">=</span> LEFT_FOR<span class="punc">[</span>prev<span class="punc">]</span>       <span class="cmt"># 首选:相对当前朝向左转</span>
+    <span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+        tryPoint <span class="punc">=</span> <span class="fn">pointInDirection</span><span class="punc">(</span>tryDir<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+        <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isPathClear</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> tryPoint<span class="punc">)</span><span class="punc">:</span>
+            prev <span class="punc">=</span> tryDir            <span class="cmt"># 记住走通的新朝向</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span>  <span class="cmt"># 防滑</span>
+            <span class="kw">break</span>                    <span class="cmt"># 走通了,跳出内层,进入下一步</span>
+        tryDir <span class="punc">=</span> <span class="fn">findNextDirection</span><span class="punc">(</span>tryDir<span class="punc">)</span>  <span class="cmt"># 堵住,顺时针换下一个方向再试</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="左手定则流程">
+        <defs>
+            <marker id="lhr-arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2E8BB0"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="11" text-anchor="middle">
+            <rect x="12" y="45" width="110" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="67" y="70" fill="#1C5E7C" font-weight="bold">首选左手方向</text>
+            <line x1="124" y1="65" x2="152" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#lhr-arr)"/>
+            <rect x="157" y="45" width="120" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="217" y="70" fill="#1C5E7C" font-weight="bold">isPathClear?</text>
+            <line x1="279" y1="65" x2="307" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#lhr-arr)"/>
+            <text x="293" y="58" fill="#2f7a45" font-size="10">通</text>
+            <rect x="312" y="45" width="110" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="367" y="70" fill="#1C5E7C" font-weight="bold">moveXY 前进</text>
+            <line x1="424" y1="65" x2="452" y2="65" stroke="#2E8BB0" stroke-width="2" marker-end="url(#lhr-arr)"/>
+            <rect x="457" y="45" width="90" height="40" rx="10" fill="#e2f3f9" stroke="#2E8BB0" stroke-width="2"/><text x="502" y="70" fill="#1C5E7C" font-weight="bold">下一步</text>
+            <path d="M217,87 L217,110 L217,110 Q217,118 210,118 L100,118 Q90,118 90,108" fill="none" stroke="#D98A2B" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#lhr-arr)"/>
+            <text x="150" y="115" fill="#bd7415" font-size="10">堵→顺时针换方向再试</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 16.5 ==================== -->
+<div class="section-header" id="section-16-5">
+    <h2>16.5 迷宫地图建模</h2>
+    <div class="en-title">Modeling the Maze as a Grid</div>
+</div>
+
+<h3 id="sec-16-5-1">16.5.1 二维数组地图（The 2D Array Map）</h3>
+
+<h4>16.5.1.1 把迷宫抽象成网格
+    <span class="en">Abstract the maze into a grid</span>
+</h4>
+
+<p>当任务变复杂(要找宝藏再回出口),光靠贴墙走就不够了——我们需要在"脑中"建一张地图。第 34 关用<strong>二维数组</strong> <code>maze</code> 来表示整个迷宫:每个格子存一个字符,<code>"X"</code> 表示墙,<code>"."</code> 表示已知的通路,<code>"?"</code> 表示尚未探明的房间。行列间隔布局让"房间"和"房间之间的门"都能被表示出来。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用字符常量表示格子的三种状态</span>
+wall <span class="punc">=</span> <span class="str">"X"</span>       <span class="cmt"># 墙,不可通过</span>
+unknown <span class="punc">=</span> <span class="str">"?"</span>    <span class="cmt"># 未探明的房间</span>
+empty <span class="punc">=</span> <span class="str">"."</span>      <span class="cmt"># 已知通路</span>
+
+<span class="cmt"># 构建空白迷宫地图:外围一圈墙,内部按行列交错填充</span>
+maze <span class="punc">=</span> <span class="punc">[]</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>height<span class="punc">)</span><span class="punc">:</span>
+    maze<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="punc">[</span>wall<span class="punc">])</span>       <span class="cmt"># 每行以左边界墙开头</span>
+<span class="cmt"># ……再逐行按 i%2 / j%2 判断填 wall 还是 unknown……</span></pre>
+</div>
+
+<div class="concept-viz">
+    <div class="maze-grid" style="grid-template-columns: repeat(7, 34px);">
+        <div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div>
+        <div class="mcell wall">X</div><div class="mcell path">.</div><div class="mcell unknown">?</div><div class="mcell unknown">?</div><div class="mcell wall">X</div><div class="mcell unknown">?</div><div class="mcell wall">X</div>
+        <div class="mcell wall">X</div><div class="mcell unknown">?</div><div class="mcell wall">X</div><div class="mcell unknown">?</div><div class="mcell wall">X</div><div class="mcell unknown">?</div><div class="mcell wall">X</div>
+        <div class="mcell wall">X</div><div class="mcell unknown">?</div><div class="mcell unknown">?</div><div class="mcell unknown">?</div><div class="mcell unknown">?</div><div class="mcell unknown">?</div><div class="mcell wall">X</div>
+        <div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div><div class="mcell wall">X</div>
+    </div>
+    <div style="font-size:0.85em;color:var(--text-light);">
+        <span style="color:#6a8294;font-weight:700;">X 墙</span>&nbsp;·&nbsp;
+        <span style="color:#7794a3;font-weight:700;">? 未探明</span>&nbsp;·&nbsp;
+        <span style="color:var(--primary-dark);font-weight:700;">. 已知通路</span>&nbsp;·&nbsp;探索时把 ? 逐步变成 . 或 X
+    </div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-16-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:4d7c135e5c:START anchor=sec-16-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4d7c135e5c">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH9-SEC16-9159F5758DD6。</span>
+<!-- CC-PROTECTION:HIDDEN:4d7c135e5c:END -->
+
+<h3 id="sec-16-5-2">16.5.2 行列与坐标转换（Row/Col to Coordinates）</h3>
+
+<h4>16.5.2.1 网格索引 ↔ 游戏坐标
+    <span class="en">Convert grid indices to game coordinates</span>
+</h4>
+
+<p>地图里用<strong>行列(row/col)</strong>索引方便,但让英雄移动要用<strong>游戏坐标(x/y)</strong>。所以需要一个转换函数,把网格索引乘上房间间距、再加一个偏移量 <code>zeroShift</code>,换算成实际坐标。四个方向函数(<code>north/south/east/west</code>)就是在此基础上,一次跨两格(跨过中间的"门格")算出邻居房间的坐标与行列。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 网格索引 → 游戏坐标</span>
+<span class="kw">def</span> <span class="fn">coorConvert</span><span class="punc">(</span>i<span class="punc">,</span> dist<span class="punc">)</span><span class="punc">:</span>
+    <span class="kw">return</span> i <span class="punc">*</span> distanceBetweenRooms <span class="punc">/</span> <span class="num">2</span> <span class="punc">+</span> zeroShift<span class="punc">.</span>x
+
+<span class="cmt"># 求北面邻居:行 +2(跨过门格),返回坐标与新行列</span>
+<span class="kw">def</span> <span class="fn">north</span><span class="punc">()</span><span class="punc">:</span>
+    <span class="kw">return</span> <span class="punc">{</span>
+        <span class="str">'x'</span><span class="punc">:</span> <span class="fn">coorConvert</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>col<span class="punc">)</span><span class="punc">,</span>
+        <span class="str">'y'</span><span class="punc">:</span> <span class="fn">coorConvert</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>row <span class="punc">+</span> <span class="num">2</span><span class="punc">)</span><span class="punc">,</span>
+        <span class="str">'row'</span><span class="punc">:</span> <span class="obj">hero</span><span class="punc">.</span>row <span class="punc">+</span> <span class="num">2</span><span class="punc">,</span> <span class="str">'col'</span><span class="punc">:</span> <span class="obj">hero</span><span class="punc">.</span>col
+    <span class="punc">}</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">"跨两格"的门格设计：</span>地图里相邻两个房间之间隔着一个"门格"——房间在偶数格,门在奇数格。所以移动到邻居房间时,行或列要 <strong>±2</strong> 而不是 ±1。检测门是否开着时,则去看中间那个 <strong>±1</strong> 的门格。这种交错布局让"房间"和"门"能分别记录状态。
+</div>
+
+<!-- ==================== 16.6 ==================== -->
+<div class="section-header" id="section-16-6">
+    <h2>16.6 栈与深度优先搜索</h2>
+    <div class="en-title">Stack and Depth-First Search</div>
+</div>
+
+<h3 id="sec-16-6-1">16.6.1 用栈实现 DFS（DFS with a Stack）</h3>
+
+<h4>16.6.1.1 后进先出,一条路走到底
+    <span class="en">Last in, first out — go deep first</span>
+</h4>
+
+<p><strong>深度优先搜索(DFS)</strong>的思想是"一条路走到黑",走不通再回退换路。它天然可以用<strong>栈(stack)</strong>实现——栈是"后进先出(LIFO)"的结构:把待探索的房间压入栈,每次取出<strong>最新压入</strong>的那个继续深入;走进死胡同就回退到栈里上一个岔路口。每个栈元素还记录了"到达这里的路径",这样找到目标时就能直接返回整条路。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用栈做 DFS(关键片段,简化示意)</span>
+<span class="kw">def</span> <span class="fn">findPath</span><span class="punc">(</span>m<span class="punc">,</span> needExit<span class="punc">)</span><span class="punc">:</span>
+    stack <span class="punc">=</span> <span class="punc">[[</span><span class="obj">hero</span><span class="punc">.</span>row<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>col<span class="punc">,</span> <span class="str">""</span><span class="punc">]]</span>   <span class="cmt"># [行, 列, 到此的路径]</span>
+    visited <span class="punc">=</span> <span class="punc">[]</span>                       <span class="cmt"># 已访问房间记录</span>
+    <span class="kw">while</span> <span class="fn">len</span><span class="punc">(</span>stack<span class="punc">)</span><span class="punc">:</span>
+        current <span class="punc">=</span> stack<span class="punc">.</span><span class="fn">pop</span><span class="punc">()</span>          <span class="cmt"># LIFO:取最新压入的房间</span>
+        row<span class="punc">,</span> col<span class="punc">,</span> path <span class="punc">=</span> current<span class="punc">[</span><span class="num">0</span><span class="punc">],</span> current<span class="punc">[</span><span class="num">1</span><span class="punc">],</span> current<span class="punc">[</span><span class="num">2</span><span class="punc">]</span>
+        <span class="cmt"># 到达目标就返回路径;否则把可走的邻居压栈……</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 160" width="520" role="img" aria-label="栈实现DFS">
+        <text x="260" y="22" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">栈:后进先出,深入优先</text>
+        <g font-family="monospace" font-size="12" text-anchor="middle">
+            <rect x="180" y="40" width="160" height="30" rx="5" fill="#234254" stroke="#4FB5D8"/><text x="260" y="60" fill="#a5d4e8">[row,col,"S"] 先压</text>
+            <rect x="180" y="74" width="160" height="30" rx="5" fill="#234254" stroke="#4FB5D8"/><text x="260" y="94" fill="#a5d4e8">[row,col,"SW"] 后压</text>
+            <rect x="180" y="108" width="160" height="30" rx="5" fill="#2f5a3f" stroke="#6bbf88" stroke-width="2"/><text x="260" y="128" fill="#a8e0be">[row,col,"SWN"] 栈顶</text>
+        </g>
+        <text x="400" y="128" font-size="11" fill="#e8a15a" font-family="sans-serif">← pop() 先取栈顶</text>
+        <text x="120" y="128" font-size="11" fill="#6bbf88" font-family="sans-serif" text-anchor="end">最深处优先探索</text>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">DFS vs. BFS:</span>DFS 用<strong>栈</strong>,一头扎到底,内存省、实现简单,适合"只要找到一条路"的场景(如本关找宝藏)。相对地,BFS(广度优先)用<strong>队列</strong>,一层层向外扩,能找到<strong>最短路</strong>但更耗内存。第九单元学的队列和本单元的栈,正好是这两种搜索的引擎。
+</div>
+
+
+<!-- CC-PROTECTION:AD:9dfa595e04:START anchor=sec-16-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9dfa595e04">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，玩家已累计编写超过 10 亿行真实代码，编程也能很酷。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9dfa595e04:END -->
+
+<h3 id="sec-16-6-2">16.6.2 记录已访问房间（Tracking Visited Rooms）</h3>
+
+<h4>16.6.2.1 别重复进同一个房间
+    <span class="en">Don't enter the same room twice</span>
+</h4>
+
+<p>DFS 最容易犯的错就是<strong>兜圈子</strong>——绕回已经走过的房间,陷入死循环。解决办法是维护一个 <code>visited</code> 列表:每探索一个房间,先检查它在不在 <code>visited</code> 里;若在就<strong>跳过(continue)</strong>,否则记下它再继续。房间用 <code>"行-列"</code> 拼成的字符串唯一标识,判断非常方便。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用"行-列"字符串唯一标识房间,避免重复访问</span>
+strPos <span class="punc">=</span> <span class="fn">str</span><span class="punc">(</span>row<span class="punc">)</span> <span class="punc">+</span> <span class="str">"-"</span> <span class="punc">+</span> <span class="fn">str</span><span class="punc">(</span>col<span class="punc">)</span>
+<span class="kw">if</span> visited<span class="punc">.</span><span class="fn">index</span><span class="punc">(</span>strPos<span class="punc">)</span> <span class="punc">!=</span> <span class="punc">-</span><span class="num">1</span><span class="punc">:</span>   <span class="cmt"># 已经来过</span>
+    <span class="kw">continue</span>                          <span class="cmt"># 跳过,不再重复探索</span>
+visited<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>strPos<span class="punc">)</span>              <span class="cmt"># 首次到达,记录下来</span>
+
+<span class="cmt"># 邻居若是通路(".")就带上方向压入栈,继续深入</span>
+<span class="kw">if</span> m<span class="punc">[</span>row <span class="punc">-</span> <span class="num">1</span><span class="punc">][</span>col<span class="punc">]</span> <span class="punc">==</span> <span class="str">"."</span><span class="punc">:</span>
+    stack<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="punc">[</span>row <span class="punc">-</span> <span class="num">2</span><span class="punc">,</span> col<span class="punc">,</span> path <span class="punc">+</span> <span class="str">"S"</span><span class="punc">])</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">忘记记访问 = 死循环：</span>如果不维护 <code>visited</code>,DFS 会在两个相邻房间之间来回横跳,或绕环无限循环,程序永远停不下来。<strong>"进房间先判重"</strong>是所有图搜索算法的铁律,务必养成习惯。
+</div>
+
+<!-- ==================== 16.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-16-6-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+<div class="section-header" id="section-16-7">
+    <h2>16.7 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>,只展示用于说明的关键片段,完整通关程序请你自己动手完成。</p>
+
+<!-- 脆弱的迷宫 -->
+<div class="level-card" id="sec-16-7-1">
+    <div class="level-head">
+        <span class="lv-num">第 33 关 · 脆弱的迷宫</span>
+        <h3>🧊 脆弱的迷宫 —— 左手定则贴墙逃生</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/16-7-1-1_fragile_maze.png" alt="扣哒世界 脆弱的迷宫关卡 - koudashijie.com">
+            <div class="caption">图2：脆弱的迷宫——有些门会因脚步声开启,用 isPathClear 探路、左手定则贴墙,一步步走出冰迷宫</div>
+        </div>
+
+        <h4>策略：不记地图,只管贴着左墙走</h4>
+        <p>这一关的迷宫是<strong>简单连通</strong>的,出口在外墙上——正是左手定则的理想场景。策略非常干脆:<strong>完全不需要构建地图或记录访问</strong>,只要每一步都优先朝"当前朝向的左手方向"走,堵住就顺时针换方向,一直循环下去,英雄自然会被墙"领"到出口。冰门虽脆弱、会因脚步声开启,但 <code>isPathClear</code> 会如实告诉你当下哪扇门通。</p>
+
+        <h4>思路拆解:方向表 + 探路 + 前进</h4>
+        <p>先用 <code>DIRECTIONS</code> 列表和 <code>LEFT_FOR</code> 字典准备好方向数据与"左转"映射。主循环里,先取 <code>LEFT_FOR[prev]</code> 作为首选方向,用 <code>pointInDirection</code> 算出目标点,再用 <code>isPathClear</code> 探测:通就 <code>moveXY</code> 过去并更新 <code>prev</code>;不通就 <code>findNextDirection</code> 顺时针换下一个方向重试。关键在于<strong>每次都从"左手方向"开始试</strong>,这保证了贴墙的一致性。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:每步从左手方向开始尝试</span>
+prev <span class="punc">=</span> <span class="str">"up"</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    tryDir <span class="punc">=</span> LEFT_FOR<span class="punc">[</span>prev<span class="punc">]</span>          <span class="cmt"># 首选左手方向</span>
+    <span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+        tryPoint <span class="punc">=</span> <span class="fn">pointInDirection</span><span class="punc">(</span>tryDir<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">)</span>
+        <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isPathClear</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> tryPoint<span class="punc">)</span><span class="punc">:</span>
+            prev <span class="punc">=</span> tryDir
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>tryPoint<span class="punc">.</span>x<span class="punc">,</span> tryPoint<span class="punc">.</span>y<span class="punc">)</span>   <span class="cmt"># 防滑</span>
+            <span class="kw">break</span>
+        tryDir <span class="punc">=</span> <span class="fn">findNextDirection</span><span class="punc">(</span>tryDir<span class="punc">)</span>   <span class="cmt"># 换方向重试</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">左手定则的适用前提：</span>本关能用左手定则,是因为迷宫简单连通、出入口在外墙。如果迷宫中间有"孤岛"或环形回路,单纯贴墙可能绕不出来——那就需要下一关的 DFS 了。理解"算法有适用边界",比记住算法本身更重要。
+        </div>
+    </div>
+</div>
+
+<!-- 冰块中的宝藏 -->
+<div class="level-card" id="sec-16-7-2">
+    <div class="level-head">
+        <span class="lv-num">第 34 关 · 冰块中的宝藏</span>
+        <h3>❄️ 冰块中的宝藏 —— DFS 搜宝并返回出口</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/16-7-2-1_treasure_in_ice.png" alt="扣哒世界 冰块中的宝藏关卡 - koudashijie.com">
+            <div class="caption">图3：冰块中的宝藏——构建二维地图、边走边用 isPathClear 更新,再用栈做 DFS 先找宝藏、拿到后回到红十字出口</div>
+        </div>
+
+        <h4>策略：建图 + 边探边搜 + 两阶段目标</h4>
+        <p>这是本单元的综合关,任务是<strong>先拿宝藏,再走到红十字出口</strong>。单靠贴墙走无法满足"多目标",所以要上 DFS。整体策略分三层:<strong>(1) 建图</strong>——先用二维数组 <code>maze</code> 铺好墙与未知房间;<strong>(2) 探测更新</strong>——每到一个房间,用 <code>checkPaths</code> 配合 <code>isPathClear</code> 把四周的门探明,把 <code>"?"</code> 更新成 <code>"."</code> 或保持墙;<strong>(3) DFS 求路</strong>——用 <code>findPath</code> 在已知地图上搜索:没拿到宝藏时搜"最近的未知房间"去探索,拿到宝藏后(<code>hero.gold</code> 达标)就搜"通往出口"的路。</p>
+
+        <h4>思路拆解一:探测并更新地图</h4>
+        <p><code>checkPaths</code> 把英雄当前房间标为通路 <code>"."</code>,再朝四个方向用 <code>isPathClear</code> 探测:凡是相邻的"门格"畅通、且对应房间还是 <code>"?"</code> 的,就把它更新为已知通路。这样地图会随着探索一点点"点亮"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:探测四周门,更新地图上的 ? </span>
+<span class="kw">def</span> <span class="fn">checkPaths</span><span class="punc">(</span>cMap<span class="punc">)</span><span class="punc">:</span>
+    cMap<span class="punc">[</span><span class="obj">hero</span><span class="punc">.</span>row<span class="punc">][</span><span class="obj">hero</span><span class="punc">.</span>col<span class="punc">]</span> <span class="punc">=</span> <span class="str">"."</span>   <span class="cmt"># 当前房间标为通路</span>
+    dirs <span class="punc">=</span> <span class="punc">[[</span><span class="num">1</span><span class="punc">,</span> <span class="num">0</span><span class="punc">,</span> north<span class="punc">],</span> <span class="punc">[</span><span class="punc">-</span><span class="num">1</span><span class="punc">,</span> <span class="num">0</span><span class="punc">,</span> south<span class="punc">],</span> <span class="punc">[</span><span class="num">0</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> west<span class="punc">],</span> <span class="punc">[</span><span class="num">0</span><span class="punc">,</span> <span class="punc">-</span><span class="num">1</span><span class="punc">,</span> east<span class="punc">]]</span>
+    <span class="kw">for</span> d <span class="kw">in</span> dirs<span class="punc">:</span>
+        dx<span class="punc">,</span> dy<span class="punc">,</span> dPosFunc <span class="punc">=</span> d<span class="punc">[</span><span class="num">0</span><span class="punc">],</span> d<span class="punc">[</span><span class="num">1</span><span class="punc">],</span> d<span class="punc">[</span><span class="num">2</span><span class="punc">]</span>
+        <span class="kw">if</span> cMap<span class="punc">[</span><span class="obj">hero</span><span class="punc">.</span>row <span class="punc">+</span> dx<span class="punc">][</span><span class="obj">hero</span><span class="punc">.</span>col <span class="punc">+</span> dy<span class="punc">]</span> <span class="punc">==</span> <span class="str">"?"</span> <span class="kw">and</span> \
+           <span class="obj">hero</span><span class="punc">.</span><span class="fn">isPathClear</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">,</span> <span class="fn">dPosFunc</span><span class="punc">())</span><span class="punc">:</span>
+            cMap<span class="punc">[</span><span class="obj">hero</span><span class="punc">.</span>row <span class="punc">+</span> dx<span class="punc">][</span><span class="obj">hero</span><span class="punc">.</span>col <span class="punc">+</span> dy<span class="punc">]</span> <span class="punc">=</span> <span class="str">"."</span>
+    <span class="kw">return</span> cMap</pre>
+        </div>
+
+        <h4>思路拆解二:栈式 DFS 搜路径</h4>
+        <p><code>findPath</code> 用栈从当前位置出发搜索。栈里每个元素是 <code>[行, 列, 路径字符串]</code>。取出栈顶后先判重(<code>visited</code>),再看是否命中目标:<strong>未拿宝藏</strong>时,遇到还是 <code>"?"</code> 的房间就返回路径去探它;<strong>已拿宝藏</strong>时,到达出口行列就返回路径并加上 <code>"!"</code> 表示"到出口"。没命中就把四周通路邻居带上方向(N/S/E/W)压栈继续深入。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:DFS 里的目标判断与邻居压栈</span>
+<span class="cmt"># 目标一:还没拿宝藏,找到未知房间就去探</span>
+<span class="kw">if</span> <span class="kw">not</span> needExit <span class="kw">and</span> m<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">]</span> <span class="punc">==</span> <span class="str">"?"</span><span class="punc">:</span>
+    <span class="kw">return</span> path
+<span class="cmt"># 目标二:已拿宝藏,到达出口行列</span>
+<span class="kw">if</span> needExit <span class="kw">and</span> row <span class="punc">==</span> exitRow <span class="kw">and</span> col <span class="punc">==</span> exitCol<span class="punc">:</span>
+    <span class="kw">return</span> path <span class="punc">+</span> <span class="str">"!"</span>
+<span class="cmt"># 否则:把四周通路邻居(±2 跨格)带方向压栈</span>
+<span class="kw">if</span> m<span class="punc">[</span>row <span class="punc">-</span> <span class="num">1</span><span class="punc">][</span>col<span class="punc">]</span> <span class="punc">==</span> <span class="str">"."</span><span class="punc">:</span>
+    stack<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span><span class="punc">[</span>row <span class="punc">-</span> <span class="num">2</span><span class="punc">,</span> col<span class="punc">,</span> path <span class="punc">+</span> <span class="str">"S"</span><span class="punc">])</span></pre>
+        </div>
+
+        <h4>思路拆解三:主循环——探索、判宝、走路</h4>
+        <p>主循环把三块拼起来:先 <code>checkPaths</code> 更新地图;检查 <code>hero.gold</code> 判断宝藏是否到手,更新 <code>treasureFound</code>;用 <code>findPath</code> 求出一条路径字符串;若有路就逐字符 <code>moveDir</code> 走过去(每步移动并同步更新 <code>hero.row/col</code>);走到 <code>"!"</code> 时结束搜索。反复循环直到走出出口。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段:主循环骨架</span>
+<span class="kw">while</span> inSearch<span class="punc">:</span>
+    maze <span class="punc">=</span> <span class="fn">checkPaths</span><span class="punc">(</span>maze<span class="punc">)</span>          <span class="cmt"># 1) 探测更新地图</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>              <span class="cmt"># 2) 判断宝藏是否到手</span>
+        treasureFound <span class="punc">=</span> <span class="kw">True</span>
+    path <span class="punc">=</span> <span class="fn">findPath</span><span class="punc">(</span>maze<span class="punc">,</span> treasureFound<span class="punc">)</span>  <span class="cmt"># 3) DFS 求路径</span>
+    <span class="kw">if</span> <span class="kw">not</span> path<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Arrrr!"</span><span class="punc">)</span>       <span class="cmt"># 暂时无路可走</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="kw">for</span> p <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>path<span class="punc">))</span><span class="punc">:</span>
+            <span class="fn">moveDir</span><span class="punc">(</span>path<span class="punc">[</span>p<span class="punc">])</span>          <span class="cmt"># 4) 逐步移动并同步行列</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">两阶段目标是本关的灵魂：</span>用一个布尔量 <code>treasureFound</code>(即 <code>needExit</code>)切换 DFS 的<strong>目标</strong>:没拿宝藏时目标是"探索未知",拿到后目标变成"回出口"。同一套 DFS 代码,靠一个开关服务两个阶段——这是<strong>参数化搜索</strong>的巧妙之处。别把两个目标写死成两份重复代码。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">边走边建图,而非一次看全：</span>英雄看不到整张迷宫,只能到一处探一处。所以地图是<strong>动态生长</strong>的:<code>checkPaths</code> 每轮点亮周围,DFS 只在"已知部分"上搜索,搜到未知房间就去实地探明。这正是 AI 在<strong>未知环境</strong>中"感知—建模—规划—行动"循环的缩影。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 16.8 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<div class="section-header" id="section-16-8">
+    <h2>16.8 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-16-8-1">16.8.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>16.8.1.1 迷宫算法的典型问题
+    <span class="en">Typical issues with maze algorithms</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/16-8-1-1_common_errors.png" alt="扣哒世界 迷宫算法常见错误速查 - koudashijie.com">
+    <div class="caption">图4：方向算反、忘记判重、栈用错方法、行列不同步,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>y 轴方向搞反——扣哒世界 里 <strong>y 向上为正</strong>,"up" 是 <code>+</code>、"down" 是 <code>-</code>,写反会撞墙。</li>
+        <li>忘记记录已访问——DFS 不维护 <code>visited</code> 会兜圈死循环;进房间前务必判重。</li>
+        <li>移动后不更新行列——<code>moveDir</code> 走完必须同步 <code>hero.row/col</code>,否则地图坐标与实际脱节。</li>
+        <li>行列该 ±2 却写成 ±1——房间隔着"门格",到邻居房间要跨 <strong>2</strong> 格,探门才看 <strong>1</strong> 格。</li>
+        <li>忘了冰面防滑——冰上易打滑,关卡里 <code>moveXY</code> 连调两次才停得稳。</li>
+        <li>取模写错——环形换方向用 <code>(index+1) % 4</code>,漏了 <code>% 4</code> 会索引越界。</li>
+        <li>左手定则用在复杂迷宫——有环或孤岛的迷宫贴墙走不出来,得改用 DFS。</li>
+        <li>两阶段目标写死——找宝藏和回出口应共用参数化 DFS,别复制两份重复逻辑。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你走出了封神冰川的两座冰迷宫,也掌握了 AI 与算法领域最经典的<strong>迷宫求解</strong>技术!在这两关里,你先用简洁优雅的<strong>左手定则</strong>贴墙逃生——理解了<strong>方向常量</strong>、<strong>左右转换</strong>(查找表与取模旋转)、用 <code>isPathClear</code> <strong>探路</strong>、用 <code>moveXY</code> <strong>精确移动</strong>;又用系统化的<strong>深度优先搜索</strong>找到了宝藏——学会了把迷宫抽象成<strong>二维数组地图</strong>、做<strong>行列与坐标转换</strong>、用<strong>栈</strong>驱动 DFS、并<strong>记录已访问房间</strong>避免兜圈,还懂得了用一个开关<strong>参数化切换搜索目标</strong>。从"贴墙走"到"建图搜索",你已经窥见了 AI 路径规划的核心思想。来回顾一下核心概念:</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应写法</th></tr></thead>
+        <tbody>
+            <tr><td>方向常量</td><td>固定顺序存四方向</td><td class="mono">DIRECTIONS = [...]</td></tr>
+            <tr><td>左右转换</td><td>查找表或取模旋转</td><td class="mono">LEFT_FOR / (i+1)%4</td></tr>
+            <tr><td>路径检测</td><td>走前先探门</td><td class="mono">hero.isPathClear(a, b)</td></tr>
+            <tr><td>精确移动</td><td>绝对坐标,冰面防滑</td><td class="mono">hero.moveXY(x, y)</td></tr>
+            <tr><td>左手定则</td><td>优先左转,贴墙走</td><td class="mono">LEFT_FOR[prev]</td></tr>
+            <tr><td>二维地图</td><td>X墙 / . 通 / ? 未知</td><td class="mono">maze = [[...], ...]</td></tr>
+            <tr><td>栈式 DFS</td><td>后进先出,深入优先</td><td class="mono">stack.pop() / append</td></tr>
+            <tr><td>记录访问</td><td>判重防死循环</td><td class="mono">visited 里查"行-列"</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得"感知眼前、构建地图、系统搜索、记住来路"——迷宫算法这份在未知中寻路的智慧,正是 AI 探索世界的起点。<br>
+        封神冰川的迷宫试炼圆满完成,向着更广阔的算法天地,继续前行!🧊❄️🗺️</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=h3-17 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a0c4d2; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 6（封神冰川）：第十六单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
