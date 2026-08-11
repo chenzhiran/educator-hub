@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC4-20F2213AE080">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第四单元：单元复习 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习知识卡 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 10px;
+            padding: 16px 18px;
+            box-shadow: 0 2px 10px rgba(120,80,20,0.06);
+        }
+        .review-item .ri-title {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 1.02em;
+            margin-bottom: 6px;
+        }
+        .review-item .ri-unit {
+            display: inline-block;
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            font-size: 0.72em;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        .review-item p { margin: 4px 0; font-size: 0.88em; color: var(--text-light); }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC4-20F2213AE080 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS4-第四单元</div>
+
+    <a href="#section-4-1" class="nav-section">4.1 复习地图</a>
+    <a href="#sec-4-1-1" class="nav-sub">4.1.1 三大知识板块</a>
+
+    <a href="#section-4-2" class="nav-section">4.2 while 循环回顾</a>
+    <a href="#sec-4-2-1" class="nav-sub">4.2.1 条件式循环</a>
+    <a href="#sec-4-2-2" class="nav-sub">4.2.2 计数器三部曲</a>
+    <a href="#sec-4-2-3" class="nav-sub">4.2.3 死循环防范</a>
+
+    <a href="#section-4-3" class="nav-section">4.3 数组回顾</a>
+    <a href="#sec-4-3-1" class="nav-sub">4.3.1 索引与长度</a>
+    <a href="#sec-4-3-2" class="nav-sub">4.3.2 遍历三部曲</a>
+    <a href="#sec-4-3-3" class="nav-sub">4.3.3 数组要刷新</a>
+
+    <a href="#section-4-4" class="nav-section">4.4 核心技能：循环嵌套</a>
+    <a href="#sec-4-4-1" class="nav-sub">4.4.1 什么是嵌套循环</a>
+    <a href="#sec-4-4-2" class="nav-sub">4.4.2 内外层的分工</a>
+    <a href="#sec-4-4-3" class="nav-sub">4.4.3 索引必须各自独立</a>
+
+    <a href="#section-4-5" class="nav-section">4.5 实战关卡精讲</a>
+    <a href="#sec-4-5-1" class="nav-sub">4.5.1 银行突袭</a>
+
+    <a href="#section-4-6" class="nav-section">4.6 综合易错点</a>
+    <a href="#sec-4-6-1" class="nav-sub">4.6.1 易错点清单</a>
+
+    <a href="#section-4-7" class="nav-section">4.7 自测练习</a>
+    <a href="#sec-4-7-1" class="nav-sub">4.7.1 自我检验</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第四单元：单元复习</h1>
+    <div class="subtitle">Unit 4: Unit Review</div>
+    <div class="badge">计算机科学 4 · 流金沙漠 Sarven Desert · 综合关卡「银行突袭」</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 4.1 ==================== -->
+<div class="section-header" id="section-4-1">
+    <h2>4.1 复习地图</h2>
+    <div class="en-title">A Map of What You've Learned</div>
+</div>
+
+<h3 id="sec-4-1-1">4.1.1 三大知识板块（Three Big Ideas）</h3>
+
+<h4>4.1.1.1 把散落的知识连成一张网
+    <span class="en">Connect the dots into one picture</span>
+</h4>
+
+<p>恭喜你走到了流金沙漠的复习站！在前面几个单元里，你分别学习了 <span class="keyword">while 循环</span>、<span class="keyword">数组（列表）</span>，以及如何用<span class="keyword">索引</span>去遍历它们。这些知识看似各自独立，其实是一环扣一环的。本单元不引入全新的语法，而是把它们<strong>拧成一股绳</strong>——通过综合关卡"银行突袭"，让你看到循环与数组结合后能爆发出多大的威力。</p>
+
+<p>先来鸟瞰一下我们要复习的三大板块，以及它们之间的关系：</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 210" width="560" role="img" aria-label="三大知识板块关系图">
+        <!-- while -->
+        <rect x="30" y="70" width="140" height="60" rx="10" fill="#FBF1DC" stroke="#C8821E" stroke-width="2"/>
+        <text x="100" y="96" font-size="14" font-family="sans-serif" fill="#9C5E14" text-anchor="middle" font-weight="bold">while 循环</text>
+        <text x="100" y="116" font-size="10" font-family="sans-serif" fill="#6b5840" text-anchor="middle">重复执行</text>
+        <!-- array -->
+        <rect x="210" y="70" width="140" height="60" rx="10" fill="#FBF1DC" stroke="#C8821E" stroke-width="2"/>
+        <text x="280" y="96" font-size="14" font-family="sans-serif" fill="#9C5E14" text-anchor="middle" font-weight="bold">数组 / 列表</text>
+        <text x="280" y="116" font-size="10" font-family="sans-serif" fill="#6b5840" text-anchor="middle">存储一组数据</text>
+        <!-- 结合 -->
+        <rect x="390" y="70" width="150" height="60" rx="10" fill="#C8821E" stroke="#9C5E14" stroke-width="2"/>
+        <text x="465" y="94" font-size="14" font-family="sans-serif" fill="#fff" text-anchor="middle" font-weight="bold">遍历 + 嵌套</text>
+        <text x="465" y="114" font-size="10" font-family="sans-serif" fill="#fbe9cf" text-anchor="middle">逐个处理每个元素</text>
+        <!-- 箭头 -->
+        <line x1="170" y1="100" x2="208" y2="100" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="208,100 198,95 198,105" fill="#9C5E14"/>
+        <line x1="350" y1="100" x2="388" y2="100" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="388,100 378,95 378,105" fill="#9C5E14"/>
+        <text x="285" y="30" font-size="13" font-family="sans-serif" fill="#C8821E" text-anchor="middle" font-weight="bold">循环 × 数组 = 处理任意数量的目标</text>
+        <text x="285" y="185" font-size="11" font-family="sans-serif" fill="#97836a" text-anchor="middle">这正是「银行突袭」关卡要综合运用的全部能力</text>
+    </svg>
+</div>
+
+<div class="review-grid">
+    <div class="review-item">
+        <div class="ri-unit">第一单元</div>
+        <div class="ri-title">while 循环</div>
+        <p>用任意布尔条件控制"重复到何时为止"，警惕死循环。</p>
+    </div>
+    <div class="review-item">
+        <div class="ri-unit">第三单元</div>
+        <div class="ri-title">数组（列表）</div>
+        <p>用方括号和从 0 起的索引存取一组数据，用 len() 量长度。</p>
+    </div>
+    <div class="review-item">
+        <div class="ri-unit">本单元</div>
+        <div class="ri-title">遍历与嵌套</div>
+        <p>把两者合体：用循环遍历数组，再用外层循环反复处理多组数据。</p>
+    </div>
+</div>
+
+<!-- ==================== 4.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-4-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+
+<div class="section-header" id="section-4-2">
+    <h2>4.2 while 循环回顾</h2>
+    <div class="en-title">Review: while Loops</div>
+</div>
+
+<h3 id="sec-4-2-1">4.2.1 条件式循环（Conditional Loops）</h3>
+
+<h4>4.2.1.1 "条件为假时，循环结束"
+    <span class="en">The loop ends when the condition is false</span>
+</h4>
+
+<p>快速回忆核心要义：<span class="keyword">while 循环</span>在每一圈<strong>开头</strong>检查条件，条件为真就再跑一圈，为假就退出。条件不必永远是 <code>True</code>——用一个迟早会变假的条件，就能精确控制循环次数。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>gold &lt; <span class="num">30</span><span class="punc">:</span>   <span class="cmt"># 条件为真就继续，够 30 金就停</span>
+    item = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+    <span class="kw">if</span> item<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>item<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8b8a886441:START anchor=sec-4-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8b8a886441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想解锁全部 11 张地图、2300+ 关卡？立即访问 <a href="https://koudashijie.com/">koudashijie.com</a>，开启你的编程冒险。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8b8a886441:END -->
+
+<h3 id="sec-4-2-2">4.2.2 计数器三部曲（The Counter Pattern）</h3>
+
+<h4>4.2.2.1 初始化 → 判断 → 递增
+    <span class="en">Initialize, test, increment</span>
+</h4>
+
+<p>"重复固定次数"的万能模板，你在"尘埃"关卡里就掌握了它。这个模式在本单元的遍历里将再次登场——只不过计数器换成了"索引"。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔢 计数器三部曲</div>
+    <strong>①初始化</strong>：循环前设起点，如 <code>attacks = 0</code><br>
+    <strong>②判断</strong>：用计数器作条件，如 <code>while attacks < 10</code><br>
+    <strong>③递增</strong>：循环体内 <code>attacks += 1</code>，逼近终止<br>
+    <strong>三者缺一不可——少了③就是死循环。</strong>
+</div>
+
+<h3 id="sec-4-2-3">4.2.3 死循环防范（Avoiding Infinite Loops）</h3>
+
+<h4>4.2.3.1 让条件迟早变假
+    <span class="en">Make sure the condition eventually turns false</span>
+</h4>
+
+<div class="warn-box">
+    <span class="warn-label">黄金法则再强调：</span>循环体内必须有代码能让条件<strong>逐渐趋向"变假"</strong>——计数器要递增、变量要更新、金币要增加。银行突袭关卡也明确警告：<strong>"别忘了每次循环里增加索引的值，不然会出现无限循环（infinite loop）的错误。"</strong>
+</div>
+
+<!-- ==================== 4.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-4-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+
+<div class="section-header" id="section-4-3">
+    <h2>4.3 数组回顾</h2>
+    <div class="en-title">Review: Arrays</div>
+</div>
+
+<h3 id="sec-4-3-1">4.3.1 索引与长度（Index and Length）</h3>
+
+<h4>4.3.1.1 从 0 开始，len() 量长度
+    <span class="en">Zero-based indexing and len()</span>
+</h4>
+
+<p>数组是有序的数据列表。用 <code>array[n]</code> 取索引为 <code>n</code> 的元素，<strong>索引从 0 开始</strong>；用 <code>len(array)</code> 得到元素个数。合法索引范围永远是 <code>0</code> 到 <code>len-1</code>，越界就会报错。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="数组索引与长度回顾">
+        <rect x="40" y="35" width="100" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="140" y="35" width="100" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="240" y="35" width="100" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="340" y="35" width="100" height="46" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="90" y="63" font-size="14" font-family="monospace" fill="#d4b14a" text-anchor="middle">敌人A</text>
+        <text x="190" y="63" font-size="14" font-family="monospace" fill="#d4b14a" text-anchor="middle">敌人B</text>
+        <text x="290" y="63" font-size="14" font-family="monospace" fill="#d4b14a" text-anchor="middle">敌人C</text>
+        <text x="390" y="63" font-size="14" font-family="monospace" fill="#d4b14a" text-anchor="middle">敌人D</text>
+        <text x="90" y="103" font-size="15" font-family="monospace" fill="#e8845a" text-anchor="middle">[0]</text>
+        <text x="190" y="103" font-size="15" font-family="monospace" fill="#e8845a" text-anchor="middle">[1]</text>
+        <text x="290" y="103" font-size="15" font-family="monospace" fill="#e8845a" text-anchor="middle">[2]</text>
+        <text x="390" y="103" font-size="15" font-family="monospace" fill="#e8845a" text-anchor="middle">[3]</text>
+        <text x="240" y="22" font-size="13" font-family="monospace" fill="#f0c674" text-anchor="middle">enemies（len = 4）</text>
+        <text x="240" y="130" font-size="12" font-family="sans-serif" fill="#E0A23F" text-anchor="middle">合法索引 0~3；enemies[4] 越界报错</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-4-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-4-3-2">4.3.2 遍历三部曲（The Iteration Recipe）</h3>
+
+<h4>4.3.2.1 索引=0 → 条件 &lt;len() → 每轮 +1
+    <span class="en">Index 0, test with len(), increment</span>
+</h4>
+
+<p>这是本单元的重头戏，也是"银行突袭"的基石。银行突袭关卡把遍历方法讲得非常标准：<strong>"创建一个用作数组索引的变量，初始值应该为 0……然后把索引变量加上 1，读取下一个元素。while 的条件部分则是检查索引变量是否仍小于数组长度。"</strong></p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemyIndex = <span class="num">0</span>                       <span class="cmt"># ① 索引从 0 开始</span>
+<span class="kw">while</span> enemyIndex &lt; <span class="fn">len</span><span class="punc">(</span>enemies<span class="punc">):</span>   <span class="cmt"># ② 条件：索引 < 长度</span>
+    enemy = enemies<span class="punc">[</span>enemyIndex<span class="punc">]</span>     <span class="cmt"># 用索引取当前元素</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    enemyIndex <span class="hl">+= 1</span>                  <span class="cmt"># ③ 每轮 +1，游标前进</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">遍历本质就是计数器：</span>对比一下就会发现——遍历三部曲和 while 计数器三部曲<strong>结构完全一样</strong>，只是把普通计数器换成了"索引变量"，并用 <code>len()</code> 当作终点。理解这一点，你就打通了循环与数组的任督二脉。
+</div>
+
+<h3 id="sec-4-3-3">4.3.3 数组要刷新（Refresh Stale Arrays）</h3>
+
+<h4>4.3.3.1 战况在变，数据也要更新
+    <span class="en">Re-fetch the array each round</span>
+</h4>
+
+<p>物品会被收集、敌人会死亡或新增，因此 find 方法返回的数组可能<strong>过时</strong>。在反复执行的外层循环里，每轮都要重新调用 <code>findEnemies()</code>、<code>findItems()</code> 拿到最新数据。"银行突袭"里的 <code>enemies = hero.findEnemies()</code> 就写在外层 <code>while True</code> 的开头，正是为了每波兽人来袭时刷新名单。</p>
+
+<!-- ==================== 4.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-4-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+<!-- CC-PROTECTION:HIDDEN:04a4ddbe2c:START anchor=sec-4-3-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="04a4ddbe2c">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:04a4ddbe2c:END -->
+
+<div class="section-header" id="section-4-4">
+    <h2>4.4 核心技能：循环嵌套</h2>
+    <div class="en-title">Key Skill: Nested Loops</div>
+</div>
+
+<h3 id="sec-4-4-1">4.4.1 什么是嵌套循环（What Is a Nested Loop）</h3>
+
+<h4>4.4.1.1 循环里面还有循环
+    <span class="en">A loop inside another loop</span>
+</h4>
+
+<p>本单元真正的"新意"在于把循环<strong>套起来</strong>。银行突袭关卡点明：<strong>"如果你需要对几组事物（敌人、朋友等等）重复那些动作，那你可以将代码放进另一个 while 循环里……之后你的英雄会一次次收集完所有的物品。"</strong> 这就是<span class="keyword">嵌套循环（nested loop）</span>——一个循环放在另一个循环体内。</p>
+
+<p>在"银行突袭"里，外层是一个 <code>while True</code>（永远守卫银行），内层则是两个遍历循环（一个打完所有敌人、一个捡完所有金币）。外层每转一圈，内层就会完整地跑完一整轮。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 230" width="520" role="img" aria-label="嵌套循环结构图">
+        <!-- 外层框 -->
+        <rect x="30" y="20" width="460" height="195" rx="10" fill="none" stroke="#C8821E" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="50" y="42" font-size="13" font-family="monospace" fill="#f0c674">while True:  ← 外层循环（守卫银行）</text>
+        <!-- 内层框1 -->
+        <rect x="60" y="55" width="400" height="65" rx="8" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="78" y="76" font-size="12" font-family="monospace" fill="#e0a23f">while enemyIndex &lt; len(enemies):</text>
+        <text x="98" y="98" font-size="11" font-family="monospace" fill="#d8c8a8">attack(enemies[enemyIndex])</text>
+        <text x="98" y="114" font-size="11" font-family="monospace" fill="#d8c8a8">enemyIndex += 1  ← 内层① 打完所有敌人</text>
+        <!-- 内层框2 -->
+        <rect x="60" y="130" width="400" height="65" rx="8" fill="#3a2c18" stroke="#E0A23F" stroke-width="2"/>
+        <text x="78" y="151" font-size="12" font-family="monospace" fill="#e0a23f">while coinIndex &lt; len(coins):</text>
+        <text x="98" y="173" font-size="11" font-family="monospace" fill="#d8c8a8">moveXY(coins[coinIndex]...)</text>
+        <text x="98" y="189" font-size="11" font-family="monospace" fill="#d8c8a8">coinIndex += 1  ← 内层② 捡完所有金币</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-4-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+<!-- CC-PROTECTION:HIDDEN:1bf90aaf84:START anchor=sec-4-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1bf90aaf84">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:1bf90aaf84:END -->
+
+<h3 id="sec-4-4-2">4.4.2 内外层的分工（Inner vs. Outer）</h3>
+
+<h4>4.4.2.1 外层管"重复几轮"，内层管"一轮里逐个处理"
+    <span class="en">Outer repeats rounds, inner processes each element</span>
+</h4>
+
+<p>理解嵌套循环的钥匙是分清两层各自的职责。一个生动的比喻：外层循环像"一天又一天"，内层循环像"这一天里挨家挨户送信"。每过一天（外层一圈），邮差都要把当天所有的信件（内层遍历）送完。</p>
+
+<table class="styled-table">
+    <thead><tr><th></th><th>外层循环</th><th>内层循环</th></tr></thead>
+    <tbody>
+        <tr><td>在银行突袭里</td><td><code>while True</code></td><td><code>while enemyIndex < len(enemies)</code></td></tr>
+        <tr><td>职责</td><td>反复守卫，等待一波又一波兽人</td><td>把当前这一波敌人逐个打完</td></tr>
+        <tr><td>转一圈意味着</td><td>处理完一整波来袭</td><td>处理完一个敌人</td></tr>
+        <tr><td>执行次数</td><td>永远（关卡不结束就一直转）</td><td>= 当前数组的长度</td></tr>
+    </tbody>
+</table>
+
+<h3 id="sec-4-4-3">4.4.3 索引必须各自独立（Each Loop Needs Its Own Index）</h3>
+
+<h4>4.4.3.1 不同数组用不同的索引变量
+    <span class="en">Use a separate index for each array</span>
+</h4>
+
+<p>这是嵌套遍历里最关键、也最容易出错的一点。银行突袭要先遍历 <code>enemies</code>、再遍历 <code>coins</code>，它们各自需要一个<strong>独立的索引变量</strong>——<code>enemyIndex</code> 和 <code>coinIndex</code>，绝不能共用一个。而且每次进入内层循环前，都要把对应的索引<strong>重新归零</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">True</span><span class="punc">:</span>
+    enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+    enemyIndex = <span class="num">0</span>                    <span class="hl"># 敌人索引，进循环前归零</span>
+    <span class="kw">while</span> enemyIndex &lt; <span class="fn">len</span><span class="punc">(</span>enemies<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemies<span class="punc">[</span>enemyIndex<span class="punc">]</span><span class="punc">)</span>
+        enemyIndex += <span class="num">1</span>
+
+    coins = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>
+    coinIndex = <span class="num">0</span>                     <span class="hl"># 金币索引，另起一个、也要归零</span>
+    <span class="kw">while</span> coinIndex &lt; <span class="fn">len</span><span class="punc">(</span>coins<span class="punc">):</span>
+        coin = coins<span class="punc">[</span>coinIndex<span class="punc">]</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> coin<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+        coinIndex += <span class="num">1</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">忘记归零的后果：</span>如果外层循环转第二圈时，索引还停留在上一圈结束时的值（比如仍等于长度），内层循环的条件一开始就为假，会<strong>直接跳过、一个元素都不处理</strong>。所以每次进入内层遍历前，务必把索引重新设回 0。
+</div>
+
+<!-- ==================== 4.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-4-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-4-5">
+    <h2>4.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<h3 id="sec-4-5-1">4.5.1 银行突袭（Bank Raid）</h3>
+
+<h4>4.5.1.1 策略：外层守卫，内层双遍历
+    <span class="en">Strategy: guard outside, double-iterate inside</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-5-1-1_bank_raid.png" alt="扣哒世界 银行突袭关卡 - koudashijie.com">
+    <div class="caption">图1：银行突袭——一波波兽人来抢金，先遍历敌人全歼，再遍历金币全收</div>
+</div>
+
+<p>这是本单元的综合大关，把 while 循环、数组、遍历、嵌套四样本领熔于一炉。兽人会<strong>一波又一波</strong>地来抢黄金，你要守住银行、击退每一波并把散落的金币全部收回。</p>
+
+<p><strong>算法思路分三层</strong>：最外层用 <code>while True</code> 无限守卫；每一圈开头先 <code>findEnemies()</code> 刷新敌人数组，用一个 <code>enemyIndex</code> 遍历循环把这一波敌人<strong>逐个攻击</strong>直至清空；打完后再 <code>findItems()</code> 拿到金币数组，用另一个 <code>coinIndex</code> 遍历循环<strong>逐个移动收集</strong>。外层转一圈就完整处理一波"来袭 + 清扫"，然后循环回去等待下一波。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🏦 银行突袭 · 算法骨架</div>
+    <strong>外层</strong>：<code>while True</code> —— 永远守卫<br>
+    &nbsp;&nbsp;├ 刷新 <code>enemies</code>，<code>enemyIndex = 0</code><br>
+    &nbsp;&nbsp;├ <strong>内层①</strong>：遍历 enemies，逐个 <code>attack</code>，<code>enemyIndex += 1</code><br>
+    &nbsp;&nbsp;├ 刷新 <code>coins</code>，<code>coinIndex = 0</code><br>
+    &nbsp;&nbsp;└ <strong>内层②</strong>：遍历 coins，逐个 <code>moveXY</code>，<code>coinIndex += 1</code>
+</div>
+
+<p><strong>三个关键领悟</strong>：其一，<strong>为什么要嵌套</strong>——单靠一层遍历只能处理"一波"，套上 <code>while True</code> 才能应对"一波又一波"；其二，<strong>两个索引各司其职</strong>，<code>enemyIndex</code> 和 <code>coinIndex</code> 独立计数、进内层前各自归零；其三，<strong>数组每轮刷新</strong>，敌人和金币的数组都在外层循环内重新获取，保证数据永远是最新的。掌握了这一关，你就真正学会了"用程序处理任意数量、不断变化的目标"。</p>
+
+<div class="info-box">
+    <span class="info-label">先打后收的顺序也是策略：</span>关卡把"攻击敌人"放在"收集金币"之前，是有讲究的——先清除威胁，再安心捡钱，避免收金币途中被兽人偷袭。顺序安排本身就是算法设计的一部分。
+</div>
+
+<!-- ==================== 4.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-4-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+<!-- CC-PROTECTION:HIDDEN:ca3f542e82:START anchor=sec-4-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ca3f542e82">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC4-20F2213AE080。</span>
+<!-- CC-PROTECTION:HIDDEN:ca3f542e82:END -->
+
+<div class="section-header" id="section-4-6">
+    <h2>4.6 综合易错点</h2>
+    <div class="en-title">Common Mistakes (Combined)</div>
+</div>
+
+<h3 id="sec-4-6-1">4.6.1 循环 + 数组 + 嵌套的坑（Pitfalls）</h3>
+
+<h4>4.6.1.1 综合运用时最容易翻车的地方
+    <span class="en">Where things go wrong when combined</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-6-1-1_common_errors.png" alt="扣哒世界 综合易错点示意 - koudashijie.com">
+    <div class="caption">图2：忘记递增索引、索引不归零、内外层索引混用，是综合关卡最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">综合易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘记递增索引——写了 <code>while enemyIndex < len(enemies)</code> 却漏掉 <code>enemyIndex += 1</code>，索引卡在 0，直接死循环。</li>
+        <li>进内层前索引不归零——外层第二圈时索引还是上一轮的旧值，导致内层被整个跳过，一个都不处理。</li>
+        <li>内外层共用一个索引变量——两个遍历都用 <code>i</code>，彼此干扰，计数彻底混乱。</li>
+        <li>忘记在外层刷新数组——只在循环外取一次 find，第二波敌人来了却看不见，操作过时数据。</li>
+        <li>索引越界——条件写成 <code><=</code> 而非 <code><</code>，多走一格访问 <code>array[len]</code> 报错。</li>
+        <li>读取前不检查空数组——某一波没有金币时，若逻辑不当直接访问 <code>coins[0]</code> 会崩溃（遍历本身用 <code>len()</code> 天然安全，但单独取首元素时要当心）。</li>
+        <li>缩进错乱——把内层循环或善后代码放错层级，导致"打一个敌人就去捡一次金币"这类逻辑错乱。</li>
+    </ul>
+</div>
+
+<!-- ==================== 4.7 ==================== -->
+<div class="section-header" id="section-4-7">
+    <h2>4.7 自测练习</h2>
+    <div class="en-title">Check Your Understanding</div>
+</div>
+
+<h3 id="sec-4-7-1">4.7.1 自我检验（Quick Self-Test）</h3>
+
+<h4>4.7.1.1 试着不看答案回答这些问题
+    <span class="en">Try to answer without peeking</span>
+</h4>
+
+<p>复习的最好方式是主动回忆。合上前面的内容，试着回答下面这几个问题，检验你是否真正掌握了本单元：</p>
+
+<table class="styled-table">
+    <thead><tr><th>#</th><th>问题</th><th>参考答案</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td>一个长度为 5 的数组，合法索引范围是？</td><td>0 到 4（即 0 ~ len−1）</td></tr>
+        <tr><td>2</td><td>遍历循环的三个步骤是什么？</td><td>索引置 0 → 条件用 <code>&lt; len()</code> → 每轮 <code>+= 1</code></td></tr>
+        <tr><td>3</td><td>为什么每次外层循环都要重新 <code>findEnemies()</code>？</td><td>因为数组会过时，敌人会死亡或新增</td></tr>
+        <tr><td>4</td><td>两个内层遍历能共用一个索引变量吗？</td><td>不能，各需独立变量并各自归零</td></tr>
+        <tr><td>5</td><td>忘记写 <code>index += 1</code> 会怎样？</td><td>索引不变、条件永真，造成死循环</td></tr>
+        <tr><td>6</td><td>条件用 <code>&lt;=</code> 代替 <code>&lt;</code> 会怎样？</td><td>多走一格，访问越界索引导致报错</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">进阶思考：</span>如果银行突袭里希望"每打倒一个敌人就顺手捡一枚最近的金币"，该怎么改？（提示：这时可能不该用两个并列的遍历，而要考虑在一个循环里同时处理，或调整逻辑顺序——动手改改代码，感受不同结构带来的不同行为。）
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-4-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成了流金沙漠的这一站复习！本单元没有全新的语法，却是最重要的一课——你把 <strong>while 循环</strong>、<strong>数组</strong>、<strong>索引遍历</strong>三样本领融会贯通，并首次掌握了<strong>嵌套循环</strong>：用外层循环反复处理"一波又一波"的任务，用内层遍历"逐个"处理每一波里的所有目标。"银行突袭"关卡正是这一切的集大成之作。来做最后的回顾：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>来源单元</th></tr></thead>
+        <tbody>
+            <tr><td>条件式 while</td><td>条件为假时循环结束</td><td>第一单元</td></tr>
+            <tr><td>计数器三部曲</td><td>初始化→判断→递增</td><td>第一单元</td></tr>
+            <tr><td>索引与长度</td><td>从 0 起，合法范围 0~len−1</td><td>第三单元</td></tr>
+            <tr><td>遍历三部曲</td><td>索引=0 → &lt;len() → +=1</td><td>第三单元</td></tr>
+            <tr><td>数组要刷新</td><td>外层每轮重新调用 find 方法</td><td>第三单元</td></tr>
+            <tr><td>嵌套循环</td><td>外层管几轮，内层管逐个</td><td>本单元 · 银行突袭</td></tr>
+            <tr><td>独立索引</td><td>不同数组用不同索引、各自归零</td><td>本单元 · 银行突袭</td></tr>
+            <tr><td>死循环防范</td><td>索引必须递增，条件迟早变假</td><td>贯穿全部</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        能把循环与数组层层嵌套、指挥千军万马的英雄，已经是真正的程序员了。<br>
+        流金沙漠的试炼到此告一段落，向着更广阔的世界前进吧，勇敢的程序员！🏜️🔁📚
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（流金沙漠）：第四单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
