@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC10-7BEE3247A164">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十单元：生命、时间、价值、金币属性 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+        .code-block .bool { color: #6fae6f; font-weight: 600; }
+        .code-block .ret { color: #d98ec0; font-weight: 600; }
+        .code-block .andkw { color: #b6d97e; font-weight: 700; }
+        .code-block .op { color: #ff9a5a; font-weight: 700; }
+        .code-block .brk { color: #e07e7e; font-weight: 700; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.tf-true { color: #4a8a3d; font-weight: 700; }
+        .styled-table td.tf-false { color: #a5331f; font-weight: 700; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC10-7BEE3247A164 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第十单元</div>
+
+    <a href="#section-10-1" class="nav-section">10.1 生命值属性</a>
+    <a href="#sec-10-1-1" class="nav-sub">10.1.1 health 与 maxHealth</a>
+    <a href="#sec-10-1-2" class="nav-sub">10.1.2 用比例设阈值</a>
+    <a href="#sec-10-1-3" class="nav-sub">10.1.3 读取他人的血量</a>
+
+    <a href="#section-10-2" class="nav-section">10.2 时间属性</a>
+    <a href="#sec-10-2-1" class="nav-sub">10.2.1 hero.time</a>
+    <a href="#sec-10-2-2" class="nav-sub">10.2.2 elif 分阶段</a>
+
+    <a href="#section-10-3" class="nav-section">10.3 价值与金币</a>
+    <a href="#sec-10-3-1" class="nav-sub">10.3.1 item.value</a>
+    <a href="#sec-10-3-2" class="nav-sub">10.3.2 hero.gold</a>
+    <a href="#sec-10-3-3" class="nav-sub">10.3.3 累加计数器</a>
+
+    <a href="#section-10-4" class="nav-section">10.4 break 与自定义函数</a>
+    <a href="#sec-10-4-1" class="nav-sub">10.4.1 break 跳出循环</a>
+    <a href="#sec-10-4-2" class="nav-sub">10.4.2 定义自己的函数</a>
+
+    <a href="#section-10-5" class="nav-section">10.5 实战关卡精讲</a>
+    <a href="#sec-10-5-1" class="nav-sub">10.5.1 Kithgard附魔师</a>
+    <a href="#sec-10-5-2" class="nav-sub">10.5.2 生命值关卡</a>
+    <a href="#sec-10-5-3" class="nav-sub">10.5.3 Killdeer操作</a>
+    <a href="#sec-10-5-4" class="nav-sub">10.5.4 守时</a>
+    <a href="#sec-10-5-5" class="nav-sub">10.5.5 沙漠十字</a>
+    <a href="#sec-10-5-6" class="nav-sub">10.5.6 金币收集关卡</a>
+
+    <a href="#section-10-6" class="nav-section">10.6 常见错误</a>
+    <a href="#sec-10-6-1" class="nav-sub">10.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十单元：生命、时间、价值、金币属性</h1>
+    <div class="subtitle">Unit 10: health, time, value &amp; gold</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · Kithgard附魔师 → 贪婪保护</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 10.1 ==================== -->
+<div class="section-header" id="section-10-1">
+    <h2>10.1 生命值属性</h2>
+    <div class="en-title">Health Attributes</div>
+</div>
+
+<h3 id="sec-10-1-1">10.1.1 health 与 maxHealth（Current and Max Health）</h3>
+
+<h4>10.1.1.1 当前血量和血量上限
+    <span class="en">Current health vs the maximum</span>
+</h4>
+
+<p>前几单元你学会了读取对象的 <code>pos</code>、<code>type</code> 等属性。本单元再添几个至关重要的属性，首先是<strong>生命值</strong>。每个战斗单位都有两个血量属性：<span class="keyword-en">health</span> 是<strong>当前血量</strong>（随受伤减少、随治疗回升），<span class="keyword-en">maxHealth</span> 是<strong>血量上限</strong>（满血时的数值，通常固定不变）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>current = <span class="obj">hero</span><span class="punc">.</span>health      <span class="cmt"># 英雄现在还剩多少血</span>
+maximum = <span class="obj">hero</span><span class="punc">.</span>maxHealth   <span class="cmt"># 英雄满血是多少</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么要两个属性:</span>只看 <code>health</code> 无法判断"伤得重不重"——满血 100 时剩 40 算重伤,满血 1000 时剩 40 已濒死。必须把 <code>health</code> 和 <code>maxHealth</code> 结合起来看<strong>比例</strong>,才能得出"还剩几成血"这个真正有用的信息。
+</div>
+
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-10-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+<h3 id="sec-10-1-2">10.1.2 用比例设阈值（Thresholds with Proportions）</h3>
+
+<h4>10.1.2.1 用除法算出"一半""三分之一"
+    <span class="en">Use division for halves and thirds</span>
+</h4>
+
+<p>"医疗护理"关卡教了核心技巧：<strong>用除法运算符 <code>/</code> 把 <code>maxHealth</code> 除以一个数，得到一个"阈值"，再拿 <code>health</code> 和它比较</strong>。比如 <code>maxHealth / 2</code> 就是"半血线"，<code>maxHealth / 3</code> 就是"三分之一血线"。当 <code>health</code> 低于这条线，就说明该撤退治疗了：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>healingThreshold = <span class="obj">hero</span><span class="punc">.</span>maxHealth <span class="op">/</span> <span class="num">2</span>   <span class="cmt"># 半血线</span>
+<span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>health <span class="hl">&lt;</span> healingThreshold<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">65</span><span class="punc">,</span> <span class="num">46</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Heal please!"</span><span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">阈值的妙处:</span>把"maxHealth / 2"存进一个名字清晰的变量(如 <code>healingThreshold</code>),既让代码<strong>读起来像自然语言</strong>("如果血量低于治疗阈值"),又方便调整——想改成三分之一血才治疗,只需把 <code>/ 2</code> 改成 <code>/ 3</code>,一处修改处处生效。
+</div>
+
+<h3 id="sec-10-1-3">10.1.3 读取他人的血量（Reading Others' Health）</h3>
+
+<h4>10.1.3.1 敌人也有 health 和 maxHealth
+    <span class="en">Enemies have health too</span>
+</h4>
+
+<p>和 <code>pos</code> 一样，生命值属性也是"万物皆有"的。<code>enemy.health</code> 是敌人当前血量、<code>enemy.maxHealth</code> 是敌人血量上限。"王之谷"就利用这一点——只在骷髅血量<strong>大于</strong>其最大血量三分之一时才攻击（血太低就跑）：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">.</span>health <span class="hl">&gt;</span> enemy<span class="punc">.</span>maxHealth <span class="op">/</span> <span class="num">3</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>
+<span class="kw">else</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">35</span><span class="punc">,</span> <span class="num">16</span><span class="punc">)</span>   <span class="cmt"># 血低了就撤</span></pre>
+</div>
+
+<!-- ==================== 10.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=sec-10-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+
+<div class="section-header" id="section-10-2">
+    <h2>10.2 时间属性</h2>
+    <div class="en-title">The Time Attribute</div>
+</div>
+
+<h3 id="sec-10-2-1">10.2.1 hero.time（Reading the Clock）</h3>
+
+<h4>10.2.1.1 读取游戏已经过去的秒数
+    <span class="en">How many seconds have elapsed</span>
+</h4>
+
+<p>"守时"关卡引入了 <span class="keyword-en">hero.time</span> 属性。它表示<strong>自按下运行按钮以来已经过去了多少秒</strong>，是一个随游戏进行不断增大的数字。有了它，你就能让英雄"看表行事"——在不同的时间段做不同的事：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>time <span class="hl">&lt;</span> <span class="num">10</span><span class="punc">:</span>       <span class="cmt"># 前 10 秒</span>
+    ...</pre>
+</div>
+
+<h3 id="sec-10-2-2">10.2.2 elif 分阶段（Phases with elif）</h3>
+
+<h4>10.2.2.1 用 else-if 串起多个时间段
+    <span class="en">Chain time phases with else-if</span>
+</h4>
+
+<p>要按时间划分多个阶段，就需要 <span class="keyword-en">elif</span>（else-if）。"守时"关卡解释：<strong>"if 语句可以和 else-if 配合使用，只有第一个 if 为 false，且第二个 if 为 true 时后一个 if 才会执行。"</strong> 这样几个 <code>elif</code> 串起来，就构成了一条"要么这样、要么那样"的互斥判断链：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>time <span class="hl">&lt;</span> <span class="num">10</span><span class="punc">:</span>          <span class="cmt"># 阶段一: 前10秒,攻击</span>
+    ...
+<span class="kw">elif</span> <span class="obj">hero</span><span class="punc">.</span>time <span class="hl">&lt;</span> <span class="num">35</span><span class="punc">:</span>        <span class="cmt"># 阶段二: 10~35秒,收集硬币</span>
+    ...
+<span class="kw">else</span><span class="punc">:</span>                        <span class="cmt"># 阶段三: 35秒后,再次攻击</span>
+    ...</pre>
+</div>
+
+<div class="remember-box">
+    <span class="remember-label">elif 的顺序很关键:</span>因为 <code>elif</code> 是"前面都不成立才轮到我",所以判断要<strong>从小到大排</strong>。<code>time < 35</code> 这一条只有在 <code>time < 10</code> 不成立(即已过10秒)时才会被检查,所以它实际覆盖的是"10 到 35 秒"这一段。理解这种"层层过滤"的逻辑,是用好 elif 链的核心。
+</div>
+
+<!-- ==================== 10.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-10-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<div class="section-header" id="section-10-3">
+    <h2>10.3 价值与金币</h2>
+    <div class="en-title">Value and Gold</div>
+</div>
+
+<h3 id="sec-10-3-1">10.3.1 item.value（An Item's Worth）</h3>
+
+<h4>10.3.1.1 每个物品都有价值
+    <span class="en">Every item has a value</span>
+</h4>
+
+<p>物品也有属性。<span class="keyword-en">item.value</span> 表示一个物品<strong>值多少金币</strong>。第七单元"春雷"里我们就用 <code>value</code> 区分过银币（值 2）和蓝宝石（值 10）；本单元则用它来<strong>累计</strong>收集到的财富。<code>coin.value</code> 读出这枚硬币的价值：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>worth = coin<span class="punc">.</span>value   <span class="cmt"># 这枚硬币值多少钱</span></pre>
+</div>
+
+<h3 id="sec-10-3-2">10.3.2 hero.gold（Your Purse）</h3>
+
+<h4>10.3.2.1 英雄身上的金币总数
+    <span class="en">The gold the hero currently holds</span>
+</h4>
+
+<p>"诱饵演习"引入了 <span class="keyword-en">hero.gold</span>——英雄目前<strong>实际持有</strong>的金币数。它和自己用变量累加的计数器不同：<code>hero.gold</code> 是游戏自动维护的、你真正能花的钱。建造单位（如 <code>"decoy"</code> 诱饵）需要消耗金币，所以要先检查 <code>hero.gold</code> 够不够：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold <span class="hl">&gt;=</span> <span class="num">25</span><span class="punc">:</span>          <span class="cmt"># 钱够 25 才建造</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"decoy"</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-10-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+
+<h3 id="sec-10-3-3">10.3.3 累加计数器（Accumulator Counter）</h3>
+
+<h4>10.3.3.1 用变量自己记账
+    <span class="en">Keep your own running total</span>
+</h4>
+
+<p>"囤积黄金"让你用一个变量当"账本"，把每枚硬币的价值累加起来。这就是编程中经典的<strong>累加器（accumulator）</strong>模式：先在循环<strong>外</strong>把计数器初始化为 0，每收集一枚硬币就用 <code>+=</code> 把它的 <code>value</code> 加进去：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>totalGold = <span class="num">0</span>                    <span class="cmt"># 循环外: 账本清零</span>
+<span class="kw">while</span> <span class="bool">True</span><span class="punc">:</span>
+    coin = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+    <span class="kw">if</span> coin<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>coin<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> coin<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+        totalGold <span class="op">+=</span> coin<span class="punc">.</span>value  <span class="cmt"># 每收一枚就记一笔账</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">初始化必须在循环外:</span>计数器 <code>totalGold = 0</code> 一定要写在 <code>while</code> <strong>之前</strong>! 如果错放到循环<strong>里面</strong>,每转一圈它都被重置为 0,永远也累加不起来。"先在外面清零,再在里面累加"是累加器模式雷打不动的规矩。
+</div>
+
+<!-- ==================== 10.4 ==================== -->
+<div class="section-header" id="section-10-4">
+    <h2>10.4 break 与自定义函数</h2>
+    <div class="en-title">"break" and Custom Functions</div>
+</div>
+
+<h3 id="sec-10-4-1">10.4.1 break 跳出循环（Breaking a Loop）</h3>
+
+<h4>10.4.1.1 提前终止 while 循环
+    <span class="en">Exit the loop early</span>
+</h4>
+
+<p>"囤积黄金"引入了 <span class="keyword">break</span> 语句。关卡解释：<strong>"当你 break 一个循环时，循环会马上终止运行，且程序将会执行循环之后的代码。"</strong> 平时 <code>while True</code> 会永远转下去，但配合 <code>break</code>，我们就能在满足某个条件（比如凑够 25 金）时<strong>主动跳出</strong>，去执行循环后面的收尾动作：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="bool">True</span><span class="punc">:</span>
+    <span class="cmt"># ... 收集硬币、累加 totalGold ...</span>
+    <span class="kw">if</span> totalGold <span class="hl">&gt;=</span> <span class="num">25</span><span class="punc">:</span>
+        <span class="brk">break</span>                    <span class="cmt"># 凑够了,跳出循环</span>
+
+<span class="cmt"># 循环结束后才会执行到这里</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">58</span><span class="punc">,</span> <span class="num">33</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>totalGold<span class="punc">)</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🚪 break 像"紧急出口"</div>
+    <p><code>while True</code> 本是一间没有门的房间,程序会一直在里面打转。<code>break</code> 就是墙上凿出的一扇紧急出口——一旦条件满足,程序立刻从这扇门走出去,继续执行循环<strong>下方</strong>的代码。没有 <code>break</code>,那些收尾代码永远等不到执行的机会。</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-10-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<h3 id="sec-10-4-2">10.4.2 定义自己的函数（Defining Functions）</h3>
+
+<h4>10.4.2.1 用 def 打包一段动作
+    <span class="en">Package actions with def</span>
+</h4>
+
+<p>"Kithgard附魔师"让你第一次<strong>定义自己的函数</strong>。关卡说，函数的第一个好处就是<strong>把一大堆代码缩减为一行</strong>，还让代码更易理解。定义函数用 <code>def</code> 关键字，包含<strong>函数名</strong>和<strong>函数体</strong>两部分：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">moveRight</span><span class="punc">():</span>              <span class="cmt"># 函数名: moveRight</span>
+    x = <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x <span class="op">+</span> <span class="num">12</span>    <span class="cmt"># ↓ 函数体: 调用时执行的代码</span>
+    y = <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+
+<span class="fn">moveRight</span><span class="punc">()</span>                   <span class="cmt"># 定义好后,一行就能调用</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">"定义"和"调用"是两回事:</span><code>def moveRight():</code> 只是<strong>定义</strong>——告诉程序"moveRight 这个词代表这段代码",本身不会执行任何动作;真正让英雄动起来的是后面那句 <code>moveRight()</code> ——这才是<strong>调用</strong>。定义写一次,调用可以写很多次,这正是函数省事的地方。
+</div>
+
+<!-- ==================== 10.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-10-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+<!-- CC-PROTECTION:HIDDEN:ea646424c7:START anchor=sec-10-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ea646424c7">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:ea646424c7:END -->
+
+<div class="section-header" id="section-10-5">
+    <h2>10.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"属性怎么读、阈值怎么设、循环怎么控制"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-10-5-1">10.5.1 Kithgard附魔师（Kithgard Enchanter）</h3>
+
+<h4>10.5.1.1 策略：定义三个移动函数再调用
+    <span class="en">Strategy: define three move functions, then call them</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-1-1_kithgard_enchanter.png" alt="扣哒世界 Kithgard附魔师关卡 - koudashijie.com">
+    <div class="caption">图1：Kithgard附魔师——自定义 moveRight/moveUp/moveDown 三个函数,组合出通关路线</div>
+</div>
+
+<p>这是自定义函数的入门关。任务是定义 <code>moveRight</code>、<code>moveUp</code>、<code>moveDown</code> 三个函数，每个让英雄相对移动 12 米，然后按正确顺序调用它们走出地牢。算法思路是：每个函数内部都用第九单元学的"读当前坐标 → 加减 12 → moveXY"来实现相应方向的移动；定义好后，在下方按路线依次 <code>moveRight()</code>、<code>moveDown()</code>、<code>moveUp()</code>…… 调用。核心是理解<strong>定义与调用分离</strong>，以及函数如何把一段坐标计算浓缩成一个好记的名字。</p>
+
+<h3 id="sec-10-5-2">10.5.2 生命值关卡：扫雷 / 医疗护理（Health Levels）</h3>
+
+<h4>10.5.2.1 策略：血量低于阈值就撤退治疗
+    <span class="en">Strategy: retreat to heal below the threshold</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-2-1_health_levels.png" alt="扣哒世界 医疗护理关卡 - koudashijie.com">
+    <div class="caption">图2：医疗护理/扫雷——用 maxHealth/2 设半血线,受重伤就撤退求医,否则继续行动</div>
+</div>
+
+<p>这两关都靠"生命值阈值"决策。"扫雷"要用身体引爆硬币下的地雷带农民过峡谷，血量太低就向左撤 10 米请医生治疗；"医疗护理"则是边战斗边在受伤时撤到治疗师处。算法思路一致：先算 <code>healingThreshold = hero.maxHealth / 2</code>，用 <code>if hero.health < healingThreshold</code> 判断是否重伤——是就撤退并 <code>say</code> 求治疗，<code>elif</code>/<code>else</code> 才继续正常行动（收集硬币或攻击敌人）。核心是把"生存"放在最高优先级——<strong>先保命，再干活</strong>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察:</span>注意判断顺序——"是否需要治疗"必须<strong>放在最前面</strong>用 <code>if</code> 判断,收集/攻击放在 <code>elif</code>/<code>else</code>。这样一旦重伤,程序会优先执行撤退,而不会先去贪一枚硬币或补一刀。<strong>用条件的先后顺序表达优先级</strong>,是策略类关卡的通用智慧。
+</div>
+
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-10-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:d2fee984dd:START anchor=sec-10-5-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="d2fee984dd">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:d2fee984dd:END -->
+
+<h3 id="sec-10-5-3">10.5.3 Killdeer操作 / 王之谷（Boolean-Return Levels）</h3>
+
+<h4>10.5.3.1 策略：用返回布尔值的函数封装"该不该跑"
+    <span class="en">Strategy: wrap "should I run" in a boolean function</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-3-1_killdeer.png" alt="扣哒世界 Killdeer操作关卡 - koudashijie.com">
+    <div class="caption">图3：Killdeer操作——写 shouldRun() 返回布尔值,血量过低时诱敌撤退到陷阱</div>
+</div>
+
+<p>"Killdeer 操作"把生命值判断<strong>封装进一个返回布尔值的函数</strong>，复习了第四单元的返回值知识。算法思路是：定义 <code>shouldRun()</code> 函数，内部判断 <code>hero.health < hero.maxHealth / 2</code>，血量过半就 <code>return True</code>、否则 <code>return False</code>；主循环里用 <code>if shouldRun():</code> 决定跑向陷阱还是继续战斗。"王之谷"（概念挑战）则直接用 <code>enemy.health > enemy.maxHealth / 3</code> 判断——敌人血量高才打、血低就撤。核心是体会：<strong>把复杂的血量判断封装成一个名字清晰的函数，主逻辑就变得像读句子一样简单。</strong></p>
+
+<h3 id="sec-10-5-4">10.5.4 守时（On the Clock）</h3>
+
+<h4>10.5.4.1 策略：用 hero.time 和 elif 链分阶段行动
+    <span class="en">Strategy: phase actions by time with an elif chain</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-4-1_timekeeping.png" alt="扣哒世界 守时关卡 - koudashijie.com">
+    <div class="caption">图4：守时——按 hero.time 分三阶段:先助战、再攒钱、后再战</div>
+</div>
+
+<p>这一关是时间属性的核心演练。任务是按游戏时间分阶段行动。算法思路是用一条 <code>if/elif/else</code> 链：<code>if hero.time < 10</code>——前 10 秒协助战斗；<code>elif hero.time < 35</code>——10 到 35 秒收集硬币攒资源；<code>else</code>——35 秒后再次投入战斗。关键在于理解 <code>elif</code> 链的"层层过滤"——第二个条件只有在第一个不成立时才被检查，所以 <code>time < 35</code> 实际管的是"10~35 秒"这一段。这一关教你<strong>让程序按时间节奏自动切换策略</strong>。</p>
+
+<div class="tip-box">
+    <span class="tip-label">进阶提示:</span>关卡还提醒——最后战斗吃紧时,可以在血量低时让英雄撤退(结合本单元的生命值知识);若敌人类型是 <code>"palisade"</code>(栅栏)则不必攻击。这说明真实关卡往往要<strong>把多个单元的知识叠加运用</strong>:时间分阶段 + 生命值保命 + 类型筛选,一起构成完整策略。
+</div>
+
+
+<!-- CC-PROTECTION:AD:d19090cfd1:START anchor=sec-10-5-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="d19090cfd1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，你敲下的 if 和 for，直接变成英雄的剑招与魔法。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d19090cfd1:END -->
+<!-- CC-PROTECTION:HIDDEN:851c59744c:START anchor=sec-10-5-4 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="851c59744c">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC10-7BEE3247A164。</span>
+<!-- CC-PROTECTION:HIDDEN:851c59744c:END -->
+
+<h3 id="sec-10-5-5">10.5.5 沙漠十字（Desert Combat / Cross）</h3>
+
+<h4>10.5.5.1 策略：用命名布尔变量组合出对角方向
+    <span class="en">Strategy: name boolean vars to compose diagonals</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-5-1_desert_cross.png" alt="扣哒世界 沙漠十字关卡 - koudashijie.com">
+    <div class="caption">图5：沙漠十字——把上下左右判断存成 isAbove/isLeft 等布尔变量,再用 and 组合出四个对角</div>
+</div>
+
+<p>这一关把第九单元的坐标比较升级成<strong>更清晰的写法</strong>。食人魔从对角线四个角进攻，你要判断方位并在对应角建火焰陷阱。算法思路的巧妙之处在于：先把四个方向判断分别<strong>存进命名布尔变量</strong>——<code>isLeft = hero.pos.x > enemy.pos.x</code>、<code>isAbove = hero.pos.y < enemy.pos.y</code> 等；再用 <code>and</code> 组合出对角方向，如 <code>if isLeft and isAbove:</code> 在左上角建陷阱。这样代码读起来就是"如果在左边且在上面"，一目了然。</p>
+
+<div class="remember-box">
+    <span class="remember-label">命名布尔变量的价值:</span>关卡特意对比了两种写法——直接写 <code>hero.pos.x > enemy.pos.x and hero.pos.y < enemy.pos.y</code> 又长又难懂;而先存成 <code>isLeft</code>、<code>isAbove</code>,再写 <code>isLeft and isAbove</code>,则<strong>既好写又好读</strong>。给中间结果起个好名字,是让复杂逻辑清晰化的高级技巧。
+</div>
+
+<h3 id="sec-10-5-6">10.5.6 金币收集关卡：囤积黄金 / 诱饵演习 / 贪婪保护 / 千岩谷</h3>
+
+<h4>10.5.6.1 策略：累加计数 + 达标 break
+    <span class="en">Strategy: accumulate, then break when the goal is met</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-5-6-1_gold_levels.png" alt="扣哒世界 囤积黄金关卡 - koudashijie.com">
+    <div class="caption">图6：囤积黄金/诱饵演习——收集到目标金额或数量后 break 跳出循环,再执行收尾</div>
+</div>
+
+<p>这几关都围绕"金币 + 计数 + break"展开。"囤积黄金"用 <code>totalGold += coin.value</code> 累加价值，达到 25 就 <code>break</code>，出循环后向 Naria 报数。"诱饵演习"则用 <code>hero.gold</code> 判断——够 25 金就建一个诱饵、给 <code>decoysBuilt</code> 加 1，建满 4 个就 <code>break</code>。"贪婪保护"（概念挑战）收集到 99 金后 <code>break</code> 逃向安全区。"千岩谷"（组合挑战）则综合坐标移动、比较运算和血量比例，跟着发光石穿越山谷。</p>
+
+<p>算法思路的共性是<strong>"循环外初始化计数器 → 循环内累加并判断 → 达标 break → 循环后收尾"</strong>这套完整框架。它把"重复做某事直到攒够"这一常见需求，用可靠的结构表达了出来。</p>
+
+<div class="info-box">
+    <span class="info-label">gold 与自建计数器的区别:</span>"囤积黄金"用自己的变量 <code>totalGold</code> 记账,而"诱饵演习"用系统的 <code>hero.gold</code>。区别在于:<code>hero.gold</code> 是<strong>可花费的真实金钱</strong>(建造会扣减),而 <code>totalGold</code> 只是你自己的<strong>统计数字</strong>(不会因花钱而减少)。根据你是要"统计收集量"还是"检查购买力",选用对应的那一个。
+</div>
+
+<!-- ==================== 10.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-10-5-6 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<div class="section-header" id="section-10-6">
+    <h2>10.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-10-6-1">10.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>10.6.1.1 属性与循环控制的典型问题
+    <span class="en">Typical issues with attributes and loop control</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-6-1-1_common_errors.png" alt="扣哒世界 属性与循环常见错误示意 - koudashijie.com">
+    <div class="caption">图7：计数器放错位置、混淆 health/maxHealth、忘调用函数,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>计数器初始化放进了循环——<code>totalGold = 0</code> 若写在 while 里，每轮清零永远攒不够，必须放在循环外。</li>
+        <li>混淆 health 与 maxHealth——判断重伤要用 <code>health &lt; maxHealth / 2</code>，别把两者写反或只用其中一个。</li>
+        <li>比例阈值漏括号或除错数——想要"三分之一血"是 <code>maxHealth / 3</code>，别错写成别的数或忘了除。</li>
+        <li>只定义函数却忘了调用——写了 <code>def moveRight():</code> 却没写 <code>moveRight()</code>，英雄不会动。</li>
+        <li>忘记写 break 或 break 条件错——没有 break 的 <code>while True</code> 永不结束，循环后的收尾代码永远执行不到。</li>
+        <li>elif 顺序排反——时间/血量阈值要从小到大或按优先级排，顺序错会让某些分支永远进不去。</li>
+        <li>把 hero.gold 当自建计数器改——<code>hero.gold</code> 由系统维护，不能像普通变量那样随意赋值累加。</li>
+        <li>累加时用了 = 而非 +=——写成 <code>totalGold = coin.value</code> 会每次覆盖而非累加，得用 <code>+=</code>。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成流金沙漠第十单元！你掌握了一批描述游戏世界的关键属性——生命值 <code>health</code>/<code>maxHealth</code>、时间 <code>time</code>、价值 <code>value</code>、金币 <code>gold</code>，学会了用比例设阈值来做保命决策、用 <code>elif</code> 分阶段、用累加器记账、用 <code>break</code> 控制循环，还第一次亲手用 <code>def</code> 定义了自己的函数。这些能力让你的英雄真正"懂得权衡"，能根据自身与环境的状态做出聪明选择。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>health / maxHealth</td><td>当前血量与血量上限</td><td>医疗护理、扫雷</td></tr>
+            <tr><td>比例阈值</td><td>maxHealth / 2 判断重伤</td><td>医疗护理、Killdeer操作</td></tr>
+            <tr><td>读他人血量</td><td>enemy.health 等</td><td>王之谷</td></tr>
+            <tr><td>hero.time</td><td>游戏经过的秒数</td><td>守时</td></tr>
+            <tr><td>elif 分阶段</td><td>互斥判断链,层层过滤</td><td>守时</td></tr>
+            <tr><td>item.value</td><td>物品的价值</td><td>囤积黄金</td></tr>
+            <tr><td>hero.gold</td><td>可花费的真实金钱</td><td>诱饵演习</td></tr>
+            <tr><td>累加计数器</td><td>循环外清零,循环内 +=</td><td>囤积黄金</td></tr>
+            <tr><td>break</td><td>达标时主动跳出循环</td><td>囤积黄金、贪婪保护</td></tr>
+            <tr><td>自定义函数</td><td>def 定义,调用执行</td><td>Kithgard附魔师</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得权衡生命、时间与财富的英雄,才能在沙漠中做出最明智的抉择。<br>
+        流金沙漠的旅程接近尾声,继续前进吧,勇敢的程序员！🏜️❤️⏳💰🤖
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=h3-18 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第十单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
