@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC9-D4D2CFF6A329">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第九单元：方向与坐标变化 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+        .code-block .bool { color: #6fae6f; font-weight: 600; }
+        .code-block .ret { color: #d98ec0; font-weight: 600; }
+        .code-block .andkw { color: #b6d97e; font-weight: 700; }
+        .code-block .op { color: #ff9a5a; font-weight: 700; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.tf-true { color: #4a8a3d; font-weight: 700; }
+        .styled-table td.tf-false { color: #a5331f; font-weight: 700; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC9-D4D2CFF6A329 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第九单元</div>
+
+    <a href="#section-9-1" class="nav-section">9.1 坐标系与 pos</a>
+    <a href="#sec-9-1-1" class="nav-sub">9.1.1 地图的坐标系</a>
+    <a href="#sec-9-1-2" class="nav-sub">9.1.2 pos.x 与 pos.y</a>
+    <a href="#sec-9-1-3" class="nav-sub">9.1.3 万物皆有 pos</a>
+
+    <a href="#section-9-2" class="nav-section">9.2 相对移动</a>
+    <a href="#sec-9-2-1" class="nav-sub">9.2.1 加减改变坐标</a>
+    <a href="#sec-9-2-2" class="nav-sub">9.2.2 四个方向的口诀</a>
+    <a href="#sec-9-2-3" class="nav-sub">9.2.3 斜线移动</a>
+
+    <a href="#section-9-3" class="nav-section">9.3 位置比较与计算</a>
+    <a href="#sec-9-3-1" class="nav-sub">9.3.1 用 < > 判断方向</a>
+    <a href="#sec-9-3-2" class="nav-sub">9.3.2 基于他人坐标定位</a>
+    <a href="#sec-9-3-3" class="nav-sub">9.3.3 求中点坐标</a>
+
+    <a href="#section-9-4" class="nav-section">9.4 实战关卡精讲</a>
+    <a href="#sec-9-4-1" class="nav-sub">9.4.1 强壮的沙牦牛</a>
+    <a href="#sec-9-4-2" class="nav-sub">9.4.2 绿洲</a>
+    <a href="#sec-9-4-3" class="nav-sub">9.4.3 Sarven路 / 干燥灌溉</a>
+    <a href="#sec-9-4-4" class="nav-sub">9.4.4 Sarven间隙</a>
+    <a href="#sec-9-4-5" class="nav-sub">9.4.5 十字路口</a>
+    <a href="#sec-9-4-6" class="nav-sub">9.4.6 截断</a>
+    <a href="#sec-9-4-7" class="nav-sub">9.4.7 雷蹄 / 友好的雷区</a>
+
+    <a href="#section-9-5" class="nav-section">9.5 常见错误</a>
+    <a href="#sec-9-5-1" class="nav-sub">9.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第九单元：方向与坐标变化</h1>
+    <div class="subtitle">Unit 9: Directions &amp; Coordinate Changes</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 强壮的沙牦牛 → 友好的雷区</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 9.1 ==================== -->
+<div class="section-header" id="section-9-1">
+    <h2>9.1 坐标系与 pos</h2>
+    <div class="en-title">The Coordinate System and "pos"</div>
+</div>
+
+<h3 id="sec-9-1-1">9.1.1 地图的坐标系（The Map's Coordinate System）</h3>
+
+<h4>9.1.1.1 用两个数字定位地图上任意一点
+    <span class="en">Locate any point with two numbers</span>
+</h4>
+
+<p>之前你一直用 <code>moveXY(x, y)</code> 移动到固定地点，但那些数字是从哪来的？本单元揭开谜底——整张地图其实是一个<strong>坐标系</strong>。地图上每一个点，都可以用一对数字 <code>(x, y)</code> 精确描述：<code>x</code> 表示<strong>水平方向（左右）</strong>的位置，<code>y</code> 表示<strong>垂直方向（上下）</strong>的位置。</p>
+
+<p>这套坐标系有个关键规则，"十字路口"关卡说得很清楚：<strong>x 坐标越往左越小、越往右越大；y 坐标越往下越小、越往上越大</strong>。地图左下角是原点 <code>(0, 0)</code>，越往右上走，两个坐标值都越大。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 400 300" width="400" role="img" aria-label="地图坐标系示意">
+        <!-- 坐标轴 -->
+        <line x1="50" y1="260" x2="380" y2="260" stroke="#C8821E" stroke-width="2"/>
+        <line x1="50" y1="260" x2="50" y2="20" stroke="#C8821E" stroke-width="2"/>
+        <!-- 箭头 -->
+        <polygon points="380,260 370,255 370,265" fill="#C8821E"/>
+        <polygon points="50,20 45,30 55,30" fill="#C8821E"/>
+        <!-- 标签 -->
+        <text x="355" y="285" font-size="15" font-family="monospace" fill="#9C5E14">x 增大 →</text>
+        <text x="60" y="35" font-size="15" font-family="monospace" fill="#9C5E14">↑ y 增大</text>
+        <text x="20" y="278" font-size="13" font-family="monospace" fill="#6b5840">(0,0)</text>
+        <!-- 英雄点 -->
+        <circle cx="200" cy="150" r="8" fill="#D98E32"/>
+        <text x="212" y="145" font-size="14" font-family="monospace" fill="#3a2e1f">英雄 (x, y)</text>
+        <!-- 虚线 -->
+        <line x1="200" y1="150" x2="200" y2="260" stroke="#E0A23F" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="200" y1="150" x2="50" y2="150" stroke="#E0A23F" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="195" y="278" font-size="12" font-family="monospace" fill="#6b5840">x</text>
+        <text x="30" y="155" font-size="12" font-family="monospace" fill="#6b5840">y</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-9-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+<h3 id="sec-9-1-2">9.1.2 pos.x 与 pos.y（Reading pos.x and pos.y）</h3>
+
+<h4>9.1.2.1 pos 里装着当前的 x 和 y
+    <span class="en">pos holds the current x and y</span>
+</h4>
+
+<p>"强壮的沙牦牛"关卡介绍了读取位置的方法：<strong>"<code>hero.pos</code> 属性表示英雄的当前位置。pos 对象又有两个属性：x 和 y。"</strong> 也就是说，<code>hero.pos.x</code> 是英雄此刻的横坐标，<code>hero.pos.y</code> 是纵坐标——它们是随英雄移动而实时变化的数字。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 读取英雄当前位置的 x 和 y,存进变量</span>
+x = <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x
+y = <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y</pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">属性套属性:</span><code>hero.pos.x</code> 读起来是"英雄的 pos 的 x"——<code>pos</code> 是英雄的一个属性,它本身又是个对象,里面还装着 <code>x</code> 和 <code>y</code> 两个属性。这种"点号一层套一层"的写法,是访问嵌套对象数据的常见方式。
+</div>
+
+<h3 id="sec-9-1-3">9.1.3 万物皆有 pos（Everything Has a pos）</h3>
+
+<h4>9.1.3.1 敌人、朋友、物品都能读位置
+    <span class="en">Enemies, friends, items all have a pos</span>
+</h4>
+
+<p>"Sarven间隙"关卡提示了一个重要事实：<strong>"英雄、敌人、朋友、甚至物品，都可以访问 pos 属性。"</strong> 这意味着你不仅能知道自己在哪，还能知道敌人在哪（<code>enemy.pos.x</code>）、朋友在哪（<code>friend.pos.y</code>）、物品在哪（<code>item.pos.x</code>）。掌握了所有对象的坐标，你就能做出各种基于位置的智能决策。</p>
+
+<!-- ==================== 9.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-9-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:7287032081:START anchor=sec-9-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="7287032081">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:7287032081:END -->
+
+<div class="section-header" id="section-9-2">
+    <h2>9.2 相对移动</h2>
+    <div class="en-title">Relative Movement</div>
+</div>
+
+<h3 id="sec-9-2-1">9.2.1 加减改变坐标（Add/Subtract to Move）</h3>
+
+<h4>9.2.1.1 在当前坐标上加减,得到目标坐标
+    <span class="en">Offset the current coordinate</span>
+</h4>
+
+<p>这是本单元的核心思想——<span class="keyword">相对移动（Relative Movement）</span>。以前 <code>moveXY(30, 20)</code> 是移动到<strong>固定</strong>的绝对位置；现在我们改为<strong>相对</strong>于当前位置移动：先读出 <code>hero.pos.x</code>，在它基础上加或减一个数，再 <code>moveXY</code> 过去。</p>
+
+<p>"强壮的沙牦牛"给了最经典的例子——向右移动 10 米，就是让新的 x 等于当前 x 加 10，而 y 不变：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 相对当前位置向右移动 10 米(y 保持不变)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x <span class="op">+</span> <span class="num">10</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么相对移动很重要:</span>"绿洲"关卡点出了它的价值——<strong>"使用像这样的小范围移动技术可以让您在途中改变位置,这对于应对不断变化的威胁和新信息是非常有帮助的。"</strong> 每次只走一小步,走完再重新观察、重新决策,英雄就能灵活应对随时出现的牦牛和敌人,而不是傻乎乎地一头冲到底。
+</div>
+
+<h3 id="sec-9-2-2">9.2.2 四个方向的口诀（Four-Direction Rules）</h3>
+
+<h4>9.2.2.1 加右减左,加上减下
+    <span class="en">+x right, -x left, +y up, -y down</span>
+</h4>
+
+<p>根据坐标系的规则，对 <code>x</code> 和 <code>y</code> 做加减，就对应四个基本方向。"Sarven间隙"关卡的提醒可以浓缩成一句口诀：<strong>"对 y 做减法是往下走，对 x 做减法是往左走。"</strong> 反过来加法就是往上、往右。整理成表：</p>
+
+<table class="styled-table">
+    <thead><tr><th>想去的方向</th><th>怎么改坐标</th><th>代码示例</th></tr></thead>
+    <tbody>
+        <tr><td>向右 →</td><td>x 加</td><td><code>hero.pos.x + 10</code></td></tr>
+        <tr><td>向左 ←</td><td>x 减</td><td><code>hero.pos.x - 10</code></td></tr>
+        <tr><td>向上 ↑</td><td>y 加</td><td><code>hero.pos.y + 10</code></td></tr>
+        <tr><td>向下 ↓</td><td>y 减</td><td><code>hero.pos.y - 10</code></td></tr>
+    </tbody>
+</table>
+
+<p>值得一提的是复合赋值运算符 <code>+=</code> 和 <code>-=</code>。<code>x += 10</code> 是 <code>x = x + 10</code> 的简写，意思是"把 x 增加 10"；<code>x -= 10</code> 则是"把 x 减少 10"。用它们改坐标更简洁：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>x = <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x
+x <span class="op">+=</span> <span class="num">10</span>          <span class="cmt"># 等同于 x = x + 10,向右</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f739b47d40:START anchor=sec-9-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="f739b47d40">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，课程覆盖全球 190 多个国家，获得 32 万名全球教师的信赖。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f739b47d40:END -->
+
+<h3 id="sec-9-2-3">9.2.3 斜线移动（Diagonal Movement）</h3>
+
+<h4>9.2.3.1 同时改 x 和 y 就走斜线
+    <span class="en">Change both x and y for a diagonal</span>
+</h4>
+
+<p>如果只改 x 或只改 y，走的是横线或竖线；如果<strong>同时</strong>改动 x 和 y，英雄就会走<strong>斜线</strong>。"Sarven路"要求朝右上斜行——x 和 y 都增加；"干燥灌溉"要求朝左上斜行——x 减、y 加：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 向右上斜线移动(x 加 5, y 加 5)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x <span class="op">+</span> <span class="num">5</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y <span class="op">+</span> <span class="num">5</span><span class="punc">)</span>
+
+<span class="cmt"># 向左上斜线移动(x 减 6, y 加 4)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x <span class="op">-</span> <span class="num">6</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y <span class="op">+</span> <span class="num">4</span><span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 9.3 ==================== -->
+<div class="section-header" id="section-9-3">
+    <h2>9.3 位置比较与计算</h2>
+    <div class="en-title">Comparing and Computing Positions</div>
+</div>
+
+<h3 id="sec-9-3-1">9.3.1 用 &lt; &gt; 判断方向（Direction via &lt; &gt;）</h3>
+
+<h4>9.3.1.1 比较坐标就能知道谁在谁的哪边
+    <span class="en">Compare coordinates to find relative direction</span>
+</h4>
+
+<p>"十字路口"关卡教了一个强大技巧：<strong>用 <code>&lt;</code> 和 <code>&gt;</code> 比较两个对象的坐标，就能判断出它们的相对方向</strong>。关卡原话："如果英雄的位置坐标 x 大于敌人的位置坐标 x，因为 x 坐标越往左越小，所以英雄在食人魔的右边。"</p>
+
+<table class="styled-table">
+    <thead><tr><th>比较</th><th>含义</th></tr></thead>
+    <tbody>
+        <tr><td><code>enemy.pos.x &lt; hero.pos.x</code></td><td>敌人的 x 更小 → 敌人在英雄<strong>左边</strong></td></tr>
+        <tr><td><code>enemy.pos.x &gt; hero.pos.x</code></td><td>敌人的 x 更大 → 敌人在英雄<strong>右边</strong></td></tr>
+        <tr><td><code>enemy.pos.y &lt; hero.pos.y</code></td><td>敌人的 y 更小 → 敌人在英雄<strong>下方</strong></td></tr>
+        <tr><td><code>enemy.pos.y &gt; hero.pos.y</code></td><td>敌人的 y 更大 → 敌人在英雄<strong>上方</strong></td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">大声读出来:</span>"十字路口"建议——<strong>"有时大声读出来会很有用。"</strong> 把 <code>enemy.pos.y > hero.pos.y</code> 念成"敌人的 y 比我的 y 大,所以敌人在我上面",逻辑就清楚了。当你分不清方向时,回到"坐标大小 ↔ 上下左右"的基本规则,一读便知。
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-9-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<h3 id="sec-9-3-2">9.3.2 基于他人坐标定位（Positioning Off Others）</h3>
+
+<h4>9.3.2.1 在敌人坐标上加减,算出建造/站位点
+    <span class="en">Offset an enemy's position to place things</span>
+</h4>
+
+<p>既然敌人也有 <code>pos</code>，我们就能<strong>相对于敌人</strong>来计算一个位置。"Sarven间隙"要在敌人左侧 20 米建围栏——用敌人的 x 减 20；"雷蹄"要在牦牛下方 10 米建围栏——用牦牛的 y 减 10：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 在敌人左侧 20 米处建围栏</span>
+x = enemy<span class="punc">.</span>pos<span class="punc">.</span>x <span class="op">-</span> <span class="num">20</span>
+y = enemy<span class="punc">.</span>pos<span class="punc">.</span>y
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> x<span class="punc">,</span> y<span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-9-3-3">9.3.3 求中点坐标（Finding the Midpoint）</h3>
+
+<h4>9.3.3.1 两点坐标相加除以2
+    <span class="en">Add two coordinates and divide by 2</span>
+</h4>
+
+<p>"截断"关卡引入了一个漂亮的数学公式——求两点之间的<strong>中点</strong>。要站在塔和农民正中间保护农民，就得算出他俩连线的中点坐标。公式很简单：<strong>把两个点的 x 相加除以 2，得到中点的 x；y 同理</strong>。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">📐 中点公式的由来</div>
+    <p>一维例子最直观:塔在 x=0,农民在 x=10,正中间显然是 <code>(0 + 10) / 2 = 5</code>。就算塔挪到 x=6,公式照样管用:<code>(6 + 10) / 2 = 8</code>。把这个思路分别用在 x 和 y 上,就得到了二维平面的中点。</p>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 求 friend 和 enemy 连线的中点</span>
+x = <span class="punc">(</span>friend<span class="punc">.</span>pos<span class="punc">.</span>x <span class="op">+</span> enemy<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">)</span> <span class="op">/</span> <span class="num">2</span>
+y = <span class="punc">(</span>friend<span class="punc">.</span>pos<span class="punc">.</span>y <span class="op">+</span> enemy<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span> <span class="op">/</span> <span class="num">2</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">括号不能省:</span>一定要写成 <code>(a + b) / 2</code>,先加后除。如果漏掉括号写成 <code>a + b / 2</code>,按运算优先级会先算 <code>b / 2</code> 再加 <code>a</code>,结果就错了。这和上一单元逻辑运算里"用括号保证顺序"是同一个道理。
+</div>
+
+<!-- ==================== 9.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:72e5ce6ad0:START anchor=sec-9-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="72e5ce6ad0">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，全球超 2000 万用户通过它开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:72e5ce6ad0:END -->
+<!-- CC-PROTECTION:HIDDEN:3905e931f9:START anchor=sec-9-3-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="3905e931f9">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:3905e931f9:END -->
+
+<div class="section-header" id="section-9-4">
+    <h2>9.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"坐标怎么加减、方向怎么判断"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-9-4-1">9.4.1 强壮的沙牦牛（Sand Yak Strong）</h3>
+
+<h4>9.4.1.1 策略：牦牛靠近就 x 加 10 向右闪避
+    <span class="en">Strategy: dodge right by adding 10 to x</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-1-1_sand_yak.png" alt="扣哒世界 强壮的沙牦牛关卡 - koudashijie.com">
+    <div class="caption">图2：强壮的沙牦牛——牦牛靠近10米内时,x 加10向右闪身躲避</div>
+</div>
+
+<p>这是相对移动的入门关。任务是躲开 4 头沙牦牛：当有牦牛靠近到 10 米以内时，向右闪 10 米避开。算法思路是主循环里先用 <code>hero.pos.x</code>、<code>hero.pos.y</code> 记下当前位置，找到最近的牦牛，<code>if hero.distanceTo(yak) < 10</code> 判断它是否够近；够近就把 <code>x</code> 加 10（<code>x += 10</code>），再 <code>moveXY(x, y)</code> 向右闪避。核心是第一次体会"读当前坐标 → 加减 → moveXY"这套相对移动的骨架。</p>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-9-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:90ad628fa9:START anchor=sec-9-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="90ad628fa9">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC9-D4D2CFF6A329。</span>
+<!-- CC-PROTECTION:HIDDEN:90ad628fa9:END -->
+
+<h3 id="sec-9-4-2">9.4.2 绿洲（The Oasis）</h3>
+
+<h4>9.4.2.1 策略：近牦牛就向左,否则向右奔绿洲
+    <span class="en">Strategy: left to dodge, else right to the oasis</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-2-1_oasis.png" alt="扣哒世界 绿洲关卡 - koudashijie.com">
+    <div class="caption">图3：绿洲——用 if/else 双向抉择,躲牦牛向左、奔绿洲向右</div>
+</div>
+
+<p>这一关在"沙牦牛"基础上加了 <code>if/else</code> 双向抉择。目标是往右到达绿洲，但路上有牦牛。算法思路是：<code>if enemy and hero.distanceTo(enemy) < 10</code>——有牦牛且靠近时，<code>x -= 10</code> 向左躲避；<code>else</code>——没有威胁时，<code>x += 10</code> 继续向右奔向绿洲。这一关让你把"向左（减）"和"向右（加）"两个方向配合 <code>if/else</code> 灵活切换，边躲边进。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察:</span>注意条件里用了 <code>enemy and ...</code> 的短路写法(上一单元的知识)——先确认牦牛存在,再算距离,避免没敌人时报错。<strong>相对移动 + 存在性判断 + if/else 分流</strong>三者结合,是应对动态环境的经典组合拳。
+</div>
+
+<h3 id="sec-9-4-3">9.4.3 Sarven路 &amp; 干燥灌溉（Diagonal Levels）</h3>
+
+<h4>9.4.3.1 策略：无敌人就走斜线,有敌人就攻击
+    <span class="en">Strategy: move diagonally, attack if enemy appears</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-3-1_sarven_road.png" alt="扣哒世界 Sarven路关卡 - koudashijie.com">
+    <div class="caption">图4：Sarven路——同时增大 x 和 y 走右上斜线,遇敌则先攻击</div>
+</div>
+
+<p>这两关引入了斜线移动。"Sarven路"要朝右上前进——x、y 同时加 5；"干燥灌溉"要朝左上前进——x 减 6、y 加 4。算法思路一致：主循环里先 <code>findNearestEnemy</code>，<code>if enemy</code> 就 <code>attack</code>，<code>else</code>（没敌人）才走斜线 <code>moveXY(pos.x±a, pos.y±b)</code>。把"同时改动两个坐标"和"边走边战"结合起来，是这两关的训练重点。</p>
+
+<div class="tip-box">
+    <span class="tip-label">斜线的方向:</span>斜线方向完全由"x 加还是减、y 加还是减"这两个选择决定——右上(+x+y)、左上(-x+y)、右下(+x-y)、左下(-x-y)。想清楚要去哪个角,再决定两个坐标各自加还是减,斜线移动就不会出错。
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-9-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-9-4-4">9.4.4 Sarven间隙（Sarven Gaps）</h3>
+
+<h4>9.4.4.1 策略：在敌人左侧建围栏,无敌人则向下移动
+    <span class="en">Strategy: build a fence left of the enemy, else move down</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-4-1_sarven_gaps.png" alt="扣哒世界 Sarven间隙关卡 - koudashijie.com">
+    <div class="caption">图5：Sarven间隙——相对敌人坐标定位,在其左侧20米建围栏拦截</div>
+</div>
+
+<p>这一关首次让你<strong>相对于敌人的坐标</strong>来定位。任务是一边向下移动接近绿洲，一边在食人魔左侧 20 米处建围栏挡路。算法思路是：<code>if enemy</code> 存在，就取 <code>x = enemy.pos.x - 20</code>、<code>y = enemy.pos.y</code>，用 <code>buildXY("fence", x, y)</code> 在敌人左侧建栏；<code>else</code> 没敌人时，用 <code>hero.pos.y - 10</code> 向下移动。关键突破是意识到——<strong>加减的基准不一定是自己的坐标，也可以是敌人的坐标</strong>。</p>
+
+<h3 id="sec-9-4-5">9.4.5 十字路口（Crossroads）</h3>
+
+<h4>9.4.5.1 策略：比较坐标判断来袭方向,对应建陷阱
+    <span class="en">Strategy: compare coords to find attack direction</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-5-1_crossroads.png" alt="扣哒世界 十字路口关卡 - koudashijie.com">
+    <div class="caption">图6：十字路口——用 < > 比较敌我坐标,判断敌人从哪个方向来,在对应X处建火焰陷阱</div>
+</div>
+
+<p>这一关是"位置比较"的核心演练。食人魔从上下左右四个方向进攻，你要判断每个敌人来自哪一方，在对应方向的 X 标记处建造火焰陷阱。算法思路是用 <code>if/elif</code> 链依次比较：<code>enemy.pos.x < hero.pos.x</code>（敌人在左）→ 在左侧 X 建陷阱；<code>enemy.pos.x > hero.pos.x</code>（在右）→ 右侧；再比 <code>pos.y</code> 判断上下。每种方向对应一组固定的建造坐标。核心是把"坐标大小比较"翻译成"方向判断"。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察:</span>这一关用 <code>if/elif/elif/elif</code> 而不是四个独立的 <code>if</code>,因为敌人只可能主要来自<strong>一个</strong>方向,用 elif 链能在命中第一个匹配后就跳过其余判断,既高效又符合逻辑。判断方向的顺序(先左右后上下)可以根据关卡布局灵活安排。
+</div>
+
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-9-4-5 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+
+<h3 id="sec-9-4-6">9.4.6 截断（Interception）</h3>
+
+<h4>9.4.6.1 策略：站到敌我中点,拦在农民与塔之间
+    <span class="en">Strategy: stand at the midpoint to shield</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-6-1_interception.png" alt="扣哒世界 截断关卡 - koudashijie.com">
+    <div class="caption">图7：截断——用中点公式算出敌人与农民连线的中点,站在中间保护农民</div>
+</div>
+
+<p>这一关是坐标计算的高光时刻——用<strong>中点公式</strong>动态定位。要保护农民，就得站在敌人（塔）和农民之间。算法思路是：每一轮找到 <code>enemy</code> 和 <code>friend</code>，用 <code>x = (friend.pos.x + enemy.pos.x) / 2</code> 和 <code>y = (friend.pos.y + enemy.pos.y) / 2</code> 算出他俩的中点，再 <code>moveXY(x, y)</code> 站过去。由于放在 <code>while True</code> 里，敌人一移动，中点就重新计算，英雄会持续调整站位，始终挡在中间。</p>
+
+<div class="info-box">
+    <span class="info-label">动态计算的威力:</span>这一关最精彩之处在于——中点<strong>不是固定的</strong>,而是每一帧根据敌我实时位置算出来的。这展示了坐标计算的真正价值:把数学公式放进循环,英雄就能像有智能一样,自动追踪并响应场上的变化。
+</div>
+
+<h3 id="sec-9-4-7">9.4.7 雷蹄 &amp; 友好的雷区（Direction-Compare Levels）</h3>
+
+<h4>9.4.7.1 策略：比较 y 坐标决定上方还是下方行动
+    <span class="en">Strategy: compare y to act above or below</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-4-7-1_thunderhooves.png" alt="扣哒世界 雷蹄关卡 - koudashijie.com">
+    <div class="caption">图8：雷蹄——比较牦牛与英雄的 y 坐标,在牦牛的另一侧建围栏拦截</div>
+</div>
+
+<p>这两关都靠<strong>比较 y 坐标</strong>来决策。"雷蹄"中牦牛随机从上方或下方出现，你要在牦牛<strong>靠英雄的那一侧</strong>建围栏拦截：<code>if yak.pos.y > hero.pos.y</code>（牦牛在上方）→ 在牦牛<em>下方</em> 10 米（<code>yak.pos.y - 10</code>）建栏；<code>else</code>（牦牛在下方）→ 在牦牛<em>上方</em>建栏；没牦牛就向右移动。</p>
+
+<p>"友好的雷区"（概念挑战）思路类似：比较敌我 y 坐标，敌人在上就向上走 4 米、在下就向下走 4 米躲避，同时每轮固定向右走 12 米穿过雷区。这两关让你熟练运用"比较坐标 → 决定往哪个方向加减"这一完整链条。</p>
+
+<div class="tip-box">
+    <span class="tip-label">思路辨析:</span>"雷蹄"是"敌人在哪边,就在它<strong>另一边</strong>建栏拦住去路";"友好的雷区"是"敌人在哪边,就<strong>朝反方向</strong>躲开"。两者都基于同一个 y 坐标比较,但后续动作的方向相反——关键在于想清楚"我到底想拦截还是躲避",再决定加减的方向。
+</div>
+
+<!-- ==================== 9.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-9-4-7 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<div class="section-header" id="section-9-5">
+    <h2>9.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-9-5-1">9.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>9.5.1.1 坐标与方向环节的典型问题
+    <span class="en">Typical issues with coordinates and directions</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-5-1-1_common_errors.png" alt="扣哒世界 坐标方向常见错误示意 - koudashijie.com">
+    <div class="caption">图9：方向加减弄反、中点漏括号、忘更新坐标,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>方向加减弄反——想向左却写成 <code>x + 10</code>(实际向右)，想向下却写成 <code>y + 10</code>(实际向上)，务必牢记"加右减左、加上减下"。</li>
+        <li>改错了坐标轴——想上下移动却改了 x，想左右移动却改了 y。左右动 x、上下动 y，别搞混。</li>
+        <li>中点公式漏括号——写成 <code>a + b / 2</code> 会先算除法，必须写 <code>(a + b) / 2</code> 先加后除。</li>
+        <li>忘记先读取或更新坐标——用了 <code>x</code> 变量却没先写 <code>x = hero.pos.x</code>，或改了 x 却忘了 y 也要传给 moveXY。</li>
+        <li>比较方向时读反坐标规则——记住 x 越大越靠右、y 越大越靠上，别把"y 大"当成"在下面"。</li>
+        <li>把 <code>pos</code> 当数字用——<code>pos</code> 是对象，不能直接 <code>hero.pos + 10</code>，要写 <code>hero.pos.x + 10</code>。</li>
+        <li>忘记对象可能不存在——相对敌人坐标建造前，若没先 <code>if enemy:</code> 确认存在，没敌人时读 <code>enemy.pos</code> 会报错。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成流金沙漠第九单元！你终于看懂了地图背后的坐标系，学会了读取 <code>pos.x</code>/<code>pos.y</code>、用加减实现相对移动、用 <code>&lt;</code>/<code>&gt;</code> 比较坐标判断方向，还掌握了相对他人定位和求中点这样的实用计算。从此，英雄的每一步移动都可以是精确、灵活、随机应变的。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>坐标系</td><td>x 左右、y 上下,右上为大</td><td>全单元</td></tr>
+            <tr><td>pos.x / pos.y</td><td>读取对象当前位置</td><td>强壮的沙牦牛</td></tr>
+            <tr><td>万物皆有 pos</td><td>敌人/朋友/物品都能读</td><td>Sarven间隙</td></tr>
+            <tr><td>相对移动</td><td>当前坐标加减后 moveXY</td><td>强壮的沙牦牛、绿洲</td></tr>
+            <tr><td>方向口诀</td><td>加右减左、加上减下</td><td>绿洲、Sarven间隙</td></tr>
+            <tr><td>斜线移动</td><td>同时改 x 和 y</td><td>Sarven路、干燥灌溉</td></tr>
+            <tr><td>坐标比较判方向</td><td>用 &lt; &gt; 判断上下左右</td><td>十字路口、雷蹄</td></tr>
+            <tr><td>相对他人定位</td><td>在敌人坐标上加减</td><td>Sarven间隙、雷蹄</td></tr>
+            <tr><td>求中点</td><td>(a+b)/2,记得加括号</td><td>截断</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        读懂坐标、算准方向的英雄,能在沙漠的任何一点精准落脚。<br>
+        继续向沙漠深处进发吧,勇敢的程序员！🏜️🧭🤖
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=h3-18 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第九单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
