@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC4-A1EA1127A9EF">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第四单元：函数的返回值 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --accent: #4FBF7C;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #2E9E5B;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1F7A44;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(255, 193, 7, 0.20); border-radius: 3px; padding: 0 2px; }
+        .code-block .bool { color: #6fae6f; font-weight: 600; }
+        .code-block .ret { color: #c678dd; font-weight: 600; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #ffebee;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC4-A1EA1127A9EF | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第四单元</div>
+
+    <a href="#section-4-1" class="nav-section">4.1 认识返回值</a>
+    <a href="#sec-4-1-1" class="nav-sub">4.1.1 函数能返回一个值</a>
+    <a href="#sec-4-1-2" class="nav-sub">4.1.2 调用等于返回值</a>
+    <a href="#sec-4-1-3" class="nav-sub">4.1.3 你早就用过返回值</a>
+
+    <a href="#section-4-2" class="nav-section">4.2 return 关键字</a>
+    <a href="#sec-4-2-1" class="nav-sub">4.2.1 return 的语法</a>
+    <a href="#sec-4-2-2" class="nav-sub">4.2.2 return 立即终止函数</a>
+    <a href="#sec-4-2-3" class="nav-sub">4.2.3 多个 return 分支</a>
+
+    <a href="#section-4-3" class="nav-section">4.3 用好返回值</a>
+    <a href="#sec-4-3-1" class="nav-sub">4.3.1 返回布尔值做判断</a>
+    <a href="#sec-4-3-2" class="nav-sub">4.3.2 返回数字与坐标</a>
+    <a href="#sec-4-3-3" class="nav-sub">4.3.3 返回特殊"哨兵值"</a>
+
+    <a href="#section-4-4" class="nav-section">4.4 实战关卡精讲</a>
+    <a href="#sec-4-4-1" class="nav-sub">4.4.1 树精树林</a>
+    <a href="#sec-4-4-2" class="nav-sub">4.4.2 盲距/金属探测器</a>
+    <a href="#sec-4-4-3" class="nav-sub">4.4.3 固定打击/金币猎手</a>
+    <a href="#sec-4-4-4" class="nav-sub">4.4.4 返回 Agrippa</a>
+    <a href="#sec-4-4-5" class="nav-sub">4.4.5 食人魔入侵者</a>
+    <a href="#sec-4-4-6" class="nav-sub">4.4.6 森林风暴</a>
+
+    <a href="#section-4-5" class="nav-section">4.5 常见错误</a>
+    <a href="#sec-4-5-1" class="nav-sub">4.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第四单元：函数的返回值</h1>
+    <div class="subtitle">Unit 4: Function Return Values</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 树精树林 → 森林风暴</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 4.1 ==================== -->
+<div class="section-header" id="section-4-1">
+    <h2>4.1 认识返回值</h2>
+    <div class="en-title">Meet the Return Value</div>
+</div>
+
+<h3 id="sec-4-1-1">4.1.1 函数能返回一个值（Functions Can Return a Value）</h3>
+
+<h4>4.1.1.1 函数不只做事，还能"交回结果"
+    <span class="en">Functions can hand back a result</span>
+</h4>
+
+<p>之前你写的函数都是"做一件事"——移动、攻击、说话。本单元让函数学会一项新本领：<strong>算出一个结果并交回来</strong>。"树精树林"关卡一句话点题：<strong>"函数可以返回（return）一个值！"</strong></p>
+
+<p>这意味着函数不再只是"指令的打包"，它还可以像一台机器：<strong>你给它输入，它经过内部计算，吐出一个结果</strong>。这个被吐出的结果，就叫<span class="keyword">返回值（Return Value）</span>。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-1-1-1_return_intro.png" alt="扣哒世界 返回值示意图 - koudashijie.com">
+    <div class="caption">图1：带返回值的函数像一台机器——投入原料,经过加工,产出一个结果</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-4-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+<!-- CC-PROTECTION:HIDDEN:a80d3d60d4:START anchor=sec-4-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a80d3d60d4">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:a80d3d60d4:END -->
+
+<h3 id="sec-4-1-2">4.1.2 调用等于返回值（A Call Equals Its Return）</h3>
+
+<h4>4.1.2.1 函数调用本身"变成"那个值
+    <span class="en">The call itself becomes the value</span>
+</h4>
+
+<p>这是理解返回值的关键。关卡解释：<strong>"当一个函数被调用时，它将等于它所返回的值。"</strong> 也就是说，<code>shouldAttack(enemy)</code> 这个调用，<strong>整体就等于</strong>函数内部 <code>return</code> 出来的那个值。所以你可以把调用结果<strong>存进变量</strong>，供后面使用：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># heroShouldAttack 将被赋值为 shouldAttack() 返回的值</span>
+heroShouldAttack = <span class="fn">shouldAttack</span><span class="punc">(</span>enemy<span class="punc">)</span>
+<span class="kw">if</span> heroShouldAttack<span class="punc">:</span>      <span class="cmt"># 用返回值来做判断</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-4-1-3">4.1.3 你早就用过返回值（You've Used Them Already）</h3>
+
+<h4>4.1.3.1 findNearestEnemy 就有返回值
+    <span class="en">findNearestEnemy already returns one</span>
+</h4>
+
+<p>"盲距"关卡点破真相：<strong>"其实之前你用 hero.findNearestEnemy() 的时候就见过了。"</strong> 想想看——<code>enemy = hero.findNearestEnemy()</code>，等号右边的调用返回了一个敌人对象，被存进了 <code>enemy</code>。同理 <code>hero.distanceTo(enemy)</code> 返回一个距离数字。本单元的新本领是：<strong>给自己写的函数也加上返回值。</strong></p>
+
+<!-- ==================== 4.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-4-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:c0b0d246dd:START anchor=sec-4-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="c0b0d246dd">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:c0b0d246dd:END -->
+
+<div class="section-header" id="section-4-2">
+    <h2>4.2 return 关键字</h2>
+    <div class="en-title">The "return" Keyword</div>
+</div>
+
+<h3 id="sec-4-2-1">4.2.1 return 的语法（Syntax of return）</h3>
+
+<h4>4.2.1.1 return 后面跟要交回的值
+    <span class="en">Put the value after return</span>
+</h4>
+
+<p>"盲距"关卡介绍语法：<strong>"要从函数返回一个值，需要使用 return 关键字。在它的后面加上要返回的值（或者变量）。"</strong> 写法很简单——<code>return</code> 后面跟上你想交回去的那个值或变量：</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 460 110" width="460" role="img" aria-label="return语法解剖">
+        <text x="60" y="55" font-size="22" font-family="monospace" fill="#d98ec0">return</text>
+        <text x="160" y="55" font-size="22" font-family="monospace" fill="#f0c674">result</text>
+        <!-- 标注 -->
+        <line x1="95" y1="68" x2="95" y2="95" stroke="#d98ec0" stroke-width="2"/>
+        <text x="55" y="105" font-size="13" font-family="sans-serif" fill="#c47ab0">返回关键字</text>
+        <line x1="195" y1="68" x2="195" y2="95" stroke="#E0A23F" stroke-width="2"/>
+        <text x="240" y="105" font-size="13" font-family="sans-serif" fill="#d98e32">要交回去的值/变量</text>
+    </svg>
+</div>
+
+<h3 id="sec-4-2-2">4.2.2 return 立即终止函数（return Ends the Function）</h3>
+
+<h4>4.2.2.1 执行到 return，函数当场结束
+    <span class="en">The function stops at return</span>
+</h4>
+
+<p>这是 <code>return</code> 一个极重要的特性。"树精树林"关卡警告：<strong>"函数在执行 return 语句后就会立刻终止！"</strong> 一旦遇到 <code>return</code>，函数<strong>当场交回结果并退出</strong>，它后面的代码都不会再执行。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 return 像"交卷离场"</div>
+    <p>想象函数在做一份试卷。写到 <code>return</code> 这一行，就等于"交卷、立刻走人"。后面还没写的题目（代码）一律作废。所以 <code>return</code> 不仅交回答案，还<strong>终结了整个函数的运行</strong>。</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-4-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-4-2-3">4.2.3 多个 return 分支（Multiple Returns）</h3>
+
+<h4>4.2.3.1 多个 return，只有一个会生效
+    <span class="en">Many returns, only one runs</span>
+</h4>
+
+<p>"固定打击"关卡指出：<strong>"你可以在一个函数中使用多个 return 语句，但是只有一个会被使用，因为 return 会导致函数停止执行，并且返回到函数被调用的地方。"</strong> 配合 <code>if/else</code>，函数可以根据不同情况走向不同的 <code>return</code>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">shouldAttack</span><span class="punc">(</span>target<span class="punc">):</span>
+    <span class="kw">if</span> <span class="kw">not</span> target<span class="punc">:</span>
+        <span class="ret">return</span> <span class="bool">False</span>          <span class="cmt"># 分支一：没目标，交回 False 并退出</span>
+    <span class="kw">if</span> target<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"burl"</span><span class="punc">:</span>
+        <span class="ret">return</span> <span class="bool">False</span>          <span class="cmt"># 分支二：是树精，交回 False 并退出</span>
+    <span class="ret">return</span> <span class="bool">True</span>              <span class="cmt"># 都不是，才走到这里交回 True</span></pre>
+</div>
+
+<p>哪个 <code>return</code> 先被执行到，函数就交回哪个值并立刻结束，后面的 <code>return</code> 再也没机会运行。这种"层层筛查、命中即返回"的写法非常实用。</p>
+
+<!-- ==================== 4.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-4-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:8431cf0892:START anchor=sec-4-2-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="8431cf0892">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC4-A1EA1127A9EF。</span>
+<!-- CC-PROTECTION:HIDDEN:8431cf0892:END -->
+
+<div class="section-header" id="section-4-3">
+    <h2>4.3 用好返回值</h2>
+    <div class="en-title">Making the Most of Return Values</div>
+</div>
+
+<h3 id="sec-4-3-1">4.3.1 返回布尔值做判断（Return a Boolean）</h3>
+
+<h4>4.3.1.1 把"该不该"封进函数
+    <span class="en">Wrap a yes/no decision in a function</span>
+</h4>
+
+<p>返回值最常见的用法，是返回上单元学的<strong>布尔值</strong>，把一段复杂的判断逻辑封装起来。"返回 Agrippa"关卡总结得好：<strong>"通过将距离检查放入独立的函数，这段代码可以变得简洁很多。函数会返回一个布尔值，我们可以基于这个值来决定是否攻击。"</strong></p>
+
+<p>于是主循环里只需一行 <code>if enemyInRange(enemy):</code> 就能读懂"敌人是否在范围内"，而具体怎么算距离、怎么比较，全藏在函数里。<strong>函数返回 True/False，主代码据此分流</strong>——这是组织复杂判断的黄金模式。</p>
+
+<h3 id="sec-4-3-2">4.3.2 返回数字与坐标（Return Numbers and Coordinates）</h3>
+
+<h4>4.3.2.1 返回算好的距离或位置
+    <span class="en">Return a computed distance or position</span>
+</h4>
+
+<p>返回值不限于布尔值。"盲距"和"金属探测器"让函数<strong>返回一个数字</strong>（到敌人/硬币的距离），"食人魔入侵者"让函数<strong>返回一个坐标</strong>（敌人的 x 位置）。函数把"算出有用信息"的活儿包办了，主代码拿到现成结果直接用：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">nearestEnemyDistance</span><span class="punc">():</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    result = <span class="num">0</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        result = <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span>
+    <span class="ret">return</span> result        <span class="cmt"># 交回算好的距离</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-4-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<h3 id="sec-4-3-3">4.3.3 返回特殊"哨兵值"（Return a Sentinel）</h3>
+
+<h4>4.3.3.1 用 0 或 -1 表示"没有"
+    <span class="en">Use 0 or -1 to mean "none"</span>
+</h4>
+
+<p>有时函数没有有效结果可返回——比如附近没有敌人。这时常约定返回一个特殊的"<strong>哨兵值</strong>"来表示"空"。"盲距""金属探测器"约定<strong>没敌人/硬币时返回 0</strong>，"食人魔入侵者"约定<strong>没敌人时返回 -1</strong>。主代码再用 <code>if distance > 0:</code> 之类的判断把这种"无结果"情况排除掉。</p>
+
+<div class="info-box">
+    <span class="info-label">设计智慧：</span>为什么用 0 或 -1？因为真实的距离/坐标不会是这些值，用它们当"没有"的标记不会和正常结果混淆。这种"用一个不可能出现的正常值来表示异常"的约定，是编程中常见的技巧。
+</div>
+
+<!-- ==================== 4.4 ==================== -->
+<div class="section-header" id="section-4-4">
+    <h2>4.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"为什么这样返回、怎么用返回值"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-4-4-1">4.4.1 树精树林（Sleepwalkers / Burl Boss）</h3>
+
+<h4>4.4.1.1 策略：返回 True/False 决定是否攻击
+    <span class="en">Strategy: return a boolean to decide attacking</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-4-1-1_burl_woods.png" alt="扣哒世界 树精树林关卡 - koudashijie.com">
+    <div class="caption">图2：树精树林——shouldAttack 函数返回布尔值,决定英雄是否出手</div>
+</div>
+
+<p>这是返回值的入门关。任务是<strong>只打有效目标、放过树精</strong>。算法思路是写 <code>shouldAttack(target)</code> 函数:用"层层筛查、命中即返回"的写法——没目标返回 <code>False</code>、是 <code>"burl"</code> 返回 <code>False</code>、其余返回 <code>True</code>。主循环把找到的敌人传进去,用返回的布尔值决定要不要 <code>attack</code>。核心在体会"调用等于返回值"——把判断结果存进变量再用。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察:</span>注意几个 return 的顺序——先排除"不该打"的情况(没目标、是树精),都通过了才返回 True。由于 return 会立即终止函数,只要命中前面任一条件,就不会走到最后的 <code>return True</code>。这种"先否决、后肯定"的结构很常见。
+</div>
+
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-4-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<h3 id="sec-4-4-2">4.4.2 盲距 &amp; 金属探测器（Distance Levels）</h3>
+
+<h4>4.4.2.1 策略：返回距离数字,无目标返回 0
+    <span class="en">Strategy: return a distance, or 0 if none</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-4-2-1_blind_distance.png" alt="扣哒世界 盲距关卡 - koudashijie.com">
+    <div class="caption">图3：盲距——函数返回到敌人的距离,英雄当观测手报给盲眼巫师</div>
+</div>
+
+<p>这两关让函数<strong>返回一个数字</strong>。"盲距"中英雄当观测手,写 <code>nearestEnemyDistance()</code> 返回到最近敌人的距离;"金属探测器"中英雄当炮兵测距仪,写 <code>coinDistance()</code> 返回到硬币的距离。算法思路一致:函数内先找目标,有就 <code>distanceTo</code> 算距离并返回,<strong>没有就返回 0</strong>。主循环拿到返回值,只在 <code>> 0</code> 时才 say 出来。</p>
+
+<div class="info-box">
+    <span class="info-label">哨兵值的妙用:</span>返回 0 表示"没有目标"是关键设计。主代码用 <code>if distance > 0:</code> 过滤掉"无目标"的情况,既避免了报假数据,也节省了巫师/大炮的有限能量。函数返回值 + 主代码判断,配合得天衣无缝。
+</div>
+
+<h3 id="sec-4-4-3">4.4.3 固定打击 &amp; 金币猎手（Range Check Levels）</h3>
+
+<h4>4.4.3.1 策略：返回布尔判断"够近了吗"
+    <span class="en">Strategy: return whether it's close enough</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-4-3-1_coin_hunter.png" alt="扣哒世界 金币猎手关卡 - koudashijie.com">
+    <div class="caption">图4：金币猎手——isCoinClose 返回布尔值,只移向 20 米内的硬币</div>
+</div>
+
+<p>这两关把"距离检查"封成返回布尔值的函数。"固定打击"中英雄被困,只能等敌人进入攻击范围(≤3 米),写 <code>inAttackRange(enemy)</code> 返回"是否够近";"金币猎手"中身中毒,乱动会受伤,写 <code>isCoinClose(coin)</code> 返回"硬币是否在 20 米内"。算法思路是:函数内算距离、与阈值比较、返回 True/False;主循环据此决定攻击或移动。</p>
+
+<div class="tip-box">
+    <span class="tip-label">为何要"够近才动":</span>这两关都有"贸然行动会受伤"的设定,所以必须先用返回值确认"安全/有效"再行动。把"够不够近"的判断封进函数返回,让主逻辑读起来就像一句话:<strong>"如果够近,就行动"</strong>,清晰又安全。
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-4-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3 id="sec-4-4-4">4.4.4 返回 Agrippa（Agrippa Returns）</h3>
+
+<h4>4.4.4.1 策略：用返回值进一步重构
+    <span class="en">Strategy: refactor further with return values</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-4-4-1_agrippa_returns.png" alt="扣哒世界 返回Agrippa关卡 - koudashijie.com">
+    <div class="caption">图5：返回 Agrippa——把距离检查抽成返回布尔值的函数,代码更流畅</div>
+</div>
+
+<p>这是对此前"Agrippa 重构"的再升级。上次只是把动作抽成函数,这次更进一步——<strong>用函数计算并返回一个值</strong>。算法思路是写 <code>enemyInRange(enemy)</code> 返回"距离是否小于 5"的布尔值,再配合 <code>cleaveOrAttack(enemy)</code> 函数。主循环里 <code>if enemyInRange(enemy): cleaveOrAttack(enemy)</code> 读起来像自然语言。返回值让代码"胜似流水"。</p>
+
+<div class="remember-box">
+    <span class="remember-label">两类函数:</span>这一关同时用到两种函数——<code>enemyInRange</code> 是<strong>"计算并返回值"</strong>型(返回布尔),<code>cleaveOrAttack</code> 是<strong>"执行动作"</strong>型(不返回)。理解这两类函数的分工,是组织清晰代码的关键。
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-4-4-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-4-4-5">4.4.5 食人魔入侵者（概念挑战 · Ogre Intruders）</h3>
+
+<h4>4.4.5.1 策略：返回 x 坐标,无敌人返回 -1
+    <span class="en">Strategy: return enemy x, or -1 if none</span>
+</h4>
+
+<p>这是<strong>概念挑战</strong>。古老机器人靠英雄报出的敌人 x 坐标来打击食人魔。算法思路是完成 <code>getEnemyX()</code>:找到敌人就 <code>return enemy.pos.x</code>,<strong>没有敌人就返回 -1</strong>。主循环拿到返回值,据此报点给机器人。这关再次强化"函数返回有用信息、主代码消费信息"的协作模式,并练习用 -1 作哨兵值。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">getEnemyX</span><span class="punc">():</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        <span class="ret">return</span> enemy<span class="punc">.</span>pos<span class="punc">.</span>x   <span class="cmt"># 有敌人 → 返回它的 x 坐标</span>
+    <span class="ret">return</span> -<span class="num">1</span>               <span class="cmt"># 没敌人 → 返回 -1 表示"无"</span></pre>
+</div>
+
+<h3 id="sec-4-4-6">4.4.6 森林风暴（组合挑战 · Storm the Forest）</h3>
+
+<h4>4.4.6.1 策略：把三重检查封进一个返回函数
+    <span class="en">Strategy: pack three checks into one function</span>
+</h4>
+
+<p>这是<strong>组合挑战</strong>,要求融会 <code>==</code>、<code>type</code> 属性和 <code>return</code>。英雄受传送风暴困扰,不能离护盾光线超过 15 米。任务是只收集 15 米内的 <code>"coin"</code>、只攻击 15 米内的 <code>"munchkin"</code>。关卡的巧思在于:收集和攻击都要检查<strong>三件事——存在、够近、类型对</strong>,逻辑高度相似。算法思路是把这三重检查封进一个返回布尔值的通用函数 <code>isCloseType(target, type)</code>,只写一次逻辑,两处复用。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">isCloseType</span><span class="punc">(</span>target<span class="punc">,</span> type<span class="punc">):</span>
+    <span class="kw">if</span> target<span class="punc">:</span>                              <span class="cmt"># ① 存在吗</span>
+        <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>target<span class="punc">)</span> &lt; <span class="num">15</span><span class="punc">:</span>   <span class="cmt"># ② 够近吗</span>
+            <span class="kw">if</span> target<span class="punc">.</span>type <span class="hl">==</span> type<span class="punc">:</span>           <span class="cmt"># ③ 类型对吗</span>
+                <span class="ret">return</span> <span class="bool">True</span>
+    <span class="ret">return</span> <span class="bool">False</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">集大成之作:</span>这一关把前几单元的本领全用上了——<strong>嵌套 if 检查多个条件、<code>type ==</code> 核验身份、<code>distanceTo</code> 算距离、return 交回布尔值、多参数函数复用逻辑</strong>。因为对硬币是"移动"、对敌人是"攻击"(动作不同),所以动作不放进函数,而是让函数只返回判断结果,由主代码选择正确动作。这正是"返回值"相比"直接做事"更灵活之处。
+</div>
+
+<!-- ==================== 4.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:c1d65681b7:START anchor=sec-4-4-6 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="c1d65681b7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，编程小白都在偷偷玩的闯关游戏，写一行代码角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c1d65681b7:END -->
+
+<div class="section-header" id="section-4-5">
+    <h2>4.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-4-5-1">4.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>4.5.1.1 返回值环节的典型问题
+    <span class="en">Typical issues with return values</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/4-5-1-1_common_errors.png" alt="扣哒世界 返回值常见错误示意 - koudashijie.com">
+    <div class="caption">图6：忘写 return、漏掉无目标情况、未接住返回值,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘记写 <code>return</code>——函数算了半天却没交回结果，调用处拿到的会是空值。</li>
+        <li>漏掉"无目标"的返回——没敌人时没 return 0/-1，导致后续判断出错。</li>
+        <li>没接住返回值——直接调用却不存进变量也不在 if 里用，结果白白丢失。</li>
+        <li>误以为 return 后的代码还会运行——return 会立即终止函数，后面代码作废。</li>
+        <li>把 <code>return</code> 写成 <code>say</code>——说出来不等于返回，主代码并不能"接住"说出的话。</li>
+        <li>哨兵值与正常值混淆——选的"表示无"的值（如 0）若可能是正常结果，就会判断错误。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成流金沙漠第四单元！你的函数从"只会做事"进化到了"会计算并交回结果"。掌握了 <code>return</code>，你就能把复杂的判断与计算封装起来，让主代码读起来清晰如流水——这是模块化编程的又一次飞跃。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>返回值</td><td>函数算出并交回的结果</td><td>树精树林</td></tr>
+            <tr><td>调用等于返回值</td><td>调用结果可存进变量</td><td>树精树林</td></tr>
+            <tr><td>return 关键字</td><td>后跟要交回的值</td><td>盲距</td></tr>
+            <tr><td>return 立即终止</td><td>执行后函数当场退出</td><td>树精树林</td></tr>
+            <tr><td>多个 return</td><td>只有一个会生效</td><td>固定打击</td></tr>
+            <tr><td>返回布尔值</td><td>封装判断、主代码分流</td><td>固定打击、返回 Agrippa</td></tr>
+            <tr><td>返回数字/坐标</td><td>交回距离、位置等信息</td><td>盲距、食人魔入侵者</td></tr>
+            <tr><td>哨兵值</td><td>用 0 / -1 表示"无"</td><td>金属探测器、食人魔入侵者</td></tr>
+            <tr><td>封装复用逻辑</td><td>一个返回函数多处用</td><td>森林风暴</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会返回结果、会封装判断的英雄，才能写出胜似流水的优雅代码。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️↩️🤖
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=h3-17 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第四单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
