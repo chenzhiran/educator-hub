@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC12-052978F20066">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十二单元：认识 for 循环 · 统率千军 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC12-052978F20066 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS4-第十二单元</div>
+
+    <a href="#section-12-1" class="nav-section">12.1 从 while 到 for</a>
+    <a href="#sec-12-1-1" class="nav-sub">12.1.1 for 循环的由来</a>
+    <a href="#sec-12-1-2" class="nav-sub">12.1.2 for 与 while 对比</a>
+
+    <a href="#section-12-2" class="nav-section">12.2 for 循环解剖</a>
+    <a href="#sec-12-2-1" class="nav-sub">12.2.1 for X in Y 结构</a>
+    <a href="#sec-12-2-2" class="nav-sub">12.2.2 遍历数组</a>
+    <a href="#sec-12-2-3" class="nav-sub">12.2.3 range() 计数</a>
+
+    <a href="#section-12-3" class="nav-section">12.3 for 指挥军队</a>
+    <a href="#sec-12-3-1" class="nav-sub">12.3.1 遍历盟友下令</a>
+    <a href="#sec-12-3-2" class="nav-sub">12.3.2 索引配对两数组</a>
+
+    <a href="#section-12-4" class="nav-section">12.4 实战关卡精讲</a>
+    <a href="#sec-12-4-1" class="nav-sub">12.4.1 木材守卫</a>
+    <a href="#sec-12-4-2" class="nav-sub">12.4.2 动物园管理员</a>
+    <a href="#sec-12-4-3" class="nav-sub">12.4.3 壮烈牺牲</a>
+
+    <a href="#section-12-5" class="nav-section">12.5 常见错误</a>
+    <a href="#sec-12-5-1" class="nav-sub">12.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十二单元：认识 for 循环 · 统率千军</h1>
+    <div class="subtitle">Unit 12: Meet the For Loop — Commanding with Iteration</div>
+    <div class="badge">计算机科学 4 · 安息云峰 Cloudrip Mountain · 木材守卫 → 动物园管理员 → 壮烈牺牲</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 12.1 ==================== -->
+<div class="section-header" id="section-12-1">
+    <h2>12.1 从 while 到 for</h2>
+    <div class="en-title">From While to For</div>
+</div>
+
+<p>在上一单元，你学会了用 <code>while</code> 循环配合索引三件套来遍历盟友数组、逐个下令。那套写法很好用，但每次都要手写"设索引、判条件、自增索引"三行仪式，稍不留神漏了 <code>soldierIndex += 1</code> 就会死循环。本单元你将认识一位更简洁的老朋友——<span class="keyword">for 循环（for loop）</span>。关卡"木材守卫"的提示说得很直白："一个 for 循环类似于一个 while 循环。有更多的准备工作，但它可以用来完成同样的事情。"学会 for 循环，你指挥千军万马时的代码会变得又短又稳。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>for 循环专门用来"把一件事对一批对象各做一遍"。指挥每一名士兵、召唤固定数量的部队、让士兵和守卫点一一配对——这些"重复固定次数"或"逐个处理数组"的场景，正是 for 循环大显身手的地方。这一单元你要把 for 循环练成指挥军队的默认武器。
+</div>
+
+<h3 id="sec-12-1-1">12.1.1 for 循环的由来（Why For Loops Exist）</h3>
+
+<h4>12.1.1.1 while 遍历的"三件套"回顾
+    <span class="en">Recalling the while-loop ritual</span>
+</h4>
+
+<p>回忆一下上一单元用 <code>while</code> 遍历盟友数组的写法：先设一个索引 <code>soldierIndex = 0</code>，再用 <code>while soldierIndex &lt; len(soldiers)</code> 判断，循环体里取出 <code>soldiers[soldierIndex]</code>，最后别忘 <code>soldierIndex += 1</code>。四个步骤缺一不可，尤其是最后那句自增，一旦漏掉就会卡在第一名士兵上死循环。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># while 遍历：四步都要自己写</span>
+soldiers = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+soldierIndex = <span class="num">0</span>                       <span class="cmt"># ① 设索引</span>
+<span class="kw">while</span> soldierIndex &lt; <span class="fn">len</span><span class="punc">(</span>soldiers<span class="punc">):</span>       <span class="cmt"># ② 判条件</span>
+    soldier = soldiers<span class="punc">[</span>soldierIndex<span class="punc">]</span>     <span class="cmt"># ③ 取元素</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>soldier<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> pos<span class="punc">)</span>
+    soldierIndex <span class="hl">+= 1</span>                    <span class="cmt"># ④ 自增（最易漏）</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-12-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+<!-- CC-PROTECTION:HIDDEN:77536c064e:START anchor=sec-12-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="77536c064e">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:77536c064e:END -->
+
+<h3 id="sec-12-1-2">12.1.2 for 与 while 对比（For vs. While）</h3>
+
+<h4>12.1.2.1 同样的事，for 更省心
+    <span class="en">Same job, less bookkeeping</span>
+</h4>
+
+<p>for 循环把"设索引、判条件、自增"这些琐事全部自动化了。你只需说清"对这个数组里的每个元素"，它就会自动从头到尾走一遍，每轮把当前元素交到你手里。下面把同一件事——遍历盟友数组——用两种循环写出来，一眼就能看出 for 的简洁。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>while 写法（要管索引）</h5>
+        <div class="code-block">
+<pre>friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+i = <span class="num">0</span>
+<span class="kw">while</span> i &lt; <span class="fn">len</span><span class="punc">(</span>friends<span class="punc">):</span>
+    friend = friends<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="cmt"># ...处理 friend...</span>
+    i += <span class="num">1</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>for 写法（不用管索引）</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> friend <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">():</span>
+    <span class="cmt"># ...处理 friend...</span>
+
+    <span class="cmt"># 索引、自增全部省掉</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="info-box">
+    <span class="info-label">什么时候用 for，什么时候用 while？</span>一条经验法则：当你事先知道"要重复几次"或"要逐个处理一个数组/序列"时，用 <code>for</code> 最合适；当你不知道要循环多少次、只知道"满足某条件就一直做"（如"有钱就一直召唤"、游戏主循环 <code>while True</code>）时，用 <code>while</code> 更自然。本单元里，逐个指挥士兵用 for，而外层"永远运转"的游戏节拍仍然用 <code>while True</code>。
+</div>
+
+<!-- ==================== 12.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-12-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<div class="section-header" id="section-12-2">
+    <h2>12.2 for 循环解剖</h2>
+    <div class="en-title">Anatomy of a For Loop</div>
+</div>
+
+<h3 id="sec-12-2-1">12.2.1 for X in Y 结构（The for X in Y Form）</h3>
+
+<h4>12.2.1.1 两个部分：变量与序列
+    <span class="en">Two parts: the variable and the sequence</span>
+</h4>
+
+<p>关卡注释精确地概括了 for 循环的骨架："for 循环有两个部分：<code>for X in Y</code>。Y 是需要遍历的数组，循环对 Y 中的每个元素都会执行一次，而 X 会被设置成当前循环的元素。"换句话说，<code>Y</code> 是被处理的"一批东西"，<code>X</code> 是每一轮从这批东西里取出来的"当前这一个"。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 160" width="600" role="img" aria-label="for循环结构解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">for 循环的两个部分</text>
+        <text x="70" y="80" font-size="20" font-family="monospace" fill="#7cc7e8">for</text>
+        <text x="125" y="80" font-size="20" font-family="monospace" fill="#9fd4a8">friend</text>
+        <text x="215" y="80" font-size="20" font-family="monospace" fill="#7cc7e8">in</text>
+        <text x="255" y="80" font-size="20" font-family="monospace" fill="#a5c8e8">hero.findFriends()</text>
+        <text x="490" y="80" font-size="20" font-family="monospace" fill="#cdddea">:</text>
+        <text x="155" y="115" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">X：当前元素</text>
+        <text x="360" y="115" font-size="11" fill="#a5c8e8" text-anchor="middle" font-family="sans-serif">Y：要遍历的数组</text>
+        <line x1="155" y1="88" x2="155" y2="105" stroke="#9fd4a8" stroke-width="1.5"/>
+        <line x1="360" y1="88" x2="360" y2="105" stroke="#a5c8e8" stroke-width="1.5"/>
+        <text x="300" y="145" font-size="12" fill="#6a8294" text-anchor="middle" font-family="sans-serif" font-style="italic">每轮：把 Y 里的下一个元素装进 X，执行一次循环体</text>
+    </svg>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🔁 for 循环执行节奏</div>
+    <strong>第 1 轮</strong>：X = 数组第 0 个元素 → 执行循环体<br>
+    <strong>第 2 轮</strong>：X = 数组第 1 个元素 → 执行循环体<br>
+    <strong>……</strong> 一直到最后一个元素<br>
+    <strong>结束</strong>：数组走完，循环自动停止——<strong>不用你操心索引，也不会死循环。</strong>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-12-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<h3 id="sec-12-2-2">12.2.2 遍历数组（Iterating an Array）</h3>
+
+<h4>12.2.2.1 直接把数组交给 for
+    <span class="en">Feed the array straight to for</span>
+</h4>
+
+<p>for 循环最常见的用法，就是直接遍历一个数组。比如遍历所有盟友、遍历所有敌人、遍历所有物品。你不需要先取长度、也不需要索引，直接写 <code>for 元素 in 数组:</code> 即可。下面这段来自"木材守卫"的片段，就用 for 遍历了 <code>findFriends()</code> 返回的盟友数组。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 遍历每一个盟友，只让士兵行动</span>
+<span class="kw">for</span> friend <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">():</span>
+    <span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"soldier"</span><span class="punc">:</span>
+        enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+        <span class="kw">if</span> enemy<span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">for 里的 X 就是元素本身：</span>注意这里 <code>friend</code> 每一轮直接就是一个盟友对象，可以立刻用 <code>friend.type</code>、<code>friend.findNearestEnemy()</code>。这和 while 写法里要先 <code>friend = friends[i]</code> 手动取出相比，省了一步。for 已经替你"取好"了。
+</div>
+
+<h3 id="sec-12-2-3">12.2.3 range() 计数（Counting with range）</h3>
+
+<h4>12.2.3.1 想重复固定次数就用 range
+    <span class="en">Repeat a fixed number of times</span>
+</h4>
+
+<p>如果你不是要遍历现成的数组，而是想"把一件事做 N 次"，就把 for 和 <code>range()</code> 搭配起来。<code>range(4)</code> 会生成 <code>0, 1, 2, 3</code> 这样一串数字（从 0 开始、不含 4，共 4 个），for 循环就会执行 4 次。"动物园管理员"里用 <code>for i in range(4): hero.summon("soldier")</code> 恰好召唤了 4 个士兵。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 召唤正好 4 个士兵</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">4</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">summon</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">)</span>   <span class="cmt"># 循环体执行 4 次</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="range生成数字">
+        <text x="280" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">range(4) 生成的数字序列</text>
+        <text x="280" y="52" text-anchor="middle" font-size="12" fill="#6a8294" font-family="monospace">range(4) → 0, 1, 2, 3（从 0 开始，不含 4，共 4 个）</text>
+        <g font-family="monospace" font-size="18">
+            <rect x="90" y="70" width="46" height="40" rx="8" fill="#182633" stroke="#e8a15a" stroke-width="2"/>
+            <text x="113" y="96" text-anchor="middle" fill="#e8a15a">0</text>
+            <rect x="180" y="70" width="46" height="40" rx="8" fill="#182633" stroke="#e8a15a" stroke-width="2"/>
+            <text x="203" y="96" text-anchor="middle" fill="#e8a15a">1</text>
+            <rect x="270" y="70" width="46" height="40" rx="8" fill="#182633" stroke="#e8a15a" stroke-width="2"/>
+            <text x="293" y="96" text-anchor="middle" fill="#e8a15a">2</text>
+            <rect x="360" y="70" width="46" height="40" rx="8" fill="#182633" stroke="#e8a15a" stroke-width="2"/>
+            <text x="383" y="96" text-anchor="middle" fill="#e8a15a">3</text>
+            <rect x="450" y="70" width="46" height="40" rx="8" fill="#182633" stroke="#C0453B" stroke-width="2" stroke-dasharray="4"/>
+            <text x="473" y="96" text-anchor="middle" fill="#C0453B">4</text>
+        </g>
+        <text x="473" y="126" text-anchor="middle" font-size="10" fill="#C0453B" font-family="sans-serif">不包含</text>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">range(4) 不含 4：</span>初学者最容易搞混的一点——<code>range(4)</code> 得到的是 0、1、2、3，共 <strong>4</strong> 个数，但最大只到 <strong>3</strong>，不包含 4。这和数组索引从 0 开始、最大到"长度减一"是完全一致的规则。所以 <code>range(len(friends))</code> 正好能覆盖一个数组的所有合法索引。
+</div>
+
+<h4>12.2.3.2 用 range(len(数组)) 拿到"下标"
+    <span class="en">range(len(...)) gives you the indexes</span>
+</h4>
+
+<p>有时你不只想遍历数组，还想知道"当前是第几个"——因为你要用这个序号去另一个数组里取对应的东西。这时可以写 <code>for j in range(len(friends)):</code>，此时 <code>j</code> 依次是 0、1、2……正好是每个元素的下标。"动物园管理员"和"壮烈牺牲"两关都用了这招，让士兵和守卫点一一配对，我们在 12.3.2 详细讲。</p>
+
+<!-- ==================== 12.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-12-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-12-3">
+    <h2>12.3 for 指挥军队</h2>
+    <div class="en-title">Commanding Troops with For</div>
+</div>
+
+<h3 id="sec-12-3-1">12.3.1 遍历盟友下令（Command Every Friend）</h3>
+
+<h4>12.3.1.1 for + command 的黄金组合
+    <span class="en">The for + command combo</span>
+</h4>
+
+<p>上一单元的核心是 <code>command(谁, 动作, 目标)</code> 三参数。本单元把它和 for 循环合起来，就得到指挥全军的最简写法：<code>for friend in hero.findFriends():</code> 里对每个 <code>friend</code> 调用一次 <code>command</code>。移动时第三参数传坐标字典，攻击时第三参数传敌人对象——这条规则和上一单元完全一致。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> friend <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">():</span>
+    <span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"soldier"</span><span class="punc">:</span>
+        enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+        <span class="kw">if</span> enemy<span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>   <span class="cmt"># 有敌人：攻击</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            rightPos = <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">83</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">45</span><span class="punc">}</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> rightPos<span class="punc">)</span>   <span class="cmt"># 没敌人：撤向右边</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">让每名士兵"自己找最近的敌人"：</span>注意这里用的是 <code>friend.findNearestEnemy()</code>，也就是让每个士兵各自寻找离"它自己"最近的敌人，而不是离英雄最近的。这样分散在各处的士兵能各自迎击身边的威胁，比全军扑向同一个目标更聪明。
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-12-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+<h3 id="sec-12-3-2">12.3.2 索引配对两数组（Pairing Two Arrays by Index）</h3>
+
+<h4>12.3.2.1 用同一个下标同时取两边
+    <span class="en">One index, two arrays</span>
+</h4>
+
+<p>这是本单元最精彩的技巧：当你有<strong>两个平行数组</strong>——一个装士兵、一个装守卫点——想让"第 j 名士兵去第 j 个点"时，就用 <code>for j in range(len(friends)):</code> 拿到共用的下标 <code>j</code>，再用它同时索引两个数组：<code>friend = friends[j]</code> 和 <code>point = points[j]</code>。这样士兵和位置就一一配对上了。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 210" width="620" role="img" aria-label="索引配对两数组">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">同一个下标 j，配对两个数组</text>
+        <g font-family="sans-serif" font-size="12">
+            <!-- friends 行 -->
+            <text x="60" y="72" text-anchor="end" fill="#2f7a45" font-weight="bold">friends</text>
+            <rect x="80" y="55" width="90" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="125" y="77" text-anchor="middle" fill="#2f7a45">士兵0</text>
+            <rect x="185" y="55" width="90" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="230" y="77" text-anchor="middle" fill="#2f7a45">士兵1</text>
+            <rect x="290" y="55" width="90" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="335" y="77" text-anchor="middle" fill="#2f7a45">士兵2</text>
+            <rect x="395" y="55" width="90" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="440" y="77" text-anchor="middle" fill="#2f7a45">士兵3</text>
+            <!-- points 行 -->
+            <text x="60" y="162" text-anchor="end" fill="#2A5A85" font-weight="bold">points</text>
+            <rect x="80" y="145" width="90" height="34" rx="6" fill="#E4EFF7" stroke="#2A5A85"/>
+            <text x="125" y="167" text-anchor="middle" fill="#2A5A85">点0</text>
+            <rect x="185" y="145" width="90" height="34" rx="6" fill="#E4EFF7" stroke="#2A5A85"/>
+            <text x="230" y="167" text-anchor="middle" fill="#2A5A85">点1</text>
+            <rect x="290" y="145" width="90" height="34" rx="6" fill="#E4EFF7" stroke="#2A5A85"/>
+            <text x="335" y="167" text-anchor="middle" fill="#2A5A85">点2</text>
+            <rect x="395" y="145" width="90" height="34" rx="6" fill="#E4EFF7" stroke="#2A5A85"/>
+            <text x="440" y="167" text-anchor="middle" fill="#2A5A85">点3</text>
+            <!-- 配对连线 -->
+            <line x1="125" y1="89" x2="125" y2="145" stroke="#E0912F" stroke-width="2" stroke-dasharray="4"/>
+            <line x1="230" y1="89" x2="230" y2="145" stroke="#E0912F" stroke-width="2" stroke-dasharray="4"/>
+            <line x1="335" y1="89" x2="335" y2="145" stroke="#E0912F" stroke-width="2" stroke-dasharray="4"/>
+            <line x1="440" y1="89" x2="440" y2="145" stroke="#E0912F" stroke-width="2" stroke-dasharray="4"/>
+            <text x="545" y="115" fill="#bd7415" font-weight="bold">j=0,1,2,3</text>
+            <text x="545" y="133" fill="#6a8294" font-style="italic">同下标配对</text>
+        </g>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 让第 j 名士兵去第 j 个守卫点</span>
+friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+<span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    friend = friends<span class="punc">[</span>j<span class="punc">]</span>       <span class="cmt"># 用 j 取士兵</span>
+    point = points<span class="punc">[</span>j<span class="punc">]</span>        <span class="cmt"># 用同一个 j 取位置</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> point<span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么这里必须用 range，而不是 for friend in friends？</span>因为你需要那个<strong>序号 j</strong> 去 <code>points</code> 里取对应的点。如果直接写 <code>for friend in friends</code>，你只拿到了士兵，却没有序号，就无法知道该配 <code>points</code> 里的哪一个。凡是"要同时按位置访问两个数组"的场景，就用 <code>for j in range(len(...))</code>。
+</div>
+
+<!-- ==================== 12.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:2e3e6cfba7:START anchor=sec-12-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="2e3e6cfba7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从暗影地牢的对象与方法起步，到流金沙漠的算法拓展，一路闯关一路变强。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2e3e6cfba7:END -->
+<!-- CC-PROTECTION:HIDDEN:de59fddcc3:START anchor=sec-12-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="de59fddcc3">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:de59fddcc3:END -->
+
+<div class="section-header" id="section-12-4">
+    <h2>12.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 木材守卫 -->
+<div class="level-card" id="sec-12-4-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 木材守卫</span>
+        <h3>🪵 木材守卫 —— 用 for 指挥每个士兵</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/12-4-1-1_timber_guard.png" alt="扣哒世界 木材守卫关卡 - koudashijie.com">
+            <div class="caption">图2：木材守卫——英雄退后捡币攒钱，用 for 循环指挥每名士兵各自迎敌</div>
+        </div>
+
+        <h4>策略：英雄躲后方，士兵冲前线</h4>
+        <p>这是 for 循环的入门关。核心策略是<strong>分工</strong>：英雄自己不去和兽人硬拼（关卡明确警告"如果你试着亲自和兽人作战，你可能会吸引兽人刺客的注意"），而是退到后方专心捡硬币攒钱、召唤士兵；真正的战斗交给召唤出来的士兵。所有指挥动作都放在一个 <code>while True</code> 大循环里持续进行。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是每轮循环做三件事：其一，<code>coin = findNearest(findItems())</code>，有硬币就 <code>move(coin.pos)</code> 过去捡（英雄借此后撤）；其二，<code>if hero.gold &gt;= hero.costOf("soldier"):</code> 就 <code>summon("soldier")</code> 扩军；其三，也是本关重点——用 <code>for friend in hero.findFriends()</code> 遍历所有盟友，只对 <code>friend.type == "soldier"</code> 的下令，让每名士兵用 <code>findNearestEnemy()</code> 找到身边的敌人，有敌人就 <code>command(friend, "attack", enemy)</code>，没敌人就 <code>command(friend, "move", rightPos)</code> 推进到地图右侧。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：for 遍历盟友，各自迎敌或推进</span>
+<span class="kw">for</span> friend <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">():</span>
+    <span class="kw">if</span> friend<span class="punc">.</span>type == <span class="str">"soldier"</span><span class="punc">:</span>
+        enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+        <span class="kw">if</span> enemy<span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>
+        <span class="kw">else</span><span class="punc">:</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> <span class="num">83</span><span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> <span class="num">45</span><span class="punc">})</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">先判断类型再下令：</span><code>findFriends()</code> 返回的可能不只有士兵。先用 <code>if friend.type == "soldier"</code> 筛一遍，避免对不能作战的盟友发出攻击命令而报错或浪费。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">for 让"死循环隐患"消失：</span>用 for 遍历盟友，就不必再写 <code>index += 1</code>，自然不会因为漏掉自增而卡死。这正是本关想让你体会的 for 相对 while 的最大好处。
+        </div>
+    </div>
+</div>
+
+<!-- 动物园管理员 -->
+<div class="level-card" id="sec-12-4-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 动物园管理员</span>
+        
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=h3-8 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:a51709993a:START anchor=h3-8 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a51709993a">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC12-052978F20066。</span>
+<!-- CC-PROTECTION:HIDDEN:a51709993a:END -->
+
+<h3>🦁 动物园管理员 —— 士兵与守卫点配对</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/12-4-2-1_zoo_keeper.png" alt="扣哒世界 动物园管理员关卡 - koudashijie.com">
+            <div class="caption">图3：动物园管理员——把 4 名士兵分别派到 4 个笼子旁，各自就地防守</div>
+        </div>
+
+        <h4>策略：定点防守，四点四兵</h4>
+        <p>本关要保护 4 个关着雪人的笼子。策略是先把 4 个笼子的坐标存进一个数组 <code>points</code>，再召唤 4 名士兵，让第 j 名士兵驻守第 j 个笼子。关卡贴心提示："收集硬币时，可以在收集 80 金钱后停下，因为每个士兵的费用为 20"——80 ÷ 20 正好 4 个兵，与 4 个点对应。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法分三段。第一段攒钱：<code>while hero.gold &lt; 80:</code> 反复捡币，够 80 就停。第二段建军：<code>for i in range(4): hero.summon("soldier")</code> 精确召唤 4 个。第三段是本关灵魂——在 <code>while True</code> 里，用 <code>for j in range(len(friends)):</code> 拿到共用下标 <code>j</code>，同时取出 <code>friend = friends[j]</code> 和 <code>point = points[j]</code>，实现士兵与守卫点一一配对；再判断"附近是否真有兽人靠近"，是就 <code>attack</code>，否则 <code>move</code> 回自己的守卫点。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：同下标配对士兵与守卫点，就地防守</span>
+<span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    point = points<span class="punc">[</span>j<span class="punc">]</span>
+    friend = friends<span class="punc">[</span>j<span class="punc">]</span>
+    enemy = friend<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy <span class="kw">and</span> enemy<span class="punc">.</span>team == <span class="str">"ogres"</span> <span class="kw">and</span> friend<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>enemy<span class="punc">)</span> &lt; <span class="num">5</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> enemy<span class="punc">)</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> point<span class="punc">)</span>   <span class="cmt"># 回到自己的守卫点</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">"距离小于 5 才出击"的意义：</span>条件 <code>friend.distanceTo(enemy) &lt; 5</code> 让士兵只在敌人逼近时才离开岗位迎击，敌人一走远（或没敌人）就 <code>move</code> 回守卫点。这样每个笼子始终有兵把守，不会被士兵盲目追击而露出空档。这正是"定点防守"策略的关键。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">数组下标不能越界：</span>本关 <code>points</code> 有 4 个元素，士兵也召唤 4 个，两者数量一致，<code>points[j]</code> 才不会越界。如果士兵数量超过守卫点数量，<code>points[j]</code> 就会因为下标超出范围而报错——这也是为什么要精确召唤 4 个，不多不少。
+        </div>
+    </div>
+</div>
+
+<!-- 壮烈牺牲 -->
+<div class="level-card" id="sec-12-4-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 壮烈牺牲</span>
+        <h3>🎯 壮烈牺牲 —— 士兵沿路布点当诱饵</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/12-4-3-1_glorious_sacrifice.png" alt="扣哒世界 壮烈牺牲关卡 - koudashijie.com">
+            <div class="caption">图4：壮烈牺牲——4 名士兵作诱饵，沿预设路径逐点移动，为英雄开路</div>
+        </div>
+
+        <h4>策略：士兵当诱饵，逐点吸引火力</h4>
+        <p>本关的士兵是"消耗品诱饵"——他们沿一条通往兽人营地的路径，被分别派往 4 个关键点，用来吸引和牵制敌人。策略与"动物园管理员"一脉相承，都是<strong>士兵与坐标点按下标配对</strong>，只不过这次不再是原地防守，而是一次性把每名士兵派往路径上的不同位置。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是：先 <code>while hero.gold &lt; 80:</code> 攒够 80 金；再 <code>for i in range(4): hero.summon("soldier")</code> 召唤 4 名诱饵；接着定义含 4 个坐标的 <code>points</code> 数组和 <code>friends = hero.findFriends()</code>；最后用 <code>for j in range(len(friends)):</code> 遍历下标，把 <code>friends[j]</code> 和 <code>points[j]</code> 配对，逐个 <code>command(friend, "move", point)</code>，让每名士兵各奔其位。关卡注释点明了这一手法："使用 range 来得到可供遍历的数组。让各盟友士兵和各地点位置配对，然后命令他们移动。"</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：range 遍历下标，士兵与路径点配对移动</span>
+friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+<span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    point = points<span class="punc">[</span>j<span class="punc">]</span>
+    friend = friends<span class="punc">[</span>j<span class="punc">]</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> point<span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">与动物园管理员的异同：</span>两关都用 <code>for j in range(len(friends))</code> 做"下标配对"，这是本单元最该练熟的模式。区别在于：动物园管理员放在 <code>while True</code> 里反复判断攻击/回防，是"持续防守"；壮烈牺牲只需把士兵一次性派到位，是"一次布点"。同一套配对骨架，服务于不同战术。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">诱饵战术的算法之美：</span>把士兵和一串预设坐标配对，本质上是用一个 for 循环完成了"批量分配任务"。当你以后遇到"N 个执行者对应 N 个任务/位置"的问题时，都可以套用这个"range 下标 + 双数组配对"的思路。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 12.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:d19090cfd1:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="d19090cfd1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，你敲下的 if 和 for，直接变成英雄的剑招与魔法。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d19090cfd1:END -->
+
+<div class="section-header" id="section-12-5">
+    <h2>12.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-12-5-1">12.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>12.5.1.1 for 循环的典型问题
+    <span class="en">Typical issues with for loops</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch7_sec12_12-5-1-1_common_errors.png" alt="扣哒世界 for循环常见错误速查 - koudashijie.com">
+    <div class="caption">图5：range 边界搞错、下标越界、该用 range 却用了 for-in，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>误以为 range(4) 含 4——它其实是 0、1、2、3，共 4 个数，最大只到 3，别当成 1 到 4。</li>
+        <li>该用下标却用了 for-in——需要同时索引两个数组时，必须写 <code>for j in range(len(...))</code> 拿到 j，而不是 <code>for friend in friends</code>。</li>
+        <li>两个数组数量不一致——士兵数比 points 多，<code>points[j]</code> 会下标越界报错；要让数量对齐（如恰好召唤 4 个）。</li>
+        <li>忘了冒号或缩进——<code>for ... :</code> 行末要有冒号，循环体要缩进，否则语法错误。</li>
+        <li>还在 for 里手写 index += 1——for 已自动前进，再自增反而打乱下标。</li>
+        <li>攻击传错目标——<code>"attack"</code> 第三参数是敌人对象，<code>"move"</code> 第三参数才是坐标字典，别混。</li>
+        <li>没先判断类型——对 <code>findFriends()</code> 里的非士兵盟友直接下攻击令，可能报错，应先 <code>if friend.type == "soldier"</code>。</li>
+        <li>英雄亲自上阵——木材守卫里让英雄硬拼会招来刺客，应退后捡币、把战斗交给士兵。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-12-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在安息云峰又解锁了一件趁手的循环武器——<strong>for 循环</strong>！这一单元你明白了 for 和 while"殊途同归"：凡是"重复固定次数"或"逐个处理一个数组"的活儿，for 都能用更短、更稳的代码完成，还彻底告别了漏写自增导致的死循环。你掌握了 <code>for X in Y</code> 遍历数组、<code>for i in range(n)</code> 重复 n 次、以及最精彩的 <code>for j in range(len(数组))</code> 用同一下标配对两个平行数组的技巧，并把它用在了指挥士兵迎敌、定点防守、沿路布诱饵这三场战斗里。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>for 类似 while</td><td>准备更少，能完成同样的事</td><td>木材守卫</td></tr>
+            <tr><td>for X in Y 结构</td><td>Y 是数组，X 是每轮当前元素</td><td>三关</td></tr>
+            <tr><td>遍历数组</td><td><code>for friend in findFriends()</code></td><td>木材守卫</td></tr>
+            <tr><td>range(n) 计数</td><td>生成 0~n-1，重复 n 次</td><td>动物园管理员</td></tr>
+            <tr><td>range 不含上界</td><td>range(4) 是 0、1、2、3</td><td>动物园管理员</td></tr>
+            <tr><td>range(len(数组))</td><td>拿到全部合法下标 j</td><td>动物园管理员 / 壮烈牺牲</td></tr>
+            <tr><td>双数组下标配对</td><td><code>friends[j]</code> 配 <code>points[j]</code></td><td>动物园管理员 / 壮烈牺牲</td></tr>
+            <tr><td>for + command</td><td>逐个下令，无需管索引</td><td>三关</td></tr>
+            <tr><td>英雄退后分工</td><td>捡币召唤，战斗交给士兵</td><td>木材守卫</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用 for 循环把一道命令传遍千军的英雄，才配称云峰之上真正的统帅。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🔁⚔️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（安息云峰）：第十二单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
