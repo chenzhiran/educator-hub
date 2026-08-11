@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC9-3C3B48751FCD">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第九单元：单元复习 · 求和与综合应用 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(168,83,19,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(168,83,19,0.08);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC9-3C3B48751FCD | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS4-第九单元</div>
+
+    <a href="#section-9-1" class="nav-section">9.1 单元总复习</a>
+    <a href="#sec-9-1-1" class="nav-sub">9.1.1 四单元知识串联</a>
+    <a href="#sec-9-1-2" class="nav-sub">9.1.2 遍历数组的地基</a>
+
+    <a href="#section-9-2" class="nav-section">9.2 求和函数模式</a>
+    <a href="#sec-9-2-1" class="nav-sub">9.2.1 什么是累加器</a>
+    <a href="#sec-9-2-2" class="nav-sub">9.2.2 累加器三部曲</a>
+    <a href="#sec-9-2-3" class="nav-sub">9.2.3 对象数组求和</a>
+
+    <a href="#section-9-3" class="nav-section">9.3 三大搜索模式对照</a>
+    <a href="#sec-9-3-1" class="nav-sub">9.3.1 求和 / 计数 / 极值</a>
+    <a href="#sec-9-3-2" class="nav-sub">9.3.2 同一骨架，不同灵魂</a>
+
+    <a href="#section-9-4" class="nav-section">9.4 多分支条件判断</a>
+    <a href="#sec-9-4-1" class="nav-sub">9.4.1 三种情况分别处理</a>
+    <a href="#sec-9-4-2" class="nav-sub">9.4.2 == 与 != 的用法</a>
+
+    <a href="#section-9-5" class="nav-section">9.5 实战关卡精讲</a>
+    <a href="#sec-9-5-1" class="nav-sub">9.5.1 许愿井</a>
+
+    <a href="#section-9-6" class="nav-section">9.6 常见错误</a>
+    <a href="#sec-9-6-1" class="nav-sub">9.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第九单元：单元复习 · 求和与综合应用</h1>
+    <div class="subtitle">Unit 9: Review — Summation &amp; Integration</div>
+    <div class="badge">计算机科学 4 · 流金沙漠 Sarven Desert · 许愿井 Wishing Well</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 9.1 ==================== -->
+<div class="section-header" id="section-9-1">
+    <h2>9.1 单元总复习</h2>
+    <div class="en-title">Putting It All Together</div>
+</div>
+
+<p>欢迎来到流金沙漠的最后一站！这是一个<strong>复习单元</strong>——它不引入太多全新的语法，而是把前几个单元学到的 <span class="keyword">while 循环</span>、<span class="keyword">数组迭代</span>、<span class="keyword">函数封装</span>、<span class="keyword">条件判断</span> 熔于一炉，用一口神秘的"许愿井"考验你能否把它们组合起来解决真正的问题。真正的编程能力，往往就体现在<strong>把零散的知识点串成一条完整思路</strong>的那一刻。</p>
+
+<div class="remember-box">
+    <span class="remember-label">复习单元的意义：</span>前面每个单元都像一件工具——循环是"重复"、数组是"一串数据"、函数是"打包好的动作"、条件是"分岔路口"。到了本单元，你要学会像工匠一样<strong>同时握住这几件工具</strong>：先用函数封装一段求和逻辑，再用条件判断结果落在哪个区间，最后用循环去执行相应的动作。这正是 AI 决策"感知→计算→判断→行动"的完整链条。
+</div>
+
+<h3 id="sec-9-1-1">9.1.1 四单元知识串联（Four Units in One）</h3>
+
+<h4>9.1.1.1 每件工具都会在许愿井里登场
+    <span class="en">Every tool reappears here</span>
+</h4>
+
+<div class="review-grid">
+    <div class="review-card">
+        <h4>🔁 while 循环</h4>
+        <p>条件为真就重复。许愿井里用它遍历硬币、也用 <code>while True</code> 反复检查井里的状态。</p>
+    </div>
+    <div class="review-card">
+        <h4>📦 数组迭代</h4>
+        <p>用索引逐个走过硬币数组，<code>coins[coinIndex]</code> 取出每一枚硬币。</p>
+    </div>
+    <div class="review-card">
+        <h4>🧩 函数封装</h4>
+        <p><code>sumCoinValues()</code> 把"求和"打包成一个带参数、有返回值的工具。</p>
+    </div>
+    <div class="review-card">
+        <h4>🔀 条件判断</h4>
+        <p>用 <code>&lt;</code>、<code>&gt;</code>、<code>==</code> 把结果分成"不够 / 太多 / 刚好"三种情况分别应对。</p>
+    </div>
+</div>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-1-1-1_review_map.png" alt="扣哒世界 第九单元知识地图 - koudashijie.com">
+    <div class="caption">图1：第九单元知识地图——四件工具在"许愿井"里汇成一条完整思路</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9dfa595e04:START anchor=sec-9-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9dfa595e04">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，玩家已累计编写超过 10 亿行真实代码，编程也能很酷。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9dfa595e04:END -->
+
+<h3 id="sec-9-1-2">9.1.2 遍历数组的地基（The Foundation）</h3>
+
+<h4>9.1.2.1 一切从"逐个走过"开始
+    <span class="en">It all starts with iteration</span>
+</h4>
+
+<p>无论是求和、计数还是找极值，起点都是同一段遍历骨架：一个索引变量、一个 <code>while</code> 条件、一句索引自增。本单元的所有新花样，都是在这段骨架里"往里塞不同的动作"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>coins = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>     <span class="cmt"># 拿到硬币数组</span>
+coinIndex = <span class="num">0</span>                  <span class="cmt"># 索引从 0 开始</span>
+<span class="kw">while</span> coinIndex &lt; <span class="fn">len</span><span class="punc">(</span>coins<span class="punc">):</span>   <span class="cmt"># 没走完就继续</span>
+    coin = coins<span class="punc">[</span>coinIndex<span class="punc">]</span>     <span class="cmt"># 取出当前硬币</span>
+    <span class="cmt"># ... 在这里对 coin 做点什么 ...</span>
+    coinIndex <span class="hl">+= 1</span>              <span class="cmt"># 索引前进（别忘）</span></pre>
+</div>
+
+<!-- ==================== 9.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-9-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-9-2">
+    <h2>9.2 求和函数模式</h2>
+    <div class="en-title">The Summation Pattern</div>
+</div>
+
+<h3 id="sec-9-2-1">9.2.1 什么是累加器（What Is an Accumulator）</h3>
+
+<h4>9.2.1.1 用一个变量"攒住"逐渐增长的总和
+    <span class="en">One variable holds the running total</span>
+</h4>
+
+<p>许愿井关卡的核心是一个 <span class="keyword">求和函数（sum function）</span>。它的思想非常朴素——正如关卡所说："<strong>史上最简单的求和函数，就是将数组内的数字相加。</strong>"实现它的关键道具是一个 <span class="keyword">累加器（accumulator）</span>变量：先把它设为 0，然后遍历数组，把每个元素<strong>依次加进去</strong>，走完一遍，累加器里存的就是总和。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 170" width="560" role="img" aria-label="累加器工作示意">
+        <text x="280" y="26" text-anchor="middle" font-size="15" fill="#f0c674" font-weight="bold" font-family="sans-serif">累加器：像滚雪球一样越滚越大</text>
+        <g font-family="monospace" font-size="13">
+            <circle cx="70" cy="90" r="22" fill="#3d2e1a" stroke="#E0A23F" stroke-width="2"/>
+            <text x="70" y="95" text-anchor="middle" fill="#f0c674">0</text>
+            <circle cx="190" cy="90" r="26" fill="#3d2e1a" stroke="#E0A23F" stroke-width="2"/>
+            <text x="190" y="95" text-anchor="middle" fill="#f0c674">+2=2</text>
+            <circle cx="320" cy="90" r="30" fill="#3d2e1a" stroke="#E0A23F" stroke-width="2"/>
+            <text x="320" y="95" text-anchor="middle" fill="#f0c674">+3=5</text>
+            <circle cx="460" cy="90" r="34" fill="#3d2e1a" stroke="#28c840" stroke-width="2"/>
+            <text x="460" y="95" text-anchor="middle" fill="#28c840">+4=9</text>
+        </g>
+        <defs>
+            <marker id="acc-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#a08a5e"/>
+            </marker>
+        </defs>
+        <line x1="95" y1="90" x2="160" y2="90" stroke="#a08a5e" stroke-width="2" marker-end="url(#acc-arr)"/>
+        <line x1="218" y1="90" x2="288" y2="90" stroke="#a08a5e" stroke-width="2" marker-end="url(#acc-arr)"/>
+        <line x1="352" y1="90" x2="424" y2="90" stroke="#a08a5e" stroke-width="2" marker-end="url(#acc-arr)"/>
+        <text x="280" y="150" text-anchor="middle" font-size="12" fill="#d8c8a8" font-family="sans-serif">初始为 0 → 每遇到一个数就加进来 → 走完就是总和</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-9-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+<!-- CC-PROTECTION:HIDDEN:4938113989:START anchor=sec-9-2-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4938113989">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:4938113989:END -->
+
+<h3 id="sec-9-2-2">9.2.2 累加器三部曲（The Accumulator Pattern）</h3>
+
+<h4>9.2.2.1 归零 → 逐个累加 → 返回
+    <span class="en">Zero, add each, return</span>
+</h4>
+
+<p>求和函数有一个雷打不动的三段式套路。它和第一单元的"计数器三部曲"是同一个家族——只不过计数器每次固定 +1，而累加器每次加上的是<strong>元素的实际值</strong>。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🧮 累加器三部曲</div>
+    <strong>①归零</strong>：循环前把累加器设为 0，如 <code>totalValue = 0</code><br>
+    <strong>②逐个累加</strong>：循环体内 <code>totalValue += coins[i].value</code><br>
+    <strong>③返回结果</strong>：循环结束后 <code>return totalValue</code>，把总和交出去<br>
+    <strong>三者缺一不可——少了①总和会出错，少了②不会累加，少了③外面拿不到结果。</strong>
+</div>
+
+<h3 id="sec-9-2-3">9.2.3 对象数组求和（Summing Object Properties）</h3>
+
+<h4>9.2.3.1 加的不是硬币本身，而是它的 value 属性
+    <span class="en">Add the property, not the object</span>
+</h4>
+
+<p>这里有一个关键细节：许愿井里的数组元素<strong>不是纯数字，而是硬币对象</strong>。正如关卡所说："我们有一个对象（硬币）数组，所以我们要把每个硬币的 value 属性加起来。"因此累加时写的是 <code>coins[coinIndex].value</code> 而不是 <code>coins[coinIndex]</code>——要用点号取出那枚硬币的<strong>价值属性</strong>再相加。下面是许愿井里 <code>sumCoinValues()</code> 的写法：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">sumCoinValues</span><span class="punc">(</span>coins<span class="punc">):</span>
+    coinIndex = <span class="num">0</span>
+    totalValue = <span class="num">0</span>              <span class="cmt"># ① 累加器归零</span>
+    <span class="kw">while</span> coinIndex &lt; <span class="fn">len</span><span class="punc">(</span>coins<span class="punc">):</span>
+        totalValue <span class="hl">+= coins[coinIndex].value</span>   <span class="cmt"># ② 加上这枚硬币的价值</span>
+        coinIndex += <span class="num">1</span>
+    <span class="kw">return</span> totalValue          <span class="cmt"># ③ 返回总价值</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">value 与 len 的区别：</span><code>len(coins)</code> 数的是硬币的<strong>数量</strong>（有几枚），而 <code>coin.value</code> 是每枚硬币的<strong>面值</strong>（值多少）。许愿井要求"刚好 104 个硬币"，其实比较的是所有硬币的<strong>价值总和</strong>是否等于 104——两枚 1 分银币和一枚 2 分金币在数量上是 3 枚，但价值总和也可能相同，理解这一点才能读懂这一关。
+</div>
+
+<!-- ==================== 9.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:fc3dddac56:START anchor=sec-9-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="fc3dddac56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，把编程变成闯关游戏，玩着玩着就成了别人眼里的代码大佬。</span>
+</aside>
+<!-- CC-PROTECTION:AD:fc3dddac56:END -->
+
+<div class="section-header" id="section-9-3">
+    <h2>9.3 三大搜索模式对照</h2>
+    <div class="en-title">Three Patterns, One Skeleton</div>
+</div>
+
+<h3 id="sec-9-3-1">9.3.1 求和 / 计数 / 极值（Sum, Count, Extreme）</h3>
+
+<h4>9.3.1.1 遍历数组的三种"往里塞的动作"
+    <span class="en">Three things you can do while iterating</span>
+</h4>
+
+<p>把前几个单元和本单元连起来看，你会发现遍历数组时最常做的三件事，其实是同一段骨架里换了不同的"内芯"：<strong>求和</strong>（本单元）把每个值加进累加器，<strong>计数</strong>（第一单元）每遇到一个就 +1，<strong>找极值</strong>（第七、八单元）把每个值和擂主比较。看懂这张对照表，你就真正打通了整条"数组处理"的脉络。</p>
+
+<table class="styled-table">
+    <thead><tr><th>模式</th><th>准备变量</th><th>循环体内的动作</th><th>典型关卡</th></tr></thead>
+    <tbody>
+        <tr><td>求和</td><td><code>total = 0</code></td><td><code>total += coin.value</code></td><td>许愿井</td></tr>
+        <tr><td>计数</td><td><code>count = 0</code></td><td><code>count += 1</code></td><td>尘埃、沙漠战役</td></tr>
+        <tr><td>找最小</td><td><code>best = 9999</code></td><td><code>if v &lt; best: best = v</code></td><td>沙蛇</td></tr>
+        <tr><td>找最大</td><td><code>best = 0</code></td><td><code>if v &gt; best: best = v</code></td><td>疯狂的 Maxer</td></tr>
+    </tbody>
+</table>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-9-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+<h3 id="sec-9-3-2">9.3.2 同一骨架，不同灵魂（Same Bones）</h3>
+
+<h4>9.3.2.1 学会"套模板"，新问题也不慌
+    <span class="en">Recognize the pattern, adapt the core</span>
+</h4>
+
+<div class="remember-box">
+    <span class="remember-label">核心洞察：</span>遇到一个新的数组问题时，先问自己两句话——"我要维护一个什么样的记录变量？""每遇到一个元素，我该对这个记录做什么？"。想清楚这两点，剩下的遍历骨架永远一样。这种"识别模式、替换内芯"的思维，是从背代码走向<strong>会编程</strong>的分水岭。
+</div>
+
+<!-- ==================== 9.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-9-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<div class="section-header" id="section-9-4">
+    <h2>9.4 多分支条件判断</h2>
+    <div class="en-title">Handling Multiple Cases</div>
+</div>
+
+<h3 id="sec-9-4-1">9.4.1 三种情况分别处理（Three Branches）</h3>
+
+<h4>9.4.1.1 不够、太多、刚好
+    <span class="en">Too little, too much, just right</span>
+</h4>
+
+<p>拿到金币总值后，许愿井要求根据结果落在哪个区间做出不同反应：不够就喊 "Non satis"、太多就喊 "Nimis"、刚好 104 就开始收集。这需要<strong>并列的多个 if 判断</strong>把数轴切成三段，每段对应一个动作。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 180" width="600" role="img" aria-label="三分支判断流程图">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#9C5E14" font-weight="bold" font-family="sans-serif">按金币总值分三种情况处理</text>
+        <polygon points="300,45 400,80 300,115 200,80" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="300" y="78" font-size="12" font-family="monospace" fill="#9C5E14" text-anchor="middle">goldAmount</text>
+        <text x="300" y="95" font-size="11" font-family="monospace" fill="#6b5840" text-anchor="middle">vs 104</text>
+        <g font-family="sans-serif" font-size="11">
+            <rect x="30" y="130" width="150" height="38" rx="8" fill="#fdf3df" stroke="#E8A33D" stroke-width="2"/>
+            <text x="105" y="148" text-anchor="middle" fill="#c47e16">&lt; 104：say("Non satis")</text>
+            <text x="105" y="162" text-anchor="middle" fill="#6b5840">还不够</text>
+
+            <rect x="225" y="130" width="150" height="38" rx="8" fill="#FBF1DC" stroke="#C8821E" stroke-width="2"/>
+            <text x="300" y="148" text-anchor="middle" fill="#9C5E14">== 104：收集硬币</text>
+            <text x="300" y="162" text-anchor="middle" fill="#6b5840">刚刚好</text>
+
+            <rect x="420" y="130" width="150" height="38" rx="8" fill="#fbe8e3" stroke="#C0392B" stroke-width="2"/>
+            <text x="495" y="148" text-anchor="middle" fill="#a5331f">&gt; 104：say("Nimis")</text>
+            <text x="495" y="162" text-anchor="middle" fill="#6b5840">太多了</text>
+        </g>
+        <line x1="230" y1="95" x2="120" y2="128" stroke="#6b5840" stroke-width="1.5"/>
+        <line x1="300" y1="115" x2="300" y2="128" stroke="#6b5840" stroke-width="1.5"/>
+        <line x1="370" y1="95" x2="480" y2="128" stroke="#6b5840" stroke-width="1.5"/>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">拉丁语彩蛋：</span>许愿井里用的是拉丁语——<strong>"Non satis"</strong> 意思是"不够"，<strong>"Nimis"</strong> 意思是"太多"。喊出正确的话，井才会给出反馈。三个 if 分别对应三条互不重叠的数轴区间，无论金币总值是多少，永远只会命中其中一条。
+</div>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-9-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<h3 id="sec-9-4-2">9.4.2 == 与 != 的用法（Comparison Operators）</h3>
+
+<h4>9.4.2.1 判断相等用 ==，判断不相等用 !=
+    <span class="en">Equality and inequality</span>
+</h4>
+
+<p>许愿井还用到了两个重要的比较运算符。判断两个值是否<strong>相等</strong>用 <code>==</code>（两个等号，别和赋值的单个 <code>=</code> 混淆）；判断是否<strong>不相等</strong>用 <code>!=</code>。关卡里先用 <code>if goldAmount != 0</code> 确认"井里确实有硬币"（不为 0 才继续），再用 <code>if goldAmount == requiredGold</code> 确认"总值刚好达标"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>goldAmount = <span class="fn">sumCoinValues</span><span class="punc">(</span>items<span class="punc">)</span>
+<span class="kw">if</span> goldAmount != <span class="num">0</span><span class="punc">:</span>              <span class="cmt"># 井里有硬币才判断</span>
+    <span class="kw">if</span> goldAmount &lt; requiredGold<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Non satis"</span><span class="punc">)</span>   <span class="cmt"># 不够</span>
+    <span class="kw">if</span> goldAmount &gt; requiredGold<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Nimis"</span><span class="punc">)</span>       <span class="cmt"># 太多</span>
+    <span class="kw">if</span> goldAmount == requiredGold<span class="punc">:</span>
+        <span class="fn">collectAllCoins</span><span class="punc">()</span>          <span class="cmt"># 刚好，开始收集</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">最经典的坑：</span>千万别把 <code>==</code> 写成 <code>=</code>。<code>=</code> 是"赋值"（把右边存进左边），<code>==</code> 才是"比较是否相等"。在 <code>if</code> 条件里写错成 <code>=</code> 会直接报错。记忆口诀：<strong>"一个等号是给予，两个等号是询问。"</strong>
+</div>
+
+<!-- ==================== 9.5 ==================== -->
+<div class="section-header" id="section-9-5">
+    <h2>9.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<div class="level-card" id="sec-9-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 许愿井</span>
+        <h3>🪙 许愿井 —— 求和判断与综合应用</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/9-5-1-1_wishing_well.png" alt="扣哒世界 许愿井关卡 - koudashijie.com">
+            <div class="caption">图2：许愿井——先求出硬币总值，判断是否刚好 104，再决定收集还是等待</div>
+        </div>
+
+        <h4>策略：先算总值，再按区间反应</h4>
+        <p>许愿井要求你收集<strong>刚好 104 的金币总值</strong>，不多不少。整关的策略是一条清晰的链条：先用 <code>sumCoinValues()</code> 求出井里所有硬币的<strong>价值总和</strong>，再拿这个总和和目标值 104 比较，落在哪个区间就做哪个动作——不够喊 "Non satis"、太多喊 "Nimis"、刚好就调用 <code>collectAllCoins()</code> 把硬币全收进来。整个判断包在 <code>while True</code> 里，因为井里的硬币会变化，需要持续监测。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法思路是四步走：第一步，每轮用 <code>hero.findItems()</code> 感知井里当前的硬币数组；第二步，把数组交给求和函数得到 <code>goldAmount</code>；第三步，先用 <code>if goldAmount != 0</code> 排除"井里暂时没硬币"的空档；第四步，用三个并列的 if 按 <code>&lt;</code> / <code>&gt;</code> / <code>==</code> 分别处理不够、太多、刚好三种情况。关键在于——<strong>收集动作只在"刚好等于 104"时才触发</strong>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：求和 + 三分支判断</span>
+goldAmount = <span class="fn">sumCoinValues</span><span class="punc">(</span>items<span class="punc">)</span>
+<span class="kw">if</span> goldAmount == requiredGold<span class="punc">:</span>   <span class="cmt"># 只有刚好才收集</span>
+    <span class="fn">collectAllCoins</span><span class="punc">()</span></pre>
+        </div>
+
+        <h4>算法看点：函数在这里"各司其职"</h4>
+        <p>这一关最漂亮的地方，是它把大问题拆成了几个<strong>各司其职的小函数</strong>：<code>sumCoinValues(coins)</code> 只负责"算总和"，<code>collectAllCoins()</code> 只负责"把硬币收干净"，主循环只负责"判断该走哪条分支"。这种<strong>职责分离</strong>的设计，正是本单元想让你体会的综合能力——每个函数都简单到一眼看懂，组合起来却能完成复杂任务。</p>
+
+        <div class="info-box">
+            <span class="info-label">collectAllCoins 的小技巧：</span>收集函数内部用的是"边找边收"的经典写法：<code>item = hero.findNearest(hero.findItems())</code> 找到最近的硬币，走过去捡起，然后<strong>再找一次</strong>更新 <code>item</code>；只要还找得到（<code>while item</code>）就继续，找不到了自然停下。这正是第一单元"用变量做循环条件、循环内更新变量"的应用。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">读懂再动手：</span>关卡特意提示"看一下 <code>sumCoinValues()</code> 的代码，看看它怎么做到的"。这是复习单元的用意——<strong>先读懂别人写好的函数，理解累加器模式，再把它用起来</strong>。学会读代码，和学会写代码同样重要。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">易错提醒：</span>不要把 <code>collectAllCoins()</code> 放到三个判断之外无条件调用，否则不管够不够都会去收集，就失去了"精确凑数"的意义。收集必须<strong>严格绑定在 <code>== requiredGold</code> 这一条分支里</strong>。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+
+<div class="section-header" id="section-9-6">
+    <h2>9.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-9-6-1">9.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>9.6.1.1 求和与综合应用的典型问题
+    <span class="en">Typical issues in this review unit</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch7_sec9_9-6-1-1_common_errors.png" alt="扣哒世界 求和综合应用常见错误速查 - koudashijie.com">
+    <div class="caption">图3：累加器忘记归零、混淆 = 与 ==、漏加 .value，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>累加器忘记归零——没写 <code>totalValue = 0</code> 就直接累加，总和从一开始就是错的。</li>
+        <li>漏加 <code>.value</code>——写成 <code>totalValue += coins[i]</code> 而不是 <code>coins[i].value</code>，试图把"硬币对象"加进数字，会出错。</li>
+        <li>混淆 <code>=</code> 与 <code>==</code>——条件里判断相等要用 <code>==</code>，单个 <code>=</code> 是赋值。</li>
+        <li><code>return</code> 位置错误——把 <code>return totalValue</code> 写进 while 循环里，会导致才加一枚就提前返回，总和不完整。</li>
+        <li>忘记索引自增——漏掉 <code>coinIndex += 1</code>，卡在第一枚硬币上死循环。</li>
+        <li>收集动作放错位置——把 <code>collectAllCoins()</code> 放在判断之外，导致不管够不够都去收集。</li>
+        <li>没排除空数组——漏掉 <code>if goldAmount != 0</code>，井里暂时没硬币时会误判为"不够"而反复喊话。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-9-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:438594da11:START anchor=sec-9-6-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="438594da11">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:438594da11:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你走到了流金沙漠的终点！这一站没有全新的语法，却是最见功力的一站——你把 while 循环、数组迭代、函数封装和条件判断<strong>拧成了一股绳</strong>。你掌握了<strong>累加器模式</strong>（归零→逐个累加→返回），理解了求和、计数、找极值其实是同一段骨架换不同内芯，学会了用并列 if 把结果分成多个区间分别处理，也看清了 <code>=</code> 与 <code>==</code>、<code>value</code> 与 <code>len</code> 这些细微却致命的区别。更重要的是，你体会到了<strong>职责分离</strong>的设计之美：让每个小函数只做一件事，再把它们组合成解决方案。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应/呼应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>累加器模式</td><td>归零→逐个累加→返回</td><td>许愿井</td></tr>
+            <tr><td>对象数组求和</td><td>加的是 <code>.value</code> 属性</td><td>许愿井</td></tr>
+            <tr><td>value vs len</td><td>面值总和 vs 元素个数</td><td>许愿井</td></tr>
+            <tr><td>三大模式对照</td><td>求和/计数/极值同骨架</td><td>全部单元</td></tr>
+            <tr><td>多分支 if</td><td>数轴切三段各管一段</td><td>许愿井</td></tr>
+            <tr><td>== 与 !=</td><td>比较相等/不相等</td><td>许愿井</td></tr>
+            <tr><td>= vs ==</td><td>赋值 vs 比较，别写混</td><td>许愿井</td></tr>
+            <tr><td>职责分离</td><td>每个函数只做一件事</td><td>许愿井</td></tr>
+            <tr><td>读懂再复用</td><td>先读透函数再调用</td><td>许愿井</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        能把零散工具拧成一条思路的英雄，才算真正走出了流金沙漠。<br>
+        愿你在下一片天地继续披荆斩棘，勇敢的程序员！🏜️🪙✨
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+<!-- CC-PROTECTION:HIDDEN:3920c71f9d:START anchor=h3-12 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="3920c71f9d">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC9-3C3B48751FCD。</span>
+<!-- CC-PROTECTION:HIDDEN:3920c71f9d:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（流金沙漠）：第九单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
