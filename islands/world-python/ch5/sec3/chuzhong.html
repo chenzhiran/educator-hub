@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC3-38A89C9BCE04">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第三单元：类型属性与相等运算符 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #2E9E5B;
+            --primary-light: #4FBF7C;
+            --primary-lighter: #E8F7EE;
+            --primary-dark: #1F7A44;
+            --accent: #4FBF7C;
+            --dark: #14241a;
+            --dark-code: #1e2a22;
+            --dark-code-border: #314538;
+            --text: #2d2d2d;
+            --text-light: #555;
+            --text-lighter: #888;
+            --bg: #ffffff;
+            --bg-alt: #f7faf8;
+            --bg-card: #ffffff;
+            --border: #e3ece6;
+            --success: #2E9E5B;
+            --warning: #FFC107;
+            --error: #f44336;
+            --info: #2196F3;
+            --code-keyword: #c678dd;
+            --code-string: #98c379;
+            --code-comment: #5c8a6f;
+            --code-function: #61afef;
+            --code-number: #d19a66;
+            --code-text: #b6c2ba;
+            --code-punctuation: #b6c2ba;
+            --code-object: #e5c07b;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14241a;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #1f3a29; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #cdd8d0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(46, 158, 91, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #23402e;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #a7b8ad;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #e8f4fd;
+            color: #1F7A44;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #eef2ef;
+            color: #c2185b;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #6b8a76;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(255, 193, 7, 0.20); border-radius: 3px; padding: 0 2px; }
+        .code-block .bool { color: #6fae6f; font-weight: 600; }
+
+        .tip-box {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #f57f17; margin-right: 6px; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #1565c0; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #ffebee;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #c62828; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #f4f8f5 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC3-38A89C9BCE04 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第三单元</div>
+
+    <a href="#section-3-1" class="nav-section">3.1 布尔值与比较</a>
+    <a href="#sec-3-1-1" class="nav-sub">3.1.1 布尔值 True/False</a>
+    <a href="#sec-3-1-2" class="nav-sub">3.1.2 比较产生布尔值</a>
+    <a href="#sec-3-1-3" class="nav-sub">3.1.3 if 语句的判断</a>
+
+    <a href="#section-3-2" class="nav-section">3.2 相等运算符 ==</a>
+    <a href="#sec-3-2-1" class="nav-sub">3.2.1 == 检查是否相等</a>
+    <a href="#sec-3-2-2" class="nav-sub">3.2.2 == 与 = 的区别</a>
+    <a href="#sec-3-2-3" class="nav-sub">3.2.3 与运算结合使用</a>
+
+    <a href="#section-3-3" class="nav-section">3.3 type 类型属性</a>
+    <a href="#sec-3-3-1" class="nav-sub">3.3.1 type 是字符串属性</a>
+    <a href="#sec-3-3-2" class="nav-sub">3.3.2 type 后不加括号</a>
+    <a href="#sec-3-3-3" class="nav-sub">3.3.3 按类型分流战术</a>
+
+    <a href="#section-3-4" class="nav-section">3.4 实战关卡精讲</a>
+    <a href="#sec-3-4-1" class="nav-sub">3.4.1 叫阵</a>
+    <a href="#sec-3-4-2" class="nav-sub">3.4.2 濒危树瘤之战</a>
+    <a href="#sec-3-4-3" class="nav-sub">3.4.3 嘲弄</a>
+    <a href="#sec-3-4-4" class="nav-sub">3.4.4 错误的类型</a>
+
+    <a href="#section-3-5" class="nav-section">3.5 常见错误</a>
+    <a href="#sec-3-5-1" class="nav-sub">3.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第三单元：类型属性与相等运算符</h1>
+    <div class="subtitle">Unit 3: The "type" Property &amp; Equality Operator</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 叫阵 → 错误的类型</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 3.1 ==================== -->
+<div class="section-header" id="section-3-1">
+    <h2>3.1 布尔值与比较</h2>
+    <div class="en-title">Booleans and Comparison</div>
+</div>
+
+<h3 id="sec-3-1-1">3.1.1 布尔值 True / False（The Boolean）</h3>
+
+<h4>3.1.1.1 非真即假的一种值
+    <span class="en">A value that's either true or false</span>
+</h4>
+
+<p>本单元让英雄学会"做判断"。一切判断的基础，是一种特殊的值——<span class="keyword">布尔值（Boolean）</span>。"叫阵"关卡定义道：<strong>"布尔值是 True（真）和 False（假）二者取其一的值。"</strong></p>
+
+<p>不同于数字可以有无数个、字符串可以千变万化，布尔值<strong>只有两种可能</strong>：要么 <code>True</code>，要么 <code>False</code>。它就像一个开关，非开即关，没有第三种状态。判断"对不对""成不成立"的结果，正是用布尔值来表示的。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-1-1-1_boolean_intro.png" alt="扣哒世界 布尔值示意图 - koudashijie.com">
+    <div class="caption">图1：布尔值就像一个开关——只有 True 和 False 两种状态</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-3-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<h3 id="sec-3-1-2">3.1.2 比较产生布尔值（Comparison Yields a Boolean）</h3>
+
+<h4>3.1.2.1 比一比，得出真或假
+    <span class="en">Compare two values, get true or false</span>
+</h4>
+
+<p>布尔值从哪来？最常见的来源就是<strong>比较</strong>。关卡说：<strong>"使用比较运算符对比两个值。比较的结果要么是 True（成立），要么是 False（不成立）。"</strong></p>
+
+<p>比如 <code>4 == 4</code> 这个比较，问的是"4 和 4 相等吗？"答案显然是"相等"，所以它的<strong>值就是 True</strong>。而 <code>4 == 5</code> 问"4 和 5 相等吗？"答案是"不相等"，它的值就是 False。一个比较表达式，最终会"算"出一个布尔值。</p>
+
+<h3 id="sec-3-1-3">3.1.3 if 语句的判断（The if Statement）</h3>
+
+<h4>3.1.3.1 条件为真才执行
+    <span class="en">Run the block only when true</span>
+</h4>
+
+<p>布尔值最重要的用武之地是 <code>if</code> 语句。关卡解释：<strong>"if 语句是说：'如果（if）这个为 True，那么就做那个。' if 内的代码块只会在条件成立（值为 True）时才会运行。"</strong></p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 480 150" width="480" role="img" aria-label="if语句判断流程">
+        <text x="30" y="45" font-size="18" font-family="monospace" fill="#d98ec0">if</text>
+        <text x="60" y="45" font-size="18" font-family="monospace" fill="#e8845a">2 + 2 == 4</text>
+        <text x="215" y="45" font-size="18" font-family="monospace" fill="#d8c8a8">:</text>
+        <!-- 条件评估 -->
+        <text x="250" y="45" font-size="13" font-family="sans-serif" fill="#6fae6f">→ 值为 True</text>
+        <line x1="130" y1="55" x2="130" y2="85" stroke="#E0A23F" stroke-width="2"/>
+        <polygon points="130,85 126,75 134,75" fill="#E0A23F"/>
+        <text x="60" y="110" font-size="18" font-family="monospace" fill="#e0a23f">hero.say</text>
+        <text x="160" y="110" font-size="18" font-family="monospace" fill="#d4b14a">("嘿！")</text>
+        <text x="260" y="110" font-size="13" font-family="sans-serif" fill="#E0A23F">← 条件为真，执行这一句</text>
+    </svg>
+</div>
+
+<p>所以 <code>if</code> 的工作流程是：先把条件算成一个布尔值，如果是 <code>True</code> 就执行下面缩进的代码块，如果是 <code>False</code> 就跳过。"叫阵"关卡的玩法正是<strong>修改条件让它变成 True</strong>，从而触发英雄说出激怒食人魔的话。</p>
+
+<!-- ==================== 3.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:15fc1530ec:START anchor=sec-3-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="15fc1530ec">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，超过 520 万编程比赛专业选手也在玩，写代码就是你的超能力。</span>
+</aside>
+<!-- CC-PROTECTION:AD:15fc1530ec:END -->
+
+<div class="section-header" id="section-3-2">
+    <h2>3.2 相等运算符 ==</h2>
+    <div class="en-title">The Equality Operator ==</div>
+</div>
+
+<h3 id="sec-3-2-1">3.2.1 == 检查是否相等（Checking Equality）</h3>
+
+<h4>3.2.1.1 两个等号，问"相等吗？"
+    <span class="en">Two equals signs ask "are they equal?"</span>
+</h4>
+
+<p>本单元的核心运算符是<span class="keyword">相等运算符（==）</span>。关卡介绍：<strong>"我们首先要接触的比较运算符是等于运算符。在 Python 和 JavaScript 中，该运算符被记作 ==。"</strong> 它检查两侧的值是否相等，相等得 <code>True</code>，不等得 <code>False</code>：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="num">4</span> <span class="hl">==</span> <span class="num">4</span>      <span class="cmt"># 值为 </span><span class="bool">True</span>
+<span class="num">4</span> <span class="hl">==</span> <span class="num">5</span>      <span class="cmt"># 值为 </span><span class="bool">False</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-3-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<h3 id="sec-3-2-2">3.2.2 == 与 = 的区别（== vs =）</h3>
+
+<h4>3.2.2.1 一个比较，一个赋值
+    <span class="en">One compares, one assigns</span>
+</h4>
+
+<p>这是初学者<strong>最容易混淆</strong>的一点，关卡郑重警告：<strong>"注意这里是两个等号连在一起，是 ==，而不是 =。一个等号是赋值运算符，用于为变量赋值！新编程者容易混淆这两个运算符！"</strong></p>
+
+<table class="styled-table">
+    <thead><tr><th>运算符</th><th>名称</th><th>作用</th><th>示例</th></tr></thead>
+    <tbody>
+        <tr><td><code>=</code></td><td>赋值运算符</td><td>把右边的值<strong>存进</strong>左边的变量</td><td><code>x = 5</code>（让 x 等于 5）</td></tr>
+        <tr><td><code>==</code></td><td>相等运算符</td><td><strong>比较</strong>两边是否相等，得布尔值</td><td><code>x == 5</code>（x 是 5 吗？）</td></tr>
+    </tbody>
+</table>
+
+<div class="warn-box">
+    <span class="warn-label">关键区分：</span>记住一句口诀——"<strong>一个等号是'变成'，两个等号是'是不是'</strong>"。在 <code>if</code> 条件里要判断相等，<strong>必须</strong>用 <code>==</code>。写成一个 <code>=</code> 是赋值，会导致语法错误或逻辑错误。
+</div>
+
+<h3 id="sec-3-2-3">3.2.3 与运算结合使用（Combining with Arithmetic）</h3>
+
+<h4>3.2.3.1 先算数，再比较
+    <span class="en">Calculate first, then compare</span>
+</h4>
+
+<p>"叫阵"关卡演示了 <code>==</code> 可以和上单元的数学运算符结合：<strong>先把两边的算式各自算出结果，再比较是否相等</strong>。例如：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="num">2</span> + <span class="num">2</span> <span class="hl">==</span> <span class="num">4</span>    <span class="cmt"># 左边算出 4，4 == 4 → </span><span class="bool">True</span>
+<span class="num">2</span> + <span class="num">2</span> <span class="hl">==</span> <span class="num">5</span>    <span class="cmt"># 左边算出 4，4 == 5 → </span><span class="bool">False</span></pre>
+</div>
+
+<p>运算优先于比较：<code>+</code> 先做完，得到的结果再交给 <code>==</code> 判断。这种"先计算后比较"的组合，让条件可以表达更复杂的判断。</p>
+
+<!-- ==================== 3.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=sec-3-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+<!-- CC-PROTECTION:HIDDEN:c95e4fc10b:START anchor=sec-3-2-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="c95e4fc10b">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:c95e4fc10b:END -->
+
+<div class="section-header" id="section-3-3">
+    <h2>3.3 type 类型属性</h2>
+    <div class="en-title">The "type" Property</div>
+</div>
+
+<h3 id="sec-3-3-1">3.3.1 type 是字符串属性（type Is a String Property）</h3>
+
+<h4>3.3.1.1 告诉你"这是什么"
+    <span class="en">Tells you what something is</span>
+</h4>
+
+<p>上单元你学会了读 <code>pos</code> 属性。本单元的明星属性是 <code>type</code>。"濒危树瘤之战"关卡介绍：<strong>"每种敌人都有一个属性，名为 type（类型），表示为字符串（引号内的数据内容，例如 'thrower'）。"</strong></p>
+
+<p>"嘲弄"关卡进一步强调它的普遍性：<strong>"所有的单位和物品都有 type 属性。这个属性是非常重要的，因为它让你能够对不同类型的敌人/朋友/物品定义不同的战术。"</strong> 食人魔有矮人（<code>"munchkin"</code>）、斗士（<code>"brawler"</code>）、投掷手（<code>"thrower"</code>）等，还有树瘤（<code>"burl"</code>）等——读 <code>type</code> 就能分辨它们。</p>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-3-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-3-3-2">3.3.2 type 后不加括号（No Parentheses After type）</h3>
+
+<h4>3.3.2.1 属性不是方法
+    <span class="en">A property is not a method</span>
+</h4>
+
+<p>关卡两度强调一个容易犯的错：<strong>"注意 type 是一种属性，而不是 moveXY(20, 20) 那样的方法。type 后不可以使用 ()。"</strong></p>
+
+<div class="text-illustration">
+    <div class="illus-title">💡 属性 vs 方法：读数据 vs 做动作</div>
+    <p><strong>方法</strong>是让对象"做一件事"，要带括号，如 <code>hero.moveXY(20, 20)</code>、<code>hero.attack(enemy)</code>。<strong>属性</strong>是对象"自带的一份数据"，直接读取、不带括号，如 <code>enemy.type</code>、<code>enemy.pos</code>。写成 <code>enemy.type()</code> 是错的——type 不是动作，不能被"调用"。</p>
+</div>
+
+<h3 id="sec-3-3-3">3.3.3 按类型分流战术（Branch by Type）</h3>
+
+<h4>3.3.3.1 用 type == 决定怎么打
+    <span class="en">Use type == to choose tactics</span>
+</h4>
+
+<p>把 <code>type</code> 属性和 <code>==</code> 运算符结合，就能<strong>针对不同类型的单位采取不同行动</strong>。这是本单元最强大的组合：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">if</span> enemy<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"munchkin"</span><span class="punc">:</span>   <span class="cmt"># 读 type 并比较</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>             <span class="cmt"># 矮人 → 攻击</span>
+<span class="kw">if</span> enemy<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"ogre"</span><span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">41</span><span class="punc">,</span> <span class="num">47</span><span class="punc">)</span>         <span class="cmt"># 食人魔 → 逃跑</span></pre>
+</div>
+
+<p>这样英雄就能"看人下菜"：矮人就打、投掷手也打、树瘤忽略、强敌逃跑。读类型 → 比较 → 分流行动，是处理多种对象的通用算法。</p>
+
+<!-- ==================== 3.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-3-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+<!-- CC-PROTECTION:HIDDEN:e0f63af2dc:START anchor=sec-3-3-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="e0f63af2dc">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:e0f63af2dc:END -->
+
+<div class="section-header" id="section-3-4">
+    <h2>3.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"为什么这样判断、这样分流"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-3-4-1">3.4.1 叫阵（Taunt）</h3>
+
+<h4>3.4.1.1 策略：把条件改成 True 来触发嘲讽
+    <span class="en">Strategy: make conditions true to taunt</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-4-1-1_taunt.png" alt="扣哒世界 叫阵关卡 - koudashijie.com">
+    <div class="caption">图2：叫阵——修改 if 条件使其为 True,让英雄喊话把食人魔引入雷区</div>
+</div>
+
+<p>这是布尔值与 <code>if</code> 的入门关。任务是让英雄说出激怒食人魔的话,把它们诱入雷区。算法思路是<strong>修改 if 后面的比较条件,使其值为 True</strong>——比如把条件改成 <code>3 + 3 == 6</code>(成立)或 <code>20 == 20</code>(成立),条件为真,下面的 <code>hero.say</code> 就会执行。这一关的精髓在于亲手体验"条件为 True 才触发动作"这一核心机制。</p>
+
+<div class="info-box">
+    <span class="info-label">理解要点:</span>只有当 <code>==</code> 两侧真正相等时,比较才得 True,if 块才运行。亲手把 <code>2 + 2 == 5</code>(False)改成相等的式子,就能直观看到条件真假如何决定代码是否执行。
+</div>
+
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-3-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+
+<h3 id="sec-3-4-2">3.4.2 濒危树瘤之战（Endangered Burl）</h3>
+
+<h4>3.4.2.1 策略：按 type 分四类应对
+    <span class="en">Strategy: handle four types differently</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-4-2-1_endangered_burl.png" alt="扣哒世界 濒危树瘤之战关卡 - koudashijie.com">
+    <div class="caption">图3：濒危树瘤之战——按 type 决定攻击、忽略还是逃跑</div>
+</div>
+
+<p>这一关首次把 <code>type</code> 和 <code>==</code> 结合实战。地图上混杂着多种单位,要求<strong>区别对待</strong>:攻击 <code>"thrower"</code> 和 <code>"munchkin"</code>,忽略 <code>"burl"</code>(濒危树瘤,不能伤害),遇到 <code>"ogre"</code> 强敌则逃往村口。算法思路是用<strong>多个 if 分别检查 enemy.type</strong>,每种类型对应一种行动。读类型、比较、分流——三步构成清晰的应对逻辑。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键洞察:</span>同样是循环找最近敌人,但行动不再是"见敌就打",而是<strong>先看它是什么类型,再决定怎么办</strong>。type 属性让英雄从"莽夫"升级为"会判断的战术家"。注意 type 后绝不能加括号。
+</div>
+
+<h3 id="sec-3-4-3">3.4.3 嘲弄（Munchkin Swarm）</h3>
+
+<h4>3.4.3.1 策略：把分流逻辑封进函数
+    <span class="en">Strategy: wrap branching logic in a function</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-4-3-1_munchkin_swarm.png" alt="扣哒世界 嘲弄关卡 - koudashijie.com">
+    <div class="caption">图4：嘲弄——攻击矮人、呼叫斗士、忽略树精,逻辑封装成函数</div>
+</div>
+
+<p>这一关把"按类型分流"和前面学过的<strong>函数</strong>结合起来。任务是攻击矮人(<code>"munchkin"</code>)、呼叫斗士(<code>"brawler"</code>,因为斗士要用陷阱对付)、忽略树精。算法思路是定义一个 <code>dealEnemy(enemy)</code> 函数,把"检查 type 并采取对应行动"的逻辑封装其中,主循环里找到敌人就调用它。这样代码既清晰又易复用。</p>
+
+<div class="tip-box">
+    <span class="tip-label">设计巧思:</span>把"类型判断 + 行动"打包成带参数的函数,是非常好的组织方式。主循环只管"找敌人、交给函数处理",具体怎么分类应对则藏在函数里。这正是第八单元"多参数函数"与本单元"类型判断"的融会贯通。
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-3-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<h3 id="sec-3-4-4">3.4.4 错误的类型（概念挑战 · Wrong Type）</h3>
+
+<h4>3.4.4.1 策略：用类型过滤,只打特定敌人
+    <span class="en">Strategy: filter by type, attack only one kind</span>
+</h4>
+
+<p>这是<strong>概念挑战</strong>,要击败至少 10 个 <code>"munchkin"</code>,但<strong>绝不能误伤其他单位</strong>——树精、骷髅不主动惹你,而今天农民穿了蓝衣会被 <code>findNearestEnemy</code> 当成敌人找到,却万万不能打。算法思路是:找到最近敌人后,<strong>用 <code>if enemy.type == "munchkin"</code> 作为过滤器</strong>,只有类型确实是矮人才攻击,其余一律放过。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+<span class="kw">if</span> enemy<span class="punc">:</span>
+    <span class="kw">if</span> enemy<span class="punc">.</span>type <span class="hl">==</span> <span class="str">"munchkin"</span><span class="punc">:</span>  <span class="cmt"># 类型过滤器</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>            <span class="cmt"># 只打矮人</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">算法本质:</span>这里 <code>type == "munchkin"</code> 充当了一道"<strong>身份核验</strong>"——找到的不一定是该打的。先核验类型再动手,既完成了任务,又避免误伤无辜。这是"类型判断"作为安全过滤器的典型应用。
+</div>
+
+<!-- ==================== 3.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-3-4-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-3-5">
+    <h2>3.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-3-5-1">3.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>3.5.1.1 判断与类型环节的典型问题
+    <span class="en">Typical issues with comparison and type</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/3-5-1-1_common_errors.png" alt="扣哒世界 类型判断常见错误示意 - koudashijie.com">
+    <div class="caption">图5：== 写成 =、type 加括号、类型拼写错,是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>把 <code>==</code> 写成 <code>=</code>——条件判断必须用两个等号，一个等号是赋值。</li>
+        <li>给 type 加括号——<code>enemy.type()</code> 是错的，type 是属性不是方法，应写 <code>enemy.type</code>。</li>
+        <li>类型字符串拼写或大小写错误——<code>"munchkin"</code> 必须用引号且拼写准确，<code>"Munchkin"</code> 不相等。</li>
+        <li>忘记给类型加引号——<code>enemy.type == munchkin</code> 会把 munchkin 当变量，应加引号。</li>
+        <li>没先判断敌人是否存在——直接读 <code>enemy.type</code> 而 enemy 为空时会出错，要先 <code>if enemy:</code>。</li>
+        <li>误伤不该打的单位——没用类型过滤就攻击，可能打到农民或濒危树瘤。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你完成流金沙漠第三单元！你掌握了编程中至关重要的"判断"能力——用布尔值表达真假，用 <code>==</code> 比较，用 <code>type</code> 识别身份，再让 <code>if</code> 根据结果分流行动。从此英雄不再盲目出手，而是会"看清对象、做出决策"。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>布尔值 Boolean</td><td>只有 True / False 两种值</td><td>叫阵</td></tr>
+            <tr><td>比较产生布尔值</td><td>比一比，得真或假</td><td>叫阵</td></tr>
+            <tr><td>if 语句</td><td>条件为 True 才执行</td><td>叫阵</td></tr>
+            <tr><td>相等运算符 ==</td><td>检查两侧是否相等</td><td>全部</td></tr>
+            <tr><td>== 与 = 之别</td><td>比较 vs 赋值，勿混淆</td><td>叫阵</td></tr>
+            <tr><td>type 属性</td><td>字符串，表示对象类型</td><td>濒危树瘤之战</td></tr>
+            <tr><td>type 不加括号</td><td>属性不是方法</td><td>濒危树瘤之战</td></tr>
+            <tr><td>按类型分流</td><td><code>type ==</code> 决定战术</td><td>嘲弄</td></tr>
+            <tr><td>类型当过滤器</td><td>核验身份再行动</td><td>错误的类型</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会判断真假、会识别类型的英雄，才能在流金沙漠中明辨敌友、精准决策。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️⚖️🎯
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+<!-- CC-PROTECTION:HIDDEN:695737e7af:START anchor=h3-15 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="695737e7af">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC3-38A89C9BCE04。</span>
+<!-- CC-PROTECTION:HIDDEN:695737e7af:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第三单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
