@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC14-091C3CE33A76">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十四单元：单元复习 · 借刀杀敌 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC14-091C3CE33A76 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS4-第十四单元</div>
+
+    <a href="#section-14-1" class="nav-section">14.1 温故：四大工具</a>
+    <a href="#sec-14-1-1" class="nav-sub">14.1.1 字典 · 召唤 · 指挥</a>
+    <a href="#sec-14-1-2" class="nav-sub">14.1.2 for 循环与遍历</a>
+
+    <a href="#section-14-2" class="nav-section">14.2 新技能：找最值</a>
+    <a href="#sec-14-2-1" class="nav-sub">14.2.1 打擂台算法</a>
+    <a href="#sec-14-2-2" class="nav-sub">14.2.2 遍历找最大 health</a>
+    <a href="#sec-14-2-3" class="nav-sub">14.2.3 每帧重算的意义</a>
+
+    <a href="#section-14-3" class="nav-section">14.3 战术思维复习</a>
+    <a href="#sec-14-3-1" class="nav-sub">14.3.1 集中火力</a>
+    <a href="#sec-14-3-2" class="nav-sub">14.3.2 借刀杀人</a>
+
+    <a href="#section-14-4" class="nav-section">14.4 实战关卡精讲</a>
+    <a href="#sec-14-4-1" class="nav-sub">14.4.1 借刀</a>
+
+    <a href="#section-14-5" class="nav-section">14.5 常见错误</a>
+    <a href="#sec-14-5-1" class="nav-sub">14.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 全阶段总复习</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十四单元：单元复习 · 借刀杀敌</h1>
+    <div class="subtitle">Unit 14: Unit Review — The Borrowed Sword</div>
+    <div class="badge">计算机科学 4 · 安息云峰 Cloudrip Mountain · 借刀 Borrowed Sword</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 14.1 ==================== -->
+<div class="section-header" id="section-14-1">
+    <h2>14.1 温故：四大工具</h2>
+    <div class="en-title">Recap: Your Four Core Tools</div>
+</div>
+
+<p>走到安息云峰的这一站，你已经攒下了一整套指挥军队的本领。本单元是一个<strong>复习单元</strong>——我们先把前几单元学的核心工具串起来温习一遍，再在"借刀"这一关里把它们<strong>综合运用</strong>，同时学会一个全新的经典算法：<strong>遍历数组找最值</strong>。这一关不需要英雄亲自动手，而是考验你能不能用一段聪明的程序，指挥弓箭手打赢一场原本必输的仗。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元定位：</span>复习 + 综合 + 新算法。你要复习<strong>字典</strong>（坐标）、<strong>summon/command</strong>（召唤与指挥）、<strong>for 循环遍历</strong>三大工具，并新学"<strong>打擂台式找最大值</strong>"这一在编程里无处不在的算法，最后把它们拧成一个漂亮的"借刀杀人"战术。
+</div>
+
+<h3 id="sec-14-1-1">14.1.1 字典 · 召唤 · 指挥（Dict, Summon, Command）</h3>
+
+<h4>14.1.1.1 三张老面孔快速回顾
+    <span class="en">Three familiar faces</span>
+</h4>
+
+<p>先用三张卡片快速回忆前几单元的核心工具。它们在本关都会以某种形式出现或作为基础。</p>
+
+<div class="review-grid">
+    <div class="review-card">
+        <h4>🗂️ 字典 Dictionary</h4>
+        <p>用花括号存键值对，坐标写成 <code>{"x": 50, "y": 40}</code>，作为"去哪里"的命令目标。</p>
+    </div>
+    <div class="review-card">
+        <h4>⭐ 召唤 summon</h4>
+        <p>先 <code>costOf</code> 问价、比 <code>gold</code>，钱够就 <code>summon("soldier")</code> 把金币换成部队。</p>
+    </div>
+    <div class="review-card">
+        <h4>🎖️ 指挥 command</h4>
+        <p>三参数 <code>command(谁, 动作, 目标)</code>：移动传坐标字典，攻击传敌人对象。</p>
+    </div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-14-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3 id="sec-14-1-2">14.1.2 for 循环与遍历（For Loops &amp; Iteration）</h3>
+
+<h4>14.1.2.1 用一句 for 指挥全军
+    <span class="en">One for loop commands the whole army</span>
+</h4>
+
+<p>第十二、十三单元你把 <code>for</code> 循环练成了指挥的默认武器：<code>for friend in hero.findFriends():</code> 就能逐个取出盟友、逐个下令，不用再手写索引和自增。本关同样以 for 遍历为骨架——只不过这次要遍历<strong>两次</strong>：先遍历敌人找出目标，再遍历盟友统一下令。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 复习：for 遍历盟友，逐个下令</span>
+friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+<span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> target<span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 14.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-14-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+<div class="section-header" id="section-14-2">
+    <h2>14.2 新技能：找最值</h2>
+    <div class="en-title">New Skill: Finding the Maximum</div>
+</div>
+
+<h3 id="sec-14-2-1">14.2.1 打擂台算法（The King-of-the-Hill Pattern）</h3>
+
+<h4>14.2.1.1 遍历中"擂主"不断被挑战
+    <span class="en">A champion that keeps getting challenged</span>
+</h4>
+
+<p>"从一堆东西里挑出最大的那个"是编程里最基础、最常用的算法之一，我们叫它<strong>打擂台</strong>（找最值）。做法是：先设一个"擂主"变量存"目前见过的最大值"，再逐个检查每个元素——如果某个比当前擂主还大，它就成为新擂主。全部检查完，擂主就是真正的最大值。本关要找的是 <code>health</code>（生命值）最高的敌人。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 220" width="620" role="img" aria-label="打擂台找最大值">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">打擂台：逐个挑战，留下最大的</text>
+        <g font-family="sans-serif" font-size="12">
+            <text x="40" y="60" fill="#4d6373">敌人生命值：</text>
+            <rect x="150" y="45" width="70" height="34" rx="6" fill="#eaf2f8" stroke="#4A7A9B"/>
+            <text x="185" y="67" text-anchor="middle" fill="#3a6480">30</text>
+            <rect x="240" y="45" width="70" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="275" y="67" text-anchor="middle" fill="#2f7a45">80</text>
+            <rect x="330" y="45" width="70" height="34" rx="6" fill="#eaf2f8" stroke="#4A7A9B"/>
+            <text x="365" y="67" text-anchor="middle" fill="#3a6480">50</text>
+            <rect x="420" y="45" width="70" height="34" rx="6" fill="#fbeae7" stroke="#C0453B" stroke-width="2"/>
+            <text x="455" y="67" text-anchor="middle" fill="#9e352c">95</text>
+            <rect x="510" y="45" width="70" height="34" rx="6" fill="#eaf2f8" stroke="#4A7A9B"/>
+            <text x="545" y="67" text-anchor="middle" fill="#3a6480">60</text>
+
+            <text x="40" y="120" fill="#bd7415" font-weight="bold">擂主变化：</text>
+            <text x="150" y="120" fill="#4d6373" font-family="monospace">0 → 30 → 80 → 80 → </text>
+            <text x="360" y="120" fill="#C0453B" font-family="monospace" font-weight="bold">95</text>
+            <text x="410" y="120" fill="#4d6373" font-family="monospace"> → 95</text>
+
+            <rect x="180" y="150" width="260" height="42" rx="8" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="310" y="176" text-anchor="middle" fill="#bd7415" font-weight="bold">最终擂主 = 95（生命值最高的敌人）</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-14-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-14-2-2">14.2.2 遍历找最大 health（Loop to Find Max Health）</h3>
+
+<h4>14.2.2.1 两个变量：擂主与它的分数
+    <span class="en">Two variables: the champion and its score</span>
+</h4>
+
+<p>把打擂台翻译成代码，需要两个变量：一个记"当前最强的敌人对象"（<code>toughest</code>），一个记"这个最强敌人的生命值"（<code>mostHealth</code>）。开局把 <code>toughest</code> 设为 <code>None</code>、<code>mostHealth</code> 设为 <code>0</code>；然后 <code>for enemy in enemies:</code> 逐个比较，遇到 <code>enemy.health &gt; mostHealth</code> 就同时更新这两个变量。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 打擂台：找出生命值最高的敌人</span>
+toughest = <span class="kw">None</span>          <span class="cmt"># 擂主（对象），一开始还没有</span>
+mostHealth = <span class="num">0</span>            <span class="cmt"># 擂主的生命值，从 0 起</span>
+enemies = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+<span class="kw">for</span> enemy <span class="kw">in</span> enemies<span class="punc">:</span>
+    <span class="kw">if</span> enemy<span class="punc">.</span>health &gt; mostHealth<span class="punc">:</span>   <span class="cmt"># 比擂主还强？</span>
+        toughest = enemy               <span class="cmt"># 换擂主</span>
+        mostHealth = enemy<span class="punc">.</span>health      <span class="cmt"># 更新最高分</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">两个变量必须"同步更新"：</span>一旦发现更强的敌人，<code>toughest</code>（是谁）和 <code>mostHealth</code>（多强）要在同一个 if 里一起改。如果只更新其中一个，"擂主"和"擂主的分数"就对不上了，后续比较全乱套。这是打擂台算法最容易出错的地方。
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么 mostHealth 从 0 开始？</span>因为任何活着的敌人生命值都大于 0，所以第一个敌人一定能顺利"登上擂台"成为初始擂主。把初始最大值设成 0（或一个足够小的数），能保证擂台不会空着。
+</div>
+
+
+<!-- CC-PROTECTION:AD:de8534a7d9:START anchor=sec-14-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="de8534a7d9">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从第一行代码开始，把你的想法变成真的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:de8534a7d9:END -->
+<!-- CC-PROTECTION:HIDDEN:46e77c9962:START anchor=sec-14-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="46e77c9962">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:46e77c9962:END -->
+
+<h3 id="sec-14-2-3">14.2.3 每帧重算的意义（Recompute Every Tick）</h3>
+
+<h4>14.2.3.1 目标会变，所以要不停重找
+    <span class="en">The target changes, so keep re-finding it</span>
+</h4>
+
+<p>本关最妙的一点在关卡提示里说得很清楚："不要持续攻击最难对付的敌人直到击败它！你要让你的弓箭手不断地将目标换为任何此刻生命值最高的敌人！"因为随着战斗进行，各单位的生命值时刻在变——现在最强的，被打几下后可能就不再是最强的了。所以整段"找最值 + 下令"必须放进 <code>while True</code>，<strong>每一帧都重新算一次擂主</strong>，让弓箭手的火力永远压在当下最硬的那个目标上。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔄 每帧重算的三步节拍</div>
+    <strong>①感知</strong>：<code>findEnemies()</code> 拿到当前所有敌人<br>
+    <strong>②决策</strong>：打擂台算出此刻 health 最高的 <code>toughest</code><br>
+    <strong>③行动</strong>：命令所有弓箭手集火 <code>toughest</code><br>
+    下一帧，重复①②③——目标随战况实时切换，绝不"死磕"一个。
+</div>
+
+<!-- ==================== 14.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-14-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:6cc332c5ca:START anchor=sec-14-2-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="6cc332c5ca">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:6cc332c5ca:END -->
+
+<div class="section-header" id="section-14-3">
+    <h2>14.3 战术思维复习</h2>
+    <div class="en-title">Reviewing Tactical Thinking</div>
+</div>
+
+<h3 id="sec-14-3-1">14.3.1 集中火力（Focus Fire）</h3>
+
+<h4>14.3.1.1 全军打同一个目标
+    <span class="en">The whole army hits one target</span>
+</h4>
+
+<p>找到擂主之后，怎么下令？答案是<strong>集中火力</strong>——遍历所有弓箭手，让他们统统攻击<strong>同一个</strong> <code>toughest</code>。这与上一单元"各打各的最近敌人"正好相反：那里是分散应敌保阵型，这里是攥成拳头快速打死一个高威胁目标。用哪种，取决于战场目标。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 集中火力：所有弓箭手打同一个目标</span>
+<span class="kw">if</span> toughest<span class="punc">:</span>
+    friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> friends<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> toughest<span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">别忘了先 if toughest：</span>如果场上暂时没有敌人，打擂台结束后 <code>toughest</code> 仍是 <code>None</code>。此时若直接下令攻击 <code>None</code> 会出错。用 <code>if toughest:</code> 守卫一下——有目标才下令，没目标就跳过。这是"用前先判断存在"的好习惯。
+</div>
+
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-14-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+
+<h3 id="sec-14-3-2">14.3.2 借刀杀人（Let Enemies Fight）</h3>
+
+<h4>14.3.2.1 让两拨敌人先自相残杀
+    <span class="en">Let the two enemy sides wear each other down</span>
+</h4>
+
+<p>"借刀"这个关卡名点出了最高明的战术思想。场上食人魔正和雪人打架，关卡分析指出：如果你什么都不做、或只瞄最近的敌人，一方会赢、且残兵足以反过来击败你的弓箭手。聪明的做法是<strong>始终攻击当下最强的一方</strong>——相当于总去帮"弱势方"补刀，让两拨敌人尽可能互相消耗（借他们的刀互砍），等他们两败俱伤，你的弓箭手再收拾残局。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 180" width="600" role="img" aria-label="借刀杀人战术">
+        <text x="300" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">借刀：总打最强的一方，促其两败俱伤</text>
+        <g font-family="sans-serif" font-size="12">
+            <circle cx="130" cy="90" r="34" fill="#fbeae7" stroke="#C0453B" stroke-width="2"/>
+            <text x="130" y="87" text-anchor="middle" fill="#9e352c" font-weight="bold">食人魔</text>
+            <text x="130" y="104" text-anchor="middle" fill="#9e352c" font-size="10">互砍</text>
+            <circle cx="470" cy="90" r="34" fill="#eaf2f8" stroke="#4A7A9B" stroke-width="2"/>
+            <text x="470" y="87" text-anchor="middle" fill="#3a6480" font-weight="bold">雪人</text>
+            <text x="470" y="104" text-anchor="middle" fill="#3a6480" font-size="10">互砍</text>
+            <line x1="164" y1="90" x2="436" y2="90" stroke="#E0912F" stroke-width="2" stroke-dasharray="6"/>
+            <text x="300" y="82" text-anchor="middle" fill="#bd7415">⚔ 自相残杀 ⚔</text>
+            <rect x="210" y="130" width="180" height="34" rx="8" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="300" y="153" text-anchor="middle" fill="#2f7a45" font-weight="bold">弓箭手：补刀最强方</text>
+            <line x1="300" y1="94" x2="300" y2="128" stroke="#2f7a45" stroke-width="2" stroke-dasharray="4"/>
+        </g>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">算法与战术的合一：</span>"总打最强的一方"在代码里恰好就是"每帧找 health 最高的敌人来打"。打擂台算法在这里不只是一段技巧，它<strong>本身就是这条战术的化身</strong>——谁暂时占上风就削谁，动态维持天平平衡，直到双方一起被拖垮。算法即策略，这正是本关想让你体会的编程之美。
+</div>
+
+<!-- ==================== 14.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-14-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:0303774feb:START anchor=sec-14-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0303774feb">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC14-091C3CE33A76。</span>
+<!-- CC-PROTECTION:HIDDEN:0303774feb:END -->
+
+<div class="section-header" id="section-14-4">
+    <h2>14.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 借刀 -->
+<div class="level-card" id="sec-14-4-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 借刀</span>
+        <h3>🗡️ 借刀 —— 集火最强，坐收渔利</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/14-4-1-1_borrowed_sword.png" alt="扣哒世界 借刀关卡 - koudashijie.com">
+            <div class="caption">图2：借刀——食人魔与雪人混战，弓箭手每帧改瞄当下生命值最高者，坐收两败俱伤之利</div>
+        </div>
+
+        <h4>策略：英雄不出手，只当"军师"</h4>
+        <p>本关最反直觉的一点是——<strong>英雄自己不参与战斗</strong>。关卡明确说"你的英雄不需要参与战斗"。你的角色是"军师"：站在后方，用一段每帧刷新的程序，指挥弓箭手把火力始终压在场上最强的敌人身上。真正的杀伤既来自弓箭手，也来自被你操控着"互相消耗"的两拨敌人。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法结构是"<code>while True</code> + 两个 for"。每一帧分三步走。第一步<strong>找最值</strong>：把 <code>toughest = None</code>、<code>mostHealth = 0</code> 归零后，用 <code>for enemy in hero.findEnemies():</code> 打擂台，遇到 <code>enemy.health &gt; mostHealth</code> 就更新 <code>toughest</code> 和 <code>mostHealth</code>。第二步<strong>判断存在</strong>：<code>if toughest:</code> 确认确实找到了目标。第三步<strong>集中火力</strong>：<code>for friend in hero.findFriends():</code> 让每个弓箭手都 <code>command(friend, "attack", toughest)</code>。下一帧重复，目标随战况实时切换。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：找最值 → 判断存在 → 集中火力</span>
+toughest = <span class="kw">None</span>
+mostHealth = <span class="num">0</span>
+<span class="kw">for</span> enemy <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">():</span>
+    <span class="kw">if</span> enemy<span class="punc">.</span>health &gt; mostHealth<span class="punc">:</span>
+        toughest = enemy
+        mostHealth = enemy<span class="punc">.</span>health
+
+<span class="kw">if</span> toughest<span class="punc">:</span>
+    <span class="kw">for</span> friend <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">():</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>friend<span class="punc">,</span> <span class="str">"attack"</span><span class="punc">,</span> toughest<span class="punc">)</span></pre>
+        </div>
+
+        <h4>算法要点回顾</h4>
+        <p>这段代码把本阶段的工具几乎全用上了：<strong>两次 for 遍历</strong>（一次找目标、一次下令）、<strong>command 三参数</strong>（攻击传敌人对象）、<strong>打擂台找最值</strong>（新算法）、以及 <code>if toughest</code> 的<strong>存在性判断</strong>。缺了打擂台就无法锁定最强目标；缺了每帧重算就会"死磕一个"而错失动态平衡；缺了 <code>if toughest</code> 则可能对 <code>None</code> 下令而报错。</p>
+
+        <div class="warn-box">
+            <span class="warn-label">变量归零要在循环内：</span><code>toughest = None</code> 和 <code>mostHealth = 0</code> 必须写在 <code>while True</code> 的<strong>每一轮开头</strong>。若写在循环外只归零一次，擂主就会一直沿用上一帧的旧值，无法随战况刷新，弓箭手会盯着一个可能已经变弱甚至消失的目标。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">为什么不用 findNearest？</span>如果只用 <code>findNearestEnemy()</code> 打最近的，你可能帮某一方太快清场，让胜方带着大量残兵反扑。而"打最强的"能持续压制暂时的优势方，把两拨敌人的战力都耗在互殴上——这就是本关必须自己写打擂台、而不能偷懒用现成"找最近"的原因。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 14.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=h3-8 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<div class="section-header" id="section-14-5">
+    <h2>14.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-14-5-1">14.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>14.5.1.1 找最值与集火的典型问题
+    <span class="en">Typical issues with max-finding and focus fire</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/14-5-1-1_common_errors.png" alt="扣哒世界 借刀常见错误速查 - koudashijie.com">
+    <div class="caption">图3：变量没在循环内归零、只更新一个变量、忘记 if toughest，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>归零写在循环外——<code>toughest</code>、<code>mostHealth</code> 应在 <code>while True</code> 每轮开头重置，否则擂主永远刷新不了。</li>
+        <li>只更新一个变量——发现更强敌人时，<code>toughest</code> 和 <code>mostHealth</code> 要在同一个 if 里一起改，漏一个就对不上。</li>
+        <li>比较写反——想找最大却写成 <code>enemy.health &lt; mostHealth</code>，结果找出的是最弱的敌人。</li>
+        <li>忘记 if toughest——场上没敌人时 <code>toughest</code> 为 <code>None</code>，直接攻击 <code>None</code> 会报错。</li>
+        <li>死磕一个目标——把找最值放在 <code>while True</code> 外只算一次，弓箭手会盯着旧目标，违背"不断改瞄"的战术。</li>
+        <li>英雄亲自上阵——本关英雄应只做指挥，冲进混战反而可能被残兵击败。</li>
+        <li>攻击传错目标——<code>"attack"</code> 第三参数是敌人对象 <code>toughest</code>，不是坐标字典。</li>
+        <li>mostHealth 初值设太大——若设成一个比所有敌人都大的数，就没有敌人能登上擂台，<code>toughest</code> 一直是 <code>None</code>。</li>
+    </ul>
+</div>
+
+<!-- ==================== 总复习小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-14-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>全阶段总复习 ✨</h3>
+
+    <p>恭喜你走到安息云峰这一阶段的复习关！回望这一路，你从手写坐标字典指挥英雄，到用首领之星召唤军队，到用 <code>command</code> 三参数下令，再到用 <code>while</code> 和 <code>for</code> 遍历整支部队；这一单元你又把它们综合起来，并学会了编程中无处不在的<strong>打擂台找最值</strong>算法，用一招"集火最强、借刀杀人"打赢了一场原本必输的仗。更重要的是，你体会到了<strong>算法即战术</strong>——一段好代码，本身就是一条好计谋。来做一次全阶段的核心概念大回顾：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>阶段主题</th><th>核心工具 / 算法</th><th>代表关卡</th></tr></thead>
+        <tbody>
+            <tr><td>字典练习（U11）</td><td>坐标字典、summon、command 三参数</td><td>安息之云指挥官 / 佣兵山</td></tr>
+            <tr><td>认识 for（U12）</td><td><code>for X in Y</code>、<code>range()</code>、双数组配对</td><td>木材守卫 / 动物园管理员</td></tr>
+            <tr><td>练习 for（U13）</td><td><code>friend.findNearestEnemy()</code>、相对坐标 <code>pos.x</code></td><td>狩猎派对</td></tr>
+            <tr><td>找最值（U14）</td><td>打擂台：擂主 + 最高分同步更新</td><td>借刀</td></tr>
+            <tr><td>集中火力</td><td>全军 for 遍历打同一目标</td><td>借刀</td></tr>
+            <tr><td>存在性判断</td><td><code>if toughest:</code> 用前先判断</td><td>借刀</td></tr>
+            <tr><td>每帧重算</td><td><code>while True</code> 内感知→决策→行动</td><td>借刀 / 狩猎派对</td></tr>
+            <tr><td>算法即战术</td><td>"打最强" = 借刀杀人的化身</td><td>借刀</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把字典、循环、找最值熔于一炉，让程序替自己运筹帷幄的英雄，才是云峰之上真正的统帅。<br>
+        带着这一身本领，继续向雪山之巅挺进吧，勇敢的程序员！🏔️🗡️♟️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（安息云峰）：第十四单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
