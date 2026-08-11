@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC12-9BB843BAEBE3">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十二单元：事件处理机制 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC12-9BB843BAEBE3 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第十二单元</div>
+
+    <a href="#section-12-1" class="nav-section">12.1 事件处理入门</a>
+    <a href="#sec-12-1-1" class="nav-sub">12.1.1 顺序执行 vs 并行</a>
+    <a href="#sec-12-1-2" class="nav-sub">12.1.2 什么是事件处理器</a>
+    <a href="#sec-12-1-3" class="nav-sub">12.1.3 on() 绑定事件</a>
+
+    <a href="#section-12-2" class="nav-section">12.2 宠物与类型查找</a>
+    <a href="#sec-12-2-1" class="nav-sub">12.2.1 findNearestByType</a>
+    <a href="#sec-12-2-2" class="nav-sub">12.2.2 fetch 取物</a>
+    <a href="#sec-12-2-3" class="nav-sub">12.2.3 常见类型字符串</a>
+
+    <a href="#section-12-3" class="nav-section">12.3 事件参数 event</a>
+    <a href="#sec-12-3-1" class="nav-sub">12.3.1 event.speaker</a>
+    <a href="#sec-12-3-2" class="nav-sub">12.3.2 event.message</a>
+    <a href="#sec-12-3-3" class="nav-sub">12.3.3 二者联合判断</a>
+
+    <a href="#section-12-4" class="nav-section">12.4 实战关卡精讲</a>
+    <a href="#sec-12-4-1" class="nav-sub">12.4.1 快速赛跑</a>
+    <a href="#sec-12-4-2" class="nav-sub">12.4.2 沙漠蘑菇/蘑菇之声</a>
+    <a href="#sec-12-4-3" class="nav-sub">12.4.3 钥匙陷阱</a>
+    <a href="#sec-12-4-4" class="nav-sub">12.4.4 命令链</a>
+    <a href="#sec-12-4-5" class="nav-sub">12.4.5 宠物工程师</a>
+    <a href="#sec-12-4-6" class="nav-sub">12.4.6 宠物翻译家/副官</a>
+    <a href="#sec-12-4-7" class="nav-sub">12.4.7 炼金术</a>
+    <a href="#sec-12-4-8" class="nav-sub">12.4.8 概念挑战合集</a>
+
+    <a href="#section-12-5" class="nav-section">12.5 常见错误</a>
+    <a href="#sec-12-5-1" class="nav-sub">12.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十二单元：事件处理机制</h1>
+    <div class="subtitle">Unit 12: Event Handling &amp; Pet Programming</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 快速赛跑 → 奥林匹克比赛</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 12.1 ==================== -->
+<div class="section-header" id="section-12-1">
+    <h2>12.1 事件处理入门</h2>
+    <div class="en-title">Getting Started with Event Handling</div>
+</div>
+
+<h3 id="sec-12-1-1">12.1.1 顺序执行 vs 并行（Sequential vs Parallel）</h3>
+
+<h4>12.1.1.1 代码本来是"排队"执行的
+    <span class="en">Code normally runs in line</span>
+</h4>
+
+<p>"快速赛跑"关卡一开场就点明了一个基础事实：<strong>"通常而言，代码会按顺序执行：下一条命令运行之前，必须要等前一条先执行完。"</strong> 这就是<span class="keyword">顺序执行（Sequential Execution）</span>——一行做完才轮到下一行，像排队一样。</p>
+
+<p>可是在赛跑关卡里，如果英雄先跑、宠物再跑，宠物永远追不上。关卡给出了解法：<strong>"如果将宠物的代码放入事件处理器函数，那就会和英雄的代码并行运行！"</strong> 这里出现了本单元的核心思想——<span class="keyword">并行（Parallel）</span>：让宠物和英雄的代码<strong>同时</strong>跑起来，而不是一个等另一个。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-1-1-1_sequential_vs_parallel.png" alt="扣哒世界 顺序执行与并行对比 - koudashijie.com">
+    <div class="caption">图1：顺序执行像单车道排队，事件处理让宠物与英雄"分道并行"</div>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 540 170" width="540" role="img" aria-label="顺序与并行对比">
+        <!-- 顺序 -->
+        <text x="120" y="24" font-size="13" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">顺序执行（慢）</text>
+        <rect x="30" y="35" width="80" height="28" rx="6" fill="#FBF1DC" stroke="#E0A23F"/>
+        <text x="70" y="54" font-size="12" font-family="sans-serif" fill="#3a2e1f" text-anchor="middle">英雄跑</text>
+        <line x1="110" y1="49" x2="135" y2="49" stroke="#9C5E14" stroke-width="2"/><polygon points="141,49 131,44 131,54" fill="#9C5E14"/>
+        <rect x="143" y="35" width="80" height="28" rx="6" fill="#FBF1DC" stroke="#E0A23F"/>
+        <text x="183" y="54" font-size="12" font-family="sans-serif" fill="#3a2e1f" text-anchor="middle">宠物才跑</text>
+        <!-- 并行 -->
+        <text x="400" y="24" font-size="13" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">并行执行（快）</text>
+        <rect x="320" y="35" width="150" height="28" rx="6" fill="#fdf3df" stroke="#E8A33D"/>
+        <text x="395" y="54" font-size="12" font-family="sans-serif" fill="#3a2e1f" text-anchor="middle">英雄跑（主线程）</text>
+        <rect x="320" y="72" width="150" height="28" rx="6" fill="#f6efe2" stroke="#B5742A"/>
+        <text x="395" y="91" font-size="12" font-family="sans-serif" fill="#3a2e1f" text-anchor="middle">宠物跑（事件处理器）</text>
+        <text x="395" y="125" font-size="11" font-family="sans-serif" fill="#B5742A" text-anchor="middle">两条线同时进行 ↑</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-12-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<h3 id="sec-12-1-2">12.1.2 什么是事件处理器（What Is an Event Handler）</h3>
+
+<h4>12.1.2.1 "听到信号才触发"的特殊函数
+    <span class="en">A function triggered by a signal</span>
+</h4>
+
+<p><span class="keyword">事件处理器（Event Handler）</span>本质上是一个<strong>函数</strong>，但它很特别：它不由你主动调用，而是<strong>当某个"事件"发生时，由系统自动触发执行</strong>。你只需提前写好这个函数、并把它"登记"到某个事件上，之后每当那个事件发生，函数就会自动运行。</p>
+
+<p>比如"快速赛跑"里的 <code>petMove</code> 函数，登记给了 <code>"spawn"</code>（出生/登场）事件——宠物一登场，这个函数就自动执行，宠物就跑了起来，完全不用等英雄那行代码。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔔 事件处理器的"三步曲"</div>
+    第一步：<strong>定义</strong>一个函数（写好"事件发生时该做什么"）<br>
+    第二步：用 <code>on()</code> 把它<strong>绑定</strong>到某个事件名上<br>
+    第三步：<strong>等待触发</strong>——事件一发生，函数自动执行，与主代码并行<br>
+    <strong>你负责"写好+挂上"，系统负责"在对的时机喊它起来"。</strong>
+</div>
+
+<h3 id="sec-12-1-3">12.1.3 on() 绑定事件（Binding with on()）</h3>
+
+<h4>12.1.3.1 pet.on(事件名, 函数)
+    <span class="en">pet.on(eventName, handler)</span>
+</h4>
+
+<p>绑定事件用的是 <code>on()</code> 方法。它接收两个参数：第一个是<strong>事件名字符串</strong>（如 <code>"spawn"</code>、<code>"hear"</code>），第二个是<strong>要绑定的函数名</strong>（注意：只写函数名，<strong>不加括号</strong>）。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 130" width="520" role="img" aria-label="on 方法解剖">
+        <text x="20" y="55" font-size="18" font-family="monospace" fill="#f0c674">pet</text>
+        <text x="58" y="55" font-size="18" font-family="monospace" fill="#d8c8a8">.</text>
+        <text x="68" y="55" font-size="18" font-family="monospace" fill="#e0a23f">on</text>
+        <text x="92" y="55" font-size="18" font-family="monospace" fill="#d8c8a8">(</text>
+        <text x="103" y="55" font-size="18" font-family="monospace" fill="#d4b14a">"spawn"</text>
+        <text x="185" y="55" font-size="18" font-family="monospace" fill="#d8c8a8">,</text>
+        <text x="200" y="55" font-size="18" font-family="monospace" fill="#e0a23f">petMove</text>
+        <text x="290" y="55" font-size="18" font-family="monospace" fill="#d8c8a8">)</text>
+        <!-- 标注 -->
+        <line x1="140" y1="65" x2="140" y2="92" stroke="#E0A23F" stroke-width="2"/>
+        <text x="110" y="112" font-size="12" font-family="sans-serif" fill="#E0A23F">事件名（字符串）</text>
+        <line x1="235" y1="65" x2="235" y2="92" stroke="#e8845a" stroke-width="2"/>
+        <text x="300" y="112" font-size="12" font-family="sans-serif" fill="#e8845a">函数名（不加括号！）</text>
+    </svg>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">petMove</span><span class="punc">(</span>event<span class="punc">):</span>
+    <span class="obj">pet</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">50</span><span class="punc">,</span> <span class="num">21</span><span class="punc">)</span>
+
+<span class="obj">pet</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"spawn"</span><span class="punc">,</span> <span class="hl">petMove</span><span class="punc">)</span>   <span class="cmt"># 绑定：宠物一登场就跑</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">50</span><span class="punc">,</span> <span class="num">12</span><span class="punc">)</span>       <span class="cmt"># 英雄同时也跑</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">最易错的一点：</span>绑定时写 <code>pet.on("spawn", petMove)</code> 而<strong>不是</strong> <code>pet.on("spawn", petMove())</code>。加了括号意味着"立刻调用这个函数、把它的返回值传进去"，那就完全错了——我们要传的是<strong>函数本身</strong>，让系统日后去调用它。
+</div>
+
+<!-- ==================== 12.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-12-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+<!-- CC-PROTECTION:HIDDEN:ea5a680ab4:START anchor=sec-12-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ea5a680ab4">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:ea5a680ab4:END -->
+
+<div class="section-header" id="section-12-2">
+    <h2>12.2 宠物与类型查找</h2>
+    <div class="en-title">Pets &amp; Finding by Type</div>
+</div>
+
+<h3 id="sec-12-2-1">12.2.1 findNearestByType（按类型查找）</h3>
+
+<h4>12.2.1.1 用类型字符串精准定位
+    <span class="en">Locate by a type string</span>
+</h4>
+
+<p>"沙漠蘑菇"关卡介绍了宠物的独特能力：<strong>"findNearestByType 接受一个字符串参数，表示你要找的物品/单位的类型。"</strong> 有了它，宠物不需要"特殊眼镜"就能按类型挑出你想要的东西——比如只找药水、不碰有毒的蘑菇。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>potion = <span class="obj">pet</span><span class="punc">.</span><span class="fn">findNearestByType</span><span class="punc">(</span><span class="str">"potion"</span><span class="punc">)</span>   <span class="cmt"># 只找药水</span>
+skeleton = <span class="obj">pet</span><span class="punc">.</span><span class="fn">findNearestByType</span><span class="punc">(</span><span class="str">"skeleton"</span><span class="punc">)</span> <span class="cmt"># 也能找敌人</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">不止找物品：</span>"蘑菇之声"关卡强调，<strong>findNearestByType 找的不仅仅是物品</strong>——它同样能找骷髅、弓箭手、巫师等单位。凡是有"类型"的对象，都能用它精准定位。
+</div>
+
+<h3 id="sec-12-2-2">12.2.2 fetch 取物（Fetching Items）</h3>
+
+<h4>12.2.2.1 让宠物"叼"东西回来
+    <span class="en">Let the pet retrieve items</span>
+</h4>
+
+<p>找到了还得取回。<code>pet.fetch(item)</code> 让宠物去<strong>拾取并运送</strong>某件物品给英雄。"蘑菇之声"关卡特别说明：宠物 <strong>fetch 只是搬运，不会消耗或使用物品</strong>——它把药水叼过来，药水还是完整的药水。这在"钥匙陷阱"这类关卡尤其重要，因为英雄本人去碰钥匙会触发陷阱，而让宠物 fetch 就安全了。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>potion = <span class="obj">pet</span><span class="punc">.</span><span class="fn">findNearestByType</span><span class="punc">(</span><span class="str">"potion"</span><span class="punc">)</span>
+<span class="obj">pet</span><span class="punc">.</span><span class="fn">fetch</span><span class="punc">(</span>potion<span class="punc">)</span>   <span class="cmt"># 宠物把药水叼回来给英雄</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:21f9328d9c:START anchor=sec-12-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="21f9328d9c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>目前 扣哒世界 支持 Python、JavaScript、C++ 等多种语言，会员还可解锁更多高级内容。官网：<a href="https://koudashijie.com/">koudashijie.com</a></span>
+</aside>
+<!-- CC-PROTECTION:AD:21f9328d9c:END -->
+
+<h3 id="sec-12-2-3">12.2.3 常见类型字符串（Common Type Strings）</h3>
+
+<h4>12.2.3.1 小心拼写，类型是字符串
+    <span class="en">Mind the spelling — types are strings</span>
+</h4>
+
+<p>"钥匙陷阱"关卡反复提醒：<strong>"小心物品类型和拼写错误。物品类型是字符串。"</strong> 类型名必须一字不差，多一个字母、少一个连字符，宠物就找不到东西。下表整理了本单元用到的常见类型：</p>
+
+<table class="styled-table">
+    <thead><tr><th>类别</th><th>类型字符串</th><th>说明</th></tr></thead>
+    <tbody>
+        <tr><td>药水</td><td><code>"potion"</code></td><td>大/中/小药水统一都是这个类型</td></tr>
+        <tr><td>铜钥匙</td><td><code>"bronze-key"</code></td><td>注意中间是连字符 <code>-</code></td></tr>
+        <tr><td>银钥匙</td><td><code>"silver-key"</code></td><td>拼写务必准确</td></tr>
+        <tr><td>金钥匙</td><td><code>"gold-key"</code></td><td>不是 <code>"goldkey"</code></td></tr>
+        <tr><td>单位</td><td><code>"skeleton"</code>、<code>"archer"</code>、<code>"soldier"</code>、<code>"wizard"</code>、<code>"paladin"</code></td><td>敌我单位也能按类型找</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 12.3 ==================== -->
+<div class="section-header" id="section-12-3">
+    <h2>12.3 事件参数 event</h2>
+    <div class="en-title">The event Parameter</div>
+</div>
+
+<p>"命令链"关卡揭示了事件处理器更深的一层：<strong>"事件处理器函数会获得触发事件（event）的信息。"</strong> 那个几乎每个处理器都写着的 <code>event</code> 参数，其实装着关于"这次事件到底怎么回事"的宝贵数据。对 <code>"hear"</code>（听到声音）事件来说，最有用的是两个属性：<code>event.speaker</code> 和 <code>event.message</code>。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="event 对象结构">
+        <rect x="180" y="15" width="160" height="34" rx="8" fill="#C8821E"/>
+        <text x="260" y="38" font-size="15" font-family="monospace" fill="#fff" text-anchor="middle">event</text>
+        <line x1="230" y1="49" x2="150" y2="80" stroke="#E0A23F" stroke-width="2"/>
+        <line x1="290" y1="49" x2="370" y2="80" stroke="#E0A23F" stroke-width="2"/>
+        <rect x="55" y="82" width="190" height="36" rx="8" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="150" y="105" font-size="14" font-family="monospace" fill="#9C5E14" text-anchor="middle">.speaker（谁说的）</text>
+        <rect x="285" y="82" width="190" height="36" rx="8" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="380" y="105" font-size="14" font-family="monospace" fill="#9C5E14" text-anchor="middle">.message（说了啥）</text>
+        <text x="150" y="138" font-size="11" font-family="sans-serif" fill="#6b5840" text-anchor="middle">是一个"单位"</text>
+        <text x="380" y="138" font-size="11" font-family="sans-serif" fill="#6b5840" text-anchor="middle">是一个"字符串"</text>
+    </svg>
+</div>
+
+<h3 id="sec-12-3-1">12.3.1 event.speaker（谁说的话）</h3>
+
+<h4>12.3.1.1 认出声音来自哪个单位
+    <span class="en">Identify who is speaking</span>
+</h4>
+
+<p><code>event.speaker</code> 是<strong>发出声音的那个单位</strong>。"命令链"关卡用它让宠物只回应英雄：<strong>"你就可以让宠物只回应英雄说的话。"</strong> 判断方法是把 speaker 和某个已知单位作比较：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">onHear</span><span class="punc">(</span>event<span class="punc">):</span>
+    <span class="kw">if</span> event<span class="punc">.</span><span class="hl">speaker</span> == <span class="obj">hero</span><span class="punc">:</span>   <span class="cmt"># 只有英雄说话才回应</span>
+        <span class="obj">pet</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"WOOF"</span><span class="punc">)</span>
+
+<span class="obj">pet</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"hear"</span><span class="punc">,</span> onHear<span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">过滤发言人：</span>很多关卡（如"宠物探索者""危险钥匙""奥林匹克比赛"）都要求<strong>只听特定角色的话，忽略别人</strong>。核心手法就是先用 <code>findNearestByType</code> 或 <code>findNearestFriend</code> 拿到"该听的那个单位"，再用 <code>if event.speaker == 那个单位</code> 把其他人的声音全部滤掉。
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-12-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3 id="sec-12-3-2">12.3.2 event.message（说了什么）</h3>
+
+<h4>12.3.2.1 读取声音的内容
+    <span class="en">Read the spoken content</span>
+</h4>
+
+<p><code>event.message</code> 是<strong>被说出来的那句话</strong>，是个字符串。"宠物翻译家"关卡用它解密雇佣兵的命令，"宠物副官"用它区分"Fire"和"Heal"两种指令。判断方法就是把 message 和目标字符串比对：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">onHear</span><span class="punc">(</span>event<span class="punc">):</span>
+    <span class="kw">if</span> event<span class="punc">.</span><span class="hl">message</span> == <span class="str">"Fire"</span><span class="punc">:</span>
+        <span class="obj">pet</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">64</span><span class="punc">,</span> <span class="num">16</span><span class="punc">)</span>
+    <span class="kw">elif</span> event<span class="punc">.</span><span class="hl">message</span> == <span class="str">"Heal"</span><span class="punc">:</span>
+        <span class="obj">pet</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">64</span><span class="punc">,</span> <span class="num">52</span><span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-12-3-3">12.3.3 二者联合判断（Combining speaker &amp; message）</h3>
+
+<h4>12.3.3.1 既看是谁说、又看说了啥
+    <span class="en">Check both who and what</span>
+</h4>
+
+<p>最严谨的判断会<strong>同时用上 speaker 和 message</strong>——先确认"是不是该听的人"，再确认"他说了什么"。"奥林匹克比赛"就是典范：宠物必须等<strong>裁判</strong>（而不是粉丝）说出<strong>"Start"</strong>才起跑，用 <code>and</code> 把两个条件连起来：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>referee = <span class="obj">pet</span><span class="punc">.</span><span class="fn">findNearestByType</span><span class="punc">(</span><span class="str">"wizard"</span><span class="punc">)</span>
+<span class="kw">if</span> event<span class="punc">.</span>speaker == referee <span class="kw">and</span> event<span class="punc">.</span>message == <span class="str">"Start"</span><span class="punc">:</span>
+    <span class="obj">pet</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">53</span><span class="punc">,</span> <span class="num">27</span><span class="punc">)</span>   <span class="cmt"># 只有裁判喊 Start 才起跑</span></pre>
+</div>
+
+<!-- ==================== 12.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-12-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+<!-- CC-PROTECTION:HIDDEN:88e3ff3a07:START anchor=sec-12-3-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="88e3ff3a07">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:88e3ff3a07:END -->
+
+<div class="section-header" id="section-12-4">
+    <h2>12.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"事件怎么绑、参数怎么读、并行怎么配合"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-12-4-1">12.4.1 快速赛跑（Sprint）</h3>
+
+<h4>12.4.1.1 策略：把宠物代码搬进事件处理器
+    <span class="en">Strategy: move pet code into a handler</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-4-1-1_sprint.png" alt="扣哒世界 快速赛跑关卡 - koudashijie.com">
+    <div class="caption">图2：快速赛跑——宠物代码放进 spawn 处理器，与英雄并行冲线</div>
+</div>
+
+<p>这是事件处理的首秀。算法思路极简却关键：定义 <code>petMove(event)</code> 让宠物跑向终点，然后用 <code>pet.on("spawn", petMove)</code> 绑定到"出生"事件。<strong>要点在于理解"为什么这样能赢"</strong>——如果宠物代码写在主线程里，它得等英雄那行跑完；而搬进事件处理器后，宠物在"登场"瞬间就并行开跑，两者同时冲刺，宠物才追得上。</p>
+
+<h3 id="sec-12-4-2">12.4.2 沙漠蘑菇 &amp; 蘑菇之声（Mushroom Levels）</h3>
+
+<h4>12.4.2.1 策略：宠物送药、英雄看血收集
+    <span class="en">Strategy: pet fetches potions, hero watches health</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-4-2-1_mushroom.png" alt="扣哒世界 沙漠蘑菇关卡 - koudashijie.com">
+    <div class="caption">图3：沙漠蘑菇——宠物在处理器里不停送药，英雄在主线程按血量安全收集</div>
+</div>
+
+<p>这两关首次让"事件处理器 + findNearestByType + fetch"三件套协同工作。算法思路是<strong>分工并行</strong>：在 <code>onSpawn</code> 处理器里让宠物用 <code>findNearestByType("potion")</code> 不断找药水并 <code>fetch</code> 送来；英雄则在主 <code>while</code> 循环里收集蘑菇，但<strong>加一道血量守卫</strong>——只有当 <code>hero.health > hero.maxHealth / 3</code> 时才去碰有毒的蘑菇。宠物负责"续命"，英雄负责"采集"，两条线各跑各的。</p>
+
+<p>"蘑菇之声"进阶为<strong>按顺序取多样物品</strong>：处理器里先 fetch 药水、再 fetch 金钥匙，英雄则先打骷髅、骷髅倒下后再去开箱。关键是理解宠物的取物动作与英雄的战斗是并行推进的。</p>
+
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-12-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<h3 id="sec-12-4-3">12.4.3 钥匙陷阱（The Key to Success）</h3>
+
+<h4>12.4.3.1 策略：钥匙交给宠物，英雄绝不亲取
+    <span class="en">Strategy: let the pet handle the trapped keys</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-4-3-1_key_trap.png" alt="扣哒世界 钥匙陷阱关卡 - koudashijie.com">
+    <div class="caption">图4：钥匙陷阱——宠物依次 fetch 铜、银、金三钥匙，英雄专心御敌</div>
+</div>
+
+<p>这一关的核心策略是<strong>"危险的活交给宠物"</strong>：英雄本人去拿钥匙会中陷阱，所以在 <code>onSpawn</code> 里让宠物连续 fetch 三把钥匙（铜、银、金），英雄则在主循环里对付食人魔、并在血量低时让宠物去找药水。<strong>思路要点是分清"谁该做什么"</strong>——宠物承担搬运，英雄承担战斗，两者互不阻塞。拼写三种钥匙类型时务必准确。</p>
+
+<h3 id="sec-12-4-4">12.4.4 命令链（Chain of Command）</h3>
+
+<h4>12.4.4.1 策略：用 event.speaker 只认英雄
+    <span class="en">Strategy: respond only to the hero</span>
+</h4>
+
+<p>这一关引入 <code>event.speaker</code>。算法思路是：在 <code>onHear</code> 里判断 <code>if event.speaker == hero</code>，只有英雄说话时宠物才回应"WOOF"去唤醒巫师；英雄则在主循环里发现敌人后 <code>say("Ogres!")</code> 报警，再按路线移动。<strong>关键在于理解"发言人过滤"</strong>——场上可能有很多声音，必须靠 speaker 锁定唯一该响应的对象。</p>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-12-4-4 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+<!-- CC-PROTECTION:HIDDEN:00681d4988:START anchor=sec-12-4-4 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="00681d4988">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC12-9BB843BAEBE3。</span>
+<!-- CC-PROTECTION:HIDDEN:00681d4988:END -->
+
+<h3 id="sec-12-4-5">12.4.5 宠物工程师（Pet the Engineer）</h3>
+
+<h4>12.4.5.1 策略：按发言人分派宠物去不同按钮
+    <span class="en">Strategy: route the pet by who called</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-4-5-1_pet_engineer.png" alt="扣哒世界 宠物工程师关卡 - koudashijie.com">
+    <div class="caption">图5：宠物工程师——听弓箭手呼救去左按钮，听士兵呼救去右按钮</div>
+</div>
+
+<p>这一关把 <code>event.speaker</code> 用出了"分支路由"的味道。算法思路是：先用 <code>findNearestByType</code> 分别拿到 archer 和 soldier 两个单位，再在处理器里用 <code>if/elif</code> 判断 <code>event.speaker</code> 到底是谁——是弓箭手就去左按钮 <code>(32,30)</code>，是士兵就去右按钮 <code>(48,30)</code>。<strong>核心思想是"根据谁在呼救，决定宠物去哪"</strong>，speaker 成了选择动作的依据。</p>
+
+<h3 id="sec-12-4-6">12.4.6 宠物翻译家 &amp; 宠物副官（Message Levels）</h3>
+
+<h4>12.4.6.1 策略：用 event.message 决定动作
+    <span class="en">Strategy: act on the message content</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-4-6-1_pet_translator.png" alt="扣哒世界 宠物翻译家关卡 - koudashijie.com">
+    <div class="caption">图6：宠物翻译家——把听到的方位词倒过来念，为炮兵翻译命令</div>
+</div>
+
+<p>这两关的主角是 <code>event.message</code>。"宠物翻译家"的思路是<strong>把听到的消息映射成另一句话</strong>：听到 "North" 就说 "Htron"、"South" 就说 "Htuos"——用一串 <code>if</code> 做"消息→翻译"的对照表。"宠物副官"则是<strong>把消息映射成动作</strong>：听到 "Fire" 移到底部、"Heal" 移到顶部。妙处在于消息由英雄在主循环里根据战况动态喊出（血量低喊 "Heal"、遇强敌喊 "Fire"），宠物听令而动——<strong>这就是主线程与事件处理器"喊话—响应"的协作模式</strong>。</p>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-12-4-6 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-12-4-7">12.4.7 炼金术（Alchemy）</h3>
+
+<h4>12.4.7.1 策略：听令则取药，否则回待命点
+    <span class="en">Strategy: fetch on command, else return</span>
+</h4>
+
+<p>这一关把 message 判断和 fetch、待命结合起来。算法思路是：在 <code>onHear</code> 里，若 <code>event.message == "Fetch"</code> 就让宠物 fetch 药水送给正在战斗的英雄；<strong>否则（else）让宠物回到红色待命标记</strong>。这体现了一个实用模式——<strong>事件处理器不仅规定"该做什么"，也规定"没轮到时待在哪"</strong>，让宠物始终处于随时待命的状态。</p>
+
+<h3 id="sec-12-4-8">12.4.8 概念挑战合集：宠物探索者 · 危险钥匙 · 奥林匹克比赛</h3>
+
+<h4>12.4.8.1 策略：speaker + message 双重把关
+    <span class="en">Strategy: filter by speaker and message together</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-4-8-1_olympics.png" alt="扣哒世界 奥林匹克比赛关卡 - koudashijie.com">
+    <div class="caption">图7：奥林匹克比赛——只听裁判喊"Start"才起跑，避免抢跑犯规</div>
+</div>
+
+<p>这三个挑战关卡是本单元的综合考场，共同套路是<strong>"先认人、再听话"</strong>。"宠物探索者"要只听探索者、不听农民，再按他报的数字 1/2/3 去对应按钮；"危险钥匙"要只听圣骑士，按她说的 Gold/Silver/Bronze 取对应钥匙；"奥林匹克比赛"要只听裁判、且只在他喊 "Start" 时起跑。</p>
+
+<div class="remember-box">
+    <span class="remember-label">通用算法骨架：</span>这类关卡都可归纳为同一套结构——<strong>①</strong> 在处理器外或内先 <code>findNearestByType</code>/<code>findNearestFriend</code> 锁定"该听的单位"；<strong>②</strong> 用 <code>if event.speaker == 该单位</code> 过滤掉无关声音；<strong>③</strong> 在其内部再用 <code>if event.message == ...</code> 的分支决定具体动作。<strong>先过滤发言人、再解析消息内容</strong>，是响应式事件编程的经典范式。
+</div>
+
+<!-- ==================== 12.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-12-4-8 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+
+<div class="section-header" id="section-12-5">
+    <h2>12.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-12-5-1">12.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>12.5.1.1 事件处理的典型问题
+    <span class="en">Typical issues with event handling</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch5_sec12_12-5-1-1_common_errors.png" alt="扣哒世界 事件处理常见错误示意 - koudashijie.com">
+    <div class="caption">图8：绑定加括号、类型拼错、忘记 event 参数，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>绑定时给函数名加了括号——写成 <code>pet.on("spawn", petMove())</code>，应为不带括号的 <code>petMove</code>，否则传的是返回值而非函数本身。</li>
+        <li>处理器函数漏写 <code>event</code> 参数——像 <code>def onHear():</code> 会导致无法接收事件数据，应写 <code>def onHear(event):</code>。</li>
+        <li>类型字符串拼写/连字符错误——<code>"gold-key"</code> 写成 <code>"goldkey"</code> 或 <code>"gold_key"</code>，宠物就找不到。</li>
+        <li>混淆 speaker 与 message——speaker 是"单位"要和单位比较，message 是"字符串"要和字符串比较，两者不能对调。</li>
+        <li>忘记过滤发言人——不判断 <code>event.speaker</code> 就响应，结果宠物听了农民或粉丝的话，导致抢跑或走错。</li>
+        <li>比较 message 时忘了引号或写错大小写——<code>"Start"</code> 写成 <code>Start</code>（变量）或 <code>"start"</code>（小写）都匹配不上。</li>
+        <li>误以为事件处理器会阻塞主线程——它其实是并行运行的，主 <code>while</code> 循环不会等它，需理解两条线各自独立。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在流金沙漠掌握了事件处理机制！你学会了用事件处理器让宠物与英雄<strong>并行</strong>行动、用 <code>on()</code> 绑定事件、用 <code>findNearestByType</code> 和 <code>fetch</code> 指挥宠物取物，还能通过 <code>event.speaker</code> 和 <code>event.message</code> 让宠物"听懂"该听谁的、听到了什么。这是迈向响应式、事件驱动编程的重要一步。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>并行执行</td><td>事件处理器与主线程同时运行</td><td>快速赛跑</td></tr>
+            <tr><td>on() 绑定</td><td><code>pet.on("事件", 函数名)</code> 不加括号</td><td>快速赛跑</td></tr>
+            <tr><td>findNearestByType</td><td>按类型字符串找物品/单位</td><td>沙漠蘑菇</td></tr>
+            <tr><td>fetch 取物</td><td>宠物搬运物品，不消耗</td><td>蘑菇之声、钥匙陷阱</td></tr>
+            <tr><td>event 参数</td><td>装着触发事件的信息</td><td>命令链</td></tr>
+            <tr><td>event.speaker</td><td>是谁说的（单位）</td><td>命令链、宠物工程师</td></tr>
+            <tr><td>event.message</td><td>说了什么（字符串）</td><td>宠物翻译家、副官</td></tr>
+            <tr><td>speaker+message</td><td>先认人、再听话</td><td>危险钥匙、奥林匹克</td></tr>
+            <tr><td>喊话—响应协作</td><td>英雄 say，宠物听令而动</td><td>炼金术、宠物副官</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会绑定事件、会读取消息的英雄，才能与忠诚的宠物并肩征服沙漠。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️🐾📡
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=h3-19 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第十二单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
