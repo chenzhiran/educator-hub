@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH5-SEC11-0745C93DF285">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十一单元：循环控制 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH5-SEC11-0745C93DF285 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS3-第十一单元</div>
+
+    <a href="#section-11-1" class="nav-section">11.1 循环控制概览</a>
+    <a href="#sec-11-1-1" class="nav-sub">11.1.1 什么是循环控制</a>
+    <a href="#sec-11-1-2" class="nav-sub">11.1.2 continue 与 break 对比</a>
+    <a href="#sec-11-1-3" class="nav-sub">11.1.3 一轮循环的生命周期</a>
+
+    <a href="#section-11-2" class="nav-section">11.2 continue 跳过本轮</a>
+    <a href="#sec-11-2-1" class="nav-sub">11.2.1 continue 的执行逻辑</a>
+    <a href="#sec-11-2-2" class="nav-sub">11.2.2 continue + 条件判断</a>
+    <a href="#sec-11-2-3" class="nav-sub">11.2.3 用 continue 过滤对象</a>
+
+    <a href="#section-11-3" class="nav-section">11.3 break 跳出循环</a>
+    <a href="#sec-11-3-1" class="nav-sub">11.3.1 break 的执行逻辑</a>
+    <a href="#sec-11-3-2" class="nav-sub">11.3.2 break 与终止条件</a>
+    <a href="#sec-11-3-3" class="nav-sub">11.3.3 break 之后的代码</a>
+
+    <a href="#section-11-4" class="nav-section">11.4 实战关卡精讲</a>
+    <a href="#sec-11-4-1" class="nav-sub">11.4.1 炼金术传承</a>
+    <a href="#sec-11-4-2" class="nav-sub">11.4.2 伪装大师</a>
+    <a href="#sec-11-4-3" class="nav-sub">11.4.3 逃到春天</a>
+
+    <a href="#section-11-5" class="nav-section">11.5 进阶技巧</a>
+    <a href="#sec-11-5-1" class="nav-sub">11.5.1 二者的配合使用</a>
+    <a href="#sec-11-5-2" class="nav-sub">11.5.2 continue 与死循环风险</a>
+
+    <a href="#section-11-6" class="nav-section">11.6 常见错误</a>
+    <a href="#sec-11-6-1" class="nav-sub">11.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十一单元：循环控制</h1>
+    <div class="subtitle">Unit 11: Loop Control — continue &amp; break</div>
+    <div class="badge">计算机科学 3 · 流金沙漠 Sarven Desert · 炼金术传承 → 逃到春天</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 11.1 ==================== -->
+<div class="section-header" id="section-11-1">
+    <h2>11.1 循环控制概览</h2>
+    <div class="en-title">Overview of Loop Control</div>
+</div>
+
+<h3 id="sec-11-1-1">11.1.1 什么是循环控制（What Is Loop Control）</h3>
+
+<h4>11.1.1.1 在循环里"改道"的两个开关
+    <span class="en">Two switches that reroute a loop</span>
+</h4>
+
+<p>你已经熟悉了 <span class="keyword">while 循环（while loop）</span>——它会一遍又一遍地执行循环体。但真实世界里，循环并不总是"从头到尾老老实实跑一整轮"。有时你想<strong>跳过某一轮的剩余部分</strong>，有时你想<strong>干脆彻底离开循环</strong>。这就是<span class="keyword">循环控制（Loop Control）</span>要解决的问题。</p>
+
+<p>本单元介绍两个关键的循环控制语句：<code>continue</code> 和 <code>break</code>。它们就像装在循环里的两个开关——<code>continue</code> 是"跳过本轮、重来下一轮"，<code>break</code> 是"立刻离开整个循环"。掌握了它们，你就能让循环真正听从你的指挥。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-1-1-1_loop_control_intro.png" alt="扣哒世界 循环控制示意图 - koudashijie.com">
+    <div class="caption">图1：continue 像"跳过这一站的班车"，break 像"直接下车走人"</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-11-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<h3 id="sec-11-1-2">11.1.2 continue 与 break 对比（continue vs break）</h3>
+
+<h4>11.1.2.1 一张表看清区别
+    <span class="en">The difference at a glance</span>
+</h4>
+
+<p>这两个语句名字都短，作用却截然不同。最容易混淆的地方在于：<strong>continue 不会结束循环，break 才会</strong>。下表帮你一眼分清：</p>
+
+<table class="styled-table">
+    <thead><tr><th>语句</th><th>作用</th><th>跳到哪里</th><th>循环是否继续</th></tr></thead>
+    <tbody>
+        <tr><td><code>continue</code></td><td>跳过本轮剩余代码</td><td>回到循环开头，进入下一轮</td><td>继续</td></tr>
+        <tr><td><code>break</code></td><td>终止整个循环</td><td>跳到循环外，执行循环后面的代码</td><td>结束</td></tr>
+    </tbody>
+</table>
+
+<div class="remember-box">
+    <span class="remember-label">一句话记忆：</span><strong>continue = "这一轮我不干了，下一轮见"；break = "整个循环我都不干了，散伙"。</strong> 前者是"跳过"，后者是"退出"。
+</div>
+
+<h3 id="sec-11-1-3">11.1.3 一轮循环的生命周期（The Life of One Iteration）</h3>
+
+<h4>11.1.3.1 循环体里发生了什么
+    <span class="en">What happens inside the loop body</span>
+</h4>
+
+<p>要真正理解 <code>continue</code> 和 <code>break</code>，先要看清一轮循环（英文叫 <span class="keyword-en">iteration</span>，迭代）是怎么走的。一个 <code>while True</code> 循环，每一轮都会从循环体第一行开始，逐行往下执行，跑到最后一行后，再自动回到第一行开始下一轮。<code>continue</code> 和 <code>break</code> 就是在这个流程中"插一脚"：</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 260" width="560" role="img" aria-label="循环控制流程图">
+        <!-- 循环开始 -->
+        <rect x="200" y="15" width="160" height="36" rx="8" fill="#C8821E"/>
+        <text x="280" y="38" font-size="14" font-family="sans-serif" fill="#fff" text-anchor="middle">循环开头（下一轮起点）</text>
+        <!-- 箭头 -->
+        <line x1="280" y1="51" x2="280" y2="78" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="280,84 275,74 285,74" fill="#9C5E14"/>
+        <!-- 循环体 -->
+        <rect x="180" y="85" width="200" height="90" rx="8" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="280" y="108" font-size="13" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">循环体（逐行执行）</text>
+        <text x="280" y="132" font-size="12" font-family="monospace" fill="#3a2e1f" text-anchor="middle">if 条件: continue ──┐</text>
+        <text x="280" y="152" font-size="12" font-family="monospace" fill="#3a2e1f" text-anchor="middle">if 条件: break ────┘</text>
+        <text x="280" y="170" font-size="11" font-family="sans-serif" fill="#6b5840" text-anchor="middle">其余代码...</text>
+        <!-- continue 回环 -->
+        <path d="M 180 110 Q 90 110 90 33 Q 90 15 195 20" fill="none" stroke="#B5742A" stroke-width="2" stroke-dasharray="5,4"/>
+        <polygon points="195,20 185,16 187,26" fill="#B5742A"/>
+        <text x="60" y="75" font-size="12" font-family="sans-serif" fill="#B5742A" text-anchor="middle">continue</text>
+        <text x="60" y="90" font-size="10" font-family="sans-serif" fill="#B5742A" text-anchor="middle">跳回开头</text>
+        <!-- 自然回环 -->
+        <path d="M 380 130 Q 480 130 480 33 Q 480 15 365 20" fill="none" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="365,20 375,16 373,26" fill="#9C5E14"/>
+        <text x="510" y="80" font-size="11" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">正常结尾</text>
+        <text x="510" y="95" font-size="10" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">也回开头</text>
+        <!-- break 出口 -->
+        <line x1="280" y1="175" x2="280" y2="210" stroke="#C0392B" stroke-width="2"/>
+        <polygon points="280,216 275,206 285,206" fill="#C0392B"/>
+        <rect x="190" y="217" width="180" height="34" rx="8" fill="#fbe8e3" stroke="#C0392B" stroke-width="2"/>
+        <text x="280" y="239" font-size="13" font-family="sans-serif" fill="#a5331f" text-anchor="middle">break → 循环外的代码</text>
+    </svg>
+</div>
+
+<p>可以看到：<strong>continue 把控制权抛回循环开头</strong>（虚线箭头），本轮后面的代码全部被跳过；而 <strong>break 直接冲出循环</strong>（红色出口），连"回开头"都不做了，程序继续执行循环<em>后面</em>的语句。</p>
+
+<!-- ==================== 11.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:9dfa595e04:START anchor=sec-11-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9dfa595e04">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，玩家已累计编写超过 10 亿行真实代码，编程也能很酷。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9dfa595e04:END -->
+<!-- CC-PROTECTION:HIDDEN:4fd7d6552f:START anchor=sec-11-1-3 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4fd7d6552f">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:4fd7d6552f:END -->
+
+<div class="section-header" id="section-11-2">
+    <h2>11.2 continue 跳过本轮</h2>
+    <div class="en-title">continue — Skip the Current Iteration</div>
+</div>
+
+<h3 id="sec-11-2-1">11.2.1 continue 的执行逻辑（How continue Works）</h3>
+
+<h4>11.2.1.1 "这一轮的剩下部分，不看了"
+    <span class="en">Skip the rest of this round</span>
+</h4>
+
+<p>"炼金术传承"关卡这样介绍：<strong>"使用 continue 语句停止循环的当前迭代过程，并在下一轮循环的开始处重新开始。"</strong> 换句话说，程序一旦执行到 <code>continue</code>，就会<strong>立即放弃本轮循环体里 continue 之后的所有代码</strong>，直接跳回循环开头，开始新的一轮。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="continue 语句解剖">
+        <text x="20" y="35" font-size="15" font-family="monospace" fill="#d98ec0">while</text>
+        <text x="75" y="35" font-size="15" font-family="monospace" fill="#f0c674">True</text>
+        <text x="115" y="35" font-size="15" font-family="monospace" fill="#d8c8a8">:</text>
+        <text x="40" y="62" font-size="15" font-family="monospace" fill="#d98ec0">if</text>
+        <text x="70" y="62" font-size="15" font-family="monospace" fill="#d8c8a8">not enemy:</text>
+        <text x="80" y="89" font-size="15" font-family="monospace" fill="#d98ec0">continue</text>
+        <text x="80" y="120" font-size="14" font-family="monospace" fill="#a08a5e"># ↓ 这些代码本轮被跳过</text>
+        <!-- 标注 -->
+        <line x1="150" y1="80" x2="290" y2="80" stroke="#B5742A" stroke-width="2" stroke-dasharray="4,3"/>
+        <line x1="290" y1="80" x2="290" y2="20" stroke="#B5742A" stroke-width="2" stroke-dasharray="4,3"/>
+        <polygon points="290,20 285,30 295,30" fill="#B5742A"/>
+        <text x="360" y="55" font-size="12" font-family="sans-serif" fill="#E0A23F">跳回 while 开头</text>
+        <text x="360" y="72" font-size="12" font-family="sans-serif" fill="#E0A23F">重新找敌人</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:fc3dddac56:START anchor=sec-11-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="fc3dddac56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，把编程变成闯关游戏，玩着玩着就成了别人眼里的代码大佬。</span>
+</aside>
+<!-- CC-PROTECTION:AD:fc3dddac56:END -->
+
+<h3 id="sec-11-2-2">11.2.2 continue + 条件判断（continue with if）</h3>
+
+<h4>11.2.2.1 只在特定情况下跳过
+    <span class="en">Skip only when a condition is met</span>
+</h4>
+
+<p>单独一个 <code>continue</code> 会让循环体后半部分永远执行不到，几乎没有意义。它真正的威力来自和 <code>if</code> 搭档。关卡明确指出：<strong>"continue 可以和条件判别搭配起来，跳过部分代码。"</strong> 也就是"当满足某个条件时，才跳过本轮"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">True</span><span class="punc">:</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> <span class="kw">not</span> enemy<span class="punc">:</span>
+        <span class="hl">continue</span>   <span class="cmt"># 没有敌人 → 跳过本轮，重新去找</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span>   <span class="cmt"># 只有"有敌人"时才会执行到这里</span></pre>
+</div>
+
+<p>这段代码的意思是：如果没找到敌人（<code>not enemy</code> 为真），就 <code>continue</code> 跳回开头重新找；只有当敌人确实存在时，程序才会跳过那个 <code>if</code>，继续往下执行攻击代码。<code>continue</code> 就像一道"守门",不满足前提就把你请回起点。</p>
+
+<h3 id="sec-11-2-3">11.2.3 用 continue 过滤对象（Filtering with continue）</h3>
+
+<h4>11.2.3.1 遇到"不该处理"的对象就跳过
+    <span class="en">Skip objects you should not handle</span>
+</h4>
+
+<p>continue 最实用的场景之一，是<strong>过滤掉不符合要求的对象</strong>。"炼金术传承"关卡要求避开毒药，只取水。思路是：找到物品后先检查它的 <code>type</code>，如果是毒药就 <code>continue</code> 跳过，绝不去碰它：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>item = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+<span class="kw">if</span> item<span class="punc">.</span>type <span class="kw">is</span> <span class="str">"poison"</span><span class="punc">:</span>
+    <span class="hl">continue</span>   <span class="cmt"># 是毒药 → 跳过，不去拿</span>
+<span class="cmt"># 走到这里，物品一定不是毒药，可以安全处理</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">过滤思维：</span>把 continue 想象成一个"筛子"——每一轮先用 <code>if</code> 检查对象是否合格，不合格的直接 continue 筛掉，让后面的代码只处理"通过筛选"的对象。这是处理混杂数据时极其常见的模式。
+</div>
+
+<!-- ==================== 11.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-11-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<div class="section-header" id="section-11-3">
+    <h2>11.3 break 跳出循环</h2>
+    <div class="en-title">break — Exit the Loop Entirely</div>
+</div>
+
+<h3 id="sec-11-3-1">11.3.1 break 的执行逻辑（How break Works）</h3>
+
+<h4>11.3.1.1 "整个循环，到此为止"
+    <span class="en">End the whole loop here</span>
+</h4>
+
+<p>如果说 <code>continue</code> 是"跳过本轮",那 <code>break</code> 就是"彻底收工"。程序执行到 <code>break</code> 时，会<strong>立刻终止整个循环</strong>，不再有下一轮，控制权转交给循环<em>后面</em>的第一条语句。对于 <code>while True</code> 这种本来永不停止的死循环来说，<code>break</code> 是让它优雅退出的关键出口。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="break 语句解剖">
+        <text x="20" y="35" font-size="15" font-family="monospace" fill="#d98ec0">while</text>
+        <text x="75" y="35" font-size="15" font-family="monospace" fill="#f0c674">True</text>
+        <text x="115" y="35" font-size="15" font-family="monospace" fill="#d8c8a8">:</text>
+        <text x="40" y="62" font-size="15" font-family="monospace" fill="#d98ec0">if</text>
+        <text x="70" y="62" font-size="15" font-family="monospace" fill="#d8c8a8">hero.time > 30:</text>
+        <text x="80" y="89" font-size="15" font-family="monospace" fill="#e8845a">break</text>
+        <text x="20" y="120" font-size="15" font-family="monospace" fill="#f0c674">hero.moveXY(46, 34)</text>
+        <!-- 标注 -->
+        <line x1="150" y1="83" x2="330" y2="83" stroke="#C0392B" stroke-width="2"/>
+        <line x1="330" y1="83" x2="330" y2="112" stroke="#C0392B" stroke-width="2"/>
+        <polygon points="330,118 325,108 335,108" fill="#C0392B"/>
+        <text x="400" y="90" font-size="12" font-family="sans-serif" fill="#C0392B">直接跳到</text>
+        <text x="400" y="107" font-size="12" font-family="sans-serif" fill="#C0392B">循环外</text>
+    </svg>
+</div>
+
+<h3 id="sec-11-3-2">11.3.2 break 与终止条件（break as a Stop Condition）</h3>
+
+<h4>11.3.2.1 用 break 给死循环装上"刹车"
+    <span class="en">A brake for infinite loops</span>
+</h4>
+
+<p><code>while True</code> 会无限循环下去，如果不加控制，英雄就永远卡在里面。<code>break</code> 配合 <code>if</code> 就成了这个死循环的"刹车"——一旦达成目标或满足退出条件，就 <code>break</code> 出去。"逃到春天"关卡用了两处经典的 break：一处按时间退出，一处按金币数量退出。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">True</span><span class="punc">:</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>time > <span class="num">30</span><span class="punc">:</span>
+        <span class="hl">break</span>   <span class="cmt"># 时间超过 30 秒 → 退出这个循环</span>
+    <span class="cmt"># ... 战斗代码 ...</span></pre>
+</div>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">True</span><span class="punc">:</span>
+    <span class="cmt"># ... 捡金币代码 ...</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>gold > <span class="num">20</span><span class="punc">:</span>
+        <span class="hl">break</span>   <span class="cmt"># 金币够 20 → 收工，去下一个目标</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">设计要点：</span>用 <code>break</code> 时，一定要保证退出条件<strong>迟早会成立</strong>。上面两例中，时间会不断流逝、金币会不断增加，所以条件必然在某刻满足，循环一定能退出。如果条件永远不成立，循环就成了真正的死循环。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-11-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+<!-- CC-PROTECTION:HIDDEN:d190b50bfa:START anchor=sec-11-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="d190b50bfa">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:d190b50bfa:END -->
+
+<h3 id="sec-11-3-3">11.3.3 break 之后的代码（Code After break）</h3>
+
+<h4>11.3.3.1 循环退出后，程序继续往下走
+    <span class="en">The program continues after the loop</span>
+</h4>
+
+<p>很多初学者误以为 <code>break</code> 会结束整个程序——其实不然。<code>break</code> 只结束<strong>它所在的那一个循环</strong>，程序会接着执行循环后面的语句。这正是"逃到春天"能分成"先战斗、再捡金、最后离开"三段的原因：每段用一个 <code>while True</code> 加 <code>break</code>，break 完就自然进入下一段。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🏃 逃到春天的三段式结构</div>
+    第一个 <code>while</code>：战斗直到时间超 30 秒 → <code>break</code><br>
+    ↓ 循环外：<code>hero.moveXY(46, 34)</code> 走到草坪<br>
+    第二个 <code>while</code>：捡金币直到金币超 20 → <code>break</code><br>
+    ↓ 循环外：<code>hero.moveXY(78, 34)</code> 从右边离开<br>
+    <strong>每个 break 都是一段任务的"完成信号"，交接给下一段。</strong>
+</div>
+
+<!-- ==================== 11.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-11-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<div class="section-header" id="section-11-4">
+    <h2>11.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"为什么在这里跳过、在那里退出"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-11-4-1">11.4.1 炼金术传承（Alchemic Power）</h3>
+
+<h4>11.4.1.1 策略：用 continue 层层设卡，只取水
+    <span class="en">Strategy: guard clauses that skip until only water remains</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-4-1-1_alchemic_power.png" alt="扣哒世界 炼金术传承关卡 - koudashijie.com">
+    <div class="caption">图2：炼金术传承——用连续的 continue 过滤掉"没敌人""没物品""毒药"三种情况</div>
+</div>
+
+<p>这是 <code>continue</code> 的首秀。任务是不让脱水的食人矮人抢到水源。算法核心是一串<strong>"守卫式判断"（guard clauses）</strong>：在 <code>while True</code> 里连续放三个 <code>if ... continue</code>，像三道关卡逐层筛选——</p>
+
+<p>第一道，若没找到敌人（<code>not enemy</code>）就 <code>continue</code>，因为没敌人就没必要行动；第二道，若地上没有物品（<code>not item</code>）就喊一句"给我点喝的"再 <code>continue</code>，等系统刷新出物品；第三道，若物品是毒药（<code>item.type is "poison"</code>）就 <code>continue</code> 跳过，绝不碰它。三关都通过后，剩下的<strong>一定是一瓶水</strong>，此时才用 <code>moveXY</code> 去取水并送回起点。</p>
+
+<div class="tip-box">
+    <span class="tip-label">思路要点：</span>守卫式 continue 的妙处在于——<strong>把"不该处理的情况"一个个提前排除</strong>，让最后的核心代码运行时，前提条件已经全部满足，逻辑异常清晰。这比层层嵌套的 <code>if-else</code> 更易读、更不易出错。</p>
+</div>
+
+<h3 id="sec-11-4-2">11.4.2 伪装大师（Master of Disguise）</h3>
+
+<h4>11.4.2.1 策略：用 continue 实现"敌人在场就静止不动"
+    <span class="en">Strategy: use continue to freeze when watched</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-4-2-1_master_disguise.png" alt="扣哒世界 伪装大师关卡 - koudashijie.com">
+    <div class="caption">图3：伪装大师——英雄伪装成仙人掌，卫兵在看时用 continue 保持不动</div>
+</div>
+
+<p>这是一个<strong>概念挑战</strong>关卡，展示了 <code>continue</code> 一个非常巧妙的用法：<strong>"有时要用 continue 什么都不做。"</strong> 英雄伪装成仙人掌去敌营偷 7 颗宝石，但只要卫兵在看（即附近有敌人），行走的仙人掌就会露馅，所以必须原地不动。</p>
+
+<p>算法思路是：在循环开头先 <code>findNearestEnemy()</code>，如果<strong>有敌人</strong>就立刻 <code>continue</code>——注意这里 continue 之后没有任何移动代码会执行，英雄自然就"定住"了。只有当没有敌人时，程序才会跳过 continue，往下执行 <code>findNearestItem()</code> 和 <code>moveXY</code> 去捡宝石。</p>
+
+<div class="remember-box">
+    <span class="remember-label">反向思维：</span>前一关用 continue 是为了"跳过去做别的"，这一关用 continue 却是为了"什么都不做地等待"。<strong>continue 的本质是"跳过本轮剩余的动作"——而当剩余动作正好是"移动"时，跳过它就等于"静止"。</strong> 同一个语句，用途可以完全相反。
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-11-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3 id="sec-11-4-3">11.4.3 逃到春天（Escape 'Em）</h3>
+
+<h4>11.4.3.1 策略：break、continue、time、gold 四合一
+    <span class="en">Strategy: combine break, continue, time and gold</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-4-3-1_escape_spring.png" alt="扣哒世界 逃到春天关卡 - koudashijie.com">
+    <div class="caption">图4：逃到春天——限时战斗、精准过滤、收够金币，三段任务用 break 依次交接</div>
+</div>
+
+<p>这是<strong>组合挑战</strong>关卡，把本单元所有概念熔于一炉：用 <code>break</code> 在完成目标后离开循环，用 <code>continue</code> 避免攻击错误的敌人，用 <code>gold</code> 属性判断金币是否够了。任务分三段：30 秒内击败 7 个食人魔（忽略 "burl" 和 "sand-yak" 类型）、去草坪收集 20 金、最后从右边离开。</p>
+
+<p>第一段的算法最精彩，同时用到了 break 和 continue：<strong>先判时间</strong>，<code>if hero.time > 30: break</code> 保证不超时；<strong>再判类型</strong>，找到敌人后如果它是 "burl" 或 "sand-yak"，就 <code>continue</code> 跳过（不攻击这些无关目标），否则才 <code>attack</code>。两个控制语句各司其职——break 管"何时结束"，continue 管"跳过谁"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">True</span><span class="punc">:</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>time > <span class="num">30</span><span class="punc">:</span>
+        <span class="hl">break</span>                        <span class="cmt"># 时间到 → 退出战斗段</span>
+    enemy = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">if</span> enemy<span class="punc">:</span>
+        <span class="kw">if</span> enemy<span class="punc">.</span>type == <span class="str">"burl"</span> <span class="kw">or</span> enemy<span class="punc">.</span>type == <span class="str">"sand-yak"</span><span class="punc">:</span>
+            <span class="hl">continue</span>                 <span class="cmt"># 无关目标 → 跳过，不攻击</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">分段思维：</span>整关由三个独立的 <code>while</code> 段落串成，每段用 <code>break</code> 退出后，就靠一句 <code>moveXY</code> 走到下一段的位置。<strong>把复杂任务拆成"若干个带 break 的循环段"</strong>，是处理多阶段目标的通用架构——每一段专注一件事，做完就 break 交棒。
+</div>
+
+<!-- ==================== 11.5 ==================== -->
+<div class="section-header" id="section-11-5">
+    <h2>11.5 进阶技巧</h2>
+    <div class="en-title">Advanced Techniques</div>
+</div>
+
+<h3 id="sec-11-5-1">11.5.1 二者的配合使用（Using Both Together）</h3>
+
+<h4>11.5.1.1 一个循环里同时放 continue 和 break
+    <span class="en">continue and break in one loop</span>
+</h4>
+
+<p>一个循环里完全可以同时出现 <code>continue</code> 和 <code>break</code>，它们互不冲突、各管一摊。常见的搭配模式是：<strong>break 负责"终点条件"（何时整体结束），continue 负责"过滤条件"（跳过哪些不处理）</strong>。执行顺序通常是先检查 break 条件，再检查 continue 条件，最后才是核心动作。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 540 200" width="540" role="img" aria-label="continue 与 break 配合">
+        <rect x="200" y="10" width="140" height="30" rx="6" fill="#C8821E"/>
+        <text x="270" y="30" font-size="12" font-family="sans-serif" fill="#fff" text-anchor="middle">循环开头</text>
+        <line x1="270" y1="40" x2="270" y2="58" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="270,64 265,54 275,54" fill="#9C5E14"/>
+        <!-- break 判断 -->
+        <rect x="180" y="65" width="180" height="30" rx="6" fill="#fbe8e3" stroke="#C0392B" stroke-width="2"/>
+        <text x="270" y="85" font-size="12" font-family="sans-serif" fill="#a5331f" text-anchor="middle">达成终点？→ break 退出</text>
+        <line x1="270" y1="95" x2="270" y2="108" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="270,114 265,104 275,104" fill="#9C5E14"/>
+        <!-- continue 判断 -->
+        <rect x="175" y="115" width="190" height="30" rx="6" fill="#f6efe2" stroke="#B5742A" stroke-width="2"/>
+        <text x="270" y="135" font-size="12" font-family="sans-serif" fill="#97601f" text-anchor="middle">对象不合格？→ continue 跳过</text>
+        <line x1="270" y1="145" x2="270" y2="158" stroke="#9C5E14" stroke-width="2"/>
+        <polygon points="270,164 265,154 275,154" fill="#9C5E14"/>
+        <!-- 核心动作 -->
+        <rect x="195" y="165" width="150" height="30" rx="6" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="270" y="185" font-size="12" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">执行核心动作</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-11-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+<!-- CC-PROTECTION:HIDDEN:c2441f1ecd:START anchor=sec-11-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="c2441f1ecd">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH5-SEC11-0745C93DF285。</span>
+<!-- CC-PROTECTION:HIDDEN:c2441f1ecd:END -->
+
+<h3 id="sec-11-5-2">11.5.2 continue 与死循环风险（continue &amp; Infinite Loops）</h3>
+
+<h4>11.5.2.1 用错 continue 会让循环卡死
+    <span class="en">Misusing continue can trap the loop</span>
+</h4>
+
+<p>continue 虽好，但用不当会引发隐蔽的问题：如果一个 <code>continue</code> 前面漏掉了任何"能改变状态"的代码，循环可能永远在同一个分支里空转。比如在计数循环里，如果 <code>continue</code> 跳过了"计数器加一"那一行，计数器就永远不变，循环条件也就永远不满足，程序卡死。</p>
+
+<div class="warn-box">
+    <span class="warn-label">警惕：</span>在计次循环（如 <code>while i < 10</code>）里使用 continue 时要格外小心——务必确保<strong>负责推进循环的那行代码（比如 <code>i += 1</code>）不会被 continue 跳过</strong>。否则一旦进入 continue 分支，计数器停滞，就成了永远出不来的死循环。本单元关卡多用 <code>while True</code>，靠 break 退出，相对不易踩这个坑，但迁移到计次循环时必须提高警惕。
+</div>
+
+<!-- ==================== 11.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-11-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+<div class="section-header" id="section-11-6">
+    <h2>11.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-11-6-1">11.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>11.6.1.1 循环控制的典型问题
+    <span class="en">Typical issues with loop control</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch5_sec11_11-6-1-1_common_errors.png" alt="扣哒世界 循环控制常见错误示意 - koudashijie.com">
+    <div class="caption">图5：混淆 continue 与 break、忘记退出条件、continue 前漏改状态，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>把 <code>continue</code> 和 <code>break</code> 用反——想跳过一轮却写了 break，结果整个循环提前结束；想退出却写了 continue，结果循环停不下来。</li>
+        <li>以为 <code>break</code> 会结束整个程序——其实它只结束当前所在的那一个循环，后面的代码照常执行。</li>
+        <li>continue 或 break 忘了配 <code>if</code> 条件——裸放一个 continue，会让它后面的代码永远执行不到。</li>
+        <li>continue 前漏掉推进状态的代码——在计次循环里，若跳过了 <code>i += 1</code> 之类，会导致死循环。</li>
+        <li>退出条件永远不成立——用 break 时，如果依赖的条件（时间、金币等）实际上永远达不到，循环无法退出。</li>
+        <li>忘记检查 <code>item.type</code> 就行动——像"炼金术传承"里没过滤毒药，英雄就会去碰不该碰的东西。</li>
+        <li>缩进错误——continue/break 必须在循环体内、且在正确的 if 分支下，缩进错了逻辑就全乱了。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在流金沙漠掌握了循环控制！你学会了用 <code>continue</code> 灵活跳过不该处理的轮次、用 <code>break</code> 在恰当时机干净利落地退出循环，还见识了二者配合、以及"用 continue 什么都不做"的巧妙用法。这些是精细掌控程序流程的核心技能。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>continue 语句</td><td>跳过本轮剩余代码，回到循环开头</td><td>炼金术传承</td></tr>
+            <tr><td>continue + 条件</td><td>满足条件才跳过，常用于过滤</td><td>炼金术传承</td></tr>
+            <tr><td>用 continue 静止</td><td>跳过移动代码 = 原地不动</td><td>伪装大师</td></tr>
+            <tr><td>break 语句</td><td>立即终止整个循环</td><td>逃到春天</td></tr>
+            <tr><td>break 作退出</td><td>给 while True 装"刹车"</td><td>逃到春天</td></tr>
+            <tr><td>二者配合</td><td>break 管终点，continue 管过滤</td><td>逃到春天</td></tr>
+            <tr><td>分段任务</td><td>多个带 break 的循环段串联</td><td>逃到春天</td></tr>
+            <tr><td>死循环风险</td><td>continue 别跳过推进状态的代码</td><td>进阶技巧</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        会跳过、会退出的英雄，才能在循环的沙暴中收放自如。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️🔁⏭️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=h3-16 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 3（流金沙漠）：第十一单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
