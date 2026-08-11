@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH7-SEC2-6E9B8214EC45">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第二单元：练习 while 循环 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（沙漠主题）===== */
+        :root {
+            --primary: #E69B2D;
+            --primary-light: #F4C95D;
+            --primary-lighter: #FFF3D1;
+            --primary-dark: #A85313;
+            --accent: #1FA7A0;
+            --dark: #2B2118;
+            --dark-code: #231B14;
+            --dark-code-border: #5A4528;
+            --text: #3A2A1B;
+            --text-light: #6E5638;
+            --text-lighter: #9C8567;
+            --bg: #ffffff;
+            --bg-alt: #FFF9EC;
+            --bg-card: #ffffff;
+            --border: #EBD7AA;
+            --success: #E69B2D;
+            --warning: #F4C95D;
+            --error: #C0392B;
+            --info: #1FA7A0;
+            --code-keyword: #d98ec0;
+            --code-string: #F4C95D;
+            --code-comment: #9B865F;
+            --code-function: #1FA7A0;
+            --code-number: #e8845a;
+            --code-text: #E8D7B5;
+            --code-punctuation: #E8D7B5;
+            --code-object: #F4C95D;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #2B2118;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #3B2C1C; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #F1DFC0;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(230, 155, 45, 0.20);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #554027;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #D8C39F;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 沙丘装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: radial-gradient(ellipse at 30% 100%, rgba(0,0,0,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 75% 100%, rgba(0,0,0,0.12) 0%, transparent 60%);
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #FFF0C7;
+            color: #A85313;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #E7F6E7;
+            color: #6A7F22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #FFF3D1;
+            color: #b5432a;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #9C8567;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(244, 201, 93, 0.24); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #FFF3D1;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #A85313; margin-right: 6px; }
+
+        .info-box {
+            background: #EAF8F6;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #137D78; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbe8e3;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #a5331f; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(168,83,19,0.12);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(168,83,19,0.08);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #FFF9EC 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH7-SEC2-6E9B8214EC45 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">流金沙漠·CS4-第二单元</div>
+
+    <a href="#section-2-1" class="nav-section">2.1 多个 while 循环</a>
+    <a href="#sec-2-1-1" class="nav-sub">2.1.1 一关多循环</a>
+    <a href="#sec-2-1-2" class="nav-sub">2.1.2 循环的先后顺序</a>
+    <a href="#sec-2-1-3" class="nav-sub">2.1.3 不同类型的条件</a>
+
+    <a href="#section-2-2" class="nav-section">2.2 精确控制次数</a>
+    <a href="#sec-2-2-1" class="nav-sub">2.2.1 收集"正好 N 个"</a>
+    <a href="#sec-2-2-2" class="nav-sub">2.2.2 &lt; 与 &lt;= 之差</a>
+    <a href="#sec-2-2-3" class="nav-sub">2.2.3 差一错误</a>
+
+    <a href="#section-2-3" class="nav-section">2.3 相等条件循环</a>
+    <a href="#sec-2-3-1" class="nav-sub">2.3.1 用 == 做条件</a>
+    <a href="#sec-2-3-2" class="nav-sub">2.3.2 何时自动停下</a>
+
+    <a href="#section-2-4" class="nav-section">2.4 实战关卡精讲</a>
+    <a href="#sec-2-4-1" class="nav-sub">2.4.1 海市蜃楼</a>
+    <a href="#sec-2-4-2" class="nav-sub">2.4.2 菠菜力量</a>
+
+    <a href="#section-2-5" class="nav-section">2.5 常见错误</a>
+    <a href="#sec-2-5-1" class="nav-sub">2.5.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第二单元：练习 while 循环</h1>
+    <div class="subtitle">Unit 2: Practicing while Loops</div>
+    <div class="badge">计算机科学 4 · 流金沙漠 Sarven Desert · 海市蜃楼 → 菠菜力量</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 2.1 ==================== -->
+<div class="section-header" id="section-2-1">
+    <h2>2.1 多个 while 循环</h2>
+    <div class="en-title">Multiple while Loops</div>
+</div>
+
+<h3 id="sec-2-1-1">2.1.1 一关多循环（Many Loops, One Level）</h3>
+
+<h4>2.1.1.1 把大任务拆成几段循环
+    <span class="en">Split a big task into several loops</span>
+</h4>
+
+<p>上一单元你认识了 while 循环，这一单元是<strong>动手练习</strong>——尤其要练"在一段程序里用好几个循环"。"海市蜃楼"关卡开门见山：<strong>"使用多个 while 循环执行各种任务。"</strong> 现实中的任务往往由几个阶段组成，每个阶段有自己的目标和终止条件，于是<strong>一个阶段配一个循环</strong>是最自然的做法。</p>
+
+<p>"海市蜃楼"就把一整关拆成四步：先攒够金币、再建诱饵、然后挑衅兽人、最后撤退。其中"攒金币"和"挑衅"各是一个 while 循环，"建诱饵""撤退"则是循环之间的单次动作。理解"哪些该循环、哪些只做一次"，是本单元的第一项功课。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-1-1-1_multi_loop_intro.png" alt="扣哒世界 多个 while 循环示意图 - koudashijie.com">
+    <div class="caption">图1：一整关像一条流水线，每个阶段配一个带独立终止条件的 while 循环</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-2-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+<!-- CC-PROTECTION:HIDDEN:4af653f0ca:START anchor=sec-2-1-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4af653f0ca">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:4af653f0ca:END -->
+
+<h3 id="sec-2-1-2">2.1.2 循环的先后顺序（The Order of Loops）</h3>
+
+<h4>2.1.2.1 上一个循环停了，下一个才开始
+    <span class="en">A loop must finish before the next begins</span>
+</h4>
+
+<p>多个循环<strong>按顺序排列、依次执行</strong>：只有当第一个循环的条件变假、它彻底停下后，程序才会往下走到第二个循环。这一点非常重要——它意味着<strong>每个循环都必须能自己停下来</strong>，否则程序会永远卡在前一个循环里，后面的循环和动作根本轮不到。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 540 130" width="540" role="img" aria-label="多循环顺序执行">
+        <rect x="15" y="45" width="115" height="40" rx="8" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="72" y="63" font-size="12" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">循环①攒金币</text>
+        <text x="72" y="79" font-size="10" font-family="monospace" fill="#6b5840" text-anchor="middle">gold &lt; 25</text>
+        <line x1="130" y1="65" x2="160" y2="65" stroke="#9C5E14" stroke-width="2"/><polygon points="166,65 156,60 156,70" fill="#9C5E14"/>
+        <rect x="167" y="50" width="90" height="30" rx="8" fill="#f6efe2" stroke="#B5742A" stroke-width="2"/>
+        <text x="212" y="69" font-size="11" font-family="sans-serif" fill="#97601f" text-anchor="middle">建诱饵</text>
+        <line x1="257" y1="65" x2="287" y2="65" stroke="#9C5E14" stroke-width="2"/><polygon points="293,65 283,60 283,70" fill="#9C5E14"/>
+        <rect x="294" y="45" width="115" height="40" rx="8" fill="#FBF1DC" stroke="#E0A23F" stroke-width="2"/>
+        <text x="351" y="63" font-size="12" font-family="sans-serif" fill="#9C5E14" text-anchor="middle">循环②挑衅</text>
+        <text x="351" y="79" font-size="10" font-family="monospace" fill="#6b5840" text-anchor="middle">health==max</text>
+        <line x1="409" y1="65" x2="439" y2="65" stroke="#9C5E14" stroke-width="2"/><polygon points="445,65 435,60 435,70" fill="#9C5E14"/>
+        <rect x="446" y="50" width="80" height="30" rx="8" fill="#f6efe2" stroke="#B5742A" stroke-width="2"/>
+        <text x="486" y="69" font-size="11" font-family="sans-serif" fill="#97601f" text-anchor="middle">撤退</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-2-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:00a6dd2cdc:START anchor=sec-2-1-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="00a6dd2cdc">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:00a6dd2cdc:END -->
+
+<h3 id="sec-2-1-3">2.1.3 不同类型的条件（Mixing Condition Types）</h3>
+
+<h4>2.1.3.1 同一关里混用多种条件
+    <span class="en">Different conditions in one level</span>
+</h4>
+
+<p>"海市蜃楼"精彩之处在于——它在同一关里用了两种截然不同的循环条件。第一个循环用<strong>数值比较</strong> <code>hero.gold &lt; 25</code>（攒够就停），第二个循环用<strong>相等判断</strong> <code>hero.health == hero.maxHealth</code>（一旦掉血就停）。这提醒我们：<strong>条件要为每个阶段"量身定制"</strong>，选对条件，循环才能在恰当的时机停下。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>gold &lt; <span class="num">25</span><span class="punc">:</span>              <span class="cmt"># 条件A：数值比较</span>
+    <span class="cmt"># ... 收集金币 ...</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"decoy"</span><span class="punc">,</span> <span class="num">71</span><span class="punc">,</span> <span class="num">68</span><span class="punc">)</span>  <span class="cmt"># 循环之间的单次动作</span>
+
+<span class="kw">while</span> <span class="obj">hero</span><span class="punc">.</span>health == <span class="obj">hero</span><span class="punc">.</span>maxHealth<span class="punc">:</span> <span class="cmt"># 条件B：相等判断</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Ogres stink!"</span><span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 2.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-2-1-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<div class="section-header" id="section-2-2">
+    <h2>2.2 精确控制次数</h2>
+    <div class="en-title">Controlling the Exact Count</div>
+</div>
+
+<h3 id="sec-2-2-1">2.2.1 收集"正好 N 个"（Collect Exactly N）</h3>
+
+<h4>2.2.1.1 多一个也不行，少一个也不行
+    <span class="en">Not one more, not one fewer</span>
+</h4>
+
+<p>"菠菜力量"提出了一个更苛刻的要求：<strong>收集正好 7 瓶药水</strong>——喝少了打不过食人魔，喝多了会生病。这类"精确 N 次"的任务，考验的是计数循环的<strong>精确性</strong>。思路仍是计数器三部曲：<code>potionCount = 0</code> 初始化，<code>while potionCount &lt; 7</code> 判断，捡到药水后 <code>potionCount += 1</code>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>potionCount = <span class="num">0</span>
+<span class="kw">while</span> potionCount &lt; <span class="num">7</span><span class="punc">:</span>
+    item = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestItem</span><span class="punc">()</span>
+    <span class="kw">if</span> item<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>item<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> item<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>
+        potionCount <span class="hl">+= 1</span>   <span class="cmt"># 只在真的捡到时才计数</span></pre>
+</div>
+
+<h3 id="sec-2-2-2">2.2.2 &lt; 与 &lt;= 之差（&lt; versus &lt;=）</h3>
+
+<h4>2.2.2.1 一个符号，差一整轮
+    <span class="en">One symbol, one whole iteration</span>
+</h4>
+
+<p>"菠菜力量"点出了本单元最核心的一个陷阱：<strong>"一个常见的错误是在 potionCount 小于或等于 7 时执行循环，结果收集了 8 瓶药水。"</strong> 也就是说，<code>&lt;</code> 和 <code>&lt;=</code> 只差一个等号，循环次数却会差整整一轮。</p>
+
+<p>为什么？关键在于<strong>循环在计数达到几时还会再进去一次</strong>。用 <code>potionCount &lt; 7</code>：当计数为 6 时条件成立、进去捡第 7 瓶、计数变 7；下一轮 7 &lt; 7 为假，停止——正好 7 瓶。但若用 <code>potionCount &lt;= 7</code>：当计数为 7 时 7 &lt;= 7 仍成立，会再进去捡第 8 瓶——多了一瓶！</p>
+
+<table class="styled-table">
+    <thead><tr><th>条件写法</th><th>计数为 7 时</th><th>最终收集</th><th>结果</th></tr></thead>
+    <tbody>
+        <tr><td><code>potionCount &lt; 7</code></td><td>7 &lt; 7 为假，停止</td><td>正好 7 瓶</td><td>✅ 正确</td></tr>
+        <tr><td><code>potionCount &lt;= 7</code></td><td>7 &lt;= 7 为真，再捡一瓶</td><td>8 瓶</td><td>❌ 多一瓶</td></tr>
+    </tbody>
+</table>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 120" width="520" role="img" aria-label="小于与小于等于对比">
+        <text x="30" y="45" font-size="18" font-family="monospace" fill="#e8845a">potionCount</text>
+        <text x="180" y="45" font-size="22" font-family="monospace" fill="#28c840">&lt;</text>
+        <text x="205" y="45" font-size="18" font-family="monospace" fill="#e8845a">7</text>
+        <text x="255" y="45" font-size="14" font-family="sans-serif" fill="#28c840">→ 正好 7 瓶 ✔</text>
+        <text x="30" y="90" font-size="18" font-family="monospace" fill="#e8845a">potionCount</text>
+        <text x="180" y="90" font-size="22" font-family="monospace" fill="#ff5f57">&lt;=</text>
+        <text x="212" y="90" font-size="18" font-family="monospace" fill="#e8845a">7</text>
+        <text x="262" y="90" font-size="14" font-family="sans-serif" fill="#ff5f57">→ 多出 1 瓶 ✘</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=sec-2-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<h3 id="sec-2-2-3">2.2.3 差一错误（Off-by-One Errors）</h3>
+
+<h4>2.2.3.1 编程界最出名的小 bug
+    <span class="en">The famous off-by-one bug</span>
+</h4>
+
+<p>刚才那个"多一瓶/少一瓶"的问题，在编程里有个专门的名字，叫做<span class="keyword">差一错误（Off-by-One Error）</span>。它是初学者乃至资深程序员都会犯的经典 bug——循环多跑一次或少跑一次，往往就是因为条件里的 <code>&lt;</code> 和 <code>&lt;=</code>（或计数器起点是 0 还是 1）没选对。</p>
+
+<div class="remember-box">
+    <span class="remember-label">验证小技巧：</span>写完计数循环后，别急着运行——先<strong>心算"临界那一刻"</strong>：计数正好等于目标值时，条件到底是真还是假？想清楚这一步会不会"多进去一轮"，差一错误就无所遁形。对于"从 0 开始、要 N 次"的循环，用 <code>&lt; N</code> 几乎总是对的。
+</div>
+
+<!-- ==================== 2.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-2-2-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+<div class="section-header" id="section-2-3">
+    <h2>2.3 相等条件循环</h2>
+    <div class="en-title">Loops with Equality Conditions</div>
+</div>
+
+<h3 id="sec-2-3-1">2.3.1 用 == 做条件（Using ==）</h3>
+
+<h4>2.3.1.1 "只要还……就一直……"
+    <span class="en">Keep going while two values match</span>
+</h4>
+
+<p>"海市蜃楼"的挑衅循环用了 <code>while hero.health == hero.maxHealth</code>——只要生命值<strong>等于</strong>满血，就一直挑衅兽人。这类相等条件的含义是"只要状态还没被打破，就继续做某事"。这里的言外之意是：兽人被激怒后迟早会打你一下，你的血一旦掉哪怕一点点，<code>health == maxHealth</code> 就变假，挑衅停止，你便可以安全撤退了。</p>
+
+<div class="warn-box">
+    <span class="warn-label">== 不是 =：</span>条件里判断"相等"必须用<strong>双等号 <code>==</code></strong>，单等号 <code>=</code> 是赋值。写成 <code>while hero.health = hero.maxHealth</code> 会直接报错。这是初学者极易混淆的一点——<strong>"比较用双等，赋值用单等"</strong>务必牢记。
+</div>
+
+
+<!-- CC-PROTECTION:AD:15fc1530ec:START anchor=sec-2-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="15fc1530ec">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，超过 520 万编程比赛专业选手也在玩，写代码就是你的超能力。</span>
+</aside>
+<!-- CC-PROTECTION:AD:15fc1530ec:END -->
+
+<h3 id="sec-2-3-2">2.3.2 何时自动停下（When It Stops by Itself）</h3>
+
+<h4>2.3.2.1 靠外部事件打破条件
+    <span class="en">An outside event breaks the condition</span>
+</h4>
+
+<p>值得注意的是：挑衅循环体里只有一句 <code>hero.say(...)</code>，<strong>并没有任何代码去主动改变 health</strong>。那它靠什么停下来？靠<strong>外部事件</strong>——被兽人攻击。这和上一单元"峡谷风暴"里牦牛撤离、"先有付出才有回报"里烈日掉血是同一类：<strong>循环的终止不一定由你的代码直接造成，也可以由游戏世界的变化触发</strong>，只要那个变化最终会让条件变假即可。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔄 两种"让条件变假"的方式</div>
+    <strong>内部驱动</strong>：循环体自己改变条件相关的值——如 <code>potionCount += 1</code>、循环末尾重新找 <code>yak</code>。<br>
+    <strong>外部驱动</strong>：由游戏世界的事件改变属性——如被兽人打掉血、金币被系统结算。<br>
+    <strong>无论哪种，只要条件迟早会变假，循环就能安全退出；两种都不会发生，就是死循环。</strong>
+</div>
+
+<!-- ==================== 2.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-2-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<div class="section-header" id="section-2-4">
+    <h2>2.4 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，看懂"每个循环该配什么条件、按什么顺序排"，你就能自己写出完整解法。</p>
+
+<h3 id="sec-2-4-1">2.4.1 海市蜃楼（Mirage）</h3>
+
+<h4>2.4.1.1 策略：四阶段任务，循环与单次动作交替
+    <span class="en">Strategy: four phases of loops and one-shot actions</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-4-1-1_mirage.png" alt="扣哒世界 海市蜃楼关卡 - koudashijie.com">
+    <div class="caption">图2：海市蜃楼——攒金币→建诱饵→挑衅→撤退，循环与单次动作交替推进</div>
+</div>
+
+<p>这一关是"多循环编排"的典范。算法思路是把任务拆成四个前后相接的阶段：<strong>①</strong> 用 <code>while hero.gold &lt; 25</code> 的循环攒够金币；<strong>②</strong> 循环结束后用一次 <code>buildXY("decoy", ...)</code> 在指定标记建诱饵；<strong>③</strong> 用 <code>while hero.health == hero.maxHealth</code> 的循环持续挑衅，把兽人斗士引向诱饵，直到自己挨打掉血才停；<strong>④</strong> 最后一次 <code>moveXY</code> 撤退到红 X。</p>
+
+<div class="tip-box">
+    <span class="tip-label">思路要点：</span>成败的关键是<strong>分清"循环动作"与"单次动作"</strong>——攒钱、挑衅需要重复所以用循环；建诱饵、撤退只做一次所以放在循环外。此外两个循环的条件类型不同（数值 vs 相等），要根据"这个阶段靠什么信号结束"来选择合适的条件。
+</div>
+
+<h3 id="sec-2-4-2">2.4.2 菠菜力量（Salted Earth / Spinach Power）</h3>
+
+<h4>2.4.2.1 策略：精确计数，警惕差一错误
+    <span class="en">Strategy: count precisely, beware off-by-one</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/2-4-2-1_spinach_power.png" alt="扣哒世界 菠菜力量关卡 - koudashijie.com">
+    <div class="caption">图3：菠菜力量——精确收集 7 瓶药水（不多不少），再进入战斗循环</div>
+</div>
+
+<p>这一关的核心是<strong>精确控制收集数量</strong>。算法思路是标准计数循环：<code>potionCount = 0</code> 起步，<code>while potionCount &lt; 7</code> 判断，找到药水后移动过去并 <code>potionCount += 1</code>。收满 7 瓶、条件变假后，再用一个 <code>while True</code> 战斗循环去打食人魔。</p>
+
+<div class="remember-box">
+    <span class="remember-label">关键抉择：</span>这一关最考验人的是那个不等号——<strong>必须用 <code>&lt; 7</code> 而非 <code>&lt;= 7</code></strong>。前者精确收 7 瓶，后者会收 8 瓶导致英雄"喝药过量生病"而失败。同时注意 <code>potionCount += 1</code> 要放在 <code>if item</code> 内部——只有真正捡到药水才计数，否则空转几轮却虚增计数，同样会数错。<strong>"计数放对位置 + 不等号选对方向"，是精确计数循环的两大命门。</strong>
+</div>
+
+<!-- ==================== 2.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-2-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+<!-- CC-PROTECTION:HIDDEN:da4c297fa5:START anchor=sec-2-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="da4c297fa5">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH7-SEC2-6E9B8214EC45。</span>
+<!-- CC-PROTECTION:HIDDEN:da4c297fa5:END -->
+
+<div class="section-header" id="section-2-5">
+    <h2>2.5 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-2-5-1">2.5.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>2.5.1.1 练习 while 循环时的典型问题
+    <span class="en">Typical issues when practicing loops</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch7_sec2_2-5-1-1_common_errors.png" alt="扣哒世界 练习 while 循环常见错误示意 - koudashijie.com">
+    <div class="caption">图4：差一错误、计数位置错、混淆 = 与 ==，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>差一错误——把 <code>&lt; 7</code> 写成 <code>&lt;= 7</code>，导致多收一个；这是本单元头号陷阱。</li>
+        <li>计数器位置错——把 <code>potionCount += 1</code> 放到了 <code>if item</code> 外面，没捡到也计数，数量对不上。</li>
+        <li>混淆 <code>=</code> 与 <code>==</code>——相等条件里误用赋值号 <code>=</code>，程序报错。</li>
+        <li>前一个循环停不下来——多循环程序里，若第一个循环是死循环，后面的循环和动作永远执行不到。</li>
+        <li>把单次动作写进了循环——建诱饵、撤退这类只需做一次的动作误放进循环体，被反复触发。</li>
+        <li>条件类型选错——该用数值比较的地方用了相等判断（或反之），循环无法在正确时机停止。</li>
+        <li>忘记初始化计数器——没写 <code>potionCount = 0</code> 就直接在循环里用它，导致报错。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=sec-2-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在流金沙漠完成了 while 循环的实战演练！你练会了在一关里编排<strong>多个前后相接的循环</strong>、为每个阶段挑选合适的条件类型、精确控制收集"正好 N 个"，还认清了编程界最出名的<strong>差一错误</strong>，理解了循环既能靠内部代码、也能靠外部事件停下来。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>多个循环</td><td>一阶段一循环，依次执行</td><td>海市蜃楼</td></tr>
+            <tr><td>循环顺序</td><td>前一个停了后一个才开始</td><td>海市蜃楼</td></tr>
+            <tr><td>混用条件类型</td><td>数值比较与相等判断并用</td><td>海市蜃楼</td></tr>
+            <tr><td>精确计数</td><td>收集正好 N 个</td><td>菠菜力量</td></tr>
+            <tr><td>&lt; 与 &lt;= 之差</td><td>差一个等号，差一整轮</td><td>菠菜力量</td></tr>
+            <tr><td>差一错误</td><td>心算临界值，避免多跑一轮</td><td>菠菜力量</td></tr>
+            <tr><td>计数位置</td><td>只在真正达成时才 += 1</td><td>菠菜力量</td></tr>
+            <tr><td>相等条件</td><td><code>==</code> 比较，靠事件打破</td><td>海市蜃楼</td></tr>
+            <tr><td>内部/外部驱动</td><td>两种让条件变假的方式</td><td>全部关卡</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        既能编排多循环、又能精准计数的英雄，才能在沙漠里步步为营。<br>
+        继续向沙漠深处进发吧，勇敢的程序员！🏜️🔁🧪
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #c2b094; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 4（流金沙漠）：第二单元</p>
+    <p style="margin-top:8px; color:#8a7355;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
