@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC15-44F3AA2A9EDA">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十五单元：越界防护 · 安全访问二维数组 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 网格可视化 ===== */
+        .grid-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .grid-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC15-44F3AA2A9EDA | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十五单元</div>
+
+    <a href="#section-15-1" class="nav-section">15.1 越界的危险</a>
+    <a href="#sec-15-1-1" class="nav-sub">15.1.1 什么是索引越界</a>
+    <a href="#sec-15-1-2" class="nav-sub">15.1.2 IndexError 异常</a>
+
+    <a href="#section-15-2" class="nav-section">15.2 二维数组回顾</a>
+    <a href="#sec-15-2-1" class="nav-sub">15.2.1 数组的数组</a>
+    <a href="#sec-15-2-2" class="nav-sub">15.2.2 len 测量长度</a>
+
+    <a href="#section-15-3" class="nav-section">15.3 边界检查模式</a>
+    <a href="#sec-15-3-1" class="nav-sub">15.3.1 检查行 row</a>
+    <a href="#sec-15-3-2" class="nav-sub">15.3.2 检查列 col</a>
+    <a href="#sec-15-3-3" class="nav-sub">15.3.3 逻辑运算符合并</a>
+
+    <a href="#section-15-4" class="nav-section">15.4 不规则行长度</a>
+    <a href="#sec-15-4-1" class="nav-sub">15.4.1 每行列数不同</a>
+
+    <a href="#section-15-5" class="nav-section">15.5 实战关卡精讲</a>
+    <a href="#sec-15-5-1" class="nav-sub">15.5.1 梦游者</a>
+    <a href="#sec-15-5-2" class="nav-sub">15.5.2 大炮陆战队</a>
+    <a href="#sec-15-5-3" class="nav-sub">15.5.3 雪花莲</a>
+
+    <a href="#section-15-6" class="nav-section">15.6 常见错误</a>
+    <a href="#sec-15-6-1" class="nav-sub">15.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十五单元：越界防护 · 安全访问二维数组</h1>
+    <div class="subtitle">Unit 15: Bounds Protection — Safe Access to 2D Arrays</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 梦游者 → 大炮陆战队 → 雪花莲</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 15.1 ==================== -->
+<div class="section-header" id="section-15-1">
+    <h2>15.1 越界的危险</h2>
+    <div class="en-title">The Danger of Going Out of Bounds</div>
+</div>
+
+<p>欢迎来到计算机科学 5 的第十五单元！在之前的单元里，你已经学会了怎样用嵌套循环遍历二维数组、用 <code>grid[i][j]</code> 读取每一个格子。可是当地图不再"方方正正"、当坐标来自随机或外部来源时，一个粗心的索引就会让程序<strong>崩溃</strong>。本单元你将学会一件专业程序员每天都在做的事——<span class="keyword">边界检查（bounds checking）</span>：在访问数组元素之前，先确认这个位置真的存在。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>访问二维数组的某个格子 <code>grid[row][col]</code> 前，先用 <code>row &lt; len(grid)</code> 确认行存在，再用 <code>col &lt; len(grid[row])</code> 确认列存在。只有两条都成立，才安全地读取那个格子。这套"先检查、后访问"的习惯能彻底避免 <span class="keyword-en">IndexError</span> 索引越界异常，尤其是在每行长度都不一样的<strong>不规则数组</strong>上。
+</div>
+
+<h3 id="sec-15-1-1">15.1.1 什么是索引越界（What Is Out-of-Bounds Access）</h3>
+
+<h4>15.1.1.1 伸手去够不存在的格子
+    <span class="en">Reaching for a cell that isn't there</span>
+</h4>
+
+<p>数组的索引是从 <code>0</code> 开始编号的。一个有 3 个元素的数组，合法索引只有 <code>0</code>、<code>1</code>、<code>2</code>——最大索引永远是<strong>长度减一</strong>。如果你去访问 <code>grid[3]</code>，就像伸手去够一个根本不存在的格子：程序无法凭空造出数据，只能报错停下。二维数组更容易出错，因为你要同时保证"行"和"列"两个索引都合法。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🏚️ 越界就像敲不存在的门牌号</div>
+    一条街上只有 1 号到 3 号三栋房子。你拿着"4 号"的地址去送信——可 4 号根本不存在，邮差只能空手而归并大喊"查无此址！"。数组访问也一样：<strong>索引必须落在 <code>0</code> 到 <code>长度-1</code> 之间</strong>，超出这个范围，Python 就会"查无此址"地报错。
+</div>
+
+
+<!-- CC-PROTECTION:AD:8e73525d56:START anchor=sec-15-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8e73525d56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，有用户说它真的很适合打基础，触类旁通下 C 语言也学得很快。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8e73525d56:END -->
+
+<h3 id="sec-15-1-2">15.1.2 IndexError 索引越界异常（The IndexError Exception）</h3>
+
+<h4>15.1.2.1 越界会抛出异常、终止程序
+    <span class="en">Out-of-range access raises an exception</span>
+</h4>
+
+<p>当访问的索引超出数组范围时，Python 会抛出 <span class="keyword-en">IndexError</span>（列表越界）异常。关卡"雪花莲"的说明就直接演示了两种典型的越界：<strong>行对但列错</strong>，以及<strong>行本身就不存在</strong>。这两种情况都会让程序中断——在游戏里，就意味着大炮朝着不存在的坐标开火、任务失败。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 假设 forestMap 的第 0 行只有 3 个元素（索引 0、1、2）</span>
+<span class="cmt"># 正确的行，但错误的列：</span>
+forestMap<span class="punc">[</span><span class="num">0</span><span class="punc">][</span><span class="num">4</span><span class="punc">]</span>   <span class="cmt"># ← IndexError：第 0 行没有第 4 列</span>
+
+<span class="cmt"># 错误的行，任意列：</span>
+forestMap<span class="punc">[</span><span class="num">5</span><span class="punc">][</span><span class="num">1</span><span class="punc">]</span>   <span class="cmt"># ← IndexError：forestMap[5] 根本不存在</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">异常 = 程序急刹车：</span>IndexError 一旦被抛出，如果没有处理，后面的代码就<strong>全部停止执行</strong>。这就是为什么"边界检查"如此重要——与其让程序撞墙崩溃，不如提前看清路况、绕开不存在的格子。
+</div>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/15-1-2-1_index_error.png" alt="扣哒世界 IndexError 索引越界示意 - koudashijie.com">
+    <div class="caption">图1：索引从 0 开始，越过数组末尾就会触发 IndexError 异常</div>
+</div>
+
+<!-- ==================== 15.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-15-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-15-2">
+    <h2>15.2 二维数组回顾</h2>
+    <div class="en-title">Reviewing 2D Arrays</div>
+</div>
+
+<h3 id="sec-15-2-1">15.2.1 数组的数组（An Array of Arrays）</h3>
+
+<h4>15.2.1.1 像电子表格一样的行与列
+    <span class="en">Rows and columns like a spreadsheet</span>
+</h4>
+
+<p>正如"大炮陆战队"关卡所说："二维数组是每个元素都是数组的数组。因此，我们得到了类似电子表格的东西。"外层数组的每个元素本身又是一个数组——外层的索引是"行"，内层的索引是"列"。要取出某个格子，就写两对方括号：先选行，再选列。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一个 2 行 3 列的二维数组</span>
+grid <span class="punc">=</span> <span class="punc">[</span>
+    <span class="punc">[</span><span class="num">0</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">2</span><span class="punc">],</span>   <span class="cmt"># ← 第 0 行</span>
+    <span class="punc">[</span><span class="num">3</span><span class="punc">,</span> <span class="num">4</span><span class="punc">,</span> <span class="num">5</span><span class="punc">]</span>    <span class="cmt"># ← 第 1 行</span>
+<span class="punc">]</span>
+
+grid<span class="punc">[</span><span class="num">0</span><span class="punc">][</span><span class="num">0</span><span class="punc">]</span>   <span class="cmt"># 是 0（第 0 行、第 0 列）</span>
+grid<span class="punc">[</span><span class="num">1</span><span class="punc">][</span><span class="num">2</span><span class="punc">]</span>   <span class="cmt"># 是 5（第 1 行、第 2 列）</span>
+grid<span class="punc">[</span><span class="num">1</span><span class="punc">][</span><span class="num">0</span><span class="punc">]</span>   <span class="cmt"># 是 3（第 1 行、第 0 列）</span></pre>
+</div>
+
+<div class="grid-viz">
+    <svg viewBox="0 0 440 170" width="440" role="img" aria-label="二维数组行列示意">
+        <text x="220" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">grid[行][列] —— 先选行，再选列</text>
+        <g font-family="monospace" font-size="15">
+            <!-- 列标题 -->
+            <text x="120" y="52" text-anchor="middle" fill="#7d94a3" font-size="12">列0</text>
+            <text x="200" y="52" text-anchor="middle" fill="#7d94a3" font-size="12">列1</text>
+            <text x="280" y="52" text-anchor="middle" fill="#7d94a3" font-size="12">列2</text>
+            <!-- 行0 -->
+            <text x="60" y="88" text-anchor="middle" fill="#7d94a3" font-size="12">行0</text>
+            <rect x="90" y="66" width="60" height="34" rx="6" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="120" y="89" text-anchor="middle" fill="#2A5A85">0</text>
+            <rect x="170" y="66" width="60" height="34" rx="6" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="200" y="89" text-anchor="middle" fill="#2A5A85">1</text>
+            <rect x="250" y="66" width="60" height="34" rx="6" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="280" y="89" text-anchor="middle" fill="#2A5A85">2</text>
+            <!-- 行1 -->
+            <text x="60" y="130" text-anchor="middle" fill="#7d94a3" font-size="12">行1</text>
+            <rect x="90" y="108" width="60" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="120" y="131" text-anchor="middle" fill="#2f7a45">3</text>
+            <rect x="170" y="108" width="60" height="34" rx="6" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="200" y="131" text-anchor="middle" fill="#2f7a45">4</text>
+            <rect x="250" y="108" width="60" height="34" rx="6" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="280" y="131" text-anchor="middle" fill="#bd7415">5</text>
+            <!-- 标注 -->
+            <text x="370" y="131" fill="#bd7415" font-size="12" font-family="sans-serif">grid[1][2]=5</text>
+        </g>
+    </svg>
+</div>
+
+<h3 id="sec-15-2-2">15.2.2 len 测量长度（Measuring Length with len）</h3>
+
+<h4>15.2.2.1 len 告诉你"有几行、每行几列"
+    <span class="en">len reveals how many rows and columns</span>
+</h4>
+
+<p>要做边界检查，先得知道数组"有多大"。函数 <code>len()</code> 返回一个数组里元素的个数。对二维数组来说，<code>len(grid)</code> 是<strong>行数</strong>；而 <code>len(grid[row])</code> 是<strong>第 row 行的列数</strong>。这正是边界检查的两把"尺子"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>grid <span class="punc">=</span> <span class="punc">[[</span><span class="num">0</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">2</span><span class="punc">],</span> <span class="punc">[</span><span class="num">3</span><span class="punc">,</span> <span class="num">4</span><span class="punc">,</span> <span class="num">5</span><span class="punc">]]</span>
+
+<span class="fn">len</span><span class="punc">(</span>grid<span class="punc">)</span>        <span class="cmt"># 2 —— 一共有 2 行</span>
+<span class="fn">len</span><span class="punc">(</span>grid<span class="punc">[</span><span class="num">0</span><span class="punc">])</span>     <span class="cmt"># 3 —— 第 0 行有 3 列</span>
+<span class="fn">len</span><span class="punc">(</span>grid<span class="punc">[</span><span class="num">1</span><span class="punc">])</span>     <span class="cmt"># 3 —— 第 1 行有 3 列</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">长度与最大索引：</span>如果 <code>len(grid)</code> 是 <code>2</code>，那么合法的行索引就是 <code>0</code> 和 <code>1</code>——<strong>最大索引 = 长度 − 1</strong>。所以判断"索引合法"的条件是 <code>索引 &lt; 长度</code>，而不是 <code>索引 &lt;= 长度</code>。这个"小于"非常关键，多一个等号就会越界。
+</div>
+
+<!-- ==================== 15.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-15-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+
+<div class="section-header" id="section-15-3">
+    <h2>15.3 边界检查模式</h2>
+    <div class="en-title">The Bounds-Checking Pattern</div>
+</div>
+
+<h3 id="sec-15-3-1">15.3.1 检查行 row（Checking the Row）</h3>
+
+<h4>15.3.1.1 先确认这一行存在
+    <span class="en">First confirm the row exists</span>
+</h4>
+
+<p>安全访问的第一步：确认行索引 <code>row</code> 落在合法范围内，也就是 <code>row &lt; len(grid)</code>。只有这一行真的存在，我们才有资格去看它有几列。如果连行都不存在，谈论"列"就毫无意义——就像先要确认门牌号所在的那条街存在，才能谈门牌号。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>row <span class="punc">=</span> <span class="num">1</span>
+<span class="kw">if</span> row <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">):</span>
+    <span class="cmt"># 到这里，说明 row 是一个合法的行索引</span>
+    <span class="cmt"># ...接着才检查列...</span>
+    <span class="kw">pass</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-15-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3 id="sec-15-3-2">15.3.2 检查列 col（Checking the Column）</h3>
+
+<h4>15.3.2.1 再确认这一列存在
+    <span class="en">Then confirm the column exists</span>
+</h4>
+
+<p>确认行存在之后，第二步是检查列索引：<code>col &lt; len(forestMap[row])</code>。注意这里用的是 <code>len(forestMap[row])</code>——是<strong>那一行自己的长度</strong>，而不是整个数组的长度。这一点在不规则数组里尤其重要，因为每行的列数可能都不一样。关卡"雪花莲"给出的正是这个"两层嵌套 if"的标准写法：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>row <span class="punc">=</span> <span class="num">1</span>
+col <span class="punc">=</span> <span class="num">3</span>
+<span class="kw">if</span> row <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">):</span>
+    <span class="cmt"># 如果 row 是正确的索引</span>
+    <span class="kw">if</span> col <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">[</span>row<span class="punc">]):</span>
+        <span class="cmt"># 现在我们才能安全地取到单元格</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>forestMap<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">])</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 200" width="600" role="img" aria-label="边界检查流程">
+        <text x="300" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">安全访问 grid[row][col] 的两道关卡</text>
+        <defs>
+            <marker id="bc-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="11">
+            <!-- 关卡1 -->
+            <rect x="30" y="60" width="140" height="60" rx="10" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+            <text x="100" y="86" text-anchor="middle" fill="#2A5A85" font-weight="bold">① row &lt; len(grid)?</text>
+            <text x="100" y="106" text-anchor="middle" fill="#6a8294">这一行存在吗？</text>
+            <line x1="172" y1="90" x2="215" y2="90" stroke="#4d6373" stroke-width="2" marker-end="url(#bc-arr)"/>
+            <text x="193" y="82" text-anchor="middle" fill="#2f7a45" font-size="10">是</text>
+            <!-- 关卡2 -->
+            <rect x="218" y="60" width="160" height="60" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="298" y="86" text-anchor="middle" fill="#2f7a45" font-weight="bold">② col &lt; len(grid[row])?</text>
+            <text x="298" y="106" text-anchor="middle" fill="#6a8294">这一列存在吗？</text>
+            <line x1="380" y1="90" x2="423" y2="90" stroke="#4d6373" stroke-width="2" marker-end="url(#bc-arr)"/>
+            <text x="401" y="82" text-anchor="middle" fill="#2f7a45" font-size="10">是</text>
+            <!-- 安全访问 -->
+            <rect x="426" y="60" width="150" height="60" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="501" y="86" text-anchor="middle" fill="#bd7415" font-weight="bold">✅ 安全访问</text>
+            <text x="501" y="106" text-anchor="middle" fill="#6a8294" font-family="monospace">grid[row][col]</text>
+            <!-- 否 分支 -->
+            <line x1="100" y1="122" x2="100" y2="160" stroke="#C0453B" stroke-width="2" marker-end="url(#bc-arr)"/>
+            <text x="118" y="145" fill="#C0453B" font-size="10">否</text>
+            <line x1="298" y1="122" x2="298" y2="160" stroke="#C0453B" stroke-width="2" marker-end="url(#bc-arr)"/>
+            <text x="316" y="145" fill="#C0453B" font-size="10">否</text>
+            <rect x="60" y="162" width="278" height="30" rx="8" fill="#fbeae7" stroke="#C0453B"/>
+            <text x="199" y="182" text-anchor="middle" fill="#9e352c">跳过 —— 绝不访问不存在的格子</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-15-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<h3 id="sec-15-3-3">15.3.3 用逻辑运算符合并（Combining with Logical Operators）</h3>
+
+<h4>15.3.3.1 用 and 把两步写成一行
+    <span class="en">Merge both checks with and</span>
+</h4>
+
+<p>两层嵌套的 if 逻辑清晰，但也可以用逻辑运算符 <code>and</code> 写得更简洁。关键在于 <code>and</code> 的<strong>短路特性</strong>：它先算左边，只有左边为真才会去算右边。这恰好符合我们的需要——先确认 <code>row</code> 合法，再去算 <code>len(forestMap[row])</code>。如果行不存在，右边根本不会执行，也就不会触发越界。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 第二部分仅在第一部分为真时才检查（短路求值）</span>
+<span class="kw">if</span> row <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">)</span> <span class="kw">and</span> col <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">[</span>row<span class="punc">]):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>forestMap<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">])</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">顺序不能颠倒：</span>必须先写 <code>row &lt; len(forestMap)</code>，<strong>再</strong>写 <code>col &lt; len(forestMap[row])</code>。如果把两者对调，那么当 <code>row</code> 越界时，Python 会先去算 <code>forestMap[row]</code> 来取长度——这本身就是一次越界访问，程序当场崩溃，短路保护也就失效了。
+</div>
+
+<div class="compare-2col">
+    <div>
+        <h5>写法A：嵌套 if（清晰）</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> row <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>grid<span class="punc">):</span>
+    <span class="kw">if</span> col <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>grid<span class="punc">[</span>row<span class="punc">]):</span>
+        <span class="fn">use</span><span class="punc">(</span>grid<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">])</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>写法B：and 合并（简洁）</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> row <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>grid<span class="punc">)</span> <span class="kw">and</span> \
+   col <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>grid<span class="punc">[</span>row<span class="punc">]):</span>
+    <span class="fn">use</span><span class="punc">(</span>grid<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">])</span></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 15.4 ==================== -->
+<div class="section-header" id="section-15-4">
+    <h2>15.4 不规则行长度</h2>
+    <div class="en-title">Jagged Rows (Irregular Row Lengths)</div>
+</div>
+
+<h3 id="sec-15-4-1">15.4.1 每行列数不同（Rows of Different Lengths）</h3>
+
+<h4>15.4.1.1 参差不齐的"数组的数组"
+    <span class="en">A jagged array of arrays</span>
+</h4>
+
+<p>大多数地图都是整齐的矩形，每行列数相同。但二维数组并不要求这样——正如"雪花莲"关卡强调的："数组各行的长度不同。所以我们在访问前需要检查坐标的正确性。"这种每行长度不一的数组叫做<strong>不规则数组</strong>（jagged array）。它正是边界检查的"用武之地"：因为你无法用一个统一的列数去套所有行。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一个不规则的森林地图：每行列数都不一样</span>
+forestMap <span class="punc">=</span> <span class="punc">[</span>
+    <span class="punc">[</span><span class="num">1</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">0</span><span class="punc">],</span>          <span class="cmt"># 第 0 行：3 列（索引 0~2）</span>
+    <span class="punc">[</span><span class="num">0</span><span class="punc">,</span> <span class="num">1</span><span class="punc">],</span>             <span class="cmt"># 第 1 行：2 列（索引 0~1）</span>
+    <span class="punc">[</span><span class="num">1</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">0</span><span class="punc">,</span> <span class="num">0</span><span class="punc">,</span> <span class="num">1</span><span class="punc">]</span>    <span class="cmt"># 第 2 行：5 列（索引 0~4）</span>
+<span class="punc">]</span></pre>
+</div>
+
+<div class="grid-viz">
+    <svg viewBox="0 0 460 190" width="460" role="img" aria-label="不规则数组示意">
+        <text x="230" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">不规则数组：每行长度不同</text>
+        <g font-family="monospace" font-size="13">
+            <!-- 行0：3列 -->
+            <text x="40" y="60" fill="#7d94a3" font-size="11" font-family="sans-serif">行0</text>
+            <rect x="70" y="42" width="42" height="28" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="91" y="61" text-anchor="middle" fill="#2f7a45">1</text>
+            <rect x="116" y="42" width="42" height="28" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="137" y="61" text-anchor="middle" fill="#2f7a45">1</text>
+            <rect x="162" y="42" width="42" height="28" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="183" y="61" text-anchor="middle" fill="#9e352c">0</text>
+            <text x="360" y="61" fill="#7d94a3" font-size="10" font-family="sans-serif">len=3</text>
+            <!-- 行1：2列 -->
+            <text x="40" y="105" fill="#7d94a3" font-size="11" font-family="sans-serif">行1</text>
+            <rect x="70" y="87" width="42" height="28" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="91" y="106" text-anchor="middle" fill="#9e352c">0</text>
+            <rect x="116" y="87" width="42" height="28" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="137" y="106" text-anchor="middle" fill="#2f7a45">1</text>
+            <text x="360" y="106" fill="#7d94a3" font-size="10" font-family="sans-serif">len=2</text>
+            <!-- 行2：5列 -->
+            <text x="40" y="150" fill="#7d94a3" font-size="11" font-family="sans-serif">行2</text>
+            <rect x="70" y="132" width="42" height="28" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="91" y="151" text-anchor="middle" fill="#2f7a45">1</text>
+            <rect x="116" y="132" width="42" height="28" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="137" y="151" text-anchor="middle" fill="#2f7a45">1</text>
+            <rect x="162" y="132" width="42" height="28" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="183" y="151" text-anchor="middle" fill="#9e352c">0</text>
+            <rect x="208" y="132" width="42" height="28" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="229" y="151" text-anchor="middle" fill="#9e352c">0</text>
+            <rect x="254" y="132" width="42" height="28" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="275" y="151" text-anchor="middle" fill="#2f7a45">1</text>
+            <text x="360" y="151" fill="#7d94a3" font-size="10" font-family="sans-serif">len=5</text>
+        </g>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么必须用 <code>len(grid[row])</code>：</span>在上图里，第 1 行只有 2 列。如果你想访问 <code>grid[1][2]</code>，虽然行 <code>1</code> 存在，但该行没有索引 <code>2</code> 的列——用整体列数去判断就会出错，只有用<strong>该行自己的长度</strong> <code>len(grid[1])</code> 才能得到正确的 <code>2</code>。这就是"逐行测量"的意义。
+</div>
+
+<!-- ==================== 15.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-15-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+<!-- CC-PROTECTION:HIDDEN:17330c93aa:START anchor=sec-15-4-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="17330c93aa">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:17330c93aa:END -->
+
+<div class="section-header" id="section-15-5">
+    <h2>15.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 梦游者 -->
+<div class="level-card" id="sec-15-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 梦游者</span>
+        <h3>😴 梦游者 —— 照图建栅栏，遍历规则网格</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/15-5-1-1_sleepwalkers.png" alt="扣哒世界 梦游者关卡 - koudashijie.com">
+            <div class="caption">图2：梦游者——按 Senick 准备的网格图，在标 1 的位置筑栅栏，放行农民、拦住雪人</div>
+        </div>
+
+        <h4>策略：读图 1 就建栏，别惊醒雪人</h4>
+        <p>本关是本单元的入门关，先复习"规则二维数组"的遍历。村里混进了梦游的雪人，我们要按猎人 Senick 的<code>fenceMap</code>（一个由 <code>0</code> 和 <code>1</code> 组成的网格）建立栅栏系统：<code>1</code> 是要建栅栏的地方，<code>0</code> 是空格。核心约束是<strong>不能用战斗手段</strong>（会惊醒雪人），只能悄悄筑墙，让熟睡的农民通过、把雪人拦在外面。建完栅栏后英雄要立刻回村，因为雪人能察觉到英雄。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法是标准的<strong>嵌套循环遍历二维数组</strong>：外层 <code>for i in range(len(fenceMap))</code> 逐行，内层 <code>for j in range(len(fenceMap[i]))</code> 逐列。对每个格子，如果 <code>fenceMap[i][j]</code> 为 <code>1</code>（真），就用关卡预先给好的 <code>convertCoor(i, j)</code> 把"行列坐标"转成游戏世界的 <code>(x, y)</code> 坐标，移动过去并 <code>buildXY("fence", ...)</code> 建栏。注意内层用 <code>len(fenceMap[i])</code> 逐行取列数——这是养成安全习惯的开始，即使本关网格是规则的。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：嵌套循环遍历 fenceMap，遇 1 就建栏</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>fenceMap<span class="punc">)):</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>fenceMap<span class="punc">[</span>i<span class="punc">])):</span>
+        <span class="kw">if</span> fenceMap<span class="punc">[</span>i<span class="punc">][</span>j<span class="punc">]:</span>              <span class="cmt"># 值为 1 即为真</span>
+            pos <span class="punc">=</span> <span class="fn">convertCoor</span><span class="punc">(</span>i<span class="punc">,</span> j<span class="punc">)</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>pos<span class="punc">[</span><span class="str">'x'</span><span class="punc">],</span> pos<span class="punc">[</span><span class="str">'y'</span><span class="punc">])</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fence"</span><span class="punc">,</span> pos<span class="punc">[</span><span class="str">'x'</span><span class="punc">],</span> pos<span class="punc">[</span><span class="str">'y'</span><span class="punc">])</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">用 range(len(...)) 拿到索引：</span>本关既要用到值（判断是否为 1），又要用到<strong>行列号</strong>（传给 <code>convertCoor</code>），所以用 <code>range(len(...))</code> 遍历索引最合适——这样 <code>i</code>、<code>j</code> 就是现成的行列坐标。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">建完就撤：</span>关卡特别提醒，雪人能察觉英雄，所以循环结束后要 <code>hero.moveXY(29, 17)</code> 回到安全的村子里。别筑完栏还傻站在雪人旁边。
+        </div>
+    </div>
+</div>
+
+<!-- 大炮陆战队 -->
+<div class="level-card" id="sec-15-5-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 大炮陆战队</span>
+        
+<!-- CC-PROTECTION:AD:453f82b029:START anchor=h3-9 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="453f82b029">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想获取更多编程干货和闯关攻略？小红书搜索 扣哒世界 扣哒鸭，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:453f82b029:END -->
+<!-- CC-PROTECTION:HIDDEN:b9f76200b9:START anchor=h3-9 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b9f76200b9">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:b9f76200b9:END -->
+
+<h3>💥 大炮陆战队 —— 按指定坐标精确读取</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/15-5-2-1_cannon_marines.png" alt="扣哒世界 大炮陆战队关卡 - koudashijie.com">
+            <div class="caption">图3：大炮陆战队——读取着陆区地图的指定格子，谨慎报出坐标与内容，让大炮精确开火</div>
+        </div>
+
+        <h4>策略：只报正确坐标，谨慎开火</h4>
+        <p>本关用大炮把士兵和"反陷阱弹"发射到山上的村庄广场。着陆区地图 <code>landingMap</code> 是一个<strong>字符串二维数组</strong>，每个格子是 <code>"peasant"</code>（农民）、<code>"trap"</code>（陷阱）或 <code>"clear"</code>（空地）。你向大炮"说出"行、列和那里的内容，大炮听到 <code>"trap"</code> 或 <code>"clear"</code> 就会开火。策略的核心是<strong>精确</strong>：广场上有农民，必须只报出示例代码给定的正确坐标，绝不能报错坐标——否则炮弹会打偏或误伤农民。</p>
+
+        <h4>思路拆解</h4>
+        <p>本关不需要循环，而是练习<strong>用 <code>array[i][j]</code> 精确读取指定格子</strong>并说出来。关卡给出了一串要处理的坐标点（如第 2 行第 1 列、第 1 行第 0 列……），你只需依次用 <code>landingMap[row][col]</code> 取值、用 <code>hero.say()</code> 报出坐标与内容即可。关键教训是"越界的后果"：关卡演示了如果写成 <code>landingMap[9001][19]</code> 这种超范围的索引，就会触发引用/索引错误、大炮 BOOM 打偏。所以务必<strong>照给定坐标读取</strong>，行列不要写反、不要超范围。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：读取指定坐标的值并报出</span>
+cell <span class="punc">=</span> landingMap<span class="punc">[</span><span class="num">0</span><span class="punc">][</span><span class="num">0</span><span class="punc">]</span>              <span class="cmt"># 第 0 行第 0 列</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"行0列0 "</span> <span class="punc">+</span> cell<span class="punc">)</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"行2列1 "</span> <span class="punc">+</span> landingMap<span class="punc">[</span><span class="num">2</span><span class="punc">][</span><span class="num">1</span><span class="punc">])</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"行1列0 "</span> <span class="punc">+</span> landingMap<span class="punc">[</span><span class="num">1</span><span class="punc">][</span><span class="num">0</span><span class="punc">])</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"行0列2 "</span> <span class="punc">+</span> landingMap<span class="punc">[</span><span class="num">0</span><span class="punc">][</span><span class="num">2</span><span class="punc">])</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"行1列3 "</span> <span class="punc">+</span> landingMap<span class="punc">[</span><span class="num">1</span><span class="punc">][</span><span class="num">3</span><span class="punc">])</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">行列不能反：</span><code>landingMap[2][1]</code> 是"第 2 行第 1 列"，而 <code>landingMap[1][2]</code> 是"第 1 行第 2 列"——两者完全不同。第一个方括号永远是<strong>行</strong>，第二个永远是<strong>列</strong>。写反了大炮就打错地方。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">规则地图 vs 不规则地图：</span>本关的 <code>landingMap</code> 每行列数相同（规则矩形），所以照给定坐标读取就很安全。但关卡也提醒你："里面的数组可以有不同的长度"——这正是下一关"雪花莲"要面对的挑战，也是本单元边界检查的真正战场。
+        </div>
+    </div>
+</div>
+
+<!-- 雪花莲 -->
+<div class="level-card" id="sec-15-5-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 雪花莲</span>
+        
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+<!-- CC-PROTECTION:HIDDEN:0ff29c35f6:START anchor=h3-10 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="0ff29c35f6">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC15-44F3AA2A9EDA。</span>
+<!-- CC-PROTECTION:HIDDEN:0ff29c35f6:END -->
+
+<h3>❄️ 雪花莲 —— 不规则地图上的安全访问</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/15-5-3-1_snowdrops.png" alt="扣哒世界 雪花莲关卡 - koudashijie.com">
+            <div class="caption">图4：雪花莲——森林地图每行长度不同，射击前必须先做边界检查，只朝陷阱开火</div>
+        </div>
+
+        <h4>策略：先检查，后开火，弹药珍贵</h4>
+        <p>本关是本单元的<strong>压轴关</strong>，把"边界检查"用到极致。森林地图 <code>forestMap</code> 是不规则二维数组：<code>1</code> 是安全的空地，<code>0</code> 是陷阱，而且<strong>每行长度都不同</strong>。任务是清除陷阱，但弹药珍贵、只够清理陷阱的数量，还不能乱射引起火灾。关卡给了你一串要检查的坐标点数组 <code>cells</code>（其中有些坐标可能越界！），策略核心是：<strong>对每个坐标先做边界检查，确认格子存在、且值为 0（陷阱），才报出坐标开火</strong>。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法分三层判断，缺一不可。第一，遍历 <code>cells</code>，从每个字典里取出 <code>row</code> 和 <code>col</code>。第二，做<strong>两级边界检查</strong>：先 <code>if row &lt; len(forestMap)</code> 确认行存在，再 <code>if col &lt; len(forestMap[row])</code> 确认这一行有这一列——因为每行长度不同，必须用 <code>len(forestMap[row])</code> 逐行测量。第三，只有前两关都通过、且 <code>forestMap[row][col] == 0</code>（是陷阱）时，才 <code>hero.say()</code> 报出"行 X 列 Y 开炮！"。这样既不会越界崩溃，也不会浪费弹药朝空地开火。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：遍历坐标点，三层判断后才开火</span>
+<span class="kw">for</span> cell <span class="kw">in</span> cells<span class="punc">:</span>
+    row <span class="punc">=</span> cell<span class="punc">[</span><span class="str">"row"</span><span class="punc">]</span>
+    col <span class="punc">=</span> cell<span class="punc">[</span><span class="str">"col"</span><span class="punc">]</span>
+    <span class="kw">if</span> row <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">):</span>            <span class="cmt"># ① 行存在吗？</span>
+        <span class="kw">if</span> col <span class="punc">&lt;</span> <span class="fn">len</span><span class="punc">(</span>forestMap<span class="punc">[</span>row<span class="punc">]):</span>    <span class="cmt"># ② 这一行有这一列吗？</span>
+            <span class="kw">if</span> forestMap<span class="punc">[</span>row<span class="punc">][</span>col<span class="punc">]</span> <span class="punc">==</span> <span class="num">0</span><span class="punc">:</span>  <span class="cmt"># ③ 是陷阱吗？</span>
+                <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"行"</span> <span class="punc">+</span> row <span class="punc">+</span> <span class="str">"列"</span> <span class="punc">+</span> col <span class="punc">+</span> <span class="str">"开炮!"</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">也可以用 and 合并前两层：</span>如果你觉得三层缩进太深，可以把前两个边界检查用 <code>and</code> 合成一句：<code>if row &lt; len(forestMap) and col &lt; len(forestMap[row]):</code>，再在里面判断是否为陷阱。效果完全相同，代码更扁平。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别跳过检查直接访问：</span>本关的 <code>cells</code> 里<strong>故意</strong>放了越界坐标。如果你省掉边界检查，直接写 <code>if forestMap[row][col] == 0</code>，一遇到越界坐标就会抛出 IndexError，程序崩溃、任务失败。这正是本单元要教会你的核心教训：<strong>坐标来自外部时，访问前必须检查。</strong>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 15.6 ==================== -->
+<div class="section-header" id="section-15-6">
+    <h2>15.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-15-6-1">15.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>15.6.1.1 边界检查的典型问题
+    <span class="en">Typical issues with bounds checking</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/15-6-1-1_common_errors.png" alt="扣哒世界 边界检查常见错误速查 - koudashijie.com">
+    <div class="caption">图5：检查顺序颠倒、用错长度、把 &lt; 写成 &lt;=，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>检查顺序颠倒——必须先查 <code>row</code> 再查 <code>col</code>；先访问 <code>forestMap[row]</code> 取长度而行已越界，会当场崩溃，短路保护失效。</li>
+        <li>列检查用错长度——应是 <code>len(forestMap[row])</code>（该行的列数），而不是 <code>len(forestMap)</code>（行数）或 <code>len(forestMap[0])</code>（只有第 0 行的列数）。</li>
+        <li>把 <code>&lt;</code> 写成 <code>&lt;=</code>——合法索引是 <code>0</code> 到 <code>长度-1</code>，用 <code>索引 &lt; 长度</code> 判断；写成 <code>&lt;=</code> 会正好越界一格。</li>
+        <li>行列写反——第一个方括号是行、第二个是列；<code>grid[row][col]</code> 和 <code>grid[col][row]</code> 含义完全不同。</li>
+        <li>完全省略边界检查——当坐标来自随机或外部来源（如关卡给的 <code>cells</code> 数组）时，直接访问极易越界崩溃。</li>
+        <li>把规则数组的经验套到不规则数组上——以为"每行都一样长"，结果在参差不齐的地图上越界。</li>
+        <li>忘记从字典取值——遍历 <code>cells</code> 时要先 <code>cell["row"]</code>、<code>cell["col"]</code> 取出坐标，别直接把字典当索引用。</li>
+        <li>混淆"值"和"索引"——<code>forestMap[row][col] == 0</code> 判断的是格子里的值（是不是陷阱），而 <code>row</code>、<code>col</code> 是位置，两者别搞混。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=sec-15-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你掌握了一项专业程序员每天都在用的防御技能——<strong>边界检查</strong>！这一单元你理解了索引从 <code>0</code> 开始、最大索引等于<strong>长度减一</strong>，越过范围就会抛出 <span class="keyword-en">IndexError</span> 让程序崩溃。你学会了安全访问二维数组的黄金模式：先用 <code>row &lt; len(grid)</code> 确认行存在，再用 <code>col &lt; len(grid[row])</code> 确认列存在，两条都成立才读取 <code>grid[row][col]</code>；也学会了用 <code>and</code> 的短路特性把两步合成一句。你还认识了每行长度不同的<strong>不规则数组</strong>，明白了为什么列检查必须用"该行自己的长度"。在"梦游者、大炮陆战队、雪花莲"三关里，你从规则网格的遍历，一步步走到不规则地图上的安全访问。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>索引从 0 开始</td><td>最大索引 = 长度 − 1</td><td>三关</td></tr>
+            <tr><td>IndexError 异常</td><td>越界访问会崩溃终止</td><td>雪花莲</td></tr>
+            <tr><td>len 测长度</td><td><code>len(grid)</code> 行数 / <code>len(grid[r])</code> 列数</td><td>三关</td></tr>
+            <tr><td>检查行</td><td><code>row &lt; len(grid)</code></td><td>雪花莲</td></tr>
+            <tr><td>检查列</td><td><code>col &lt; len(grid[row])</code></td><td>雪花莲</td></tr>
+            <tr><td>and 短路合并</td><td>先真才算右边，顺序不能反</td><td>雪花莲</td></tr>
+            <tr><td>不规则行长度</td><td>每行列数不同需逐行测量</td><td>雪花莲</td></tr>
+            <tr><td>精确读取 grid[i][j]</td><td>第一括号行、第二括号列</td><td>大炮陆战队</td></tr>
+            <tr><td>嵌套循环遍历</td><td><code>range(len(...))</code> 逐行逐列</td><td>梦游者</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得在伸手之前先看清脚下、在访问之前先确认存在的英雄，才是云峰之上真正稳健的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️❄️🛡️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十五单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

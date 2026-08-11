@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC8-FB5D9C4AC1FA">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第八单元：子串匹配 · 在字符串里搜寻踪迹 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 逐帧演示表格（子串匹配） ===== */
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .trace-table th, .trace-table td {
+            border: 1px solid var(--border);
+            padding: 8px 6px;
+        }
+        .trace-table thead { background: var(--primary); color: #fff; }
+        .trace-table .cell-hit { background: #dcf0e0; color: #2f7a45; font-weight: 700; }
+        .trace-table .cell-miss { background: #fbeae7; color: #9e352c; font-weight: 700; }
+        .trace-table .cell-cur { background: #fdf3e0; color: #bd7415; font-weight: 700; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC8-FB5D9C4AC1FA | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第八单元</div>
+
+    <a href="#section-8-1" class="nav-section">8.1 什么是子串匹配</a>
+    <a href="#sec-8-1-1" class="nav-sub">8.1.1 子串与包含关系</a>
+    <a href="#sec-8-1-2" class="nav-sub">8.1.2 大海捞针的思路</a>
+
+    <a href="#section-8-2" class="nav-section">8.2 字符串的下标访问</a>
+    <a href="#sec-8-2-1" class="nav-sub">8.2.1 len 与 string[i]</a>
+    <a href="#sec-8-2-2" class="nav-sub">8.2.2 逐字符比较</a>
+
+    <a href="#section-8-3" class="nav-section">8.3 单指针滑动法</a>
+    <a href="#sec-8-3-1" class="nav-sub">8.3.1 needleIndex 计数器</a>
+    <a href="#sec-8-3-2" class="nav-sub">8.3.2 匹配、前进与重置</a>
+
+    <a href="#section-8-4" class="nav-section">8.4 双重循环法</a>
+    <a href="#sec-8-4-1" class="nav-sub">8.4.1 外层选起点 i</a>
+    <a href="#sec-8-4-2" class="nav-sub">8.4.2 内层比对 j</a>
+    <a href="#sec-8-4-3" class="nav-sub">8.4.3 break 与完整匹配</a>
+
+    <a href="#section-8-5" class="nav-section">8.5 实战关卡精讲</a>
+    <a href="#sec-8-5-1" class="nav-sub">8.5.1 高原者</a>
+
+    <a href="#section-8-6" class="nav-section">8.6 算法进阶与复杂度</a>
+    <a href="#sec-8-6-1" class="nav-sub">8.6.1 时间复杂度</a>
+    <a href="#sec-8-6-2" class="nav-sub">8.6.2 内置方法对照</a>
+
+    <a href="#section-8-7" class="nav-section">8.7 常见错误</a>
+    <a href="#sec-8-7-1" class="nav-sub">8.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第八单元：子串匹配 · 在字符串里搜寻踪迹</h1>
+    <div class="subtitle">Unit 8: Substring Matching — Searching Within Strings</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 第 13 关：高原者</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 8.1 ==================== -->
+<div class="section-header" id="section-8-1">
+    <h2>8.1 什么是子串匹配</h2>
+    <div class="en-title">What Is Substring Matching</div>
+</div>
+
+<p>在前面的旅程里，你已经能召唤军队、指挥作战、用函数封装行为、用循环遍历数组和字典。现在食人魔耍起了阴招——它们在大门附近立起怪异的雕像，施放<strong>黑魔法</strong>，普通士兵一走近就会被吞噬，只有<strong>高地居民（Highlander）</strong>才能免疫。可英雄手下的士兵混在一起，谁是高地人呢？线索只有一条：<strong>高地人的名字里总是包含 "mac"</strong>。要把他们一个个挑出来，你需要一件全新的工具——<span class="keyword">子串匹配（substring matching）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>子串匹配就是判断"一个短字符串是否作为连续的一段出现在另一个长字符串里"。本单元你将亲手写一个 <code>wordInString(string, word)</code> 函数，用<strong>下标访问</strong>取出每个字符、用<strong>双重循环</strong>在长字符串的每个起点上尝试对齐、用<strong>逐字符比较</strong>判断是否吻合、用 <code>break</code> 提前中断失败的尝试，最终判断名字里到底有没有 "mac"。
+</div>
+
+<h3 id="sec-8-1-1">8.1.1 子串与包含关系（Substring &amp; Containment）</h3>
+
+<h4>8.1.1.1 什么叫"子串"
+    <span class="en">A substring is a contiguous slice</span>
+</h4>
+
+<p><span class="keyword">子串</span>指的是原字符串中<strong>连续的一段</strong>字符。比如 <code>"Fangrimac"</code> 里，从第 6 个字符起的 <code>"mac"</code> 就是它的一个子串；而 <code>"mca"</code>（顺序被打乱）就不是，<code>"mac"</code> 里字符必须<strong>紧挨在一起、顺序一致</strong>。判断长字符串里是否含有某个子串，就叫"子串匹配"或"字符串包含检测"。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/8-1-1-1_substring_concept.png" alt="扣哒世界 子串概念示意 - koudashijie.com">
+    <div class="caption">图1：子串是原字符串中连续的一段——"mac" 在 "Fangrimac" 中连续出现，因此它含有子串 "mac"</div>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🧵 连续 + 顺序 = 子串</div>
+    <strong>是子串：</strong><code>"mac"</code> 在 <code>"Macbeth"</code>（不区分大小写时）、<code>"Fangrimac"</code>、<code>"macGyver"</code> 中都连续出现。<br>
+    <strong>不是子串：</strong><code>"mac"</code> 不在 <code>"Camo"</code>（有 m、a、c 但不连续）、<code>"Reynaldo"</code>（根本没有）里。
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-8-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+<h3 id="sec-8-1-2">8.1.2 大海捞针的思路（The Needle in a Haystack）</h3>
+
+<h4>8.1.2.1 haystack 与 needle
+    <span class="en">The long string vs. the short target</span>
+</h4>
+
+<p>算法界习惯把这两个字符串叫作 <span class="keyword-en">haystack</span>（干草堆，被搜索的长字符串）和 <span class="keyword-en">needle</span>（针，要找的短子串）。这个比喻很形象——在一大堆干草里找一根针。本关里，士兵的名字 <code>soldier.id</code> 就是 haystack，<code>"mac"</code> 就是 needle。核心问题是：这根"针"到底藏没藏在"草堆"里？</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 180" width="620" role="img" aria-label="haystack 与 needle">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">在长字符串（haystack）里找短子串（needle）</text>
+        <g font-family="monospace" font-size="15">
+            <text x="60" y="70" fill="#3a6480" font-weight="bold">haystack:</text>
+            <rect x="175" y="52" width="30" height="26" fill="#eaf2f8" stroke="#4A7A9B"/><text x="190" y="71" text-anchor="middle" fill="#24323d">F</text>
+            <rect x="205" y="52" width="30" height="26" fill="#eaf2f8" stroke="#4A7A9B"/><text x="220" y="71" text-anchor="middle" fill="#24323d">a</text>
+            <rect x="235" y="52" width="30" height="26" fill="#eaf2f8" stroke="#4A7A9B"/><text x="250" y="71" text-anchor="middle" fill="#24323d">n</text>
+            <rect x="265" y="52" width="30" height="26" fill="#eaf2f8" stroke="#4A7A9B"/><text x="280" y="71" text-anchor="middle" fill="#24323d">g</text>
+            <rect x="295" y="52" width="30" height="26" fill="#eaf2f8" stroke="#4A7A9B"/><text x="310" y="71" text-anchor="middle" fill="#24323d">r</text>
+            <rect x="325" y="52" width="30" height="26" fill="#eaf2f8" stroke="#4A7A9B"/><text x="340" y="71" text-anchor="middle" fill="#24323d">i</text>
+            <rect x="355" y="52" width="30" height="26" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/><text x="370" y="71" text-anchor="middle" fill="#2f7a45" font-weight="bold">m</text>
+            <rect x="385" y="52" width="30" height="26" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/><text x="400" y="71" text-anchor="middle" fill="#2f7a45" font-weight="bold">a</text>
+            <rect x="415" y="52" width="30" height="26" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/><text x="430" y="71" text-anchor="middle" fill="#2f7a45" font-weight="bold">c</text>
+
+            <text x="60" y="130" fill="#bd7415" font-weight="bold">needle:</text>
+            <rect x="355" y="112" width="30" height="26" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/><text x="370" y="131" text-anchor="middle" fill="#bd7415" font-weight="bold">m</text>
+            <rect x="385" y="112" width="30" height="26" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/><text x="400" y="131" text-anchor="middle" fill="#bd7415" font-weight="bold">a</text>
+            <rect x="415" y="112" width="30" height="26" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/><text x="430" y="131" text-anchor="middle" fill="#bd7415" font-weight="bold">c</text>
+            <text x="400" y="164" text-anchor="middle" fill="#2f7a45" font-size="12" font-family="sans-serif">✅ 在下标 6 处对齐成功！</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 8.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-8-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-8-2">
+    <h2>8.2 字符串的下标访问</h2>
+    <div class="en-title">Indexing Into Strings</div>
+</div>
+
+<h3 id="sec-8-2-1">8.2.1 len 与 string[i]（Length and Indexing）</h3>
+
+<h4>8.2.1.1 字符串像一排带编号的格子
+    <span class="en">A string is a row of numbered cells</span>
+</h4>
+
+<p>字符串在内存里就像一排格子，每个格子放一个字符，从 <strong>0</strong> 开始编号。用 <code>len(string)</code> 得到它的长度（格子总数），用 <code>string[i]</code> 取出第 <code>i</code> 个格子里的字符。注意：合法下标是从 <code>0</code> 到 <code>len(string) - 1</code>，取 <code>string[len(string)]</code> 会越界报错。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 150" width="560" role="img" aria-label="字符串下标解剖">
+        <text x="280" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">字符串 "mac" 的下标</text>
+        <g font-family="monospace" font-size="24">
+            <rect x="140" y="50" width="60" height="50" fill="#182633" stroke="#7cc7e8" stroke-width="2"/>
+            <text x="170" y="84" text-anchor="middle" fill="#9fd4a8">m</text>
+            <rect x="200" y="50" width="60" height="50" fill="#182633" stroke="#7cc7e8" stroke-width="2"/>
+            <text x="230" y="84" text-anchor="middle" fill="#9fd4a8">a</text>
+            <rect x="260" y="50" width="60" height="50" fill="#182633" stroke="#7cc7e8" stroke-width="2"/>
+            <text x="290" y="84" text-anchor="middle" fill="#9fd4a8">c</text>
+        </g>
+        <g font-family="monospace" font-size="13" fill="#f0c674">
+            <text x="170" y="122" text-anchor="middle">[0]</text>
+            <text x="230" y="122" text-anchor="middle">[1]</text>
+            <text x="290" y="122" text-anchor="middle">[2]</text>
+        </g>
+        <text x="410" y="70" font-family="sans-serif" font-size="12" fill="#cdddea">len("mac") = 3</text>
+        <text x="410" y="92" font-family="sans-serif" font-size="12" fill="#cdddea">"mac"[1] = "a"</text>
+    </svg>
+</div>
+
+<h3 id="sec-8-2-2">8.2.2 逐字符比较（Character-by-Character Comparison）</h3>
+
+<h4>8.2.2.1 用 == 比对两个字符是否相同
+    <span class="en">Compare characters with ==</span>
+</h4>
+
+<p>子串匹配的最小单位就是"比较两个字符是否相等"。取出 haystack 的某个字符和 needle 的某个字符，用 <code>==</code> 判断它们是否一样。整段子串是否匹配，就是把 needle 里的每个字符都逐一比对通过。这个"逐字符"的思想是整个算法的基石。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 取长度、取字符、比字符</span>
+string = <span class="str">"Fangrimac"</span>
+word = <span class="str">"mac"</span>
+
+<span class="fn">print</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>string<span class="punc">))</span>   <span class="cmt"># 9</span>
+<span class="fn">print</span><span class="punc">(</span>string<span class="punc">[</span><span class="num">6</span><span class="punc">])</span>     <span class="cmt"># "m"</span>
+<span class="fn">print</span><span class="punc">(</span>string<span class="punc">[</span><span class="num">6</span><span class="punc">]</span> == word<span class="punc">[</span><span class="num">0</span><span class="punc">])</span>  <span class="cmt"># True，'m' == 'm'</span></pre>
+</div>
+
+<!-- ==================== 8.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-8-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<div class="section-header" id="section-8-3">
+    <h2>8.3 单指针滑动法</h2>
+    <div class="en-title">The Single-Pointer Sliding Approach</div>
+</div>
+
+<p>在正式写双重循环之前，关卡先用一个更直观的思路帮你热身：只走一遍 haystack，用一个"计数指针" <code>needleIndex</code> 记录"到目前为止 needle 已经连续匹配到第几位"。这是关卡说明里给出的示范片段。</p>
+
+<h3 id="sec-8-3-1">8.3.1 needleIndex 计数器（The Match Counter）</h3>
+
+<h4>8.3.1.1 它记录"已连续匹配的进度"
+    <span class="en">It tracks how far the needle matched so far</span>
+</h4>
+
+<p><code>needleIndex</code> 从 0 出发。每当 haystack 的当前字符与 <code>needle[needleIndex]</code> 相同，就说明"针"又对上了一位，把 <code>needleIndex</code> 加 1，指向针的下一个待比字符。一旦 <code>needleIndex</code> 达到 needle 的长度，就说明整根针都连续对齐过了——找到了！</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>haystack = <span class="str">"Hello, world!"</span>
+needle   = <span class="str">"o, w"</span>
+needleIndex = <span class="num">0</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>haystack<span class="punc">)):</span>
+    letter = haystack<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="cmt"># 当前字符与"针"的当前待比字符是否相同？</span>
+    <span class="kw">if</span> letter == needle<span class="punc">[</span>needleIndex<span class="punc">]:</span>
+        needleIndex += <span class="num">1</span>          <span class="cmt"># 对上一位，指向下一位</span>
+        <span class="kw">if</span> needleIndex &gt;= <span class="fn">len</span><span class="punc">(</span>needle<span class="punc">):</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Yep! found it!"</span><span class="punc">)</span>
+            <span class="kw">break</span>                   <span class="cmt"># 整根针都对上了！</span>
+    <span class="kw">else</span><span class="punc">:</span>
+        needleIndex = <span class="num">0</span>          <span class="cmt"># 断了，从头再来</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-8-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+<!-- CC-PROTECTION:HIDDEN:812d5997ec:START anchor=sec-8-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="812d5997ec">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:812d5997ec:END -->
+
+<h3 id="sec-8-3-2">8.3.2 匹配、前进与重置（Match, Advance, Reset）</h3>
+
+<h4>8.3.2.1 关键在"断了就重置"
+    <span class="en">On a mismatch, reset the counter</span>
+</h4>
+
+<p>这段代码的灵魂是那个 <code>else: needleIndex = 0</code>。只要当前字符对不上，就意味着"从刚才那个起点开始的连续匹配断了"，必须把计数器<strong>清零、从头再数</strong>。因为子串要求"连续"，中途断一次，前面攒的进度就全作废了。下面用 <code>needle="o, w"</code> 在 <code>"Hello, world!"</code> 上逐帧演示计数器怎么涨、怎么归零。</p>
+
+<table class="trace-table">
+    <thead>
+        <tr><th>i</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>字符</td>
+            <td>H</td><td>e</td><td>l</td><td>l</td>
+            <td class="cell-hit">o</td><td class="cell-hit">,</td><td class="cell-hit"> </td><td class="cell-hit">w</td><td>o</td>
+        </tr>
+        <tr>
+            <td>needleIndex→</td>
+            <td class="cell-miss">0</td><td class="cell-miss">0</td><td class="cell-miss">0</td><td class="cell-miss">0</td>
+            <td class="cell-cur">1</td><td class="cell-cur">2</td><td class="cell-cur">3</td><td class="cell-hit">4✓</td><td>—</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">读表小提示：</span>前四个字符 H、e、l、l 都不等于 needle 的首字符 <code>"o"</code>，计数器一直是 0；到下标 4 遇到 <code>"o"</code> 开始连续对上 <code>o</code>、<code>,</code>、<code>空格</code>、<code>w</code>，计数器涨到 4，等于 <code>len("o, w")</code>，匹配成功，<code>break</code> 退出。
+</div>
+
+<!-- ==================== 8.4 ==================== -->
+<div class="section-header" id="section-8-4">
+    <h2>8.4 双重循环法</h2>
+    <div class="en-title">The Nested-Loop Approach</div>
+</div>
+
+<p>关卡真正要你在 <code>wordInString</code> 里实现的，是更经典、更通用的<strong>双重循环</strong>解法：<strong>外层</strong>枚举 haystack 里每一个"可能的起点"，<strong>内层</strong>从这个起点出发，把 needle 逐字符对齐比较。这也叫"朴素字符串匹配（naive string matching）"。</p>
+
+<h3 id="sec-8-4-1">8.4.1 外层选起点 i（Outer Loop: Choose a Start）</h3>
+
+<h4>8.4.1.1 只需枚举到 lenString - lenWord
+    <span class="en">Start positions stop at lenString − lenWord</span>
+</h4>
+
+<p>外层循环变量 <code>i</code> 表示"把 needle 的头对齐到 haystack 的第 <code>i</code> 个字符上"。这里有个重要优化：<strong>起点不必枚举到字符串末尾</strong>。如果剩下的字符还没 needle 长，就绝不可能装得下它了。所以 <code>i</code> 只需从 <code>0</code> 走到 <code>lenString - lenWord</code>，超过这个位置继续找是浪费。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 190" width="600" role="img" aria-label="外层滑动起点">
+        <text x="300" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">needle 沿着 haystack 逐个起点滑动</text>
+        <g font-family="monospace" font-size="14">
+            <text x="30" y="60" fill="#3a6480">haystack:</text>
+            <text x="160" y="60" fill="#24323d" letter-spacing="8">Camomac</text>
+
+            <text x="30" y="100" fill="#bd7415">i=0:</text>
+            <text x="160" y="100" fill="#C0453B" letter-spacing="8">mac</text>
+            <text x="470" y="100" fill="#C0453B" font-family="sans-serif" font-size="12">C≠m ✗</text>
+
+            <text x="30" y="128" fill="#bd7415">i=1:</text>
+            <text x="182" y="128" fill="#C0453B" letter-spacing="8">mac</text>
+            <text x="470" y="128" fill="#C0453B" font-family="sans-serif" font-size="12">a≠m ✗</text>
+
+            <text x="30" y="156" fill="#bd7415">i=4:</text>
+            <text x="248" y="156" fill="#2f7a45" letter-spacing="8">mac</text>
+            <text x="470" y="156" fill="#2f7a45" font-family="sans-serif" font-size="12">全对 ✓</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-8-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-8-4-2">8.4.2 内层比对 j（Inner Loop: Compare Each Char）</h3>
+
+<h4>8.4.2.1 用 string[i+j] 对齐 word[j]
+    <span class="en">Align string[i+j] with word[j]</span>
+</h4>
+
+<p>内层循环变量 <code>j</code> 从 0 到 <code>lenWord - 1</code>，逐个检查 needle 的每个字符。关键在下标的对齐关系：needle 的第 <code>j</code> 个字符 <code>word[j]</code>，应当对应 haystack 里 <strong><code>string[i + j]</code></strong> 这个位置——因为整根针的头放在了 <code>i</code>，那么针的第 <code>j</code> 位自然落在 <code>i + j</code>。这个 <code>i + j</code> 的下标换算是本关最需要理解透的一点。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="i加j下标对齐">
+        <text x="280" y="24" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">当 i=4 时，word[j] 对齐 string[4+j]</text>
+        <g font-family="monospace" font-size="13">
+            <text x="60" y="60" fill="#a5c8e8">string[4+0]='m'</text>
+            <text x="260" y="60" fill="#cdddea">↔</text>
+            <text x="300" y="60" fill="#f0c674">word[0]='m'</text>
+            <text x="60" y="82" fill="#a5c8e8">string[4+1]='a'</text>
+            <text x="260" y="82" fill="#cdddea">↔</text>
+            <text x="300" y="82" fill="#f0c674">word[1]='a'</text>
+            <text x="60" y="104" fill="#a5c8e8">string[4+2]='c'</text>
+            <text x="260" y="104" fill="#cdddea">↔</text>
+            <text x="300" y="104" fill="#f0c674">word[2]='c'</text>
+            <text x="440" y="82" fill="#9fd4a8" font-family="sans-serif" font-size="12">三位全等 ✓</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:72e5ce6ad0:START anchor=sec-8-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="72e5ce6ad0">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，全球超 2000 万用户通过它开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:72e5ce6ad0:END -->
+
+<h3 id="sec-8-4-3">8.4.3 break 与完整匹配（Break &amp; Full Match）</h3>
+
+<h4>8.4.3.1 一处不合就 break，全对到底就 return True
+    <span class="en">Break on mismatch, return True on full match</span>
+</h4>
+
+<p>内层比对有两个出口。其一，只要 <code>string[i+j] != word[j]</code>，这个起点就<strong>废了</strong>——用 <code>break</code> 立刻跳出内层，回到外层换下一个起点，没必要再比后面的字符。其二，如果一路比到了 needle 的最后一位（<code>j == lenWord - 1</code>）都还相等，就说明<strong>整根针完整匹配</strong>，直接 <code>return True</code>。如果所有起点都试遍了还没成功，函数最后 <code>return False</code>。下面是关卡里 <code>wordInString</code> 的核心逻辑片段。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># wordInString 的核心：双重循环 + break + 完整匹配判断</span>
+<span class="kw">def</span> <span class="fn">wordInString</span><span class="punc">(</span>string<span class="punc">,</span> word<span class="punc">):</span>
+    lenString = <span class="fn">len</span><span class="punc">(</span>string<span class="punc">)</span>
+    lenWord = <span class="fn">len</span><span class="punc">(</span>word<span class="punc">)</span>
+    <span class="cmt"># 外层：逐个起点 i（只需到 lenString - lenWord）</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> lenString - lenWord<span class="punc">):</span>
+        <span class="cmt"># 内层：逐字符比对 needle 的每一位 j</span>
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>lenWord<span class="punc">):</span>
+            <span class="kw">if</span> string<span class="punc">[</span>i + j<span class="punc">]</span> != word<span class="punc">[</span>j<span class="punc">]:</span>
+                <span class="kw">break</span>                   <span class="cmt"># 断了，换下一个起点</span>
+            <span class="kw">elif</span> j == lenWord - <span class="num">1</span><span class="punc">:</span>
+                <span class="kw">return</span> <span class="kw">True</span>            <span class="cmt"># 最后一位也对上，完整匹配！</span>
+    <span class="kw">return</span> <span class="kw">False</span>                       <span class="cmt"># 所有起点都失败</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">elif 的位置很讲究：</span><code>elif j == lenWord - 1</code> 必须写成 <code>if ... break</code> 的<strong>否则分支</strong>。含义是"这一位相等（没进 break），而且它正好是最后一位"——两个条件同时成立，才能确信整根针都对齐了。若这一位不是最后一位，就什么都不做，让内层循环继续比下一位 <code>j</code>。
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">边界小心：range(0, lenString - lenWord)</span> 在 Python 里是"取不到右端点"的。严格来说，为了不漏掉恰好贴在末尾的匹配，起点应枚举到 <code>lenString - lenWord + 1</code>（即 <code>range(0, lenString - lenWord + 1)</code>）。关卡示范代码用的是 <code>lenString - lenWord</code>，对本关名字里的 "mac" 已经够用；但当你把这套算法用到其它场景、尤其是子串恰好在字符串结尾时，记得把上界加 1 才不会漏判。
+</div>
+
+<!-- ==================== 8.5 ==================== -->
+<div class="section-header" id="section-8-5">
+    <h2>8.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 高原者 -->
+<div class="level-card" id="sec-8-5-1">
+    <div class="level-head">
+        <span class="lv-num">第 13 关 · 高原者</span>
+        <h3>⛰️ 高原者 —— 只召唤名字含 "mac" 的高地人</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/8-5-1-1_highlanders.png" alt="扣哒世界 高原者关卡 - koudashijie.com">
+            <div class="caption">图2：高原者——大门旁的黑魔法雕像会吞噬普通士兵，只有名字含 "mac" 的高地人能免疫</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>食人魔在大门附近立起施放黑魔法的雕像，没有防御地走过去，你的士兵就会损失。<strong>只有高地居民免疫这种黑魔法</strong>。而识别高地人的唯一线索是：<strong>他们的名字里总是包含 "mac"</strong>。所以你要遍历所有盟友，用子串匹配把名字含 "mac" 的人挑出来、让他们做好战斗准备，然后一声令下发起进攻。</p>
+
+        <h4>策略：写好"检测器"，再筛人</h4>
+        <p>本关的策略分两层。<strong>第一层是写工具</strong>：补全 <code>wordInString(string, word)</code> 函数，让它能可靠回答"<code>word</code> 是不是 <code>string</code> 的子串"。<strong>第二层是用工具筛人</strong>：用 <code>hero.findFriends()</code> 拿到所有盟友，对每个 <code>soldier</code> 调用 <code>wordInString(soldier.id, highlanderName)</code>，返回 <code>True</code> 的就是高地人，让他 <code>hero.say(soldier.id + " be ready.")</code>；筛完后统一 <code>hero.say("ATTACK!!!")</code>。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法的核心全在 <code>wordInString</code> 里，就是 8.4 讲的双重循环。默认代码已经给好 <code>lenString</code>、<code>lenWord</code> 两个长度变量，并用注释把每一步都提示清楚："从 0 到 (lenString − lenWord) 遍历索引 i；对每个 i，遍历索引 j 到 word 的长度；如果 <code>string[i+j] != word[j]</code> 则中断循环；如果这是 word 的最后一个字母（<code>j == lenWord - 1</code>）则返回 True；如果循环结束都没成功，返回 False。"你要做的就是把这些注释翻译成 8.4 里那段双重循环代码，并<strong>删掉占位用的那行 <code>return True</code></strong>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：遍历盟友，用子串匹配筛出高地人</span>
+highlanderName = <span class="str">"mac"</span>
+
+soldiers = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+<span class="kw">for</span> soldier <span class="kw">in</span> soldiers<span class="punc">:</span>
+    <span class="kw">if</span> <span class="fn">wordInString</span><span class="punc">(</span>soldier<span class="punc">.</span>id<span class="punc">,</span> highlanderName<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>soldier<span class="punc">.</span>id + <span class="str">" be ready."</span><span class="punc">)</span>
+
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"ATTACK!!!"</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别忘删掉占位的 return True：</span>默认代码里有一行 <code>return True</code> 并注明"在写好函数后删除它"。如果不删，函数会对<strong>任何</strong>名字都返回 <code>True</code>，把普通士兵也当成高地人送去送死。写完双重循环后，务必把这行占位删掉。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么用函数封装？</span>把"子串匹配"封装成 <code>wordInString</code>，主循环就只需一句 <code>if wordInString(...)</code> 就能表达"这个人是不是高地人"，非常清晰。这正是前面单元学的"用函数封装行为"和本单元"子串匹配算法"的结合——算法藏在函数里，主逻辑读起来像自然语言。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">大小写要留意：</span>本关的名字都以小写 "mac" 连续出现，直接比较即可。但现实中 "Mac" 和 "mac" 是不同字符。若要忽略大小写，可以先把两边都转成小写（如 <code>string.lower()</code> 与 <code>word.lower()</code>）再比较——这是一个值得记住的扩展技巧。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 8.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+<!-- CC-PROTECTION:HIDDEN:366e53f6d3:START anchor=h3-10 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="366e53f6d3">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:366e53f6d3:END -->
+
+<div class="section-header" id="section-8-6">
+    <h2>8.6 算法进阶与复杂度</h2>
+    <div class="en-title">Going Deeper: Complexity &amp; Built-ins</div>
+</div>
+
+<h3 id="sec-8-6-1">8.6.1 时间复杂度（Time Complexity）</h3>
+
+<h4>8.6.1.1 朴素匹配是 O(n × m)
+    <span class="en">Naive matching costs O(n × m)</span>
+</h4>
+
+<p>设 haystack 长度为 <code>n</code>、needle 长度为 <code>m</code>。外层有大约 <code>n</code> 个起点，每个起点内层最多比 <code>m</code> 个字符，所以最坏情况下要做约 <code>n × m</code> 次比较，记作 <span class="keyword-en">O(n × m)</span>。对本关这种短名字（needle 只有 3 个字符），这完全够快。但如果 haystack 和 needle 都很长、又有大量"差一点就匹配"的情形，朴素法会显得慢。</p>
+
+<div class="info-box">
+    <span class="info-label">更快的算法长什么样？</span>为了突破 O(n × m)，计算机科学家发明了 <strong>KMP</strong>（Knuth–Morris–Pratt）、<strong>Boyer–Moore</strong>、<strong>Rabin–Karp</strong> 等高级算法。它们的核心思路是"匹配失败时不要傻乎乎地把起点只挪一格从头再比，而是利用已经比过的信息跳得更远"，能把时间降到接近 O(n + m)。本单元你先掌握最朴素、最好懂的双重循环打底，日后再学它们会水到渠成。
+</div>
+
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-8-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<h3 id="sec-8-6-2">8.6.2 内置方法对照（Built-in Alternatives）</h3>
+
+<h4>8.6.2.1 现实中一句 in 就够
+    <span class="en">In real Python, "in" does it in one line</span>
+</h4>
+
+<p>关卡让你亲手实现子串匹配，是为了理解<strong>底层原理</strong>。而在真实的 Python 编程里，判断子串通常一行就够——用 <code>in</code> 运算符，或用字符串的 <code>find</code>／<code>index</code> 方法。理解了手写版，再用内置版，你才知道它们背后在做什么。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>手写版（理解原理）</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> <span class="fn">wordInString</span><span class="punc">(</span>name<span class="punc">,</span> <span class="str">"mac"</span><span class="punc">):</span>
+    ...
+<span class="cmt"># 双重循环，自己判断</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>内置版（日常首选）</h5>
+        <div class="code-block">
+<pre><span class="kw">if</span> <span class="str">"mac"</span> <span class="kw">in</span> name<span class="punc">:</span>
+    ...
+<span class="cmt"># in 直接返回 True/False</span></pre>
+        </div>
+    </div>
+</div>
+
+<table class="styled-table">
+    <thead><tr><th>写法</th><th>作用</th><th>返回值</th></tr></thead>
+    <tbody>
+        <tr><td><code>"mac" in name</code></td><td>判断是否包含子串</td><td><code>True</code> / <code>False</code></td></tr>
+        <tr><td><code>name.find("mac")</code></td><td>找到子串首次出现的下标</td><td>下标；找不到返回 <code>-1</code></td></tr>
+        <tr><td><code>name.index("mac")</code></td><td>同 find，但找不到时报错</td><td>下标；找不到抛异常</td></tr>
+        <tr><td><code>name.count("mac")</code></td><td>统计子串出现次数</td><td>整数次数</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 8.7 ==================== -->
+<div class="section-header" id="section-8-7">
+    <h2>8.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-8-7-1">8.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>8.7.1.1 子串匹配的典型问题
+    <span class="en">Typical issues in substring matching</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec8_8-7-1-1_common_errors.png" alt="扣哒世界 子串匹配常见错误速查 - koudashijie.com">
+    <div class="caption">图3：下标越界、忘删占位 return、比对下标写错，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘删占位的 <code>return True</code>——它会让函数对任何输入都返回真，普通士兵被误判为高地人。写完逻辑一定要删掉它。</li>
+        <li>下标对齐写错——应是 <code>string[i + j]</code> 对齐 <code>word[j]</code>，写成 <code>string[i]</code> 或 <code>string[j]</code> 都会算错。</li>
+        <li>完整匹配判断漏了——只 <code>break</code> 却忘了写 <code>elif j == lenWord - 1: return True</code>，函数永远不会返回真。</li>
+        <li>break 与 return 位置混乱——不匹配才 <code>break</code>（换起点），匹配到最后一位才 <code>return True</code>；两者不能对调。</li>
+        <li>下标越界——外层起点若不限制在 <code>lenString - lenWord</code> 附近，<code>string[i + j]</code> 会超出字符串长度而报错。</li>
+        <li>单指针法忘了重置——用 <code>needleIndex</code> 计数时，遇到不匹配一定要 <code>needleIndex = 0</code>，否则会错判非连续的匹配。</li>
+        <li>大小写不一致——<code>"Mac"</code> 与 <code>"mac"</code> 不相等；需要忽略大小写时先统一转小写。</li>
+        <li>函数没被调用／没删占位就筛人——记得在 <code>for soldier</code> 循环里真正调用 <code>wordInString</code> 并根据返回值行动。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:fc3dddac56:START anchor=sec-8-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="fc3dddac56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，把编程变成闯关游戏，玩着玩着就成了别人眼里的代码大佬。</span>
+</aside>
+<!-- CC-PROTECTION:AD:fc3dddac56:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你在安息云峰攻克了黑魔法雕像！这一单元你掌握了字符串处理里非常实用的一项技能——<strong>子串匹配</strong>。你理解了子串"连续且顺序一致"的定义，学会了用 <code>len</code> 和 <code>string[i]</code> 下标访问字符、用 <code>==</code> 逐字符比较；你既见识了用 <code>needleIndex</code> 计数器的<strong>单指针滑动法</strong>，也亲手写出了更通用的<strong>双重循环法</strong>——外层枚举起点 <code>i</code>、内层用 <code>string[i+j]</code> 对齐 <code>word[j]</code>、不匹配就 <code>break</code>、比到最后一位就 <code>return True</code>。最后你把这套算法封装进 <code>wordInString</code>，在"高原者"关里精准挑出名字含 "mac" 的高地人。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应内容</th></tr></thead>
+        <tbody>
+            <tr><td>子串定义</td><td>连续 + 顺序一致的一段字符</td><td>8.1</td></tr>
+            <tr><td>haystack / needle</td><td>长字符串里找短子串</td><td>8.1</td></tr>
+            <tr><td>下标访问</td><td><code>len(s)</code> 与 <code>s[i]</code></td><td>8.2</td></tr>
+            <tr><td>逐字符比较</td><td>用 <code>==</code> 比对单个字符</td><td>8.2</td></tr>
+            <tr><td>单指针滑动</td><td>needleIndex 计数，断则重置</td><td>8.3</td></tr>
+            <tr><td>双重循环</td><td>外层选起点 i、内层比对 j</td><td>8.4</td></tr>
+            <tr><td>i+j 下标对齐</td><td><code>string[i+j]</code> ↔ <code>word[j]</code></td><td>8.4</td></tr>
+            <tr><td>break 与完整匹配</td><td>不合就断、全对就返回 True</td><td>8.4 · 高原者</td></tr>
+            <tr><td>时间复杂度</td><td>朴素法 O(n×m)</td><td>8.6</td></tr>
+            <tr><td>内置替代</td><td><code>in</code> / <code>find</code> / <code>index</code></td><td>8.6</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        能在一大堆字符里精准捞出那根"针"、把算法优雅封装成函数的英雄，<br>
+        才是云峰之上真正沉着的程序员。继续向雪山之巅挺进吧，勇敢的程序员！🏔️⛰️🔍
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+<!-- CC-PROTECTION:HIDDEN:957cee2d61:START anchor=h3-14 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="957cee2d61">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC8-FB5D9C4AC1FA。</span>
+<!-- CC-PROTECTION:HIDDEN:957cee2d61:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第八单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

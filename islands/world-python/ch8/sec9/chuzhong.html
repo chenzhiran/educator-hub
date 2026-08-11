@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC9-ABFCC4CA9555">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第九单元：循环步长 · 让循环大步流星 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 逐步序列表格（range 展开） ===== */
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .trace-table th, .trace-table td {
+            border: 1px solid var(--border);
+            padding: 8px 6px;
+        }
+        .trace-table thead { background: var(--primary); color: #fff; }
+        .trace-table .cell-hit { background: #dcf0e0; color: #2f7a45; font-weight: 700; }
+        .trace-table .cell-miss { background: #fbeae7; color: #9e352c; font-weight: 700; }
+        .trace-table .cell-cur { background: #fdf3e0; color: #bd7415; font-weight: 700; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC9-ABFCC4CA9555 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第九单元</div>
+
+    <a href="#section-9-1" class="nav-section">9.1 什么是循环步长</a>
+    <a href="#sec-9-1-1" class="nav-sub">9.1.1 从"逐一"到"跳跃"</a>
+    <a href="#sec-9-1-2" class="nav-sub">9.1.2 步长解决什么问题</a>
+
+    <a href="#section-9-2" class="nav-section">9.2 range 三参数</a>
+    <a href="#sec-9-2-1" class="nav-sub">9.2.1 start / end / step</a>
+    <a href="#sec-9-2-2" class="nav-sub">9.2.2 end 取不到（左闭右开）</a>
+
+    <a href="#section-9-3" class="nav-section">9.3 正步长与负步长</a>
+    <a href="#sec-9-3-1" class="nav-sub">9.3.1 正步长递增</a>
+    <a href="#sec-9-3-2" class="nav-sub">9.3.2 负步长递减</a>
+
+    <a href="#section-9-4" class="nav-section">9.4 按间隔移动坐标</a>
+    <a href="#sec-9-4-1" class="nav-sub">9.4.1 moveXY 沿边巡逻</a>
+    <a href="#sec-9-4-2" class="nav-sub">9.4.2 buildXY 定点建造</a>
+
+    <a href="#section-9-5" class="nav-section">9.5 用循环消灭重复</a>
+    <a href="#sec-9-5-1" class="nav-sub">9.5.1 循环 vs 手写重复</a>
+
+    <a href="#section-9-6" class="nav-section">9.6 实战关卡精讲</a>
+    <a href="#sec-9-6-1" class="nav-sub">9.6.1 边缘防御</a>
+    <a href="#sec-9-6-2" class="nav-sub">9.6.2 危险的路线</a>
+
+    <a href="#section-9-7" class="nav-section">9.7 常见错误</a>
+    <a href="#sec-9-7-1" class="nav-sub">9.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第九单元：循环步长 · 让循环大步流星</h1>
+    <div class="subtitle">Unit 9: Loop Step — Iterating with a Stride</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 第 14–15 关：边缘防御 → 危险的路线</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 9.1 ==================== -->
+<div class="section-header" id="section-9-1">
+    <h2>9.1 什么是循环步长</h2>
+    <div class="en-title">What Is a Loop Step</div>
+</div>
+
+<p>山林中有一座宁静的村庄，静得反常——食人魔就要来了！你需要在村庄四周布置哨塔和火焰陷阱。这些防御点不是随意摆放的，而是<strong>沿着边界、每隔固定距离</strong>放一个。如果用普通循环一个坐标一个坐标地写，代码会又长又乱。本单元你将学会 <code>for</code> 循环的第三个参数——<span class="keyword">步长（step）</span>，让循环变量不再只是"加一加一"地走，而是能<strong>大步流星地跳跃前进，甚至倒着走</strong>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span><code>range(start, end, step)</code> 的第三个参数 <code>step</code> 决定循环变量"每次跳多远"。正的 <code>step</code> 让它<strong>递增</strong>，负的 <code>step</code> 让它<strong>递减</strong>。配合 <code>hero.moveXY(x, y)</code> 沿边巡逻、<code>hero.buildXY(type, x, y)</code> 定点建造，你只用几行循环就能在村庄四条边上等距布满防御工事，把大量重复代码压缩成简洁的几行。
+</div>
+
+<h3 id="sec-9-1-1">9.1.1 从"逐一"到"跳跃"（From One-by-One to Striding）</h3>
+
+<h4>9.1.1.1 默认步长是 1
+    <span class="en">The default step is 1</span>
+</h4>
+
+<p>之前你写的 <code>range(0, 5)</code> 会依次产生 0、1、2、3、4——每次悄悄地加 1，这个"1"就是<strong>默认步长</strong>。但很多时候我们不想一格一格挪：布防的点每隔 20 个单位一个，倒计时每 10 秒报一次，跳格子每次跳 2 步……这时就要显式地把步长写出来。关卡概览一语道破："for 循环不仅可以用于遍历数组，还可以一次增加 2、4、10 甚至 20 个单位！"</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 默认步长 1</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> <span class="num">5</span><span class="punc">):</span>
+    <span class="fn">print</span><span class="punc">(</span>i<span class="punc">)</span>      <span class="cmt"># 0 1 2 3 4</span>
+
+<span class="cmt"># 步长 10，一次跳 10</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">0</span><span class="punc">,</span> <span class="num">100</span><span class="punc">,</span> <span class="num">10</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>i<span class="punc">)</span>   <span class="cmt"># 0 10 20 ... 90</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:690a149e74:START anchor=sec-9-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="690a149e74">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜 CoCo陈之然，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:690a149e74:END -->
+
+<h3 id="sec-9-1-2">9.1.2 步长解决什么问题（Why Step Matters）</h3>
+
+<h4>9.1.2.1 等距布点，天生适合步长
+    <span class="en">Evenly-spaced points love a step</span>
+</h4>
+
+<p>凡是"从某处开始、每隔固定距离做一次、到某处结束"的任务，步长循环都是最优解：沿墙每 20 米放一个哨塔、每 24 米埋一个陷阱、每 5 单位走一步。你只需告诉循环三件事——从哪开始、到哪结束、每次跨多大——剩下的重复动作它替你完成。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/9-1-2-1_step_intro.png" alt="扣哒世界 步长布点示意 - koudashijie.com">
+    <div class="caption">图1：沿边界等距布防——从起点出发，每隔固定步长放一个防御点，直到终点前停下</div>
+</div>
+
+<!-- ==================== 9.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=sec-9-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<div class="section-header" id="section-9-2">
+    <h2>9.2 range 三参数</h2>
+    <div class="en-title">The Three-Argument range()</div>
+</div>
+
+<h3 id="sec-9-2-1">9.2.1 start / end / step（三个位置参数）</h3>
+
+<h4>9.2.1.1 起点、终点、步长
+    <span class="en">Start, end, and step</span>
+</h4>
+
+<p><code>range(start, end, step)</code> 有三个参数，位置和含义都固定：<strong>start</strong> 是起点（包含在内），<strong>end</strong> 是终点（<strong>不</strong>包含），<strong>step</strong> 是每次前进的量。循环变量从 <code>start</code> 出发，每轮加上 <code>step</code>，一旦越过 <code>end</code> 就停下。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 600 150" width="600" role="img" aria-label="range 三参数解剖">
+        <text x="300" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">range 的三个零件</text>
+        <text x="150" y="80" font-size="22" font-family="monospace" fill="#7cc7e8">range</text>
+        <text x="230" y="80" font-size="22" font-family="monospace" fill="#cdddea">(</text>
+        <text x="248" y="80" font-size="22" font-family="monospace" fill="#e8a15a">40</text>
+        <text x="278" y="80" font-size="22" font-family="monospace" fill="#cdddea">,</text>
+        <text x="296" y="80" font-size="22" font-family="monospace" fill="#e8a15a">81</text>
+        <text x="326" y="80" font-size="22" font-family="monospace" fill="#cdddea">,</text>
+        <text x="344" y="80" font-size="22" font-family="monospace" fill="#e8a15a">20</text>
+        <text x="376" y="80" font-size="22" font-family="monospace" fill="#cdddea">)</text>
+        <text x="259" y="112" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">start 起点</text>
+        <text x="307" y="126" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">end 终点(不含)</text>
+        <text x="355" y="112" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">step 步长</text>
+        <line x1="259" y1="88" x2="259" y2="102" stroke="#e8a15a" stroke-width="1.5"/>
+        <line x1="307" y1="88" x2="307" y2="116" stroke="#e8a15a" stroke-width="1.5"/>
+        <line x1="355" y1="88" x2="355" y2="102" stroke="#e8a15a" stroke-width="1.5"/>
+    </svg>
+</div>
+
+<h3 id="sec-9-2-2">9.2.2 end 取不到（左闭右开）（The End Is Exclusive）</h3>
+
+<h4>9.2.2.1 为什么写 81 而不是 80
+    <span class="en">Why we write 81, not 80</span>
+</h4>
+
+<p>这是最容易踩的坑。<code>range</code> 遵循"<strong>左闭右开</strong>"：起点算数，终点不算。关卡北边界要从 <code>x=40</code> 走到 <code>x=80</code>（含 80），步长 20，如果写 <code>range(40, 80, 20)</code>，产生的是 40、60——<strong>80 被漏掉了</strong>！所以必须把 end 写成比目标终点稍大的数，如 <code>range(40, 81, 20)</code>，才能产生 40、60、80。默认代码的注释也特意提醒："<code>range</code> 不包括第二个边界。"</p>
+
+<table class="trace-table">
+    <thead>
+        <tr><th>写法</th><th>产生的序列</th><th>含 80 吗</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>range(40, 80, 20)</td><td class="cell-miss">40, 60</td><td class="cell-miss">❌ 漏了</td></tr>
+        <tr><td>range(40, 81, 20)</td><td class="cell-hit">40, 60, 80</td><td class="cell-hit">✅ 正确</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">口诀：</span>想让循环"走到并包含"某个终点，就把 end 写成"那个终点 + 1"（正步长）或"那个终点 − 1"（负步长）。只要 end 落在"最后一个想要的值"和"下一个会跳到的值"之间即可，写 +1 最稳妥。
+</div>
+
+<!-- ==================== 9.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-9-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-9-3">
+    <h2>9.3 正步长与负步长</h2>
+    <div class="en-title">Positive &amp; Negative Steps</div>
+</div>
+
+<h3 id="sec-9-3-1">9.3.1 正步长递增（Counting Up）</h3>
+
+<h4>9.3.1.1 从小往大，step 为正
+    <span class="en">Ascending: step is positive</span>
+</h4>
+
+<p>当 <code>step</code> 为正数时，循环变量从 <code>start</code> 一路<strong>递增</strong>到接近 <code>end</code>。此时必须满足 <code>start &lt; end</code>，否则循环一次都不执行。关卡里"沿北边界从 x=40 到 x=80"就是典型的正步长。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 正步长：20, 40, 60, 80</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">20</span><span class="punc">,</span> <span class="num">100</span><span class="punc">,</span> <span class="num">20</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>i<span class="punc">)</span>   <span class="cmt"># 20 40 60 80</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:de8534a7d9:START anchor=sec-9-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="de8534a7d9">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从第一行代码开始，把你的想法变成真的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:de8534a7d9:END -->
+
+<h3 id="sec-9-3-2">9.3.2 负步长递减（Counting Down）</h3>
+
+<h4>9.3.2.1 从大往小，step 为负
+    <span class="en">Descending: step is negative</span>
+</h4>
+
+<p>当 <code>step</code> 为负数时，循环变量从 <code>start</code> 一路<strong>递减</strong>到接近 <code>end</code>。此时必须满足 <code>start &gt; end</code>（起点比终点大）。关卡里"沿东边界从 y=40 到 y=20"就要用负步长：<code>range(40, 19, -20)</code> 产生 40、20——注意 end 写成 19（比 20 小 1），才能把 20 包含进来。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 负步长：40, 20（end 写 19 才含 20）</span>
+<span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">19</span><span class="punc">,</span> -<span class="num">20</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">80</span><span class="punc">,</span> y<span class="punc">)</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 160" width="600" role="img" aria-label="正负步长对比">
+        <text x="300" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">正步长向右递增，负步长向左递减</text>
+        <defs>
+            <marker id="s-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#2f7a45"/>
+            </marker>
+            <marker id="s-arr2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#C0453B"/>
+            </marker>
+        </defs>
+        <g font-family="monospace" font-size="13">
+            <text x="30" y="65" fill="#2f7a45" font-family="sans-serif">step=+20</text>
+            <circle cx="160" cy="60" r="14" fill="#dcf0e0" stroke="#2f7a45"/><text x="160" y="65" text-anchor="middle" fill="#2f7a45">40</text>
+            <circle cx="280" cy="60" r="14" fill="#dcf0e0" stroke="#2f7a45"/><text x="280" y="65" text-anchor="middle" fill="#2f7a45">60</text>
+            <circle cx="400" cy="60" r="14" fill="#dcf0e0" stroke="#2f7a45"/><text x="400" y="65" text-anchor="middle" fill="#2f7a45">80</text>
+            <line x1="176" y1="60" x2="264" y2="60" stroke="#2f7a45" stroke-width="2" marker-end="url(#s-arr)"/>
+            <line x1="296" y1="60" x2="384" y2="60" stroke="#2f7a45" stroke-width="2" marker-end="url(#s-arr)"/>
+
+            <text x="30" y="125" fill="#C0453B" font-family="sans-serif">step=−20</text>
+            <circle cx="400" cy="120" r="14" fill="#fbeae7" stroke="#C0453B"/><text x="400" y="125" text-anchor="middle" fill="#C0453B">40</text>
+            <circle cx="280" cy="120" r="14" fill="#fbeae7" stroke="#C0453B"/><text x="280" y="125" text-anchor="middle" fill="#C0453B">20</text>
+            <line x1="384" y1="120" x2="296" y2="120" stroke="#C0453B" stroke-width="2" marker-end="url(#s-arr2)"/>
+        </g>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">方向和步长必须一致：</span>正步长要求 <code>start &lt; end</code>，负步长要求 <code>start &gt; end</code>。如果方向反了——比如 <code>range(40, 20, 20)</code>（起点大于终点却用正步长），或 <code>range(20, 40, -20)</code>（起点小于终点却用负步长）——range 会<strong>什么都不产生</strong>，循环体一次也不执行，防御点全没建成。
+</div>
+
+<!-- ==================== 9.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:2e3e6cfba7:START anchor=sec-9-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="2e3e6cfba7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从暗影地牢的对象与方法起步，到流金沙漠的算法拓展，一路闯关一路变强。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2e3e6cfba7:END -->
+<!-- CC-PROTECTION:HIDDEN:a665af1d33:START anchor=sec-9-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a665af1d33">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:a665af1d33:END -->
+
+<div class="section-header" id="section-9-4">
+    <h2>9.4 按间隔移动坐标</h2>
+    <div class="en-title">Moving Coordinates by Intervals</div>
+</div>
+
+<h3 id="sec-9-4-1">9.4.1 moveXY 沿边巡逻（Patrolling with moveXY）</h3>
+
+<h4>9.4.1.1 一条边固定一个坐标，另一个坐标随循环变化
+    <span class="en">Fix one coordinate, vary the other</span>
+</h4>
+
+<p>沿一条边巡逻的诀窍是：<strong>那条边上有一个坐标是固定的，另一个坐标随循环变量变化</strong>。走北边界（<code>y=60</code> 不变）时，让 <code>x</code> 随循环从 40 跳到 80；走东边界（<code>x=80</code> 不变）时，让 <code>y</code> 随循环从 40 降到 20。每到一个点就 <code>hero.moveXY(x, y)</code> 移动过去。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 北边界：y 固定 60，x 从 40 递增到 80</span>
+<span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">81</span><span class="punc">,</span> <span class="num">20</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> <span class="num">60</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Here"</span><span class="punc">)</span></pre>
+</div>
+
+<h3 id="sec-9-4-2">9.4.2 buildXY 定点建造（Building with buildXY）</h3>
+
+<h4>9.4.2.1 buildXY(类型, x, y) 直接在坐标造东西
+    <span class="en">buildXY places a structure at (x, y)</span>
+</h4>
+
+<p><code>hero.buildXY(type, x, y)</code> 让英雄直接在指定坐标建造指定类型的建筑，无需先移动过去。它比"先 moveXY 再建"更省时——在"危险的路线"里，你只有 80 秒，用 <code>buildXY</code> 能一口气把火焰陷阱布满四条通道。第一个参数是建筑类型字符串（如 <code>"fire-trap"</code>），后两个是坐标。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>moveXY（先走过去）</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> <span class="num">60</span><span class="punc">)</span>
+<span class="cmt"># 英雄本体移动到该点</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>buildXY（远程建造）</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> x<span class="punc">,</span> <span class="num">114</span><span class="punc">)</span>
+<span class="cmt"># 直接在该点造陷阱</span></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-9-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<div class="section-header" id="section-9-5">
+    <h2>9.5 用循环消灭重复</h2>
+    <div class="en-title">Killing Repetition with Loops</div>
+</div>
+
+<h3 id="sec-9-5-1">9.5.1 循环 vs 手写重复（Loop vs. Copy-Paste）</h3>
+
+<h4>9.5.1.1 一行循环顶十几行手写
+    <span class="en">One loop replaces a dozen lines</span>
+</h4>
+
+<p>如果不用步长循环，你得手写每一个坐标：<code>buildXY("fire-trap", 40, 114)</code>、<code>buildXY("fire-trap", 64, 114)</code>、<code>buildXY("fire-trap", 88, 114)</code>……不仅冗长，改起来还容易出错。用一行 <code>for x in range(40, 113, 24):</code> 就能全部搞定。这正是编程里最重要的原则之一——<span class="keyword-en">DRY（Don't Repeat Yourself，不要重复自己）</span>。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>❌ 手写重复（啰嗦易错）</h5>
+        <div class="code-block">
+<pre><span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span><span class="num">40</span><span class="punc">,</span><span class="num">114</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span><span class="num">64</span><span class="punc">,</span><span class="num">114</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span><span class="num">88</span><span class="punc">,</span><span class="num">114</span><span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span><span class="num">112</span><span class="punc">,</span><span class="num">114</span><span class="punc">)</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>✅ 步长循环（简洁清晰）</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">113</span><span class="punc">,</span> <span class="num">24</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> x<span class="punc">,</span> <span class="num">114</span><span class="punc">)</span>
+
+
+
+<span class="cmt"># 一行循环 = 四行手写</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="info-box">
+    <span class="info-label">再进一步：用函数分组：</span>"危险的路线"把四条边各自封装成 <code>buildNorthLine()</code>、<code>buildEastLine()</code>、<code>buildSouthLine()</code>、<code>buildWestLine()</code> 四个函数，主程序只需依次调用它们。这是"步长循环"和第一单元"函数封装"的组合拳——循环消灭一条边内部的重复，函数消灭四条边之间的结构重复。
+</div>
+
+<!-- ==================== 9.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-9-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<div class="section-header" id="section-9-6">
+    <h2>9.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 边缘防御 -->
+<div class="level-card" id="sec-9-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 14 关 · 边缘防御</span>
+        <h3>🛡️ 边缘防御 —— 沿四条边界巡逻布塔</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/9-6-1-1_border_patrol.png" alt="扣哒世界 边缘防御关卡 - koudashijie.com">
+            <div class="caption">图2：边缘防御——沿村庄四条边界等距巡逻，在每个点让农民建造哨塔</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>宁静的村庄需要坚固的防御工事。每个农民都能造一座自动哨塔，塔会攻击城外一切单位。你要做的是<strong>沿着村庄的四条边界巡逻</strong>，每走到一个点就 <code>hero.say("Here")</code> 告诉农民在此建造，绕村一圈后躲回村里。</p>
+
+        <h4>策略：把正方形拆成四条边</h4>
+        <p>这是一个正方形边界，四条边各写一个 <code>for</code> 循环。关键是想清楚每条边"哪个坐标固定、哪个坐标变、往哪个方向走、用正还是负步长"。绕村一圈是顺时针：北边向右（x 增）、东边向下（y 减）、南边向左（x 减）、西边向上（y 增）。默认代码已经替你写好北、东两条边，留下南、西两条边让你补全。</p>
+
+        <h4>思路拆解</h4>
+        <p>四条边的方向和步长符号一一对应。北边界 <code>y=60</code>，x 从 40 递增到 80，用 <code>range(40, 81, 20)</code>（正步长）。东边界 <code>x=80</code>，y 从 40 递减到 20，用 <code>range(40, 19, -20)</code>（负步长，end 写 19 才含 20）。照此推理：南边界 <code>y=20</code>，x 从 60 递减到 20，用 <code>range(60, 19, -20)</code>；西边界 <code>x=20</code>，y 从 40 递增到 60，用 <code>range(40, 61, 20)</code>。每个点都 <code>hero.moveXY(...)</code> 后 <code>hero.say("Here")</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：需要你补全的南、西两条边</span>
+<span class="cmt"># 南边界 y=20，x 从 60 递减到 20（负步长）</span>
+<span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">60</span><span class="punc">,</span> <span class="num">19</span><span class="punc">,</span> -<span class="num">20</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> <span class="num">20</span><span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Here"</span><span class="punc">)</span>
+
+<span class="cmt"># 西边界 x=20，y 从 40 递增到 60（正步长）</span>
+<span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">61</span><span class="punc">,</span> <span class="num">20</span><span class="punc">):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">20</span><span class="punc">,</span> y<span class="punc">)</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Here"</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">四条边的方向记忆法：</span>顺时针绕村一圈——北边"→"（x 增，正步长）、东边"↓"（y 减，负步长）、南边"←"（x 减，负步长）、西边"↑"（y 增，正步长）。坐标变大用正步长，变小用负步长，方向别搞反。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">最后别忘躲回村里：</span>绕完一圈，代码末尾要 <code>hero.moveXY(50, 40)</code> 让英雄退到村庄中心的安全位置，否则英雄留在边界上可能被敌人攻击。
+        </div>
+    </div>
+</div>
+
+<!-- 危险的路线 -->
+<div class="level-card" id="sec-9-6-2">
+    <div class="level-head">
+        <span class="lv-num">第 15 关 · 危险的路线</span>
+        
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3>🔥 危险的路线 —— 四条通道埋满火焰陷阱</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/9-6-2-1_dangerous_path.png" alt="扣哒世界 危险的路线关卡 - koudashijie.com">
+            <div class="caption">图3：危险的路线——在四个方向的所有通道上等距埋下火焰陷阱，抢在食人魔猎人队到达前完成</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>通往村庄的入口很多，你必须在<strong>四个方向的所有通道</strong>都埋下火焰陷阱。食人魔猎人队 80 秒后就到——时间紧迫，正是用 <code>for</code> 循环节省时间、让代码简洁的最佳场景。这一关引入了 <code>buildXY</code>，可以远程建造，比逐点移动快得多。</p>
+
+        <h4>策略：四条边各写一个建造函数</h4>
+        <p>本关的结构比"边缘防御"更进一步：它把四条边分别封装成 <code>buildNorthLine</code>、<code>buildEastLine</code>、<code>buildSouthLine</code>、<code>buildWestLine</code> 四个<strong>函数</strong>，主程序末尾依次调用四个函数、最后 <code>hero.moveXY(40, 94)</code> 撤离。默认代码给好了北线函数作示范，其余三个函数体是 <code>pass</code>，等你填。策略就是：读懂每条边的注释（起止坐标 + 步长），把对应的 <code>for</code> 循环 + <code>buildXY</code> 填进各自的函数里。</p>
+
+        <h4>思路拆解</h4>
+        <p>每条边的参数都写在注释里，照着翻译即可。北线 <code>y=114</code>，x 从 40 到 112 步长 24：<code>range(40, 113, 24)</code>。东线 <code>x=140</code>，y 从 110 到 38 步长 18（递减）：<code>range(110, 37, -18)</code>。南线 <code>y=22</code>，x 从 132 到 32 步长 20（递减）：<code>range(132, 31, -20)</code>。西线 <code>x=20</code>，y 从 28 到 108 步长 16（递增）：<code>range(28, 109, 16)</code>。递增用正步长、递减用负步长，end 记得比目标终点多走/少走一点以便包含终点。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：用函数封装每条边（示例两个）</span>
+<span class="kw">def</span> <span class="fn">buildEastLine</span><span class="punc">():</span>
+    <span class="cmt"># x=140 固定，y 从 110 递减到 38，步长 -18</span>
+    <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">110</span><span class="punc">,</span> <span class="num">37</span><span class="punc">,</span> -<span class="num">18</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> <span class="num">140</span><span class="punc">,</span> y<span class="punc">)</span>
+
+<span class="kw">def</span> <span class="fn">buildWestLine</span><span class="punc">():</span>
+    <span class="cmt"># x=20 固定，y 从 28 递增到 108，步长 16</span>
+    <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">28</span><span class="punc">,</span> <span class="num">109</span><span class="punc">,</span> <span class="num">16</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> <span class="num">20</span><span class="punc">,</span> y<span class="punc">)</span>
+
+<span class="cmt"># 定义后务必调用四个函数</span>
+<span class="fn">buildNorthLine</span><span class="punc">()</span>
+<span class="fn">buildEastLine</span><span class="punc">()</span>
+<span class="fn">buildSouthLine</span><span class="punc">()</span>
+<span class="fn">buildWestLine</span><span class="punc">()</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">定义 ≠ 调用：</span>把三个 <code>pass</code> 换成循环只是"写好了函数体"。别忘了主程序末尾的 <code>buildNorthLine()</code>…<code>buildWestLine()</code> 四行调用——没有它们，函数里的代码一个陷阱都不会建。这一点和第一单元"定义后必须调用"是同一个道理。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么用 buildXY 而不是先 moveXY？</span>这关只有 80 秒，英雄若逐点跑过去建造会浪费大量时间在路上。<code>buildXY</code> 让英雄站在原地就能远程放置陷阱，四条边几十个点几乎瞬间布完——在限时关卡里，选对 API 就是选对了策略。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别让步长把点漏在边界外：</span>比如东线注释说"到 y=38"，但 <code>range(110, 37, -18)</code> 实际产生 110、92、74、56、38——正好压线到 38。动手前不妨在纸上把序列展开算一遍，确认既没漏点、也没有点落到通道之外。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.7 ==================== -->
+<div class="section-header" id="section-9-7">
+    <h2>9.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-9-7-1">9.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>9.7.1.1 步长循环的典型问题
+    <span class="en">Typical issues with stepped loops</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec9_9-7-1-1_common_errors.png" alt="扣哒世界 循环步长常见错误速查 - koudashijie.com">
+    <div class="caption">图4：终点漏一格、步长符号搞反、函数定义了不调用，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>终点漏一格——想包含 80 却写 <code>range(40, 80, 20)</code>，结果漏掉 80。正步长把 end 写成"终点 +1"。</li>
+        <li>负步长 end 没减够——想包含 20 却写 <code>range(40, 20, -20)</code>，20 被排除。负步长把 end 写成"终点 −1"。</li>
+        <li>步长符号搞反——坐标要变小却用了正步长（或反之），range 什么都不产生，循环体一次不执行。</li>
+        <li>方向与起止矛盾——正步长却 <code>start &gt; end</code>、负步长却 <code>start &lt; end</code>，同样得到空循环。</li>
+        <li>固定坐标写错——沿北边界时 y 应恒为 60，若误把 y 也写成变量，点就跑偏了。</li>
+        <li>函数定义了不调用——把 <code>pass</code> 换成循环后忘了在主程序调用该函数，陷阱不会建成。</li>
+        <li>buildXY 参数顺序错——应是 <code>buildXY("类型", x, y)</code>，类型字符串在前，别和坐标顺序弄混。</li>
+        <li>忘记撤离——绕完/建完后没让英雄退到安全点，英雄暴露在边界被敌人攻击。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=sec-9-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+<!-- CC-PROTECTION:HIDDEN:553c7849ea:START anchor=sec-9-7-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="553c7849ea">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:553c7849ea:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你守住了山林中的村庄！这一单元你解锁了 <code>for</code> 循环的第三个参数——<strong>步长</strong>，让循环从"逐一挪动"升级为"大步跳跃、还能倒着走"。你掌握了 <code>range(start, end, step)</code> 的三个参数含义、牢记了"左闭右开、end 取不到"的规则，学会了用<strong>正步长递增</strong>和<strong>负步长递减</strong>沿四个方向遍历坐标，用 <code>moveXY</code> 巡逻、用 <code>buildXY</code> 定点建造，并把"步长循环"和"函数封装"组合起来，用极简的代码消灭了大量重复。你在"边缘防御"里绕村布塔、在"危险的路线"里限时埋雷，两关都漂亮通过。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>range 三参数</td><td><code>range(start, end, step)</code></td><td>两关</td></tr>
+            <tr><td>左闭右开</td><td>start 含、end 不含</td><td>两关</td></tr>
+            <tr><td>正步长递增</td><td>step&gt;0 且 start&lt;end</td><td>两关</td></tr>
+            <tr><td>负步长递减</td><td>step&lt;0 且 start&gt;end</td><td>两关</td></tr>
+            <tr><td>end 补偿</td><td>含终点：+1 或 −1</td><td>两关</td></tr>
+            <tr><td>moveXY 巡逻</td><td>固定一坐标、变另一坐标</td><td>边缘防御</td></tr>
+            <tr><td>buildXY 建造</td><td><code>buildXY("类型", x, y)</code></td><td>危险的路线</td></tr>
+            <tr><td>循环消灭重复</td><td>DRY，一行顶多行</td><td>两关</td></tr>
+            <tr><td>函数封装每条边</td><td>定义后必须调用</td><td>危险的路线</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用一个小小的步长参数掌控循环节奏、用循环与函数把重复代码化繁为简的英雄，<br>
+        才是云峰之上真正高效的程序员。继续向雪山之巅挺进吧，勇敢的程序员！🏔️🛡️🔥
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+<!-- CC-PROTECTION:HIDDEN:ec203a379c:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ec203a379c">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC9-ABFCC4CA9555。</span>
+<!-- CC-PROTECTION:HIDDEN:ec203a379c:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第九单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

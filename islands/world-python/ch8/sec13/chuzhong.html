@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC13-A5F57195D304">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十三单元：坐标遍历 · 用嵌套循环扫遍二维网格 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 网格 SVG 演示 ===== */
+        .grid-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .grid-demo svg { max-width: 100%; height: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC13-A5F57195D304 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十三单元</div>
+
+    <a href="#section-13-1" class="nav-section">13.1 什么是坐标遍历</a>
+    <a href="#sec-13-1-1" class="nav-sub">13.1.1 从一维到二维</a>
+    <a href="#sec-13-1-2" class="nav-sub">13.1.2 嵌套循环画网格</a>
+
+    <a href="#section-13-2" class="nav-section">13.2 外层行 · 内层列</a>
+    <a href="#sec-13-2-1" class="nav-sub">13.2.1 外循环 X、内循环 Y</a>
+    <a href="#sec-13-2-2" class="nav-sub">13.2.2 遍历顺序</a>
+
+    <a href="#section-13-3" class="nav-section">13.3 坐标增量步长</a>
+    <a href="#sec-13-3-1" class="nav-sub">13.3.1 用 step 控制间距</a>
+    <a href="#sec-13-3-2" class="nav-sub">13.3.2 起点+步长×数量</a>
+
+    <a href="#section-13-4" class="nav-section">13.4 读取对象属性</a>
+    <a href="#sec-13-4-1" class="nav-sub">13.4.1 tentDistanceX/Y</a>
+    <a href="#sec-13-4-2" class="nav-sub">13.4.2 拒绝硬编码</a>
+
+    <a href="#section-13-5" class="nav-section">13.5 逐行遍历优化</a>
+    <a href="#sec-13-5-1" class="nav-sub">13.5.1 逐行比逐列快</a>
+
+    <a href="#section-13-6" class="nav-section">13.6 实战关卡精讲</a>
+    <a href="#sec-13-6-1" class="nav-sub">13.6.1 网格搜索</a>
+    <a href="#sec-13-6-2" class="nav-sub">13.6.2 网格雷区</a>
+    <a href="#sec-13-6-3" class="nav-sub">13.6.3 拿起武器！</a>
+
+    <a href="#section-13-7" class="nav-section">13.7 常见错误</a>
+    <a href="#sec-13-7-1" class="nav-sub">13.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十三单元：坐标遍历 · 用嵌套循环扫遍二维网格</h1>
+    <div class="subtitle">Unit 13: Grid Traversal — Nested Loops over 2D Coordinates</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 第 20–22 关：网格搜索 → 网格雷区 → 拿起武器！</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 13.1 ==================== -->
+<div class="section-header" id="section-13-1">
+    <h2>13.1 什么是坐标遍历</h2>
+    <div class="en-title">What Is Grid Traversal</div>
+</div>
+
+<p>一张旧藏宝图上写着"宝藏在 x:?0, y:?0"，可关键数字看不清；食人魔大军排着整齐的队形逼近村庄，等着被一整片地雷伺候；沉睡的营地里四排帐篷、每排五顶，士兵还在梦乡……这三个任务有一个共同点：你要处理的不是<strong>一条线上</strong>的点，而是<strong>一整片区域里的每一个点</strong>。要走遍一个二维平面上的所有位置，就需要把上一单元的嵌套循环用到坐标上——这就是本单元的主题：<span class="keyword">坐标遍历（grid traversal）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用<strong>两层嵌套 <code>for</code> 循环</strong>遍历二维坐标空间——<strong>外层循环</strong>控制一个坐标（行 / X），<strong>内层循环</strong>控制另一个坐标（列 / Y）；用<strong>步长 step</strong> 设定相邻点的间距；用"<strong>起点 + 步长 × 数量</strong>"算出遍历范围；从对象属性（如 <code>tentDistanceX/Y</code>）<strong>读取真实间距而非硬编码</strong>；并懂得<strong>逐行遍历</strong>比逐列遍历移动更省时。
+</div>
+
+<h3 id="sec-13-1-1">13.1.1 从一维到二维（From a Line to a Plane）</h3>
+
+<h4>13.1.1.1 一个循环走一条线，两个循环铺一片
+    <span class="en">One loop for a line, two for a plane</span>
+</h4>
+
+<p>第九单元你用单个 <code>for</code> 循环沿一条边界巡逻——那是<strong>一维</strong>的：只有一个坐标在变。而一片区域是<strong>二维</strong>的：X 和 Y 都要变。关卡概览一语点破："你可以用 for 循环映射出不止一维的位置！嵌套 for 循环将覆盖每个单独的方块。"外层循环每固定一个 X，内层循环就把所有 Y 走一遍，两层配合，平面上的每个格点都会被访问到。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/13-1-1-1_grid_intro.png" alt="扣哒世界 坐标遍历示意 - koudashijie.com">
+    <div class="caption">图1：嵌套循环把二维区域"织"成一张网——外层定一列/行，内层走完该列/行的每个点</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:bb852e58d8:START anchor=sec-13-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="bb852e58d8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>今日头条关注 扣哒世界 玩游戏学编程，深度了解 扣哒世界 的更多故事。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bb852e58d8:END -->
+
+<h3 id="sec-13-1-2">13.1.2 嵌套循环画网格（Drawing a Grid）</h3>
+
+<h4>13.1.2.1 每个 (x, y) 组合都是一个格点
+    <span class="en">Every (x, y) pair is a grid point</span>
+</h4>
+
+<p>嵌套坐标循环产生的所有 <code>(x, y)</code> 组合，正好铺满一个规则的点阵。关卡概览给了最经典的示范：在 100×100 的方形里，从 (10,10) 一直走到 (90,90)，把每个格点都踏一遍。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 走遍 100x100 里每个格点</span>
+<span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">100</span><span class="punc">,</span> <span class="num">10</span><span class="punc">):</span>
+    <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">100</span><span class="punc">,</span> <span class="num">10</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+<span class="cmt"># 英雄依次到达 (10,10)…(10,90)…(90,90)</span></pre>
+</div>
+
+<div class="grid-demo">
+    <svg viewBox="0 0 320 240" width="320" role="img" aria-label="网格点阵">
+        <text x="160" y="20" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">嵌套循环踏遍每个格点</text>
+        <g>
+            <!-- grid dots -->
+            <g fill="#5B9BD5">
+            <circle cx="60" cy="60" r="6"/><circle cx="120" cy="60" r="6"/><circle cx="180" cy="60" r="6"/><circle cx="240" cy="60" r="6"/>
+            <circle cx="60" cy="120" r="6"/><circle cx="120" cy="120" r="6"/><circle cx="180" cy="120" r="6"/><circle cx="240" cy="120" r="6"/>
+            <circle cx="60" cy="180" r="6"/><circle cx="120" cy="180" r="6"/><circle cx="180" cy="180" r="6"/><circle cx="240" cy="180" r="6"/>
+            </g>
+            <text x="40" y="45" font-size="10" fill="#4d6373" font-family="monospace">Y↓</text>
+            <text x="270" y="220" font-size="10" fill="#4d6373" font-family="monospace">X→</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 13.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:cdcc9f75b4:START anchor=sec-13-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="cdcc9f75b4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>快手关注 CoCo陈之然，北大毕业的游戏迷带你玩着学编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cdcc9f75b4:END -->
+
+<div class="section-header" id="section-13-2">
+    <h2>13.2 外层行 · 内层列</h2>
+    <div class="en-title">Outer Row, Inner Column</div>
+</div>
+
+<h3 id="sec-13-2-1">13.2.1 外循环 X、内循环 Y（Outer X, Inner Y）</h3>
+
+<h4>13.2.1.1 谁在外、谁在内，决定走法
+    <span class="en">Which loop is outer decides the path</span>
+</h4>
+
+<p>两层循环分别管一个坐标。若外层管 X、内层管 Y（如"网格搜索"），英雄会<strong>先固定一个 X，把这一竖列的所有 Y 走完，再换下一个 X</strong>——即<strong>逐列</strong>移动。反过来外层管 Y、内层管 X（如"拿起武器！"），就是<strong>逐行</strong>移动。哪个在外由任务需要决定，效率也可能因此不同（见 13.5）。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 580 150" width="580" role="img" aria-label="嵌套坐标循环解剖">
+        <text x="290" y="24" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">外层管一个坐标，内层管另一个坐标</text>
+        <text x="40" y="62" font-size="15" font-family="monospace" fill="#7cc7e8">for x in range(...):</text>
+        <text x="80" y="92" font-size="15" font-family="monospace" fill="#7cc7e8">for y in range(...):</text>
+        <text x="120" y="122" font-size="15" font-family="monospace" fill="#cdddea">hero.moveXY(x, y)</text>
+        <text x="330" y="62" font-size="11" fill="#f0c674" font-family="sans-serif">← 外层：固定 X（选一列）</text>
+        <text x="360" y="92" font-size="11" fill="#9fd4a8" font-family="sans-serif">← 内层：走完这一列所有 Y</text>
+        <text x="360" y="122" font-size="11" fill="#a5c8e8" font-family="sans-serif">← 到达每个 (x, y) 点</text>
+    </svg>
+</div>
+
+<h3 id="sec-13-2-2">13.2.2 遍历顺序（The Order of Visits）</h3>
+
+<h4>13.2.2.1 内层转完一整圈，外层才走一步
+    <span class="en">Inner finishes before outer advances</span>
+</h4>
+
+<p>和所有嵌套循环一样：<strong>内层要完整跑完，外层才前进一格</strong>。以"网格搜索"为例（外 X 内 Y），执行轨迹是：X=20 时 Y 从 20 走到 50；然后 X=30，Y 又从 20 走到 50……如此往复。理解这个顺序，才能预测英雄的实际走位路线。</p>
+
+<table class="styled-table">
+    <thead><tr><th>步骤</th><th>x</th><th>y</th><th>到达点</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td>20</td><td>20</td><td>(20, 20)</td></tr>
+        <tr><td>2</td><td>20</td><td>30</td><td>(20, 30)</td></tr>
+        <tr><td>3</td><td>20</td><td>40</td><td>(20, 40)</td></tr>
+        <tr><td>4</td><td>20</td><td>50</td><td>(20, 50)</td></tr>
+        <tr><td>5</td><td>30</td><td>20</td><td>(30, 20) ← 换列，Y 重头开始</td></tr>
+    </tbody>
+</table>
+
+<!-- ==================== 13.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-13-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:1755da6931:START anchor=sec-13-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1755da6931">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:1755da6931:END -->
+
+<div class="section-header" id="section-13-3">
+    <h2>13.3 坐标增量步长</h2>
+    <div class="en-title">Coordinate Step Increments</div>
+</div>
+
+<h3 id="sec-13-3-1">13.3.1 用 step 控制间距（Spacing with step）</h3>
+
+<h4>13.3.1.1 步长就是相邻点的距离
+    <span class="en">The step is the gap between points</span>
+</h4>
+
+<p>坐标遍历里，<code>range</code> 的第三个参数 <code>step</code> 直接决定<strong>相邻两个格点之间的距离</strong>。"网格搜索"用 <code>step = 10</code>，格点每隔 10 个单位一个；"网格雷区"用步长 8，让地雷密密麻麻布满，不留缝隙。步长选多大，取决于任务对"疏密"的要求——搜宝要覆盖所有可能点，布雷则要密到无法穿越。</p>
+
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-13-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+<h3 id="sec-13-3-2">13.3.2 起点+步长×数量（start + step × count）</h3>
+
+<h4>13.3.2.1 用"数量"反推终点
+    <span class="en">Derive the end from the count</span>
+</h4>
+
+<p>当你知道"从哪开始、每格多宽、一共几格"时，终点可以算出来：<code>终点 = 起点 + 步长 × 数量</code>。"网格雷区"就用了这个技巧——<code>range(12, 12 + 8*6, 8)</code> 表示"从 12 开始，步长 8，共 6 列"；<code>range(12, 12 + 8*7, 8)</code> 表示"7 行"。这样写比手算终点更清晰，一眼就能看出布了几行几列。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 起点12，步长8，X方向6列、Y方向7行</span>
+<span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="num">12</span> + <span class="num">8</span>*<span class="num">6</span><span class="punc">,</span> <span class="num">8</span><span class="punc">):</span>   <span class="cmt"># 12,20,28,36,44,52 → 6 个</span>
+    <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="num">12</span> + <span class="num">8</span>*<span class="num">7</span><span class="punc">,</span> <span class="num">8</span><span class="punc">):</span>  <span class="cmt"># 12,20,…,60 → 7 个</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> x<span class="punc">,</span> y<span class="punc">)</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么这样写更好？</span><code>12 + 8*6</code> 让"12 是起点、8 是间距、6 是数量"三个信息一目了然。若直接写死终点 <code>60</code>，别人（和几天后的你）就得反推它是怎么来的。把意图写进公式里，代码才好懂、好改。
+</div>
+
+<!-- ==================== 13.4 ==================== -->
+<div class="section-header" id="section-13-4">
+    <h2>13.4 读取对象属性</h2>
+    <div class="en-title">Reading Object Attributes</div>
+</div>
+
+<h3 id="sec-13-4-1">13.4.1 tentDistanceX/Y（Getting Spacing from Data）</h3>
+
+<h4>13.4.1.1 从单位身上读取真实间距
+    <span class="en">Read the real spacing from a unit</span>
+</h4>
+
+<p>"拿起武器！"里，帐篷间距不是固定数字，而是<strong>藏在军士（sergeant）这个对象的属性里</strong>。你先找到军士，再读它的 <code>tentDistanceX</code> 和 <code>tentDistanceY</code>，就得到了横向、纵向的真实间距，用它们当步长。这体现了一个重要思想：<strong>数据可以来自游戏对象，而不必写死在代码里</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 从军士对象读取帐篷间距</span>
+sergeant = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">())</span>
+stepX = sergeant<span class="punc">.</span>tentDistanceX   <span class="cmt"># 横向间距</span>
+stepY = sergeant<span class="punc">.</span>tentDistanceY   <span class="cmt"># 纵向间距</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:72e5ce6ad0:START anchor=sec-13-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="72e5ce6ad0">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，全球超 2000 万用户通过它开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:72e5ce6ad0:END -->
+
+<h3 id="sec-13-4-2">13.4.2 拒绝硬编码（Avoid Hard-Coding）</h3>
+
+<h4>13.4.2.1 每个营地间距不同，写死会失败
+    <span class="en">Hard-coded values break on other maps</span>
+</h4>
+
+<p>关卡特别警告："每个营地会略有不同，所以不要对值进行硬编码！"如果你把间距写成固定的数字，换一个营地布局就全乱套。用 <code>tentDistanceX/Y</code> 读取当前营地的真实间距，代码就能<strong>自动适配任何营地</strong>——这正是<span class="keyword-en">可复用、可泛化</span>的程序应有的样子。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>❌ 硬编码（换营地就错）</h5>
+        <div class="code-block">
+<pre>stepX = <span class="num">18</span>   <span class="cmt"># 写死</span>
+stepY = <span class="num">16</span>   <span class="cmt"># 换图失效</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>✅ 读属性（自动适配）</h5>
+        <div class="code-block">
+<pre>stepX = sergeant<span class="punc">.</span>tentDistanceX
+stepY = sergeant<span class="punc">.</span>tentDistanceY</pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 13.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-13-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<div class="section-header" id="section-13-5">
+    <h2>13.5 逐行遍历优化</h2>
+    <div class="en-title">Row-by-Row Efficiency</div>
+</div>
+
+<h3 id="sec-13-5-1">13.5.1 逐行比逐列快（Rows Beat Columns Here）</h3>
+
+<h4>13.5.1.1 让英雄少走冤枉路
+    <span class="en">Minimize the hero's travel</span>
+</h4>
+
+<p>"拿起武器！"里关卡反复提醒："逐行去叫士兵要比逐列叫更快。"为什么？因为营地是<strong>宽 5 顶、高 4 排</strong>的横向布局。若逐行走（外层 Y、内层 X），英雄在每一排里横向连续移动、走完一排换下一排，路径顺畅；若逐列走（外层 X、内层 Y），英雄要在窄窄的纵向来回蹿、频繁跨排，绕远得多。<strong>让内层循环沿"更长的那个方向"走，能减少来回折返</strong>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 逐行遍历：外层 Y（4 排），内层 X（5 顶）</span>
+<span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>firstY<span class="punc">,</span> firstY + stepY*<span class="num">4</span><span class="punc">,</span> stepY<span class="punc">):</span>
+    <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>firstX<span class="punc">,</span> firstX + stepX*<span class="num">5</span><span class="punc">,</span> stepX<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Wake UP!"</span><span class="punc">)</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">效率也是策略：</span>算法正确只是第一步，<strong>路径是否高效</strong>常常决定成败。在限时关卡里（"拿起武器！"要赶在食人魔进攻前叫醒所有士兵），选对遍历方向，就能省下宝贵的时间。这提醒我们：同一个网格，遍历顺序不同，代价可能天差地别。
+</div>
+
+<!-- ==================== 13.6 ==================== -->
+<div class="section-header" id="section-13-6">
+    <h2>13.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 网格搜索 -->
+<div class="level-card" id="sec-13-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 20 关 · 网格搜索</span>
+        <h3>🗺️ 网格搜索 —— 走遍每个可能的藏宝点</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/13-6-1-1_grid_search.png" alt="扣哒世界 网格搜索关卡 - koudashijie.com">
+            <div class="caption">图2：网格搜索——藏宝坐标看不清，就用嵌套循环把边界内每个可能的点都走一遍</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>藏宝图上的坐标 "x:?0, y:?0" 数字模糊，只知道 ?0 可能是 10、20、30……树木和石头的位置已找到，圈定了一个矩形范围。策略很直接：<strong>既然不知道确切点，就把范围内所有可能的点都搜一遍</strong>，在每个点用 <code>say</code> 提示农民试挖。</p>
+
+        <h4>策略与思路拆解</h4>
+        <p>关卡给好了边界变量：<code>leftBorder=20</code>、<code>rightBorder=61</code>、<code>bottomBorder=20</code>、<code>topBorder=51</code>、<code>step=10</code>，还写好了外层 X 循环，留下内层 Y 循环让你补全。思路就是<strong>在外层 X 循环里嵌套一个 Y 循环</strong>：<code>for y in range(bottomBorder, topBorder, step)</code>，每到一个 <code>(x, y)</code> 就 <code>hero.moveXY(x, y)</code> 再 <code>hero.say("试试这里!")</code>。注意用给定的边界变量而不是写死数字，rightBorder 取 61（比 60 多 1）是为了让 60 也被走到。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：需要补全的内层 Y 循环</span>
+<span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>leftBorder<span class="punc">,</span> rightBorder<span class="punc">,</span> step<span class="punc">):</span>
+    <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>bottomBorder<span class="punc">,</span> topBorder<span class="punc">,</span> step<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"试试这里!"</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">用变量，别写死数字：</span>关卡把边界都存进了变量，就是希望你写 <code>range(bottomBorder, topBorder, step)</code> 而不是 <code>range(20, 51, 10)</code>。用变量的代码含义更清楚，改边界时只需改一处。这是好习惯的起点。
+        </div>
+    </div>
+</div>
+
+<!-- 网格雷区 -->
+<div class="level-card" id="sec-13-6-2">
+    <div class="level-head">
+        <span class="lv-num">第 21 关 · 网格雷区</span>
+        
+<!-- CC-PROTECTION:AD:de8534a7d9:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="de8534a7d9">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从第一行代码开始，把你的想法变成真的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:de8534a7d9:END -->
+<!-- CC-PROTECTION:HIDDEN:a918d71fad:START anchor=h3-10 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="a918d71fad">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:a918d71fad:END -->
+
+<h3>💣 网格雷区 —— 密布地雷等敌人踏入</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/13-6-2-1_grid_minefield.png" alt="扣哒世界 网格雷区关卡 - koudashijie.com">
+            <div class="caption">图3：网格雷区——用嵌套循环把火焰陷阱密密麻麻铺成一片，等食人魔队形踏入后一起引爆</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>食人魔排着<strong>整齐的队形</strong>进军，正好利用这一点：在他们必经之处铺一整片地雷，等全体踏入再一起引爆。你有 90 秒建雷区。地雷（fire-trap）只有人类踩到才炸，所以布雷时英雄自己走上去也不怕。</p>
+
+        <h4>策略与思路拆解</h4>
+        <p>核心是用嵌套循环 + <code>buildXY</code> 铺一片密集网格。关卡给了范围写法 <code>range(12, 12+8*6, 8)</code>（X 方向 6 列）和 <code>range(12, 12+8*7, 8)</code>（Y 方向 7 行），你要在内层循环里 <code>hero.buildXY("fire-trap", x, y)</code>。有一个巧妙细节：<strong>每建完一列，让英雄向右挪一步 <code>hero.moveXY(hero.pos.x + 8, hero.pos.y)</code>，避免把自己困在刚布好的陷阱堆里</strong>。布完雷后进入等待——用 <code>while True</code> 监测最近的敌人，当 <code>hero.distanceTo(nearest) < 20</code> 时移动到雷区中心引爆并 <code>break</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：嵌套循环布雷 + 建完一列右移避险</span>
+<span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="num">12</span> + <span class="num">8</span>*<span class="num">6</span><span class="punc">,</span> <span class="num">8</span><span class="punc">):</span>
+    <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="num">12</span> + <span class="num">8</span>*<span class="num">7</span><span class="punc">,</span> <span class="num">8</span><span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">buildXY</span><span class="punc">(</span><span class="str">"fire-trap"</span><span class="punc">,</span> x<span class="punc">,</span> y<span class="punc">)</span>
+    <span class="cmt"># 一列建完向右走，别困住自己</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>x + <span class="num">8</span><span class="punc">,</span> <span class="obj">hero</span><span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别把自己困在陷阱里：</span>那句 <code>moveXY(hero.pos.x + 8, hero.pos.y)</code> 放在<strong>外层循环内、内层循环后</strong>——每铺完一整列就右移一步，让英雄始终站在还没布雷的空地上。漏了它，英雄可能被自己刚建的陷阱团团围住动弹不得。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">引爆时机靠距离判断：</span>布完雷不是结束——要 <code>while True</code> 持续找最近的敌人，<code>if nearest and hero.distanceTo(nearest) < 20</code> 说明敌军已踏入雷区范围，此时英雄冲进去触发引爆再 <code>break</code>。这把本单元的坐标遍历和前面学的"距离判断 + 循环控制"串在了一起。
+        </div>
+    </div>
+</div>
+
+<!-- 拿起武器 -->
+<div class="level-card" id="sec-13-6-3">
+    <div class="level-head">
+        <span class="lv-num">第 22 关 · 拿起武器！</span>
+        
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=h3-11 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+<!-- CC-PROTECTION:HIDDEN:b561ff81ca:START anchor=h3-11 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b561ff81ca">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC13-A5F57195D304。</span>
+<!-- CC-PROTECTION:HIDDEN:b561ff81ca:END -->
+
+<h3>📢 拿起武器！ —— 逐行叫醒沉睡的军队</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/13-6-3-1_arm_yourselves.png" alt="扣哒世界 拿起武器关卡 - koudashijie.com">
+            <div class="caption">图4：拿起武器！——4 排 5 列共 20 顶帐篷，逐行走到每个 X 标记处用 say 唤醒士兵</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>食人魔即将进攻，你的军队却在睡觉！营地有 <strong>4 排、每排 5 顶</strong>共 20 顶帐篷，每顶前有个 X 标记。你要走到每个标记处用 <code>hero.say()</code> 喊醒士兵。要抢时间，还要注意——战斗打响时赶紧离开营地，否则被食人魔看见会招来增援。</p>
+
+        <h4>策略与思路拆解</h4>
+        <p>这一关综合了本单元所有要点。<strong>第一，读属性不硬编码</strong>：<code>sergeant = hero.findNearest(hero.findFriends())</code>，再取 <code>stepX = sergeant.tentDistanceX</code>、<code>stepY = sergeant.tentDistanceY</code> 作步长。<strong>第二，用起点+步长×数量定范围</strong>：起点 <code>firstX=10, firstY=14</code>，X 方向 5 顶、Y 方向 4 排。<strong>第三，逐行遍历更快</strong>：外层 Y（4 排）、内层 X（5 顶），每到一个标记 <code>moveXY(x, y)</code> 后 <code>say("Wake UP!")</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：读属性 + 逐行遍历唤醒</span>
+stepX = sergeant<span class="punc">.</span>tentDistanceX
+stepY = sergeant<span class="punc">.</span>tentDistanceY
+<span class="cmt"># 外层 Y 走 4 排，内层 X 走 5 顶（逐行更快）</span>
+<span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>firstY<span class="punc">,</span> firstY + stepY*<span class="num">4</span><span class="punc">,</span> stepY<span class="punc">):</span>
+    <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>firstX<span class="punc">,</span> firstX + stepX*<span class="num">5</span><span class="punc">,</span> stepX<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"Wake UP!"</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">行数、列数对应哪个循环？</span>4 排 → Y 方向循环 <code>× 4</code>；5 顶 → X 方向循环 <code>× 5</code>。数量乘错（比如 Y 乘 5、X 乘 4）会漏叫或多跑。动手前先数清"几排几列"，把数量填对。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">战斗开始要撤离：</span>唤醒全部士兵后，别让英雄留在营地——食人魔看见英雄会派增援。及时离开是这关的隐藏要求，算法完成后还要顾及走位安全。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 13.7 ==================== -->
+<div class="section-header" id="section-13-7">
+    <h2>13.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-13-7-1">13.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>13.7.1.1 坐标遍历的典型问题
+    <span class="en">Typical issues in grid traversal</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/13-7-1-1_common_errors.png" alt="扣哒世界 坐标遍历常见错误速查 - koudashijie.com">
+    <div class="caption">图5：内外循环坐标弄反、终点漏格、硬编码间距，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>内外循环坐标弄反——想逐行却把 X 放外层，导致逐列移动、路径绕远甚至超时。</li>
+        <li>内层用错变量——内层循环体里仍用外层变量、忘了用内层的，格点全落在一条线上。</li>
+        <li>终点漏一格——<code>range</code> 左闭右开，想包含最后一列/行要把终点写足（如 rightBorder 取 61）。</li>
+        <li>数量乘错——"起点+步长×数量"里数量填错，会漏掉或多走整行整列。</li>
+        <li>硬编码间距——把 <code>tentDistanceX/Y</code> 写成固定数字，换营地立刻失效。</li>
+        <li>step 与坐标不匹配——X 和 Y 的步长可能不同（如 tentDistanceX ≠ tentDistanceY），别用同一个。</li>
+        <li>把自己困进陷阱——布雷时忘了每列后右移避险，英雄被自建陷阱围住。</li>
+        <li>忘记引爆/撤离——坐标遍历完成后，还要处理引爆时机或战斗开始时离场等收尾动作。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-13-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你把嵌套循环从"数组"推广到了"整片二维空间"！这一单元你掌握了<strong>坐标遍历</strong>：用<strong>两层嵌套 <code>for</code> 循环</strong>扫遍网格上每个 <code>(x, y)</code> 点，理解了<strong>外层控制一个坐标（行/X）、内层控制另一个坐标（列/Y）</strong>以及"内层跑完外层才前进"的顺序；你会用 <code>step</code> 设定格点<strong>间距</strong>、用"<strong>起点 + 步长 × 数量</strong>"清晰地界定范围；学会了从对象属性 <code>tentDistanceX/Y</code> <strong>读取真实数据、拒绝硬编码</strong>，让程序自动适配不同营地；还懂得了<strong>逐行遍历比逐列更省路</strong>的效率之道。你在"网格搜索"里地毯式寻宝、在"网格雷区"里密布陷阱、在"拿起武器！"里逐行唤醒全军。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>坐标遍历</td><td>嵌套循环扫遍二维网格</td><td>三关</td></tr>
+            <tr><td>外行内列</td><td>外层一坐标、内层另一坐标</td><td>三关</td></tr>
+            <tr><td>遍历顺序</td><td>内层跑完外层才前进</td><td>三关</td></tr>
+            <tr><td>坐标步长</td><td>step = 相邻点间距</td><td>三关</td></tr>
+            <tr><td>起点+步长×数量</td><td>用数量反推终点</td><td>网格雷区·拿起武器</td></tr>
+            <tr><td>读取对象属性</td><td><code>tentDistanceX/Y</code></td><td>拿起武器</td></tr>
+            <tr><td>拒绝硬编码</td><td>数据来自对象，自动适配</td><td>拿起武器</td></tr>
+            <tr><td>逐行遍历优化</td><td>沿更长方向走更省路</td><td>拿起武器</td></tr>
+            <tr><td>buildXY 布点</td><td>网格化建造陷阱</td><td>网格雷区</td></tr>
+            <tr><td>收尾动作</td><td>避险/引爆/撤离</td><td>网格雷区·拿起武器</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用两层循环织出整片网格、又能读活数据、走对路线的英雄，<br>
+        才是云峰之上真正掌控空间的程序员。继续向雪山之巅挺进吧，勇敢的程序员！🏔️🗺️💣</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=h3-14 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十三单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

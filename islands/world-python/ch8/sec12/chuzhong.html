@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC12-B9364DB51CB1">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十二单元：最近距离 · 找出距离最小的一对 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 追踪表格 ===== */
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .trace-table th, .trace-table td {
+            border: 1px solid var(--border);
+            padding: 8px 6px;
+        }
+        .trace-table thead { background: var(--primary); color: #fff; }
+        .trace-table .cell-update { background: #dcf0e0; color: #2f7a45; font-weight: 700; }
+        .trace-table .cell-keep { background: #e6e9ec; color: #8299AA; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC12-B9364DB51CB1 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十二单元</div>
+
+    <a href="#section-12-1" class="nav-section">12.1 什么是最近距离</a>
+    <a href="#sec-12-1-1" class="nav-sub">12.1.1 从"配对"到"最优配对"</a>
+    <a href="#sec-12-1-2" class="nav-sub">12.1.2 打擂台找最小值</a>
+
+    <a href="#section-12-2" class="nav-section">12.2 distanceTo 测距</a>
+    <a href="#sec-12-2-1" class="nav-sub">12.2.1 两单位间的距离</a>
+
+    <a href="#section-12-3" class="nav-section">12.3 嵌套循环遍历单位对</a>
+    <a href="#sec-12-3-1" class="nav-sub">12.3.1 for i / for j + continue</a>
+    <a href="#sec-12-3-2" class="nav-sub">12.3.2 计算每一对的距离</a>
+
+    <a href="#section-12-4" class="nav-section">12.4 追踪最小值</a>
+    <a href="#sec-12-4-1" class="nav-sub">12.4.1 minDistance 初始值</a>
+    <a href="#sec-12-4-2" class="nav-sub">12.4.2 双变量同步更新</a>
+
+    <a href="#section-12-5" class="nav-section">12.5 返回最近的一对</a>
+    <a href="#sec-12-5-1" class="nav-sub">12.5.1 返回并使用结果</a>
+
+    <a href="#section-12-6" class="nav-section">12.6 实战关卡精讲</a>
+    <a href="#sec-12-6-1" class="nav-sub">12.6.1 提前思考</a>
+
+    <a href="#section-12-7" class="nav-section">12.7 常见错误</a>
+    <a href="#sec-12-7-1" class="nav-sub">12.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十二单元：最近距离 · 找出距离最小的一对</h1>
+    <div class="subtitle">Unit 12: Nearest Pair — Tracking the Minimum Distance</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 第 19 关：提前思考</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 12.1 ==================== -->
+<div class="section-header" id="section-12-1">
+    <h2>12.1 什么是最近距离</h2>
+    <div class="en-title">What Is the Nearest Pair</div>
+</div>
+
+<p>食人魔推来了一门巨型火炮 "Big Bertha"！士兵们疯狂躲避，却躲不掉——因为这门大炮的瞄准逻辑是：<strong>锁定场上距离最接近的两个单位</strong>。既然你能预知它的目标，就能抢先一步保护他们：让巫师给那两个士兵施加"石肤"技能。可问题是，怎么在一群士兵里算出<strong>哪两个人挨得最近</strong>？上一单元你学会了用嵌套循环找出"匹配的一对"，这一单元更进一步——不仅要遍历所有单位对，还要<strong>比较它们的距离、记录并返回其中最小的那一对</strong>。这就是本单元的主题：<span class="keyword">最近距离查找（nearest pair）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用<strong>嵌套循环</strong>遍历所有单位对（<code>for i</code> 套 <code>for j</code>，<code>if i == j: continue</code> 跳过自比较），用 <code>distanceTo()</code> 算出每对的<strong>距离</strong>，用一个 <code>minDistance</code> 变量<strong>打擂台</strong>记录当前最小距离、同时用 <code>nearestPair</code> 记住对应的那一对单位，遍历完毕就<strong>返回距离最近的两个单位</strong>。这是"遍历所有组合"和"追踪最值"两大技巧的结合。
+</div>
+
+<h3 id="sec-12-1-1">12.1.1 从"配对"到"最优配对"（From a Pair to the Best Pair）</h3>
+
+<h4>12.1.1.1 不是找到就行，而是找最小的
+    <span class="en">Not just any pair — the closest one</span>
+</h4>
+
+<p>上一单元的配对查找，一旦找到匹配就 <code>return</code> 收工。但本单元不同：任意两个单位之间<strong>都</strong>有距离，都算"一对"，我们要的是其中<strong>距离最小的那一对</strong>。这意味着不能找到一对就停——必须<strong>把所有对都比一遍</strong>，才能确定谁最近。这正是"找最值"和"找匹配"的关键差别。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-1-1-1_nearest_intro.png" alt="扣哒世界 最近距离示意 - koudashijie.com">
+    <div class="caption">图1：大炮瞄准场上距离最近的两个单位——我们要遍历所有单位对，找出其中间距最小的一对</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:4e7be9e733:START anchor=sec-12-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="4e7be9e733">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，在知识树中系统学习对象、方法、字符串、变量、循环、条件分支、函数、参数、事件和地图设计。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4e7be9e733:END -->
+
+<h3 id="sec-12-1-2">12.1.2 打擂台找最小值（The Champion Pattern）</h3>
+
+<h4>12.1.2.1 用一个"守擂者"记录当前最优
+    <span class="en">Keep a running best</span>
+</h4>
+
+<p>在一堆数里找最小值，有个经典套路叫"打擂台"：先设一个"守擂者"（初始最优值），然后逐个拿新选手来挑战——谁更小谁就上台当新的守擂者。遍历结束，台上留着的就是最小值。本关就是让"距离"来打擂台：<code>minDistance</code> 是守擂者，每算出一对的距离就和它比一比，更小就更新。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🏆 打擂台三步曲</div>
+    <strong>① 设擂主</strong>：<code>minDistance = 9001</code>（先放一个大得离谱的初值）。<br>
+    <strong>② 挑战</strong>：每算出一对的距离 <code>distance</code>，就问"你比擂主小吗？"<br>
+    <strong>③ 换人</strong>：若 <code>distance < minDistance</code>，新距离上台，同时记住这一对是谁。
+</div>
+
+<!-- ==================== 12.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=sec-12-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<div class="section-header" id="section-12-2">
+    <h2>12.2 distanceTo 测距</h2>
+    <div class="en-title">Measuring Distance with distanceTo</div>
+</div>
+
+<h3 id="sec-12-2-1">12.2.1 两单位间的距离（Distance Between Two Units）</h3>
+
+<h4>12.2.1.1 unitA.distanceTo(unitB) 返回间距
+    <span class="en">unitA.distanceTo(unitB) returns the gap</span>
+</h4>
+
+<p><code>单位A.distanceTo(单位B)</code> 直接返回两个单位之间的直线距离（一个数字）。你不用自己去算坐标差、开平方——游戏内置的这个方法替你完成了。距离越小，两个单位挨得越近。本关比较的就是这个返回值。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 计算第 i 个单位到第 j 个单位的距离</span>
+distance = units<span class="punc">[</span>i<span class="punc">].</span><span class="fn">distanceTo</span><span class="punc">(</span>units<span class="punc">[</span>j<span class="punc">])</span>
+<span class="fn">print</span><span class="punc">(</span>distance<span class="punc">)</span>   <span class="cmt"># 例如 12.7，越小越近</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">距离是对称的：</span><code>A.distanceTo(B)</code> 和 <code>B.distanceTo(A)</code> 结果完全相同——甲到乙的距离，等于乙到甲的距离。这也是为什么 (i, j) 和 (j, i) 其实是同一对；不过本关用完整双重循环重复算一遍也无妨，不影响找到正确的最小值。
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="distanceTo 测距">
+        <text x="280" y="24" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">distanceTo 返回两单位间的直线距离</text>
+        <circle cx="140" cy="80" r="18" fill="#182633" stroke="#7cc7e8" stroke-width="2"/>
+        <text x="140" y="85" text-anchor="middle" fill="#9fd4a8" font-family="monospace" font-size="13">A</text>
+        <circle cx="410" cy="80" r="18" fill="#182633" stroke="#7cc7e8" stroke-width="2"/>
+        <text x="410" y="85" text-anchor="middle" fill="#9fd4a8" font-family="monospace" font-size="13">B</text>
+        <line x1="158" y1="80" x2="392" y2="80" stroke="#f0c674" stroke-width="2" stroke-dasharray="6"/>
+        <text x="275" y="70" text-anchor="middle" fill="#f0c674" font-family="monospace" font-size="13">distance</text>
+    </svg>
+</div>
+
+<!-- ==================== 12.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-12-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<div class="section-header" id="section-12-3">
+    <h2>12.3 嵌套循环遍历单位对</h2>
+    <div class="en-title">Nested Loops Over All Pairs</div>
+</div>
+
+<h3 id="sec-12-3-1">12.3.1 for i / for j + continue（All Pairs, Skip Self）</h3>
+
+<h4>12.3.1.1 沿用上一单元的配对框架
+    <span class="en">Reuse the pairing framework</span>
+</h4>
+
+<p>遍历所有单位对的骨架和第十一单元完全一样：外层 <code>for i</code> 固定第一个单位，内层 <code>for j</code> 遍历第二个单位，<code>if i == j: continue</code> 跳过"自己和自己"。区别只在循环体内做的事——上一单元是判断"是否匹配"，这一单元是"算距离并比大小"。</p>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-12-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-12-3-2">12.3.2 计算每一对的距离（Distance for Every Pair）</h3>
+
+<h4>12.3.2.1 在内层循环里算距离
+    <span class="en">Compute the distance inside the inner loop</span>
+</h4>
+
+<p>跳过自比较后，就对当前这一对 <code>units[i]</code> 和 <code>units[j]</code> 调用 <code>distanceTo</code> 得到它们的间距。这个 <code>distance</code> 是接下来"打擂台"的挑战者。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 遍历所有单位对，逐对算距离</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>units<span class="punc">)):</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>units<span class="punc">)):</span>
+        <span class="kw">if</span> i == j<span class="punc">:</span>
+            <span class="kw">continue</span>                       <span class="cmt"># 跳过自比较</span>
+        distance = units<span class="punc">[</span>i<span class="punc">].</span><span class="fn">distanceTo</span><span class="punc">(</span>units<span class="punc">[</span>j<span class="punc">])</span>
+        <span class="cmt"># 下一步：拿 distance 打擂台</span></pre>
+</div>
+
+<!-- ==================== 12.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-12-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+<!-- CC-PROTECTION:HIDDEN:1ceb33c618:START anchor=sec-12-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1ceb33c618">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:1ceb33c618:END -->
+
+<div class="section-header" id="section-12-4">
+    <h2>12.4 追踪最小值</h2>
+    <div class="en-title">Tracking the Minimum</div>
+</div>
+
+<h3 id="sec-12-4-1">12.4.1 minDistance 初始值（The Initial Value）</h3>
+
+<h4>12.4.1.1 为什么初值要设得很大
+    <span class="en">Why start with a huge number</span>
+</h4>
+
+<p>找最小值时，守擂者的初值要设成一个<strong>足够大</strong>的数，大到"任何真实距离都会比它小"，这样第一对算出来的距离就一定能挑战成功、顺利上台。关卡用了 <code>minDistance = 9001</code>（一个有梗的大数）。如果反过来初值设成 0 或很小的数，那就永远没有距离能比它更小，最终什么都找不到。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>找最小值（本关）</h5>
+        <div class="code-block">
+<pre>minDistance = <span class="num">9001</span>
+<span class="cmt"># 初值要大</span>
+<span class="kw">if</span> distance &lt; minDistance<span class="punc">:</span>
+    ...</pre>
+        </div>
+    </div>
+    <div>
+        <h5>找最大值（概览对照）</h5>
+        <div class="code-block">
+<pre>maxDistance = <span class="num">0</span>
+<span class="cmt"># 初值要小</span>
+<span class="kw">if</span> distance &gt; maxDistance<span class="punc">:</span>
+    ...</pre>
+        </div>
+    </div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">找最小用大初值，找最大用小初值：</span>关卡概览特意给了"找最远的一对"作对照——它用 <code>maxDistance = 0</code> 且比较 <code>&gt;</code>。本关要找最近，所以反过来：<code>minDistance = 9001</code> 且比较 <code>&lt;</code>。方向搞反，结果就完全错了。
+</div>
+
+<h3 id="sec-12-4-2">12.4.2 双变量同步更新（Update Two Variables Together）</h3>
+
+<h4>12.4.2.1 记距离的同时也要记"是谁"
+    <span class="en">Record both the distance and the pair</span>
+</h4>
+
+<p>这是本关最核心的一步。当发现一对更近的单位时，要<strong>同时更新两个变量</strong>：<code>minDistance</code> 记住新的最小距离，<code>nearestPair</code> 记住这对是谁。二者必须<strong>成对更新、缺一不可</strong>——只更新距离却忘了记单位，最后就不知道最近的是谁；只记单位却不更新距离，下次比较的基准就错了。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 发现更近的一对，两个变量一起更新</span>
+<span class="kw">if</span> distance &lt; minDistance<span class="punc">:</span>
+    minDistance = distance                <span class="cmt"># ① 更新最小距离</span>
+    nearestPair = <span class="punc">[</span>units<span class="punc">[</span>i<span class="punc">],</span> units<span class="punc">[</span>j<span class="punc">]]</span>  <span class="cmt"># ② 记住是这一对</span></pre>
+</div>
+
+<p>下面用 4 个单位、几对距离演示 <code>minDistance</code> 和 <code>nearestPair</code> 如何一步步被刷新（挑战成功才更新，失败就保持）：</p>
+
+<table class="trace-table">
+    <thead>
+        <tr><th>检查的一对</th><th>distance</th><th>&lt; minDistance?</th><th>minDistance</th><th>nearestPair</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>初始</td><td>—</td><td>—</td><td>9001</td><td>["Nobody","Nobody"]</td></tr>
+        <tr><td>A–B</td><td>30</td><td class="cell-update">是</td><td class="cell-update">30</td><td class="cell-update">[A, B]</td></tr>
+        <tr><td>A–C</td><td>45</td><td class="cell-keep">否</td><td class="cell-keep">30</td><td class="cell-keep">[A, B]</td></tr>
+        <tr><td>B–C</td><td>18</td><td class="cell-update">是</td><td class="cell-update">18</td><td class="cell-update">[B, C]</td></tr>
+        <tr><td>C–D</td><td>25</td><td class="cell-keep">否</td><td class="cell-keep">18</td><td class="cell-keep">[B, C]</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">读表小结：</span>擂主从 9001 一路被刷新到 30、再到 18；只有距离更小时（30、18）两个变量才一起更新，距离更大时（45、25）保持不动。遍历完，<code>nearestPair = [B, C]</code> 就是最近的一对——正是我们要的答案。
+</div>
+
+<!-- ==================== 12.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-12-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<div class="section-header" id="section-12-5">
+    <h2>12.5 返回最近的一对</h2>
+    <div class="en-title">Returning the Nearest Pair</div>
+</div>
+
+<h3 id="sec-12-5-1">12.5.1 返回并使用结果（Return &amp; Use the Result）</h3>
+
+<h4>12.5.1.1 循环全跑完，再 return
+    <span class="en">Return after the loops finish</span>
+</h4>
+
+<p>和上一单元"找到就 <code>return</code>"截然不同：找最小值必须<strong>等双重循环全部跑完</strong>才能确定答案，所以 <code>return nearestPair</code> 要写在<strong>循环外面</strong>。如果在循环内提前 return，就等于只比了一部分对就下结论，很可能错过真正最近的那一对。</p>
+
+<div class="warn-box">
+    <span class="warn-label">return 的位置决定成败：</span>找匹配可以"边找边返回"，找最值绝不能。<code>return nearestPair</code> 必须在两层 <code>for</code> 都结束之后。放错位置（缩进进了循环里）是本关最隐蔽的 bug——它可能"碰巧"在简单情形下对，却在复杂情形下悄悄出错。
+</div>
+
+<p>调用处每帧判断大炮何时发射，到点就调用函数拿到最近的一对，说出他们的名字让巫师保护：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    soldiers = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"soldier"</span><span class="punc">)</span>
+    <span class="cmt"># 已知大炮的发射时刻</span>
+    <span class="kw">if</span> <span class="obj">hero</span><span class="punc">.</span>time % <span class="num">8</span> == <span class="num">5</span><span class="punc">:</span>
+        pair = <span class="fn">findNearestPair</span><span class="punc">(</span>soldiers<span class="punc">)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>pair<span class="punc">[</span><span class="num">0</span><span class="punc">].</span>id + <span class="str">" "</span> + pair<span class="punc">[</span><span class="num">1</span><span class="punc">].</span>id<span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 12.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-12-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+<!-- CC-PROTECTION:HIDDEN:1a3a2e3599:START anchor=sec-12-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1a3a2e3599">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:1a3a2e3599:END -->
+
+<div class="section-header" id="section-12-6">
+    <h2>12.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 提前思考 -->
+<div class="level-card" id="sec-12-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 19 关 · 提前思考</span>
+        <h3>🎯 提前思考 —— 算出大炮会瞄准的那一对</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/12-6-1-1_thinking_ahead.png" alt="扣哒世界 提前思考关卡 - koudashijie.com">
+            <div class="caption">图2：提前思考——预判巨炮 Big Bertha 锁定的最近两名士兵，抢先让巫师为他们施加石肤</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>食人魔的巨炮 "Big Bertha" 每隔一段时间开火一次，每次都锁定<strong>场上距离最近的两个单位</strong>。你要做的是<strong>提前算出</strong>这两名士兵是谁，在大炮发射前说出他们的名字——巫师听到后会给他们施加石肤（stoneskin）保护。目标是撑住阵地、分散大炮注意力，直到特种小队赶到。</p>
+
+        <h4>策略：写好"找最近一对"的函数，卡准发射时刻调用</h4>
+        <p>策略分两层。<strong>算法层</strong>：补全 <code>findNearestPair(units)</code>，用嵌套循环遍历所有士兵对，用 <code>distanceTo</code> 算距离，用 <code>minDistance</code> 打擂台找出最近的一对并返回。<strong>时机层</strong>：主循环用 <code>if hero.time % 8 == 5</code> 判断大炮即将发射的时刻，只在这一刻调用函数、说出名字——既省算力，又确保保护恰好赶在开火前生效。</p>
+
+        <h4>思路拆解</h4>
+        <p>函数遵循 12.4 的打擂台模板：先 <code>minDistance = 9001</code>、<code>nearestPair = ["Nobody", "Nobody"]</code>；外层 <code>for i</code>、内层 <code>for j</code> 遍历所有对，<code>if i == j: continue</code> 跳过自比较；<code>distance = units[i].distanceTo(units[j])</code> 算距离；<code>if distance < minDistance</code> 就把 <code>minDistance</code> 更新为新距离、把 <code>nearestPair</code> 更新为 <code>[units[i], units[j]]</code>；最后在循环外 <code>return nearestPair</code>。调用处用 <code>pair[0].id</code> 和 <code>pair[1].id</code> 拼出名字说出来。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：打擂台找最近一对（核心逻辑）</span>
+<span class="kw">def</span> <span class="fn">findNearestPair</span><span class="punc">(</span>units<span class="punc">):</span>
+    minDistance = <span class="num">9001</span>
+    nearestPair = <span class="punc">[</span><span class="str">"Nobody"</span><span class="punc">,</span> <span class="str">"Nobody"</span><span class="punc">]</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>units<span class="punc">)):</span>
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>units<span class="punc">)):</span>
+            <span class="kw">if</span> i == j<span class="punc">:</span>
+                <span class="kw">continue</span>
+            distance = units<span class="punc">[</span>i<span class="punc">].</span><span class="fn">distanceTo</span><span class="punc">(</span>units<span class="punc">[</span>j<span class="punc">])</span>
+            <span class="kw">if</span> distance &lt; minDistance<span class="punc">:</span>
+                minDistance = distance
+                nearestPair = <span class="punc">[</span>units<span class="punc">[</span>i<span class="punc">],</span> units<span class="punc">[</span>j<span class="punc">]]</span>
+    <span class="kw">return</span> nearestPair          <span class="cmt"># ← 在循环外返回</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">hero.time % 8 == 5 是什么意思？</span>取余运算 <code>%</code> 让条件<strong>周期性成立</strong>：每 8 秒一个周期，在余数为 5 的那一刻触发。这正好对应大炮的发射节奏——不用每帧都算最近对，只在关键时刻算一次即可，既高效又精准。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">return 千万别写进循环里：</span>本关最容易错的就是把 <code>return nearestPair</code> 误缩进到 <code>for</code> 循环内部。那样函数会在第一对（甚至第一次比较）就返回，根本没比完所有对，找到的"最近"往往是错的。记住：<strong>找最值要遍历到底，return 在循环之外。</strong>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">初值 9001 的作用：</span>把 <code>minDistance</code> 设成远大于任何可能距离的数，保证第一对一定能刷新它。若不慎设成 0，条件 <code>distance < 0</code> 永远不成立，<code>nearestPair</code> 会一直停留在 <code>["Nobody","Nobody"]</code>，说出来的名字自然是错的。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 12.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=h3-9 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+
+<div class="section-header" id="section-12-7">
+    <h2>12.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-12-7-1">12.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>12.7.1.1 最近距离查找的典型问题
+    <span class="en">Typical issues in nearest-pair search</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/12-7-1-1_common_errors.png" alt="扣哒世界 最近距离常见错误速查 - koudashijie.com">
+    <div class="caption">图3：初值设反、return 放进循环、只更新一个变量，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>初值设反——找最小却把 <code>minDistance</code> 设成 0 或很小，导致永远刷新不了，结果一直是初始的占位值。</li>
+        <li>比较符号用反——找最近应是 <code>distance &lt; minDistance</code>；写成 <code>&gt;</code> 会变成找最远，方向全错。</li>
+        <li>return 放进循环里——必须在两层 for 都结束后再 <code>return nearestPair</code>，否则没比完就下结论。</li>
+        <li>只更新一个变量——更新了 <code>minDistance</code> 却忘了 <code>nearestPair</code>（或反之），最后拿不到正确的一对。</li>
+        <li>忘跳过自比较——漏了 <code>if i == j: continue</code>，同一单位到自己的距离为 0，会永远"最近"却毫无意义。</li>
+        <li>distanceTo 用法错——应是 <code>units[i].distanceTo(units[j])</code>，别写成对 pos 或数组调用。</li>
+        <li>取结果下标错——返回的是一对，用 <code>pair[0]</code>、<code>pair[1]</code> 取；说名字要取 <code>.id</code> 并用空格连接。</li>
+        <li>发射时机判断错——<code>hero.time % 8 == 5</code> 的取余条件写错，会导致保护没卡在大炮开火前。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=sec-12-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+<!-- CC-PROTECTION:HIDDEN:517c59023c:START anchor=sec-12-7-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="517c59023c">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC12-B9364DB51CB1。</span>
+<!-- CC-PROTECTION:HIDDEN:517c59023c:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你识破了巨炮 Big Bertha 的瞄准逻辑！这一单元你把"配对查找"升级成了"<strong>最优配对查找</strong>"——不只是找到一对，而是找出<strong>距离最小的那一对</strong>。你复用了<strong>嵌套循环 + 跳过自比较</strong>的框架遍历所有单位对，学会了用 <code>distanceTo()</code> 测量两单位间距，掌握了最关键的<strong>"打擂台"追踪最值</strong>技巧：把 <code>minDistance</code> 初值设得足够大、每遇到更近的一对就<strong>同步更新 <code>minDistance</code> 和 <code>nearestPair</code> 两个变量</strong>，并牢记<strong>找最值必须遍历到底、<code>return</code> 要写在循环之外</strong>。配合 <code>hero.time % 8 == 5</code> 卡准发射时机，你成功预判并保护了危险中的士兵。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应内容</th></tr></thead>
+        <tbody>
+            <tr><td>最优配对</td><td>找距离最小的一对</td><td>12.1</td></tr>
+            <tr><td>打擂台模式</td><td>守擂者 + 逐个挑战</td><td>12.1 · 12.4</td></tr>
+            <tr><td>distanceTo 测距</td><td><code>A.distanceTo(B)</code></td><td>12.2</td></tr>
+            <tr><td>嵌套循环遍历对</td><td><code>for i / for j</code> + continue</td><td>12.3</td></tr>
+            <tr><td>逐对算距离</td><td>内层循环里 distanceTo</td><td>12.3</td></tr>
+            <tr><td>minDistance 初值</td><td>找最小设大值（9001）</td><td>12.4</td></tr>
+            <tr><td>双变量同步更新</td><td>距离与配对一起更新</td><td>12.4 · 提前思考</td></tr>
+            <tr><td>循环外 return</td><td>遍历到底再返回</td><td>12.5 · 提前思考</td></tr>
+            <tr><td>取余控制时机</td><td><code>hero.time % 8 == 5</code></td><td>提前思考</td></tr>
+            <tr><td>最小 vs 最大</td><td>初值与比较符号相反</td><td>12.4</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得遍历万千组合、用一个擂台变量牢牢守住最优解、并算准时机出手的英雄，<br>
+        才是云峰之上真正料敌先机的程序员。继续向雪山之巅挺进吧，勇敢的程序员！🏔️🎯🛡️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=h3-11 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十二单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

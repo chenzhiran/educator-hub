@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC16-A7989ED0B49A">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十六单元：状态数组 · 追踪与更新元素 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 数组可视化 ===== */
+        .array-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .array-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC16-A7989ED0B49A | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十六单元</div>
+
+    <a href="#section-16-1" class="nav-section">16.1 什么是状态数组</a>
+    <a href="#sec-16-1-1" class="nav-sub">16.1.1 用数组记录状态</a>
+    <a href="#sec-16-1-2" class="nav-sub">16.1.2 索引即身份</a>
+
+    <a href="#section-16-2" class="nav-section">16.2 修改数组元素</a>
+    <a href="#sec-16-2-1" class="nav-sub">16.2.1 按索引赋值</a>
+    <a href="#sec-16-2-2" class="nav-sub">16.2.2 随机访问任意元素</a>
+
+    <a href="#section-16-3" class="nav-section">16.3 嵌套循环匹配更新</a>
+    <a href="#sec-16-3-1" class="nav-sub">16.3.1 位置匹配</a>
+    <a href="#sec-16-3-2" class="nav-sub">16.3.2 break 提前退出</a>
+
+    <a href="#section-16-4" class="nav-section">16.4 用 None 表示删除</a>
+    <a href="#sec-16-4-1" class="nav-sub">16.4.1 None 与空位</a>
+    <a href="#sec-16-4-2" class="nav-sub">16.4.2 查找第一个空位</a>
+
+    <a href="#section-16-5" class="nav-section">16.5 实战关卡精讲</a>
+    <a href="#sec-16-5-1" class="nav-sub">16.5.1 驯鹿苏醒</a>
+    <a href="#sec-16-5-2" class="nav-sub">16.5.2 驯鹿观察者</a>
+    <a href="#sec-16-5-3" class="nav-sub">16.5.3 驯鹿招标</a>
+
+    <a href="#section-16-6" class="nav-section">16.6 常见错误</a>
+    <a href="#sec-16-6-1" class="nav-sub">16.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十六单元：状态数组 · 追踪与更新元素</h1>
+    <div class="subtitle">Unit 16: State Arrays — Tracking and Updating Elements</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 驯鹿苏醒 → 驯鹿观察者 → 驯鹿招标</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 16.1 ==================== -->
+<div class="section-header" id="section-16-1">
+    <h2>16.1 什么是状态数组</h2>
+    <div class="en-title">What Is a State Array</div>
+</div>
+
+<p>欢迎来到计算机科学 5 的第十六单元！之前你已经会创建数组、遍历数组、读取元素了。但数组不只是"只读的清单"——它还能被<strong>不断修改</strong>，用来记录一群对象随时间变化的状态。本单元你将学会一项在游戏开发、库存管理、任务调度里无处不在的核心技巧：<span class="keyword">状态数组（state array）</span>。你要帮助盲人牧民 Merek，用一个数组记录哪些驯鹿醒着、哪些围栏空着，并把驯鹿一只只安排进圈里。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>用一个数组"平行地"记录另一组对象的状态——第 <code>i</code> 只驯鹿的状态放在 <code>deerStatus[i]</code>。你将学会用 <code>deerStatus[i] = "awake"</code> 修改元素、用嵌套循环做位置匹配并更新状态、用 <code>None</code> 表示"空位/已删除"、以及查找数组里第一个空位来分配新对象。这套技巧让你能"追踪一群东西的当前状态并动态调整"。
+</div>
+
+<h3 id="sec-16-1-1">16.1.1 用数组记录状态（Tracking Status with an Array）</h3>
+
+<h4>16.1.1.1 一个平行数组，专门存"状态"
+    <span class="en">A parallel array that holds status</span>
+</h4>
+
+<p>状态数组的核心思想是"平行"：你有一组对象（比如 5 只驯鹿），再单独建一个同样长度的数组，专门记录它们各自的状态。关卡"驯鹿苏醒"一开始就给了这样一个数组，5 只驯鹿全都初始化为 <code>'asleep'</code>（睡着）。随着程序运行，你把醒来的驯鹿在数组里对应位置改成 <code>'awake'</code>。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 这个数组记录每只驯鹿的状态（初始全部睡着）</span>
+deerStatus <span class="punc">=</span> <span class="punc">[</span><span class="str">'asleep'</span><span class="punc">,</span> <span class="str">'asleep'</span><span class="punc">,</span> <span class="str">'asleep'</span><span class="punc">,</span> <span class="str">'asleep'</span><span class="punc">,</span> <span class="str">'asleep'</span><span class="punc">]</span>
+
+<span class="cmt"># 这个数组是驯鹿本身</span>
+friends <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span></pre>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🦌 状态数组就像"点名表"</div>
+    老师有一份学生名单（<code>friends</code>），又有一张同样顺序的"出勤表"（<code>deerStatus</code>）。名单第 <code>2</code> 位的同学，出勤表第 <code>2</code> 格就记录他"到"还是"缺席"。两张表<strong>顺序一一对应</strong>，靠同一个索引把"是谁"和"状态如何"连接起来。
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-16-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-16-1-2">16.1.2 索引即身份（The Index Is the Identity）</h3>
+
+<h4>16.1.2.1 同一个索引，串起两个数组
+    <span class="en">One index links two parallel arrays</span>
+</h4>
+
+<p>平行数组之所以能配合，是因为它们共用同一套索引。<code>friends[2]</code> 是第 3 只驯鹿这个对象，<code>deerStatus[2]</code> 就是它的状态。只要保证两个数组顺序不乱，<code>i</code> 就同时是"第几只驯鹿"和"它的状态在哪一格"。这就是为什么遍历时我们常用 <code>range(len(...))</code> 拿到索引——索引本身携带了"身份"信息。</p>
+
+<div class="array-viz">
+    <svg viewBox="0 0 480 180" width="480" role="img" aria-label="平行数组示意">
+        <text x="240" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">两个平行数组，靠同一个索引对齐</text>
+        <g font-family="monospace" font-size="12">
+            <!-- 索引 -->
+            <text x="60" y="58" fill="#7d94a3" font-size="11" font-family="sans-serif">索引</text>
+            <text x="130" y="58" text-anchor="middle" fill="#7d94a3">0</text>
+            <text x="200" y="58" text-anchor="middle" fill="#7d94a3">1</text>
+            <text x="270" y="58" text-anchor="middle" fill="#7d94a3">2</text>
+            <text x="340" y="58" text-anchor="middle" fill="#7d94a3">3</text>
+            <text x="410" y="58" text-anchor="middle" fill="#7d94a3">4</text>
+            <!-- friends -->
+            <text x="55" y="92" fill="#3a6480" font-size="11" font-family="sans-serif">friends</text>
+            <rect x="100" y="72" width="60" height="30" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="130" y="92" text-anchor="middle" fill="#2A5A85">🦌</text>
+            <rect x="170" y="72" width="60" height="30" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="200" y="92" text-anchor="middle" fill="#2A5A85">🦌</text>
+            <rect x="240" y="72" width="60" height="30" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="270" y="92" text-anchor="middle" fill="#2A5A85">🦌</text>
+            <rect x="310" y="72" width="60" height="30" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="340" y="92" text-anchor="middle" fill="#2A5A85">🦌</text>
+            <rect x="380" y="72" width="60" height="30" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/><text x="410" y="92" text-anchor="middle" fill="#2A5A85">🦌</text>
+            <!-- 连接虚线 -->
+            <line x1="270" y1="102" x2="270" y2="122" stroke="#E0912F" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <!-- deerStatus -->
+            <text x="42" y="146" fill="#2f7a45" font-size="11" font-family="sans-serif">deerStatus</text>
+            <rect x="100" y="126" width="60" height="30" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="130" y="145" text-anchor="middle" fill="#9e352c" font-size="9">asleep</text>
+            <rect x="170" y="126" width="60" height="30" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="200" y="145" text-anchor="middle" fill="#9e352c" font-size="9">asleep</text>
+            <rect x="240" y="126" width="60" height="30" rx="5" fill="#dcf0e0" stroke="#2f7a45"/><text x="270" y="145" text-anchor="middle" fill="#2f7a45" font-size="9">awake</text>
+            <rect x="310" y="126" width="60" height="30" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="340" y="145" text-anchor="middle" fill="#9e352c" font-size="9">asleep</text>
+            <rect x="380" y="126" width="60" height="30" rx="5" fill="#fbeae7" stroke="#C0453B"/><text x="410" y="145" text-anchor="middle" fill="#9e352c" font-size="9">asleep</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 16.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=sec-16-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<div class="section-header" id="section-16-2">
+    <h2>16.2 修改数组元素</h2>
+    <div class="en-title">Modifying Array Elements</div>
+</div>
+
+<h3 id="sec-16-2-1">16.2.1 按索引赋值（Assigning by Index）</h3>
+
+<h4>16.2.1.1 array[i] = 新值
+    <span class="en">array[i] = newValue</span>
+</h4>
+
+<p>数组不是刻在石头上的——你可以随时把某个位置的元素换成新值。语法很简单：把 <code>array[i]</code> 放在等号左边，右边写新值。关卡说明里给了最直观的演示：读取用 <code>a[1]</code>，赋值也用 <code>a[1]</code>，只是放在等号左边。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>a <span class="punc">=</span> <span class="punc">[</span><span class="kw">None</span><span class="punc">,</span> <span class="str">'no'</span><span class="punc">,</span> <span class="str">'maybe'</span><span class="punc">]</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>a<span class="punc">[</span><span class="num">1</span><span class="punc">])</span>   <span class="cmt"># 说 "no"</span>
+
+a<span class="punc">[</span><span class="num">1</span><span class="punc">]</span> <span class="punc">=</span> <span class="str">'yes'</span>      <span class="cmt"># ← 把索引 1 的元素改成 'yes'</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>a<span class="punc">[</span><span class="num">1</span><span class="punc">])</span>   <span class="cmt"># 说 "yes"</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="按索引赋值解剖">
+        <text x="280" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">按索引赋值的三个零件</text>
+        <text x="70" y="80" font-size="22" font-family="monospace" fill="#a5c8e8">deerStatus</text>
+        <text x="240" y="80" font-size="22" font-family="monospace" fill="#cdddea">[</text>
+        <text x="258" y="80" font-size="22" font-family="monospace" fill="#e8a15a">i</text>
+        <text x="272" y="80" font-size="22" font-family="monospace" fill="#cdddea">]</text>
+        <text x="295" y="80" font-size="22" font-family="monospace" fill="#7cc7e8">=</text>
+        <text x="320" y="80" font-size="22" font-family="monospace" fill="#9fd4a8">"awake"</text>
+        <text x="150" y="110" font-size="11" fill="#a5c8e8" text-anchor="middle" font-family="sans-serif">哪个数组</text>
+        <text x="258" y="110" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">哪个位置</text>
+        <text x="390" y="110" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">存进什么新值</text>
+        <line x1="150" y1="88" x2="150" y2="100" stroke="#a5c8e8" stroke-width="1.5"/>
+        <line x1="258" y1="88" x2="258" y2="100" stroke="#e8a15a" stroke-width="1.5"/>
+        <line x1="390" y1="88" x2="390" y2="100" stroke="#9fd4a8" stroke-width="1.5"/>
+    </svg>
+</div>
+
+<h3 id="sec-16-2-2">16.2.2 随机访问任意元素（Random Access）</h3>
+
+<h4>16.2.2.1 任意顺序、任意位置，只要它存在
+    <span class="en">Any element, any order — if it exists</span>
+</h4>
+
+<p>你不一定非得从头到尾遍历。只要元素<strong>存在</strong>，就能以任意顺序读取或修改任意位置——这叫"随机访问"。但关卡也反复提醒：索引必须在有效范围内。一个长度为 3 的数组，合法索引是 <code>0</code>、<code>1</code>、<code>2</code>；访问 <code>a[3]</code> 就会越界报错（这正好呼应上一单元的边界防护）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>a <span class="punc">=</span> <span class="punc">[</span><span class="kw">None</span><span class="punc">,</span> <span class="str">'one'</span><span class="punc">,</span> <span class="str">'two'</span><span class="punc">]</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>a<span class="punc">[</span><span class="num">1</span><span class="punc">])</span>   <span class="cmt"># 说 "one"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>a<span class="punc">[</span><span class="num">2</span><span class="punc">])</span>   <span class="cmt"># 说 "two"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>a<span class="punc">[</span><span class="num">0</span><span class="punc">])</span>   <span class="cmt"># 什么都不说（元素是 None）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>a<span class="punc">[</span><span class="num">3</span><span class="punc">])</span>   <span class="cmt"># 错误！数组从 0 开始，到 2 结束</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">None 是"什么都没有"：</span>上面 <code>a[0]</code> 的值是 <code>None</code>——一个专门表示"空、无、还没有值"的特殊对象。让英雄去说 <code>None</code>，他什么都不会说。这个特性在本单元后面表示"空位"时会大显身手。
+</div>
+
+<!-- ==================== 16.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:5744a41fe1:START anchor=sec-16-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="5744a41fe1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>遇到难题？来 <a href="https://koudashijie.com/">koudashijie.com</a>，扣哒鸭会及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:5744a41fe1:END -->
+
+<div class="section-header" id="section-16-3">
+    <h2>16.3 嵌套循环匹配更新</h2>
+    <div class="en-title">Matching and Updating with Nested Loops</div>
+</div>
+
+<h3 id="sec-16-3-1">16.3.1 位置匹配（Matching by Position）</h3>
+
+<h4>16.3.1.1 外层对象、内层位置，两两比对
+    <span class="en">Outer objects, inner positions</span>
+</h4>
+
+<p>很多时候，你需要把两组东西"配对"——比如判断每只驯鹿站在哪个围栏上。做法是<strong>嵌套循环</strong>：外层遍历每只驯鹿，内层遍历每个围栏位置，逐一比较坐标。当某只驯鹿的 <code>x</code> 和 <code>y</code> 都和某个围栏相等时，就"匹配成功"，把该围栏对应位置的状态更新为这只驯鹿。这正是"驯鹿观察者"关卡的核心算法。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 外层：遍历每只驯鹿</span>
+<span class="kw">for</span> deerIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    reindeer <span class="punc">=</span> friends<span class="punc">[</span>deerIndex<span class="punc">]</span>
+    <span class="cmt"># 内层：遍历每个围栏位置</span>
+    <span class="kw">for</span> penIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>penPositions<span class="punc">)):</span>
+        penPos <span class="punc">=</span> penPositions<span class="punc">[</span>penIndex<span class="punc">]</span>
+        <span class="kw">if</span> penPos<span class="punc">.</span>x <span class="punc">==</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>x <span class="kw">and</span> penPos<span class="punc">.</span>y <span class="punc">==</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">:</span>
+            penOccupants<span class="punc">[</span>penIndex<span class="punc">]</span> <span class="punc">=</span> reindeer<span class="punc">.</span>id  <span class="cmt"># 匹配成功，记录</span>
+            <span class="kw">break</span>                              <span class="cmt"># 找到就停</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:c1d65681b7:START anchor=sec-16-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="c1d65681b7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，编程小白都在偷偷玩的闯关游戏，写一行代码角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c1d65681b7:END -->
+
+<h3 id="sec-16-3-2">16.3.2 break 提前退出（Breaking Early）</h3>
+
+<h4>16.3.2.1 匹配到就停，别做无用功
+    <span class="en">Once matched, stop searching</span>
+</h4>
+
+<p>一只驯鹿只可能站在一个围栏上。所以一旦内层循环找到匹配的围栏、更新完状态，就该用 <code>break</code> 立刻跳出内层循环——继续比对剩下的围栏毫无意义，还浪费时间。<code>break</code> 只跳出<strong>它所在的那一层</strong>循环（这里是内层围栏循环），外层驯鹿循环会继续处理下一只驯鹿。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 580 180" width="580" role="img" aria-label="嵌套循环 break 流程">
+        <text x="290" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">找到匹配 → 更新 → break 跳出内层</text>
+        <defs>
+            <marker id="nl-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="11">
+            <rect x="30" y="55" width="120" height="55" rx="10" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+            <text x="90" y="80" text-anchor="middle" fill="#2A5A85" font-weight="bold">取一只驯鹿</text>
+            <text x="90" y="98" text-anchor="middle" fill="#6a8294">外层循环</text>
+            <line x1="152" y1="82" x2="192" y2="82" stroke="#4d6373" stroke-width="2" marker-end="url(#nl-arr)"/>
+            <rect x="195" y="55" width="140" height="55" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="265" y="80" text-anchor="middle" fill="#2f7a45" font-weight="bold">逐个比对围栏</text>
+            <text x="265" y="98" text-anchor="middle" fill="#6a8294">内层循环</text>
+            <line x1="337" y1="82" x2="377" y2="82" stroke="#4d6373" stroke-width="2" marker-end="url(#nl-arr)"/>
+            <text x="357" y="74" text-anchor="middle" fill="#2f7a45" font-size="10">坐标相等</text>
+            <rect x="380" y="55" width="170" height="55" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="465" y="78" text-anchor="middle" fill="#bd7415" font-weight="bold">更新状态 + break</text>
+            <text x="465" y="98" text-anchor="middle" fill="#6a8294">跳出内层，回外层</text>
+            <!-- 回环 -->
+            <path d="M465 112 L465 145 L90 145 L90 112" fill="none" stroke="#5B9BD5" stroke-width="1.8" stroke-dasharray="4,4" marker-end="url(#nl-arr)"/>
+            <text x="278" y="162" text-anchor="middle" fill="#3a6480" font-size="10">外层继续处理下一只驯鹿</text>
+        </g>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">break 只跳一层：</span>在双层循环里，<code>break</code> 只结束<strong>最内层</strong>循环，不会连外层一起结束。所以驯鹿匹配到围栏后 <code>break</code>，程序会自然回到外层去看下一只驯鹿，非常适合"每个对象找到归宿就收手"的场景。
+</div>
+
+<!-- ==================== 16.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-16-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+
+<div class="section-header" id="section-16-4">
+    <h2>16.4 用 None 表示删除</h2>
+    <div class="en-title">Using None to Mark Deletion</div>
+</div>
+
+<h3 id="sec-16-4-1">16.4.1 None 与空位（None as an Empty Slot）</h3>
+
+<h4>16.4.1.1 把元素设为 None，就像"清空这一格"
+    <span class="en">Setting an element to None empties the slot</span>
+</h4>
+
+<p>在"驯鹿招标"关卡里，你需要把已经归位的驯鹿从待分配名单中"移除"。但直接删掉数组元素会让后面所有元素的索引都往前挪、打乱平行关系。更安全的做法是：<strong>把那个位置设为 <code>None</code></strong>——数组长度不变、索引不乱，只是这一格被标记为"空、已处理、无需再管"。关卡默认代码里 <code>penOccupants</code> 一开始就全是 <code>None</code>，表示所有围栏都空着。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 围栏占用情况，初始全空（用 None 表示空位）</span>
+penOccupants <span class="punc">=</span> <span class="punc">[</span><span class="kw">None</span><span class="punc">,</span> <span class="kw">None</span><span class="punc">,</span> <span class="kw">None</span><span class="punc">,</span> <span class="kw">None</span><span class="punc">,</span> <span class="kw">None</span><span class="punc">]</span>
+
+<span class="cmt"># 驯鹿归位后，把它从待分配名单里"抹掉"</span>
+friends<span class="punc">[</span>deerIndex<span class="punc">]</span> <span class="punc">=</span> <span class="kw">None</span>   <span class="cmt"># ← 长度不变，只是这格变空</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">设 None ≠ 真正删除：</span>把 <code>friends[i] = None</code> 只是把该位置的内容清空，数组仍然有 5 个格子。后面遍历时你会遇到这些 <code>None</code>，必须<strong>主动跳过</strong>它们（比如用 <code>if not reindeer: continue</code>），否则会把"空位"当成驯鹿去处理而出错。
+</div>
+
+<h3 id="sec-16-4-2">16.4.2 查找第一个空位（Finding the First Empty Slot）</h3>
+
+<h4>16.4.2.1 从头扫描，遇到空位就停
+    <span class="en">Scan from the start, stop at the first empty</span>
+</h4>
+
+<p>"分配"类问题有一个经典算法：<strong>找第一个空位</strong>。做法是从索引 0 开始遍历目标数组，用 <code>if not penOccupants[occIndex]:</code> 判断这一格是不是空的（<code>None</code> 在布尔判断里是"假"，所以 <code>not None</code> 为真）。找到第一个空位后，就把对象放进去，并立刻 <code>break</code> 退出——这样才能保证每个对象只占一个位置、不会重复分配。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 寻找第一个没有驯鹿的圈</span>
+<span class="kw">for</span> occIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>penOccupants<span class="punc">)):</span>
+    <span class="kw">if</span> <span class="kw">not</span> penOccupants<span class="punc">[</span>occIndex<span class="punc">]:</span>   <span class="cmt"># 这一格是空的（None / 假）</span>
+        penOccupants<span class="punc">[</span>occIndex<span class="punc">]</span> <span class="punc">=</span> reindeer  <span class="cmt"># 放进去</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>reindeer<span class="punc">,</span> <span class="str">'move'</span><span class="punc">,</span> penPositions<span class="punc">[</span>occIndex<span class="punc">])</span>
+        <span class="kw">break</span>   <span class="cmt"># 找到就停，避免重复分配</span></pre>
+</div>
+
+<div class="array-viz">
+    <svg viewBox="0 0 500 130" width="500" role="img" aria-label="查找第一个空位">
+        <text x="250" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">从左往右扫描，第一个 None 就是目标</text>
+        <defs>
+            <marker id="fs-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#E0912F"/>
+            </marker>
+        </defs>
+        <g font-family="monospace" font-size="12">
+            <rect x="40" y="55" width="80" height="36" rx="6" fill="#dcf0e0" stroke="#2f7a45"/><text x="80" y="78" text-anchor="middle" fill="#2f7a45" font-size="10">Dasher</text>
+            <rect x="130" y="55" width="80" height="36" rx="6" fill="#dcf0e0" stroke="#2f7a45"/><text x="170" y="78" text-anchor="middle" fill="#2f7a45" font-size="10">Vixen</text>
+            <rect x="220" y="55" width="80" height="36" rx="6" fill="#fdf3e0" stroke="#E0912F" stroke-width="2.5"/><text x="260" y="78" text-anchor="middle" fill="#bd7415" font-size="10">None ★</text>
+            <rect x="310" y="55" width="80" height="36" rx="6" fill="#f3f8fb" stroke="#cfe0eb"/><text x="350" y="78" text-anchor="middle" fill="#7d94a3" font-size="10">None</text>
+            <rect x="400" y="55" width="80" height="36" rx="6" fill="#f3f8fb" stroke="#cfe0eb"/><text x="440" y="78" text-anchor="middle" fill="#7d94a3" font-size="10">None</text>
+            <!-- 扫描箭头 -->
+            <line x1="55" y1="108" x2="245" y2="108" stroke="#E0912F" stroke-width="2" marker-end="url(#fs-arr)"/>
+            <text x="260" y="120" text-anchor="middle" fill="#bd7415" font-size="10" font-family="sans-serif">停！第一个空位，放入并 break</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 16.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-16-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+<!-- CC-PROTECTION:HIDDEN:057958e754:START anchor=sec-16-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="057958e754">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:057958e754:END -->
+
+<div class="section-header" id="section-16-5">
+    <h2>16.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 驯鹿苏醒 -->
+<div class="level-card" id="sec-16-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 驯鹿苏醒</span>
+        <h3>🌅 驯鹿苏醒 —— 修改状态数组标记"醒来"</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/16-5-1-1_reindeer_wakeup.png" alt="扣哒世界 驯鹿苏醒关卡 - koudashijie.com">
+            <div class="caption">图2：驯鹿苏醒——根据 y 坐标判断驯鹿是否离圈，把状态数组对应位置改成 awake，再报告给盲人牧民 Merek</div>
+        </div>
+
+        <h4>策略：按位置判断醒睡，再逐一报告</h4>
+        <p>本关是状态数组的入门关。盲人牧民 Merek 看不见，需要你告诉他每只驯鹿是醒是睡。判断依据很简单：<strong>不在圈里（y 坐标 &gt; 30）的驯鹿一定是醒着的</strong>。策略分两步——先遍历所有驯鹿，把醒着的在 <code>deerStatus</code> 里标记为 <code>'awake'</code>；再遍历 <code>deerStatus</code>，把每只驯鹿的索引和状态"说"给 Merek。他听到"asleep"就会命令那只驯鹿醒来。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法有两个循环。<strong>第一个循环更新状态</strong>：用 <code>range(len(friends))</code> 遍历拿到 <code>deerIndex</code>，取出 <code>reindeer = friends[deerIndex]</code>，若 <code>reindeer.pos.y &gt; 30</code>，就执行核心一步 <code>deerStatus[deerIndex] = 'awake'</code>——注意这里用<strong>同一个索引</strong> <code>deerIndex</code> 同时定位驯鹿和它的状态格，这就是平行数组的精髓。<strong>第二个循环负责报告</strong>：遍历 <code>deerStatus</code>，用字符串拼接说出"Reindeer + 索引 + is + 状态"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段一：按位置更新状态数组</span>
+<span class="kw">for</span> deerIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    reindeer <span class="punc">=</span> friends<span class="punc">[</span>deerIndex<span class="punc">]</span>
+    <span class="kw">if</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">&gt;</span> <span class="num">30</span><span class="punc">:</span>            <span class="cmt"># 不在圈里 = 醒着</span>
+        deerStatus<span class="punc">[</span>deerIndex<span class="punc">]</span> <span class="punc">=</span> <span class="str">'awake'</span>  <span class="cmt"># 同索引定位状态</span>
+
+<span class="cmt"># 关键片段二：遍历状态数组，报告给 Merek</span>
+<span class="kw">for</span> statusIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>deerStatus<span class="punc">)):</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">'Reindeer '</span> <span class="punc">+</span> statusIndex <span class="punc">+</span> <span class="str">' is '</span> <span class="punc">+</span> deerStatus<span class="punc">[</span>statusIndex<span class="punc">])</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么用索引而不用值遍历：</span>因为你要同时操作两个平行数组（<code>friends</code> 和 <code>deerStatus</code>），必须靠共享的索引 <code>deerIndex</code> 把二者对齐。如果只用 <code>for reindeer in friends</code>，就拿不到能定位状态格的索引了。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">初始值的意义：</span><code>deerStatus</code> 一开始全是 <code>'asleep'</code>，所以你只需把"醒着的"改成 <code>'awake'</code>，没被改动的自然保持"睡着"。这种"先假设一个默认状态，再修正例外"的写法非常常见。
+        </div>
+    </div>
+</div>
+
+<!-- 驯鹿观察者 -->
+<div class="level-card" id="sec-16-5-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 驯鹿观察者</span>
+        
+<!-- CC-PROTECTION:AD:2a55f34022:START anchor=h3-9 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="2a55f34022">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>视频号搜索 扣哒世界 玩游戏学编程，不定期分享编程知识和学习技巧。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2a55f34022:END -->
+<!-- CC-PROTECTION:HIDDEN:d16a3dcca7:START anchor=h3-9 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="d16a3dcca7">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:d16a3dcca7:END -->
+
+<h3>👁️ 驯鹿观察者 —— 嵌套循环做位置匹配</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/16-5-2-1_reindeer_watcher.png" alt="扣哒世界 驯鹿观察者关卡 - koudashijie.com">
+            <div class="caption">图3：驯鹿观察者——逐只驯鹿与每个围栏坐标比对，把占用围栏的驯鹿 id 记入 penOccupants，空围栏保持 empty</div>
+        </div>
+
+        <h4>策略：找出已占围栏，报告空位</h4>
+        <p>本关引入<strong>嵌套循环 + 位置匹配</strong>。Merek 想把驯鹿放进围栏过夜，但不知道哪些围栏已经有驯鹿了。你有围栏位置数组 <code>penPositions</code>、占用状态数组 <code>penOccupants</code>（初始全是 <code>'empty'</code>）和驯鹿数组 <code>friends</code>。策略是：通过比对坐标，找出每只已站在围栏上的驯鹿，把它的 <code>id</code> 记入对应围栏的 <code>penOccupants</code>；最后报告每个围栏的占用情况，Merek 听到 <code>'empty'</code> 就会派驯鹿过去。</p>
+
+        <h4>思路拆解</h4>
+        <p>核心是双层循环的<strong>位置匹配</strong>：外层遍历每只驯鹿，内层遍历每个围栏位置。当 <code>penPos.x == reindeer.pos.x and penPos.y == reindeer.pos.y</code> 时，说明这只驯鹿正站在这个围栏上，于是执行 <code>penOccupants[penIndex] = reindeer.id</code> 记录，并 <code>break</code> 跳出内层——一只驯鹿只占一个围栏，找到即停。注意这里存的是 <code>reindeer.id</code>（驯鹿的标识），而不是整只驯鹿对象，因为 Merek 只需要知道"是哪一只"。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：嵌套循环匹配坐标，记录占用</span>
+<span class="kw">for</span> deerIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    reindeer <span class="punc">=</span> friends<span class="punc">[</span>deerIndex<span class="punc">]</span>
+    <span class="kw">for</span> penIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>penPositions<span class="punc">)):</span>
+        penPos <span class="punc">=</span> penPositions<span class="punc">[</span>penIndex<span class="punc">]</span>
+        <span class="kw">if</span> penPos<span class="punc">.</span>x <span class="punc">==</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>x <span class="kw">and</span> penPos<span class="punc">.</span>y <span class="punc">==</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">:</span>
+            penOccupants<span class="punc">[</span>penIndex<span class="punc">]</span> <span class="punc">=</span> reindeer<span class="punc">.</span>id  <span class="cmt"># 记录 id</span>
+            <span class="kw">break</span>                              <span class="cmt"># 跳出内层</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">x 和 y 都要相等：</span>判断位置匹配必须<strong>同时</strong>比较 <code>x</code> 和 <code>y</code>（用 <code>and</code> 连接）。只比 <code>x</code> 相等是不够的——不同围栏可能横坐标相同、纵坐标不同。只有两个坐标都吻合，才能确定驯鹿真的在这个围栏上。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">与"驯鹿苏醒"的进阶关系：</span>上一关只用单层循环更新状态；本关多了一层内循环，用来"在另一个数组里找匹配项"。这种"外层拿对象、内层找归属"的双层结构，是数据配对、查表、去重等许多问题的通用骨架。
+        </div>
+    </div>
+</div>
+
+<!-- 驯鹿招标 -->
+<div class="level-card" id="sec-16-5-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 驯鹿招标</span>
+        
+<!-- CC-PROTECTION:AD:4636e50567:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4636e50567">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4636e50567:END -->
+
+<h3>🏕️ 驯鹿招标 —— 移除元素并重新分配空位</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/16-5-3-1_reindeer_assign.png" alt="扣哒世界 驯鹿招标关卡 - koudashijie.com">
+            <div class="caption">图4：驯鹿招标——先把已归位的驯鹿从 friends 中设为 None，再把剩下的驯鹿一只只分配到第一个空围栏</div>
+        </div>
+
+        <h4>策略：两轮处理，先登记后分配</h4>
+        <p>本关是本单元的<strong>压轴关</strong>，综合运用了修改元素、None 删除、查找空位三大技巧。任务是让每只驯鹿都睡进一个圈里。策略分两轮：<strong>第一轮</strong>找出已经站在圈里的驯鹿，把它们记入 <code>penOccupants</code>，同时把它们从 <code>friends</code> 里设为 <code>None</code>（表示"已处理，无需再分配"）；<strong>第二轮</strong>遍历剩下的驯鹿，为每只找一个第一个空圈，命令它移动过去。</p>
+
+        <h4>思路拆解：第一轮 —— 登记并"移除"</h4>
+        <p>和"驯鹿观察者"类似，用嵌套循环做位置匹配。区别在于匹配成功后做<strong>两件事</strong>：<code>penOccupants[penIndex] = reindeer</code> 把驯鹿存进占用数组，<strong>并且</strong> <code>friends[deerIndex] = None</code> 把它从待分配名单里抹掉。这样第二轮就不会重复处理已归位的驯鹿了。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 第一轮关键片段：匹配成功后登记 + 移除</span>
+<span class="kw">if</span> penPos<span class="punc">.</span>x <span class="punc">==</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>x <span class="kw">and</span> penPos<span class="punc">.</span>y <span class="punc">==</span> reindeer<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">:</span>
+    penOccupants<span class="punc">[</span>penIndex<span class="punc">]</span> <span class="punc">=</span> reindeer   <span class="cmt"># 登记进占用数组</span>
+    friends<span class="punc">[</span>deerIndex<span class="punc">]</span> <span class="punc">=</span> <span class="kw">None</span>          <span class="cmt"># 从名单里"删除"</span>
+    <span class="kw">break</span></pre>
+        </div>
+
+        <h4>思路拆解：第二轮 —— 跳过空位、找空圈分配</h4>
+        <p>再次遍历 <code>friends</code>。由于已归位的驯鹿被设成了 <code>None</code>，遇到它们要用 <code>if not reindeer: continue</code> <strong>跳过</strong>。对于真正剩下的驯鹿，用"查找第一个空位"算法遍历 <code>penOccupants</code>，<code>if not penOccupants[occIndex]:</code> 找到第一个空圈，就把驯鹿放进去、命令它 <code>move</code> 过去，然后 <code>break</code> 提前退出，防止一只驯鹿被分到多个圈。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 第二轮关键片段：跳过 None，为剩下的驯鹿找空圈</span>
+<span class="kw">for</span> deerIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    reindeer <span class="punc">=</span> friends<span class="punc">[</span>deerIndex<span class="punc">]</span>
+    <span class="kw">if</span> <span class="kw">not</span> reindeer<span class="punc">:</span>          <span class="cmt"># 是 None（已归位），跳过</span>
+        <span class="kw">continue</span>
+    <span class="kw">for</span> occIndex <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>penOccupants<span class="punc">)):</span>
+        <span class="kw">if</span> <span class="kw">not</span> penOccupants<span class="punc">[</span>occIndex<span class="punc">]:</span>   <span class="cmt"># 第一个空圈</span>
+            penOccupants<span class="punc">[</span>occIndex<span class="punc">]</span> <span class="punc">=</span> reindeer
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>reindeer<span class="punc">,</span> <span class="str">'move'</span><span class="punc">,</span> penPositions<span class="punc">[</span>occIndex<span class="punc">])</span>
+            <span class="kw">break</span>                       <span class="cmt"># 分配一个就停</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">continue 和 break 别混淆：</span><code>continue</code> 是"跳过本次循环的剩余部分，直接进入下一轮"——用来略过 <code>None</code> 空位；<code>break</code> 是"彻底结束当前循环"——用来在找到空圈分配后停手。用错会导致驯鹿分配混乱：该跳过的没跳过、该停的没停。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么第二轮存整只驯鹿而非 id：</span>因为这一轮不仅要"记录"，还要 <code>hero.command(reindeer, 'move', ...)</code> 亲自指挥驯鹿移动到空圈——命令需要驯鹿对象本身，所以 <code>penOccupants</code> 里存的是 <code>reindeer</code> 而不是它的 id。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 16.6 ==================== -->
+<div class="section-header" id="section-16-6">
+    <h2>16.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-16-6-1">16.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>16.6.1.1 状态数组的典型问题
+    <span class="en">Typical issues with state arrays</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/16-6-1-1_common_errors.png" alt="扣哒世界 状态数组常见错误速查 - koudashijie.com">
+    <div class="caption">图5：索引对不齐、忘跳 None、缺 break、混淆 continue 与 break，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>两个平行数组索引对不齐——更新状态时必须用同一个索引，写成 <code>deerStatus[deerIndex]</code> 而不是别的变量，否则改错了驯鹿的状态。</li>
+        <li>忘记跳过 None——把元素设为 <code>None</code> 后再遍历，一定要用 <code>if not x: continue</code> 跳过空位，否则会把空位当对象处理而报错。</li>
+        <li>匹配后忘写 break——找到归属却不 <code>break</code>，内层循环会继续跑，可能重复分配或做无用功。</li>
+        <li>continue 与 break 混用——跳过空位该用 <code>continue</code>，分配完成该用 <code>break</code>，用反了逻辑就乱。</li>
+        <li>位置匹配只比 x 或只比 y——必须 <code>x</code> 和 <code>y</code> 都用 <code>and</code> 判断相等，才能确认真的在同一位置。</li>
+        <li>把"值"当"索引"——<code>deerStatus[i]</code> 里的 <code>i</code> 是位置，元素的值是状态，别把状态字符串拿去当索引用。</li>
+        <li>误以为设 None 会缩短数组——<code>friends[i] = None</code> 不改变长度，只是清空该格，<code>len(friends)</code> 依然不变。</li>
+        <li>存错了内容——只需报告身份就存 <code>id</code>；还要指挥移动就存整只驯鹿对象，按用途选择存什么。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-16-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:d44dbe6c6e:START anchor=sec-16-6-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="d44dbe6c6e">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC16-A7989ED0B49A。</span>
+<!-- CC-PROTECTION:HIDDEN:d44dbe6c6e:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你掌握了"状态数组"这项强大的追踪技能！这一单元你理解了平行数组的核心思想——用同一个索引把"对象"和"它的状态"连接起来。你学会了用 <code>array[i] = 新值</code> 修改任意位置的元素、用嵌套循环做位置匹配并更新状态、用 <code>None</code> 表示"空位或已删除"、以及"查找第一个空位"这一经典分配算法；还弄清了 <code>break</code>（结束循环）和 <code>continue</code>（跳过本轮）的区别。在"驯鹿苏醒、驯鹿观察者、驯鹿招标"三关里，你从单层更新状态，一步步走到"移除元素 + 重新分配"的综合应用。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>平行状态数组</td><td>同索引连接对象与状态</td><td>三关</td></tr>
+            <tr><td>按索引赋值</td><td><code>array[i] = 新值</code></td><td>驯鹿苏醒</td></tr>
+            <tr><td>随机访问</td><td>任意顺序读写存在的元素</td><td>三关</td></tr>
+            <tr><td>嵌套循环匹配</td><td>外层对象、内层位置比对</td><td>观察者/招标</td></tr>
+            <tr><td>break 提前退出</td><td>匹配到就跳出内层</td><td>观察者/招标</td></tr>
+            <tr><td>None 表示删除</td><td>清空该格，长度不变</td><td>驯鹿招标</td></tr>
+            <tr><td>跳过空位 continue</td><td><code>if not x: continue</code></td><td>驯鹿招标</td></tr>
+            <tr><td>查找第一个空位</td><td>从头扫描，遇空即分配</td><td>驯鹿招标</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用一个数组追踪万物状态、把对象井井有条地登记与分配的英雄，才是云峰之上真正周全的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🦌📋
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十六单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

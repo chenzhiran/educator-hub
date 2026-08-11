@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC7-1629895A5A0A">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第七单元：字符遍历 · 字符串就是字符的数组 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC7-1629895A5A0A | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第七单元</div>
+
+    <a href="#section-7-1" class="nav-section">7.1 字符串就是字符数组</a>
+    <a href="#sec-7-1-1" class="nav-sub">7.1.1 一串排好队的字符</a>
+    <a href="#sec-7-1-2" class="nav-sub">7.1.2 长度与索引</a>
+
+    <a href="#section-7-2" class="nav-section">7.2 按索引访问字符</a>
+    <a href="#sec-7-2-1" class="nav-sub">7.2.1 word[i] 取单个字符</a>
+    <a href="#sec-7-2-2" class="nav-sub">7.2.2 len 获取字符串长度</a>
+
+    <a href="#section-7-3" class="nav-section">7.3 for 遍历字符串</a>
+    <a href="#sec-7-3-1" class="nav-sub">7.3.1 逐个走过每个字符</a>
+    <a href="#sec-7-3-2" class="nav-sub">7.3.2 两种遍历写法</a>
+
+    <a href="#section-7-4" class="nav-section">7.4 遍历查找字符</a>
+    <a href="#sec-7-4-1" class="nav-sub">7.4.1 找到就返回</a>
+    <a href="#sec-7-4-2" class="nav-sub">7.4.2 返回布尔：有没有</a>
+    <a href="#sec-7-4-3" class="nav-sub">7.4.3 返回索引：在哪里</a>
+
+    <a href="#section-7-5" class="nav-section">7.5 实战关卡精讲</a>
+    <a href="#sec-7-5-1" class="nav-sub">7.5.1 我们中间的间谍</a>
+    <a href="#sec-7-5-2" class="nav-sub">7.5.2 以我的名义</a>
+
+    <a href="#section-7-6" class="nav-section">7.6 常见错误</a>
+    <a href="#sec-7-6-1" class="nav-sub">7.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第七单元：字符遍历 · 字符串就是字符的数组</h1>
+    <div class="subtitle">Unit 7: Iterating Characters — A String Is an Array of Letters</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 我们中间的间谍 → 以我的名义</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 7.1 ==================== -->
+<div class="section-header" id="section-7-1">
+    <h2>7.1 字符串就是字符数组</h2>
+    <div class="en-title">A String Is Like an Array of Characters</div>
+</div>
+
+<p>前面单元里你反复用数组管理单位、坐标、策略。这一单元你会发现一个重要真相：<strong>字符串（一段文字）其实也是一个数组</strong>——一个由字符排成队的数组。关卡说得斩钉截铁："字符串就是一个数组！像数组一样遍历它。"掌握了这一点，你就能像检查军队一样，一个字一个字地检查名字，揪出名字里藏着 <code>z</code> 的间谍、破解 Thoktar 名字里的秘密。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>你将理解字符串与数组的相通之处——用 <code>len()</code> 获取<strong>字符串长度</strong>、用 <code>word[i]</code> <strong>按索引访问单个字符</strong>、用 <code>for</code> 循环<strong>遍历字符串的每个字符</strong>；并学会两个经典的字符串查找算法：一个返回<strong>布尔值</strong>（某字符在不在名字里），一个返回<strong>索引位置</strong>（某字符藏在名字的第几位）。
+</div>
+
+<h3 id="sec-7-1-1">7.1.1 一串排好队的字符（Characters in a Row）</h3>
+
+<h4>7.1.1.1 每个字符都有自己的位置
+    <span class="en">Each character has its own slot</span>
+</h4>
+
+<p>把字符串想象成一排编了号的储物格：单词 <code>"Reza"</code> 就是四个格子，从左到右分别装着 <code>R</code>、<code>e</code>、<code>z</code>、<code>a</code>。和数组一模一样，这些格子从 <strong>0</strong> 开始编号：第 0 格是 <code>R</code>、第 1 格是 <code>e</code>、第 2 格是 <code>z</code>、第 3 格是 <code>a</code>。这套编号就是<strong>索引</strong>，是我们精确定位某个字符的钥匙。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 150" width="520" role="img" aria-label="字符串索引示意">
+        <text x="260" y="28" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">"Reza" —— 四个字符，索引从 0 开始</text>
+        <g font-family="monospace" font-size="24">
+            <rect x="90" y="50" width="60" height="50" rx="6" fill="#182633" stroke="#5B9BD5"/>
+            <text x="120" y="84" text-anchor="middle" fill="#9fd4a8">R</text>
+            <rect x="160" y="50" width="60" height="50" rx="6" fill="#182633" stroke="#5B9BD5"/>
+            <text x="190" y="84" text-anchor="middle" fill="#9fd4a8">e</text>
+            <rect x="230" y="50" width="60" height="50" rx="6" fill="#182633" stroke="#E0912F" stroke-width="2"/>
+            <text x="260" y="84" text-anchor="middle" fill="#e8a15a">z</text>
+            <rect x="300" y="50" width="60" height="50" rx="6" fill="#182633" stroke="#5B9BD5"/>
+            <text x="330" y="84" text-anchor="middle" fill="#9fd4a8">a</text>
+        </g>
+        <g font-family="monospace" font-size="13" fill="#7cc7e8">
+            <text x="120" y="122" text-anchor="middle">0</text>
+            <text x="190" y="122" text-anchor="middle">1</text>
+            <text x="260" y="122" text-anchor="middle">2</text>
+            <text x="330" y="122" text-anchor="middle">3</text>
+        </g>
+        <text x="440" y="84" font-size="11" fill="#6a8294" font-family="sans-serif">z 在第 2 格</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-7-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<h3 id="sec-7-1-2">7.1.2 长度与索引（Length and Index）</h3>
+
+<h4>7.1.2.1 长度是"格子总数"，索引最大是"长度减一"
+    <span class="en">Length is the count, max index is length minus one</span>
+</h4>
+
+<p>字符串的<strong>长度</strong>就是它有几个字符，用 <code>len()</code> 得到。<code>"Reza"</code> 有 4 个字符，<code>len("Reza")</code> 就是 4。但因为索引从 0 数起，合法索引是 <code>0</code> 到 <code>len-1</code>（也就是 0~3）。关卡的两个小例子把这两点说得很直观："<code>hero.say("Hello World"[0])</code> 英雄说 H；<code>hero.say(len("Hello World"))</code> 英雄说 11。"</p>
+
+<!-- ==================== 7.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:bf385e5ba1:START anchor=sec-7-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="bf385e5ba1">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>学习编程需要动手写大量代码，来 <a href="https://koudashijie.com/">koudashijie.com</a>，让你带着微笑学习。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bf385e5ba1:END -->
+
+<div class="section-header" id="section-7-2">
+    <h2>7.2 按索引访问字符</h2>
+    <div class="en-title">Accessing a Character by Index</div>
+</div>
+
+<h3 id="sec-7-2-1">7.2.1 word[i] 取单个字符（Getting One Character）</h3>
+
+<h4>7.2.1.1 方括号加下标，取出那一格
+    <span class="en">Brackets with an index pull out one slot</span>
+</h4>
+
+<p>和数组取元素完全一样，用<strong>方括号加索引</strong> <code>word[i]</code> 就能取出字符串里第 <code>i</code> 个字符。比如 <code>"Reza"[2]</code> 得到 <code>"z"</code>。这是本单元一切操作的基石——无论是遍历还是查找，最终都要靠 <code>word[i]</code> 把某个位置的字符单独拎出来看一看。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>word = <span class="str">"Reza"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>word<span class="punc">[</span><span class="num">0</span><span class="punc">])</span>   <span class="cmt"># 说 "R"</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>word<span class="punc">[</span><span class="num">2</span><span class="punc">])</span>   <span class="cmt"># 说 "z"</span>
+character = word<span class="punc">[</span>i<span class="punc">]</span>   <span class="cmt"># 取出第 i 个字符，存进变量</span></pre>
+</div>
+
+<h3 id="sec-7-2-2">7.2.2 len 获取字符串长度（Length with len）</h3>
+
+<h4>7.2.2.1 遍历的边界由 len 决定
+    <span class="en">len defines the loop boundary</span>
+</h4>
+
+<p><code>len(word)</code> 告诉你字符串有多长，它是遍历时的"边界线"。要走遍每个字符，就让索引 <code>i</code> 从 0 走到 <code>len(word) - 1</code>——在 Python 里正好写成 <code>range(len(word))</code>。用 <code>len()</code> 而不是写死一个数字，代码就能应对任意长度的名字，无论是 3 个字母还是 30 个字母都通用。</p>
+
+<div class="info-box">
+    <span class="info-label">和前面的知识一脉相承：</span>你会发现字符串的 <code>len()</code>、<code>[i]</code>、<code>for</code> 遍历，和第四单元数组的用法几乎一模一样。这正是编程的美妙之处——<strong>一套核心概念，处处适用</strong>。把字符串当数组看，你已经会的所有数组技巧都能直接迁移过来。
+</div>
+
+<!-- ==================== 7.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-7-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+
+<div class="section-header" id="section-7-3">
+    <h2>7.3 for 遍历字符串</h2>
+    <div class="en-title">Iterating a String with for</div>
+</div>
+
+<h3 id="sec-7-3-1">7.3.1 逐个走过每个字符（Visiting Every Character）</h3>
+
+<h4>7.3.1.1 用 range(len(...)) 逐位访问
+    <span class="en">Loop over range(len(...))</span>
+</h4>
+
+<p>遍历字符串的标准套路是：<code>for i in range(len(word))</code> 让 <code>i</code> 从 0 依次取到最后一位，每轮用 <code>word[i]</code> 取出当前字符来处理。关卡给的例子把每个字母逐一念出来：</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre>string = <span class="str">"Hello, World!"</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>string<span class="punc">)):</span>
+    letter = string<span class="punc">[</span>i<span class="punc">]</span>       <span class="cmt"># 取出第 i 个字符</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>letter<span class="punc">)</span>          <span class="cmt"># 英雄逐一讲出每个字母</span></pre>
+</div>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 560 150" width="560" role="img" aria-label="for 循环逐个走过字符">
+        <text x="280" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">i = 0,1,2,3… 逐格取出字符处理</text>
+        <g font-family="monospace" font-size="18">
+            <rect x="60" y="50" width="46" height="46" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="83" y="80" text-anchor="middle" fill="#2A5A85">R</text>
+            <rect x="115" y="50" width="46" height="46" rx="5" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="138" y="80" text-anchor="middle" fill="#2f7a45">e</text>
+            <rect x="170" y="50" width="46" height="46" rx="5" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="193" y="80" text-anchor="middle" fill="#bd7415">z</text>
+            <rect x="225" y="50" width="46" height="46" rx="5" fill="#fbeae7" stroke="#C0453B"/>
+            <text x="248" y="80" text-anchor="middle" fill="#9e352c">a</text>
+        </g>
+        <defs>
+            <marker id="c-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <line x1="290" y1="73" x2="330" y2="73" stroke="#4d6373" stroke-width="2" marker-end="url(#c-arr)"/>
+        <g font-family="sans-serif" font-size="11" fill="#4d6373">
+            <text x="440" y="60" text-anchor="middle">i=0 → 处理 R</text>
+            <text x="440" y="78" text-anchor="middle">i=1 → 处理 e</text>
+            <text x="440" y="96" text-anchor="middle">i=2 → 处理 z …</text>
+        </g>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-7-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3 id="sec-7-3-2">7.3.2 两种遍历写法（Two Ways to Iterate）</h3>
+
+<h4>7.3.2.1 按索引 vs 直接取字符
+    <span class="en">By index vs. directly by character</span>
+</h4>
+
+<p>遍历字符串有两种常见写法。一种是<strong>按索引</strong>（<code>for i in range(len(word))</code>，再 <code>word[i]</code>），当你需要知道"字符在第几位"时必须用它。另一种是<strong>直接取字符</strong>（<code>for character in word</code>），当你只关心字符本身、不在乎位置时更简洁。本单元两关正好各展示一种思路。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>按索引（能拿到位置 i）</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>word<span class="punc">)):</span>
+    char = word<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="cmt"># 知道 char 在第 i 位</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>直接取字符（更简洁）</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> char <span class="kw">in</span> word<span class="punc">:</span>
+    <span class="cmt"># 直接拿到每个字符</span>
+    <span class="cmt"># 但不知道它在第几位</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">要不要位置，决定用哪种：</span>"我们中间的间谍"只需判断"有没有 z"，两种写法都行；但"以我的名义"要的是"z 在第几位"，就<strong>必须</strong>用带索引 <code>i</code> 的写法。选写法前先问自己：我需要位置信息吗？
+</div>
+
+<!-- ==================== 7.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:4e7be9e733:START anchor=sec-7-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="4e7be9e733">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，在知识树中系统学习对象、方法、字符串、变量、循环、条件分支、函数、参数、事件和地图设计。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4e7be9e733:END -->
+
+<div class="section-header" id="section-7-4">
+    <h2>7.4 遍历查找字符</h2>
+    <div class="en-title">Searching for a Character</div>
+</div>
+
+<h3 id="sec-7-4-1">7.4.1 找到就返回（Return As Soon As Found）</h3>
+
+<h4>7.4.1.1 边遍历边比较，一命中就交差
+    <span class="en">Compare while looping, return on the first hit</span>
+</h4>
+
+<p>查找的通用模式是：<strong>遍历每个字符，逐一和目标比较，一旦相等就立刻返回结果</strong>。因为 <code>return</code> 会立即结束函数，所以找到目标那一刻循环就停了，不会做无用功。如果整个字符串走完都没找到，就在循环<strong>之后</strong>返回一个"没找到"的默认值。这个"循环内找到即返回、循环后兜底"的结构，是查找算法的标准骨架。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 600 180" width="600" role="img" aria-label="查找字符流程">
+        <text x="300" y="24" text-anchor="middle" font-size="13" fill="#2A5A85" font-weight="bold" font-family="sans-serif">逐个比较：命中即返回，走完才兜底</text>
+        <g font-family="sans-serif" font-size="12">
+            <rect x="40" y="55" width="150" height="44" rx="8" fill="#eaf2f8" stroke="#4A7A9B"/>
+            <text x="115" y="82" text-anchor="middle" fill="#3a6480">word[i] == letter?</text>
+            <defs>
+                <marker id="f7-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+                </marker>
+            </defs>
+            <line x1="192" y1="66" x2="250" y2="66" stroke="#2f7a45" stroke-width="2" marker-end="url(#f7-arr)"/>
+            <text x="220" y="58" fill="#2f7a45" font-size="10">是</text>
+            <rect x="252" y="46" width="160" height="40" rx="8" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="332" y="71" text-anchor="middle" fill="#2f7a45" font-size="11">立即 return 结果</text>
+
+            <line x1="115" y1="101" x2="115" y2="130" stroke="#4d6373" stroke-width="2" marker-end="url(#f7-arr)"/>
+            <text x="150" y="120" fill="#C0453B" font-size="10">否，看下一个</text>
+            <rect x="40" y="132" width="220" height="38" rx="8" fill="#fbeae7" stroke="#C0453B"/>
+            <text x="150" y="156" text-anchor="middle" fill="#9e352c" font-size="11">走完仍没找到 → 返回默认值</text>
+        </g>
+    </svg>
+</div>
+
+<h3 id="sec-7-4-2">7.4.2 返回布尔：有没有（Return a Boolean）</h3>
+
+<h4>7.4.2.1 letterInWord —— 判断字符在不在
+    <span class="en">letterInWord — does it contain the letter</span>
+</h4>
+
+<p>"我们中间的间谍"的 <code>letterInWord(word, letter)</code> 回答的是"是/否"问题：这个名字里<strong>有没有</strong>某个字母？算法是：遍历每个字符，若某个字符等于目标字母，立刻 <code>return True</code>；若遍历完都没匹配上，最后 <code>return False</code>。返回的是一个<strong>布尔值</strong>，正好能直接拿去做 <code>if</code> 判断。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">letterInWord</span><span class="punc">(</span>word<span class="punc">,</span> letter<span class="punc">):</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>word<span class="punc">)):</span>
+        character = word<span class="punc">[</span>i<span class="punc">]</span>
+        <span class="kw">if</span> character == letter<span class="punc">:</span>   <span class="cmt"># 找到了！</span>
+            <span class="kw">return</span> <span class="kw">True</span>            <span class="cmt"># 立即回报"有"</span>
+    <span class="kw">return</span> <span class="kw">False</span>                   <span class="cmt"># 走完都没有 → "没有"</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-7-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+<!-- CC-PROTECTION:HIDDEN:029eda017b:START anchor=sec-7-4-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="029eda017b">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:029eda017b:END -->
+
+<h3 id="sec-7-4-3">7.4.3 返回索引：在哪里（Return an Index）</h3>
+
+<h4>7.4.3.1 letterIndex —— 报出字符的位置
+    <span class="en">letterIndex — where the letter sits</span>
+</h4>
+
+<p>"以我的名义"的 <code>letterIndex(word, letter)</code> 回答的是"在哪"问题：某字母藏在名字的<strong>第几位</strong>？算法几乎一样，只是命中时不再返回 <code>True</code>，而是返回<strong>当前的索引 <code>i</code></strong>（一个数字）。因为要用到位置，这里<strong>必须</strong>用带 <code>i</code> 的索引遍历。没找到则返回一个默认值（如 <code>-1</code> 或 <code>0</code>）。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">letterIndex</span><span class="punc">(</span>word<span class="punc">,</span> letter<span class="punc">):</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>word<span class="punc">)):</span>
+        char = word<span class="punc">[</span>i<span class="punc">]</span>
+        <span class="kw">if</span> char == letter<span class="punc">:</span>      <span class="cmt"># 找到目标字母</span>
+            <span class="kw">return</span> i               <span class="cmt"># 返回它所在的索引（数字）</span>
+    <span class="kw">return</span> -<span class="num">1</span>                    <span class="cmt"># 没找到的默认值</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">同一个骨架，两种回报：</span>对比一下，<code>letterInWord</code> 和 <code>letterIndex</code> 的循环结构完全相同，唯一区别是命中时"回报什么"：一个报 <code>True</code>（在不在），一个报 <code>i</code>（在哪里）。<strong>掌握一个查找骨架，改改返回值就能解决一大类问题</strong>——这正是算法思维的迁移力。
+</div>
+
+<!-- ==================== 7.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-7-4-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<div class="section-header" id="section-7-5">
+    <h2>7.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy & Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 我们中间的间谍 -->
+<div class="level-card" id="sec-7-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 我们中间的间谍</span>
+        <h3>🕵️ 我们中间的间谍 —— 找出名字带 z 的人</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/7-5-1-1_spy_among_us.png" alt="扣哒世界 我们中间的间谍关卡 - koudashijie.com">
+            <div class="caption">图2：我们中间的间谍——农民里混着一个食人魔间谍，靠"名字里有字母 z"这条线索把他揪出来</div>
+        </div>
+
+        <h4>策略：用名字里的破绽揪出间谍</h4>
+        <p>本关的线索很妙：内门能撑很久，真正的威胁是混在农民里的<strong>间谍</strong>，而间谍的名字里藏着字母 <code>"z"</code>。策略就是<strong>逐一检查每个朋友的名字</strong>，谁的名字里带 <code>z</code>，谁就是间谍，把他喊出来揭穿；名字干净的就是真朋友。</p>
+
+        <h4>思路拆解：内外两层遍历</h4>
+        <p>算法是"双层遍历"。<strong>外层</strong>遍历所有朋友，取出每个人的名字 <code>friend.id</code>。<strong>内层</strong>（封装在 <code>letterInWord</code> 里）遍历这个名字的每个字符，判断有没有 <code>z</code>。补全 <code>letterInWord</code> 的关键就一句：当 <code>character == letter</code> 时 <code>return True</code>，让"找到即返回"的骨架完整起来。主循环再用它的布尔返回值做 <code>if</code> 分流：是间谍就喊 "is a spy!"，否则喊 "is a friend."。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：补全查找骨架 + 外层逐人检查</span>
+<span class="kw">def</span> <span class="fn">letterInWord</span><span class="punc">(</span>word<span class="punc">,</span> letter<span class="punc">):</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>word<span class="punc">)):</span>
+        <span class="kw">if</span> word<span class="punc">[</span>i<span class="punc">]</span> == letter<span class="punc">:</span>
+            <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">return</span> <span class="kw">False</span>
+
+spyLetter = <span class="str">"z"</span>
+<span class="kw">for</span> friend <span class="kw">in</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">():</span>
+    <span class="kw">if</span> <span class="fn">letterInWord</span><span class="punc">(</span>friend<span class="punc">.</span>id<span class="punc">,</span> spyLetter<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>friend<span class="punc">.</span>id + <span class="str">" is a spy!"</span><span class="punc">)</span>
+    <span class="cmt"># else: 喊出他是朋友</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">friend.id 就是名字：</span>每个单位的 <code>id</code> 是它的名字字符串。把 <code>friend.id</code> 传进 <code>letterInWord</code>，就是在检查"这个人的名字里有没有 z"。这也再次印证了本单元的核心——<strong>名字是字符串，字符串是数组，所以能一格一格地查</strong>。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">大小写要留意：</span><code>"z"</code> 和 <code>"Z"</code> 在计算机看来是<strong>不同</strong>的字符。若线索是小写 z，而某个名字里是大写 Z，直接比较是匹配不上的。本关按小写 z 匹配即可，但这个"大小写敏感"的坑值得记住，以后处理文本时常会遇到。
+        </div>
+    </div>
+</div>
+
+<!-- 以我的名义 -->
+<div class="level-card" id="sec-7-5-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 以我的名义</span>
+        
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+<!-- CC-PROTECTION:HIDDEN:ed96660c05:START anchor=h3-10 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ed96660c05">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:ed96660c05:END -->
+
+<h3>🗝️ 以我的名义 —— 用字符索引锁定宝箱</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/7-5-2-1_in_my_name.png" alt="扣哒世界 以我的名义关卡 - koudashijie.com">
+            <div class="caption">图3：以我的名义——Thoktar 名字里 z 所在的索引，正是藏有宝藏的宝箱编号，选错就前功尽弃</div>
+        </div>
+
+        <h4>策略：名字里的 z 指向正确宝箱</h4>
+        <p>本关只有一次机会：面前一排宝箱，只有一个装着宝藏，选错骷髅就会夺走奖品。破解的钥匙藏在 Thoktar 的名字里——<strong>正确宝箱的编号，等于字母 z 在 Thoktar 名字中的索引</strong>。所以策略是：算出 z 在名字里的位置，再据此走到对应的宝箱。</p>
+
+        <h4>思路拆解：返回索引 + 坐标换算</h4>
+        <p>核心是补全返回<strong>索引</strong>的 <code>letterIndex</code>。用带 <code>i</code> 的遍历逐个检查名字字符，一旦 <code>char == letter</code> 就 <code>return i</code>（这个数字就是宝箱编号）；找不到则返回默认值。拿到 <code>chestIndex</code> 后，关卡用一个线性公式把"编号"换算成"坐标"：<code>hero.moveXY(16 + chestIndex * 8, 36)</code>——每个宝箱间隔 8 格，从起点 16 开始，第 <code>chestIndex</code> 个箱子就在 <code>16 + 编号 × 8</code> 处。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：返回 z 的索引，再换算成宝箱坐标</span>
+<span class="kw">def</span> <span class="fn">letterIndex</span><span class="punc">(</span>word<span class="punc">,</span> letter<span class="punc">):</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>word<span class="punc">)):</span>
+        <span class="kw">if</span> word<span class="punc">[</span>i<span class="punc">]</span> == letter<span class="punc">:</span>
+            <span class="kw">return</span> i          <span class="cmt"># z 的位置 = 宝箱编号</span>
+    <span class="kw">return</span> <span class="num">0</span>                 <span class="cmt"># 没找到的默认值</span>
+
+ogreLetter = <span class="str">"z"</span>
+shaman = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findByType</span><span class="punc">(</span><span class="str">"thoktar"</span><span class="punc">)[</span><span class="num">0</span><span class="punc">]</span>
+chestIndex = <span class="fn">letterIndex</span><span class="punc">(</span>shaman<span class="punc">.</span>id<span class="punc">,</span> ogreLetter<span class="punc">)</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">16</span> + chestIndex * <span class="num">8</span><span class="punc">,</span> <span class="num">36</span><span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">"索引 → 坐标"的线性映射：</span><code>16 + chestIndex * 8</code> 是一个典型的线性换算：<code>16</code> 是第 0 号箱子的起始 x 坐标，<code>8</code> 是相邻箱子的间距。索引每加 1，坐标就右移 8。这种"用编号乘以间距再加起点"的公式，在把"第几个"变成"在哪里"时极其常用。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">默认值的选择要谨慎：</span>本关"找不到"时返回 <code>0</code>，意味着默认走向第 0 号箱子。但更严谨的写法常返回 <code>-1</code> 表示"没找到"，让调用方能明确区分"在第 0 位"和"根本不存在"。这一关因为 z 一定存在，返回什么默认值影响不大；但养成用 <code>-1</code> 表达"查无此项"的习惯，能避免日后把"没找到"误当成"在开头"。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 7.6 ==================== -->
+<div class="section-header" id="section-7-6">
+    <h2>7.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-7-6-1">7.6.1 字符遍历与查找的坑（Pitfalls）</h3>
+
+<h4>7.6.1.1 字符串相关的常见问题
+    <span class="en">Typical issues with string iteration</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec7_7-6-1-1_common_errors.png" alt="扣哒世界 字符遍历常见错误速查 - koudashijie.com">
+    <div class="caption">图4：混用 = 与 ==、返回布尔与索引搞反、忘写兜底返回、大小写不匹配，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>比较字符用了 <code>=</code>——判断字符相等要用 <code>==</code>，<code>=</code> 是赋值，写错会报错。</li>
+        <li>该返回索引却返回了 <code>True</code>——<code>letterIndex</code> 命中时要 <code>return i</code>（数字），不是 <code>return True</code>。</li>
+        <li>忘写循环后的兜底返回——没找到时若不 <code>return False</code> / <code>return -1</code>，函数会返回 <code>None</code>，逻辑出错。</li>
+        <li>把兜底 return 写进循环里——<code>return False</code> 应在 <code>for</code> <strong>之外</strong>，写在循环里会只查第一个字符就退出。</li>
+        <li>索引越界——用 <code>word[len(word)]</code> 会越界；合法索引最大是 <code>len(word) - 1</code>。</li>
+        <li>大小写不匹配——<code>"z"</code> 与 <code>"Z"</code> 是不同字符，需要时可先统一大小写再比较。</li>
+        <li>忘了取当前字符——写了 <code>for i in range(...)</code> 却直接比较 <code>i</code>，应先 <code>word[i]</code> 取出字符再比。</li>
+        <li>只关心"有没有"却用了带 i 的复杂写法——只判断存在时，<code>for c in word</code> 更简洁；要位置才用索引。</li>
+        <li>坐标换算公式记错——"编号→坐标"是 <code>起点 + 编号 × 间距</code>，别漏了起点或间距。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-7-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+<!-- CC-PROTECTION:HIDDEN:e0f4eb84df:START anchor=sec-7-6-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="e0f4eb84df">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC7-1629895A5A0A。</span>
+<!-- CC-PROTECTION:HIDDEN:e0f4eb84df:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你解锁了处理文字的能力！这一单元你领悟了一个关键观念——<strong>字符串就是字符的数组</strong>：可以用 <code>len()</code> 量长度、用 <code>word[i]</code> 按索引取字符、用 <code>for</code> 循环逐个遍历。你还掌握了查找算法的通用骨架"遍历比较、命中即返回、走完兜底"，并用它写出两个变体：<code>letterInWord</code> 返回<strong>布尔值</strong>（名字里有没有 z）帮你揪出间谍，<code>letterIndex</code> 返回<strong>索引</strong>（z 在第几位）帮你锁定藏宝的宝箱。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>字符串即数组</td><td>字符排成队，索引从 0 开始</td><td>两关</td></tr>
+            <tr><td>len 取长度</td><td>字符个数，遍历的边界</td><td>两关</td></tr>
+            <tr><td>word[i] 取字符</td><td>方括号加索引取出单个字符</td><td>两关</td></tr>
+            <tr><td>for 遍历字符串</td><td>range(len(word)) 逐位访问</td><td>两关</td></tr>
+            <tr><td>查找骨架</td><td>比较→命中即 return→走完兜底</td><td>两关</td></tr>
+            <tr><td>返回布尔</td><td>letterInWord：在不在</td><td>间谍</td></tr>
+            <tr><td>返回索引</td><td>letterIndex：在第几位</td><td>以我的名义</td></tr>
+            <tr><td>索引→坐标</td><td>起点 + 编号 × 间距</td><td>以我的名义</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把一个个名字拆成字符、从字里行间读出秘密的英雄，才是云峰之上真正明察秋毫的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🕵️🗝️
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第七单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

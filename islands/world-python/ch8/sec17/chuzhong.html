@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC17-55567B202B44">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十七单元：几何计算 · 周长面积与近似比较 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 几何图示 ===== */
+        .geo-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .geo-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC17-55567B202B44 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十七单元</div>
+
+    <a href="#section-17-1" class="nav-section">17.1 用代码算几何</a>
+    <a href="#sec-17-1-1" class="nav-sub">17.1.1 坐标与距离</a>
+    <a href="#sec-17-1-2" class="nav-sub">17.1.2 用函数封装公式</a>
+
+    <a href="#section-17-2" class="nav-section">17.2 矩形的周长与面积</a>
+    <a href="#sec-17-2-1" class="nav-sub">17.2.1 周长 (a+b)×2</a>
+    <a href="#sec-17-2-2" class="nav-sub">17.2.2 面积 a×b</a>
+
+    <a href="#section-17-3" class="nav-section">17.3 近似比较容错</a>
+    <a href="#sec-17-3-1" class="nav-sub">17.3.1 为何需要容错</a>
+    <a href="#sec-17-3-2" class="nav-sub">17.3.2 3% 误差算法</a>
+
+    <a href="#section-17-4" class="nav-section">17.4 坐标偏移算顶点</a>
+    <a href="#sec-17-4-1" class="nav-sub">17.4.1 正方形的性质</a>
+    <a href="#sec-17-4-2" class="nav-sub">17.4.2 用偏移求角点</a>
+
+    <a href="#section-17-5" class="nav-section">17.5 圆的面积与 π</a>
+    <a href="#sec-17-5-1" class="nav-sub">17.5.1 π×r² 公式</a>
+    <a href="#sec-17-5-2" class="nav-sub">17.5.2 Math.PI 常量</a>
+
+    <a href="#section-17-6" class="nav-section">17.6 实战关卡精讲</a>
+    <a href="#sec-17-6-1" class="nav-sub">17.6.1 矩形仪式</a>
+    <a href="#sec-17-6-2" class="nav-sub">17.6.2 方盾</a>
+    <a href="#sec-17-6-3" class="nav-sub">17.6.3 雪人面积</a>
+
+    <a href="#section-17-7" class="nav-section">17.7 常见错误</a>
+    <a href="#sec-17-7-1" class="nav-sub">17.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十七单元：几何计算 · 周长面积与近似比较</h1>
+    <div class="subtitle">Unit 17: Geometry — Perimeter, Area &amp; Approximate Comparison</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 矩形仪式 → 方盾 → 雪人面积</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 17.1 ==================== -->
+<div class="section-header" id="section-17-1">
+    <h2>17.1 用代码算几何</h2>
+    <div class="en-title">Doing Geometry with Code</div>
+</div>
+
+<p>欢迎来到计算机科学 5 的第十七单元！在这一单元里，几何不再是纸上的公式，而是拯救村庄的魔法。你要用代码计算矩形的周长与面积、用坐标偏移把圣骑士摆成正方形、用圆面积公式为天选之子注入呐喊之力。更重要的是，你会遇到一个真实编程中无处不在的难题——<strong>计算机对小数的处理并不完美</strong>，于是你将学到专业程序员的应对之道：<span class="keyword">近似比较（approximate comparison）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>把几何公式写成 Python 函数——矩形周长 <code>(a+b)×2</code>、矩形面积 <code>a×b</code>、圆面积 <code>π×r²</code>；用<strong>坐标偏移</strong>由已知角点算出正方形的其余顶点；并用<strong>3% 容差</strong>的 <code>almostEqual</code> 函数解决浮点数"几乎相等但不完全相等"的比较难题。
+</div>
+
+<h3 id="sec-17-1-1">17.1.1 坐标与距离（Coordinates and Distance）</h3>
+
+<h4>17.1.1.1 位置是 (x, y)，距离用 distanceTo
+    <span class="en">Positions are (x, y); measure with distanceTo</span>
+</h4>
+
+<p>游戏世界里每个单位都有一个位置 <code>pos</code>，包含横坐标 <code>pos.x</code> 和纵坐标 <code>pos.y</code>。两点之间的距离可以直接用 <code>distanceTo</code> 测量。本单元的几何计算，正是建立在"用坐标表示位置、用距离表示边长"之上——比如把两个圣骑士之间的距离当作矩形的一条边。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用某个单位作为测量的"基准点"</span>
+base <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span><span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">())</span>
+
+<span class="cmt"># 测量基准点到两个圣骑士的距离，作为矩形的两条边</span>
+sideSN <span class="punc">=</span> base<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span><span class="str">"Femae"</span><span class="punc">)</span>      <span class="cmt"># 南北方向的边</span>
+sideWE <span class="punc">=</span> base<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span><span class="str">"Illumina"</span><span class="punc">)</span>  <span class="cmt"># 东西方向的边</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:ef60469b4c:START anchor=sec-17-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="ef60469b4c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜陈之然，看她如何用 扣哒世界 带零基础小白轻松入门编程。</span>
+</aside>
+<!-- CC-PROTECTION:AD:ef60469b4c:END -->
+
+<h3 id="sec-17-1-2">17.1.2 用函数封装公式（Wrapping Formulas in Functions）</h3>
+
+<h4>17.1.2.1 一个公式，一个函数
+    <span class="en">One formula, one function</span>
+</h4>
+
+<p>回忆第一单元学的函数——把"做某件事"的代码打包命名。几何公式是函数的绝佳用武之地：把"算周长"写成 <code>perimeter(a, b)</code>、"算面积"写成 <code>area(a, b)</code>，之后需要时喊一声名字、传入边长，就能拿到结果。这让主循环里的代码清晰得像数学公式本身。别忘了函数要用 <code>return</code> 把算出的结果<strong>返回</strong>出来。</p>
+
+<div class="info-box">
+    <span class="info-label">return 才有结果：</span>几何函数光算出值还不够，必须用 <code>return</code> 把结果送回调用处，否则函数默认返回 <code>None</code>。比如 <code>return side1 * side2</code>——算出面积并交回去。
+</div>
+
+<!-- ==================== 17.2 ==================== -->
+<div class="section-header" id="section-17-2">
+    <h2>17.2 矩形的周长与面积</h2>
+    <div class="en-title">Perimeter and Area of a Rectangle</div>
+</div>
+
+<h3 id="sec-17-2-1">17.2.1 周长 (a+b)×2（Perimeter）</h3>
+
+<h4>17.2.1.1 四条边加起来
+    <span class="en">Sum of all four sides</span>
+</h4>
+
+<p>矩形有四条边，对边相等：两条长为 <code>a</code>、两条长为 <code>b</code>。所以周长就是四条边的总和 <code>a + a + b + b</code>，可以更简洁地写成 <code>a×2 + b×2</code>，或者提取公因数写成 <code>(a + b)×2</code>——三种写法完全等价，选你觉得最清晰的即可。关卡"矩形仪式"要求你补全这个函数。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 周长 = 四条边之和</span>
+<span class="kw">def</span> <span class="fn">perimeter</span><span class="punc">(</span>side1<span class="punc">,</span> side2<span class="punc">):</span>
+    <span class="kw">return</span> side1 <span class="punc">*</span> <span class="num">2</span> <span class="punc">+</span> side2 <span class="punc">*</span> <span class="num">2</span>
+    <span class="cmt"># 等价写法：return (side1 + side2) * 2</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-17-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+
+<h3 id="sec-17-2-2">17.2.2 面积 a×b（Area）</h3>
+
+<h4>17.2.2.1 相邻两边相乘
+    <span class="en">Multiply two adjacent sides</span>
+</h4>
+
+<p>矩形的面积是两条<strong>相邻</strong>边的乘积 <code>a × b</code>。注意是"相邻"两边（一长一宽），不是两条对边。这个公式最简单，一行 <code>return</code> 就够了。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 面积 = 相邻两边相乘</span>
+<span class="kw">def</span> <span class="fn">area</span><span class="punc">(</span>side1<span class="punc">,</span> side2<span class="punc">):</span>
+    <span class="kw">return</span> side1 <span class="punc">*</span> side2</pre>
+</div>
+
+<div class="geo-viz">
+    <svg viewBox="0 0 440 190" width="440" role="img" aria-label="矩形周长与面积">
+        <text x="220" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">矩形：周长 (a+b)×2，面积 a×b</text>
+        <rect x="110" y="55" width="220" height="100" rx="4" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2.5"/>
+        <text x="220" y="112" text-anchor="middle" fill="#2A5A85" font-family="sans-serif" font-size="13">面积 = a × b</text>
+        <!-- a 边（宽） -->
+        <text x="220" y="48" text-anchor="middle" fill="#bd7415" font-family="monospace" font-size="13">a</text>
+        <text x="220" y="175" text-anchor="middle" fill="#bd7415" font-family="monospace" font-size="13">a</text>
+        <!-- b 边（高） -->
+        <text x="95" y="110" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="13">b</text>
+        <text x="345" y="110" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="13">b</text>
+    </svg>
+</div>
+
+<div class="compare-2col">
+    <div>
+        <h5>周长 perimeter</h5>
+        <div class="code-block">
+<pre><span class="kw">def</span> <span class="fn">perimeter</span><span class="punc">(</span>a<span class="punc">,</span> b<span class="punc">):</span>
+    <span class="kw">return</span> a<span class="punc">*</span><span class="num">2</span> <span class="punc">+</span> b<span class="punc">*</span><span class="num">2</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>面积 area</h5>
+        <div class="code-block">
+<pre><span class="kw">def</span> <span class="fn">area</span><span class="punc">(</span>a<span class="punc">,</span> b<span class="punc">):</span>
+    <span class="kw">return</span> a <span class="punc">*</span> b</pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 17.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:32ec340449:START anchor=sec-17-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="32ec340449">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>知识体系与图鉴大全，尽在信息页：<a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:32ec340449:END -->
+
+<div class="section-header" id="section-17-3">
+    <h2>17.3 近似比较容错</h2>
+    <div class="en-title">Approximate Comparison (Tolerance)</div>
+</div>
+
+<h3 id="sec-17-3-1">17.3.1 为何需要容错（Why Tolerance Is Needed）</h3>
+
+<h4>17.3.1.1 计算机算不准小数
+    <span class="en">Computers can't represent decimals exactly</span>
+</h4>
+
+<p>关卡"矩形仪式"点破了一个关键真相："计算机很难处理精确的数字。"这有两层原因：其一，计算机用二进制存储小数，很多十进制小数（如 0.1）根本无法精确表示，运算后会产生微小误差（这叫<strong>浮点误差</strong>）；其二，圣骑士在不停移动，边长时刻在变，几乎不可能刚好卡在某个精确值上。如果你用 <code>==</code> 去判断"面积是否等于 660"，可能永远也等不到那一刻。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🎯 精确相等 vs 差不多就行</div>
+    要求你"把水倒到正好 500.000000 毫升"几乎不可能——手一抖就多了或少了。但"倒到 500 毫升左右，误差别超过 3%"就很现实。程序判断移动中的目标值时也一样：<strong>用一个容差范围代替精确相等</strong>，才切合实际。
+</div>
+
+<h3 id="sec-17-3-2">17.3.2 3% 误差算法（The 3% Tolerance Algorithm）</h3>
+
+<h4>17.3.2.1 落在 0.97 倍到 1.03 倍之间就算相等
+    <span class="en">Within 0.97× to 1.03× counts as equal</span>
+</h4>
+
+<p>解决办法是写一个"近似相等"函数 <code>almostEqual</code>。它不要求两个值分毫不差，而是检查一个值是否落在另一个值的 <strong>97% 到 103%</strong> 区间内——也就是允许上下 3% 的误差。关卡给出的核心判断是：<code>valueA &gt; 0.97 * valueB and valueA &lt; 1.03 * valueB</code>。两个条件用 <code>and</code> 连接，必须同时满足才算"几乎相等"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 在 3% 误差内比较 A 和 B</span>
+<span class="kw">def</span> <span class="fn">almostEqual</span><span class="punc">(</span>valueA<span class="punc">,</span> valueB<span class="punc">):</span>
+    <span class="cmt"># A 大于 B 的 0.97 倍，且小于 B 的 1.03 倍</span>
+    <span class="kw">if</span> valueA <span class="punc">&gt;</span> <span class="num">0.97</span> <span class="punc">*</span> valueB <span class="kw">and</span> valueA <span class="punc">&lt;</span> <span class="num">1.03</span> <span class="punc">*</span> valueB<span class="punc">:</span>
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="cmt"># 否则退回到精确相等判断</span>
+    <span class="kw">return</span> valueA <span class="punc">==</span> valueB</pre>
+</div>
+
+<div class="geo-viz">
+    <svg viewBox="0 0 480 130" width="480" role="img" aria-label="3% 容差区间">
+        <text x="240" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">3% 容差：落在绿色区间就算"几乎相等"</text>
+        <!-- 数轴 -->
+        <line x1="40" y1="75" x2="440" y2="75" stroke="#7d94a3" stroke-width="1.5"/>
+        <!-- 容差区间 -->
+        <rect x="170" y="60" width="140" height="30" rx="4" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+        <line x1="240" y1="55" x2="240" y2="95" stroke="#2A5A85" stroke-width="2"/>
+        <text x="240" y="50" text-anchor="middle" fill="#2A5A85" font-family="monospace" font-size="11">目标值 B</text>
+        <text x="170" y="112" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="11">0.97×B</text>
+        <text x="310" y="112" text-anchor="middle" fill="#2f7a45" font-family="monospace" font-size="11">1.03×B</text>
+        <!-- 区间外 -->
+        <text x="100" y="112" text-anchor="middle" fill="#C0453B" font-family="sans-serif" font-size="10">太小 ✗</text>
+        <text x="385" y="112" text-anchor="middle" fill="#C0453B" font-family="sans-serif" font-size="10">太大 ✗</text>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">另一种等价写法：</span>关卡还给了用 <code>min</code>/<code>max</code> 的思路：先算出 <code>min = numberA * 0.97</code> 和 <code>max = numberA * 1.03</code>，再判断 <code>numberB</code> 是否 <code>&gt; min and &lt; max</code>。本质完全一样——都是"围绕目标值画一个 ±3% 的窗口，看另一个值有没有落进去"。
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">别用 == 比较小数：</span>这是编程里的经典陷阱。由于浮点误差，<code>0.1 + 0.2 == 0.3</code> 在很多语言里竟然是 <code>False</code>！所以凡是涉及小数（尤其是距离、面积这类计算结果）的相等判断，都应该用"近似相等"而不是 <code>==</code>。
+</div>
+
+<!-- ==================== 17.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:0daea4aa67:START anchor=sec-17-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="0daea4aa67">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>关注抖音 扣哒世界 玩游戏学编程，用 CoCo 带你走进代码世界。</span>
+</aside>
+<!-- CC-PROTECTION:AD:0daea4aa67:END -->
+<!-- CC-PROTECTION:HIDDEN:d947bfad48:START anchor=sec-17-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="d947bfad48">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:d947bfad48:END -->
+
+<div class="section-header" id="section-17-4">
+    <h2>17.4 坐标偏移算顶点</h2>
+    <div class="en-title">Computing Vertices by Coordinate Offset</div>
+</div>
+
+<h3 id="sec-17-4-1">17.4.1 正方形的性质（Properties of a Square）</h3>
+
+<h4>17.4.1.1 邻角共享坐标、四边等长
+    <span class="en">Adjacent corners share a coordinate; all sides equal</span>
+</h4>
+
+<p>关卡"方盾"要你把圣骑士摆成正方形。要算出顶点坐标，先要吃透正方形的两条性质："正方形的角与邻近的角共享 x 或 y 坐标"，以及"正方形是等边的"。也就是说，如果左上角在 <code>(x, y)</code>，右上角与它共享同一个 <code>y</code>（只是 <code>x</code> 增加了一个边长）；左下角与它共享同一个 <code>x</code>（只是 <code>y</code> 变化了一个边长）。</p>
+
+<div class="geo-viz">
+    <svg viewBox="0 0 400 220" width="400" role="img" aria-label="正方形顶点坐标关系">
+        <text x="200" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">邻角共享一个坐标，相差一个 sideLength</text>
+        <rect x="120" y="50" width="130" height="130" rx="3" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2"/>
+        <!-- 四角 -->
+        <circle cx="120" cy="50" r="6" fill="#2f7a45"/><text x="90" y="46" fill="#2f7a45" font-size="10" font-family="sans-serif">左上(x,y)</text>
+        <circle cx="250" cy="50" r="6" fill="#3E7CB1"/><text x="255" y="46" fill="#3E7CB1" font-size="10" font-family="sans-serif">右上(x+s, y)</text>
+        <circle cx="120" cy="180" r="6" fill="#E0912F"/><text x="55" y="200" fill="#bd7415" font-size="10" font-family="sans-serif">左下(x, y-s)</text>
+        <circle cx="250" cy="180" r="6" fill="#C0453B"/><text x="255" y="200" fill="#9e352c" font-size="10" font-family="sans-serif">右下(x+s, y-s)</text>
+        <text x="185" y="120" text-anchor="middle" fill="#4d6373" font-family="monospace" font-size="11">s = sideLength</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9d3b42c181:START anchor=sec-17-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9d3b42c181">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，有人称它为年度最佳发明之一，零基础也能玩，别怕——英雄都是从不会走路开始的。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9d3b42c181:END -->
+
+<h3 id="sec-17-4-2">17.4.2 用偏移求角点（Finding Corners via Offset）</h3>
+
+<h4>17.4.2.1 已知一角，加减边长得其余角
+    <span class="en">From one known corner, add/subtract the side length</span>
+</h4>
+
+<p>核心算法叫<strong>坐标偏移</strong>：以一个已知角点（比如左上角 <code>celadia</code>）为基准，通过给它的 <code>x</code> 或 <code>y</code> 加减一个 <code>sideLength</code>，就能算出其他角点的位置。在"方盾"里，两位圣骑士已在上方两角，你要算出下方两角：左下角与左上角<strong>共享 x</strong>、y 减去边长；右下角的 x 是左上角 x 加边长、y 同样减去边长。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 左下角：x 与左上角相同，y 向下偏移一个边长</span>
+leftBottom <span class="punc">=</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span>
+              <span class="str">"y"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">-</span> sideLength<span class="punc">}</span>
+
+<span class="cmt"># 右下角：x 偏移一个边长，y 也向下偏移一个边长</span>
+rightBottom <span class="punc">=</span> <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">+</span> sideLength<span class="punc">,</span>
+               <span class="str">"y"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">-</span> sideLength<span class="punc">}</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">边长哪里来：</span>正方形四边等长，所以只要量出上边两角的距离，就得到了边长：<code>sideLength = celadia.distanceTo(dedalia)</code>。这个边长既决定了正方形有多大，也是所有偏移量的来源。
+</div>
+
+<!-- ==================== 17.5 ==================== -->
+<div class="section-header" id="section-17-5">
+    <h2>17.5 圆的面积与 π</h2>
+    <div class="en-title">Circle Area and π</div>
+</div>
+
+<h3 id="sec-17-5-1">17.5.1 π×r² 公式（The πr² Formula）</h3>
+
+<h4>17.5.1.1 半径的平方乘以 π
+    <span class="en">Pi times radius squared</span>
+</h4>
+
+<p>关卡"雪人面积"用到圆面积公式：半径为 <code>r</code> 的圆，面积等于 <code>π × r × r</code>（即 <code>π×r²</code>）。在游戏里，天选之子呐喊的力度正好等于这个圆的面积，而半径就是他到最近敌人的距离。写成代码就是把半径乘两次、再乘以 π。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 半径 = 天选之子到最近敌人的距离</span>
+radius <span class="punc">=</span> chosen<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>chosen<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">())</span>
+
+<span class="cmt"># 圆的面积 = π × r × r</span>
+area <span class="punc">=</span> radius <span class="punc">*</span> radius <span class="punc">*</span> <span class="obj">Math</span><span class="punc">.</span>PI</pre>
+</div>
+
+<div class="geo-viz">
+    <svg viewBox="0 0 400 180" width="400" role="img" aria-label="圆的面积公式">
+        <text x="200" y="22" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">圆面积 = π × r²</text>
+        <circle cx="150" cy="105" r="55" fill="#E4EFF7" stroke="#3E7CB1" stroke-width="2.5"/>
+        <line x1="150" y1="105" x2="205" y2="105" stroke="#C0453B" stroke-width="2"/>
+        <circle cx="150" cy="105" r="4" fill="#2A5A85"/>
+        <text x="178" y="98" text-anchor="middle" fill="#9e352c" font-family="monospace" font-size="13">r</text>
+        <text x="300" y="100" text-anchor="middle" fill="#2A5A85" font-family="monospace" font-size="14">area =</text>
+        <text x="310" y="125" text-anchor="middle" fill="#bd7415" font-family="monospace" font-size="14">π·r·r</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:7346861dd8:START anchor=sec-17-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="7346861dd8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快对话。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7346861dd8:END -->
+
+<h3 id="sec-17-5-2">17.5.2 Math.PI 常量（The Math.PI Constant）</h3>
+
+<h4>17.5.2.1 内置的圆周率，不用自己写
+    <span class="en">A built-in constant for pi</span>
+</h4>
+
+<p>π 是一个无限不循环小数，约等于 3.14159……你不需要自己敲一长串数字，游戏提供了内置常量 <code>Math.PI</code>，它就代表这个精确的圆周率。用它比手写 <code>3.14</code> 更准确、更清晰。关卡说明也强调：π"等于任何圆周的周长与其直径的比值"，是数学中最著名的常数之一。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 直接用内置常量 Math.PI，别手写 3.14</span>
+area <span class="punc">=</span> <span class="obj">Math</span><span class="punc">.</span>PI <span class="punc">*</span> radius <span class="punc">*</span> radius   <span class="cmt"># 更精确</span>
+
+<span class="cmt"># hero.say(Math.PI)  # 大约 3.141592653589793</span></pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">常量 vs 变量：</span><code>Math.PI</code> 是一个"常量"——它的值固定不变，永远是圆周率。用常量代替写死的数字（"魔法数字"），能让代码更易读、更不容易出错。这是良好的编程习惯。
+</div>
+
+<!-- ==================== 17.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-17-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+<!-- CC-PROTECTION:HIDDEN:fd9cc437ae:START anchor=sec-17-5-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="fd9cc437ae">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:fd9cc437ae:END -->
+
+<div class="section-header" id="section-17-6">
+    <h2>17.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 矩形仪式 -->
+<div class="level-card" id="sec-17-6-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 矩形仪式</span>
+        <h3>📐 矩形仪式 —— 周长面积 + 近似比较</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/17-6-1-1_rectangle_ritual.png" alt="扣哒世界 矩形仪式关卡 - koudashijie.com">
+            <div class="caption">图2：矩形仪式——四位圣骑士不断移动，当他们围出的矩形周长与面积都接近目标值时喊出咒语 VENITE</div>
+        </div>
+
+        <h4>策略：持续监测，近似达标就念咒</h4>
+        <p>本关是本单元的核心关。四位圣骑士会不停移动，你要在他们恰好围出<strong>指定周长（104）和指定面积（660）</strong>的矩形时喊出 "VENITE!" 召唤守护者。由于骑士一直在动、且计算机算不准小数，精确相等几乎不可能，所以策略是：<strong>在 while 循环里持续测量、用近似比较判断，一旦周长和面积都落在 3% 误差内就立刻念咒</strong>。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法分三部分。第一，<strong>补全两个几何函数</strong>：<code>perimeter</code> 返回 <code>side1*2 + side2*2</code>，<code>area</code> 返回 <code>side1 * side2</code>。第二，<strong>在循环里实时计算</strong>：每一帧用 <code>distanceTo</code> 量出当前两条边长 <code>sideSN</code>、<code>sideWE</code>，代入函数得到 <code>currentPerimeter</code> 和 <code>currentArea</code>。第三，<strong>用近似比较双重判断</strong>：同时用 <code>almostEqual</code> 检查当前面积接近目标面积、当前周长接近目标周长，两个条件用 <code>and</code> 连接，都满足才 <code>say("VENITE!")</code> 并 <code>break</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：循环监测 + 近似双重判断</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    sideSN <span class="punc">=</span> base<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span><span class="str">"Femae"</span><span class="punc">)</span>
+    sideWE <span class="punc">=</span> base<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span><span class="str">"Illumina"</span><span class="punc">)</span>
+    currentPerimeter <span class="punc">=</span> <span class="fn">perimeter</span><span class="punc">(</span>sideSN<span class="punc">,</span> sideWE<span class="punc">)</span>
+    currentArea <span class="punc">=</span> <span class="fn">area</span><span class="punc">(</span>sideSN<span class="punc">,</span> sideWE<span class="punc">)</span>
+    <span class="kw">if</span> <span class="fn">almostEqual</span><span class="punc">(</span>currentArea<span class="punc">,</span> requiredArea<span class="punc">)</span> <span class="kw">and</span> \
+       <span class="fn">almostEqual</span><span class="punc">(</span>currentPerimeter<span class="punc">,</span> requiredPerimeter<span class="punc">):</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="str">"VENITE!"</span><span class="punc">)</span>
+        <span class="kw">break</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么两个条件都要查：</span>只有周长对、或只有面积对都不够——一个瘦长的矩形和一个正方形可能面积相同但周长不同。<strong>周长和面积同时达标</strong>，才能唯一确定矩形的形状，所以必须用 <code>and</code> 把两个 <code>almostEqual</code> 连起来。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别用 == 判断：</span>如果把 <code>almostEqual</code> 换成 <code>currentArea == 660</code>，由于骑士移动和浮点误差，这个条件几乎永远为假，程序会陷入死循环、咒语永远念不出来。这正是本关设计 <code>almostEqual</code> 的用意。
+        </div>
+    </div>
+</div>
+
+<!-- 方盾 -->
+<div class="level-card" id="sec-17-6-2">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 方盾</span>
+        <h3>🛡️ 方盾 —— 坐标偏移求正方形顶点</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/17-6-2-1_square_shield.png" alt="扣哒世界 方盾关卡 - koudashijie.com">
+            <div class="caption">图3：方盾——已知上方两角，用坐标偏移算出下方两角，命令两位圣骑士就位形成方阵挡住雪人</div>
+        </div>
+
+        <h4>策略：由已知两角补全另外两角</h4>
+        <p>本关要把四位圣骑士摆成正方形，用方阵挡住有侵略性的野雪人。其中 Celadia（左上角）和 Dedalia（右上角）已就位，你要计算并命令 Vaelia（左下角）和 Illumina（右下角）移动到正确位置。策略核心是<strong>利用正方形的坐标规律，从已知角点偏移出未知角点</strong>。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法分两步。第一，<strong>求边长</strong>：上方两角的距离就是边长，<code>sideLength = celadia.distanceTo(dedalia)</code>。第二，<strong>用坐标偏移算下方两角</strong>并命令移动：左下角与左上角 Celadia <strong>共享 x</strong>，y 向下偏移一个边长（<code>y - sideLength</code>）；右下角的 x 在 Celadia 基础上加一个边长（<code>x + sideLength</code>），y 同样减一个边长。用 <code>hero.command(单位, "move", 目标坐标字典)</code> 把两位圣骑士派过去。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：坐标偏移 + 命令移动</span>
+sideLength <span class="punc">=</span> celadia<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>dedalia<span class="punc">)</span>
+
+<span class="cmt"># Vaelia → 左下角（x 与左上角相同，y 减边长）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>vaelia<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span>
+    <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">-</span> sideLength<span class="punc">})</span>
+
+<span class="cmt"># Illumina → 右下角（x 加边长，y 减边长）</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>illumina<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span>
+    <span class="punc">{</span><span class="str">"x"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>x <span class="punc">+</span> sideLength<span class="punc">,</span> <span class="str">"y"</span><span class="punc">:</span> celadia<span class="punc">.</span>pos<span class="punc">.</span>y <span class="punc">-</span> sideLength<span class="punc">})</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">findByName 按名字取单位：</span>本关先用一个 <code>findByName</code> 辅助函数遍历 <code>friends</code>、按 <code>id</code> 找到指定名字的圣骑士。这样才能精确拿到 Celadia、Vaelia 等特定单位，再对它们分别下命令。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">y 是减不是加：</span>本关下方角点的 y 用的是<strong>减</strong>边长（<code>y - sideLength</code>），因为在这张地图的坐标系里"下方"对应更小的 y 值。方向的正负取决于坐标系，动手时要根据实际地图确认是加还是减。
+        </div>
+    </div>
+</div>
+
+<!-- 雪人面积 -->
+<div class="level-card" id="sec-17-6-3">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 雪人面积</span>
+        
+<!-- CC-PROTECTION:AD:9dfa595e04:START anchor=h3-12 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="9dfa595e04">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，玩家已累计编写超过 10 亿行真实代码，编程也能很酷。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9dfa595e04:END -->
+<!-- CC-PROTECTION:HIDDEN:b91aee9baa:START anchor=h3-12 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b91aee9baa">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC17-55567B202B44。</span>
+<!-- CC-PROTECTION:HIDDEN:b91aee9baa:END -->
+
+<h3>⭕ 雪人面积 —— 圆面积公式与 Math.PI</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/17-6-3-1_yeti_area.png" alt="扣哒世界 雪人面积关卡 - koudashijie.com">
+            <div class="caption">图4：雪人面积——以到最近敌人的距离为半径算出圆的面积，作为天选之子呐喊的力度，再投入战斗</div>
+        </div>
+
+        <h4>策略：算出圆面积作为呐喊力度，再战斗</h4>
+        <p>本关是本单元的收尾关，聚焦圆面积公式。天选之子能用呐喊震晕雪人，但<strong>呐喊的力度必须等于一个圆的面积</strong>，而这个圆的半径就是他到最近敌人的距离。策略很直接：先算出圆面积并"说"出来（作为呐喊力度），然后进入战斗循环持续攻击。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法分两部分。第一，<strong>计算并说出圆面积</strong>：用 <code>distanceTo(findNearestEnemy())</code> 得到半径 <code>radius</code>，代入圆面积公式 <code>area = radius * radius * Math.PI</code>，再用 <code>hero.say(area)</code> 说出来。第二，<strong>投入战斗</strong>：用循环不断找到最近敌人并攻击，直到敌人被击败——"不要只站在那，开始战斗吧！"</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：算圆面积并说出，再进入战斗</span>
+chosen <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()[</span><span class="num">0</span><span class="punc">]</span>
+radius <span class="punc">=</span> chosen<span class="punc">.</span><span class="fn">distanceTo</span><span class="punc">(</span>chosen<span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">())</span>
+area <span class="punc">=</span> radius <span class="punc">*</span> radius <span class="punc">*</span> <span class="obj">Math</span><span class="punc">.</span>PI   <span class="cmt"># π×r²</span>
+<span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>area<span class="punc">)</span>                            <span class="cmt"># 说出力度值</span>
+
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    enemy <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findNearestEnemy</span><span class="punc">()</span>
+    <span class="kw">while</span> enemy <span class="kw">and</span> enemy<span class="punc">.</span>health <span class="punc">&gt;</span> <span class="num">0</span><span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">attack</span><span class="punc">(</span>enemy<span class="punc">)</span></pre>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">radius*radius 就是 r²：</span>代码里没有专门的"平方"符号时，把半径乘两次 <code>radius * radius</code> 就等于 <code>r²</code>。乘法顺序不影响结果，写成 <code>Math.PI * radius * radius</code> 也完全一样。
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">先说力度再战斗：</span>本关要先把算出的面积 <code>say</code> 出来（这一步是"注入呐喊力度"的关键），之后才进入攻击循环。顺序不能乱——没说出正确力度，呐喊就不会生效。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 17.7 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<div class="section-header" id="section-17-7">
+    <h2>17.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-17-7-1">17.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>17.7.1.1 几何计算的典型问题
+    <span class="en">Typical issues with geometry code</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec17_17-7-1-1_common_errors.png" alt="扣哒世界 几何计算常见错误速查 - koudashijie.com">
+    <div class="caption">图5：用 == 比小数、忘写 return、坐标偏移方向错、手写 3.14 代替 π，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>用 <code>==</code> 比较小数——距离、面积等浮点结果几乎不可能精确相等，必须用近似比较 <code>almostEqual</code>。</li>
+        <li>函数忘写 return——<code>perimeter</code>、<code>area</code> 算完必须 <code>return</code> 结果，否则返回 <code>None</code>，后续计算全错。</li>
+        <li>周长面积公式混淆——周长是 <code>(a+b)×2</code>（相加），面积是 <code>a×b</code>（相乘），别把加号乘号搞反。</li>
+        <li>只判断一个条件——矩形要周长和面积<strong>同时</strong>达标，两个 <code>almostEqual</code> 必须用 <code>and</code> 连接。</li>
+        <li>坐标偏移方向错——下方角点是 <code>y - sideLength</code> 还是 <code>y + sideLength</code> 取决于坐标系，方向弄反正方形就歪了。</li>
+        <li>邻角坐标没对齐——左下角必须与左上角<strong>共享 x</strong>，写错就形不成正方形。</li>
+        <li>手写 3.14 代替 π——用内置常量 <code>Math.PI</code> 更精确、更清晰，别自己敲近似值。</li>
+        <li>把 <code>radius * radius</code> 写成 <code>radius * 2</code>——平方是自乘一次（<code>r×r</code>），不是乘以 2。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你把数学几何变成了实实在在的代码魔法！这一单元你学会了用函数封装几何公式——矩形周长 <code>(a+b)×2</code>、矩形面积 <code>a×b</code>、圆面积 <code>π×r²</code>；掌握了一个真实编程中至关重要的技巧——用 <strong>3% 容差的近似比较</strong>解决浮点数与移动目标"无法精确相等"的难题；还学会了用<strong>坐标偏移</strong>从已知角点推算正方形的其余顶点，并认识了内置常量 <code>Math.PI</code>。在"矩形仪式、方盾、雪人面积"三关里，你把几何知识、函数封装和条件判断融会贯通。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>矩形周长</td><td><code>(a+b)×2</code> 或 <code>a*2+b*2</code></td><td>矩形仪式</td></tr>
+            <tr><td>矩形面积</td><td>相邻两边相乘 <code>a×b</code></td><td>矩形仪式</td></tr>
+            <tr><td>近似比较容错</td><td>落在 0.97~1.03 倍即视为相等</td><td>矩形仪式</td></tr>
+            <tr><td>避免 == 比小数</td><td>浮点误差，用 almostEqual</td><td>矩形仪式</td></tr>
+            <tr><td>正方形性质</td><td>邻角共享坐标、四边等长</td><td>方盾</td></tr>
+            <tr><td>坐标偏移算顶点</td><td>已知角 ± sideLength 得其余角</td><td>方盾</td></tr>
+            <tr><td>圆的面积</td><td><code>π × r × r</code></td><td>雪人面积</td></tr>
+            <tr><td>Math.PI 常量</td><td>内置圆周率，胜过手写 3.14</td><td>雪人面积</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把几何公式写成代码、用容差驯服不精确的小数、用坐标偏移精准布阵的英雄，才是云峰之上真正睿智的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️📐⭕</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=h3-15 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十七单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC10-2CB3FC9BE2C7">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十单元：过滤筛选 · 把数据分门别类 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 逐步追踪表格 ===== */
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .trace-table th, .trace-table td {
+            border: 1px solid var(--border);
+            padding: 8px 6px;
+        }
+        .trace-table thead { background: var(--primary); color: #fff; }
+        .trace-table .cell-gold { background: #fdf3e0; color: #bd7415; font-weight: 700; }
+        .trace-table .cell-silver { background: #eef2f5; color: #5a6b78; font-weight: 700; }
+        .trace-table .cell-bronze { background: #f6ece2; color: #9e6b3a; font-weight: 700; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC10-2CB3FC9BE2C7 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十单元</div>
+
+    <a href="#section-10-1" class="nav-section">10.1 什么是过滤筛选</a>
+    <a href="#sec-10-1-1" class="nav-sub">10.1.1 从"一堆"到"分类"</a>
+    <a href="#sec-10-1-2" class="nav-sub">10.1.2 过滤的三要素</a>
+
+    <a href="#section-10-2" class="nav-section">10.2 遍历 + 条件筛选</a>
+    <a href="#sec-10-2-1" class="nav-sub">10.2.1 遍历原数组</a>
+    <a href="#sec-10-2-2" class="nav-sub">10.2.2 用 if 判断 value</a>
+
+    <a href="#section-10-3" class="nav-section">10.3 append 追加</a>
+    <a href="#sec-10-3-1" class="nav-sub">10.3.1 新建空数组</a>
+    <a href="#sec-10-3-2" class="nav-sub">10.3.2 append 与 push</a>
+
+    <a href="#section-10-4" class="nav-section">10.4 多路分类</a>
+    <a href="#sec-10-4-1" class="nav-sub">10.4.1 if/elif 分流</a>
+    <a href="#sec-10-4-2" class="nav-sub">10.4.2 一次遍历分三类</a>
+
+    <a href="#section-10-5" class="nav-section">10.5 把数组传给函数</a>
+    <a href="#sec-10-5-1" class="nav-sub">10.5.1 数组作参数</a>
+    <a href="#sec-10-5-2" class="nav-sub">10.5.2 字典管理单位</a>
+
+    <a href="#section-10-6" class="nav-section">10.6 实战关卡精讲</a>
+    <a href="#sec-10-6-1" class="nav-sub">10.6.1 资源谷</a>
+
+    <a href="#section-10-7" class="nav-section">10.7 常见错误</a>
+    <a href="#sec-10-7-1" class="nav-sub">10.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十单元：过滤筛选 · 把数据分门别类</h1>
+    <div class="subtitle">Unit 10: Filtering — Sorting Data into Buckets</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 第 16 关：资源谷</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 10.1 ==================== -->
+<div class="section-header" id="section-10-1">
+    <h2>10.1 什么是过滤筛选</h2>
+    <div class="en-title">What Is Filtering</div>
+</div>
+
+<p>黄金峡谷、银色沼泽、青铜盆地——三座山谷里散落着不同价值的硬币。你手下有三个农民，每人只能进自己那片区域，而每个区域只产出一种价值的硬币。麻烦来了：<code>hero.findItems()</code> 一次性把<strong>所有</strong>硬币都返回给你，混在同一个数组里。如果直接让农民去捡"最近的硬币"，他们会瞄准错误的目标、乱作一团。你需要一件新工具，把这一大堆硬币按价值<strong>分拣</strong>成三堆，再各自交给对应的农民——这就是本单元的主题：<span class="keyword">过滤筛选（filtering）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>过滤就是"从一个大数组里，按某个条件挑出符合的元素，放进新数组"。你将学会<strong>遍历</strong>原数组、用 <code>if</code> 检查每个元素的属性（如 <code>item.value</code>）、用 <code>append()</code> 把合格的元素<strong>追加</strong>到新数组，再用 <code>if/elif</code> 一次遍历把硬币<strong>分成金、银、铜三类</strong>，最后把每个分类数组<strong>作为参数传给函数</strong>去处理。这是数据处理和 AI 里最基础、最常用的操作之一。
+</div>
+
+<h3 id="sec-10-1-1">10.1.1 从"一堆"到"分类"（From a Pile to Buckets）</h3>
+
+<h4>10.1.1.1 过滤 = 保留或去除某些元素
+    <span class="en">Filtering keeps or removes elements</span>
+</h4>
+
+<p>关卡概览定义得很清楚："过滤是保留或去除某些元素的过程。"想象你面前有一大筐混装的硬币，你拿三个空篮子，一枚一枚检查：金币放金篮、银币放银篮、铜币放铜篮。检查完，原来乱糟糟的一筐，就变成了整整齐齐的三篮。程序里，"筐"是原数组，"篮子"是新数组，"一枚一枚检查"是循环，"是不是金币"是条件判断。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/10-1-1-1_filter_intro.png" alt="扣哒世界 过滤分类示意 - koudashijie.com">
+    <div class="caption">图1：过滤把混装的硬币按价值分拣进三个数组——金币、银币、铜币各归其位</div>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🧺 过滤就像"分拣快递"</div>
+    <strong>原数组</strong>：一大车混在一起的包裹（所有硬币）。<br>
+    <strong>遍历</strong>：分拣员一个一个拿起包裹检查。<br>
+    <strong>条件</strong>：看包裹的目的地标签（<code>item.value</code>）。<br>
+    <strong>append</strong>：放进对应城市的货筐（金/银/铜数组）。<br>
+    分拣完，每个货筐里都是同一目的地的包裹，直接发车即可。
+</div>
+
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-10-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+
+<h3 id="sec-10-1-2">10.1.2 过滤的三要素（The Three Ingredients）</h3>
+
+<h4>10.1.2.1 遍历、条件、收集
+    <span class="en">Iterate, test, collect</span>
+</h4>
+
+<p>任何过滤都由三个动作组成，缺一不可：<strong>遍历</strong>（把原数组的每个元素都看一遍）、<strong>条件</strong>（用 <code>if</code> 判断这个元素要不要）、<strong>收集</strong>（合格的用 <code>append</code> 放进新数组）。记住这三步，你就能应对几乎所有筛选任务。</p>
+
+<div class="flow-demo">
+    <svg viewBox="0 0 620 150" width="620" role="img" aria-label="过滤三要素">
+        <text x="310" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">过滤的三个动作</text>
+        <defs>
+            <marker id="ft-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#4d6373"/>
+            </marker>
+        </defs>
+        <g font-family="sans-serif" font-size="13">
+            <rect x="40" y="55" width="150" height="60" rx="10" fill="#eaf2f8" stroke="#4A7A9B" stroke-width="2"/>
+            <text x="115" y="82" text-anchor="middle" fill="#3a6480" font-weight="bold">① 遍历</text>
+            <text x="115" y="102" text-anchor="middle" fill="#6a8294" font-size="11">for item in items</text>
+
+            <line x1="192" y1="85" x2="228" y2="85" stroke="#4d6373" stroke-width="2" marker-end="url(#ft-arr)"/>
+
+            <rect x="235" y="55" width="150" height="60" rx="10" fill="#fdf3e0" stroke="#E0912F" stroke-width="2"/>
+            <text x="310" y="82" text-anchor="middle" fill="#bd7415" font-weight="bold">② 条件</text>
+            <text x="310" y="102" text-anchor="middle" fill="#6a8294" font-size="11">if item.value == 3</text>
+
+            <line x1="387" y1="85" x2="423" y2="85" stroke="#4d6373" stroke-width="2" marker-end="url(#ft-arr)"/>
+
+            <rect x="430" y="55" width="150" height="60" rx="10" fill="#dcf0e0" stroke="#2f7a45" stroke-width="2"/>
+            <text x="505" y="82" text-anchor="middle" fill="#2f7a45" font-weight="bold">③ 收集</text>
+            <text x="505" y="102" text-anchor="middle" fill="#6a8294" font-size="11">goldCoins.append(item)</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 10.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:12766675f6:START anchor=sec-10-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="12766675f6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，你不是走进一间教室，而是一片等待被拯救的大陆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:12766675f6:END -->
+
+<div class="section-header" id="section-10-2">
+    <h2>10.2 遍历 + 条件筛选</h2>
+    <div class="en-title">Iterating and Testing</div>
+</div>
+
+<h3 id="sec-10-2-1">10.2.1 遍历原数组（Looping Over the Source）</h3>
+
+<h4>10.2.1.1 两种遍历写法
+    <span class="en">Two ways to loop</span>
+</h4>
+
+<p>遍历数组有两种常见写法。一种是 <code>for item in items:</code>，直接把每个元素赋给 <code>item</code>，简洁好读；另一种是 <code>for i in range(len(items)):</code> 用下标访问 <code>items[i]</code>，当你需要下标时才用它。关卡默认代码用的是前者。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>直接遍历元素（推荐）</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+    <span class="cmt"># item 就是当前元素</span>
+    ...</pre>
+        </div>
+    </div>
+    <div>
+        <h5>下标遍历（需要 i 时）</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+    item = items<span class="punc">[</span>i<span class="punc">]</span>
+    ...</pre>
+        </div>
+    </div>
+</div>
+
+<h3 id="sec-10-2-2">10.2.2 用 if 判断 value（Testing item.value）</h3>
+
+<h4>10.2.2.1 按属性值筛选
+    <span class="en">Filter by an attribute's value</span>
+</h4>
+
+<p>每枚硬币都有一个 <code>value</code> 属性表示它的价值：金币 <code>value == 3</code>、银币 <code>value == 2</code>、铜币 <code>value == 1</code>。筛选的核心就是用 <code>==</code> 检查这个属性等于几。关卡概览还展示了另一个例子——按 <code>enemy.type == "thrower"</code> 筛出所有投掷手，思路完全一样，只是把"按 value 筛"换成了"按 type 筛"。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 按属性筛选：value 或 type 都行</span>
+<span class="kw">if</span> item<span class="punc">.</span>value == <span class="num">3</span><span class="punc">:</span>      <span class="cmt"># 金币</span>
+    ...
+<span class="kw">if</span> enemy<span class="punc">.</span>type == <span class="str">"thrower"</span><span class="punc">:</span>  <span class="cmt"># 投掷手</span>
+    ...</pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">value 的含义要读懂：</span>本关三座山谷各产一种价值的硬币——金币值 3、银币值 2、铜币值 1。之所以能用 value 精确区分，是因为每类硬币的 value 唯一。遇到别的任务，你要先弄清"用哪个属性、等于什么值"才能筛对。
+</div>
+
+<!-- ==================== 10.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-10-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<div class="section-header" id="section-10-3">
+    <h2>10.3 append 追加</h2>
+    <div class="en-title">Appending to a New Array</div>
+</div>
+
+<h3 id="sec-10-3-1">10.3.1 新建空数组（Start with an Empty List）</h3>
+
+<h4>10.3.1.1 先备好空篮子
+    <span class="en">Prepare the empty buckets first</span>
+</h4>
+
+<p>过滤前，要先为每个分类<strong>准备一个空数组</strong>——用 <code>[]</code> 创建。关卡里在 <code>while True</code> 循环内，每一帧都重新建三个空数组 <code>goldCoins = []</code>、<code>silverCoins = []</code>、<code>bronzeCoins = []</code>。这一步很重要：每帧重置，才能装当前这一帧新扫描到的硬币，不会和上一帧的混起来。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 每帧先备好三个空篮子</span>
+goldCoins = <span class="punc">[]</span>
+silverCoins = <span class="punc">[]</span>
+bronzeCoins = <span class="punc">[]</span></pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:8e73525d56:START anchor=sec-10-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="8e73525d56">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span><a href="https://koudashijie.com/">koudashijie.com</a>，有用户说它真的很适合打基础，触类旁通下 C 语言也学得很快。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8e73525d56:END -->
+
+<h3 id="sec-10-3-2">10.3.2 append 与 push（append vs. push）</h3>
+
+<h4>10.3.2.1 把元素放进数组末尾
+    <span class="en">Add an element to the end</span>
+</h4>
+
+<p><code>数组.append(元素)</code> 把一个元素追加到数组末尾，数组随之变长。Python 用 <code>append</code>，而关卡概览里出现的 <code>throwers.push(enemy)</code> 是 JavaScript 的写法，作用相同——都是"压入一个元素"。写 Python 时统一用 <code>append</code>。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>Python：append</h5>
+        <div class="code-block">
+<pre>goldCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+<span class="cmt"># 追加到末尾</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>JavaScript：push（对照）</h5>
+        <div class="code-block">
+<pre>throwers<span class="punc">.</span><span class="fn">push</span><span class="punc">(</span>enemy<span class="punc">)</span><span class="punc">;</span>
+<span class="cmt">// 同样是压入末尾</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 130" width="560" role="img" aria-label="append 追加过程">
+        <text x="280" y="24" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">append 把新元素接到数组末尾</text>
+        <g font-family="monospace" font-size="16">
+            <rect x="80" y="50" width="50" height="40" fill="#182633" stroke="#f0c674"/><text x="105" y="76" text-anchor="middle" fill="#e8a15a">金</text>
+            <rect x="130" y="50" width="50" height="40" fill="#182633" stroke="#f0c674"/><text x="155" y="76" text-anchor="middle" fill="#e8a15a">金</text>
+            <rect x="180" y="50" width="50" height="40" fill="#182633" stroke="#f0c674" stroke-dasharray="4"/><text x="205" y="76" text-anchor="middle" fill="#9fd4a8">＋</text>
+            <text x="300" y="76" fill="#cdddea" font-family="sans-serif" font-size="13">append(新金币)</text>
+            <text x="205" y="112" text-anchor="middle" fill="#9fd4a8" font-family="sans-serif" font-size="11">新元素追加到这里</text>
+        </g>
+    </svg>
+</div>
+
+<!-- ==================== 10.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:bba4ba8ba8:START anchor=sec-10-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="bba4ba8ba8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，看编程学习如何变成愉快的冒险之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bba4ba8ba8:END -->
+<!-- CC-PROTECTION:HIDDEN:4b62c00a25:START anchor=sec-10-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="4b62c00a25">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:4b62c00a25:END -->
+
+<div class="section-header" id="section-10-4">
+    <h2>10.4 多路分类</h2>
+    <div class="en-title">Multi-Way Classification</div>
+</div>
+
+<h3 id="sec-10-4-1">10.4.1 if/elif 分流（Branching with if/elif）</h3>
+
+<h4>10.4.1.1 三种价值，三条分支
+    <span class="en">Three values, three branches</span>
+</h4>
+
+<p>本关不是"筛一类"，而是"分三类"。用 <code>if / elif / elif</code> 把三种价值分别导向三个数组：<code>value == 3</code> 进金币数组，<code>value == 2</code> 进银币数组，<code>value == 1</code> 进铜币数组。用 <code>elif</code> 而不是三个独立的 <code>if</code>，是因为一枚硬币只可能属于一类，匹配到就无需再检查其余分支，更高效。</p>
+
+<h3 id="sec-10-4-2">10.4.2 一次遍历分三类（One Pass, Three Buckets）</h3>
+
+<h4>10.4.2.1 遍历一遍就能全部分好
+    <span class="en">Sort everything in a single loop</span>
+</h4>
+
+<p>关键在于：<strong>不需要遍历三遍</strong>。只在一个 <code>for</code> 循环里，对每枚硬币用 <code>if/elif</code> 判断一次，就把它投进正确的篮子。默认代码已经给好金币那一支（<code>if item.value == 3: goldCoins.append(item)</code>），留下银币、铜币两支让你补全。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 一次遍历，if/elif 把硬币分进三个数组</span>
+<span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+    <span class="kw">if</span> item<span class="punc">.</span>value == <span class="num">3</span><span class="punc">:</span>
+        goldCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+    <span class="kw">elif</span> item<span class="punc">.</span>value == <span class="num">2</span><span class="punc">:</span>
+        silverCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+    <span class="kw">elif</span> item<span class="punc">.</span>value == <span class="num">1</span><span class="punc">:</span>
+        bronzeCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span></pre>
+</div>
+
+<table class="trace-table">
+    <thead>
+        <tr><th>扫描到的硬币</th><th>value</th><th>命中分支</th><th>进入数组</th></tr>
+    </thead>
+    <tbody>
+        <tr><td class="cell-gold">金币</td><td>3</td><td>if</td><td class="cell-gold">goldCoins</td></tr>
+        <tr><td class="cell-bronze">铜币</td><td>1</td><td>elif(1)</td><td class="cell-bronze">bronzeCoins</td></tr>
+        <tr><td class="cell-silver">银币</td><td>2</td><td>elif(2)</td><td class="cell-silver">silverCoins</td></tr>
+        <tr><td class="cell-gold">金币</td><td>3</td><td>if</td><td class="cell-gold">goldCoins</td></tr>
+    </tbody>
+</table>
+
+<div class="tip-box">
+    <span class="tip-label">为什么用 elif 而不是三个 if？</span>三个价值互斥，一枚硬币不可能既是金又是银。用 <code>elif</code>，一旦命中就跳过后续判断，省去无用比较；若写成三个独立 <code>if</code>，每枚硬币都会白白多比两次。逻辑虽也对，但不够优雅高效。
+</div>
+
+<!-- ==================== 10.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:11e87799a3:START anchor=sec-10-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="11e87799a3">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>CoCo陈之然 的扣哒世界竞技场解说，是很多玩家通关路上的攻略宝典。</span>
+</aside>
+<!-- CC-PROTECTION:AD:11e87799a3:END -->
+
+<div class="section-header" id="section-10-5">
+    <h2>10.5 把数组传给函数</h2>
+    <div class="en-title">Passing Arrays to Functions</div>
+</div>
+
+<h3 id="sec-10-5-1">10.5.1 数组作参数（Arrays as Arguments）</h3>
+
+<h4>10.5.1.1 分好的数组交给函数处理
+    <span class="en">Hand each bucket to a function</span>
+</h4>
+
+<p>分拣完成后，三个数组各自交给对应的农民去捡。这里用了一个接收"农民 + 硬币数组"两个参数的函数 <code>commandPeasant(peasant, coins)</code>：它在 <code>coins</code> 里找离该农民最近的硬币，命令农民移动过去。把整个数组当参数传进去，函数内部就能只在这一堆硬币里搜索，绝不会跑去捡别区的硬币。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 函数接收一个农民和一个硬币数组</span>
+<span class="kw">def</span> <span class="fn">commandPeasant</span><span class="punc">(</span>peasant<span class="punc">,</span> coins<span class="punc">):</span>
+    coin = peasant<span class="punc">.</span><span class="fn">findNearest</span><span class="punc">(</span>coins<span class="punc">)</span>   <span class="cmt"># 只在这堆里找</span>
+    <span class="kw">if</span> coin<span class="punc">:</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">command</span><span class="punc">(</span>peasant<span class="punc">,</span> <span class="str">"move"</span><span class="punc">,</span> coin<span class="punc">.</span>pos<span class="punc">)</span></pre>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">别忘了判断 coin 是否存在：</span>某一帧里，某类硬币可能一枚都没有，<code>findNearest</code> 会返回 <code>None</code>。所以 <code>command</code> 前一定要用 <code>if coin:</code> 确认真的找到了硬币，否则命令一个"不存在的目标"会报错。
+</div>
+
+
+<!-- CC-PROTECTION:AD:b9660e50c2:START anchor=sec-10-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b9660e50c2">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>在小红书搜索陈之然，可以看到她用 扣哒世界 教学编程的实战分享。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b9660e50c2:END -->
+<!-- CC-PROTECTION:HIDDEN:ff17bc182b:START anchor=sec-10-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="ff17bc182b">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:ff17bc182b:END -->
+
+<h3 id="sec-10-5-2">10.5.2 字典管理单位（Managing Units with a Dict）</h3>
+
+<h4>10.5.2.1 用名字对应农民
+    <span class="en">Map names to peasants</span>
+</h4>
+
+<p>三个农民有各自的名字：Aurum（金）、Argentum（银）、Cuprum（铜，正是三种金属的拉丁名）。关卡用一个<strong>字典</strong>把名字映射到具体农民，取用时清晰明了。这样"金币数组交给 Aurum、银币数组交给 Argentum、铜币数组交给 Cuprum"就一目了然，把"分类的数据"和"处理的对象"整齐地对应起来。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 用字典给三个农民起名对应</span>
+friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+peasants = <span class="punc">{</span>
+    <span class="str">"Aurum"</span><span class="punc">:</span> friends<span class="punc">[</span><span class="num">0</span><span class="punc">],</span>     <span class="cmt"># 金</span>
+    <span class="str">"Argentum"</span><span class="punc">:</span> friends<span class="punc">[</span><span class="num">1</span><span class="punc">],</span>  <span class="cmt"># 银</span>
+    <span class="str">"Cuprum"</span><span class="punc">:</span> friends<span class="punc">[</span><span class="num">2</span><span class="punc">]</span>     <span class="cmt"># 铜</span>
+<span class="punc">}</span>
+
+<span class="cmt"># 分类数组各自交给对应农民</span>
+<span class="fn">commandPeasant</span><span class="punc">(</span>peasants<span class="punc">.</span>Aurum<span class="punc">,</span> goldCoins<span class="punc">)</span>
+<span class="fn">commandPeasant</span><span class="punc">(</span>peasants<span class="punc">.</span>Argentum<span class="punc">,</span> silverCoins<span class="punc">)</span>
+<span class="fn">commandPeasant</span><span class="punc">(</span>peasants<span class="punc">.</span>Cuprum<span class="punc">,</span> bronzeCoins<span class="punc">)</span></pre>
+</div>
+
+<!-- ==================== 10.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8ff39b59c:START anchor=sec-10-5-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="a8ff39b59c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索 扣哒世界 玩游戏学编程，海量通关视频和竞技场解说等你来看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8ff39b59c:END -->
+
+<div class="section-header" id="section-10-6">
+    <h2>10.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 资源谷 -->
+<div class="level-card" id="sec-10-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 16 关 · 资源谷</span>
+        <h3>⛏️ 资源谷 —— 按价值分拣硬币，各归其主</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/10-6-1-1_resource_valley.png" alt="扣哒世界 资源谷关卡 - koudashijie.com">
+            <div class="caption">图2：资源谷——金、银、铜三座山谷各产一种硬币，三个农民分别只能在自己的区域收集</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>黄金峡谷、银色沼泽、青铜盆地三座山谷分别只生成金币（value 3）、银币（value 2）、铜币（value 1）。三个农民 Aurum、Argentum、Cuprum 各守一区，<strong>拿不到其他区域的硬币</strong>。目标是命令每个农民去捡"自己区域里最近的硬币"，绝不能让他们瞄准错误的目标。</p>
+
+        <h4>策略：先分拣，再分派</h4>
+        <p>核心难点在于 <code>findItems()</code> 把所有硬币混在一个数组里返回。如果直接让农民对整个数组 <code>findNearest</code>，他可能瞄上别区的硬币而白跑一趟。正确策略分两步：<strong>第一步过滤</strong>——遍历所有硬币，按 <code>value</code> 分进金、银、铜三个数组；<strong>第二步分派</strong>——把每个分类数组连同对应农民传给 <code>commandPeasant</code>，让农民只在属于自己的那堆里找最近的。</p>
+
+        <h4>思路拆解</h4>
+        <p>这一关要你补两处。<strong>其一，补全过滤的分类</strong>：默认代码已写好金币分支 <code>if item.value == 3: goldCoins.append(item)</code>，你需要照着加上 <code>elif item.value == 2: silverCoins.append(item)</code> 和 <code>elif item.value == 1: bronzeCoins.append(item)</code>。<strong>其二，补全 commandPeasant 函数体</strong>：用 <code>peasant.findNearest(coins)</code> 在传入的数组里找最近硬币，若找到就 <code>hero.command(peasant, "move", coin.pos)</code>。注意整个逻辑放在 <code>while True</code> 里，每帧重新扫描、重新分拣，因为硬币会不断刷新。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：每帧重扫、分拣、分派</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    items = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>
+    goldCoins = <span class="punc">[]</span>
+    silverCoins = <span class="punc">[]</span>
+    bronzeCoins = <span class="punc">[]</span>
+    <span class="cmt"># 一次遍历分三类（银、铜两支需你补全）</span>
+    <span class="kw">for</span> item <span class="kw">in</span> items<span class="punc">:</span>
+        <span class="kw">if</span> item<span class="punc">.</span>value == <span class="num">3</span><span class="punc">:</span>
+            goldCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+        <span class="kw">elif</span> item<span class="punc">.</span>value == <span class="num">2</span><span class="punc">:</span>
+            silverCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+        <span class="kw">elif</span> item<span class="punc">.</span>value == <span class="num">1</span><span class="punc">:</span>
+            bronzeCoins<span class="punc">.</span><span class="fn">append</span><span class="punc">(</span>item<span class="punc">)</span>
+    <span class="cmt"># 分好的数组各自交给对应农民</span>
+    <span class="fn">commandPeasant</span><span class="punc">(</span>peasants<span class="punc">.</span>Aurum<span class="punc">,</span> goldCoins<span class="punc">)</span>
+    <span class="cmt"># ...银、铜同理</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">每帧重建空数组是关键：</span>三个 <code>= []</code> 必须写在 <code>while</code> 循环<strong>内部</strong>。若写在循环外，数组只会越积越多，混入早已被捡走的旧硬币，导致农民追逐已经不存在的目标。放在循环内、每帧清空重装，才能始终反映当前场上的硬币。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">为什么要把数组传给函数？</span>因为"找最近硬币并移动"这段逻辑，三个农民完全一样。把它封装成 <code>commandPeasant(peasant, coins)</code>，只需换传入的农民和数组，就能复用同一段代码——这正是"过滤 + 函数封装"的组合威力：过滤负责把数据分好，函数负责统一处理每一份。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别让农民瞄错区：</span>本关的陷阱就是"用整个 items 而不是分类后的数组"。一定要把 <code>goldCoins</code> 传给金区农民、<code>silverCoins</code> 传给银区农民，绝不能把没过滤的 <code>items</code> 传进去，否则农民会盯上够不着的别区硬币，原地空转。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 10.7 ==================== -->
+<div class="section-header" id="section-10-7">
+    <h2>10.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-10-7-1">10.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>10.7.1.1 过滤筛选的典型问题
+    <span class="en">Typical issues with filtering</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/ch8_sec10_10-7-1-1_common_errors.png" alt="扣哒世界 过滤筛选常见错误速查 - koudashijie.com">
+    <div class="caption">图3：空数组建在循环外、忘判空、传错数组，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>空数组建在循环外——<code>goldCoins = []</code> 等必须在 <code>while</code> 内每帧重建，否则会不断堆积旧硬币。</li>
+        <li>忘了 append——只写 <code>if</code> 判断却没把元素加进新数组，过滤结果永远是空的。</li>
+        <li>append 参数写错——应追加元素本身 <code>append(item)</code>，别误写成 <code>append(item.value)</code> 或索引。</li>
+        <li>用 = 代替 ==——判断相等要用 <code>==</code>；写成 <code>if item.value = 3</code> 是赋值，会语法报错。</li>
+        <li>value 判断值弄反——金 3、银 2、铜 1，别把价值和数组对错（如把 value==2 追加到金币数组）。</li>
+        <li>该用 elif 却全用 if——虽也能跑，但每枚硬币多做无用比较；互斥分类首选 <code>if/elif</code>。</li>
+        <li>忘判空就 command——某类硬币可能为空，<code>findNearest</code> 返回 <code>None</code>，需先 <code>if coin:</code> 再命令。</li>
+        <li>传错数组给函数——把未过滤的 <code>items</code> 或错误分类传给农民，导致他瞄准别区目标。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:bdf0e07fda:START anchor=sec-10-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="bdf0e07fda">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>教学版专属域名：<a href="https://koudashijie.com/">koudashijie.com</a>，专为学校和机构提供编程教学解决方案。</span>
+</aside>
+<!-- CC-PROTECTION:AD:bdf0e07fda:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你打通了资源谷！这一单元你掌握了数据处理里最常用的一项技能——<strong>过滤筛选</strong>。你理解了过滤"保留或去除某些元素"的本质，牢记了它的三要素：<strong>遍历、条件、收集</strong>；你学会了用 <code>for</code> 遍历原数组、用 <code>if</code> 检查 <code>item.value</code> 这样的属性、用 <code>append()</code> 把合格元素追加进新数组；更进一步，你用 <code>if/elif</code> 在<strong>一次遍历里把硬币分成金、银、铜三类</strong>，再把每个分类数组<strong>作为参数传给 <code>commandPeasant</code> 函数</strong>，配合字典把三个农民和三类硬币整齐对应。过滤 + 函数封装 + 字典管理，三者组合让"给对的人分对的数据"变得清晰而高效。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应内容</th></tr></thead>
+        <tbody>
+            <tr><td>过滤的本质</td><td>保留/去除符合条件的元素</td><td>10.1</td></tr>
+            <tr><td>过滤三要素</td><td>遍历 → 条件 → 收集</td><td>10.1</td></tr>
+            <tr><td>遍历数组</td><td><code>for item in items</code></td><td>10.2</td></tr>
+            <tr><td>按属性筛选</td><td><code>if item.value == 3</code></td><td>10.2 · 资源谷</td></tr>
+            <tr><td>新建空数组</td><td>循环内每帧 <code>[]</code> 重建</td><td>10.3 · 资源谷</td></tr>
+            <tr><td>append 追加</td><td><code>数组.append(元素)</code></td><td>10.3</td></tr>
+            <tr><td>if/elif 多路分类</td><td>一次遍历分三类</td><td>10.4 · 资源谷</td></tr>
+            <tr><td>数组作参数</td><td>把分类数组传给函数</td><td>10.5 · 资源谷</td></tr>
+            <tr><td>字典管理单位</td><td>名字映射到农民</td><td>10.5 · 资源谷</td></tr>
+            <tr><td>findNearest 判空</td><td><code>if coin:</code> 再命令</td><td>10.5 · 资源谷</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得把杂乱的数据按条件分门别类、再把每一份精准交给对的处理者的英雄，<br>
+        才是云峰之上真正条理分明的程序员。继续向雪山之巅挺进吧，勇敢的程序员！🏔️⛏️💰
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:cc3ef8227e:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="cc3ef8227e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>想查看完整英雄图鉴和装备图鉴？访问 <a href="https://koudashijie.com/">koudashijie.com</a>，一键掌握全部资料。</span>
+</aside>
+<!-- CC-PROTECTION:AD:cc3ef8227e:END -->
+<!-- CC-PROTECTION:HIDDEN:dcea9c7be1:START anchor=h3-13 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="dcea9c7be1">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC10-2CB3FC9BE2C7。</span>
+<!-- CC-PROTECTION:HIDDEN:dcea9c7be1:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

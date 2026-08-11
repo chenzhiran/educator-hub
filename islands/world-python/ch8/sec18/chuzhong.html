@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC18-D61BDE8DAC73">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十八单元：进制转换 · 除基取余算法 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+        .styled-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 进制图示 ===== */
+        .base-viz {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .base-viz svg { max-width: 100%; height: auto; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC18-D61BDE8DAC73 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十八单元</div>
+
+    <a href="#section-18-1" class="nav-section">18.1 什么是进制</a>
+    <a href="#sec-18-1-1" class="nav-sub">18.1.1 基数与数字系统</a>
+    <a href="#sec-18-1-2" class="nav-sub">18.1.2 同一个数的多种写法</a>
+
+    <a href="#section-18-2" class="nav-section">18.2 除基取余算法</a>
+    <a href="#sec-18-2-1" class="nav-sub">18.2.1 除法与余数</a>
+    <a href="#sec-18-2-2" class="nav-sub">18.2.2 手算示例</a>
+
+    <a href="#section-18-3" class="nav-section">18.3 用代码实现转换</a>
+    <a href="#sec-18-3-1" class="nav-sub">18.3.1 while 迭代到商为 0</a>
+    <a href="#sec-18-3-2" class="nav-sub">18.3.2 取余与更新 number</a>
+    <a href="#sec-18-3-3" class="nav-sub">18.3.3 字符串前置拼接</a>
+
+    <a href="#section-18-4" class="nav-section">18.4 二进制与三进制</a>
+    <a href="#sec-18-4-1" class="nav-sub">18.4.1 换个除数就换个进制</a>
+
+    <a href="#section-18-5" class="nav-section">18.5 实战关卡精讲</a>
+    <a href="#sec-18-5-1" class="nav-sub">18.5.1 形状和性状</a>
+
+    <a href="#section-18-6" class="nav-section">18.6 常见错误</a>
+    <a href="#sec-18-6-1" class="nav-sub">18.6.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十八单元：进制转换 · 除基取余算法</h1>
+    <div class="subtitle">Unit 18: Number Bases — The Divide-and-Remainder Algorithm</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 形状和性状</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 18.1 ==================== -->
+<div class="section-header" id="section-18-1">
+    <h2>18.1 什么是进制</h2>
+    <div class="en-title">What Is a Number Base</div>
+</div>
+
+<p>欢迎来到计算机科学 5 的第十八单元！这一单元你将潜入计算机最底层的语言——<strong>数制</strong>。我们平时数数用的是十进制，但计算机的世界建立在二进制之上。在关卡"形状和性状"里，你要命令魔法机器人处决食人魔，而机器人只听得懂<strong>二进制和三进制</strong>的命令。于是你必须写出一套算法，把十进制数字翻译成机器人能理解的进制字符串。这背后的核心，是计算机科学中最经典的算法之一：<span class="keyword">除基取余（divide and take remainder）</span>。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>把十进制数转成 <code>N</code> 进制的通用算法——用 <code>while</code> 循环不断把数字<strong>除以基数、取余数</strong>，并把每次的余数<strong>拼在结果字符串的前面</strong>，直到数字变成 <code>0</code> 为止。除以 2 就得到二进制，除以 3 就得到三进制——换个除数，就换个进制。
+</div>
+
+<h3 id="sec-18-1-1">18.1.1 基数与数字系统（Base and Number Systems）</h3>
+
+<h4>18.1.1.1 "基数"决定了有几个数字符号
+    <span class="en">The base determines how many digits exist</span>
+</h4>
+
+<p>关卡说明讲得很生动：我们日常用的是十进制（decimal），<code>dec</code> 表示 10，就像 decade（十年）。此外还有二进制（binary，<code>bi</code> = 2）和三进制（trinary，<code>tri</code> = 3）。每种数字系统的"底数"就叫<strong>基数（Base）</strong>：十进制是 Base 10，二进制是 Base 2。基数决定了这个系统里<strong>一共有几种数字符号</strong>：</p>
+
+<div class="styled-table-wrap">
+<table class="styled-table">
+    <thead><tr><th>数字系统</th><th>基数</th><th>可用的数字符号</th></tr></thead>
+    <tbody>
+        <tr><td>二进制 Binary</td><td>Base 2</td><td class="mono">0, 1</td></tr>
+        <tr><td>三进制 Trinary</td><td>Base 3</td><td class="mono">0, 1, 2</td></tr>
+        <tr><td>十进制 Decimal</td><td>Base 10</td><td class="mono">0, 1, 2, 3, 4, 5, 6, 7, 8, 9</td></tr>
+        <tr><td>十六进制 Hex</td><td>Base 16</td><td class="mono">0~9, a, b, c, d, e, f</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="text-illustration">
+    <div class="illus-title">🔢 关键直觉：你永远"够不着"基数本身</div>
+    在二进制里，你数数时<strong>永远达不到数字 2</strong>——数到 1 之后，下一个就要进位成 <code>10</code>。同理三进制里够不着 3，十进制里够不着 10。这就是为什么每个系统的数字符号最大只到"基数减一"。
+</div>
+
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-18-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+
+<h3 id="sec-18-1-2">18.1.2 同一个数的多种写法（One Number, Many Notations）</h3>
+
+<h4>18.1.2.1 数字 9 在各进制里长得都不一样
+    <span class="en">The number 9 looks different in each base</span>
+</h4>
+
+<p>同一个"量"，在不同进制里写法完全不同。关卡用数字 <code>9</code> 做了绝妙的演示——它在十进制是 <code>9</code>，但在三进制变成 <code>100</code>，在二进制变成 <code>1001</code>。数量没变，只是"记数的规则"变了。</p>
+
+<div class="base-viz">
+    <svg viewBox="0 0 480 200" width="480" role="img" aria-label="数字9在不同进制的表示">
+        <text x="240" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">同一个数 9，在不同进制里的写法</text>
+        <g font-family="monospace" font-size="15">
+            <rect x="60" y="45" width="360" height="30" rx="5" fill="#E4EFF7" stroke="#3E7CB1"/>
+            <text x="90" y="65" fill="#2A5A85" font-size="12" font-family="sans-serif">Base 10（十进制）</text>
+            <text x="380" y="65" text-anchor="end" fill="#e8a15a">9</text>
+            <rect x="60" y="82" width="360" height="30" rx="5" fill="#dcf0e0" stroke="#2f7a45"/>
+            <text x="90" y="102" fill="#2f7a45" font-size="12" font-family="sans-serif">Base 3（三进制）</text>
+            <text x="380" y="102" text-anchor="end" fill="#2f7a45">100</text>
+            <rect x="60" y="119" width="360" height="30" rx="5" fill="#fdf3e0" stroke="#E0912F"/>
+            <text x="90" y="139" fill="#bd7415" font-size="12" font-family="sans-serif">Base 2（二进制）</text>
+            <text x="380" y="139" text-anchor="end" fill="#bd7415">1001</text>
+            <text x="240" y="175" text-anchor="middle" fill="#7d94a3" font-size="11" font-family="sans-serif">数量相同，只是记数规则不同</text>
+        </g>
+    </svg>
+</div>
+
+<div class="info-box">
+    <span class="info-label">进制越小，位数越长：</span>注意到了吗——基数越小，同一个数需要的位数就越多。9 在十进制只要 1 位，二进制却要 4 位。因为每一位能表示的"信息"更少，就得用更多位来凑。这也是为什么二进制数字串往往很长。
+</div>
+
+<!-- ==================== 18.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:c3c86f6bf6:START anchor=sec-18-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="c3c86f6bf6">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布，仅供官方平台用户学习使用。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c3c86f6bf6:END -->
+<!-- CC-PROTECTION:HIDDEN:62deb35fe2:START anchor=sec-18-1-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="62deb35fe2">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:62deb35fe2:END -->
+
+<div class="section-header" id="section-18-2">
+    <h2>18.2 除基取余算法</h2>
+    <div class="en-title">The Divide-and-Remainder Algorithm</div>
+</div>
+
+<h3 id="sec-18-2-1">18.2.1 除法与余数（Division and Remainder）</h3>
+
+<h4>18.2.1.1 用目标基数当除数，反复相除
+    <span class="en">Divide repeatedly by the target base</span>
+</h4>
+
+<p>把十进制数转成别的进制，核心方法是：<strong>用想要的基数作为除数，反复相除，并记下每一步的余数</strong>。关卡原话是："将一个十进制数字转换成另一个进制的方法是用想要的基数作为除数，并观察余数。"每次相除产生一个余数（这一位的数字）和一个商（下一轮要继续处理的数），如此循环，直到商变成 0。</p>
+
+<div class="anatomy">
+    <svg viewBox="0 0 520 130" width="520" role="img" aria-label="取余与整除">
+        <text x="260" y="26" text-anchor="middle" font-size="14" fill="#f0c674" font-family="sans-serif" font-weight="bold">每一步：取余数（这一位）+ 求商（继续处理）</text>
+        <text x="80" y="80" font-size="20" font-family="monospace" fill="#a5c8e8">number</text>
+        <text x="185" y="80" font-size="20" font-family="monospace" fill="#7cc7e8">%</text>
+        <text x="210" y="80" font-size="20" font-family="monospace" fill="#e8a15a">base</text>
+        <text x="285" y="80" font-size="20" font-family="monospace" fill="#cdddea">→</text>
+        <text x="320" y="80" font-size="20" font-family="monospace" fill="#9fd4a8">remainder</text>
+        <text x="130" y="108" font-size="11" fill="#6a8294" text-anchor="middle" font-family="sans-serif">被转换的数</text>
+        <text x="210" y="108" font-size="11" fill="#e8a15a" text-anchor="middle" font-family="sans-serif">除数=基数</text>
+        <text x="360" y="108" font-size="11" fill="#9fd4a8" text-anchor="middle" font-family="sans-serif">当前这一位</text>
+    </svg>
+</div>
+
+
+<!-- CC-PROTECTION:AD:47ae9c6d46:START anchor=sec-18-2-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="47ae9c6d46">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>世界观背景、关卡指令、知识体系全汇总，尽在 <a href="https://koudashijie.com/">koudashijie.com</a>。</span>
+</aside>
+<!-- CC-PROTECTION:AD:47ae9c6d46:END -->
+
+<h3 id="sec-18-2-2">18.2.2 手算示例（Working It Out by Hand）</h3>
+
+<h4>18.2.2.1 把 9 转成三进制和二进制
+    <span class="en">Converting 9 to base 3 and base 2</span>
+</h4>
+
+<p>跟着关卡的例子手算一遍，算法就一目了然了。转换时不断除以基数、记录余数，直到商为 0；最后把<strong>所有余数从下往上（从最后到最先）读</strong>，就是答案。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>9 → 三进制（除以 3）</h5>
+        <div class="code-block">
+<pre>9 ÷ 3 = 3 ... 余 <span class="num">0</span>
+3 ÷ 3 = 1 ... 余 <span class="num">0</span>
+1 ÷ 3 = 0 ... 余 <span class="num">1</span>
+
+<span class="cmt"># 从下往上读：100 ✓</span></pre>
+        </div>
+    </div>
+    <div>
+        <h5>9 → 二进制（除以 2）</h5>
+        <div class="code-block">
+<pre>9 ÷ 2 = 4 ... 余 <span class="num">1</span>
+4 ÷ 2 = 2 ... 余 <span class="num">0</span>
+2 ÷ 2 = 1 ... 余 <span class="num">0</span>
+1 ÷ 2 = 0 ... 余 <span class="num">1</span>
+
+<span class="cmt"># 从下往上读：1001 ✓</span></pre>
+        </div>
+    </div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">余数要"倒着"读：</span>这是本算法最容易出错的地方。最先算出的余数是结果的<strong>最低位（最右边）</strong>，最后算出的余数才是<strong>最高位（最左边）</strong>。所以读答案时要从最后一个余数往回读——这正是稍后代码里"把新余数拼在字符串前面"的原因。
+</div>
+
+<!-- ==================== 18.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:4eb14cbe10:START anchor=sec-18-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="4eb14cbe10">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索 扣哒世界扣哒游戏编程，每天都有新发现。</span>
+</aside>
+<!-- CC-PROTECTION:AD:4eb14cbe10:END -->
+<!-- CC-PROTECTION:HIDDEN:b5b3ddc223:START anchor=sec-18-2-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="b5b3ddc223">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:b5b3ddc223:END -->
+
+<div class="section-header" id="section-18-3">
+    <h2>18.3 用代码实现转换</h2>
+    <div class="en-title">Implementing the Conversion in Code</div>
+</div>
+
+<h3 id="sec-18-3-1">18.3.1 while 迭代到商为 0（Loop Until Zero）</h3>
+
+<h4>18.3.1.1 只要 number 不是 0，就继续
+    <span class="en">Keep going while number is not zero</span>
+</h4>
+
+<p>手算里"反复相除直到商为 0"这个过程，用代码写就是一个 <code>while</code> 循环。循环条件是 <code>while number != 0</code>——只要 <code>number</code> 还没被除到 0，就继续处理下一位。每循环一次就处理一位数字，当 <code>number</code> 终于变成 0，说明所有位都处理完了，循环自然结束。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">def</span> <span class="fn">toTernary</span><span class="punc">(</span>number<span class="punc">):</span>
+    string <span class="punc">=</span> <span class="str">""</span>              <span class="cmt"># 从空字符串开始</span>
+    <span class="kw">while</span> number <span class="punc">!=</span> <span class="num">0</span><span class="punc">:</span>       <span class="cmt"># 只要还没除到 0，就继续</span>
+        <span class="cmt"># ...取余、更新 number、拼字符串...</span>
+        <span class="kw">pass</span>
+    <span class="kw">return</span> string</pre>
+</div>
+
+
+<!-- CC-PROTECTION:AD:9db28e3f5e:START anchor=sec-18-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="9db28e3f5e">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站UP主 CoCo陈之然 的扣哒世界竞技场解说系列是很多玩家的入门必看。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9db28e3f5e:END -->
+<!-- CC-PROTECTION:HIDDEN:e5577beefa:START anchor=sec-18-3-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="e5577beefa">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC18-D61BDE8DAC73。</span>
+<!-- CC-PROTECTION:HIDDEN:e5577beefa:END -->
+
+<h3 id="sec-18-3-2">18.3.2 取余与更新 number（Remainder and Update）</h3>
+
+<h4>18.3.2.1 取余得到这一位，整除得到下一轮
+    <span class="en">Remainder gives a digit; division gives the next number</span>
+</h4>
+
+<p>循环体里做两件算术：先用取余运算符 <code>%</code> 算出这一位的数字 <code>remainder = number % 3</code>；再把 <code>number</code> 更新为它除以基数的商，准备下一轮。关卡用了一个巧妙的写法：<code>number = (number - remainder) / 3</code>——先减掉余数让它能整除，再除以基数，确保得到的是干净的整数商。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 1. 取余数：这一位的数字</span>
+remainder <span class="punc">=</span> number <span class="punc">%</span> <span class="num">3</span>
+
+<span class="cmt"># 2. 更新 number：减掉余数后除以基数（得到商）</span>
+number <span class="punc">=</span> <span class="punc">(</span>number <span class="punc">-</span> remainder<span class="punc">)</span> <span class="punc">/</span> <span class="num">3</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么先减余数：</span><code>(number - remainder)</code> 保证结果一定能被基数整除，避免出现小数。比如 <code>9 - 0 = 9</code>，<code>9 / 3 = 3</code>，干净利落。这一步和取余是配套的——余数管"当前位"，商管"剩下的部分"。
+</div>
+
+<h3 id="sec-18-3-3">18.3.3 字符串前置拼接（Prepending to the String）</h3>
+
+<h4>18.3.3.1 新余数拼在旧字符串"前面"
+    <span class="en">The new digit goes in front</span>
+</h4>
+
+<p>这是整个算法的点睛之笔，也呼应了"余数要倒着读"的规律。每算出一个余数，就把它<strong>拼在已有字符串的前面</strong>：<code>string = remainder + string</code>。因为最先算出的是最低位、最后算出的是最高位，所以后来的余数要不断"挤到前面去"，最终字符串的顺序就自然正确了。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 把新余数拼在字符串的【前面】（不是后面！）</span>
+string <span class="punc">=</span> remainder <span class="punc">+</span> string</pre>
+</div>
+
+<div class="base-viz">
+    <svg viewBox="0 0 520 180" width="520" role="img" aria-label="字符串前置拼接过程">
+        <text x="260" y="24" text-anchor="middle" font-size="14" fill="#2A5A85" font-weight="bold" font-family="sans-serif">9 转二进制：新余数不断拼到前面</text>
+        <g font-family="monospace" font-size="14">
+            <text x="60" y="60" fill="#7d94a3" font-size="11" font-family="sans-serif">余1 →</text>
+            <rect x="115" y="45" width="40" height="26" rx="4" fill="#fdf3e0" stroke="#E0912F"/><text x="135" y="63" text-anchor="middle" fill="#bd7415">1</text>
+            <text x="240" y="60" fill="#7d94a3" font-size="11" font-family="sans-serif">string = "1"</text>
+
+            <text x="60" y="93" fill="#7d94a3" font-size="11" font-family="sans-serif">余0 →</text>
+            <rect x="115" y="78" width="40" height="26" rx="4" fill="#dcf0e0" stroke="#2f7a45"/><text x="135" y="96" text-anchor="middle" fill="#2f7a45">0</text>
+            <rect x="157" y="78" width="40" height="26" rx="4" fill="#fdf3e0" stroke="#E0912F"/><text x="177" y="96" text-anchor="middle" fill="#bd7415">1</text>
+            <text x="240" y="93" fill="#7d94a3" font-size="11" font-family="sans-serif">string = "01"</text>
+
+            <text x="60" y="126" fill="#7d94a3" font-size="11" font-family="sans-serif">余0 →</text>
+            <rect x="115" y="111" width="40" height="26" rx="4" fill="#dcf0e0" stroke="#2f7a45"/><text x="135" y="129" text-anchor="middle" fill="#2f7a45">0</text>
+            <rect x="157" y="111" width="82" height="26" rx="4" fill="#eaf2f8" stroke="#4A7A9B"/><text x="198" y="129" text-anchor="middle" fill="#3a6480">01</text>
+            <text x="255" y="126" fill="#7d94a3" font-size="11" font-family="sans-serif">string = "001"</text>
+
+            <text x="60" y="159" fill="#7d94a3" font-size="11" font-family="sans-serif">余1 →</text>
+            <rect x="115" y="144" width="40" height="26" rx="4" fill="#E4EFF7" stroke="#3E7CB1"/><text x="135" y="162" text-anchor="middle" fill="#2A5A85">1</text>
+            <rect x="157" y="144" width="100" height="26" rx="4" fill="#eaf2f8" stroke="#4A7A9B"/><text x="207" y="162" text-anchor="middle" fill="#3a6480">001</text>
+            <text x="275" y="159" fill="#C0453B" font-size="12" font-family="sans-serif" font-weight="bold">= "1001" ✓</text>
+        </g>
+    </svg>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">拼后面就全反了：</span>如果误写成 <code>string = string + remainder</code>（拼在后面），结果的位序会完全颠倒。9 的二进制会变成错误的 <code>1001</code> 的逆序。所以务必记住是 <code>remainder + string</code>——新的在前。
+</div>
+
+<!-- ==================== 18.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:c6e1930ee4:START anchor=sec-18-3-3 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="c6e1930ee4">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书搜索扣哒鸭，遇到难题及时提醒，AI 助教帮你分析，让学习更顺畅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:c6e1930ee4:END -->
+
+<div class="section-header" id="section-18-4">
+    <h2>18.4 二进制与三进制</h2>
+    <div class="en-title">Binary and Trinary</div>
+</div>
+
+<h3 id="sec-18-4-1">18.4.1 换个除数就换个进制（Change the Divisor）</h3>
+
+<h4>18.4.1.1 同一套算法，只改基数
+    <span class="en">Same algorithm, just a different base</span>
+</h4>
+
+<p>除基取余算法最优雅的地方在于它的<strong>通用性</strong>：转成几进制，就把除数改成几。<code>toTernary</code>（三进制）用 <code>% 3</code> 和 <code>/ 3</code>；<code>toBinary</code>（二进制）只需把它们全换成 <code>% 2</code> 和 <code>/ 2</code>，其余逻辑一字不差。关卡也提示："再次重复这些步骤：获取余数、减去余数和追加字符串。记住二进制用另一种方式表示 2！"——这里"另一种方式"就是指把基数从 3 改成 2。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>toTernary（除以 3）</h5>
+        <div class="code-block">
+<pre><span class="kw">while</span> number <span class="punc">!=</span> <span class="num">0</span><span class="punc">:</span>
+    remainder <span class="punc">=</span> number <span class="punc">%</span> <span class="num">3</span>
+    number <span class="punc">=</span> <span class="punc">(</span>number<span class="punc">-</span>remainder<span class="punc">)</span><span class="punc">/</span><span class="num">3</span>
+    string <span class="punc">=</span> remainder <span class="punc">+</span> string</pre>
+        </div>
+    </div>
+    <div>
+        <h5>toBinary（除以 2）</h5>
+        <div class="code-block">
+<pre><span class="kw">while</span> number <span class="punc">!=</span> <span class="num">0</span><span class="punc">:</span>
+    remainder <span class="punc">=</span> number <span class="punc">%</span> <span class="num">2</span>
+    number <span class="punc">=</span> <span class="punc">(</span>number<span class="punc">-</span>remainder<span class="punc">)</span><span class="punc">/</span><span class="num">2</span>
+    string <span class="punc">=</span> remainder <span class="punc">+</span> string</pre>
+        </div>
+    </div>
+</div>
+
+<div class="info-box">
+    <span class="info-label">一个模式，无限进制：</span>只要把 <code>2</code> 或 <code>3</code> 换成任意基数 <code>n</code>，这套算法就能转成 <code>n</code> 进制。这正是好算法的魅力——抓住本质、举一反三。（当基数超过 10 时，还需要把 10、11…映射成 <code>a</code>、<code>b</code>… 等字母，这是十六进制的额外一步。）
+</div>
+
+<!-- ==================== 18.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=sec-18-4-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+<div class="section-header" id="section-18-5">
+    <h2>18.5 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦关卡的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 形状和性状 -->
+<div class="level-card" id="sec-18-5-1">
+    <div class="level-head">
+        <span class="lv-num">关卡 · 形状和性状</span>
+        <h3>🤖 形状和性状 —— 让机器人听懂进制命令</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/18-5-1-1_shapes_and_traits.png" alt="扣哒世界 形状和性状关卡 - koudashijie.com">
+            <div class="caption">图2：形状和性状——找出最危险的食人魔，把它的血量转成三进制、类型转成二进制，说给机器人步行者听</div>
+        </div>
+
+        <h4>策略：把敌人属性翻译成机器人的语言</h4>
+        <p>本关是本单元唯一的关卡，也是进制转换的综合实战。魔法机器人步行者能替你处决食人魔，但它<strong>只接受进制字符串命令</strong>：命令由两部分组成——敌人血量的<strong>三进制</strong>表示，加上敌人类型的<strong>二进制</strong>表示。策略是：持续找出场上最危险的敌人（血量最高者），把它的血量和类型分别转换成对应进制，拼成命令字符串说给机器人听。</p>
+
+        <h4>思路拆解</h4>
+        <p>算法有三块。第一，<strong>补全 toBinary 函数</strong>：关卡已给好三进制版 <code>toTernary</code>，你要照着写二进制版——逻辑完全相同，只把 <code>% 3</code> 改成 <code>% 2</code>、<code>/ 3</code> 改成 <code>/ 2</code>。第二，<strong>找最危险的敌人</strong>：辅助函数 <code>findMostDangerous</code> 遍历所有敌人，记录血量最高的那一个（血量越多越强）。第三，<strong>在主循环里下命令</strong>：把 <code>toTernary(血量)</code> 和 <code>toBinary(类型)</code> 拼接成机器人认得的格式，用 <code>hero.say(...)</code> 说出来。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段一：补全 toBinary（除数从 3 改成 2）</span>
+<span class="kw">def</span> <span class="fn">toBinary</span><span class="punc">(</span>number<span class="punc">):</span>
+    string <span class="punc">=</span> <span class="str">""</span>
+    <span class="kw">while</span> number <span class="punc">!=</span> <span class="num">0</span><span class="punc">:</span>
+        remainder <span class="punc">=</span> number <span class="punc">%</span> <span class="num">2</span>
+        number <span class="punc">=</span> <span class="punc">(</span>number <span class="punc">-</span> remainder<span class="punc">)</span> <span class="punc">/</span> <span class="num">2</span>
+        string <span class="punc">=</span> remainder <span class="punc">+</span> string
+    <span class="kw">return</span> string</pre>
+        </div>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段二：找到最危险者，拼接进制命令</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    enemies <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">findEnemies</span><span class="punc">()</span>
+    dangerous <span class="punc">=</span> <span class="fn">findMostDangerous</span><span class="punc">(</span>enemies<span class="punc">)</span>
+    <span class="kw">if</span> dangerous<span class="punc">:</span>
+        <span class="cmt"># 命令格式：三进制(血量) + " " + 二进制(类型)</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span><span class="fn">toTernary</span><span class="punc">(</span>dangerous<span class="punc">.</span>health<span class="punc">)</span> <span class="punc">+</span> <span class="str">" "</span> <span class="punc">+</span> <span class="fn">toBinary</span><span class="punc">(</span>dangerous<span class="punc">.</span>type<span class="punc">))</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">toBinary 是 toTernary 的"复制改数"：</span>本关最省力的做法，就是把已给好的 <code>toTernary</code> 整段逻辑复制过来，只把两个基数 <code>3</code> 改成 <code>2</code>。这也印证了除基取余算法的通用性——同一个骨架，改个除数就适配新进制。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">findMostDangerous 的思路：</span>这个辅助函数用了经典的"打擂台"求最值算法：先假设没有最危险者（<code>mostDangerous = None</code>、<code>mostHealth = 0</code>），遍历每个敌人，谁的血量比当前记录更高，就把它换上擂台。遍历结束，擂台上的就是血量最高、最危险的敌人。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">两部分命令别弄反：</span>命令的顺序是"血量三进制在前、类型二进制在后"，中间用空格分隔。如果把 <code>toTernary</code> 和 <code>toBinary</code> 用错了对象（比如给血量用二进制），机器人就会误解命令、攻击错误的目标。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 18.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:d61f033529:START anchor=h3-9 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="d61f033529">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a> 找扣哒鸭，它会陪你从零基础一路打到独立写项目。</span>
+</aside>
+<!-- CC-PROTECTION:AD:d61f033529:END -->
+
+<div class="section-header" id="section-18-6">
+    <h2>18.6 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-18-6-1">18.6.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>18.6.1.1 进制转换的典型问题
+    <span class="en">Typical issues with base conversion</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/18-6-1-1_common_errors.png" alt="扣哒世界 进制转换常见错误速查 - koudashijie.com">
+    <div class="caption">图3：字符串拼错方向、循环条件写错、除数用错、忘记 return，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>字符串拼接方向反了——必须是 <code>remainder + string</code>（新的在前），写成 <code>string + remainder</code> 会让结果位序完全颠倒。</li>
+        <li>循环条件写错——应是 <code>while number != 0</code>；写成 <code>while number &gt; 1</code> 之类会漏掉最后一位。</li>
+        <li>除数用错进制——二进制要用 <code>% 2</code> 和 <code>/ 2</code>，三进制用 <code>% 3</code> 和 <code>/ 3</code>，改了取余却忘了改整除会出错。</li>
+        <li>忘记先减余数——更新 number 时用 <code>(number - remainder) / base</code>，直接 <code>number / base</code> 可能得到小数、破坏迭代。</li>
+        <li>函数忘写 return——转换函数最后必须 <code>return string</code>，否则返回 <code>None</code>，机器人收不到命令。</li>
+        <li>string 忘记初始化——循环前要先 <code>string = ""</code>，否则拼接时会报错。</li>
+        <li>余数当数字直接用——余数拼进字符串时要能和字符串相加；类型/血量为 0 时循环一次都不进，需留意边界。</li>
+        <li>血量与类型的进制搞混——血量用三进制、类型用二进制，两者不能对调。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:15fc1530ec:START anchor=sec-18-6-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="15fc1530ec">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，超过 520 万编程比赛专业选手也在玩，写代码就是你的超能力。</span>
+</aside>
+<!-- CC-PROTECTION:AD:15fc1530ec:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你掌握了计算机最底层的语言——数制转换！这一单元你理解了"基数"的含义：每种数字系统能用的符号个数等于它的基数，且永远够不着基数本身。你学会了经典的<strong>除基取余算法</strong>：用 <code>while</code> 循环不断把数字除以基数、取余数，用 <code>(number - remainder) / base</code> 迭代更新，并把每个余数<strong>拼在字符串前面</strong>（<code>string = remainder + string</code>），直到数字变成 0。你还明白了这套算法的通用性——除以 2 得二进制、除以 3 得三进制，换个除数就换个进制。在"形状和性状"关卡里，你把这套算法用于让魔法机器人听懂命令。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>说明</th></tr></thead>
+        <tbody>
+            <tr><td>基数 Base</td><td>符号个数 = 基数，够不着基数本身</td><td>二进制只有 0、1</td></tr>
+            <tr><td>多进制表示</td><td>同一个数，各进制写法不同</td><td>9 = 100(3) = 1001(2)</td></tr>
+            <tr><td>除基取余</td><td>反复除以基数、记录余数</td><td>算法核心</td></tr>
+            <tr><td>while 到 0</td><td><code>while number != 0</code></td><td>处理完所有位</td></tr>
+            <tr><td>取余得当前位</td><td><code>remainder = number % base</code></td><td>这一位的数字</td></tr>
+            <tr><td>整除得下一轮</td><td><code>(number-remainder)/base</code></td><td>剩下的部分</td></tr>
+            <tr><td>字符串前置拼接</td><td><code>string = remainder + string</code></td><td>余数倒序读</td></tr>
+            <tr><td>换除数换进制</td><td>2→二进制，3→三进制</td><td>算法通用</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得在十进制与二进制、三进制之间自如穿梭，看透数字背后记数规则的英雄，才是云峰之上真正通晓机器语言的程序员。<br>
+        继续向雪山之巅挺进吧，勇敢的程序员！🏔️🤖🔢</p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=h3-11 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十八单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

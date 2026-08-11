@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CC-PROTECTION:META:START -->
+    <meta name="copyright" content="扣哒世界 koudashijie.com">
+    <meta name="author" content="扣哒世界官方团队">
+    <meta name="publisher" content="扣哒世界">
+    <meta name="source" content="https://koudashijie.com">
+    <meta name="cc-page-id" content="KD-WORLD-PYTHON-CH8-SEC11-A5C140AF6098">
+    <!-- CC-PROTECTION:META:END -->
+    <title>第十一单元：配对查找 · 用嵌套循环找出成双成对 | 扣哒世界 编程知识</title>
+    <style>
+        /* ===== 基础重置与变量（雪山主题）===== */
+        :root {
+            --primary: #4A90E2;
+            --primary-light: #7CC4F5;
+            --primary-lighter: #EAF7FF;
+            --primary-dark: #245A8D;
+            --accent: #A7D8FF;
+            --dark: #14283A;
+            --dark-code: #162C40;
+            --dark-code-border: #315475;
+            --text: #203449;
+            --text-light: #526B80;
+            --text-lighter: #8299AA;
+            --bg: #ffffff;
+            --bg-alt: #F4FAFF;
+            --bg-card: #ffffff;
+            --border: #CDE6F5;
+            --success: #4A90E2;
+            --warning: #E0912F;
+            --error: #C0453B;
+            --info: #4A90E2;
+            --code-keyword: #8FD3F4;
+            --code-string: #9fd4a8;
+            --code-comment: #7591A5;
+            --code-function: #f0c674;
+            --code-number: #e8a15a;
+            --code-text: #D8E8F3;
+            --code-punctuation: #D8E8F3;
+            --code-object: #A7D8FF;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        /* ===== 左侧导航栏 ===== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #14283A;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: #20384D; }
+
+        .sidebar-nav .nav-title {
+            color: var(--primary-light);
+            font-size: 0.95em;
+            font-weight: 700;
+            padding: 8px 18px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: #D8EAF5;
+            text-decoration: none;
+            padding: 6px 18px;
+            font-size: 0.82em;
+            line-height: 1.5;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #fff;
+            background: rgba(74, 144, 226, 0.18);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav a.nav-section {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #29475F;
+        }
+
+        .sidebar-nav a.nav-section:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidebar-nav a.nav-sub {
+            padding-left: 30px;
+            color: #B7D2E4;
+            font-size: 0.78em;
+        }
+
+        .sidebar-nav a.nav-sub:hover { color: #fff; }
+
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .page-wrapper { margin-left: var(--sidebar-width); }
+
+        /* ===== 头部横幅 ===== */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.16) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 雪峰装饰 */
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 46px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 46%, transparent 46%),
+                        linear-gradient(-135deg, transparent 40%, rgba(255,255,255,0.14) 40%, rgba(255,255,255,0.14) 46%, transparent 46%);
+            background-size: 90px 46px, 120px 46px;
+        }
+
+        .hero-banner h1 { font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 1; }
+        .hero-banner .subtitle { font-size: 1.2em; opacity: 0.92; position: relative; z-index: 1; }
+        .hero-banner .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.22);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* ===== 章节标题 ===== */
+        .section-header {
+            background: var(--primary-lighter);
+            border-left: 5px solid var(--primary);
+            padding: 20px 25px;
+            margin: 50px 0 30px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .section-header h2 { color: var(--primary-dark); font-size: 1.8em; margin-bottom: 5px; }
+        .section-header .en-title { color: var(--text-light); font-size: 0.95em; font-style: italic; }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.4em;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lighter);
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 30px 0 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        h4 .en {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-lighter);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        p { margin: 12px 0; text-align: justify; }
+
+        .keyword {
+            background: var(--primary-lighter);
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .keyword-en {
+            background: #E2F3FF;
+            color: #245A8D;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .keyword-green {
+            background: #dcf0e0;
+            color: #2f7a45;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        code {
+            background: #EAF7FF;
+            color: #245A8D;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            white-space: nowrap;
+        }
+
+        .code-block {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #7591A5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .code-block .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+        .code-block .dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .code-block .dots .red { background: #ff5f57; }
+        .code-block .dots .yellow { background: #febc2e; }
+        .code-block .dots .green { background: #28c840; }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.7;
+            color: var(--code-text);
+        }
+
+        .code-block .kw { color: var(--code-keyword); }
+        .code-block .str { color: var(--code-string); }
+        .code-block .cmt { color: var(--code-comment); font-style: italic; }
+        .code-block .fn { color: var(--code-function); }
+        .code-block .num { color: var(--code-number); }
+        .code-block .obj { color: var(--code-object); }
+        .code-block .punc { color: var(--code-punctuation); }
+        .code-block .err { color: var(--error); text-decoration: line-through; }
+        .code-block .hl { background: rgba(74, 144, 226, 0.28); border-radius: 3px; padding: 0 2px; }
+
+        .tip-box {
+            background: #fdf3e0;
+            border-left: 4px solid var(--warning);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .tip-box .tip-label { font-weight: 700; color: #bd7415; margin-right: 6px; }
+
+        .info-box {
+            background: #eaf2f8;
+            border-left: 4px solid var(--info);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .info-box .info-label { font-weight: 700; color: #3a6480; margin-right: 6px; }
+
+        .remember-box {
+            background: var(--primary-lighter);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .remember-box .remember-label { font-weight: 700; color: var(--primary-dark); margin-right: 6px; }
+
+        .warn-box {
+            background: #fbeae7;
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+        }
+        .warn-box .warn-label { font-weight: 700; color: #9e352c; margin-right: 6px; }
+
+        .figure { margin: 24px 0; text-align: center; }
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(36,90,141,0.14);
+            border: 1px solid var(--border);
+        }
+        .figure .caption { font-size: 0.85em; color: var(--text-lighter); margin-top: 8px; font-style: italic; }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(36,90,141,0.10);
+        }
+        .styled-table thead { background: var(--primary); color: white; }
+        .styled-table th { padding: 12px 16px; text-align: left; font-weight: 600; }
+        .styled-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .styled-table tbody tr:nth-child(even) { background: var(--bg-alt); }
+        .styled-table tbody tr:hover { background: var(--primary-lighter); }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #fff 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        .summary-card h3 { color: var(--primary-dark); border: none; margin-top: 0; }
+
+        .text-illustration {
+            background: linear-gradient(135deg, #F4FAFF 0%, #fff 100%);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            font-size: 0.93em;
+            color: var(--text-light);
+        }
+        .text-illustration .illus-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        /* ===== 流程图 / 解剖图（纯 SVG） ===== */
+        .flow-demo {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-demo svg { max-width: 100%; height: auto; }
+
+        .anatomy {
+            background: var(--dark-code);
+            border: 1px solid var(--dark-code-border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .anatomy svg { max-width: 100%; height: auto; }
+
+        /* ===== 双列对比 ===== */
+        .compare-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .compare-2col > div {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .compare-2col h5 {
+            margin: 0 0 10px;
+            color: var(--primary-dark);
+            font-size: 1em;
+        }
+        .compare-2col .code-block { margin: 0; }
+
+        /* ===== 复习卡片网格 ===== */
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: linear-gradient(150deg, #fff 0%, var(--primary-lighter) 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(36,90,141,0.08);
+            border-top: 4px solid var(--primary);
+        }
+        .review-card h4 {
+            color: var(--primary-dark);
+            margin: 0 0 8px;
+            padding: 0;
+            border: none;
+            font-size: 1.05em;
+        }
+        .review-card p { margin: 0; font-size: 0.9em; color: var(--text-light); }
+
+        /* ===== 关卡卡片 ===== */
+        .level-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: 0 3px 16px rgba(36,90,141,0.10);
+        }
+        .level-card .level-head {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .level-card .level-head .lv-num {
+            background: rgba(255,255,255,0.22);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .level-card .level-head h3 {
+            color: #fff;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.3em;
+        }
+        .level-card .level-body { padding: 24px 28px; }
+        .level-card .level-body h4:first-child { margin-top: 0; }
+
+        /* ===== 配对矩阵表格 ===== */
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .trace-table th, .trace-table td {
+            border: 1px solid var(--border);
+            padding: 8px 6px;
+        }
+        .trace-table thead { background: var(--primary); color: #fff; }
+        .trace-table .cell-skip { background: #e6e9ec; color: #8299AA; }
+        .trace-table .cell-hit { background: #dcf0e0; color: #2f7a45; font-weight: 700; }
+        .trace-table .cell-miss { background: #fbeae7; color: #9e352c; }
+        .trace-table th.rowhead { background: var(--primary-dark); }
+
+        @media (max-width: 1024px) {
+            .sidebar-nav { transform: translateX(-100%); }
+            .sidebar-nav.active { transform: translateX(0); }
+            .nav-toggle { display: block; }
+            .page-wrapper { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 1.8em; }
+            .container { padding: 20px 15px; }
+            .section-header h2 { font-size: 1.4em; }
+            .code-block { padding: 14px 16px; }
+            .styled-table { font-size: 0.9em; }
+            .compare-2col { grid-template-columns: 1fr; }
+        }
+    
+
+        /* CC-PROTECTION:STYLES:START */
+        .cc-brand-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 16px 0 22px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--primary-lighter);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+        .cc-brand-note__mark {
+            flex: 0 0 auto;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .cc-brand-note a,
+        .cc-copyright-panel a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .cc-brand-note a:hover,
+        .cc-copyright-panel a:hover { text-decoration: underline; }
+        .cc-forensic-copy {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .cc-copyright-panel {
+            margin: 34px 0 8px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-alt);
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .cc-copyright-panel strong { color: var(--primary-dark); }
+        @media (max-width: 640px) {
+            .cc-brand-note { padding: 9px 11px; }
+            .cc-copyright-panel { padding: 15px; }
+        }
+        @media print {
+            .cc-brand-note { break-inside: avoid; }
+            .cc-copyright-panel::after {
+                content: attr(data-print-credit);
+                display: block;
+                margin-top: 8px;
+                font-weight: 700;
+            }
+        }
+        /* CC-PROTECTION:STYLES:END */
+
+
+/* KOUDA-QUIZ-FAB:START */
+.kouda-quiz-fab { position:fixed; top:18px; right:20px; z-index:1200; min-width:76px; height:44px; padding:0 15px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,var(--primary-light),var(--primary)); text-decoration:none; font-size:14px; font-weight:800; letter-spacing:.5px; box-shadow:0 7px 18px rgba(20,40,80,.24); border:2px solid rgba(255,255,255,.92); transition:transform .18s,box-shadow .18s; }
+.kouda-quiz-fab:hover { transform:translateY(-2px); box-shadow:0 10px 23px rgba(20,40,80,.3); }
+.kouda-quiz-fab:focus-visible { outline:3px solid var(--primary-dark); outline-offset:3px; }
+@media (max-width:600px) { .kouda-quiz-fab { top:12px; right:12px; min-width:70px; height:40px; padding:0 12px; font-size:13px; } }
+/* KOUDA-QUIZ-FAB:END */
+</style>
+</head>
+<body>
+<a class="kouda-quiz-fab" href="chuzhong_quiz.html" title="去做题" aria-label="去做题">去做题</a>
+<!-- Source Proof: KD-WORLD-PYTHON-CH8-SEC11-A5C140AF6098 | koudashijie.com -->
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar-nav').classList.toggle('active')">☰</button>
+
+<nav class="sidebar-nav">
+    <div class="nav-title">安息云峰·CS5-第十一单元</div>
+
+    <a href="#section-11-1" class="nav-section">11.1 什么是配对查找</a>
+    <a href="#sec-11-1-1" class="nav-sub">11.1.1 从"单个"到"成对"</a>
+    <a href="#sec-11-1-2" class="nav-sub">11.1.2 组合的数量</a>
+
+    <a href="#section-11-2" class="nav-section">11.2 嵌套循环</a>
+    <a href="#sec-11-2-1" class="nav-sub">11.2.1 for i 套 for j</a>
+    <a href="#sec-11-2-2" class="nav-sub">11.2.2 遍历所有组合</a>
+
+    <a href="#section-11-3" class="nav-section">11.3 跳过自比较</a>
+    <a href="#sec-11-3-1" class="nav-sub">11.3.1 if i==j: continue</a>
+    <a href="#sec-11-3-2" class="nav-sub">11.3.2 从 i+1 起省一半</a>
+
+    <a href="#section-11-4" class="nav-section">11.4 值匹配</a>
+    <a href="#sec-11-4-1" class="nav-sub">11.4.1 比较 value 相等</a>
+    <a href="#sec-11-4-2" class="nav-sub">11.4.2 返回配对结果</a>
+
+    <a href="#section-11-5" class="nav-section">11.5 字符串逐位比较</a>
+    <a href="#sec-11-5-1" class="nav-sub">11.5.1 除最后一位相同</a>
+
+    <a href="#section-11-6" class="nav-section">11.6 实战关卡精讲</a>
+    <a href="#sec-11-6-1" class="nav-sub">11.6.1 无暇的宝石对</a>
+    <a href="#sec-11-6-2" class="nav-sub">11.6.2 孪生力量</a>
+
+    <a href="#section-11-7" class="nav-section">11.7 常见错误</a>
+    <a href="#sec-11-7-1" class="nav-sub">11.7.1 易错点清单</a>
+
+    <a href="#section-summary" class="nav-section">📋 本单元小结</a>
+</nav>
+
+<div class="page-wrapper">
+
+<div class="hero-banner">
+    <h1>第十一单元：配对查找 · 用嵌套循环找出成双成对</h1>
+    <div class="subtitle">Unit 11: Pair Finding — Nested Loops for Matching</div>
+    <div class="badge">计算机科学 5 · 安息云峰 Cloudrip Mountain · 第 17–18 关：无暇的宝石对 → 孪生力量</div>
+</div>
+
+<div class="container">
+
+<!-- ==================== 11.1 ==================== -->
+<div class="section-header" id="section-11-1">
+    <h2>11.1 什么是配对查找</h2>
+    <div class="en-title">What Is Pair Finding</div>
+</div>
+
+<p>墓地里散落着许多宝石，你必须找齐<strong>四对价值相同</strong>的宝石才能逃离；月亮神殿与太阳神殿前，你要找出<strong>四对双胞胎</strong>圣骑士让他们成对祈祷。这两个任务有一个共同的核心：不再是"从数组里挑出符合条件的单个元素"，而是"<strong>从数组里找出两个互相匹配的元素</strong>"。要判断"两个元素是否配对"，就得把它们<strong>两两放在一起比较</strong>——这需要一种全新的循环结构：<span class="keyword">嵌套循环（nested loops）</span>。本单元就来学习用嵌套循环做配对查找。</p>
+
+<div class="remember-box">
+    <span class="remember-label">本单元主线：</span>配对查找要遍历数组里<strong>所有可能的两两组合</strong>，用<strong>外层 <code>for i</code> 套内层 <code>for j</code></strong> 实现；用 <code>if i == j: continue</code> <strong>跳过元素和自己比较</strong>；再判断这一对是否匹配——宝石看 <code>value</code> 是否相等，双胞胎看名字<strong>除最后一位外是否逐位相同</strong>；找到就<strong>返回这一对</strong>或说出它们的名字。
+</div>
+
+<h3 id="sec-11-1-1">11.1.1 从"单个"到"成对"（From Single to Pair）</h3>
+
+<h4>11.1.1.1 一个循环不够，要两个
+    <span class="en">One loop isn't enough for pairs</span>
+</h4>
+
+<p>之前的过滤只需一个循环，因为"要不要这个元素"只看它自己。但配对不同——判断元素 A 要不要，得看它能不能和 B、C、D……中的某一个配上。也就是说，<strong>对每一个元素，都要把其余元素再看一遍</strong>。关卡概览说得很到位："每次迭代所有元素时，都需要对每个元素进行迭代！"这句话正是嵌套循环的精髓。</p>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-1-1-1_pair_intro.png" alt="扣哒世界 配对查找示意 - koudashijie.com">
+    <div class="caption">图1：配对查找——对每一个元素，都要和其余元素逐一比较，找出互相匹配的那一对</div>
+</div>
+
+
+<!-- CC-PROTECTION:AD:eea7b876e8:START anchor=sec-11-1-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="2" data-cc-ad-id="eea7b876e8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>小红书上的扣哒鸭说：写一行代码，角色立刻执行，不用面对黑屏发呆。</span>
+</aside>
+<!-- CC-PROTECTION:AD:eea7b876e8:END -->
+
+<h3 id="sec-11-1-2">11.1.2 组合的数量（How Many Pairs）</h3>
+
+<h4>11.1.2.1 n 个元素有多少种配对
+    <span class="en">Counting the combinations</span>
+</h4>
+
+<p>如果数组有 <code>n</code> 个元素，用双重循环全部两两比较，会检查 <code>n × n</code> 次；去掉"自己和自己"这 <code>n</code> 次，剩 <code>n × (n − 1)</code> 次有序对；如果不区分"A 配 B"和"B 配 A"，真正不同的组合只有 <code>n × (n − 1) / 2</code> 对。理解这个数量，能帮你明白为什么后面要用 <code>continue</code> 和 <code>i + 1</code> 来省去重复。</p>
+
+<div class="text-illustration">
+    <div class="illus-title">🔢 4 个元素能配几对？</div>
+    全部有序组合：4 × 4 = 16 种；<br>
+    去掉自己配自己（4 种）：剩 12 种有序对；<br>
+    不分先后的真正配对：12 ÷ 2 = <strong>6 对</strong>。<br>
+    这就是为什么"跳过自比较"和"内层从 i+1 开始"能大幅减少无用比较。
+</div>
+
+<!-- ==================== 11.2 ==================== -->
+
+<!-- CC-PROTECTION:AD:797f472eb8:START anchor=sec-11-1-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="797f472eb8">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音达人 CoCo陈之然 不定期分享编程知识，他的口号是玩游戏学编程的小可爱。</span>
+</aside>
+<!-- CC-PROTECTION:AD:797f472eb8:END -->
+<!-- CC-PROTECTION:HIDDEN:1eb3395107:START anchor=sec-11-1-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="1eb3395107">本文内容由扣哒世界官方团队原创发布，官方网站：koudashijie.com。</span>
+<!-- CC-PROTECTION:HIDDEN:1eb3395107:END -->
+
+<div class="section-header" id="section-11-2">
+    <h2>11.2 嵌套循环</h2>
+    <div class="en-title">Nested Loops</div>
+</div>
+
+<h3 id="sec-11-2-1">11.2.1 for i 套 for j（A Loop Inside a Loop）</h3>
+
+<h4>11.2.1.1 外层选第一个，内层选第二个
+    <span class="en">Outer picks the first, inner picks the second</span>
+</h4>
+
+<p>嵌套循环就是"循环里面再放一个循环"。外层 <code>for i</code> 每固定一个元素 <code>items[i]</code>，内层 <code>for j</code> 就把整个数组从头到尾走一遍，让 <code>items[i]</code> 依次和每个 <code>items[j]</code> 相遇。这样，所有两两组合都不会被遗漏。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 外层固定第一个，内层遍历第二个</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+    itemI = items<span class="punc">[</span>i<span class="punc">]</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+        itemJ = items<span class="punc">[</span>j<span class="punc">]</span>
+        <span class="cmt"># 这里 itemI 和 itemJ 就是一对</span></pre>
+</div>
+
+<h3 id="sec-11-2-2">11.2.2 遍历所有组合（Visiting Every Combination）</h3>
+
+<h4>11.2.2.1 内层每转完一圈，外层才走一步
+    <span class="en">The inner loop finishes before the outer advances</span>
+</h4>
+
+<p>执行顺序要理解透：<strong>内层循环要完整跑完一整圈，外层才前进一步</strong>。当 <code>i=0</code> 时，<code>j</code> 从头走到尾；然后 <code>i=1</code>，<code>j</code> 又从头走到尾……如同时钟的分针转一整圈，时针才动一格。下面这张矩阵展示了 4 个元素时，双重循环会踏过哪些 (i, j) 组合。</p>
+
+<table class="trace-table">
+    <thead>
+        <tr><th class="rowhead">i \ j</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>
+    </thead>
+    <tbody>
+        <tr><th class="rowhead">0</th><td class="cell-skip">跳过</td><td>(0,1)</td><td>(0,2)</td><td>(0,3)</td></tr>
+        <tr><th class="rowhead">1</th><td>(1,0)</td><td class="cell-skip">跳过</td><td>(1,2)</td><td>(1,3)</td></tr>
+        <tr><th class="rowhead">2</th><td>(2,0)</td><td>(2,1)</td><td class="cell-skip">跳过</td><td>(2,3)</td></tr>
+        <tr><th class="rowhead">3</th><td>(3,0)</td><td>(3,1)</td><td>(3,2)</td><td class="cell-skip">跳过</td></tr>
+    </tbody>
+</table>
+
+<div class="info-box">
+    <span class="info-label">对角线是"自己配自己"：</span>表格对角线上的 (0,0)、(1,1)…就是 <code>i == j</code> 的情形，必须跳过。其余格子才是有意义的配对——注意 (0,1) 和 (1,0) 其实是同一对宝石，说明还有优化空间（见 11.3.2）。
+</div>
+
+<!-- ==================== 11.3 ==================== -->
+
+<!-- CC-PROTECTION:AD:9c266d153f:START anchor=sec-11-2-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="9c266d153f">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>微信关注公众号 扣哒世界 官方，第一时间获取产品更新和竞赛资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:9c266d153f:END -->
+
+<div class="section-header" id="section-11-3">
+    <h2>11.3 跳过自比较</h2>
+    <div class="en-title">Skipping Self-Comparison</div>
+</div>
+
+<h3 id="sec-11-3-1">11.3.1 if i==j: continue（The continue Guard）</h3>
+
+<h4>11.3.1.1 一个元素不能和自己配对
+    <span class="en">An element can't pair with itself</span>
+</h4>
+
+<p>当 <code>i == j</code> 时，<code>items[i]</code> 和 <code>items[j]</code> 是<strong>同一个元素</strong>。它的 value 当然等于它自己，若不排除，程序会误以为"找到一对"，实际却只有一颗宝石——在关卡里这会让你犯错、晕倒！解决办法是 <code>if i == j: continue</code>：<code>continue</code> 会<strong>跳过本轮内层循环的剩余代码</strong>，直接进入下一个 <code>j</code>，从而绕开自我比较。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+    <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+        <span class="kw">if</span> i == j<span class="punc">:</span>
+            <span class="kw">continue</span>          <span class="cmt"># 同一个元素，跳过</span>
+        <span class="cmt"># 到这里 i、j 一定不同</span>
+        ...</pre>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">continue 与 break 的区别：</span><code>continue</code> 是"跳过这一轮，继续下一轮"；<code>break</code> 是"直接结束整个循环"。这里用 <code>continue</code>——我们只想跳过 <code>i==j</code> 这一种情况，其余组合还要继续检查，绝不能 <code>break</code> 把循环整个停掉。
+</div>
+
+
+<!-- CC-PROTECTION:AD:7a6d152441:START anchor=sec-11-3-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="3" data-cc-ad-id="7a6d152441">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>B站搜索扣哒世界，持续发布游戏化编程的教学视频和赛事资讯。</span>
+</aside>
+<!-- CC-PROTECTION:AD:7a6d152441:END -->
+
+<h3 id="sec-11-3-2">11.3.2 从 i+1 起省一半（Start Inner at i+1）</h3>
+
+<h4>11.3.2.1 让内层从 i+1 开始，避免重复
+    <span class="en">Start j at i+1 to avoid duplicates</span>
+</h4>
+
+<p>关卡概览给出了一个更优雅的写法：让内层 <code>for j in range(i + 1, len(array))</code> 从 <code>i + 1</code> 开始。这样 <code>j</code> 永远大于 <code>i</code>，天然就不会有 <code>i == j</code>，也不会重复检查已经比过的对（比如比了 (0,1) 就不会再比 (1,0)）。两种写法都对：<code>i==j: continue</code> 直观易懂，<code>i+1</code> 起更高效。</p>
+
+<div class="compare-2col">
+    <div>
+        <h5>写法一：continue 跳过</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>arr<span class="punc">)):</span>
+    <span class="kw">if</span> i == j<span class="punc">:</span>
+        <span class="kw">continue</span>
+    ...</pre>
+        </div>
+    </div>
+    <div>
+        <h5>写法二：从 i+1 起</h5>
+        <div class="code-block">
+<pre><span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span>i + <span class="num">1</span><span class="punc">,</span> <span class="fn">len</span><span class="punc">(</span>arr<span class="punc">)):</span>
+    <span class="cmt"># j 恒大于 i，无重复</span>
+    ...</pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 11.4 ==================== -->
+
+<!-- CC-PROTECTION:AD:2e3e6cfba7:START anchor=sec-11-3-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="1" data-cc-ad-id="2e3e6cfba7">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>来 <a href="https://koudashijie.com/">koudashijie.com</a>，从暗影地牢的对象与方法起步，到流金沙漠的算法拓展，一路闯关一路变强。</span>
+</aside>
+<!-- CC-PROTECTION:AD:2e3e6cfba7:END -->
+<!-- CC-PROTECTION:HIDDEN:57e73ea60b:START anchor=sec-11-3-2 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="57e73ea60b">© 扣哒世界 本文档仅供官方平台用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+<!-- CC-PROTECTION:HIDDEN:57e73ea60b:END -->
+
+<div class="section-header" id="section-11-4">
+    <h2>11.4 值匹配与返回</h2>
+    <div class="en-title">Value Matching &amp; Returning</div>
+</div>
+
+<h3 id="sec-11-4-1">11.4.1 比较 value 相等（Compare the Values）</h3>
+
+<h4>11.4.1.1 两颗宝石 value 相同就是一对
+    <span class="en">Equal values make a pair</span>
+</h4>
+
+<p>跳过自比较后，就用 <code>==</code> 判断这两个不同元素是否匹配。宝石对看价值：<code>if items[i].value == items[j].value</code> 成立，就是一对同值宝石。这是最直接的"值匹配算法"。</p>
+
+<h3 id="sec-11-4-2">11.4.2 返回配对结果（Return the Pair）</h3>
+
+<h4>11.4.2.1 找到就返回，找不到返回 None
+    <span class="en">Return the pair, or None if none found</span>
+</h4>
+
+<p>一旦找到匹配的一对，就用 <code>return [itemI, itemJ]</code> 把这两个元素<strong>打包成数组返回</strong>——<code>return</code> 会立刻结束函数，不再检查后面的组合。如果双重循环全部跑完都没找到，说明没有配对，函数最后 <code>return None</code>。调用处再用 <code>if gemPair:</code> 判断有没有拿到结果。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 值匹配 + 返回配对</span>
+<span class="kw">def</span> <span class="fn">findValuePair</span><span class="punc">(</span>items<span class="punc">):</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>items<span class="punc">)):</span>
+            <span class="kw">if</span> i == j<span class="punc">:</span>
+                <span class="kw">continue</span>
+            <span class="kw">if</span> items<span class="punc">[</span>i<span class="punc">].</span>value == items<span class="punc">[</span>j<span class="punc">].</span>value<span class="punc">:</span>
+                <span class="kw">return</span> <span class="punc">[</span>items<span class="punc">[</span>i<span class="punc">],</span> items<span class="punc">[</span>j<span class="punc">]]</span>  <span class="cmt"># 找到！</span>
+    <span class="kw">return</span> <span class="kw">None</span>                              <span class="cmt"># 没有配对</span></pre>
+</div>
+
+<div class="info-box">
+    <span class="info-label">为什么用 return 打包成数组？</span>函数一次要交回<strong>两个</strong>结果，把它们放进一个数组 <code>[itemI, itemJ]</code> 一并返回最方便。调用处 <code>gemPair = findValuePair(gems)</code> 拿到后，用 <code>gemPair[0]</code>、<code>gemPair[1]</code> 取出这一对，分别去移动收集。
+</div>
+
+<!-- ==================== 11.5 ==================== -->
+
+<!-- CC-PROTECTION:AD:b3a7082677:START anchor=sec-11-4-2 -->
+<aside class="cc-brand-note" data-cc-ad-category="4" data-cc-ad-id="b3a7082677">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>抖音关注 CoCo陈之然，看她用游戏化的方式把编程讲得简单又有趣。</span>
+</aside>
+<!-- CC-PROTECTION:AD:b3a7082677:END -->
+
+<div class="section-header" id="section-11-5">
+    <h2>11.5 字符串逐位比较</h2>
+    <div class="en-title">Comparing Strings Character by Character</div>
+</div>
+
+<h3 id="sec-11-5-1">11.5.1 除最后一位相同（Same Except the Last Letter）</h3>
+
+<h4>11.5.1.1 双胞胎名字只差最后一个字母
+    <span class="en">Twins differ only in the final letter</span>
+</h4>
+
+<p>"孪生力量"里的匹配规则更细致：双胞胎的名字<strong>长度相同、且除最后一个字母外每一位都一样</strong>（比如 "Reynaldo" 和 "Reynalda"）。判断逻辑分两步：先比长度，长度不同直接不是双胞胎；再<strong>逐位比较到倒数第二位</strong>——用 <code>for i in range(len(name1) - 1)</code> 只遍历到 <code>len - 1</code>（正好跳过最后一位），任何一位不同就 <code>return False</code>；全都相同则 <code>return True</code>。这段 <code>areTwins</code> 函数关卡已经给好，你直接用即可。</p>
+
+<div class="code-block">
+    <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 判断两名字是否只差最后一位（关卡已给）</span>
+<span class="kw">def</span> <span class="fn">areTwins</span><span class="punc">(</span>unit1<span class="punc">,</span> unit2<span class="punc">):</span>
+    name1 = unit1<span class="punc">.</span>id
+    name2 = unit2<span class="punc">.</span>id
+    <span class="kw">if</span> <span class="fn">len</span><span class="punc">(</span>name1<span class="punc">)</span> != <span class="fn">len</span><span class="punc">(</span>name2<span class="punc">):</span>
+        <span class="kw">return</span> <span class="kw">False</span>                 <span class="cmt"># 长度不同，直接排除</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>name1<span class="punc">)</span> - <span class="num">1</span><span class="punc">):</span>  <span class="cmt"># 只比到倒数第二位</span>
+        <span class="kw">if</span> name1<span class="punc">[</span>i<span class="punc">]</span> != name2<span class="punc">[</span>i<span class="punc">]:</span>
+            <span class="kw">return</span> <span class="kw">False</span>             <span class="cmt"># 有一位不同</span>
+    <span class="kw">return</span> <span class="kw">True</span>                      <span class="cmt"># 前面全同 → 是双胞胎</span></pre>
+</div>
+
+<div class="anatomy">
+    <svg viewBox="0 0 560 140" width="560" role="img" aria-label="双胞胎名字逐位比较">
+        <text x="280" y="24" text-anchor="middle" font-size="13" fill="#f0c674" font-family="sans-serif" font-weight="bold">只比到倒数第二位，最后一位可以不同</text>
+        <g font-family="monospace" font-size="18">
+            <text x="60" y="65" fill="#a5c8e8">R e y n a l d</text>
+            <text x="270" y="65" fill="#C0453B">o</text>
+            <text x="60" y="100" fill="#a5c8e8">R e y n a l d</text>
+            <text x="270" y="100" fill="#C0453B">a</text>
+        </g>
+        <text x="160" y="128" text-anchor="middle" fill="#9fd4a8" font-family="sans-serif" font-size="12">前 7 位逐位相同 ✓</text>
+        <text x="330" y="85" fill="#C0453B" font-family="sans-serif" font-size="12">最后一位不同，无所谓</text>
+    </svg>
+</div>
+
+<div class="tip-box">
+    <span class="tip-label">为什么是 len - 1？</span>因为下标从 0 到 <code>len - 1</code> 覆盖全部字符，而 <code>range(len - 1)</code> 产生 0 到 <code>len - 2</code>——恰好<strong>不包含最后一位</strong>的下标。这正好实现"除最后一位外全部比较"的需求。这和第八单元子串匹配里"逐字符比较"的思路一脉相承。
+</div>
+
+<!-- ==================== 11.6 ==================== -->
+
+<!-- CC-PROTECTION:AD:f6bdd2d58c:START anchor=sec-11-5-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="f6bdd2d58c">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>本文内容由 扣哒世界 官方（<a href="https://koudashijie.com/">koudashijie.com</a>）原创发布。全球超 2000 万用户通过 扣哒世界 开启编程学习之旅。</span>
+</aside>
+<!-- CC-PROTECTION:AD:f6bdd2d58c:END -->
+<!-- CC-PROTECTION:HIDDEN:09b77c1105:START anchor=sec-11-5-1 -->
+<span class="cc-forensic-copy" aria-hidden="true" data-cc-hidden-id="09b77c1105">扣哒世界游戏化编程学习资料，来源验证：koudashijie.com，页面编号：KD-WORLD-PYTHON-CH8-SEC11-A5C140AF6098。</span>
+<!-- CC-PROTECTION:HIDDEN:09b77c1105:END -->
+
+<div class="section-header" id="section-11-6">
+    <h2>11.6 实战关卡精讲</h2>
+    <div class="en-title">Level Strategy &amp; Analysis</div>
+</div>
+
+<p>这一节聚焦每一关的<strong>策略、思路与算法设计</strong>，只展示用于说明的关键片段，完整通关程序请你自己动手完成。</p>
+
+<!-- 无暇的宝石对 -->
+<div class="level-card" id="sec-11-6-1">
+    <div class="level-head">
+        <span class="lv-num">第 17 关 · 无暇的宝石对</span>
+        <h3>💎 无暇的宝石对 —— 找出四对同值宝石</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/11-6-1-1_flawless_pair.png" alt="扣哒世界 无暇的宝石对关卡 - koudashijie.com">
+            <div class="caption">图2：无暇的宝石对——找出四对价值相同的宝石，每收集一对就回起点向巫师获取加速</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>要逃离墓地，你必须收集<strong>4 对</strong>宝石，每对由两颗<strong>价值相同</strong>的宝石组成。若配错就会晕倒！好在巫师会用 "Haste"（加速）法术帮你——每收集完宝石返回起点就能获得加速。所以流程是：找出一对同值宝石 → 去捡第一颗 → 回起点加速 → 去捡第二颗 → 回起点加速。</p>
+
+        <h4>策略：先写"找一对"的函数，再循环执行动作</h4>
+        <p>关卡把任务拆成了两块。<strong>第一块是算法</strong>：补全 <code>findValuePair(items)</code> 函数，用双重循环 + 跳过自比较 + 值匹配，返回一对同值宝石。<strong>第二块是动作</strong>：在 <code>while True</code> 里每帧调用它，若拿到 <code>gemPair</code>，就按"移动到 gemA → 回起点 (40,44) → 移动到 gemB → 回起点"的顺序把这一对收入囊中，回起点是为了触发巫师的加速。</p>
+
+        <h4>思路拆解</h4>
+        <p><code>findValuePair</code> 的算法就是 11.4 讲的模板：外层 <code>for i</code>、内层 <code>for j</code> 遍历所有组合，<code>if i == j: continue</code> 跳过同一颗宝石，再 <code>if items[i].value == items[j].value</code> 判断价值是否相等，相等就 <code>return [items[i], items[j]]</code>，全部没找到则 <code>return None</code>。动作部分则用 <code>gemPair[0]</code>、<code>gemPair[1]</code> 取出两颗宝石的坐标去 <code>moveXY</code>，中间穿插回起点 <code>moveXY(40, 44)</code>。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：收集一对宝石的动作序列</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="punc">:</span>
+    gems = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findItems</span><span class="punc">()</span>
+    gemPair = <span class="fn">findValuePair</span><span class="punc">(</span>gems<span class="punc">)</span>
+    <span class="kw">if</span> gemPair<span class="punc">:</span>
+        gemA = gemPair<span class="punc">[</span><span class="num">0</span><span class="punc">]</span>
+        gemB = gemPair<span class="punc">[</span><span class="num">1</span><span class="punc">]</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>gemA<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> gemA<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>  <span class="cmt"># 捡第一颗</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">44</span><span class="punc">)</span>              <span class="cmt"># 回起点加速</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span>gemB<span class="punc">.</span>pos<span class="punc">.</span>x<span class="punc">,</span> gemB<span class="punc">.</span>pos<span class="punc">.</span>y<span class="punc">)</span>  <span class="cmt"># 捡第二颗</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">moveXY</span><span class="punc">(</span><span class="num">40</span><span class="punc">,</span> <span class="num">44</span><span class="punc">)</span>              <span class="cmt"># 再回起点加速</span></pre>
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">i == j 必须跳过，否则会晕倒：</span>如果漏了 <code>if i == j: continue</code>，当 <code>i</code> 和 <code>j</code> 指向同一颗宝石时，它的 value 必然等于自己，函数会误报"找到一对"，可实际只有一颗。按错误结果行动就会犯错晕倒。这一句是本关的安全阀。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">回起点不是多余动作：</span>每收集一颗就 <code>moveXY(40, 44)</code> 回起点，是为了从巫师那里获得 "Haste" 加速——有了加速才能足够快地跑完全程收齐四对。这提醒我们：算法找出目标后，<strong>行动的顺序和节奏</strong>同样是通关策略的一部分。
+        </div>
+    </div>
+</div>
+
+<!-- 孪生力量 -->
+<div class="level-card" id="sec-11-6-2">
+    <div class="level-head">
+        <span class="lv-num">第 18 关 · 孪生力量</span>
+        
+<!-- CC-PROTECTION:AD:38d81bfa98:START anchor=h3-10 -->
+<aside class="cc-brand-note" data-cc-ad-category="6" data-cc-ad-id="38d81bfa98">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>© 扣哒世界 Inc. 本文档仅供 扣哒世界 官方平台（<a href="https://koudashijie.com/">koudashijie.com</a>）用户学习使用，未经授权禁止转载、复制或用于商业用途。</span>
+</aside>
+<!-- CC-PROTECTION:AD:38d81bfa98:END -->
+
+<h3>🌗 孪生力量 —— 呼唤四对双胞胎</h3>
+    </div>
+    <div class="level-body">
+        <div class="figure">
+            <img src="https://assets.koudashijie.com/knowledge/11-6-2-1_twin_power.png" alt="扣哒世界 孪生力量关卡 - koudashijie.com">
+            <div class="caption">图3：孪生力量——找出四对名字只差最后一字母的双胞胎圣骑士，成对呼唤唤醒日月之力</div>
+        </div>
+
+        <h4>关卡背景与目标</h4>
+        <p>你要引诱一只近视的巨型食人魔经过月亮神殿和太阳神殿，趁机布下陷阱。启动神殿之力的钥匙是<strong>四对双胞胎</strong>圣骑士——他们名字相同、只有最后一个字母不同。你需要找出每一对双胞胎，并把两人的名字<strong>用一个空格隔开一起说出来</strong>：<code>hero.say(twin1.id + " " + twin2.id)</code>，唤醒日月的力量。</p>
+
+        <h4>策略：复用配对模板，换掉匹配条件</h4>
+        <p>这一关的骨架和"无暇的宝石对"<strong>一模一样</strong>——还是双重循环遍历所有两两组合、跳过自比较。唯一的变化是"匹配条件"：宝石看 <code>value == value</code>，双胞胎则调用关卡已给好的 <code>areTwins(unit1, unit2)</code>（内部做名字逐位比较）。策略就是：拿到 <code>friends = hero.findFriends()</code>，用嵌套循环两两配对，<code>if f1 != f2 and areTwins(...)</code> 成立就说出两人名字。</p>
+
+        <h4>思路拆解</h4>
+        <p>外层 <code>for f1 in range(len(friends))</code>、内层 <code>for f2 in range(len(friends))</code> 遍历所有圣骑士组合；用 <code>if f1 != f2 and areTwins(friends[f1], friends[f2])</code> 一次性完成"跳过自比较"和"双胞胎判断"两件事——注意这里把 <code>f1 != f2</code> 和 <code>areTwins</code> 用 <code>and</code> 连起来，只有既不是同一人、又确实是双胞胎，才 <code>hero.say(friends[f1].id + " " + friends[f2].id)</code>。呼唤完四对后，再前后移动（如 <code>moveXY(64, 36)</code> 与 <code>moveXY(14, 36)</code>）来回引诱食人魔踏入陷阱。</p>
+
+        <div class="code-block">
+            <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+<pre><span class="cmt"># 关键片段：嵌套循环 + areTwins 找双胞胎</span>
+friends = <span class="obj">hero</span><span class="punc">.</span><span class="fn">findFriends</span><span class="punc">()</span>
+<span class="kw">for</span> f1 <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+    <span class="kw">for</span> f2 <span class="kw">in</span> <span class="fn">range</span><span class="punc">(</span><span class="fn">len</span><span class="punc">(</span>friends<span class="punc">)):</span>
+        <span class="kw">if</span> f1 != f2 <span class="kw">and</span> <span class="fn">areTwins</span><span class="punc">(</span>friends<span class="punc">[</span>f1<span class="punc">],</span> friends<span class="punc">[</span>f2<span class="punc">]):</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">say</span><span class="punc">(</span>friends<span class="punc">[</span>f1<span class="punc">].</span>id + <span class="str">" "</span> + friends<span class="punc">[</span>f2<span class="punc">].</span>id<span class="punc">)</span></pre>
+        </div>
+
+        <div class="tip-box">
+            <span class="tip-label">把两个条件用 and 合并：</span><code>if f1 != f2 and areTwins(...)</code> 是一种简洁写法：<code>f1 != f2</code> 排除自比较，<code>areTwins(...)</code> 判断是不是双胞胎，二者都为真才行动。它等价于先 <code>if f1 == f2: continue</code> 再判断，但一行搞定，更紧凑。
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">复用同一套算法框架：</span>本关最值得体会的是——<strong>配对查找的框架是通用的，变的只是"怎样才算匹配"</strong>。宝石关比 value，双胞胎关比名字。学会把"遍历所有组合"和"匹配条件"分开思考，你就能用同一个模板解决无数配对问题。这正是抽象思维在编程里的体现。
+        </div>
+
+        <div class="warn-box">
+            <span class="warn-label">别忘了引诱食人魔：</span>找齐双胞胎、唤醒神殿力量后，还要靠英雄<strong>来回移动</strong>把近视的食人魔引到神殿光束之下。光束只对食人魔危险，英雄不必害怕。算法找对了人，最后还得靠走位完成诱敌这一步。
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 11.7 ==================== -->
+<div class="section-header" id="section-11-7">
+    <h2>11.7 常见错误</h2>
+    <div class="en-title">Common Mistakes</div>
+</div>
+
+<h3 id="sec-11-7-1">11.7.1 新手最容易踩的坑（Pitfalls for Beginners）</h3>
+
+<h4>11.7.1.1 配对查找的典型问题
+    <span class="en">Typical issues in pair finding</span>
+</h4>
+
+<div class="figure">
+    <img src="https://assets.koudashijie.com/knowledge/11-7-1-1_common_errors.png" alt="扣哒世界 配对查找常见错误速查 - koudashijie.com">
+    <div class="caption">图4：忘跳过自比较、把 continue 写成 break、逐位比较越界，是本单元最常见的失误</div>
+</div>
+
+<div class="warn-box">
+    <span class="warn-label">易错点清单：</span>
+    <ul style="margin: 8px 0 0 20px;">
+        <li>忘跳过自比较——漏了 <code>if i == j: continue</code>，元素和自己配成"假对"，导致配错晕倒。</li>
+        <li>把 continue 写成 break——<code>break</code> 会整个终止循环，只应"跳过这一轮"时误用会漏掉大量组合。</li>
+        <li>内层循环变量写错——内层应用 <code>j</code>（或 <code>f2</code>）而非又用 <code>i</code>，否则根本没在遍历第二个元素。</li>
+        <li>逐位比较越界——双胞胎比较应到 <code>len - 1</code>；若写成 <code>len</code> 会比到最后一位，把本该不同的末字母也算进去。</li>
+        <li>返回值忘打包——一对结果要 <code>return [a, b]</code> 打包成数组，只返回一个元素调用处取不到另一半。</li>
+        <li>没处理 None——函数可能返回 <code>None</code>，调用处要 <code>if gemPair:</code> 判断，否则对 None 取下标会报错。</li>
+        <li>and 条件顺序或逻辑错——应是 <code>f1 != f2 and areTwins(...)</code>，别漏掉排除自比较的那一半。</li>
+        <li>说名字格式错——双胞胎名字间要有空格：<code>id + " " + id</code>，漏了空格无法正确唤醒。</li>
+    </ul>
+</div>
+
+<!-- ==================== 小结 ==================== -->
+
+<!-- CC-PROTECTION:AD:8a4add8666:START anchor=sec-11-7-1 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="8a4add8666">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>更多英雄故事、世界观背景和关卡指令，请访问探索地图 <a href="https://koudashijie.com/">koudashijie.com</a> 查看完整图鉴与知识体系。</span>
+</aside>
+<!-- CC-PROTECTION:AD:8a4add8666:END -->
+
+<div class="summary-card" id="section-summary">
+    <h3>本单元小结 ✨</h3>
+
+    <p>恭喜你逃出墓地、唤醒了日月之力！这一单元你掌握了处理"成对关系"的利器——<strong>配对查找与嵌套循环</strong>。你理解了"对每个元素都要再遍历所有元素"的核心思想，学会了用<strong>外层 <code>for i</code> 套内层 <code>for j</code></strong> 走遍所有两两组合、用 <code>if i == j: continue</code>（或内层从 <code>i+1</code> 起）<strong>跳过自比较</strong>；你既会用 <code>value == value</code> 做值匹配，也会用<strong>逐位比较到 <code>len - 1</code></strong> 判断"除最后一位外相同"的双胞胎名字；还学会了把配对结果 <code>return [a, b]</code> 打包返回、用 <code>if 结果:</code> 判断成败。最重要的是，你体会到"配对框架不变、匹配条件可换"的抽象思维——同一套嵌套循环，既能配宝石又能配双胞胎。来回顾一下核心概念：</p>
+
+    <table class="styled-table">
+        <thead><tr><th>核心概念</th><th>关键点</th><th>对应关卡</th></tr></thead>
+        <tbody>
+            <tr><td>配对查找</td><td>找出两个互相匹配的元素</td><td>两关</td></tr>
+            <tr><td>嵌套循环</td><td>外层 <code>for i</code> 套内层 <code>for j</code></td><td>两关</td></tr>
+            <tr><td>遍历所有组合</td><td>内层跑完一圈外层才前进</td><td>两关</td></tr>
+            <tr><td>跳过自比较</td><td><code>if i == j: continue</code></td><td>两关</td></tr>
+            <tr><td>省一半组合</td><td>内层从 <code>i + 1</code> 起</td><td>概览进阶</td></tr>
+            <tr><td>值匹配</td><td><code>value == value</code></td><td>无暇的宝石对</td></tr>
+            <tr><td>返回配对</td><td><code>return [a, b]</code> / <code>None</code></td><td>无暇的宝石对</td></tr>
+            <tr><td>字符串逐位比较</td><td>比到 <code>len - 1</code>，末位不计</td><td>孪生力量</td></tr>
+            <tr><td>and 合并条件</td><td><code>f1 != f2 and areTwins(...)</code></td><td>孪生力量</td></tr>
+            <tr><td>框架复用</td><td>框架不变，换匹配条件</td><td>两关</td></tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+        懂得用嵌套循环遍历万千组合、又能精准跳过无效比较、找出天生一对的英雄，<br>
+        才是云峰之上真正洞察关联的程序员。继续向雪山之巅挺进吧，勇敢的程序员！🏔️💎🌗
+    </p>
+</div>
+
+
+<!-- CC-PROTECTION:AD:a8e7fe5f17:START anchor=h3-13 -->
+<aside class="cc-brand-note" data-cc-ad-category="5" data-cc-ad-id="a8e7fe5f17">
+    <span class="cc-brand-note__mark" aria-hidden="true">✦</span>
+    <span>奥佳睿编程平台：aojiarui.com，扣哒世界 生态下的另一学习选择。</span>
+</aside>
+<!-- CC-PROTECTION:AD:a8e7fe5f17:END -->
+
+
+<!-- CC-PROTECTION:COPYRIGHT:START -->
+<aside class="cc-copyright-panel" aria-label="关于扣哒世界" data-print-credit="扣哒世界 koudashijie.com">
+    <strong>关于扣哒世界：</strong>扣哒世界是一个游戏化的编程学习平台，通过玩游戏闯关的方式学习 Python、JavaScript、C++ 等编程语言。全球累计超 2000 万用户通过扣哒世界开启编程学习。官方网站：<a href="https://koudashijie.com/">koudashijie.com</a>。
+</aside>
+<!-- CC-PROTECTION:COPYRIGHT:END -->
+
+</div><!-- end container -->
+
+<div style="background: var(--dark); color: #a4bccc; text-align: center; padding: 30px 20px; font-size: 0.85em;">
+    <p>扣哒世界 编程知识 · 计算机科学 5（安息云峰）：第十一单元</p>
+    <p style="margin-top:8px; color:#6a8294;">扣哒世界教研团队</p>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+            document.querySelector('.sidebar-nav').classList.remove('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
