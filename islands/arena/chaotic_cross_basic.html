@@ -797,17 +797,20 @@
             mate<span class="punc">.</span><span class="fn">chaseBall</span><span class="punc">()</span>    <span class="cmt"># 没球就追球</span>
 
 <span class="obj">hero</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"spawn-mate"</span><span class="punc">,</span> onSpawnMate<span class="punc">)</span></pre></div>
-<div class="code-pane cpp"><pre><span class="kw">void</span> <span class="fn">onSpawnMate</span><span class="punc">(</span><span class="obj">Mate</span><span class="punc">*</span> mate<span class="punc">)</span> <span class="punc">{</span>
+<div class="code-pane cpp"><pre><span class="kw">auto</span> <span class="fn">onSpawnMate</span><span class="punc">(</span><span class="kw">auto</span> mate<span class="punc">)</span> <span class="punc">{</span>
     <span class="kw">while</span> <span class="punc">(</span><span class="kw">true</span><span class="punc">)</span> <span class="punc">{</span>
-        <span class="kw">if</span> <span class="punc">(</span>mate<span class="punc">-></span>hasBall<span class="punc">)</span> <span class="punc">{</span>
-            mate<span class="punc">-></span><span class="fn">shoot</span><span class="punc">();</span>       <span class="cmt">// 有球就射门</span>
+        <span class="kw">if</span> <span class="punc">(</span>mate<span class="punc">.</span>hasBall<span class="punc">)</span> <span class="punc">{</span>
+            mate<span class="punc">.</span><span class="fn">shoot</span><span class="punc">();</span>       <span class="cmt">// 有球就射门</span>
         <span class="punc">}</span> <span class="kw">else</span> <span class="punc">{</span>
-            mate<span class="punc">-></span><span class="fn">chaseBall</span><span class="punc">();</span>   <span class="cmt">// 没球就追球</span>
+            mate<span class="punc">.</span><span class="fn">chaseBall</span><span class="punc">();</span>   <span class="cmt">// 没球就追球</span>
         <span class="punc">}</span>
     <span class="punc">}</span>
 <span class="punc">}</span>
 
-<span class="obj">hero</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"spawn-mate"</span><span class="punc">,</span> onSpawnMate<span class="punc">);</span></pre></div>
+<span class="kw">int</span> <span class="fn">main</span><span class="punc">()</span> <span class="punc">{</span>
+    <span class="obj">hero</span><span class="punc">.</span><span class="fn">on</span><span class="punc">(</span><span class="str">"spawn-mate"</span><span class="punc">,</span> onSpawnMate<span class="punc">);</span>
+    <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>
+<span class="punc">}</span></pre></div>
 </div>
 
 <div class="tip-box">
@@ -863,7 +866,7 @@
 mate<span class="punc">.</span><span class="fn">roll</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> power<span class="punc">)</span></pre></div>
 <div class="code-pane cpp"><pre><span class="cmt">// 最大射程 = power × params.rollRangeFactor</span>
 <span class="cmt">// 如果 power 超过 params.maxPower，会被自动限制到上限</span>
-mate<span class="punc">-></span><span class="fn">roll</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> power<span class="punc">);</span></pre></div>
+mate<span class="punc">.</span><span class="fn">roll</span><span class="punc">(</span>x<span class="punc">,</span> y<span class="punc">,</span> power<span class="punc">);</span></pre></div>
 </div>
 
 <ul class="clean">
@@ -1062,18 +1065,23 @@ mate<span class="punc">-></span><span class="fn">roll</span><span class="punc">(
         <span class="obj">hero</span><span class="punc">.</span><span class="fn">press</span><span class="punc">(</span>carrier<span class="punc">)</span>
 
     <span class="obj">hero</span><span class="punc">.</span><span class="fn">wait</span><span class="punc">(</span><span class="num">0.3</span><span class="punc">)</span></pre></div>
-<div class="code-pane cpp"><pre><span class="kw">while</span> <span class="punc">(</span><span class="kw">true</span><span class="punc">)</span> <span class="punc">{</span>
-    <span class="cmt">// 谁被眩晕了，就吹哨帮他解除</span>
-    <span class="kw">for</span> <span class="punc">(</span><span class="kw">auto</span> m <span class="punc">:</span> <span class="obj">hero</span><span class="punc">.</span>myMates<span class="punc">)</span> <span class="punc">{</span>
-        <span class="kw">if</span> <span class="punc">(</span>m<span class="punc">.</span>isStunned <span class="punc">&&</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">abilityReady</span><span class="punc">(</span><span class="str">"whistle"</span><span class="punc">))</span>
-            <span class="obj">hero</span><span class="punc">.</span><span class="fn">whistle</span><span class="punc">(</span>m<span class="punc">);</span>
+<div class="code-pane cpp"><pre><span class="kw">int</span> <span class="fn">main</span><span class="punc">()</span> <span class="punc">{</span>
+    <span class="kw">while</span> <span class="punc">(</span><span class="kw">true</span><span class="punc">)</span> <span class="punc">{</span>
+        <span class="cmt">// 谁被眩晕了，就吹哨帮他解除</span>
+        <span class="kw">for</span> <span class="punc">(</span><span class="kw">int</span> i <span class="punc">=</span> <span class="num">0</span><span class="punc">;</span> i <span class="punc">&lt;</span> <span class="obj">hero</span><span class="punc">.</span>myMates<span class="punc">.</span><span class="fn">size</span><span class="punc">();</span> i<span class="punc">++)</span> <span class="punc">{</span>
+            <span class="kw">auto</span> m <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span>myMates<span class="punc">[</span>i<span class="punc">];</span>
+            <span class="kw">if</span> <span class="punc">(</span>m<span class="punc">.</span>isStunned <span class="punc">&amp;&amp;</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isReady</span><span class="punc">(</span><span class="str">"whistle"</span><span class="punc">))</span> <span class="punc">{</span>
+                <span class="obj">hero</span><span class="punc">.</span><span class="fn">whistle</span><span class="punc">(</span>m<span class="punc">);</span>
+            <span class="punc">}</span>
+        <span class="punc">}</span>
+        <span class="cmt">// 敌方持球时，用压迫拖慢对手</span>
+        <span class="kw">auto</span> carrier <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span>ball<span class="punc">.</span>owner<span class="punc">;</span>
+        <span class="kw">if</span> <span class="punc">(</span>carrier <span class="punc">&amp;&amp;</span> carrier<span class="punc">.</span>color <span class="punc">!=</span> <span class="obj">hero</span><span class="punc">.</span>color <span class="punc">&amp;&amp;</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">isReady</span><span class="punc">(</span><span class="str">"press"</span><span class="punc">))</span> <span class="punc">{</span>
+            <span class="obj">hero</span><span class="punc">.</span><span class="fn">press</span><span class="punc">(</span>carrier<span class="punc">);</span>
+        <span class="punc">}</span>
+        <span class="obj">hero</span><span class="punc">.</span><span class="fn">wait</span><span class="punc">(</span><span class="num">0.3</span><span class="punc">);</span>
     <span class="punc">}</span>
-    <span class="cmt">// 敌方持球时，用压迫拖慢对手</span>
-    <span class="kw">auto</span> carrier <span class="punc">=</span> <span class="obj">hero</span><span class="punc">.</span>ball<span class="punc">.</span>owner<span class="punc">;</span>
-    <span class="kw">if</span> <span class="punc">(</span>carrier <span class="punc">&&</span> carrier<span class="punc">-></span>color <span class="punc">!=</span> <span class="obj">hero</span><span class="punc">.</span>color <span class="punc">&&</span> <span class="obj">hero</span><span class="punc">.</span><span class="fn">abilityReady</span><span class="punc">(</span><span class="str">"press"</span><span class="punc">))</span> <span class="punc">{</span>
-        <span class="obj">hero</span><span class="punc">.</span><span class="fn">press</span><span class="punc">(</span>carrier<span class="punc">);</span>
-    <span class="punc">}</span>
-    <span class="obj">hero</span><span class="punc">.</span><span class="fn">wait</span><span class="punc">(</span><span class="num">0.3</span><span class="punc">);</span>
+    <span class="kw">return</span> <span class="num">0</span><span class="punc">;</span>
 <span class="punc">}</span></pre></div>
 </div>
 
