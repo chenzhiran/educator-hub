@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔬 物理力学实验室 · 互动仿真游戏</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* 亮色系高级配色，高纯度亮色用于突出物体 */
+  --pink: #f43f5e;     --blue: #3b82f6;     --green: #10b981;    --yellow: #f59e0b;
+  --purple: #8b5cf6;   --orange: #f97316;   --cyan: #06b6d4;
+  /* 基础结构色 */
+  --bg: #f4f6f8;       --panel: #ffffff;    --card: #f8fafc;
+  --text: #1e293b;     --dim: #64748b;      --border: #e2e8f0;
+}
+body{
+  font-family: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 顶部导航 (毛玻璃质感) */
+header{
+  display: flex; align-items: center; gap: 14px; padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50; 
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+header h1{
+  font-size: 1.5em; 
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  -webkit-background-clip: text; background-clip: text; 
+  color: transparent; font-weight: 800; letter-spacing: -0.5px;
+}
+header .score{
+  margin-left: auto; background: var(--card); padding: 8px 20px; 
+  border-radius: 20px; font-weight: bold; font-size: 0.95em;
+  border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+header .score b{ color: var(--orange); font-size: 1.1em;}
+
+/* 关卡选择标签 */
+.levels{display: flex; gap: 10px; flex-wrap: wrap; padding: 20px 32px; background: transparent;}
+.levels button{
+  border: 1px solid var(--border); padding: 10px 18px; border-radius: 12px; 
+  font-size: 0.9em; font-weight: 600; cursor: pointer;
+  background: var(--panel); color: var(--dim); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.levels button:hover{ color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59,130,246,0.1); border-color: #bfdbfe;}
+.levels button.active{
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff; border-color: transparent; box-shadow: 0 6px 16px rgba(99,102,241,0.25);
+}
+.levels button.done::after{content: " ✅";}
+
+/* 主体布局 */
+.stage-wrap{display: flex; gap: 24px; padding: 10px 32px 30px; max-width: 1400px; margin: 0 auto; align-items: stretch;}
+@media(max-width:900px){.stage-wrap{flex-direction: column;}}
+
+/* 左侧：仿真舞台（白底，清爽边框） */
+.viz{
+  flex: 1.4; min-width: 0; background: var(--panel);
+  border-radius: 24px; padding: 20px; border: 1px solid var(--border); position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+.viz h3{font-size: 1.1em; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;}
+canvas{
+  width: 100%; background: #ffffff; 
+  border-radius: 16px; display: block; touch-action: none;
+  border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+}
+.viz-hint{margin-top: 16px; font-size: 0.9em; color: var(--dim); background: var(--bg); padding: 12px 16px; border-radius: 12px; min-height: 20px;}
+
+/* 右侧：控制面板 */
+.console{flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 16px;}
+.panel{background: var(--panel); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.02);}
+.panel h4{font-size: 1em; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; font-weight: 700;}
+
+/* 公式展示区 (浅色极简风) */
+.formula-box{
+  background: var(--bg); border-radius: 16px; padding: 18px; text-align: center;
+  font-size: 1.4em; font-weight: bold; letter-spacing: 1px; border: 1px dashed #cbd5e1;
+  position: relative; overflow: hidden; color: var(--text);
+}
+.formula-box .term{display: inline-block; padding: 2px 8px; border-radius: 8px; transition: all 0.25s;}
+.formula-box .term.pulse{background: var(--yellow); color: #fff; transform: scale(1.15); box-shadow: 0 4px 12px rgba(245,158,11,0.4);}
+.formula-box .res{color: var(--blue);}
+.formula-box .res.pulse{background: var(--blue); color: #fff; transform: scale(1.15); box-shadow: 0 4px 12px rgba(59,130,246,0.4);}
+.formula-sub{font-size: 0.6em; vertical-align: sub;}
+
+/* 滑块控件 (现代化) */
+.slider-row{margin: 18px 0;}
+.slider-row label{display: flex; justify-content: space-between; font-size: 0.9em; font-weight: 600; margin-bottom: 10px; color: var(--dim);}
+.slider-row label .val{color: var(--blue); font-family: monospace; font-size: 1.1em; font-weight: bold;}
+input[type=range]{width: 100%; height: 6px; -webkit-appearance: none; appearance: none; background: #e2e8f0; border-radius: 8px; outline: none; cursor: pointer;}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; 
+  background: #fff; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+  border: 3px solid var(--blue); transition: transform 0.1s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform: scale(1.15);}
+select{
+  width: 100%; padding: 10px 12px; border-radius: 12px; background: var(--bg); color: var(--text); 
+  border: 1px solid var(--border); font-size: 0.95em; cursor: pointer; font-weight: 500;
+  outline: none; transition: border 0.2s;
+}
+select:focus{border-color: var(--blue);}
+
+/* 交互按钮 */
+.btn{
+  border: none; padding: 12px 20px; border-radius: 12px; font-weight: bold; cursor: pointer;
+  font-size: 0.95em; color: #fff; transition: all 0.15s; margin-top: 6px; background: var(--blue);
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3); width: 100%;
+}
+.btn:hover{transform: translateY(-2px); box-shadow: 0 6px 16px rgba(59,130,246,0.4);}
+.btn:active{transform: translateY(1px); box-shadow: 0 2px 4px rgba(59,130,246,0.2);}
+.btn.green{background: var(--green); box-shadow: 0 4px 12px rgba(16,185,129,0.3);}
+.btn.green:hover{box-shadow: 0 6px 16px rgba(16,185,129,0.4);}
+.btn.pink{background: var(--pink); box-shadow: 0 4px 12px rgba(244,63,94,0.3);}
+.btn.pink:hover{box-shadow: 0 6px 16px rgba(244,63,94,0.4);}
+
+/* 现象反馈 */
+.readout{background: var(--bg); border-radius: 14px; padding: 16px; font-size: 0.95em; line-height: 1.6;}
+.readout .big{font-size: 1.4em; font-weight: 800; color: var(--blue);}
+.status-pill{display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.85em; margin-top: 8px;}
+
+/* 挑战任务面板 (柔和暖色) */
+.quest{background: #fff7ed; border-radius: 14px; padding: 16px; border: 1px solid #fdba74; transition: all 0.3s;}
+.quest .q-title{color: #ea580c; font-weight: 800; margin-bottom: 8px; font-size: 1em; display: flex; align-items: center; gap: 6px;}
+.quest .q-desc{font-size: 0.9em; line-height: 1.6; color: #7c2d12;}
+.quest.solved{background: #f0fdf4; border-color: #86efac;}
+.quest.solved .q-title{color: #166534;}
+.quest.solved .q-desc{color: #14532d;}
+
+.tip{font-size: 0.85em; color: var(--dim); margin-top: 10px; font-style: italic;}
+.knowledge{font-size: 0.88em; color: var(--dim); line-height: 1.6; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;}
+.knowledge b{color: var(--text); font-weight: 700;}
+
+@keyframes pop{0%{transform: scale(0.8); opacity: 0;} 70%{transform: scale(1.1);} 100%{transform: scale(1); opacity: 1;}}
+.toast{
+  position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff; padding: 14px 32px; border-radius: 30px;
+  font-weight: bold; font-size: 1.05em; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  z-index: 200; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔬 物理力学实验室</h1>
+  <div class="score">⭐ 已通关 <b id="score">0</b> / 8</div>
+</header>
+
+<div class="levels" id="levels"></div>
+
+<div class="stage-wrap">
+  <div class="viz">
+    <h3 id="vizTitle">🎬 仿真舞台</h3>
+    <canvas id="cv" width="560" height="420"></canvas>
+    <div class="viz-hint" id="vizHint"></div>
+  </div>
+  <div class="console" id="console"></div>
+</div>
+
+<script>
+/* ===================== 引擎框架 ===================== */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const W=560, H=420;
+let current=0, anim=null, t=0;
+const solved=new Array(8).fill(false);
+const consoleEl=document.getElementById('console');
+const vizTitle=document.getElementById('vizTitle');
+const vizHint=document.getElementById('vizHint');
+
+// 高级质感色彩常量，用于Canvas绘制
+const C_BG = '#ffffff';
+const C_TEXT = '#1e293b';
+const C_DIM = '#64748b';
+const C_ACCENT = '#3b82f6';
+const C_WARN = '#f59e0b';
+const C_SUCCESS = '#10b981';
+const C_DANGER = '#ef4444';
+
+function toast(msg){
+  const d=document.createElement('div'); d.className='toast'; d.textContent=msg; document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2000);
+}
+function markSolved(i){
+  if(!solved[i]){
+    solved[i]=true; document.getElementById('score').textContent=solved.filter(Boolean).length;
+    buildLevels(); toast('🎉 挑战完成！+1 星');
+  }
+}
+function pulse(id){
+  const e=document.getElementById(id);
+  if(e){e.classList.add('pulse'); setTimeout(()=>e.classList.remove('pulse'),300);}
+}
+
+/* 通用绘图助手 */
+function arrow(x1,y1,x2,y2,color,lw){
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw||3;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const a=Math.atan2(y2-y1,x2-x1), s=10;
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-s*Math.cos(a-0.4),y2-s*Math.sin(a-0.4));
+  ctx.lineTo(x2-s*Math.cos(a+0.4),y2-s*Math.sin(a+0.4)); ctx.closePath(); ctx.fill();
+}
+function text(str,x,y,color,size,align,weight='bold'){
+  ctx.fillStyle = color || C_TEXT; 
+  ctx.font = `${weight} ${size||14}px "Inter", sans-serif`; 
+  ctx.textAlign = align || 'left'; 
+  ctx.fillText(str,x,y); 
+  ctx.textAlign = 'left';
+}
+function emoji(e,x,y,size){
+  ctx.font = (size||30)+'px sans-serif'; 
+  ctx.textAlign = 'center'; 
+  ctx.fillText(e,x,y); 
+  ctx.textAlign = 'left';
+}
+
+/* ===================== 关卡定义 ===================== */
+const levels=[
+{
+  name:'🚗 速度',title:'🎬 小车赛跑：v = s / t',
+  hint:'拖动"路程 s"和"时间 t"，看小车速度实时改变。让 v 达到目标即可通关！',
+  html:`
+   <div class="panel"><h4>📐 公式实时联动</h4>
+     <div class="formula-box">
+       <span class="term res" id="fx-v">v</span> =
+       <span class="term" id="fx-s">s</span> /
+       <span class="term" id="fx-t">t</span>
+     </div>
+     <div class="slider-row"><label>路程 s <span class="val"><span id="sV">200</span> m</span></label>
+       <input type="range" id="sIn" min="20" max="500" value="200"></div>
+     <div class="slider-row"><label>时间 t <span class="val"><span id="tV">10</span> s</span></label>
+       <input type="range" id="tIn" min="1" max="40" value="10"></div>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout">当前速度 <span class="big" id="vOut">20.0</span> m/s<br><span style="color:var(--dim);font-size:0.9em;">= <span id="kmhOut">72.0</span> km/h</span>
+     <div class="knowledge">单位换算：<b>1 m/s = 3.6 km/h</b>。小车越快，画面跑得越快！</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">调节滑块，让小车速度正好落在 <b>25 ~ 30 m/s</b> 区间，并保持 2 秒。</div>
+     <div class="tip" id="questTip">加油，调整参数～</div></div>
+   </div>`,
+  init(){
+    const sIn=document.getElementById('sIn'),tIn=document.getElementById('tIn');
+    let carX=20, hold=0;
+    const upd=(who)=>{
+      const s=+sIn.value, tt=+tIn.value, v=s/tt;
+      document.getElementById('sV').textContent=s; document.getElementById('tV').textContent=tt;
+      document.getElementById('vOut').textContent=v.toFixed(1);
+      document.getElementById('kmhOut').textContent=(v*3.6).toFixed(1);
+      if(who) pulse('fx-'+who); pulse('fx-v');
+    };
+    sIn.oninput=()=>upd('s'); tIn.oninput=()=>upd('t'); upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle = C_BG; ctx.fillRect(0,0,W,H);
+      
+      // 清爽的赛道
+      ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0, 240, W, 80);
+      for(let i=0; i<12; i++){
+        ctx.fillStyle = (Math.floor(t/6)+i)%2 ? '#cbd5e1' : '#e2e8f0';
+        ctx.fillRect(i*50-(t*2)%50, 276, 30, 8);
+      }
+      
+      const v=(+sIn.value)/(+tIn.value);
+      carX += v*0.35; if(carX>W-40) carX=20;
+      
+      emoji('🏎️', carX, 255, 50);
+      emoji('🏁', W-30, 255, 40);
+      
+      text('v = '+v.toFixed(1)+' m/s', 20, 45, C_SUCCESS, 24);
+      text('s = '+sIn.value+' m', 20, 75, C_DIM, 16, 'normal');
+      text('t = '+tIn.value+' s', 20, 100, C_DIM, 16, 'normal');
+      
+      const inZone = v>=25 && v<=30;
+      text(inZone?'✅ 保持在目标区 25~30!':'🎯 目标：25~30 m/s', 20, H-20, inZone?C_SUCCESS:C_WARN, 16);
+      
+      if(inZone){
+        hold++; 
+        if(hold>100){
+          markSolved(0); document.getElementById('questTip').textContent='✅ 挑战完成！';
+          document.getElementById('quest').classList.add('solved');
+        }
+      } else hold=0;
+      
+      t++; anim2();
+    };
+  }
+},
+{
+  name:'⚖️ 密度',title:'🎬 天平称重：ρ = m / V',
+  hint:'选择不同材料，拖动体积，看天平上的质量条实时变化。',
+  html:`
+   <div class="panel"><h4>📐 公式实时联动</h4>
+     <div class="formula-box">
+       <span class="term res" id="fx-m">m</span> =
+       <span class="term" id="fx-rho">ρ</span> ·
+       <span class="term" id="fx-V">V</span>
+     </div>
+     <div class="slider-row"><label>材料（密度 ρ）</label>
+       <select id="matIn">
+         <option value="0.9">🧊 冰 0.9 g/cm³</option>
+         <option value="1.0" selected>💧 水 1.0 g/cm³</option>
+         <option value="2.7">🥫 铝 2.7 g/cm³</option>
+         <option value="7.9">🔩 铁 7.9 g/cm³</option>
+         <option value="11.3">🔋 铅 11.3 g/cm³</option>
+         <option value="19.3">🥇 金 19.3 g/cm³</option>
+       </select></div>
+     <div class="slider-row"><label>体积 V <span class="val"><span id="VvV">100</span> cm³</span></label>
+       <input type="range" id="VIn" min="10" max="300" value="100"></div>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout">质量 <span class="big" id="mOut">100</span> g
+     <div class="knowledge">密度是<b>物质的属性</b>。相同体积下，金比水重得多！</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">用<b>任意材料</b>配出质量正好在 <b>790~810 g</b> 之间的物块。</div>
+     <div class="tip" id="questTip">提示：铁 ρ=7.9，配 V=100 试试～</div></div>
+   </div>`,
+  init(){
+    const matIn=document.getElementById('matIn'),VIn=document.getElementById('VIn');
+    const names={"0.9":"🧊","1.0":"💧","2.7":"🥫","7.9":"🔩","11.3":"🔋","19.3":"🥇"};
+    let tilt=0;
+    const upd=(who)=>{
+      const rho=+matIn.value, V=+VIn.value, m=rho*V;
+      document.getElementById('VvV').textContent=V;
+      document.getElementById('mOut').textContent=m.toFixed(0);
+      if(who) pulse('fx-'+who); pulse('fx-m');
+      if(m>=790&&m<=810){
+        markSolved(1); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 完美配比！';
+      }
+    };
+    matIn.onchange=()=>upd('rho'); VIn.oninput=()=>upd('V'); upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      const rho=+matIn.value, V=+VIn.value, m=rho*V;
+      const targetTilt = Math.min(m/1500, 0.35); tilt += (targetTilt-tilt)*0.1;
+      
+      const cx=W/2, base=340;
+      // 亮色天平支架
+      ctx.strokeStyle='#94a3b8'; ctx.lineWidth=8; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(cx,base); ctx.lineTo(cx,180); ctx.stroke();
+      ctx.fillStyle='#cbd5e1'; 
+      ctx.beginPath(); ctx.moveTo(cx-50,base); ctx.lineTo(cx+50,base); ctx.lineTo(cx+30,base+20); ctx.lineTo(cx-30,base+20); ctx.fill();
+      
+      // 横梁
+      ctx.save(); ctx.translate(cx,180); ctx.rotate(tilt);
+      ctx.strokeStyle=C_ACCENT; ctx.lineWidth=10;
+      ctx.beginPath(); ctx.moveTo(-160,0); ctx.lineTo(160,0); ctx.stroke();
+      
+      // 左盘 (高对比度物块)
+      ctx.strokeStyle='#94a3b8'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(-160,0); ctx.lineTo(-195,70); ctx.moveTo(-160,0); ctx.lineTo(-125,70); ctx.stroke();
+      ctx.fillStyle='#e2e8f0'; ctx.fillRect(-200,70,80,12);
+      
+      const bs = 20 + V/6; // 体积可视化
+      ctx.fillStyle = '#8b5cf6'; // 亮紫色物块
+      ctx.fillRect(-160-bs/2, 70-bs, bs, bs);
+      emoji(names[matIn.value], -160, 65, Math.min(bs*0.6, 40));
+      
+      // 右盘 (质量条)
+      ctx.strokeStyle='#94a3b8'; ctx.beginPath(); ctx.moveTo(160,0); ctx.lineTo(125,70); ctx.moveTo(160,0); ctx.lineTo(195,70); ctx.stroke();
+      ctx.fillStyle='#e2e8f0'; ctx.fillRect(120,70,80,12);
+      
+      const barH = Math.min(m/10, 130);
+      ctx.fillStyle = '#f59e0b'; // 亮黄色砝码条
+      ctx.fillRect(145, 70-barH, 30, barH);
+      ctx.restore();
+      
+      text('ρ = '+rho+' g/cm³', 20, 45, C_DIM, 16, 'normal');
+      text('V = '+V+' cm³', 20, 70, C_DIM, 16, 'normal');
+      text('m = ρV = '+m.toFixed(0)+' g', 20, 100, C_ACCENT, 22);
+      text('← 物体越重，左边压得越低', 20, H-20, C_WARN, 15);
+      anim2();
+    };
+  }
+},
+{
+  name:'🍎 重力',title:'🎬 自由落体：G = m·g',
+  hint:'调节质量 m，点"松手"看物体下落。质量越大，重力箭头越长。',
+  html:`
+   <div class="panel"><h4>📐 公式实时联动</h4>
+     <div class="formula-box">
+       <span class="term res" id="fx-G">G</span> =
+       <span class="term" id="fx-m">m</span> ·
+       <span class="term" id="fx-g">g</span>
+     </div>
+     <div class="slider-row"><label>质量 m <span class="val"><span id="mV">2.0</span> kg</span></label>
+       <input type="range" id="mIn" min="1" max="100" value="20"></div>
+     <div class="slider-row"><label>所在星球环境</label>
+       <select id="gIn">
+         <option value="9.8" selected>🌍 地球 (g ≈ 9.8 N/kg)</option>
+         <option value="1.6">🌙 月球 (g ≈ 1.6 N/kg)</option>
+         <option value="24.8">🪐 木星 (g ≈ 24.8 N/kg)</option>
+       </select></div>
+     <button class="btn pink" id="dropBtn">🖐️ 松手下落！</button>
+     <button class="btn" id="resetBtn" style="background:#64748b;box-shadow:0 4px 12px rgba(100,116,139,0.3);">↩️ 复位</button>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout">重力 <span class="big" id="GOut">19.6</span> N
+     <div class="knowledge">重力方向<b>竖直向下</b>。同一地点，<b>下落快慢与质量无关</b>，但重力大小成正比。</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">切换到<b>月球</b>，让同一个物体的重力小于 <b>100 N</b>，并松手观察。</div>
+     <div class="tip" id="questTip"></div></div>
+   </div>`,
+  init(){
+    const mIn=document.getElementById('mIn'), gIn=document.getElementById('gIn');
+    let y=70, vy=0, dropping=false;
+    const upd=(who)=>{
+      const m=+mIn.value/10, g=+gIn.value, G=m*g;
+      document.getElementById('mV').textContent=m.toFixed(1);
+      document.getElementById('GOut').textContent=G.toFixed(1);
+      if(who) pulse('fx-'+who); pulse('fx-G');
+    };
+    mIn.oninput=()=>upd('m'); 
+    gIn.onchange=()=>{
+      upd('g');
+      if(+gIn.value===1.6 && (+mIn.value/10)*1.6<100){
+        markSolved(2); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 月球重力小，挑战完成！';
+      }
+    };
+    document.getElementById('dropBtn').onclick=()=>{dropping=true; vy=0; y=70;};
+    document.getElementById('resetBtn').onclick=()=>{dropping=false; y=70; vy=0;};
+    upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      
+      // 地面
+      ctx.fillStyle = '#e2e8f0'; ctx.fillRect(0, H-40, W, 40);
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(0, H-40, W, 4);
+      
+      const g=+gIn.value, m=+mIn.value/10, G=m*g;
+      if(dropping){
+        vy += g*0.03; y += vy; 
+        if(y>H-70){ y=H-70; dropping=false; }
+      }
+      
+      const cx=W/2, size = 40+m*0.6;
+      emoji('🍎', cx, y, size);
+      
+      // 醒目的红色重力箭头
+      const arrowLen = Math.min(G*1.5, 180);
+      arrow(cx+size/2, y-10, cx+size/2, y-10+arrowLen, C_DANGER, 5);
+      text('G = '+G.toFixed(1)+' N', cx+size/2+12, y+20, C_DANGER, 16);
+      
+      text('g = '+g+' N/kg', 20, 45, C_DIM, 16, 'normal');
+      text('m = '+m.toFixed(1)+' kg', 20, 70, C_DIM, 16, 'normal');
+      text(g===1.6?'🌙 处于月球环境':g===24.8?'🪐 处于木星环境':'🌍 处于地球环境', 20, H-15, C_TEXT, 15);
+      
+      anim2();
+    };
+  }
+},
+{
+  name:'🧲 摩擦力',title:'🎬 拉动木块：f 受压力和粗糙度影响',
+  hint:'调节"压力"和"接触面粗糙度"，拉力箭头和摩擦力箭头会实时变化。',
+  html:`
+   <div class="panel"><h4>📐 关系实时联动</h4>
+     <div class="formula-box" style="font-size:1.05em">
+       滑动摩擦力 <span class="term res" id="fx-f">f</span> ↑ ⟸
+       <span class="term" id="fx-N">压力</span> ↑ 、
+       <span class="term" id="fx-r">粗糙度</span> ↑
+     </div>
+     <div class="slider-row"><label>附加压力（重物） <span class="val"><span id="NV">中</span></span></label>
+       <input type="range" id="NIn" min="1" max="4" value="2"></div>
+     <div class="slider-row"><label>接触面类型 <span class="val"><span id="rV">木板</span></span></label>
+       <input type="range" id="rIn" min="1" max="3" value="2"></div>
+     <div class="slider-row"><label>向右拉力 F <span class="val"><span id="FV">3</span> N</span></label>
+       <input type="range" id="FIn" min="0" max="15" value="3"></div>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout"><span id="fricState" class="status-pill" style="background:#f1f5f9;color:var(--text);">静止</span>
+     <div class="knowledge">影响滑动摩擦力的是<b>压力</b>和<b>接触面粗糙程度</b>。静止时 <b>静摩擦力 = 拉力</b>。</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">让拉力 F 恰好<b>等于</b>最大摩擦力，使木块<b>匀速滑动</b>。</div>
+     <div class="tip" id="questTip"></div></div>
+   </div>`,
+  init(){
+    const NIn=document.getElementById('NIn'), rIn=document.getElementById('rIn'), FIn=document.getElementById('FIn');
+    let boxX=120;
+    const rNames=['','🧊光滑玻璃','🪵普通木板','🧱粗糙毛巾'];
+    const upd=(who)=>{
+      document.getElementById('NV').textContent=['','无附加','小铁块','中铁块','大铁块'][+NIn.value];
+      document.getElementById('rV').textContent=rNames[+rIn.value].slice(2);
+      document.getElementById('FV').textContent=FIn.value;
+      if(who) pulse('fx-'+who); pulse('fx-f');
+    };
+    NIn.oninput=()=>upd('N'); rIn.oninput=()=>upd('r'); FIn.oninput=()=>upd('f'); upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      const N=+NIn.value, r=+rIn.value, F=+FIn.value;
+      const fMax = N * r * 1.1; 
+      const gy = 280;
+      
+      // 清爽明亮的地面
+      const gc=['','#f1f5f9','#e2e8f0','#cbd5e1'][r];
+      ctx.fillStyle = gc; ctx.fillRect(0, gy, W, H-gy);
+      if(r===3){
+        ctx.fillStyle = '#94a3b8';
+        for(let i=0; i<80; i++) ctx.fillRect((i*41)%W, gy+((i*67)%(H-gy)), 5, 3);
+      }
+      ctx.fillStyle = '#94a3b8'; ctx.fillRect(0, gy, W, 2); // 分界线
+      
+      let moving = F > fMax;
+      let state, color, bgColor;
+      if(F===0){ state='静止（无拉力）'; color=C_DIM; bgColor='#f1f5f9'; }
+      else if(!moving){ state='静止（静摩擦力与拉力平衡）'; color=C_WARN; bgColor='#fef3c7'; }
+      else{ state='滑动！（拉力大于最大摩擦力）'; color=C_SUCCESS; bgColor='#d1fae5'; boxX+=(F-fMax)*0.5; if(boxX>W-100) boxX=50; }
+      
+      const bs = 60; // 木块基础大小
+      // 亮色木块
+      ctx.fillStyle = '#f59e0b'; ctx.fillRect(boxX, gy-bs, bs, bs);
+      ctx.strokeStyle = '#d97706'; ctx.lineWidth=2; ctx.strokeRect(boxX, gy-bs, bs, bs);
+      emoji('📦', boxX+bs/2, gy-15, 36);
+      
+      // 附加重物
+      if(N>1){
+        const wHeight = (N-1)*15;
+        ctx.fillStyle = '#94a3b8'; ctx.fillRect(boxX+10, gy-bs-wHeight, bs-20, wHeight);
+        ctx.fillStyle = '#0f172a'; ctx.font='12px sans-serif'; ctx.fillText(N*10+'kg', boxX+18, gy-bs-wHeight+12);
+      }
+      
+      // 绿色拉力箭头
+      if(F>0){
+        arrow(boxX+bs, gy-bs/2, boxX+bs+F*8, gy-bs/2, C_SUCCESS, 5);
+        text('F='+F+'N', boxX+bs+F*8+8, gy-bs/2+5, C_SUCCESS, 16);
+      }
+      
+      // 橙色摩擦力箭头
+      const fShown = moving ? fMax : F;
+      if(fShown>0){
+        arrow(boxX, gy-bs/2+15, boxX-fShown*8, gy-bs/2+15, C_WARN, 5);
+        text('f='+fShown.toFixed(1), boxX-fShown*8-55, gy-bs/2+20, C_WARN, 16);
+      }
+      
+      text('最大静摩擦力 f_max ≈ '+fMax.toFixed(1)+' N', 20, 45, C_DIM, 16);
+      
+      const stEl = document.getElementById('fricState');
+      stEl.textContent = state; stEl.style.background = bgColor; stEl.style.color = color;
+      
+      if(F>0 && Math.abs(F-fMax)<0.5){
+        markSolved(3); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 拉力恰好等于摩擦力，匀速！';
+      }
+      anim2();
+    };
+  }
+},
+{
+  name:'📌 固体压强',title:'🎬 压泡沫：p = F / S',
+  hint:'压力不变时，减小受力面积 S，压强 p 猛增，物体陷得更深！',
+  html:`
+   <div class="panel"><h4>📐 公式实时联动</h4>
+     <div class="formula-box">
+       <span class="term res" id="fx-p">p</span> =
+       <span class="term" id="fx-F">F</span> /
+       <span class="term" id="fx-S">S</span>
+     </div>
+     <div class="slider-row"><label>向下压力 F <span class="val"><span id="pFV">50</span> N</span></label>
+       <input type="range" id="pFIn" min="10" max="200" value="50"></div>
+     <div class="slider-row"><label>接触面积 S <span class="val"><span id="pSV">0.0100</span> m²</span></label>
+       <input type="range" id="pSIn" min="1" max="100" value="100"></div>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout">压强 <span class="big" id="pOut">5000</span> Pa
+     <div class="knowledge"><b>受力面积是关键！</b>压力相同，面积越小压强越大。这就是为什么图钉前端尖锐能轻松扎入。</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">在压力不超过 60N 的情况下，让压强超过 <b>10000 Pa</b>。</div>
+     <div class="tip" id="questTip">提示：尝试把受力面积调到极小。</div></div>
+   </div>`,
+  init(){
+    const pFIn=document.getElementById('pFIn'), pSIn=document.getElementById('pSIn');
+    const upd=(who)=>{
+      const F=+pFIn.value, S=+pSIn.value/10000, p=F/S;
+      document.getElementById('pFV').textContent=F;
+      document.getElementById('pSV').textContent=S.toFixed(4);
+      document.getElementById('pOut').textContent=p.toFixed(0);
+      if(who) pulse('fx-'+who); pulse('fx-p');
+      if(F<=60 && p>10000){
+        markSolved(4); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 小面积产生大压强！';
+      }
+    };
+    pFIn.oninput=()=>upd('F'); pSIn.oninput=()=>upd('S'); upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      const F=+pFIn.value, S=+pSIn.value/10000, p=F/S;
+      const foamY = 280;
+      
+      const dent = Math.min(p/200, 140);
+      const w = Math.max(8, (+pSIn.value)/100 * 160);
+      
+      // 清爽的海绵块 (浅蓝色)
+      ctx.fillStyle = '#bae6fd'; ctx.fillRect(80, foamY, W-160, 120);
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth=2; ctx.strokeRect(80, foamY, W-160, 120);
+      
+      // 凹陷遮罩层 (与背景同色)
+      ctx.fillStyle = C_BG; 
+      ctx.beginPath();
+      ctx.moveTo(W/2-w/2, foamY-2); ctx.quadraticCurveTo(W/2, foamY+dent, W/2+w/2, foamY-2);
+      ctx.lineTo(W/2+w/2+100, foamY-2); ctx.lineTo(W/2-w/2-100, foamY-2); ctx.fill();
+      
+      // 压入的亮色物体 (亮紫)
+      ctx.fillStyle = '#8b5cf6'; ctx.beginPath();
+      ctx.moveTo(W/2-40, foamY-140); ctx.lineTo(W/2+40, foamY-140); 
+      ctx.lineTo(W/2+w/2, foamY+dent-2); ctx.lineTo(W/2-w/2, foamY+dent-2); ctx.closePath(); ctx.fill();
+      
+      // 压力箭头 (正红色)
+      arrow(W/2, foamY-180, W/2, foamY-140, C_DANGER, 5);
+      text('F = '+F+' N', W/2+12, foamY-155, C_DANGER, 15);
+      
+      text('p = F/S = '+p.toFixed(0)+' Pa', 20, 45, C_ACCENT, 24);
+      text('海绵形变（陷得越深 = 压强越大）', 20, H-20, C_WARN, 15);
+      anim2();
+    };
+  }
+},
+{
+  name:'🌊 液体压强',title:'🎬 深海潜水：p = ρgh',
+  hint:'下潜越深 h 越大，压强越大！换成密度更大的盐水压强还会增加。',
+  html:`
+   <div class="panel"><h4>📐 公式实时联动</h4>
+     <div class="formula-box">
+       <span class="term res" id="fx-p">p</span> =
+       <span class="term" id="fx-rho">ρ</span> ·
+       <span class="term" id="fx-g">g</span> ·
+       <span class="term" id="fx-h">h</span>
+     </div>
+     <div class="slider-row"><label>下潜深度 h <span class="val"><span id="hV">5</span> m</span></label>
+       <input type="range" id="hIn" min="0" max="30" value="5"></div>
+     <div class="slider-row"><label>液体类型 ρ</label>
+       <select id="rhoIn">
+         <option value="1000" selected>💧 纯水 (1000 kg/m³)</option>
+         <option value="1030">🌊 海水 (1030 kg/m³)</option>
+         <option value="1300">🧂 浓盐水 (1300 kg/m³)</option>
+       </select></div>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout">潜水员承受压强 <span class="big" id="lpOut">49000</span> Pa
+     <div class="knowledge">液体压强向各个方向都有，且<b>随深度成正比增大</b>，与液体密度正相关。</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">让潜水员承受的压强超过 <b>2.5 个大气压</b>（≈ 250,000 Pa）。</div>
+     <div class="tip" id="questTip"></div></div>
+   </div>`,
+  init(){
+    const hIn=document.getElementById('hIn'), rhoIn=document.getElementById('rhoIn');
+    const upd=(who)=>{
+      const h=+hIn.value, rho=+rhoIn.value, p=rho*9.8*h;
+      document.getElementById('hV').textContent=h;
+      document.getElementById('lpOut').textContent=p.toFixed(0);
+      if(who) pulse('fx-'+who); pulse('fx-p');
+      if(p>2.5e5){
+        markSolved(5); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 极度高压，挑战成功！';
+      }
+    };
+    hIn.oninput=()=>upd('h'); rhoIn.onchange=()=>upd('rho'); upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      const h=+hIn.value, rho=+rhoIn.value, p=rho*9.8*h;
+      
+      // 清爽的水体颜色
+      const baseColor = rho>=1300 ? '#7dd3fc' : rho>=1030 ? '#bae6fd' : '#e0f2fe';
+      ctx.fillStyle = baseColor; ctx.fillRect(0, 50, W, H-50);
+      
+      // 深度渐变叠加
+      const grad = ctx.createLinearGradient(0, 50, 0, H);
+      grad.addColorStop(0, 'rgba(255,255,255,0)');
+      grad.addColorStop(1, rho>=1300 ? 'rgba(2,132,199,0.3)' : 'rgba(14,165,233,0.3)');
+      ctx.fillStyle = grad; ctx.fillRect(0, 50, W, H-50);
+      
+      // 水面波纹线
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(0,50);
+      for(let i=0; i<W; i+=20) ctx.lineTo(i, 50 + Math.sin(t*0.1 + i*0.05)*3);
+      ctx.stroke();
+      
+      const py = 50 + (h/30)*(H-110) + 20;
+      emoji('🤿', W/2, py, 50);
+      
+      // 醒目的红色压强箭头（向中心挤压）
+      const al = Math.min(p/5000, 50);
+      arrow(W/2-40-al, py-10, W/2-30, py-10, C_DANGER, 4); // 左
+      arrow(W/2+40+al, py-10, W/2+30, py-10, C_DANGER, 4); // 右
+      arrow(W/2, py+30+al, W/2, py+15, C_DANGER, 4);       // 下
+      arrow(W/2, py-60-al, W/2, py-40, C_DANGER, 4);       // 上
+      
+      text('深度 h = '+h+' m', 20, H-20, C_TEXT, 16);
+      text('p = ρgh = '+p.toFixed(0)+' Pa', 20, 80, C_ACCENT, 22);
+      text(rho>=1300?'🧂 浓盐水环境':rho>=1030?'🌊 海水环境':'💧 纯水环境', 20, 35, C_DIM, 16, 'normal');
+      
+      t++; anim2();
+    };
+  }
+},
+{
+  name:'🛟 浮力',title:'🎬 浮沉子：比较 ρ物 和 ρ液',
+  hint:'拖动物体密度和液体密度，看物体上浮、悬浮还是下沉。',
+  html:`
+   <div class="panel"><h4>📐 判据实时联动</h4>
+     <div class="formula-box" style="font-size:1.02em">
+       F<span class="formula-sub">浮</span>=<span class="term" id="fx-r">ρ<span class="formula-sub">液</span></span>·g·<span class="term" id="fx-v">V<span class="formula-sub">排</span></span><br>
+       <span style="font-size:0.85em; margin-top:8px; display:inline-block;" id="cmp" class="res">ρ物 vs ρ液</span>
+     </div>
+     <div class="slider-row"><label>物体密度 ρ物 <span class="val"><span id="opV">0.5</span> g/cm³</span></label>
+       <input type="range" id="opIn" min="2" max="20" value="5"></div>
+     <div class="slider-row"><label>液体密度 ρ液 <span class="val"><span id="olV">1.0</span> g/cm³</span></label>
+       <input type="range" id="olIn" min="8" max="16" value="10"></div>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout"><span id="buoyState" class="status-pill">漂浮</span>
+     <div class="knowledge">ρ液 > ρ物 → 上浮/漂浮；<br>ρ液 = ρ物 → 悬浮；<br>ρ液 < ρ物 → 下沉。</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">调出<b>悬浮</b>状态（ρ物 = ρ液，物体停在液体中间不上不下）。</div>
+     <div class="tip" id="questTip"></div></div>
+   </div>`,
+  init(){
+    const opIn=document.getElementById('opIn'), olIn=document.getElementById('olIn');
+    let by=200;
+    const upd=(who)=>{
+      const op=+opIn.value/10, ol=+olIn.value/10;
+      document.getElementById('opV').textContent=op.toFixed(1);
+      document.getElementById('olV').textContent=ol.toFixed(1);
+      let cmp = op<ol ? 'ρ物 < ρ液 → 最终上浮漂浮' : op>ol ? 'ρ物 > ρ液 → 最终下沉底端' : 'ρ物 = ρ液 → 可以悬浮任意深度';
+      document.getElementById('cmp').textContent=cmp;
+      if(who) pulse('fx-'+who);
+      if(Math.abs(op-ol)<0.05){
+        markSolved(6); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 两者密度相等，成功悬浮！';
+      }
+    };
+    opIn.oninput=()=>upd('r'); olIn.oninput=()=>upd('v'); upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      const op=+opIn.value/10, ol=+olIn.value/10;
+      const wt=90; // 水面高度
+      
+      // 清爽的玻璃缸与水
+      ctx.fillStyle = 'rgba(56,189,248,0.15)'; ctx.fillRect(80, wt, W-160, H-wt-30);
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth=4; ctx.strokeRect(80, wt-20, W-160, H-wt-10);
+      ctx.fillStyle = '#38bdf8'; ctx.fillRect(80, wt, W-160, 4); // 水面线
+      
+      let target;
+      if(op<ol){ const sub=op/ol; target = wt - 40*(1-sub); } // 漂浮
+      else if(op>ol){ target = H-100; } // 沉底
+      else target = (wt+H-100)/2; // 悬浮
+      
+      by += (target-by)*0.1;
+      const bs = 70;
+      // 高对比度的物块颜色
+      const col = op<ol ? C_SUCCESS : op>ol ? C_DANGER : C_WARN;
+      
+      ctx.fillStyle = col; ctx.fillRect(W/2-bs/2, by, bs, bs);
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth=2; ctx.strokeRect(W/2-bs/2, by, bs, bs);
+      emoji('📦', W/2, by+bs*0.65, 40);
+      
+      // 绿色浮力箭头 (向上)
+      const fArr = 40*Math.min(ol, 2.5);
+      arrow(W/2-25, by+bs, W/2-25, by+bs-fArr, C_SUCCESS, 5); 
+      text('F浮', W/2-55, by+bs-fArr/2, C_SUCCESS, 14);
+      
+      // 红色重力箭头 (向下)
+      const gArr = Math.min(op*30, 80);
+      arrow(W/2+25, by, W/2+25, by+gArr, C_DANGER, 5);
+      text('G', W/2+35, by+gArr/2, C_DANGER, 14);
+      
+      let state = op<ol?'⬆️ 上浮/漂浮':op>ol?'⬇️ 下沉':'⏸️ 悬浮';
+      const stEl = document.getElementById('buoyState');
+      stEl.textContent=state; stEl.style.color=col;
+      stEl.style.background = op<ol?'#d1fae5':op>ol?'#ffe4e6':'#fef3c7';
+      
+      text('ρ物 = '+op.toFixed(1), 20, 45, C_TEXT, 16);
+      text('ρ液 = '+ol.toFixed(1), 20, 70, C_TEXT, 16);
+      anim2();
+    };
+  }
+},
+{
+  name:'⚙️ 滑轮组',title:'🎬 吊运重物：F = G / n',
+  hint:'增加承重绳段数 n，拉力 F 会显著变小（省力），但拉的绳子总长 s=nh 变长（费距离）。',
+  html:`
+   <div class="panel"><h4>📐 公式实时联动</h4>
+     <div class="formula-box" style="font-size:1.15em">
+       <span class="term res" id="fx-F">F</span> =
+       <span class="term" id="fx-G">G</span> /
+       <span class="term" id="fx-n">n</span> 
+       <span style="font-size:0.75em; color:var(--dim);">s = <span class="term" id="fx-n2">n</span>·h</span>
+     </div>
+     <div class="slider-row"><label>承重绳段数 n <span class="val"><span id="nV">2</span></span></label>
+       <input type="range" id="nIn" min="1" max="5" value="2"></div>
+     <div class="slider-row"><label>物重 G <span class="val"><span id="gV2">300</span> N</span></label>
+       <input type="range" id="gIn2" min="100" max="600" value="300" step="20"></div>
+     <button class="btn green" id="liftBtn">🆙 匀速拉动！提升重物</button>
+   </div>
+   <div class="panel"><h4>📊 现象</h4>
+     <div class="readout">省力效果：拉力 <span class="big" id="fOut2">150</span> N<br><span style="color:var(--dim);font-size:0.9em;">费距离效果：拉绳距离 = <span id="sOut2">2</span> × h</span>
+     <div class="knowledge">理想滑轮组：<b>省几倍力，就要多拉几倍绳子</b>，这就是功的原理。</div></div>
+   </div>
+   <div class="panel"><div class="quest" id="quest">
+     <div class="q-title">🎯 挑战</div>
+     <div class="q-desc">把 <b>400 N</b> 的重物用<b>不超过 100 N</b> 的拉力吊起。</div>
+     <div class="tip" id="questTip"></div></div>
+   </div>`,
+  init(){
+    const nIn=document.getElementById('nIn'), gIn2=document.getElementById('gIn2');
+    let lift=0, lifting=false;
+    const upd=(who)=>{
+      const n=+nIn.value, G=+gIn2.value, F=G/n;
+      document.getElementById('nV').textContent=n; document.getElementById('gV2').textContent=G;
+      document.getElementById('fOut2').textContent=F.toFixed(0); document.getElementById('sOut2').textContent=n;
+      if(who) pulse('fx-'+(who==='n'?'n':who)); pulse('fx-F'); if(who==='n') pulse('fx-n2');
+      if(G>=400 && F<=100){
+        markSolved(7); document.getElementById('quest').classList.add('solved');
+        document.getElementById('questTip').textContent='✅ 选择够多的绳段，极其省力！';
+      }
+    };
+    nIn.oninput=()=>upd('n'); gIn2.oninput=()=>upd('G');
+    document.getElementById('liftBtn').onclick=()=>{lifting=true;};
+    upd();
+    
+    anim=()=>{
+      ctx.clearRect(0,0,W,H); ctx.fillStyle=C_BG; ctx.fillRect(0,0,W,H);
+      const n=+nIn.value, G=+gIn2.value, F=G/n;
+      if(lifting){
+        lift += 2.5; 
+        if(lift>90){ lift=90; lifting=false; }
+      } else {
+        if(lift>0 && !lifting) lift -= 1.5;
+        if(lift<0) lift = 0;
+      }
+      
+      // 坚固的承重顶梁
+      ctx.fillStyle = '#94a3b8'; ctx.fillRect(100, 40, 360, 20);
+      const cx = W/2;
+      
+      // 定滑轮 (亮蓝)
+      ctx.fillStyle = C_ACCENT; ctx.beginPath(); ctx.arc(cx-40, 75, 24, 0, 7); ctx.fill();
+      ctx.fillStyle = C_BG; ctx.beginPath(); ctx.arc(cx-40, 75, 6, 0, 7); ctx.fill();
+      
+      // 动滑轮 (亮紫)
+      const mpy = 240 - lift;
+      ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.arc(cx-40, mpy, 26, 0, 7); ctx.fill();
+      ctx.fillStyle = C_BG; ctx.beginPath(); ctx.arc(cx-40, mpy, 6, 0, 7); ctx.fill();
+      
+      // 绳索 (深灰，清晰可见)
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth=3;
+      for(let i=0; i<n; i++){
+        const rx = cx-65 + i*16.5;
+        ctx.beginPath(); ctx.moveTo(rx, 65); ctx.lineTo(rx, mpy); ctx.stroke();
+      }
+      // 人手拉扯的末端绳子
+      ctx.beginPath(); ctx.moveTo(cx-16, 65); ctx.lineTo(cx+90, 110 + lift*(n>2?1.2:1)); ctx.stroke();
+      emoji('✋', cx+110, 125 + lift*(n>2?1.2:1), 38);
+      
+      // 亮橙色重物砖块
+      ctx.fillStyle = '#f97316'; ctx.fillRect(cx-80, mpy+26, 80, 60);
+      ctx.strokeStyle = '#c2410c'; ctx.strokeRect(cx-80, mpy+26, 80, 60);
+      emoji('🧱', cx-40, mpy+65, 40);
+      text('G='+G+'N', cx-75, mpy+105, C_TEXT, 14);
+      
+      // 红色重力标注
+      arrow(cx-100, mpy+26, cx-100, mpy+26+Math.min(G/5, 60), C_DANGER, 4);
+      
+      text('向下拉力 F = G/n = '+F.toFixed(0)+' N', 20, 150, C_SUCCESS, 18);
+      text('绳段 n = '+n+'（省力 '+n+' 倍）', 20, H-45, C_WARN, 16);
+      text('手拉距离 = '+n+' × 重物提升高度', 20, H-20, C_WARN, 15);
+      
+      anim2();
+    };
+  }
+}
+];
+
+/* ===================== 动画循环控制 ===================== */
+let raf;
+function anim2(){/* 占位 */}
+function loop(){ if(anim) anim(); raf=requestAnimationFrame(loop); }
+
+function loadLevel(i){
+  current=i; t=0;
+  const L=levels[i];
+  vizTitle.textContent=L.title;
+  vizHint.textContent=L.hint;
+  consoleEl.innerHTML=L.html;
+  L.init();
+  buildLevels();
+}
+function buildLevels(){
+  const el=document.getElementById('levels'); el.innerHTML='';
+  levels.forEach((L,i)=>{
+    const b=document.createElement('button');
+    b.textContent=(i+1)+'. '+L.name;
+    if(i===current) b.classList.add('active');
+    if(solved[i]) b.classList.add('done');
+    b.onclick=()=>loadLevel(i);
+    el.appendChild(b);
+  });
+}
+
+/* HiDPI 清晰度修复 */
+function fixDPI(){
+  const dpr=window.devicePixelRatio||1; 
+  cv.width=W*dpr; cv.height=H*dpr; 
+  cv.style.width='100%'; 
+  ctx.scale(dpr,dpr);
+}
+fixDPI();
+buildLevels();
+loadLevel(0);
+loop();
+</script>
+</body>
+</html>
