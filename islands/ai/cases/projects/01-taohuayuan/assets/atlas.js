@@ -1,0 +1,3 @@
+// 不需要裁剪图片文件。用实际矩形调用同一张透明图集。
+window.PAINTED_ASSETS={width:1536,height:1024,frames:{boat:[0,180,710,330],villager:[700,20,300,520],peachBranch:[1010,40,526,510],petals:[0,580,510,430],rooster:[550,570,440,440],dog:[1030,590,506,410]}};
+window.paintedSprite=function(name,width){const f=PAINTED_ASSETS.frames[name],box=document.createElement('span'),im=document.createElement('img');box.style.cssText=`display:block;position:relative;overflow:hidden;width:${width}px;height:${width*f[3]/f[2]}px;pointer-events:none`;im.src='assets/sprites.png';im.alt='';im.style.cssText=`position:absolute;max-width:none;width:${width*1536/f[2]}px;height:${width*1024/f[2]}px;left:${-width*f[0]/f[2]}px;top:${-width*f[1]/f[2]}px`;box.append(im);return box;};
