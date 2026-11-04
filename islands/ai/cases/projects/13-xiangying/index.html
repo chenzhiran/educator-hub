@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#181f26">
+  <title>巷影预瞄 · ALLEY / 01</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="world" aria-label="三维训练街区"></div>
+  <div class="vignette"></div>
+  <div id="loading"><span class="loader"></span><p>正在点亮暮色街区…</p></div>
+  <header id="brand"><span class="brand-mark">巷</span><div>巷影预瞄<small>ALLEY / PRECISION LAB</small></div></header>
+  <main id="home" class="screen">
+    <section class="hero">
+      <div class="eyebrow"><span></span> 独立训练计划 / VOL. 01</div>
+      <h1>转角之前，<br>瞄准下一刻<span>。</span></h1>
+      <p class="hero-copy">暮色市场，十二个目标。<br>沿着街巷前进，让每一次预瞄都有答案。</p>
+      <div class="hero-tags"><span>第一人称</span><span>欧式街巷</span><span>精准训练</span></div>
+      <div class="location"><span>01</span><div>暮色市场<small>THE DUSK MARKET · 单人训练</small></div></div>
+    </section>
+    <section class="start-card">
+      <div class="eyebrow">选择你的节奏 <span class="index-label">01 / 02</span></div>
+      <button class="mode selected" data-mode="challenge"><span class="mode-icon">⌁</span><span><strong>60 秒挑战</strong><small>12 个目标 · 无辅助 · 挑战个人最佳</small></span><i>↗</i></button>
+      <button class="mode" data-mode="practice"><span class="mode-icon">◎</span><span><strong>自由练习</strong><small>不限时 · 头线引导 · 熟悉每个转角</small></span><i>↗</i></button>
+      <div class="best-row"><span>挑战个人最佳</span><strong id="homeBest">—</strong></div>
+      <button id="start" class="primary">进入街区 <span>→</span></button>
+      <p class="start-note">点击后锁定鼠标 · 按 Esc 可随时暂停</p>
+    </section>
+    <footer class="home-footer"><span><b>W A S D</b> 移动</span><span><b>鼠标</b> 瞄准 / 左键射击</span><span><b>R</b> 换弹</span><span class="edition">LOCAL EDITION / 1.0</span></footer>
+  </main>
+  <section id="hud" hidden>
+    <div class="map-panel"><canvas id="minimap" width="220" height="220"></canvas><div id="zone">入口巷道</div></div>
+    <div class="stats"><div><small>击破目标</small><strong><span id="kills">00</span><em>/ 12</em></strong></div><div class="time-stat"><small id="timerLabel">剩余时间</small><strong id="timer">1:00</strong></div><div><small>当前得分</small><strong id="score">0</strong></div></div>
+    <div class="session-label"><span id="modeLabel">限时挑战</span><small>暮色市场 / 01</small></div><button id="pauseButton" class="pause-button">Ⅱ 暂停</button>
+    <div id="crosshair"><i></i><b></b><span></span><em></em></div>
+    <div id="hitmarker">×</div><div id="hitText"></div>
+    <div id="toast" role="status"></div>
+    <div class="hud-bottom"><span>WASD 移动 <i>·</i> R 换弹 <i>·</i> Esc 暂停</span><span id="accuracy">命中率 —</span></div>
+    <div class="ammo-panel"><div id="reloadLabel">SEMI AUTO / 训练步枪</div><strong id="ammo">12</strong><span>/ ∞</span><div id="ammoBars"></div></div>
+    <div id="countdown"></div>
+  </section>
+  <section id="pause" class="overlay" hidden>
+    <div class="dialog"><div class="eyebrow">TAKE A BREATH</div><h2>稍作停留。</h2><p>计时已暂停，准备好再前进。</p>
+      <button id="resume" class="primary">继续训练 <span>→</span></button>
+      <div class="settings"><label>鼠标灵敏度 <output id="sensValue">1.0</output><input id="sensitivity" type="range" min="0.3" max="2.5" step="0.1" value="1"></label><label>声音 <output id="volumeValue">40%</output><input id="volume" type="range" min="0" max="100" value="40"></label><label class="check"><input id="lowQuality" type="checkbox">流畅画质（减少阴影）</label><label class="check"><input id="reduceMotion" type="checkbox">减少镜头反馈</label><label id="assistRow" class="check"><input id="assist" type="checkbox" checked>显示头线与可见目标提示</label></div>
+      <div class="dialog-actions"><button id="restart" class="secondary">重新开始</button><button id="quit" class="text-button">返回首页</button></div><button id="endPractice" class="text-button" hidden>结束练习并查看复盘 →</button>
+    </div>
+  </section>
+  <section id="results" class="overlay" hidden>
+    <div class="result-sheet"><div class="result-main"><div class="eyebrow" id="resultEyebrow">SESSION COMPLETE / 训练完成</div><h2 id="resultTitle">每一次，都更接近。</h2><p id="resultSubtitle"></p><div class="result-score"><strong id="finalScore">0</strong><span>本局得分</span><b id="newBest" hidden>新的个人最佳 ↗</b></div><div id="resultMetrics" class="metrics"></div><div id="advice" class="advice"></div><div class="result-actions"><button id="again" class="primary">再练一次 <span>↗</span></button><button id="backHome" class="secondary">返回首页</button></div></div><aside class="result-map"><div class="eyebrow">你的街巷轨迹</div><canvas id="reportMap" width="460" height="500"></canvas><div class="map-legend"><span class="done">● 已击破</span><span class="seen">◆ 已观察</span><span>○ 未观察</span></div><p id="pointDetail">点击地图上的目标编号，查看预瞄表现。</p></aside></div>
+  </section>
+  <div id="error" class="overlay" hidden><div class="dialog"><h2>街区暂未加载</h2><p id="errorText"></p><button onclick="location.reload()" class="primary">重新加载</button></div></div>
+  <script src="vendor/three.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
