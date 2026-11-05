@@ -21,14 +21,20 @@
       <div class="location"><span>01</span><div>暮色市场<small>THE DUSK MARKET · 单人训练</small></div></div>
     </section>
     <section class="start-card">
-      <div class="eyebrow">选择你的节奏 <span class="index-label">01 / 02</span></div>
+      <div class="eyebrow">选择你的节奏 <span class="index-label">01 / 03</span></div>
       <button class="mode selected" data-mode="challenge"><span class="mode-icon">⌁</span><span><strong>60 秒挑战</strong><small>12 个目标 · 无辅助 · 挑战个人最佳</small></span><i>↗</i></button>
       <button class="mode" data-mode="practice"><span class="mode-icon">◎</span><span><strong>自由练习</strong><small>不限时 · 头线引导 · 熟悉每个转角</small></span><i>↗</i></button>
+      <button class="mode" data-mode="combat"><span class="mode-icon">◆</span><span><strong>5v5 爆破对枪</strong><small>三张地图 · 智能人机 · 下包攻防</small></span><i>↗</i></button>
+      <div id="worldPicker" class="world-picker" hidden>
+        <button class="world-option selected" data-world="foundry"><b>01</b><span>赤锈铸造厂<small>中路交锋 / 双侧包点</small></span></button>
+        <button class="world-option" data-world="harbor"><b>02</b><span>雾港货场<small>集装箱通道 / 远距离</small></span></button>
+        <button class="world-option" data-world="citadel"><b>03</b><span>砂岩要塞<small>多层掩体 / 近距离</small></span></button>
+      </div>
       <div class="best-row"><span>挑战个人最佳</span><strong id="homeBest">—</strong></div>
       <button id="start" class="primary">进入街区 <span>→</span></button>
       <p class="start-note">点击后锁定鼠标 · 按 Esc 可随时暂停</p>
     </section>
-    <footer class="home-footer"><span><b>W A S D</b> 移动</span><span><b>鼠标</b> 瞄准 / 左键射击</span><span><b>R</b> 换弹</span><span class="edition">LOCAL EDITION / 1.0</span></footer>
+    <footer class="home-footer"><span><b>W A S D</b> 移动</span><span><b>鼠标</b> 瞄准 / 左键攻击</span><span><b>2 / 3 / 1</b> 刀 / 手枪 / 主武器</span><span><b>Ctrl</b> 蹲下</span><span class="edition">LOCAL EDITION / 2.0</span></footer>
   </main>
   <section id="hud" hidden>
     <div class="map-panel"><canvas id="minimap" width="220" height="220"></canvas><div id="zone">入口巷道</div></div>
@@ -37,15 +43,28 @@
     <div id="crosshair"><i></i><b></b><span></span><em></em></div>
     <div id="hitmarker">×</div><div id="hitText"></div>
     <div id="toast" role="status"></div>
-    <div class="hud-bottom"><span>WASD 移动 <i>·</i> R 换弹 <i>·</i> Esc 暂停</span><span id="accuracy">命中率 —</span></div>
+    <div id="combatStatus" class="combat-status" hidden><div><small>生命</small><strong id="health">100</strong></div><div><small>护甲</small><strong id="armor">0</strong></div><div><small>阵营</small><strong id="teamLabel">攻方</strong></div><div><small>任务</small><strong id="objective">取得炸弹</strong></div></div>
+    <div id="interact"><span id="interactText"></span><i></i></div>
+    <div class="hud-bottom"><span>WASD 移动 <i>·</i> Ctrl 蹲下 <i>·</i> R 换弹 <i>·</i> B 购买 <i>·</i> F 互动</span><span id="accuracy">命中率 —</span></div>
     <div class="ammo-panel"><div id="reloadLabel">SEMI AUTO / 训练步枪</div><strong id="ammo">12</strong><span>/ ∞</span><div id="ammoBars"></div></div>
     <div id="countdown"></div>
   </section>
   <section id="pause" class="overlay" hidden>
     <div class="dialog"><div class="eyebrow">TAKE A BREATH</div><h2>稍作停留。</h2><p>计时已暂停，准备好再前进。</p>
       <button id="resume" class="primary">继续训练 <span>→</span></button>
-      <div class="settings"><label>鼠标灵敏度 <output id="sensValue">1.0</output><input id="sensitivity" type="range" min="0.3" max="2.5" step="0.1" value="1"></label><label>声音 <output id="volumeValue">40%</output><input id="volume" type="range" min="0" max="100" value="40"></label><label class="check"><input id="lowQuality" type="checkbox">流畅画质（减少阴影）</label><label class="check"><input id="reduceMotion" type="checkbox">减少镜头反馈</label><label id="assistRow" class="check"><input id="assist" type="checkbox" checked>显示头线与可见目标提示</label></div>
+      <div class="settings"><label>鼠标灵敏度 <output id="sensValue">1.00</output><div class="sensitivity-control"><input id="sensitivity" type="range" min="0.01" max="10" step="0.01" value="1"><input id="sensitivityNumber" type="number" min="0.01" max="10" step="0.01" value="1.00" inputmode="decimal" aria-label="输入鼠标灵敏度"></div></label><label>声音 <output id="volumeValue">40%</output><input id="volume" type="range" min="0" max="100" value="40"></label><label class="check"><input id="lowQuality" type="checkbox">流畅画质（减少阴影）</label><label class="check"><input id="reduceMotion" type="checkbox">减少镜头反馈</label><label id="assistRow" class="check"><input id="assist" type="checkbox" checked>显示头线与可见目标提示</label></div>
       <div class="dialog-actions"><button id="restart" class="secondary">重新开始</button><button id="quit" class="text-button">返回首页</button></div><button id="endPractice" class="text-button" hidden>结束练习并查看复盘 →</button>
+    </div>
+  </section>
+  <section id="buyMenu" class="overlay buy-overlay" hidden>
+    <div class="buy-sheet"><div class="buy-head"><div><div class="eyebrow">BUY PHASE / 军械购买</div><h2>选择本回合装备</h2></div><button id="closeBuy" class="text-button">关闭 B</button></div>
+      <div class="buy-grid">
+        <button data-buy="pistol"><span>副武器</span><strong>战术手枪</strong><small>12 发 · 头部 2 枪 / 身体 5 枪</small><b>免费</b></button>
+        <button data-buy="ak"><span>自动步枪</span><strong>AK-47</strong><small>25 发 · 头部 1 枪 / 身体 4 枪</small><b>￥2,700</b></button>
+        <button data-buy="m4"><span>自动步枪</span><strong>M4</strong><small>30 发 · 头部 1 枪 / 身体 4 枪</small><b>￥2,900</b></button>
+        <button data-buy="light"><span>护甲</span><strong>轻型护甲</strong><small>增加 25 点护甲值</small><b>￥650</b></button>
+        <button data-buy="heavy"><span>护甲</span><strong>重型护甲</strong><small>增加 50 点护甲值</small><b>￥1,000</b></button>
+      </div><p>当前资金 <strong id="credits">￥8,000</strong> · 刀出生自带且不可购买</p>
     </div>
   </section>
   <section id="results" class="overlay" hidden>

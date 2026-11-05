@@ -3,7 +3,7 @@
 (() => {
 const $ = id => document.getElementById(id);
 const VERSION = 'alley-1';
-let renderer, scene, camera, gun, flash, sun;
+let renderer, scene, camera, gun, knife, flash, sun;
 let state = 'home', mode = 'challenge', previousState = 'run';
 let elapsed = 0, prep = 3, kills = 0, heads = 0, shots = 0, hits = 0, ammo = 12, reload = 0;
 let yaw = 0, pitch = 0, lastShot = -999, recoil = 0, hitFade = 0, toastTime = 0, routeClock = 0;
@@ -16,6 +16,11 @@ const player = new THREE.Vector3(0, 1.65, 14);
 const streets = [[-3,3,-9,17],[-3,19,-12,-6],[13,19,-30,-6],[3,24,-40,-25]];
 const positions = [[-1.5,5],[1.5,-2],[-1.6,-8.6],[6.5,-8.7],[11.3,-7.5],[16.2,-10],[16.7,-17],[14.6,-24],[7,-28.5],[21,-29.2],[7.5,-36.3],[20.5,-37.8]];
 let randomSeed = 7523;
+const WEAPONS={knife:{name:'战术刀',clip:0,rate:.48,body:50,head:50,auto:false,speed:1.5},pistol:{name:'战术手枪',clip:12,rate:.22,body:30,head:75,auto:false,speed:1},ak:{name:'AK-47',clip:25,rate:.105,body:37.5,head:150,auto:true,speed:.92},m4:{name:'M4',clip:30,rate:.09,body:37.5,head:150,auto:true,speed:.94}};
+let selectedWorld='foundry',currentWeapon='pistol',ownedRifle=null,weaponAmmo={pistol:12,ak:25,m4:30},equipAnim=0,slashAnim=0,mouseHeld=false;
+let playerHealth=100,playerArmor=0,credits=8000,playerTeam='attack',roundTime=120,roundOver=0,crouching=false,interactTime=0;
+let bomb={picked:false,carrier:null,planted:false,site:null,timer:40,mesh:null},activeCombatMap=null;
+const combatMaps={},bots=[],botMeshes=[];
 function rand(){randomSeed=(randomSeed*1664525+1013904223)>>>0;return randomSeed/4294967296;}
 function material(color, roughness=.85, metalness=0){return new THREE.MeshStandardMaterial({color,roughness,metalness});}
 function box(w,h,d,mat,x=0,y=0,z=0,parent=scene){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
@@ -92,7 +97,7 @@ function makeScene(){
  // Horizon silhouettes establish scale beyond playable blocks.
  for(let i=0;i<8;i++)box(5,8+rand()*7,5,mats.plaster,-20+i*8,4,-57-rand()*8);
  positions.forEach(([x,z],i)=>makeTarget(i,x,z));
- batchScenery();makeGun();
+ batchScenery();makeGun();makeCombatWorlds();
 }
 function batchScenery(){
  // Instance repeated static scenery; keep original invisible raycast meshes intact.
@@ -210,8 +215,53 @@ function makeGun(){
  const sleeve=box(.16,.17,.32,black,-.13,-.2,-.23,gun);sleeve.rotation.y=-.5;
  const fg=new THREE.ConeGeometry(.1,.22,5);fg.rotateX(-Math.PI/2);flash=new THREE.Mesh(fg,new THREE.MeshBasicMaterial({color:'#ffce78',transparent:true,opacity:.9}));flash.position.set(0,.015,-1);gun.add(flash);flash.visible=false;
  gun.scale.setScalar(.58);gun.position.set(.24,-.23,-.46);gun.rotation.set(0,-.025,0);
+ knife=new THREE.Group();camera.add(knife);const blade=material('#c9d4d4',.22,.9),handle=material('#202d31',.7,.25);
+ const kb=box(.07,.035,.7,blade,0,0,-.35,knife);kb.rotation.y=-.06;box(.1,.055,.24,handle,0,0,.14,knife);box(.18,.035,.05,handle,0,0,.01,knife);sphere(.08,material('#5c5149'),.02,-.05,.28,knife,.7,1.1,1);
+ knife.position.set(.32,-.28,-.42);knife.rotation.set(.1,-.2,.18);knife.scale.setScalar(.8);knife.visible=false;
 }
+function makeCombatWorlds(){
+ const defs={
+  foundry:{name:'赤锈铸造厂',base:180,color:'#7f4b3b',attack:[0,23],defense:[0,-23],a:[-15,-8],b:[15,-8],cover:[[-12,9,7,2],[12,9,7,2],[0,2,3,8],[-17,-1,3,7],[17,-1,3,7],[-7,-13,8,2],[7,-13,8,2]],lanes:[-15,0,15]},
+  harbor:{name:'雾港货场',base:360,color:'#426778',attack:[0,24],defense:[0,-24],a:[-16,-10],b:[16,-10],cover:[[-15,12,4,7],[15,12,4,7],[-7,4,9,2],[8,4,8,2],[-17,-3,3,8],[0,-5,4,7],[17,-3,3,8],[-9,-16,7,2],[10,-16,7,2]],lanes:[-17,0,17]},
+  citadel:{name:'砂岩要塞',base:540,color:'#9a7a55',attack:[0,23],defense:[0,-23],a:[-14,-9],b:[14,-9],cover:[[-16,11,3,8],[16,11,3,8],[-8,4,6,2],[8,4,6,2],[0,-1,4,8],[-17,-7,3,7],[17,-7,3,7],[-8,-15,7,2],[8,-15,7,2]],lanes:[-15,0,15]}
+ };
+ for(const [id,d] of Object.entries(defs)){
+  const group=new THREE.Group();group.position.x=d.base;group.visible=false;scene.add(group);const walls=[];
+  const floorMat=material(d.color,.95),wallMat=material(id==='harbor'?'#536d78':id==='citadel'?'#a78a68':'#70574d'),trim=material('#c3b392');
+  box(50,.2,58,floorMat,0,-.12,0,group);
+  const addWall=(x,z,w,dep,h=3.4)=>{const o=box(w,h,dep,wallMat,x,h/2,z,group);shotMeshes.push(o);walls.push([d.base+x-w/2,d.base+x+w/2,z-dep/2,z+dep/2]);box(w+.08,.12,dep+.08,trim,x,h+.04,z,group);return o;};
+  addWall(-25,0,1,58,5);addWall(25,0,1,58,5);addWall(0,-29,50,1,5);addWall(0,29,50,1,5);
+  d.cover.forEach(([x,z,w,dep],i)=>addWall(x,z,w,dep,i%3===0?2.6:3.4));
+  for(const [label,p,color] of [['A',d.a,'#e3a659'],['B',d.b,'#63b7bd']]){const pad=cylinder(3.7,3.7,.05,material(color),p[0],.02,p[1],group,32);pad.material.transparent=true;pad.material.opacity=.38;const c=document.createElement('canvas');c.width=c.height=128;const cx=c.getContext('2d');cx.fillStyle=color;cx.font='bold 88px sans-serif';cx.textAlign='center';cx.fillText(label,64,94);const tex=new THREE.CanvasTexture(c);const mark=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.4),new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide}));mark.rotation.x=-Math.PI/2;mark.position.set(p[0],.06,p[1]);group.add(mark);}
+  const bombMesh=new THREE.Group();group.add(bombMesh);box(.45,.16,.32,material('#283438',.4,.65),0,.12,0,bombMesh);box(.3,.035,.2,material('#e6a75c'),0,.22,0,bombMesh);for(let i=0;i<3;i++)box(.05,.04,.28,material(['#b55044','#d9c36a','#4a8b87'][i]),-.12+i*.12,.18,0,bombMesh);bombMesh.position.set(d.attack[0],0,d.attack[1]);
+  combatMaps[id]={...d,group,walls,bombMesh,bounds:[d.base-24.4,d.base+24.4,-28.4,28.4]};
+ }
+}
+function makeBot(team,index,x,z){
+ const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const body=material(team==='attack'?'#5b7d87':'#8a5b55',.6,.25),edge=material('#b9c5bf',.5,.35),meshes=[];
+ const mark=(o,part)=>{o.userData={bot:index,part};meshes.push(o);botMeshes.push(o);return o;};
+ mark(sphere(.21,edge,0,1.62,0,g,1,1.12,.95),'head');mark(box(.48,.62,.28,body,0,1.16,0,g),'body');mark(box(.34,.28,.25,body,0,.73,0,g),'body');
+ for(const s of [-1,1]){mark(cylinder(.075,.07,.55,body,s*.15,.4,0,g),'body');const arm=mark(cylinder(.065,.065,.48,body,s*.31,1.14,0,g),'body');arm.rotation.z=s*.2;}
+ box(.08,.08,.58,material('#252e31',.45,.6),.17,1.16,-.27,g);g.userData.botIndex=index;return {team,index,group:g,meshes,hp:150,dead:false,cooldown:.5+rand(),lane:activeCombatMap.lanes[index%activeCombatMap.lanes.length],goal:null,stuck:0};
+}
+function combatValidPosition(x,z,radius=.28){
+ const m=activeCombatMap;if(!m||x-radius<m.bounds[0]||x+radius>m.bounds[1]||z-radius<m.bounds[2]||z+radius>m.bounds[3])return false;
+ return !m.walls.some(w=>x+radius>w[0]&&x-radius<w[1]&&z+radius>w[2]&&z-radius<w[3]);
+}
+function resetCombat(){
+ Object.values(combatMaps).forEach(m=>m.group.visible=false);activeCombatMap=combatMaps[selectedWorld];activeCombatMap.group.visible=true;
+ bots.forEach(b=>scene.remove(b.group));bots.length=0;botMeshes.length=0;playerTeam=rand()<.5?'attack':'defense';const ownSpawn=activeCombatMap[playerTeam];
+ player.set(activeCombatMap.base+ownSpawn[0]+(rand()-.5)*2,1.65,ownSpawn[1]);yaw=playerTeam==='attack'?Math.PI:0;pitch=0;elapsed=0;prep=3;roundTime=120;roundOver=0;playerHealth=100;playerArmor=0;credits=8000;currentWeapon='pistol';ownedRifle=null;weaponAmmo={pistol:12,ak:25,m4:30};ammo=12;reload=0;shots=0;hits=0;kills=0;heads=0;equipAnim=0;slashAnim=0;interactTime=0;keys.clear();
+ bomb={picked:false,carrier:null,planted:false,site:null,timer:40,plantProgress:0,defuseProgress:0,mesh:activeCombatMap.bombMesh};bomb.mesh.visible=true;bomb.mesh.position.set(activeCombatMap.attack[0],0,activeCombatMap.attack[1]);
+ let index=0;for(const team of ['attack','defense']){const count=team===playerTeam?4:5;for(let i=0;i<count;i++){const s=activeCombatMap[team];bots.push(makeBot(team,index++,activeCombatMap.base+s[0]+(i-2)*1.1,s[1]+(team==='attack'?i%2:-i%2)));}}
+ equip('pistol',true);$('combatStatus').hidden=false;$('assistRow').hidden=true;$('timerLabel').textContent='回合时间';$('modeLabel').textContent='5v5 爆破 · '+activeCombatMap.name;$('kills').parentElement.parentElement.querySelector('small').textContent='本局击破';$('kills').parentElement.querySelector('em').textContent=' / 5';$('results').hidden=true;updateHUD();
+}
+function equip(id,instant=false){if(id==='ak'||id==='m4'){if(ownedRifle!==id)return;}if(!WEAPONS[id])return;currentWeapon=id;ammo=id==='knife'?0:weaponAmmo[id];reload=0;equipAnim=instant?0:.55;sound('reload');updateHUD();}
+function buy(item){const prices={ak:2700,m4:2900,light:650,heavy:1000,pistol:0},price=prices[item];if(price===undefined||credits<price){toast('资金不足');return;}if(item==='light'||item==='heavy'){const amount=item==='light'?25:50;if(playerArmor>=amount){toast('已拥有同级或更高护甲');return;}credits-=price;playerArmor=amount;toast(item==='light'?'已购买轻型护甲 +25':'已购买重型护甲 +50');}else{credits-=price;if(item==='ak'||item==='m4'){ownedRifle=item;weaponAmmo[item]=WEAPONS[item].clip;equip(item);}else equip('pistol');toast('已装备 '+WEAPONS[item].name);}updateHUD();$('credits').textContent='￥'+credits.toLocaleString();}
+function toggleBuy(forceClose=false){if(mode!=='combat'||!['run','prep','buy'].includes(state))return;if(state==='buy'||forceClose){state=previousState==='prep'?'prep':'run';$('buyMenu').hidden=true;lock();return;}previousState=state;state='buy';keys.clear();if(document.pointerLockElement)document.exitPointerLock();$('credits').textContent='￥'+credits.toLocaleString();$('buyMenu').hidden=false;}
 function reset(){
+ if(mode==='combat'){resetCombat();return;}
+ Object.values(combatMaps).forEach(m=>m.group.visible=false);bots.forEach(b=>scene.remove(b.group));bots.length=0;botMeshes.length=0;$('combatStatus').hidden=true;$('kills').parentElement.parentElement.querySelector('small').textContent='击破目标';$('kills').parentElement.querySelector('em').textContent='/ 12';currentWeapon='pistol';weaponAmmo.pistol=12;
  player.set(0,1.65,14);yaw=0;pitch=0;elapsed=0;prep=3;kills=0;heads=0;shots=0;hits=0;ammo=12;reload=0;recoil=0;lastShot=-999;routeClock=0;route=[[0,14]];resultSnapshot=null;keys.clear();
  for(const t of targets){Object.assign(t,{hp:100,dead:false,death:0,visibleFor:0,candidate:null,first:null,angle:null,killTime:null,headKill:false});t.group.visible=true;t.group.scale.setScalar(1);t.group.position.y=0;t.outline.visible=false;}
  $('timerLabel').textContent=mode==='challenge'?'剩余时间':'练习用时';$('modeLabel').textContent=mode==='challenge'?'限时挑战':'自由练习';$('assistRow').hidden=mode!=='practice';$('hitText').style.opacity=0;$('hitmarker').style.opacity=0;
@@ -229,7 +279,7 @@ function begin(){
 }
 function pause(){if(!['run','prep'].includes(state))return;previousState=state;state='paused';keys.clear();dragging=false;$('pause').hidden=false;$('endPractice').hidden=mode!=='practice';if(document.pointerLockElement)document.exitPointerLock();}
 function resume(){if(state!=='paused')return;state=previousState;$('pause').hidden=true;lock();initAudio();}
-function home(){state='home';keys.clear();if(document.pointerLockElement)document.exitPointerLock();$('hud').hidden=true;$('results').hidden=true;$('pause').hidden=true;$('home').hidden=false;document.body.classList.remove('playing');gun.visible=false;targets.forEach(t=>{t.group.visible=true;t.group.scale.setScalar(1);t.group.position.y=0;t.outline.visible=false;});updateBest();}
+function home(){state='home';keys.clear();if(document.pointerLockElement)document.exitPointerLock();$('hud').hidden=true;$('results').hidden=true;$('pause').hidden=true;$('buyMenu').hidden=true;$('home').hidden=false;document.body.classList.remove('playing');gun.visible=false;knife.visible=false;Object.values(combatMaps).forEach(m=>m.group.visible=false);bots.forEach(b=>scene.remove(b.group));bots.length=0;botMeshes.length=0;targets.forEach(t=>{t.group.visible=true;t.group.scale.setScalar(1);t.group.position.y=0;t.outline.visible=false;});updateBest();}
 function initAudio(){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();}catch(e){/* Audio is optional. */}}
 function sound(type){if(!audio||!volume)return;const time=audio.currentTime,gain=audio.createGain();gain.connect(audio.destination);
  if(type==='shot'){
@@ -241,7 +291,40 @@ function validPosition(x,z){
  for(const [dx,dz] of [[-radius,-radius],[radius,-radius],[-radius,radius],[radius,radius]])if(!streets.some(r=>x+dx>r[0]&&x+dx<r[1]&&z+dz>r[2]&&z+dz<r[3]))return false;
  return !colliders.some(r=>x+radius>r[0]&&x-radius<r[1]&&z+radius>r[2]&&z-radius<r[3]);
 }
+function damageBot(bot,amount,head){if(!bot||bot.dead)return;bot.hp-=amount;hits++;hitFade=.2;$('hitmarker').style.color=head?'#f2bd65':'#fff';sound(head?'head':'hit');if(bot.hp<=0){bot.dead=true;bot.group.visible=false;if(bomb.carrier===bot.index){bomb.carrier=null;bomb.picked=false;bomb.mesh.visible=true;bomb.mesh.position.set(bot.group.position.x-activeCombatMap.base,.03,bot.group.position.z);toast('炸弹已掉落');}kills++;if(head)heads++;credits+=300;$('hitText').textContent=(head?'精准爆头':'敌人击破')+' · '+String(kills).padStart(2,'0');$('hitText').style.opacity=1;if(!bots.some(b=>b.team!==playerTeam&&!b.dead))endRound(true,'敌方小队已全部击破');}}
+function combatShoot(){
+ if(state!=='run'||roundOver||equipAnim>0||reload>0)return;const w=WEAPONS[currentWeapon];if(elapsed-lastShot<w.rate)return;
+ if(currentWeapon!=='knife'&&ammo<=0){toast('弹匣已空 · 按 R 换弹');sound('reload');return;}
+ lastShot=elapsed;shots++;recoil=currentWeapon==='knife'?0:.065;if(currentWeapon!=='knife'){ammo--;weaponAmmo[currentWeapon]=ammo;flash.visible=true;sound('shot');}else{slashAnim=.35;sound('reload');}
+ camera.updateMatrixWorld(true);ray.setFromCamera(new THREE.Vector2(0,0),camera);ray.far=currentWeapon==='knife'?2.25:80;
+ const liveMeshes=botMeshes.filter(m=>{const b=bots[m.userData.bot];return b&&!b.dead&&b.team!==playerTeam;});const candidates=[...activeCombatMap.group.children,...liveMeshes];
+ const intersections=ray.intersectObjects(candidates,true);const hit=intersections.find(i=>i.object.userData.bot!==undefined||i.object.isMesh);
+ if(hit&&hit.object.userData.bot!==undefined){const bot=bots[hit.object.userData.bot],head=hit.object.userData.part==='head';damageBot(bot,head?w.head:w.body,head);}
+ ray.far=Infinity;updateHUD();
+}
+function applyPlayerDamage(amount){if(roundOver||playerHealth<=0)return;const absorbed=Math.min(playerArmor,amount*.55);playerArmor-=absorbed;playerHealth-=amount-absorbed;toast('受到身体伤害 · '+Math.ceil(playerHealth)+' HP');if(playerHealth<=0){playerHealth=0;endRound(false,'你已阵亡');}}
+function endRound(win,reason){if(roundOver)return;roundOver=4;mouseHeld=false;toast((win?'回合胜利 · ':'回合失败 · ')+reason);credits+=win?3250:1900;}
+function nearSite(){if(!activeCombatMap)return null;for(const id of ['a','b']){const p=activeCombatMap[id];if(Math.hypot(player.x-(activeCombatMap.base+p[0]),player.z-p[1])<3.7)return id.toUpperCase();}return null;}
+function updateInteraction(dt){
+ let text='',needed=0,action=null;if(playerTeam==='attack'&&!bomb.picked&&!bomb.planted&&Math.hypot(player.x-(activeCombatMap.base+activeCombatMap.attack[0]),player.z-activeCombatMap.attack[1])<2.3){text='按住 F 拾取炸弹';needed=.65;action=()=>{bomb.picked=true;bomb.carrier='player';bomb.mesh.visible=false;toast('已拾取炸弹 · 前往 A 区或 B 区');};}
+ const site=nearSite();if(playerTeam==='attack'&&bomb.picked&&bomb.carrier==='player'&&!bomb.planted&&site){text='按住 F 在 '+site+' 区下包（5 秒）';needed=5;action=()=>{bomb.planted=true;bomb.site=site;bomb.timer=40;bomb.mesh.visible=true;const p=activeCombatMap[site.toLowerCase()];bomb.mesh.position.set(p[0],.02,p[1]);toast(site+' 区下包成功 · 守住 40 秒');};}
+ if(playerTeam==='defense'&&bomb.planted&&site===bomb.site){text='按住 F 拆除炸弹（5 秒）';needed=5;action=()=>{bomb.planted=false;bomb.mesh.visible=false;endRound(true,'炸弹已拆除');};}
+ if(text){$('interact').style.opacity=1;$('interactText').textContent=text;if(keys.has('KeyF')){interactTime+=dt;$('interact').style.setProperty('--progress',Math.min(100,interactTime/needed*100)+'%');if(interactTime>=needed){interactTime=0;action();}}else interactTime=0;}else{$('interact').style.opacity=0;$('interact').style.setProperty('--progress','0%');interactTime=0;}
+}
+function updateBots(dt){
+ const m=activeCombatMap,walls=m.group.children.filter(o=>o.isMesh);
+ for(const b of bots){if(b.dead)continue;b.cooldown-=dt;const enemies=bots.filter(o=>o.team!==b.team&&!o.dead);let target=enemies.sort((a,c)=>b.group.position.distanceTo(a.group.position)-b.group.position.distanceTo(c.group.position))[0];
+  if(b.team!==playerTeam&&playerHealth>0){const d=b.group.position.distanceTo(player);if(!target||d<b.group.position.distanceTo(target.group.position))target={group:{position:player},player:true};}
+  let canSee=false;if(target){const from=b.group.position.clone().add(new THREE.Vector3(0,1.25,0)),to=target.group.position.clone();to.y=1.1;const delta=to.sub(from),dist=delta.length();ray.set(from,delta.normalize());ray.far=dist-.35;canSee=dist<28&&!ray.intersectObjects(walls,true).length;ray.far=Infinity;if(canSee){b.group.lookAt(target.group.position.x,1.1,target.group.position.z);if(b.cooldown<=0){b.cooldown=.38+rand()*.35;if(target.player)applyPlayerDamage(9);else{target.hp-=14;if(target.hp<=0){target.dead=true;target.group.visible=false;if(target.team===playerTeam&&!bots.some(o=>o.team===playerTeam&&!o.dead)&&playerHealth<=0)endRound(false,'我方小队已全部阵亡');}}}continue;}}
+  if(playerTeam==='defense'&&b.team==='attack'&&!bomb.picked&&!bomb.planted&&Math.hypot(b.group.position.x-(m.base+m.attack[0]),b.group.position.z-m.attack[1])<3){bomb.picked=true;bomb.carrier=b.index;bomb.mesh.visible=false;}
+  const chosenSite=b.index%2?m.a:m.b,destination=b.team==='attack'?(bomb.planted?chosenSite:(bomb.carrier===b.index?chosenSite:chosenSite)):m.attack;const goal=new THREE.Vector3(m.base+(Math.abs(b.group.position.z-destination[1])>8?b.lane:destination[0]),0,destination[1]);const delta=goal.sub(b.group.position);delta.y=0;if(delta.length()>.7){delta.normalize();const speed=1.65*dt,nx=b.group.position.x+delta.x*speed,nz=b.group.position.z+delta.z*speed;if(combatValidPosition(nx,b.group.position.z,.25))b.group.position.x=nx;if(combatValidPosition(b.group.position.x,nz,.25))b.group.position.z=nz;b.group.lookAt(b.group.position.x+delta.x,1,b.group.position.z+delta.z);}
+  if(playerTeam==='defense'&&b.team==='attack'&&bomb.carrier===b.index&&!bomb.planted&&Math.hypot(b.group.position.x-(m.base+chosenSite[0]),b.group.position.z-chosenSite[1])<3.3){bomb.plantProgress+=dt;if(bomb.plantProgress>=5){bomb.planted=true;bomb.site=chosenSite===m.a?'A':'B';bomb.timer=40;bomb.mesh.visible=true;bomb.mesh.position.set(chosenSite[0],.02,chosenSite[1]);toast('敌方已在 '+bomb.site+' 区下包');}}
+  if(playerTeam==='attack'&&b.team==='defense'&&bomb.planted){const p=m[bomb.site.toLowerCase()];if(Math.hypot(b.group.position.x-(m.base+p[0]),b.group.position.z-p[1])<3.3){bomb.defuseProgress+=dt;if(bomb.defuseProgress>=5){bomb.planted=false;bomb.mesh.visible=false;endRound(false,'守方人机已拆除炸弹');}}}
+ }
+ if(bomb.planted){bomb.timer-=dt;if(bomb.timer<=0)endRound(playerTeam==='attack','炸弹成功引爆');}
+}
 function shoot(){
+ if(mode==='combat'){combatShoot();return;}
  if(state!=='run'||(!dragControl&&document.pointerLockElement!==renderer.domElement)||reload>0||elapsed-lastShot<.18)return;
  if(ammo<=0){toast('弹匣已空 · 按 R 换弹');sound('reload');return;}
  ammo--;shots++;lastShot=elapsed;recoil=.065;flash.visible=true;sound('shot');
@@ -253,10 +336,13 @@ function shoot(){
  }}
  updateHUD();if(kills===12)finish();
 }
-function startReload(){if(state!=='run'||reload>0||ammo===12)return;reload=1.2;sound('reload');updateHUD();}
+function startReload(){const cap=mode==='combat'?WEAPONS[currentWeapon].clip:12;if(state!=='run'||reload>0||currentWeapon==='knife'||ammo===cap)return;reload=mode==='combat'?1.45:1.2;sound('reload');updateHUD();}
 function score(){return kills*100+heads*50+(mode==='challenge'&&kills===12?Math.floor(Math.max(0,60-elapsed))*10:0);}
 function fmtTime(n){n=Math.max(0,n);return Math.floor(n/60)+':'+String(Math.floor(n%60)).padStart(2,'0');}
 function updateHUD(){
+ if(mode==='combat'){
+  const w=WEAPONS[currentWeapon],cap=w.clip;$('kills').textContent=String(kills).padStart(2,'0');$('score').textContent=credits.toLocaleString();$('timer').textContent=fmtTime(bomb.planted?Math.ceil(bomb.timer):Math.ceil(roundTime));$('ammo').textContent=currentWeapon==='knife'?'—':String(ammo).padStart(2,'0');$('accuracy').textContent='命中率 '+(shots?Math.round(hits/shots*100)+'%':'—');$('reloadLabel').textContent=reload>0?'正在换弹…':(w.auto?'AUTO / ':'SEMI / ')+w.name;$('ammoBars').innerHTML=currentWeapon==='knife'?'':Array.from({length:Math.min(cap,30)},(_,i)=>'<i class="'+(i>=ammo?'empty':'')+'"></i>').join('');$('health').textContent=Math.ceil(playerHealth);$('armor').textContent=Math.ceil(playerArmor);$('teamLabel').textContent=playerTeam==='attack'?'攻方':'守方';$('objective').textContent=bomb.planted?(playerTeam==='attack'?'守住 '+bomb.site+' 区':'拆除 '+bomb.site+' 区'):playerTeam==='attack'?(bomb.picked?'前往包点':'拾取炸弹'):'阻止下包';return;
+ }
  $('kills').textContent=String(kills).padStart(2,'0');$('score').textContent=score();$('timer').textContent=fmtTime(mode==='challenge'?Math.ceil(Math.max(0,60-elapsed)):elapsed);$('ammo').textContent=String(ammo).padStart(2,'0');$('accuracy').textContent='命中率 '+(shots?Math.round(hits/shots*100)+'%':'—');
  $('reloadLabel').textContent=reload>0?'正在换弹…':ammo===0?'按 R 更换弹匣':'SEMI AUTO / 训练步枪';$('ammoBars').innerHTML=Array.from({length:12},(_,i)=>'<i class="'+(i>=ammo?'empty':'')+'"></i>').join('');document.querySelector('.time-stat').classList.toggle('urgent',mode==='challenge'&&elapsed>=50);
 }
@@ -301,6 +387,7 @@ function finish(){
 }
 function drawMap(canvas,report=false){
  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);
+ if(mode==='combat'&&activeCombatMap){const m=activeCombatMap,pad=13,s=(Math.min(w,h)-pad*2)/58,cv=(x,z)=>[w/2+(x-m.base)*s,h/2+z*s];ctx.fillStyle='#14222b';ctx.fillRect(0,0,w,h);ctx.fillStyle='#53646b';ctx.fillRect(w/2-25*s,h/2-29*s,50*s,58*s);ctx.fillStyle='#26373d';for(const r of m.walls){const [x,z]=cv(r[0],r[2]);ctx.fillRect(x,z,(r[1]-r[0])*s,(r[3]-r[2])*s);}for(const id of ['a','b']){const p=m[id],[x,z]=cv(m.base+p[0],p[1]);ctx.fillStyle=id==='a'?'#e3a659':'#63b7bd';ctx.beginPath();ctx.arc(x,z,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#14222b';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(id.toUpperCase(),x,z+3);}for(const b of bots){if(b.dead)continue;const [x,z]=cv(b.group.position.x,b.group.position.z);ctx.fillStyle=b.team===playerTeam?'#8cd9d5':'#d97668';ctx.beginPath();ctx.arc(x,z,3,0,Math.PI*2);ctx.fill();}const [px,pz]=cv(player.x,player.z);ctx.save();ctx.translate(px,pz);ctx.rotate(-yaw);ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(-4,5);ctx.lineTo(4,5);ctx.closePath();ctx.fill();ctx.restore();return;}
  const pad=report?30:13,scale=Math.min((w-pad*2)/30,(h-pad*2)/61);const ox=(w-30*scale)/2,oy=(h-61*scale)/2;
  const convert=(x,z)=>[ox+(x+4)*scale,oy+(z+42)*scale];
  ctx.fillStyle='#14222b';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#91a4a94a';ctx.lineWidth=1;
@@ -315,45 +402,49 @@ function updateBest(){$('homeBest').textContent=best?best.toLocaleString()+' 分
 function saveSettings(){try{localStorage.setItem(VERSION+'-settings',JSON.stringify({sensitivity,volume,reduced,assist,low:$('lowQuality').checked}));}catch(e){}}
 function loadStorage(){try{const d=JSON.parse(localStorage.getItem(VERSION)||'{}');best=Number.isFinite(d.best)?Math.max(0,d.best):0;records=Array.isArray(d.records)?d.records.slice(-10):[];savedSettings=JSON.parse(localStorage.getItem(VERSION+'-settings')||'{}')||{};}catch(e){}updateBest();}
 function bind(){
- document.querySelectorAll('.mode').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('selected',b===button));}));
+ document.querySelectorAll('.mode').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('selected',b===button));$('worldPicker').hidden=mode!=='combat';}));
+ document.querySelectorAll('.world-option').forEach(button=>button.addEventListener('click',()=>{selectedWorld=button.dataset.world;document.querySelectorAll('.world-option').forEach(b=>b.classList.toggle('selected',b===button));}));
  $('start').onclick=begin;$('resume').onclick=resume;$('restart').onclick=begin;$('again').onclick=begin;$('quit').onclick=home;$('backHome').onclick=home;$('pauseButton').onclick=pause;$('endPractice').onclick=()=>{state='run';$('pause').hidden=true;finish();};
- document.addEventListener('keydown',e=>{if(['INPUT','BUTTON'].includes(document.activeElement.tagName)&&state==='paused')return;if(['KeyW','KeyA','KeyS','KeyD','KeyR','Space'].includes(e.code)&&['run','prep'].includes(state))e.preventDefault();if(e.code==='Escape')pause();if(e.code==='KeyR')startReload();keys.add(e.code);});document.addEventListener('keyup',e=>keys.delete(e.code));
+ document.addEventListener('keydown',e=>{if(['INPUT','BUTTON'].includes(document.activeElement.tagName)&&['paused','buy'].includes(state))return;if(['KeyW','KeyA','KeyS','KeyD','KeyR','Space','ControlLeft','ControlRight','KeyF'].includes(e.code)&&['run','prep'].includes(state))e.preventDefault();if(e.code==='Escape')pause();if(e.code==='KeyR')startReload();if(e.code==='KeyB')toggleBuy();if(mode==='combat'&&e.code==='Digit2')equip('knife');if(mode==='combat'&&e.code==='Digit3')equip('pistol');if(mode==='combat'&&e.code==='Digit1'&&ownedRifle)equip(ownedRifle);keys.add(e.code);});document.addEventListener('keyup',e=>keys.delete(e.code));
  document.addEventListener('mousemove',e=>{if(!['run','prep'].includes(state)||(!dragControl&&document.pointerLockElement!==renderer.domElement)||(dragControl&&!dragging))return;yaw-=e.movementX*.002*sensitivity;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002*sensitivity,-1.35,1.35);});
  let pressX=0,pressY=0;
- renderer.domElement.addEventListener('mousedown',e=>{if(e.button===0){if(dragControl){dragging=true;pressX=e.clientX;pressY=e.clientY;}else shoot();}});
- document.addEventListener('mouseup',e=>{if(e.button===0&&dragControl){if(dragging&&Math.hypot(e.clientX-pressX,e.clientY-pressY)<5)shoot();dragging=false;}});renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
+ renderer.domElement.addEventListener('mousedown',e=>{if(e.button===0){mouseHeld=true;if(dragControl){dragging=true;pressX=e.clientX;pressY=e.clientY;}else shoot();}});
+ document.addEventListener('mouseup',e=>{if(e.button===0){mouseHeld=false;if(dragControl){if(dragging&&Math.hypot(e.clientX-pressX,e.clientY-pressY)<5)shoot();dragging=false;}}});renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
  document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement)pause();});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});window.addEventListener('blur',()=>{keys.clear();pause();});
  window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
- $('sensitivity').oninput=e=>{sensitivity=Number(e.target.value);$('sensValue').textContent=sensitivity.toFixed(1);saveSettings();};
+ const setSensitivity=value=>{sensitivity=THREE.MathUtils.clamp(Math.round((Number(value)||.01)*100)/100,.01,10);$('sensitivity').value=sensitivity;$('sensitivityNumber').value=sensitivity.toFixed(2);$('sensValue').textContent=sensitivity.toFixed(2);saveSettings();};
+ $('sensitivity').oninput=e=>setSensitivity(e.target.value);$('sensitivityNumber').onchange=e=>setSensitivity(e.target.value);$('sensitivityNumber').oninput=e=>{const v=e.target.value;if(/^\d{0,2}(\.\d{0,2})?$/.test(v)&&v!==''&&Number(v)>=.01)setSensitivity(v);};
  $('volume').oninput=e=>{volume=Number(e.target.value)/100;$('volumeValue').textContent=Math.round(volume*100)+'%';saveSettings();};
  $('reduceMotion').onchange=e=>{reduced=e.target.checked;saveSettings();};$('assist').onchange=e=>{assist=e.target.checked;saveSettings();};
  $('lowQuality').onchange=e=>{renderer.shadowMap.enabled=!e.target.checked;renderer.setPixelRatio(Math.min(devicePixelRatio,e.target.checked?1:1.6));scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});saveSettings();};
  if(Number.isFinite(savedSettings.sensitivity)){$('sensitivity').value=savedSettings.sensitivity;$('sensitivity').dispatchEvent(new Event('input'));}
  if(Number.isFinite(savedSettings.volume)){$('volume').value=savedSettings.volume*100;$('volume').dispatchEvent(new Event('input'));}
  for(const [id,key] of [['reduceMotion','reduced'],['assist','assist'],['lowQuality','low']])if(typeof savedSettings[key]==='boolean'){$(id).checked=savedSettings[key];$(id).dispatchEvent(new Event('change'));}
+ $('closeBuy').onclick=()=>toggleBuy(true);document.querySelectorAll('[data-buy]').forEach(button=>button.onclick=()=>buy(button.dataset.buy));
  $('reportMap').onclick=e=>{const c=$('reportMap'),r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*c.width,y=(e.clientY-r.top)/r.height*c.height;const p=reportPoints.find(p=>Math.hypot(p.x-x,p.y-y)<14);if(!p)return;const t=targets[p.id];$('pointDetail').textContent='目标 '+String(t.id+1).padStart(2,'0')+' · '+(t.dead?'已击破':t.first!==null?'已观察，未击破':'未观察')+' / '+(t.angle===null?'观察样本不足':'首次预瞄偏差 '+t.angle.toFixed(1)+'°')+(t.dead&&t.first!==null?' / 击破用时 '+Math.round((t.killTime-t.first)*1000)+' ms':'');};
 }
 let frame=0;
 function tick(){
  requestAnimationFrame(tick);const rawDt=clock.getDelta(),dt=Math.min(rawDt,.05);frame++;
  if(state==='home'){
-  const t=performance.now()*.0001;camera.position.set(-.8+Math.sin(t)*.12,1.95,11.7);camera.rotation.set(.055,-.1+Math.sin(t)*.025,0,'YXZ');gun.visible=false;headLines.forEach(o=>o.visible=false);
+  const t=performance.now()*.0001;camera.position.set(-.8+Math.sin(t)*.12,1.95,11.7);camera.rotation.set(.055,-.1+Math.sin(t)*.025,0,'YXZ');gun.visible=false;knife.visible=false;headLines.forEach(o=>o.visible=false);
  }else{
-  gun.visible=state!=='results';camera.position.copy(player);camera.rotation.set(pitch,yaw,0,'YXZ');headLines.forEach(o=>o.visible=mode==='practice'&&assist&&['run','prep'].includes(state));
+  gun.visible=state!=='results'&&currentWeapon!=='knife';knife.visible=state!=='results'&&currentWeapon==='knife';camera.position.copy(player);camera.rotation.set(pitch,yaw,0,'YXZ');headLines.forEach(o=>o.visible=mode==='practice'&&assist&&['run','prep'].includes(state));
  }
  if(['run','prep'].includes(state)&&(dragControl||document.pointerLockElement===renderer.domElement)){
-  if(state==='prep'){const old=Math.ceil(prep);prep-=rawDt;$('countdown').textContent=prep>0?Math.ceil(prep):'';if(Math.ceil(prep)!==old&&prep>0)sound('reload');if(prep<=0){state='run';toast(mode==='practice'?'沿街前进 · 保持头线 · 按 R 换弹':'60 秒 · 清点 12 个目标');}}
+  if(state==='prep'){const old=Math.ceil(prep);prep-=rawDt;$('countdown').textContent=prep>0?Math.ceil(prep):'';if(Math.ceil(prep)!==old&&prep>0)sound('reload');if(prep<=0){state='run';toast(mode==='combat'?(playerTeam==='attack'?'攻方出发 · F 拾取炸弹 · B 购买':'守方出发 · 守住 A / B 包点 · B 购买'):mode==='practice'?'沿街前进 · 保持头线 · 按 R 换弹':'60 秒 · 清点 12 个目标');}}
   else{
-   elapsed=Math.min(mode==='challenge'?60:Infinity,elapsed+rawDt);
-   let forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0),side=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0);const len=Math.hypot(forward,side);if(len){forward/=len;side/=len;const dx=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*3.2*dt,dz=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*3.2*dt;if(validPosition(player.x+dx,player.z))player.x+=dx;if(validPosition(player.x,player.z+dz))player.z+=dz;}
-   camera.position.copy(player);camera.updateMatrixWorld(true);observe(dt);
-   if(reload>0){reload-=dt;if(reload<=0){reload=0;ammo=12;sound('reload');updateHUD();}}
+   elapsed=Math.min(mode==='challenge'?60:Infinity,elapsed+rawDt);if(mode==='combat'&&!bomb.planted&&!roundOver)roundTime=Math.max(0,roundTime-rawDt);
+   crouching=mode==='combat'&&(keys.has('ControlLeft')||keys.has('ControlRight'));const targetHeight=crouching?1.05:1.65;player.y=THREE.MathUtils.lerp(player.y,targetHeight,Math.min(1,dt*12));
+   let forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0),side=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0);const len=Math.hypot(forward,side);if(len&&!roundOver){forward/=len;side/=len;const speed=3.2*(mode==='combat'?WEAPONS[currentWeapon].speed:1)*(crouching ? .5 : 1),dx=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed*dt,dz=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed*dt,valid=mode==='combat'?combatValidPosition:validPosition;if(valid(player.x+dx,player.z))player.x+=dx;if(valid(player.x,player.z+dz))player.z+=dz;}
+   camera.position.copy(player);camera.updateMatrixWorld(true);if(mode==='combat'){if(mouseHeld&&WEAPONS[currentWeapon].auto)combatShoot();if(!roundOver){updateBots(dt);updateInteraction(dt);if(roundTime<=0&&!bomb.planted)endRound(playerTeam==='defense','回合时间结束');}else{roundOver-=dt;if(roundOver<=0){resetCombat();state='prep';}}}else observe(dt);
+   if(reload>0){reload-=dt;if(reload<=0){reload=0;const cap=mode==='combat'?WEAPONS[currentWeapon].clip:12;ammo=cap;if(mode==='combat')weaponAmmo[currentWeapon]=cap;sound('reload');updateHUD();}}
    routeClock+=dt;if(routeClock>.2){routeClock=0;route.push([player.x,player.z]);if(mode==='practice'&&route.length>6000)route=route.filter((_,i)=>i%2===0);}
    if(mode==='challenge'&&elapsed>=60)finish();
-   $('zone').textContent=player.z<-25?'拱门庭院':player.z<-6?'市场区':'入口巷道';
+   $('zone').textContent=mode==='combat'?(nearSite()?nearSite()+' 区':player.z>8?'攻方通道':player.z<-8?'守方通道':'中央交战区'):player.z<-25?'拱门庭院':player.z<-6?'市场区':'入口巷道';
   }
   for(const t of targets)if(t.dead&&t.death>0){t.death-=dt;t.group.scale.y=Math.max(.01,t.death/.22);if(t.death<=0)t.group.visible=false;}
-  if(!reduced){const moving=keys.has('KeyW')||keys.has('KeyA')||keys.has('KeyS')||keys.has('KeyD');gun.position.y=-.23+(moving?Math.sin(elapsed*10)*.007:Math.sin(elapsed*2)*.002);gun.rotation.z=reload>0?Math.sin((1.2-reload)/1.2*Math.PI)*-.6:0;gun.position.z=-.46+recoil;gun.position.x=.24+(reload>0?-.08*Math.sin((1.2-reload)/1.2*Math.PI):0);}else{gun.position.set(.24,-.23,-.46);gun.rotation.z=0;}
+  equipAnim=Math.max(0,equipAnim-dt);slashAnim=Math.max(0,slashAnim-dt);if(!reduced){const moving=keys.has('KeyW')||keys.has('KeyA')||keys.has('KeyS')||keys.has('KeyD'),equipDrop=equipAnim>0?Math.sin(equipAnim/.55*Math.PI)*.34:0;gun.scale.setScalar(currentWeapon==='pistol' ? .48 : .64);gun.position.y=-.23-equipDrop+(moving?Math.sin(elapsed*10)*.007:Math.sin(elapsed*2)*.002);gun.rotation.z=reload>0?Math.sin((1.45-reload)/1.45*Math.PI)*-.6:equipAnim>0?-.35*Math.sin(equipAnim/.55*Math.PI):0;gun.position.z=-.46+recoil;gun.position.x=.24+(reload>0?-.08*Math.sin((1.45-reload)/1.45*Math.PI):0);knife.position.set(.32,-.28-equipDrop,-.42);knife.rotation.z=.18+(slashAnim>0?Math.sin((.35-slashAnim)/.35*Math.PI)*-1.2:0);}else{gun.position.set(.24,-.23,-.46);gun.rotation.z=0;knife.position.set(.32,-.28,-.42);}
   recoil=Math.max(0,recoil-dt*.6);flash.visible=recoil>.05;
  }
  if(!['prep'].includes(state))$('countdown').textContent='';
@@ -365,6 +456,6 @@ function tick(){
 try{
  loadStorage();makeScene();bind();$('loading').hidden=true;home();tick();
  // Read-only diagnostics used for local verification.
- window.alleyDiagnostics=()=>({state,mode,elapsed,kills,heads,shots,hits,ammo,reload,score:score(),player:{x:player.x,z:player.z},targetCount:targets.length,visibleTargets:targets.filter(t=>t.first!==null).length,renderer:renderer.info.render,version:VERSION});
+ window.alleyDiagnostics=()=>({state,mode,world:selectedWorld,elapsed,kills,heads,shots,hits,ammo,reload,weapon:currentWeapon,health:playerHealth,armor:playerArmor,team:playerTeam,botsAlive:bots.filter(b=>!b.dead).length,bomb:{picked:bomb.picked,planted:bomb.planted,site:bomb.site,timer:bomb.timer},score:score(),player:{x:player.x,y:player.y,z:player.z},targetCount:targets.length,visibleTargets:targets.filter(t=>t.first!==null).length,renderer:renderer.info.render,version:VERSION});
 }catch(e){$('loading').hidden=true;$('error').hidden=false;$('errorText').textContent='请使用支持 WebGL 的桌面浏览器打开，并确认 vendor/three.min.js 与 game.js 文件完整。'+e.message;console.error(e);}
 })();
